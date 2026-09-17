@@ -1,15 +1,19 @@
 package ru.nksk.lctapp
 
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.serialization.NavKeySerializer
+import androidx.navigation3.runtime.serialization.NavBackStackSerializer
 import androidx.savedstate.read
 import androidx.savedstate.savedState
 import androidx.savedstate.serialization.decodeFromSavedState
 import androidx.savedstate.serialization.encodeToSavedState
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlinx.serialization.PolymorphicSerializer
+import kotlinx.serialization.SerializationException
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
+import ru.nksk.lctapp.app.navigation.AppNavigationSavedStateConfiguration
 import ru.nksk.lctapp.feature.coins.navigation.Coins
 import ru.nksk.lctapp.feature.day.navigation.Day
 import ru.nksk.lctapp.feature.gear.navigation.Gear
@@ -21,7 +25,8 @@ import ru.nksk.lctapp.feature.village.navigation.Village
 /** Compatibility with the Navigation 3 Android serializer used before the package cleanup. */
 @RunWith(AndroidJUnit4::class)
 class NavigationKeyCompatibilityTest {
-    private val serializer = NavKeySerializer<NavKey>()
+    private val serializer = PolymorphicSerializer(NavKey::class)
+    private val configuration = AppNavigationSavedStateConfiguration
     private val legacyRoutes = listOf(
         "ru.nksk.lctapp.ui.menu.MainMenu" to MainMenu,
         "ru.nksk.lctapp.ui.coins.navigation.Coins" to Coins,
@@ -41,16 +46,69 @@ class NavigationKeyCompatibilityTest {
                 putSavedState("value", savedState())
             }
 
-            assertEquals(className, expected, decodeFromSavedState(serializer, legacyState))
+            assertEquals(
+                className,
+                expected,
+                decodeFromSavedState(serializer, legacyState, configuration),
+            )
         }
     }
 
     @Test
-    fun encodedFeatureKeysKeepTheirLegacyRuntimeClassNames() {
-        for ((className, route) in legacyRoutes) {
-            val encoded = encodeToSavedState(serializer, route)
+    fun encodedFeatureKeysUseStableIdsInsteadOfRuntimeClassNames() {
+        val stableRoutes = listOf(
+            "main_menu" to MainMenu,
+            "coins" to Coins,
+            "day" to Day,
+            "gear" to Gear,
+            "goal" to Goal,
+            "tasks" to Tasks,
+            "village" to Village,
+        )
+        for ((id, route) in stableRoutes) {
+            val encoded = encodeToSavedState(serializer, route, configuration)
 
-            assertEquals(className, className, encoded.read { getString("type") })
+            assertEquals(id, id, encoded.read { getString("type") })
+            assertEquals(id, route, decodeFromSavedState(serializer, encoded, configuration))
+        }
+    }
+
+    @Test
+    fun legacyBackStacksRestoreMenuAndDestinationInOrder() {
+        val stackSerializer = NavBackStackSerializer(serializer)
+        for ((className, destination) in legacyRoutes.drop(1)) {
+            val legacyStack = savedState {
+                putSavedState("0", savedState {
+                    putString("type", "ru.nksk.lctapp.ui.menu.MainMenu")
+                    putSavedState("value", savedState())
+                })
+                putSavedState("1", savedState {
+                    putString("type", className)
+                    putSavedState("value", savedState())
+                })
+            }
+
+            val restored = decodeFromSavedState(stackSerializer, legacyStack, configuration)
+
+            assertEquals(className, listOf(MainMenu, destination), restored.toList())
+            val reencoded = encodeToSavedState(stackSerializer, restored, configuration)
+            assertEquals(
+                className,
+                restored.toList(),
+                decodeFromSavedState(stackSerializer, reencoded, configuration).toList(),
+            )
+        }
+    }
+
+    @Test
+    fun unknownRouteIdsAreRejected() {
+        val unknownRoute = savedState {
+            putString("type", "unregistered_route")
+            putSavedState("value", savedState())
+        }
+
+        assertThrows(SerializationException::class.java) {
+            decodeFromSavedState(serializer, unknownRoute, configuration)
         }
     }
 }

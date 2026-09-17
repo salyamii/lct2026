@@ -13,12 +13,11 @@ All paths below are relative to `app/src/main/java/ru/nksk/lctapp/`.
 | --- | --- | --- |
 | `MainActivity.kt` | Android activity and system bars | `app` |
 | `app/LctApp.kt` | Theme and application composition | Features, shared UI |
-| `app/navigation` | Back stack, navigation policy, cross-feature wiring | Feature navigation contracts and UI actions |
+| `app/navigation` | Back stack, navigation policy, serializer registration, cross-feature wiring | Feature navigation contracts and UI actions |
 | `feature/<name>/navigation` | Stable route keys, entry registration, lifecycle-aware callbacks | Own feature, shared UI |
 | `feature/<name>/ui` | Screen state, actions, rendering, feature-specific components | Own UI, shared UI; future domain contracts |
 | `core/ui/components` | Presentation shared by several features | Shared UI |
 | `core/ui/theme` | App typography, colors, and theme | Shared UI |
-| Seven existing `ui/**` route key files | Serialized route compatibility only | Navigation 3 `NavKey`, serialization annotations |
 
 Generated Android resources remain in the shared `R` namespace while there is
 one module. Kotlin `internal` limits exposure outside the module, not between
@@ -28,13 +27,14 @@ a full compiler dependency analysis: fully qualified references and reflection
 still need code review. A future module split can enforce these boundaries in
 the compiler when the project needs stronger isolation.
 
-The existing `MainMenu`, `Gear`, `Tasks`, `Goal`, `Coins`, `Village`, and `Day`
-key declarations retain their original class/package identities. Navigation 3
-1.1.7's Android serializer persists the JVM class name and restores it using
-reflection; `@SerialName` alone does not protect a package move. Feature
-navigation exposes typealiases to these keys. This is a narrow compatibility
-exception, not a location for new screen code. New features define keys in their
-own navigation package, and later key moves need an explicit migration.
+There is one app navigation package and seven feature navigation packages.
+Each feature's `*Navigation.kt` declares its actual route key and entry builder;
+there is no parallel `ui` route tree or typealias layer.
+`app/navigation/AppNavigationSavedState.kt` registers the route serializers in
+an explicit `SavedStateConfiguration`. New saved routes use stable `@SerialName`
+IDs instead of JVM class names. Its deserializer also accepts the seven original
+`ui` class names so existing encoded route payloads remain readable. Keep these
+IDs stable and add an explicit migration when changing a saved route's format.
 
 Features must not import another feature, concrete data implementations, or
 app wiring. Route-to-route connections belong to the app host. A screen receives
@@ -68,8 +68,8 @@ use cases, ViewModels, or dependency injection containers for placeholders.
 - A feature's ViewModel will consume domain contracts and map results into UI
   state. Collect observable state with lifecycle awareness at its entry/route;
   continue passing values and callbacks to stateless screens.
-- Wire concrete dependencies in `app`. Constructor injection is enough until
-  an actual dependency graph calls for a framework.
+- Wire concrete dependencies in `app`. Use constructor injection with Hilt when
+  a working feature needs a real dependency graph; do not add it for placeholders.
 
 Persistent game state belongs outside navigation keys. Keep selected appearance
 and visual state in PetState, financial state in EconomyState, and story
@@ -86,9 +86,10 @@ before implementing affected behavior. This cleanup makes no such decisions.
 The first command checks navigation policy and package boundaries, builds the
 APK, and runs Android lint. Device coverage checks screen inputs, accessible
 actions, compact/landscape layouts, Back, recreation, and saved-state restoration.
-Legacy route fixtures also check decoding the original class names and retaining
-them on encoding. These checks do not establish full UI-state compatibility
-across APK upgrades that change the Compose tree.
+Legacy route and back-stack fixtures check decoding the original class names;
+encoding checks enforce stable route IDs. These checks and restoration within
+the current build do not establish full UI-state compatibility across APK
+upgrades that change the Compose tree or saved-state registry identity.
 
 ## References
 

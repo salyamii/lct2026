@@ -2,7 +2,9 @@
 
 The approved scope is package boundaries inside the existing `:app` Gradle
 module. Preserve the current menu, artwork, six placeholder destinations,
-route serialization names, saved-state restoration, and documented game rules.
+saved route readability, saved-state restoration, and documented game rules.
+The approved follow-up consolidates route declarations into their feature
+navigation packages and removes the legacy aliases and route tree.
 
 ## Design
 
@@ -12,11 +14,12 @@ route serialization names, saved-state restoration, and documented game rules.
   `feature/menu/ui` owns the menu state, actions, rendering, and artwork.
   Features communicate with the host through callbacks and do not import one
   another. Stateless UI does not depend on navigation APIs.
-- Keep the seven existing serialized key declarations in their original `ui`
-  packages, exposed through aliases in each feature's navigation package.
-  Navigation 3's Android serializer uses JVM class names, so moving the actual
-  key classes would make old encoded routes unreadable. These compatibility
-  declarations are the only legacy package exceptions; entries and UI move.
+- Declare each actual serialized key beside its entry builder in the feature's
+  `*Navigation.kt`. The app registers all seven route serializers through
+  `AppNavigationSavedStateConfiguration`, and new saves use stable `@SerialName`
+  IDs. A deserializer mapping reads payloads containing the original seven JVM
+  class names. This removes the old `ui` keys and typealiases while retaining
+  payload compatibility. Only the app and seven features have navigation packages.
 - `core/ui` holds shared presentation components and theme. It cannot depend
   on features or app wiring. Feature-specific artwork stays in its feature.
 - `MainMenuUiState` explicitly supplies the three currently displayed numeric
@@ -50,9 +53,11 @@ Establish the existing JVM/build/lint baseline; reproduce stale navigation with
 a failing test; run the same checks after refactoring. Device tests must cover
 all menu actions, custom menu values, large text, landscape, Back, activity
 recreation, and saved-state restoration. Decode fixtures containing the original
-route class names and preserve those names when encoding. Review changed paths
-and local documentation links. These checks do not prove full saved UI
-restoration across an APK upgrade with a changed Compose tree.
+route class names, including complete back-stack fixtures, and verify that new
+saves use stable IDs. Review changed paths and local documentation links. These
+checks and restoration within the current build do not prove full saved UI
+restoration across an APK upgrade with a changed Compose tree or saved-state
+registry identity.
 
 ## Execution plan
 
@@ -60,6 +65,8 @@ restoration across an APK upgrade with a changed Compose tree.
 - [x] Move shared UI and menu packages; extract explicit menu state and components.
 - [x] Add package dependency checks; document current and future ownership.
 - [x] Run JVM tests, debug assembly, lint, and emulator instrumentation; review.
+- [x] Consolidate feature key declarations, register explicit serializers, remove
+  legacy package exceptions, and verify payload migration and restoration.
 
 Work stays in the current checkout because the requested recent work is
 uncommitted there. No commits or changes to the existing artwork conversion

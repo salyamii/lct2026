@@ -4,12 +4,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import ru.nksk.lctapp.feature.menu.ui.MainMenuAction
 import ru.nksk.lctapp.feature.menu.ui.MainMenuDemoState
 import ru.nksk.lctapp.feature.menu.ui.MainMenuScreen
-import ru.nksk.lctapp.ui.menu.MainMenu as SavedMainMenu
 
-typealias MainMenu = SavedMainMenu
+@Serializable
+@SerialName("main_menu")
+data object MainMenu : NavKey
 
 fun EntryProviderScope<NavKey>.mainMenuEntry(onAction: (MainMenu, MainMenuAction) -> Unit) {
     entry<MainMenu> { source ->

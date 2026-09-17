@@ -27,7 +27,7 @@ import ru.nksk.lctapp.feature.village.navigation.villageEntry
 /** Navigation composition root. Features own their keys and entries; screens receive callbacks. */
 @Composable
 fun LctNavHost(modifier: Modifier = Modifier) {
-    val backStack = rememberNavBackStack(MainMenu)
+    val backStack = rememberNavBackStack(AppNavigationSavedStateConfiguration, MainMenu)
     val navigator = remember(backStack) { AppNavigator(backStack) }
 
     NavDisplay(

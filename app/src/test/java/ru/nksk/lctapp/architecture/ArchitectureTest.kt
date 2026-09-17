@@ -44,7 +44,7 @@ class ArchitectureTest {
                 }
                 for (match in importDeclaration.findAll(code)) {
                     val imported = match.groupValues[1]
-                    if (!isAllowedImport(packageName, file.name, imported)) {
+                    if (!isAllowedImport(packageName, imported)) {
                         add("$path: $packageName must not import $imported")
                     }
                 }
@@ -55,7 +55,6 @@ class ArchitectureTest {
 
     private fun isApprovedPackage(packageName: String, fileName: String): Boolean =
         when {
-            "$packageName.${fileName.removeSuffix(".kt")}" in compatibilityKeys -> true
             packageName == base -> fileName == "MainActivity.kt"
             packageName.within("$base.app") -> true
             featurePackage(packageName) != null -> true
@@ -67,18 +66,8 @@ class ArchitectureTest {
 
     private fun isAllowedImport(
         packageName: String,
-        fileName: String,
         imported: String,
     ): Boolean {
-        if ("$packageName.${fileName.removeSuffix(".kt")}" in compatibilityKeys) {
-            return imported == "androidx.navigation3.runtime.NavKey" ||
-                imported == "kotlinx.serialization.SerialName" ||
-                imported == "kotlinx.serialization.Serializable"
-        }
-        // Only the owning feature's navigation package can alias its retained key.
-        if (imported.within("$base.ui")) {
-            return compatibilityKeys[imported] == packageName
-        }
         val feature = featurePackage(packageName)
         if (feature != null && packageName.within("$feature.ui") &&
             imported.split('.').any { it == "navigation" || it == "navigation3" }
@@ -120,16 +109,6 @@ class ArchitectureTest {
 
     private companion object {
         const val base = "ru.nksk.lctapp"
-        // Exact key + filename exceptions preserve Android NavKeySerializer's runtime names.
-        val compatibilityKeys = mapOf(
-            "$base.ui.menu.MainMenu" to "$base.feature.menu.navigation",
-            "$base.ui.coins.navigation.Coins" to "$base.feature.coins.navigation",
-            "$base.ui.day.navigation.Day" to "$base.feature.day.navigation",
-            "$base.ui.gear.navigation.Gear" to "$base.feature.gear.navigation",
-            "$base.ui.goal.navigation.Goal" to "$base.feature.goal.navigation",
-            "$base.ui.tasks.navigation.Tasks" to "$base.feature.tasks.navigation",
-            "$base.ui.village.navigation.Village" to "$base.feature.village.navigation",
-        )
         val packageDeclaration = Regex("(?m)^[ \\t]*package[ \\t]+([\\w.]+)")
         val importDeclaration = Regex("(?m)^[ \\t]*import[ \\t]+([\\w.*]+)")
         val nonCode = Regex(
