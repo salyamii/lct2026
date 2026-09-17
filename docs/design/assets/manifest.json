@@ -24,6 +24,11 @@
       "id": "87:2",
       "name": "Рыжик-лисёнок · MVP runtime kit · 3 colors",
       "expected_assets": 55
+    },
+    {
+      "id": "89:2",
+      "name": "Рыжик-мужчина · MVP runtime kit · 3 colors",
+      "expected_assets": 55
     }
   ],
   "scope": "Existing menu/font assets and the imported artwork collections listed in this manifest.",
@@ -4682,6 +4687,1877 @@
       "source_format": "png",
       "lossless_rgba_verified": true,
       "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_tired_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_base_no_accessory",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:22",
+        "node_name": "adult_body_base_no_accessory_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-22"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 85424,
+      "sha256": "9510a165c542adf3c6d55d92a6c80e78e00232b7d86e764215a6e9e7002e0cf1",
+      "rgba_sha256": "d4da903e9b16c54d8274e36d926e6e7b2bf9294bb9fe6b51148d1efcffe09202",
+      "alpha_bounds": [
+        156,
+        22,
+        419,
+        488
+      ],
+      "source_sha256": "78b3291fdc616502b4b2c9f3f1756cffa3f1a5b10c074a522e609461d30e79d6",
+      "source_bytes": 131179,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_base_no_accessory.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_bandana",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:26",
+        "node_name": "adult_body_accessory_bandana_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-26"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 84718,
+      "sha256": "11eb1564764e292726c2223846beefd4d1344403c29a9ae39e6bb5869daa60c1",
+      "rgba_sha256": "53a059258752f70a570d5bd84272a151bf7d0feef4cb7b717d9cf1ce0e9bf075",
+      "alpha_bounds": [
+        163,
+        22,
+        424,
+        485
+      ],
+      "source_sha256": "ce5dd0dacfee34af286dc5db66ad535b87ddfaaeb43fc208579fe1736604f27e",
+      "source_bytes": 130248,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_bandana.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_backpack",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:30",
+        "node_name": "adult_body_accessory_backpack_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-30"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 98030,
+      "sha256": "3d257e89ed17f3cd6f8f38a6df5a3da419adedad1fe56cdf0077392fd257061a",
+      "rgba_sha256": "bca0667b7b20ae18a344a3202d745931ab84e2b2bac05287637b8646ecb913ea",
+      "alpha_bounds": [
+        156,
+        21,
+        419,
+        488
+      ],
+      "source_sha256": "d86749e530c66379808bd9b368a28a24a9337589aeb29edf529b202694977a36",
+      "source_bytes": 149834,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_backpack.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_route_patch",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:34",
+        "node_name": "adult_body_accessory_route_patch_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-34"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 90378,
+      "sha256": "9a38d4b7c3a92a0deb5b9c3d4ea6a98814bf7b0518881111fb8ada32eca05520",
+      "rgba_sha256": "3f07224a525a79ba52276f4b0355e30857808c22609bff237d8c7f9af9842707",
+      "alpha_bounds": [
+        156,
+        21,
+        420,
+        488
+      ],
+      "source_sha256": "96ad1017b09187e0d4dd415f10029ed79a01349d6100c358c4cc17c6213ad7d1",
+      "source_bytes": 138144,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_route_patch.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_hat",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:38",
+        "node_name": "adult_body_accessory_hat_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-38"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 88624,
+      "sha256": "395566887c9441a44dffd0169f7fced065eadfd05767d0cb79ccd111d80cda43",
+      "rgba_sha256": "c294927added0ecd6dd42a6b39686fbe60d24cf14d436c4b9faf475e42371f68",
+      "alpha_bounds": [
+        156,
+        21,
+        420,
+        488
+      ],
+      "source_sha256": "483ca2662efaa1eecd16424dee2c1ac8323ee728422da18ebe6dda55de063f2f",
+      "source_bytes": 137067,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_hat.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_goggles",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:42",
+        "node_name": "adult_body_accessory_goggles_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-42"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 90244,
+      "sha256": "39974a1d05c53b93a887add4149b660cbc2cd783d8158b7566bf1d912feaf602",
+      "rgba_sha256": "33c59c0f6c4edb68df1fc6ce84e0c56107e22ff9f37e07646b8fe24dfc8479c1",
+      "alpha_bounds": [
+        156,
+        21,
+        420,
+        488
+      ],
+      "source_sha256": "2f81df371129db43c689663683de03e466721aab4d3e6f794becd567665f0d6b",
+      "source_bytes": 137268,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_goggles.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_compass",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:46",
+        "node_name": "adult_body_accessory_compass_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-46"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 95348,
+      "sha256": "2c31e77f74960228fff8e755e016f1b14bdc68eec875b4db444144ab1bad0462",
+      "rgba_sha256": "cebb193fc645fdd9e279cb312b78b2cb3fef071d1d773dd5f893a631702ed1ec",
+      "alpha_bounds": [
+        115,
+        16,
+        427,
+        491
+      ],
+      "source_sha256": "1dc977bc2ced7f435c33ab6058f40dafc2b70895ce31282f2864582af984dde1",
+      "source_bytes": 148622,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_compass.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_lantern",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:50",
+        "node_name": "adult_body_accessory_lantern_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-50"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 99650,
+      "sha256": "27b7d58658a509fbbfb2ba4fecc04f8d6fe60dc13c102abbcb9d7931954597a3",
+      "rgba_sha256": "9de02ee1619e596cddc986e1717280ae86570f7d534fa2ceb491e5005703f9f7",
+      "alpha_bounds": [
+        97,
+        20,
+        430,
+        487
+      ],
+      "source_sha256": "b20b027cc23075a569dafc78ec5b8418a04080e153d655b562ca278aee5615bc",
+      "source_bytes": 151856,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_lantern.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_binoculars",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:54",
+        "node_name": "adult_body_accessory_binoculars_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-54"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 89198,
+      "sha256": "573cc30d588ad245616638bea6ba58c29da8d49ff6b8c16e1a30a4b9539ccf3e",
+      "rgba_sha256": "f7ed09e97ed98c534d56f51611277a667a2f563a818892dbd9c21dac3775730b",
+      "alpha_bounds": [
+        152,
+        21,
+        419,
+        488
+      ],
+      "source_sha256": "f111886165f8c9d4bb75b956dae96ffed0d5d95d4ac17a4aa56d236be3b1654d",
+      "source_bytes": 135470,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_binoculars.webp"
+    },
+    {
+      "resource": "ryzhik_adult_face_patch_neutral",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:58",
+        "node_name": "adult_face_patch_neutral_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-58"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 40190,
+      "sha256": "a14f98afc47e1e13435d804313e6ae57d59d38d4e0c84352fe27797c6f0d509d",
+      "rgba_sha256": "beaab9b33bdc0e010f9ae375c821bcafec5068cfdcd8ca15d73f3f767ff544fe",
+      "alpha_bounds": [
+        146,
+        62,
+        366,
+        238
+      ],
+      "source_sha256": "1353ab131662a0c79ee79e2e6a46e10152e8e5d0216442edd116924e184672ae",
+      "source_bytes": 64625,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_face_patch_neutral.webp"
+    },
+    {
+      "resource": "ryzhik_adult_face_patch_curious",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:63",
+        "node_name": "adult_face_patch_curious_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-63"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_notes": "Figma source contains an opaque white area inside the face clip. Preserved faithfully; inspect before overlay use.",
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 48090,
+      "sha256": "124a223f1d850a5008429f41ebe32049ec5d8226c6141b6fe718f948e8acc9eb",
+      "rgba_sha256": "27dfc65c1791ab09cb2325571f2cafdb104de51523697a231baa8728c7ba3f22",
+      "alpha_bounds": [
+        146,
+        62,
+        366,
+        238
+      ],
+      "source_sha256": "3b7d159028be2d069752745f5f08c7759d2758eeb6a1d3708bed67f262de641f",
+      "source_bytes": 79613,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_face_patch_curious.webp"
+    },
+    {
+      "resource": "ryzhik_adult_face_patch_confident",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:68",
+        "node_name": "adult_face_patch_confident_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-68"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 43508,
+      "sha256": "31df3cc7525adb243ce73262338cd5226a86dbe4ed0c2a318f97fd17063f24be",
+      "rgba_sha256": "37d7f9b60b091c100a7f46f8ec0603164400b19e356cf9974b7352d7abd3081c",
+      "alpha_bounds": [
+        146,
+        62,
+        366,
+        238
+      ],
+      "source_sha256": "a2e92e84cc13a4f14b759118dede43f28f1b35ffc7024af2eefd173429e5900d",
+      "source_bytes": 72632,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_face_patch_confident.webp"
+    },
+    {
+      "resource": "ryzhik_adult_face_patch_thoughtful",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:73",
+        "node_name": "adult_face_patch_thoughtful_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-73"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 46768,
+      "sha256": "d548e48d97498ee781a64fea3b808b630536a6ba2c646439ee2d7676fbd802cc",
+      "rgba_sha256": "98f3c8006f71d7e5d35b4497eb1b49e13857465dff575b21db22aa8e8bc1d2b6",
+      "alpha_bounds": [
+        146,
+        62,
+        366,
+        238
+      ],
+      "source_sha256": "0587f44729af3f294784a74499e74d770ceeb2f43ff1ac9cfc40442f603db1df",
+      "source_bytes": 77622,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_face_patch_thoughtful.webp"
+    },
+    {
+      "resource": "ryzhik_adult_face_patch_joyful",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:78",
+        "node_name": "adult_face_patch_joyful_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-78"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 47334,
+      "sha256": "c34a7e7e90e20380fda5b5f68cc52a8b69d93355d561c30d912493f2a0d6021d",
+      "rgba_sha256": "9b12ad2f37392eed24e7b15bd30891ec1b6d4f1c44321fcc5e6af05e88a081bd",
+      "alpha_bounds": [
+        146,
+        62,
+        366,
+        238
+      ],
+      "source_sha256": "fd019c893af8e4edd0cce9eacbdabdfa19270c195ebf98fbe361b2b605b57d4c",
+      "source_bytes": 78099,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_face_patch_joyful.webp"
+    },
+    {
+      "resource": "ryzhik_adult_mask_fur_color",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:83",
+        "node_name": "adult_mask_fur_color_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-83"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 121326,
+      "sha256": "19da4c992383087373e9b69cf918aaefca0f6308e525f5ffe9bca857e1eaf501",
+      "rgba_sha256": "9d2e9931bd7aff1a017040b93b0b81910e88f8204431bbb480c426d9cb5150f5",
+      "alpha_bounds": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "source_sha256": "82c20d8845b7d1a5c766a2f8a7f82f0ac89a557ed0a740928646730fbde1b8a2",
+      "source_bytes": 199231,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_mask_fur_color.webp"
+    },
+    {
+      "resource": "ryzhik_adult_mask_iris_color",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:87",
+        "node_name": "adult_mask_iris_color_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-87"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 80902,
+      "sha256": "cbb1f7f1d935fea23d7caf49e4448eff9d776f2cf416eefd0b6a80cadf5334b1",
+      "rgba_sha256": "52ce1bb8141e2989a99f62048312f7a8699726c1e1b3ac67d2b405757bfc0c5e",
+      "alpha_bounds": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "source_sha256": "145196c257d20a9b5095ffeeb42d9ead2a2dde1edd05c5645a08226e8fc4dbc8",
+      "source_bytes": 139746,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_mask_iris_color.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_bandana_sand",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:109",
+        "node_name": "adult_body_accessory_bandana_sand_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-109"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 88094,
+      "sha256": "3070bc7d9a807b9d3cad474c456444a552d03affe68d083eb2f6a766c498578e",
+      "rgba_sha256": "30e650b479c587e4c3adc56451341f5e3bb205b3052c28c0dc3ea1e7fa728606",
+      "alpha_bounds": [
+        156,
+        21,
+        420,
+        488
+      ],
+      "source_sha256": "0a963bdb8948449f79b44932eb59cb7bcf6eaed4041a7526e6342fa69d011080",
+      "source_bytes": 136532,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_bandana_sand.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_backpack_sand",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:113",
+        "node_name": "adult_body_accessory_backpack_sand_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-113"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 95374,
+      "sha256": "e64fe8f55952b5bfed97266584eefb79dad866e581f5afeaf98e0763ca0444b1",
+      "rgba_sha256": "54724de8185acc54af2f3ac1048310d32b78ff7442b3484dcb25938b89b67eba",
+      "alpha_bounds": [
+        159,
+        21,
+        422,
+        487
+      ],
+      "source_sha256": "82d19b4a2c09a286f26f42c0e8b78858fbf5918ef146e26cf0ae60bc59e0fa37",
+      "source_bytes": 146624,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_backpack_sand.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_route_patch_sand",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:117",
+        "node_name": "adult_body_accessory_route_patch_sand_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-117"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 85202,
+      "sha256": "0dd10ff3ee2af2aa8471fc1e93a16fdcabb3267b3d14f7c1f7ea1244709d2998",
+      "rgba_sha256": "5f76cf3d20aa7f62586eaf43ba292df2c599e29b1ee262a97a9a09335fd26d14",
+      "alpha_bounds": [
+        160,
+        21,
+        424,
+        487
+      ],
+      "source_sha256": "9ac339a55f1b331925ea8fbcac274272e7d9a7b109285a4ab597fa2fe5ba3e19",
+      "source_bytes": 132145,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_route_patch_sand.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_hat_sand",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:121",
+        "node_name": "adult_body_accessory_hat_sand_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-121"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 84764,
+      "sha256": "bfea2017d01a896d27ee3c194ac53a771412231439ad1b415daa35f8923a4af3",
+      "rgba_sha256": "d04ccce74de8bee44119fb3f077298425e5e69e0e09059666cc6272fbf466967",
+      "alpha_bounds": [
+        160,
+        28,
+        423,
+        487
+      ],
+      "source_sha256": "116e26303a9e09f5c1714b89a0b8b9cc610d7aa8614f5c2f3c26339610bbc13c",
+      "source_bytes": 132296,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_hat_sand.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_goggles_sand",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:125",
+        "node_name": "adult_body_accessory_goggles_sand_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-125"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 88044,
+      "sha256": "2ee7fb98b1ed87f60b3ec9754f16e5cef6e38a7c12ebdc38e27116c9da01353d",
+      "rgba_sha256": "01f89ccf2d76c288b2e4737fde76a27f636e5e9088f0b73131a0b71a9513bbf8",
+      "alpha_bounds": [
+        157,
+        21,
+        420,
+        488
+      ],
+      "source_sha256": "2aed24195ffed41e80128ce9aeedb20d108bcdfc4fb7a4a55ea77f91cb9946ab",
+      "source_bytes": 136803,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_goggles_sand.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_compass_sand",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:129",
+        "node_name": "adult_body_accessory_compass_sand_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-129"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 96272,
+      "sha256": "a1668199a36d669b97cf16d6b1bdc67a0c2bf8dd0cc30a664c21a37df058a674",
+      "rgba_sha256": "2f72dda88716c635034dcd7bdd3ee01fb69d67d989e5ed982f1c5486fc1a406d",
+      "alpha_bounds": [
+        111,
+        21,
+        420,
+        488
+      ],
+      "source_sha256": "3b6ee1258ef50ae4a4dda0f44eac501a083b36f638680280a830cebbe19b280f",
+      "source_bytes": 147415,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_compass_sand.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_lantern_sand",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:133",
+        "node_name": "adult_body_accessory_lantern_sand_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-133"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 101686,
+      "sha256": "615dba0f08776849d5806f9a467c328ced28347291c2dc1d8dd209ada92bf17f",
+      "rgba_sha256": "a9464b15a4e621b927ad8e3cb31ee688aae75c0aedb5c2051b3d924dab8b7143",
+      "alpha_bounds": [
+        97,
+        21,
+        420,
+        488
+      ],
+      "source_sha256": "a9ca958c9aeb508ad6221ab69aaac8deba9bd17dc94a83e68d3294ec5f454aa2",
+      "source_bytes": 153160,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_lantern_sand.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_binoculars_sand",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:137",
+        "node_name": "adult_body_accessory_binoculars_sand_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-137"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 90980,
+      "sha256": "c38ff4ef17a932fd78c9cd6e0481b8293b594cb446cfa8ea1d717e2abc2782f7",
+      "rgba_sha256": "6b9d84728b364fe59107f0948e3b0a3347d306cdc1c8091794c68c3eee98de80",
+      "alpha_bounds": [
+        139,
+        21,
+        416,
+        488
+      ],
+      "source_sha256": "87eaaf705db0aa9927b458ee2d57dd2265a4f0087c1d640a4ec49b99b13f4a5c",
+      "source_bytes": 139811,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_binoculars_sand.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_bandana_dark_russet",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:142",
+        "node_name": "adult_body_accessory_bandana_dark_russet_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-142"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 82580,
+      "sha256": "41db9e545115b68720615a9a5a04e5798b8489612e38d46f60df52ec7abc222f",
+      "rgba_sha256": "75fd970cb5e7d8ef0c7cf367d9290097ed96d3831bf2eab01d7af7223db4f951",
+      "alpha_bounds": [
+        160,
+        22,
+        422,
+        488
+      ],
+      "source_sha256": "da278e8fac1d275c26f9545c747d8b12c86b7ad859617a05a87133d742444ed4",
+      "source_bytes": 133471,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_bandana_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_backpack_dark_russet",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:146",
+        "node_name": "adult_body_accessory_backpack_dark_russet_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-146"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 93168,
+      "sha256": "c963b49110497c73e6dfa767f491b54cbd2918610643a346b1dbaa21f54ac8e8",
+      "rgba_sha256": "61af62b8b6bdbb3903984cb288ff02e6b4e5a839ec3ddfdbe098f1e771c8018b",
+      "alpha_bounds": [
+        156,
+        21,
+        420,
+        488
+      ],
+      "source_sha256": "36ddc721b1bea770d1d6543067982aa9b14c8dedbd45b0729aad2f04a01ffb87",
+      "source_bytes": 146568,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_backpack_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_route_patch_dark_russet",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:150",
+        "node_name": "adult_body_accessory_route_patch_dark_russet_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-150"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 87386,
+      "sha256": "dc39549769f9a1bfbf1ec73146fa99aac4e74683c1114d7496656fdc4102ba74",
+      "rgba_sha256": "565fcfc885271d829ba128fdd54bc8fcb19c8365cee41df8a1378ddd9c6c3c76",
+      "alpha_bounds": [
+        156,
+        21,
+        419,
+        487
+      ],
+      "source_sha256": "08f4530d1016312ed8394cecdedf5c2ec74024d71fe847aa48f97a0259ede9d8",
+      "source_bytes": 135392,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_route_patch_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_hat_dark_russet",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:154",
+        "node_name": "adult_body_accessory_hat_dark_russet_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-154"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 81844,
+      "sha256": "a6a05648910bc0bef8e8119f448f9938ab6714c1f31f9d2e7eedf97044042bb4",
+      "rgba_sha256": "80fcd71a155e84578e04bd9f6158f59853a12e1801a1592cfd95b380d3614431",
+      "alpha_bounds": [
+        156,
+        22,
+        421,
+        488
+      ],
+      "source_sha256": "2593d9d2446290a241c22df9459efb6491be15ddc89ccfa0d2e340b97dc41409",
+      "source_bytes": 129606,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_hat_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_goggles_dark_russet",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:158",
+        "node_name": "adult_body_accessory_goggles_dark_russet_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-158"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 80554,
+      "sha256": "64bd4f975ac46cc9cab5dd7a59402677af088371f4426f24963841571e222f2f",
+      "rgba_sha256": "3b82995ac9fd536c618bb45494077cabdf7732ae08d49c4676e1d5e5c6f65b5f",
+      "alpha_bounds": [
+        156,
+        21,
+        420,
+        488
+      ],
+      "source_sha256": "261ea50385ed136ff0847c7718fc64ac2b7add46ef896506e9e04e2329dd406a",
+      "source_bytes": 129925,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_goggles_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_compass_dark_russet",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:162",
+        "node_name": "adult_body_accessory_compass_dark_russet_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-162"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 88586,
+      "sha256": "e84111e4c8afe05e0b8574fe01b215488986fdc0858612560c0c7b3c96da693c",
+      "rgba_sha256": "be071baac7ed56b779c4e14562e36b678e832bfff5852e87fe30c5e0c5f5c08a",
+      "alpha_bounds": [
+        109,
+        21,
+        429,
+        488
+      ],
+      "source_sha256": "4d8388f8dd6905640e2ac5f3d60c9ef7b105a3b381d12dfbb178c56185a3f1e8",
+      "source_bytes": 141532,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_compass_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_lantern_dark_russet",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:166",
+        "node_name": "adult_body_accessory_lantern_dark_russet_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-166"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 84976,
+      "sha256": "e473989e5c5e21853a22c614bf9e601a27d5f51d7ff42e0bb83e72194c841e75",
+      "rgba_sha256": "004af964f65330ae5ff9b431ccab169191cc57dec7ae48bf3fe6618c36e92b1d",
+      "alpha_bounds": [
+        160,
+        19,
+        424,
+        487
+      ],
+      "source_sha256": "543aa2b73046085870cdabcf7fb822b3950acbed03edbf109d4b460cb417cc3a",
+      "source_bytes": 135450,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_lantern_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_binoculars_dark_russet",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:170",
+        "node_name": "adult_body_accessory_binoculars_dark_russet_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-170"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 85624,
+      "sha256": "22664bc9c8d45946e47c40bf8e686601fca416cacffe22def5a25cc96bb9f4ee",
+      "rgba_sha256": "e1bd1ed9f788166b9855537ee689cbf9c5ea69b8157a875579f2a416a8457add",
+      "alpha_bounds": [
+        156,
+        21,
+        420,
+        488
+      ],
+      "source_sha256": "1bb57a7734ccfc2bd6d781310f36256df269e12be23cc192aa22bb9064738cda",
+      "source_bytes": 136536,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_binoculars_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_base_sand",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:175",
+        "node_name": "adult_body_base_sand_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-175"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 81914,
+      "sha256": "85040681f3338591a92006c62e6c42a66c5b14ad9c96f88646a0389ac7b8c4e5",
+      "rgba_sha256": "8a61046817a144a640df344546e93d54a49ea592f91cfd8c51133f31e5728b62",
+      "alpha_bounds": [
+        159,
+        22,
+        423,
+        488
+      ],
+      "source_sha256": "fea3b11cc5ff184f3b1eca6161230b99ef2a80564223bb53342e76925a8a91fd",
+      "source_bytes": 132142,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_base_sand.webp"
+    },
+    {
+      "resource": "ryzhik_adult_body_base_dark_russet",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "89:179",
+        "node_name": "adult_body_base_dark_russet_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-179"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 80904,
+      "sha256": "e66c251b023631243ae087006e8bb3b61b541f2225fe086ebc26afe8e1235e1c",
+      "rgba_sha256": "51a1deb01450761165d16b15a08763f52baa4a1862a6630d867a0f30d2300e64",
+      "alpha_bounds": [
+        156,
+        21,
+        419,
+        488
+      ],
+      "source_sha256": "0c6a234544e20192699af03819201ba040ee3fc62b8795aba49d9772ed67c263",
+      "source_bytes": 127739,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_base_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_sick_copper",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:103",
+        "node_name": "adult_state_sick_copper_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-103"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 84976,
+      "sha256": "e4c152551d2d960ff86826a77b75713ddb867569403beffc553f6dc231145336",
+      "rgba_sha256": "4a437ece048c94c35ac2fa4719b7147134fb75478fd533316213e7f7cacdd784",
+      "alpha_bounds": [
+        156,
+        21,
+        419,
+        488
+      ],
+      "source_sha256": "fd6c2362177164e3c72645c01df9161c124b5a42726da0761d1ccf28f3c74b72",
+      "source_bytes": 133203,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sick_copper.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_satiated_copper",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:107",
+        "node_name": "adult_state_satiated_copper_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-107"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 85214,
+      "sha256": "b292213e7e785fbb7ca23c88bfb82f0447c6ca91faacd85e4486c146c20e35ac",
+      "rgba_sha256": "0153093cf97b4864e2ff73872ac59e4f6c8a089ea0dc9c00988704ac5766ddcd",
+      "alpha_bounds": [
+        156,
+        37,
+        419,
+        488
+      ],
+      "source_sha256": "f29dfa81ec518457f2a16d9a03428d8bb54697c25f4fb49d9cf6891cf940d793",
+      "source_bytes": 129665,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_satiated_copper.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_joy_copper",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:111",
+        "node_name": "adult_state_joy_copper_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-111"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 93738,
+      "sha256": "9fecedfbae0c548ae5cd5793cc6629e1d7f197547b6be0ceede2710021fcfa37",
+      "rgba_sha256": "15a0e41dcbf8e3d44a79cb0e36480fdc1cfdd6dd278e704eb4a3dca3f347c964",
+      "alpha_bounds": [
+        156,
+        21,
+        447,
+        488
+      ],
+      "source_sha256": "17943f953d178e5079c6af71d17b2f9349b909bbdebe5c9edd05340fc042e335",
+      "source_bytes": 144852,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_joy_copper.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_sad_copper",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:115",
+        "node_name": "adult_state_sad_copper_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-115"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 85240,
+      "sha256": "b161bec9903dbd71bd440cabe748cafae55d5a159d593c2b5e970362726ec4fd",
+      "rgba_sha256": "838dbdf532586ba590384de1e2108edd9fa622724b84ec0ae27c990c4c717dc3",
+      "alpha_bounds": [
+        156,
+        21,
+        419,
+        488
+      ],
+      "source_sha256": "387e92e6d04902345b70c7e2b370e4d76bad8087e5c77d017e99950fd194736e",
+      "source_bytes": 135946,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sad_copper.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_sick_sand",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:119",
+        "node_name": "adult_state_sick_sand_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-119"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 82986,
+      "sha256": "84d6737081cf78e356c936f9f1cd5d7a0304f09b5a1a375ea4e40b362be02fe3",
+      "rgba_sha256": "169bd7c67637629a4c78f1424d5eebd58a4f913ec8ead0b79582309ed180f31e",
+      "alpha_bounds": [
+        164,
+        23,
+        428,
+        487
+      ],
+      "source_sha256": "a158ef5cfee930c291971fe3c3a1e75aa5b2d3c9eceef3d8c0a8ddfbf27fb118",
+      "source_bytes": 130657,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sick_sand.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_satiated_sand",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:123",
+        "node_name": "adult_state_satiated_sand_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-123"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 83110,
+      "sha256": "9f9fe726a13ce83512d0f21506799c95492c3bca12a965d55d33cf4996de1217",
+      "rgba_sha256": "936ab9b8b0b209252c5f8060d4c48df256f6a0982b40b49f3f10d4036b647ac9",
+      "alpha_bounds": [
+        156,
+        21,
+        420,
+        488
+      ],
+      "source_sha256": "a68b599734b0b2fe81dbdccd36571c968db5fd79e231a9cc0f5993680df8cc40",
+      "source_bytes": 133873,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_satiated_sand.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_joy_sand",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:127",
+        "node_name": "adult_state_joy_sand_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-127"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 98700,
+      "sha256": "8de60d5ef6a5459b4b3d1a9d111bff41f3a4de61b73d99f7480fc75139412cac",
+      "rgba_sha256": "4d86721c06bd883160453d885123838680a56ea20b3710632694c56d7377f370",
+      "alpha_bounds": [
+        156,
+        21,
+        458,
+        488
+      ],
+      "source_sha256": "56eb3a00c25688d48cb277b91891b8913b53f581a22817e61c237da3322e9e42",
+      "source_bytes": 148738,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_joy_sand.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_sad_sand",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:131",
+        "node_name": "adult_state_sad_sand_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-131"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 88516,
+      "sha256": "2a15a51c694df96e1df9ddc38d9cbc4b68fdc1edb37b71a8f5e065e162ef0acf",
+      "rgba_sha256": "e4c2f9db76ac272425fc6705e5fb6b88f8b94282034a32186168ecf689fc521f",
+      "alpha_bounds": [
+        156,
+        21,
+        419,
+        488
+      ],
+      "source_sha256": "16243af533239f714150bb737bc2bf1e4ad19acd95dd2c4a44d62682fc34498e",
+      "source_bytes": 135854,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sad_sand.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_sick_dark_russet",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:135",
+        "node_name": "adult_state_sick_dark_russet_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-135"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 83648,
+      "sha256": "e08f9998fca1a9de65a1a5d016a5dfd76ef42c2ff7de79ecbc9648568792fba3",
+      "rgba_sha256": "b969401d333bf121c53ddc05f88fd17f76e1bc2d03117194e7494d4dd68de709",
+      "alpha_bounds": [
+        158,
+        21,
+        421,
+        487
+      ],
+      "source_sha256": "84bb1f15b33ce5f6e34df5e6244eaa1bab3d0b45c83b07449ada0a6adb24ef94",
+      "source_bytes": 130024,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sick_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_satiated_dark_russet",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:139",
+        "node_name": "adult_state_satiated_dark_russet_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-139"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 83680,
+      "sha256": "3e309f96436cf43d41ffded5a4edfa922f3aac8c134cdcc4c6d4a2d7a20e47c5",
+      "rgba_sha256": "02da0adf4fa2bae42b75347e73f6a5f0cad935ef9264e0e065994c792876b194",
+      "alpha_bounds": [
+        156,
+        21,
+        420,
+        488
+      ],
+      "source_sha256": "1ec816c79d9756a5309248649f2c0d18e68dd9979053d1cd08af9cfd019c1b94",
+      "source_bytes": 131670,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_satiated_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_joy_dark_russet",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:143",
+        "node_name": "adult_state_joy_dark_russet_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-143"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 85300,
+      "sha256": "eba915d4bf770ecfb8dfb780cfe8df080d19ebdbbcaf161c6ec761760e0fc18c",
+      "rgba_sha256": "858615d52cb16cee1159542b013c9db7137a7dbd2b629bb15421958c6428d813",
+      "alpha_bounds": [
+        157,
+        21,
+        421,
+        488
+      ],
+      "source_sha256": "4b119662ad0089090731000a96d98116058a4d36b87cc489445311c08b0d9b4d",
+      "source_bytes": 131512,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_joy_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_sad_dark_russet",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:147",
+        "node_name": "adult_state_sad_dark_russet_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-147"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 82084,
+      "sha256": "baafba1a808d44e539cee1ef57f8b88f979a11a5e1cb8759fe77a7d0f753cf83",
+      "rgba_sha256": "1b926ddd2b77333c8e6da093d4de32ed34392943b28cffb0c8bc9aaa7705e0e0",
+      "alpha_bounds": [
+        156,
+        21,
+        420,
+        488
+      ],
+      "source_sha256": "f7b9ae577d45383c4dec34216c7f38c79910c527fe2fb3b77688eaf46586b758",
+      "source_bytes": 129148,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sad_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_hungry_copper",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "93:30",
+        "node_name": "adult_state_hungry_copper_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=93-30"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 85116,
+      "sha256": "08216add7e8ab844601dcb25171e04ac042315d8be8f823cef99fc67b983198c",
+      "rgba_sha256": "5d839d2bff0cdb1c34274b902827c739c2338ec61676514a0233388406dd462f",
+      "alpha_bounds": [
+        156,
+        21,
+        419,
+        488
+      ],
+      "source_sha256": "54dbcca08e523408290da8b42a00bcb47f6e84d98ffe818d859df1252a23ddd5",
+      "source_bytes": 133659,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_hungry_copper.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_hungry_sand",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "93:34",
+        "node_name": "adult_state_hungry_sand_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=93-34"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 84424,
+      "sha256": "b03b9b285d49f9689bca490b3a94c89b7be4f67e45f2efc09dabbef1365d69db",
+      "rgba_sha256": "e1c3236cb05b2a6abbbafe03e0326a8f796532eb133acdc1598d6c0921d958b7",
+      "alpha_bounds": [
+        157,
+        21,
+        417,
+        487
+      ],
+      "source_sha256": "9ca6a8bc976b63f512fced0d86328fdd176b9df9aaa12a9c5ee295f14b056035",
+      "source_bytes": 134671,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_hungry_sand.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_hungry_dark_russet",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "93:38",
+        "node_name": "adult_state_hungry_dark_russet_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=93-38"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 83614,
+      "sha256": "eaa4a4e86a109e70a2e0ae1b9fdc81e121f78d2be53db5077a14b0edd8c2a7e0",
+      "rgba_sha256": "e831e93ca9703bbe271b3ec7f68c6f412b82014113206551fdbc701dded0e733",
+      "alpha_bounds": [
+        156,
+        21,
+        420,
+        488
+      ],
+      "source_sha256": "3cdd9360ed18fb2d187cbd5ff3bb2a49ebbfb89b64edc950123c360957f4039f",
+      "source_bytes": 129993,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_hungry_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_thoughtful_copper",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "94:54",
+        "node_name": "adult_state_thoughtful_copper_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-54"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 90274,
+      "sha256": "8413bc06c211ffca6f1616e905ce27a085d72ccd9a53c92d003c5b7fdccd0caa",
+      "rgba_sha256": "3bdc728677c2a952a096b8d9fd7a516709f0090be875e2f341d594cef91e04f3",
+      "alpha_bounds": [
+        155,
+        22,
+        419,
+        488
+      ],
+      "source_sha256": "72c99138f4e7184caf68dfc8a66e99e60036d0ac30b68982fd29b38e0dd2e178",
+      "source_bytes": 138939,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_thoughtful_copper.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_tired_copper",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "94:58",
+        "node_name": "adult_state_tired_copper_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-58"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 83898,
+      "sha256": "119bfd2f9dc77cb4d2fab28e483f4ee48bc97a1b410a0741a246b8f22530a8b7",
+      "rgba_sha256": "59087087d969d9441ba9ce218a2ef20164c0cfddf4c163844827fed0987094b9",
+      "alpha_bounds": [
+        156,
+        21,
+        419,
+        488
+      ],
+      "source_sha256": "78ca13aa2bb2a10788cdac3235d4d5a980664c6a9b5787d0a67d4881068d1cee",
+      "source_bytes": 131250,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_tired_copper.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_thoughtful_sand",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "94:62",
+        "node_name": "adult_state_thoughtful_sand_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-62"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 85978,
+      "sha256": "73223332f7f4b56ad6efa316e7da9be2a971472328e4a6af5d3d3b46c0bb0e46",
+      "rgba_sha256": "24d6452b90afb822316c0712115005a44876564f0ef98d2a461ccbe24499b391",
+      "alpha_bounds": [
+        144,
+        20,
+        410,
+        487
+      ],
+      "source_sha256": "16497c57b5863ccd76ea2a356d5aed661d5092ffd1db398367efd5c99d8b8c7e",
+      "source_bytes": 132998,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_thoughtful_sand.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_tired_sand",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "94:66",
+        "node_name": "adult_state_tired_sand_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-66"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 82768,
+      "sha256": "247aa685d81f41d4c882108888c0655ec2bc326f2cfed40df3892f516f1b7935",
+      "rgba_sha256": "6ae3212dab710dfe608b10912b85a073f1588f5378392989a2154564331cb8b7",
+      "alpha_bounds": [
+        155,
+        22,
+        417,
+        485
+      ],
+      "source_sha256": "65b0828e4ad34713f33e6a410a96063c8aa1e59408f9942f217b0eaa81869f59",
+      "source_bytes": 129188,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_tired_sand.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_thoughtful_dark_russet",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "94:70",
+        "node_name": "adult_state_thoughtful_dark_russet_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-70"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 81752,
+      "sha256": "3f4f146473ac18132f090ad64c36259bee4f8ee289734e9701db64b2c6600d99",
+      "rgba_sha256": "c191c1795805e2114e8a13ce9085f73b29889d0b205e78e6a15c976edeb25238",
+      "alpha_bounds": [
+        158,
+        21,
+        421,
+        487
+      ],
+      "source_sha256": "2bb9f31b640eacb1d70601dcd24ee55c011f69be37bd00ccabbbd111bd53471c",
+      "source_bytes": 130437,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_thoughtful_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_tired_dark_russet",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "94:74",
+        "node_name": "adult_state_tired_dark_russet_512",
+        "collection_id": "89:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-74"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 84094,
+      "sha256": "37611743dd60115d760dc63105eab39836efdaf07f2479aa33bac322f7bf4fee",
+      "rgba_sha256": "4cdbb998a95baf0e5e0ff476be5a4ce774a05871ad583a2cdfdfebde300b4ace",
+      "alpha_bounds": [
+        156,
+        21,
+        419,
+        488
+      ],
+      "source_sha256": "811c45326bd4d8fe12c8f33f0e28759994ae9ece8d4fe7ef01b3f76a6976554d",
+      "source_bytes": 131784,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_tired_dark_russet.webp"
     },
     {
       "resource": "menu_chevron",

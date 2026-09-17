@@ -19,6 +19,7 @@ age or character without an explicit design decision.
 | MVP poses, colors and standalone equipment | [56:2](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-2) | 20 |
 | Teen runtime layers | [56:65](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-65) | 55 |
 | Cub runtime layers | [87:2](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-2) | 55 |
+| Adult runtime layers | [89:2](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-2) | 55 |
 
 The catalog also covers the existing eight menu bitmaps, two vector icons and
 two fonts. Further collections will be added with their matching provenance.
