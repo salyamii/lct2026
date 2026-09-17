@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Exact pixel duplicates; provenance: docs/design/assets/manifest.json -->
 <resources>
+    <item type="drawable" name="ryzhik_teen_body_base_no_accessory">@drawable/ryzhik_mvp_idle_copper</item>
+    <item type="drawable" name="ryzhik_teen_body_base_sand">@drawable/ryzhik_mvp_color_sand</item>
 </resources>

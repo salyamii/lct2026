@@ -14,6 +14,11 @@
       "id": "56:2",
       "name": "Рыжик · MVP asset pack · PNG 512",
       "expected_assets": 20
+    },
+    {
+      "id": "56:65",
+      "name": "Рыжик · MVP runtime kit v3 · 3 colors",
+      "expected_assets": 55
     }
   ],
   "scope": "Existing menu/font assets and the imported artwork collections listed in this manifest.",
@@ -929,6 +934,1878 @@
       "source_format": "png",
       "lossless_rgba_verified": true,
       "path": "app/src/main/res/drawable-nodpi/gear_binoculars.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_base_no_accessory",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "65:19",
+        "node_name": "body_base_no_accessory_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=65-19"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_node_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 83106,
+      "sha256": "199ef7c07dc108bd29f37e31ca636cc950f6f93d8facc57ad7109bb3d2853238",
+      "rgba_sha256": "de858890ba28a90e4994658ced63f3615cb97a03de58aedeea9a9b3e8c9dbe3f",
+      "alpha_bounds": [
+        148,
+        56,
+        432,
+        456
+      ],
+      "source_sha256": "d4b9eef8965ff7cb2ff1dff25f204a7950a4fdd347ddd2494b4660b3f21b3a85",
+      "source_bytes": 123888,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "alias_of": "ryzhik_mvp_idle_copper",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_mvp_idle_copper.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_bandana",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "65:23",
+        "node_name": "body_accessory_bandana_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=65-23"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_node_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 83132,
+      "sha256": "1ee9ab6acb7a9c68f4820a4798deeda245d171cc1ada6a6fc5ad34fda444deed",
+      "rgba_sha256": "91430e62d7b57cc08fafb01479522e254e8e666293e3262df1f337bca73542d9",
+      "alpha_bounds": [
+        145,
+        56,
+        428,
+        456
+      ],
+      "source_sha256": "5a5b3504ce39433a8c0e9d7366292126ccdf42efa482379fb4adc01f2ed7bc46",
+      "source_bytes": 126776,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_bandana.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_backpack",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "65:27",
+        "node_name": "body_accessory_backpack_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=65-27"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_node_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 91620,
+      "sha256": "3d7c6f6a13945443073c1f614cfe3f1861d329b41626a8ad6d5efc66e374516f",
+      "rgba_sha256": "e769e59cc7b8695eaad380312d61a39851e44237c0971e13168654d4b913eb39",
+      "alpha_bounds": [
+        148,
+        56,
+        432,
+        456
+      ],
+      "source_sha256": "a962a5862e30f5aff5d49fe1bde406b1959f188aa6cabd22d2f7f417f095c12c",
+      "source_bytes": 136607,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_backpack.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_route_patch",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "65:31",
+        "node_name": "body_accessory_route_patch_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=65-31"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_node_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 83774,
+      "sha256": "c6c482e5b6ecac450f5251df3c01e54cd76523aa9119b06f6aaab6700d9ba155",
+      "rgba_sha256": "4b379f212f53109e14bd0bc8921cb6191c9fc6a5f2a54c7a72a63bcfe2e7805e",
+      "alpha_bounds": [
+        148,
+        56,
+        432,
+        456
+      ],
+      "source_sha256": "41a9da6e573a3f4e04ecaa80240a40566040e5870ad5e61ca97f6d0c81d37dca",
+      "source_bytes": 125585,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_route_patch.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_hat",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "65:35",
+        "node_name": "body_accessory_hat_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=65-35"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_node_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 82014,
+      "sha256": "2d4da74913b87f58b5173236d3d29b53c20202a3618f791e37cba9b69245e688",
+      "rgba_sha256": "6c6c24c1fc2d2fbc63d9c0521bb1bea64b062c11c97a4d9a15a7cea6eb052439",
+      "alpha_bounds": [
+        148,
+        56,
+        432,
+        456
+      ],
+      "source_sha256": "54bfe7a477293e1e05a8c580c8c0f47d13082c0c45acd19b3b166978a6aa5db2",
+      "source_bytes": 126682,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_hat.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_goggles",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "65:39",
+        "node_name": "body_accessory_goggles_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=65-39"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_node_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 84176,
+      "sha256": "9fc264a0199d91441d543234b3fdd9019443d8fe8efe29b29145dd2dd6ce907a",
+      "rgba_sha256": "3e3660f549eb0c4ef450340e9723ab58cf21963ebe6506a111f71e2317544dd9",
+      "alpha_bounds": [
+        148,
+        56,
+        432,
+        456
+      ],
+      "source_sha256": "1e862416609d79829e36281126afb5f836ad6fbdfbb9ef2c3b93951647aa089f",
+      "source_bytes": 127755,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_goggles.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_compass",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "65:43",
+        "node_name": "body_accessory_compass_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=65-43"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_node_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 84930,
+      "sha256": "fa683a25bbd4fbd6fb5edda2e453afa30ccbde5dc2cb4a9b520a5b874fc52cd1",
+      "rgba_sha256": "4bc402c9e48e5737efdf6a12fe16d78e827be520ed0488d8a085bfe18e59d8c0",
+      "alpha_bounds": [
+        148,
+        56,
+        432,
+        456
+      ],
+      "source_sha256": "b380b639baec39156c3ac2126a3d3afb727592b157f493120ad91856a879cce5",
+      "source_bytes": 127712,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_compass.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_lantern",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "65:47",
+        "node_name": "body_accessory_lantern_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=65-47"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_node_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 93570,
+      "sha256": "ce0a4e517d9586673ff268fdea3dd27526294be21800bb54beb1b30de0ff808a",
+      "rgba_sha256": "41f502f2cdf08aaf805b7743702be57a4566787699e4f0b2de98ed68e4ff1955",
+      "alpha_bounds": [
+        100,
+        56,
+        432,
+        456
+      ],
+      "source_sha256": "13605818ed32bca1b14cc28c2d49b2816d3d582e953c2a4eb1c8257b89508326",
+      "source_bytes": 140875,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_lantern.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_binoculars",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "65:51",
+        "node_name": "body_accessory_binoculars_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=65-51"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_node_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 88088,
+      "sha256": "3d77932ff2f9dc8b7888f74f2e9de10bd0f00f29297ccf60f4b5d8dbc8be469b",
+      "rgba_sha256": "643e6c94f52b7816adf12420a3f4b9e0f3ada88ff795e71c797e287215fde91f",
+      "alpha_bounds": [
+        132,
+        56,
+        438,
+        454
+      ],
+      "source_sha256": "3ea45a4b43001b070f268b2d6a95cbccc0eef3dd55aa8ae8973dea4926ae00b5",
+      "source_bytes": 131409,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_binoculars.webp"
+    },
+    {
+      "resource": "ryzhik_teen_face_patch_neutral",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "65:55",
+        "node_name": "face_patch_neutral_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=65-55"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_node_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 32590,
+      "sha256": "b1b3cd226e6525e7efa7256fbd07f9ce4c2b6eac3fa20d7a9b3d1a976f0e542d",
+      "rgba_sha256": "5ec32210059de66fa8e2854c94d9ff1d103c05509831e0e5adb38bc9fc6be418",
+      "alpha_bounds": [
+        160,
+        62,
+        344,
+        212
+      ],
+      "source_sha256": "a0f1f436361de1acae12236a8bb0bf69761f92aa87b2d376ca1130af159267aa",
+      "source_bytes": 48821,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_face_patch_neutral.webp"
+    },
+    {
+      "resource": "ryzhik_teen_face_patch_curious",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "65:59",
+        "node_name": "face_patch_curious_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=65-59"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_node_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 39222,
+      "sha256": "7254a816ac087bdc9063dd0979b4c3b80fc1f30a102805317935d0d57cd3605f",
+      "rgba_sha256": "27605efe4db340eb7a4ecdbdcb794731a4fb87078ec01f21dfe26295abe8d788",
+      "alpha_bounds": [
+        150,
+        62,
+        360,
+        238
+      ],
+      "source_sha256": "f801268462456f47f714f9f900c892e25772c4dd2ea68b80fda726b35900f276",
+      "source_bytes": 61158,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_face_patch_curious.webp"
+    },
+    {
+      "resource": "ryzhik_teen_face_patch_confident",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "65:63",
+        "node_name": "face_patch_confident_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=65-63"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_node_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 20146,
+      "sha256": "be5769113fb6647e0191dcb2505b9b8942c72d4e565a6374a53a8387e77f8394",
+      "rgba_sha256": "1105ab4b4e258d851c7bddc94cf40a04110fd3686892ac1c8522d4ec85a6583c",
+      "alpha_bounds": [
+        170,
+        101,
+        342,
+        212
+      ],
+      "source_sha256": "1102947a0d46e62a611fe77b931b13005120eb58a82b9554dc312512b48ee416",
+      "source_bytes": 32391,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_face_patch_confident.webp"
+    },
+    {
+      "resource": "ryzhik_teen_face_patch_thoughtful",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "65:67",
+        "node_name": "face_patch_thoughtful_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=65-67"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_node_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 19916,
+      "sha256": "a99fecb9c7ecc46d799fa22c5ebc7cfd8f9423480e1fe4b3277f90eb95f2dcdd",
+      "rgba_sha256": "3ea2bce2c0d62ed67f819e87156d43bdfff39ba3c146f9e5a56ff0597cf5488e",
+      "alpha_bounds": [
+        169,
+        92,
+        336,
+        204
+      ],
+      "source_sha256": "d82682de34bf11ab43fa5e721efa6f5cd7fce312c32052666503353ab4aacc75",
+      "source_bytes": 31696,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_face_patch_thoughtful.webp"
+    },
+    {
+      "resource": "ryzhik_teen_face_patch_joyful",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "65:71",
+        "node_name": "face_patch_joyful_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=65-71"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 31148,
+      "sha256": "1ea9ad88beb79b39431bca740d69faf3d71f441c58d3d4e3ed020f3c0ac7d25e",
+      "rgba_sha256": "ae1abf41bc2c913142fb786942df226aee0828e5d1fd19b044071236ae6c9c93",
+      "alpha_bounds": [
+        150,
+        70,
+        366,
+        234
+      ],
+      "source_sha256": "d23f593e81328a43b2e8896f7153fabc477545438ce22bf286694a7f7015ef2c",
+      "source_bytes": 49139,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_face_patch_joyful.webp"
+    },
+    {
+      "resource": "ryzhik_teen_mask_fur_color",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "65:75",
+        "node_name": "mask_fur_color_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=65-75"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 19536,
+      "sha256": "f64c86d76b467850410ece17e83f8c89eed618757281bc16784b30b31e4291af",
+      "rgba_sha256": "21e3e15af4bddbf954c29d96ff04fde1f51f79b96a5601c546be32e65829cedf",
+      "alpha_bounds": [
+        149,
+        56,
+        432,
+        456
+      ],
+      "source_sha256": "fa3b8b50a82744dccb257c2e013eba1a04dcc4d61116d389acdd10b2f2e8f2d4",
+      "source_bytes": 42057,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_mask_fur_color.webp"
+    },
+    {
+      "resource": "ryzhik_teen_mask_iris_color",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "65:79",
+        "node_name": "mask_iris_color_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=65-79"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_node_export",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 340,
+      "sha256": "ee8c6faa1fbaa82818b8a9cefd429bfa59fad6b0292cd94e56e6bd5e8b5edf13",
+      "rgba_sha256": "4e8959477caff7ec21878e7b470d7f8c79b1f4028231bcb4f78a3123f2a5b954",
+      "alpha_bounds": [
+        218,
+        119,
+        265,
+        141
+      ],
+      "source_sha256": "953e05aaad8302c1b622f3ef65b8390194c8e3a5e341cc800ca27fe29b9e1bae",
+      "source_bytes": 1541,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_mask_iris_color.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_bandana_sand",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "69:21",
+        "node_name": "body_accessory_bandana_sand_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=69-21"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 81956,
+      "sha256": "7da013a358ba1e72fe002813080687667a1dcb494e92b5f45d9eaaaeb2277093",
+      "rgba_sha256": "a8ea1c968aa5fbd6876a3bb9e99a42a3466bbb23d925fa400d7835f716af1e1e",
+      "alpha_bounds": [
+        145,
+        56,
+        428,
+        456
+      ],
+      "source_sha256": "450bbd9e2664eeeaf901b56e6e53076a204473c37a6505c9e3c857c7a32b03f9",
+      "source_bytes": 128349,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_bandana_sand.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_backpack_sand",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "69:25",
+        "node_name": "body_accessory_backpack_sand_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=69-25"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 86128,
+      "sha256": "29861e03a30cf941989f94de5d92232b9ca9106a386a0dd7e95fd82d7239e688",
+      "rgba_sha256": "a690d8e1e61ae1e149a374d0cf84b0bac97301c268571b3b903514220bca2643",
+      "alpha_bounds": [
+        148,
+        56,
+        432,
+        456
+      ],
+      "source_sha256": "ee5edf16c4c02b3d2bc319212192b08b0626163760a1b1efb32c6c7e6639277b",
+      "source_bytes": 137567,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_backpack_sand.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_route_patch_sand",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "69:29",
+        "node_name": "body_accessory_route_patch_sand_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=69-29"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 78784,
+      "sha256": "ca877963a992d2733a2795f42d4fb749b3debc741e1f39e629fd3a8a8c454074",
+      "rgba_sha256": "b6cd4799b6871fa7c006ed844896084e21a9613fff91414340e038ca4a9f5dc9",
+      "alpha_bounds": [
+        148,
+        56,
+        432,
+        456
+      ],
+      "source_sha256": "4715ccd05e3ef5a238ebbfef7feaf19ce167442b13ef72b6e1c9df72f790b66f",
+      "source_bytes": 124557,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_route_patch_sand.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_hat_sand",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "69:33",
+        "node_name": "body_accessory_hat_sand_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=69-33"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 81002,
+      "sha256": "5433b4633351f6f9c4ba45b59f8a24e04153e7489335220a6a06feffd45df05b",
+      "rgba_sha256": "a1104e16b389d76b875014c356e7759f8b8bed0be1bad863842257e1bf784ba2",
+      "alpha_bounds": [
+        148,
+        56,
+        432,
+        456
+      ],
+      "source_sha256": "50bc50afdeddf60eb8157742303a05619ab06b761562f7596af9103c1e7c6f18",
+      "source_bytes": 126686,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_hat_sand.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_goggles_sand",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "69:37",
+        "node_name": "body_accessory_goggles_sand_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=69-37"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 83466,
+      "sha256": "9f60dd0b1c2f4c1d3f6d3fb98bf3b761052bd9ae1e590df901e32d1e84553e4b",
+      "rgba_sha256": "4711e36dfb57797752438e2b8a3d5451db0994335b9ce2458faab480b280bcb8",
+      "alpha_bounds": [
+        149,
+        56,
+        433,
+        456
+      ],
+      "source_sha256": "4fa5d72cab5c7befbc071b98def98756ba7c3b203ca0b8f5c5deeb0b29b51286",
+      "source_bytes": 128681,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_goggles_sand.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_compass_sand",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "69:41",
+        "node_name": "body_accessory_compass_sand_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=69-41"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 82472,
+      "sha256": "05075e07290a928e3d0276aa155850047d80747ff0415b4adcfe219030079b39",
+      "rgba_sha256": "c355358195cbe13a6e9f949775679f1b8b935ae1b46fc580861f3c9568fa0293",
+      "alpha_bounds": [
+        148,
+        56,
+        432,
+        456
+      ],
+      "source_sha256": "2fb77fab64f314de60fb01785654ca5a7582a0f0f38906be7869d6cbf8dd0976",
+      "source_bytes": 126739,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_compass_sand.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_lantern_sand",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "69:45",
+        "node_name": "body_accessory_lantern_sand_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=69-45"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 91926,
+      "sha256": "fb6a95e23192df3ff26a797719b8a1c6925b0b7cb466be998598f6cd78373f0c",
+      "rgba_sha256": "396bf0fef2c004980f6618a1bd79ddbb02647e69f6a6563afa6175db2635cf22",
+      "alpha_bounds": [
+        101,
+        56,
+        433,
+        456
+      ],
+      "source_sha256": "8328c0fc1e2fce55d29cc5ab57961e25ef9859a1c5779966d44979148377f313",
+      "source_bytes": 141805,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_lantern_sand.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_binoculars_sand",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "69:49",
+        "node_name": "body_accessory_binoculars_sand_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=69-49"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 83486,
+      "sha256": "438e46524fb4f966174fe5455e76ac65066a1613481c9f3b3af66bb72fc02a78",
+      "rgba_sha256": "ad2573b7cf565a0339ca275976d008c1aa2ee9292e138e79c6c0bf0407f4b63b",
+      "alpha_bounds": [
+        132,
+        55,
+        438,
+        454
+      ],
+      "source_sha256": "4330d62d98aa0ef020e9a8a01853008723e8b5e7bebf92ba4658b35743985665",
+      "source_bytes": 131937,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_binoculars_sand.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_bandana_dark_russet",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "69:54",
+        "node_name": "body_accessory_bandana_dark_russet_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=69-54"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 80084,
+      "sha256": "f0542d1653304defe3cedd8e1df84bce5a2cc3051004c0b5469bacef10ae2aa7",
+      "rgba_sha256": "3a779a58f7fd1e5d1a22a01d7df40f5c91b7ec1f3c78537ad9498dd970f20b9e",
+      "alpha_bounds": [
+        145,
+        56,
+        428,
+        456
+      ],
+      "source_sha256": "c8c8e473b29ce2791cc68943edfc1621631c9b57d5fb72abd47768392496bcec",
+      "source_bytes": 127222,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_bandana_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_backpack_dark_russet",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "69:58",
+        "node_name": "body_accessory_backpack_dark_russet_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=69-58"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 85894,
+      "sha256": "53b9933d23ed73fa4a7bef86319157fe81b1032b0d60d520f09b89fcd2b55c5a",
+      "rgba_sha256": "540a68d5d494782d9f9534e4c4aee0b8e48395af633d9621b0b53df0f9e0038e",
+      "alpha_bounds": [
+        148,
+        56,
+        432,
+        456
+      ],
+      "source_sha256": "7b2ba1aa671076977df43a0d35240e2c26c5a5563e9fce1031a99c754e068017",
+      "source_bytes": 135910,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_backpack_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_route_patch_dark_russet",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "69:62",
+        "node_name": "body_accessory_route_patch_dark_russet_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=69-62"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 80494,
+      "sha256": "2380d2b0111b9e48edd0eb588d1de14dd40ab22e2a2c1d9987ad8893d2e713ad",
+      "rgba_sha256": "9ab67060f7843dfb26bdbf3c8d7eb234bf825a303be3e530006c904b2ec15768",
+      "alpha_bounds": [
+        148,
+        56,
+        432,
+        456
+      ],
+      "source_sha256": "21da1788cb140cea5704ba38680f8fdc841c92ad5092a911606d3a493d386cd8",
+      "source_bytes": 122272,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_route_patch_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_hat_dark_russet",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "69:66",
+        "node_name": "body_accessory_hat_dark_russet_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=69-66"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 80496,
+      "sha256": "163c3f0c82d566ec55afb1fa35af341687a3ee34fe591dd8105953ba7c4613cc",
+      "rgba_sha256": "73231526f1d01a3560cf21a760682ca116010ed9b42f1b0c3b42f0b716cf8e6d",
+      "alpha_bounds": [
+        148,
+        56,
+        432,
+        456
+      ],
+      "source_sha256": "62c40b1f9ee52f5e57208fc51e6a3969cecd6c802d04519066e69e9cadfdd33b",
+      "source_bytes": 126825,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_hat_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_goggles_dark_russet",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "69:70",
+        "node_name": "body_accessory_goggles_dark_russet_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=69-70"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 80600,
+      "sha256": "bdb0d89e0deae0741cc6ff259f72ab59b8d498f6e2cc3e3d0c2d415ea503cd7e",
+      "rgba_sha256": "84effdf5e5b7d03028bbbec85a5377776ca0eab28ba059b8c193e113302318f0",
+      "alpha_bounds": [
+        148,
+        56,
+        432,
+        456
+      ],
+      "source_sha256": "dc572b6c2f30d2a45cb67de0e5303154192d201406a0326b5fc761f6b0628ee5",
+      "source_bytes": 124757,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_goggles_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_compass_dark_russet",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "69:74",
+        "node_name": "body_accessory_compass_dark_russet_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=69-74"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 79122,
+      "sha256": "9e3646f75577ef533813412a90d22d4a8c6f242a4f049cf3295195f282b5492e",
+      "rgba_sha256": "f84f254d89755759045d71b6346c080fc33a9ec0ad37369a1b6ad48153de3afe",
+      "alpha_bounds": [
+        148,
+        56,
+        432,
+        456
+      ],
+      "source_sha256": "34bd3c6423693561e5e17519d7d4073d620e9428cc0d1f23814040c086f65a14",
+      "source_bytes": 123792,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_compass_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_lantern_dark_russet",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "69:78",
+        "node_name": "body_accessory_lantern_dark_russet_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=69-78"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 88846,
+      "sha256": "9e0fb18f4c9ef18250b4794a908cb7819162e8fca16c30f31378073377dfa786",
+      "rgba_sha256": "b03e6344759b75af0bc4bfbbbebeb86cd4866ea56d8c9fe029b92cdf989853c2",
+      "alpha_bounds": [
+        100,
+        56,
+        432,
+        456
+      ],
+      "source_sha256": "7ea5608a35e1a6200c71d86da3940dd2ee1af0d2b72253e23e8d28d9ae1a8097",
+      "source_bytes": 137604,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_lantern_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_binoculars_dark_russet",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "69:82",
+        "node_name": "body_accessory_binoculars_dark_russet_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=69-82"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 79546,
+      "sha256": "28dee3939624748354807f66d2607a3fcb1334f45751220e344ec58d0dbe3c5e",
+      "rgba_sha256": "ad78989f2a91fb0cb82bce028b2973f9fe3bcd9a210877dadb6c1e9c67c6e1e1",
+      "alpha_bounds": [
+        132,
+        56,
+        438,
+        454
+      ],
+      "source_sha256": "bdfd73d027cfe44daa1f0afa8f95505c2105ca26ec19bf2c505b105d14afbbae",
+      "source_bytes": 126430,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_binoculars_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_base_sand",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "69:87",
+        "node_name": "body_base_sand_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=69-87"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 75792,
+      "sha256": "82975d500fae1caac29e183924ee8d54a5903775fa22b00b76ee140f04a648e4",
+      "rgba_sha256": "5cad4ff7d6b7c65d259b00260cd6c5444410a587f4c11f7eb297c07966de8a14",
+      "alpha_bounds": [
+        164,
+        59,
+        427,
+        467
+      ],
+      "source_sha256": "e7bd5a3c1307b0eda4cc2bf8f70ddc56148785fcb7b15ddf7b4b845ae53cc84f",
+      "source_bytes": 116863,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "alias_of": "ryzhik_mvp_color_sand",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_mvp_color_sand.webp"
+    },
+    {
+      "resource": "ryzhik_teen_body_base_dark_russet",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "69:91",
+        "node_name": "body_base_dark_russet_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=69-91"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 77608,
+      "sha256": "a8cf1876d4ca471a3f082538584533d736cf7e3cd1299951de6c68c0c83590de",
+      "rgba_sha256": "fa4346f2fd9657078b625f1fe0168ca2e4e4f1445e85fffabed58ae1458395af",
+      "alpha_bounds": [
+        145,
+        56,
+        428,
+        456
+      ],
+      "source_sha256": "1b2bd215558d1331c63c76c84b4f92754e7bbd950fcaedd7d94cd702b47e8fcc",
+      "source_bytes": 121517,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_base_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_sick_copper",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:7",
+        "node_name": "teen_state_sick_copper_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-7"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 90118,
+      "sha256": "c72c124c5ce162ff38c1a8be93b8350b540466e348338b2d2bcb5009c5ef9c87",
+      "rgba_sha256": "0832afbb7e31a302e50803d187a987bd65c0fd31d00d44e2d7779f58f3fa602d",
+      "alpha_bounds": [
+        130,
+        57,
+        432,
+        458
+      ],
+      "source_sha256": "a2d56fb4188f9761e1e62092671a84b8de7011d5f5f109aff3b235c1b1d6299b",
+      "source_bytes": 136393,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_sick_copper.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_satiated_copper",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:11",
+        "node_name": "teen_state_satiated_copper_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-11"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 76778,
+      "sha256": "d4f7e6108df9bc6bc5e3f64062261bb3605ad37537b8cdafff8ed77c7680a6de",
+      "rgba_sha256": "b5fbd917e47e4e0549b7904011fc00f6252810d6b55d35a4bee0df1ebcb6a7f4",
+      "alpha_bounds": [
+        157,
+        52,
+        440,
+        456
+      ],
+      "source_sha256": "e9efa1b782f8ce19b1d31510e85634c3d5f8d96ad443c73ba680099aad9c631a",
+      "source_bytes": 119691,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_satiated_copper.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_joy_copper",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:15",
+        "node_name": "teen_state_joy_copper_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-15"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 85382,
+      "sha256": "3a3ff16ba4c51ad3bf9b1bdc8ecd16114f21bcaafae9f8c00cc012c2e61c1c90",
+      "rgba_sha256": "748e13b5dd5cd6e3ad510018bafb719e3044269047cf095c07dbf1a33f57348b",
+      "alpha_bounds": [
+        144,
+        55,
+        435,
+        456
+      ],
+      "source_sha256": "0b8d4bfa379333554bda5f596bfdd6b15d4079515a24d0f7dd5f3bf2721af915",
+      "source_bytes": 132119,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_joy_copper.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_sad_copper",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:19",
+        "node_name": "teen_state_sad_copper_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-19"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 79044,
+      "sha256": "4c9f2553e6fbeb4698705c154cac92dbc10ff39b16c717d526ef950d4b173f93",
+      "rgba_sha256": "38d221ea85bb2ca4053dcce9c3253385dc8c18a95f549f3745d2e34ec43ffb6e",
+      "alpha_bounds": [
+        145,
+        57,
+        431,
+        456
+      ],
+      "source_sha256": "354a5ae9adfc63596a00efd6b83a42c039b12eabe96b53cc616087e201c7e0c9",
+      "source_bytes": 120379,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_sad_copper.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_sick_sand",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:23",
+        "node_name": "teen_state_sick_sand_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-23"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 78356,
+      "sha256": "95f67736ae7f410e2bd8411ffaa28d56bdd4962b7cce94b550982535c669429a",
+      "rgba_sha256": "6d09ebf72c9e4d6dce7c311418cbaf02f8ee492bbebb49e2a1ca2912c1c17850",
+      "alpha_bounds": [
+        157,
+        59,
+        429,
+        468
+      ],
+      "source_sha256": "d195c17dd855d482d19b123d60b85531f8dc99db2c5715a816d244f8eeae9ede",
+      "source_bytes": 124440,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_sick_sand.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_satiated_sand",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:27",
+        "node_name": "teen_state_satiated_sand_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-27"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 74542,
+      "sha256": "c1f6b437f4794a4f536876fc2cc72db20090e56cfe45e867ba410bc1420bfea3",
+      "rgba_sha256": "d1d235278d60de023c7274ef201cb9d0dc5366201465ba1379b43b990a5193d1",
+      "alpha_bounds": [
+        164,
+        55,
+        420,
+        467
+      ],
+      "source_sha256": "6c8c6d27d3f7cb48b69c822e6d2f8df15ed7b709518735a1c2c99457ad8ab458",
+      "source_bytes": 114876,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_satiated_sand.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_joy_sand",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:31",
+        "node_name": "teen_state_joy_sand_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-31"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 80870,
+      "sha256": "babdbaba73e2830f32099be43a09a0f63f2b7cbbec618b11a64371cf2053e175",
+      "rgba_sha256": "24606c6c88f110dce7997255aaddfae48d91a6d6d01a343f068a58d6591e4973",
+      "alpha_bounds": [
+        112,
+        60,
+        423,
+        466
+      ],
+      "source_sha256": "47ca2e6a2499a9d2fbf5c749f4940e8556925dc3cc9f72535303fd68937e8d2d",
+      "source_bytes": 129563,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_joy_sand.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_sad_sand",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:35",
+        "node_name": "teen_state_sad_sand_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-35"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 72376,
+      "sha256": "e938077f7bcd648e094730e4d2407433c6e10dfc05c0c776cf4377cef98aacda",
+      "rgba_sha256": "7d73054e45afd344874d8558c245cfc6927dc596d5f02364f2aa216bf6ef88a4",
+      "alpha_bounds": [
+        158,
+        63,
+        425,
+        470
+      ],
+      "source_sha256": "8aae68443484b7e47f8b2ce33a7e2df4ee639782f5ef023106671a509586ac72",
+      "source_bytes": 113625,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_sad_sand.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_sick_dark_russet",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:39",
+        "node_name": "teen_state_sick_dark_russet_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-39"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 80614,
+      "sha256": "8431e96291723246800a14b71c9bac03fdad3f37e60e5960a82e6bc71ff8d925",
+      "rgba_sha256": "dbd0bdf22824f045567bdb30d6acdf3cb4b509af2f08462ccaceaef94aa5cdff",
+      "alpha_bounds": [
+        146,
+        62,
+        431,
+        455
+      ],
+      "source_sha256": "73f33de16cf8e3fcc2d7d1fa4f0f9e998a2bc7dda615db358d57bd3ddb6d2b98",
+      "source_bytes": 124208,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_sick_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_satiated_dark_russet",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:43",
+        "node_name": "teen_state_satiated_dark_russet_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-43"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 72714,
+      "sha256": "e417c52ca571d95104b4c09240608a38e33ead1edc10d7522c3109f22334d922",
+      "rgba_sha256": "ca291feb9c6de85d9dc527d2f9d4ed430d3e0276d4a310aeeb7a08fd8ffbfdb6",
+      "alpha_bounds": [
+        147,
+        52,
+        424,
+        455
+      ],
+      "source_sha256": "e78bb7989ae66061d6515c968e1024c5d3c37e319f283dfd0dfc996ae11ff57c",
+      "source_bytes": 116094,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_satiated_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_joy_dark_russet",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:47",
+        "node_name": "teen_state_joy_dark_russet_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-47"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 83462,
+      "sha256": "2e03dedc21f6e6a76b541a66b7bc5ca24b5ab75af26284694c50fb8a57e234bf",
+      "rgba_sha256": "81ec466fe8c220c10973cdf3a32c54ea11c6b258ac668ea3f7e400d1f78b6bae",
+      "alpha_bounds": [
+        124,
+        54,
+        444,
+        450
+      ],
+      "source_sha256": "748bb9d2deb0724506d89ad99d3fd01c88557d48518bf43f846a151908abd6be",
+      "source_bytes": 132021,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_joy_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_sad_dark_russet",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:51",
+        "node_name": "teen_state_sad_dark_russet_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-51"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 68236,
+      "sha256": "7a2f226ae121e6fc552b844909607a883d22083b9e768dad54bc9122804ac355",
+      "rgba_sha256": "ed87ffe0641bcfc7d64dcd0b953babf1941e8759e0b71ae890c96ee075152cc8",
+      "alpha_bounds": [
+        125,
+        90,
+        428,
+        455
+      ],
+      "source_sha256": "6d0901495a519ab59870bffc537afed5919c5c10d8287b0498492186181da3bb",
+      "source_bytes": 108827,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_sad_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_hungry_copper",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "93:4",
+        "node_name": "teen_state_hungry_copper_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=93-4"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 75406,
+      "sha256": "203fdb85a0fdba8fc8b713e8551cd141fd884bc38ab7eab2c326fd8f2567d3be",
+      "rgba_sha256": "3fe483718762d7b0d2cd97a9798ae79a00ee9223f2a79d775b5d07ff4716ebb7",
+      "alpha_bounds": [
+        153,
+        55,
+        410,
+        453
+      ],
+      "source_sha256": "a1964cbeae11e7fed0b3e522fea2cf698b23c30240e6b77375fabf3557a5dbc2",
+      "source_bytes": 120944,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_hungry_copper.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_hungry_sand",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "93:8",
+        "node_name": "teen_state_hungry_sand_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=93-8"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 73160,
+      "sha256": "24b15e91eaca7c1ee426c41fcc8b217e54be76e1b3faee13dc2ec70734941c08",
+      "rgba_sha256": "360588c96886cdbfc04b07f7d7710b3f54c95e998566ffd095f26a6f7a8f3d8f",
+      "alpha_bounds": [
+        159,
+        62,
+        427,
+        468
+      ],
+      "source_sha256": "73d6657555dbf35eb4701df0f04492d4b530fe3908ae1d6957c7aa04601b3fd9",
+      "source_bytes": 113631,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_hungry_sand.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_hungry_dark_russet",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "93:12",
+        "node_name": "teen_state_hungry_dark_russet_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=93-12"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 73036,
+      "sha256": "2635c720abdc58997f6539d54f2db3391d769a412d66a3f2780b77fe2237c22a",
+      "rgba_sha256": "e5adef897ed9e5c815ba2d90b54e71d910311b1b9769477b11f7d26744c020ed",
+      "alpha_bounds": [
+        131,
+        58,
+        434,
+        453
+      ],
+      "source_sha256": "99f07520d53e39fa4daca2b07e546ab92cf229475dd9575d0d31957b45910278",
+      "source_bytes": 117987,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_hungry_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_thoughtful_copper",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "94:4",
+        "node_name": "teen_state_thoughtful_copper_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-4"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 77770,
+      "sha256": "093a57507f9881f35214816d39c8cd6d804ce9de2406e88c1e960af7bfff2fc6",
+      "rgba_sha256": "7f2e05b5307c726300570bf2bf31cfb4002361c119d50d12ac632db04f2ccea4",
+      "alpha_bounds": [
+        149,
+        55,
+        432,
+        457
+      ],
+      "source_sha256": "c72af94b24b37f906c37df1cfa4e0f3208a17131cc6c4f700a53c97492b0150e",
+      "source_bytes": 120867,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_thoughtful_copper.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_tired_copper",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "94:8",
+        "node_name": "teen_state_tired_copper_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-8"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 78770,
+      "sha256": "9799833424f3e73e59ab1629319f2abbc60988175d079856118791e190953422",
+      "rgba_sha256": "d51e32dc476cebc9982561143af2d44c054d75e49d1fa7073356edad5d5a1e12",
+      "alpha_bounds": [
+        145,
+        58,
+        433,
+        456
+      ],
+      "source_sha256": "abd4f8bab3f6ab480f327b35fc30ead3e2796a57bfc077fb5fbc0eaf8a17679a",
+      "source_bytes": 123348,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_tired_copper.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_thoughtful_sand",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "94:12",
+        "node_name": "teen_state_thoughtful_sand_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-12"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 73138,
+      "sha256": "0069d1bd2bf871fa6521293e2fc36cf2d31b9ef8899fc19d65117308bd4674e3",
+      "rgba_sha256": "c3bfd9401f34b652f1bd7c65284af843d10807e416d787ae9627b94639c63e80",
+      "alpha_bounds": [
+        171,
+        57,
+        427,
+        467
+      ],
+      "source_sha256": "9e8d60693cb62c743d49d16f9a419de60113abca29856d75647c105d7a4f78b2",
+      "source_bytes": 112995,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_thoughtful_sand.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_tired_sand",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "94:16",
+        "node_name": "teen_state_tired_sand_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-16"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 76882,
+      "sha256": "5915f2864f4517ed19c02eeb3a4c5df1bb2964c34fd7833107e61b7604980d52",
+      "rgba_sha256": "4537d8e6e5696a22a1962cf8a89f025e7ec5c70d26d0fe0681d879179a3e3722",
+      "alpha_bounds": [
+        167,
+        43,
+        415,
+        468
+      ],
+      "source_sha256": "7a21cbcb14e0ee9d4cfc51435d2a15da916cd9f6dd4c66980da5c4cb87e8c8dc",
+      "source_bytes": 118306,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_tired_sand.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_thoughtful_dark_russet",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "94:20",
+        "node_name": "teen_state_thoughtful_dark_russet_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-20"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 72886,
+      "sha256": "3e181cf65aae993a5434b690d854f0f64131f1a2ad1f7a05066c08787df39fc1",
+      "rgba_sha256": "036333a4f34083a13f890aa4b5ce71fbc3532be3d3cae6fe55ddbc58f639c485",
+      "alpha_bounds": [
+        141,
+        52,
+        424,
+        454
+      ],
+      "source_sha256": "7fff0bcd8ddd12515cfa49862a89c1021169280d3cbff02bcf913bf0eba8c33d",
+      "source_bytes": 117766,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_thoughtful_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_tired_dark_russet",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "94:24",
+        "node_name": "teen_state_tired_dark_russet_512",
+        "collection_id": "56:65",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-24"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 75046,
+      "sha256": "d9741d315f64fd7155ec54b3d3cc34de264f8e73e8d1e857db6a42a5b5dba2a9",
+      "rgba_sha256": "41641437cbba956ff49ce85075ca2d884e163b4c7e9fea8192fb2026bd01c441",
+      "alpha_bounds": [
+        144,
+        52,
+        428,
+        455
+      ],
+      "source_sha256": "5d876f21869ebba6df339225182e81460e65ae1b3c1ed71fb9a505f50489e175",
+      "source_bytes": 118822,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_tired_dark_russet.webp"
     },
     {
       "resource": "menu_chevron",
