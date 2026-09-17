@@ -1,6 +1,7 @@
 package ru.nksk.lctapp
 
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -17,6 +18,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -29,8 +31,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import ru.nksk.lctapp.ui.menu.MainMenuScreen
-import ru.nksk.lctapp.ui.menu.MainMenuAction
+import ru.nksk.lctapp.feature.menu.ui.MainMenuUiState
+import ru.nksk.lctapp.feature.menu.ui.MainMenuScreen
+import ru.nksk.lctapp.feature.menu.ui.MainMenuAction
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
 
 @OptIn(ExperimentalTestApi::class)
@@ -38,6 +41,32 @@ import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
 class MainMenuScreenTest {
     @get:Rule
     val compose = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun suppliedStateUpdatesVisibleProgressAndAccessibleCoinBalance() {
+        val state = mutableStateOf(MainMenuUiState(coins = 275, completedGoals = 2, totalGoals = 7))
+        compose.setContent {
+            LCTAppTheme {
+                MainMenuScreen(state = state.value, onAction = {})
+            }
+        }
+
+        fun assertValues(coins: Int, completedGoals: Int, totalGoals: Int) {
+            compose.onNodeWithText(coins.toString(), useUnmergedTree = true).assertIsDisplayed()
+            compose.onNode(
+                hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility, coins)),
+            ).assertIsDisplayed()
+            compose.onNodeWithText(
+                compose.activity.getString(R.string.menu_goal_progress, completedGoals, totalGoals),
+            ).assertIsDisplayed()
+        }
+
+        assertValues(coins = 275, completedGoals = 2, totalGoals = 7)
+        compose.runOnIdle {
+            state.value = MainMenuUiState(coins = 40, completedGoals = 3, totalGoals = 8)
+        }
+        assertValues(coins = 40, completedGoals = 3, totalGoals = 8)
+    }
 
     @Test
     fun everyMenuButtonHasAnAccessibleClickAction() {
@@ -59,7 +88,7 @@ class MainMenuScreenTest {
         val selections = mutableListOf<MainMenuAction>()
         compose.setContent {
             DeviceConfigurationOverride(DeviceConfigurationOverride.FontScale(1f)) {
-                LCTAppTheme { MainMenuScreen(onAction = selections::add) }
+                LCTAppTheme { MainMenuScreen(state = MainMenuUiState(100, 0, 4), onAction = selections::add) }
             }
         }
         val village = compose.onNode(
@@ -100,7 +129,7 @@ class MainMenuScreenTest {
                     DeviceConfigurationOverride.FontScale(fontScale),
             ) {
                 LCTAppTheme {
-                    MainMenuScreen(onAction = selections::add)
+                    MainMenuScreen(state = MainMenuUiState(100, 0, 4), onAction = selections::add)
                 }
             }
         }

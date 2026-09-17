@@ -1,4 +1,4 @@
-package ru.nksk.lctapp.ui.menu
+package ru.nksk.lctapp.feature.menu.ui
 
 import android.graphics.BitmapFactory
 import androidx.annotation.DrawableRes

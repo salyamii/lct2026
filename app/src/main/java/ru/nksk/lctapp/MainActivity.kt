@@ -7,7 +7,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import ru.nksk.lctapp.ui.menu.MainMenuScreen
+import ru.nksk.lctapp.feature.menu.ui.MainMenuScreen
+import ru.nksk.lctapp.feature.menu.ui.MainMenuDemoState
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -22,7 +23,7 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             LCTAppTheme {
-                MainMenuScreen()
+                MainMenuScreen(state = MainMenuDemoState, onAction = {})
             }
         }
     }

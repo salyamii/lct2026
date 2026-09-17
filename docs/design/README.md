@@ -32,7 +32,7 @@ Both fonts use the SIL Open Font License 1.1. Their complete copyright and licen
 
 ## Compose implementation
 
-`app/src/main/java/ru/nksk/lctapp/ui/menu/MainMenuScreen.kt` implements the menu with native Compose layout, text and controls. All seven clickable entries are placeholders: the activity uses the default no-op action handler, so tapping only shows press feedback. There are no destination screens, dialogs, game-state changes or network requests.
+`app/src/main/java/ru/nksk/lctapp/feature/menu/ui/MainMenuScreen.kt` implements the menu with native Compose layout, text and controls. All seven clickable entries are placeholders: the activity uses the default no-op action handler, so tapping only shows press feedback. There are no destination screens, dialogs, game-state changes or network requests.
 
 The background fills the window while controls respect Android system bars and display cutouts. Native Android status and navigation bars replace the iOS mockup chrome. Landscape uses a side-by-side layout; portrait keeps the fox between the HUD and bottom actions. The bundled fonts support system font scaling. The village pill deliberately uses its visible bounds for both press feedback and hit testing; its surrounding layout space is not interactive. Compose previews cover 390×844, a compact phone, landscape and larger text. Blur uses platform rendering on Android 12+; older versions retain translucent panels.
 
