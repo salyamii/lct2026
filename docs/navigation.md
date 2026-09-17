@@ -39,7 +39,7 @@ The feature entries currently display a shared placeholder with Back. Replace
 that content as each feature is implemented; navigation already works. The menu
 artwork and UI state remain owned by the menu. Its entry explicitly supplies
 `MainMenuDemoState`; the coin/goal values are a design fixture, not persisted game
-data. Feature UI, shared presentation, and app wiring have separate owners.
+data. See [project architecture](architecture.md) for layer ownership.
 
 ## Adding a screen
 

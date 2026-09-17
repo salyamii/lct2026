@@ -1,0 +1,140 @@
+package ru.nksk.lctapp.architecture
+
+import java.io.File
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+/**
+ * Early feedback for package boundaries while production code shares one Gradle module.
+ * Checks declared packages and explicit imports, including aliases and wildcards; it does
+ * not resolve fully qualified references, same-package access, or transitive dependencies.
+ * Compiler-enforced boundaries will require separate modules when the app needs them.
+ */
+class ArchitectureTest {
+    @Test
+    fun productionSourcesRespectPackageBoundaries() {
+        val sourceRoot = File(requireNotNull(System.getProperty("lctapp.mainSourceDir")) {
+            "Configure lctapp.mainSourceDir for the JVM test task"
+        })
+        val sources = sourceRoot.walkTopDown()
+            .filter { it.isFile && it.extension == "kt" }
+            .sortedBy { it.path }
+            .toList()
+        assertTrue("No production Kotlin sources found in $sourceRoot", sources.isNotEmpty())
+
+        val violations = buildList {
+            for (file in sources) {
+                val path = file.relativeTo(sourceRoot).invariantSeparatorsPath
+                // Exclude comments and string examples from the package/import scan.
+                val code = nonCode.replace(file.readText()) { match ->
+                    match.value.map { if (it == '\n' || it == '\r') it else ' ' }
+                        .joinToString("")
+                }
+                val packageName = packageDeclaration.find(code)?.groupValues?.get(1)
+                if (packageName == null) {
+                    add("$path: missing package declaration")
+                    continue
+                }
+                if (path.substringBeforeLast('/') != packageName.replace('.', '/')) {
+                    add("$path: path does not match package $packageName")
+                }
+                if (!isApprovedPackage(packageName, file.name)) {
+                    add("$path: unapproved production package $packageName")
+                    continue
+                }
+                for (match in importDeclaration.findAll(code)) {
+                    val imported = match.groupValues[1]
+                    if (!isAllowedImport(packageName, file.name, imported)) {
+                        add("$path: $packageName must not import $imported")
+                    }
+                }
+            }
+        }
+        assertTrue(violations.joinToString("\n"), violations.isEmpty())
+    }
+
+    private fun isApprovedPackage(packageName: String, fileName: String): Boolean =
+        when {
+            "$packageName.${fileName.removeSuffix(".kt")}" in compatibilityKeys -> true
+            packageName == base -> fileName == "MainActivity.kt"
+            packageName.within("$base.app") -> true
+            featurePackage(packageName) != null -> true
+            packageName.within("$base.core.ui") -> true
+            packageName.within("$base.domain") -> true
+            packageName.within("$base.data") -> true
+            else -> false
+        }
+
+    private fun isAllowedImport(
+        packageName: String,
+        fileName: String,
+        imported: String,
+    ): Boolean {
+        if ("$packageName.${fileName.removeSuffix(".kt")}" in compatibilityKeys) {
+            return imported == "androidx.navigation3.runtime.NavKey" ||
+                imported == "kotlinx.serialization.SerialName" ||
+                imported == "kotlinx.serialization.Serializable"
+        }
+        // Only the owning feature's navigation package can alias its retained key.
+        if (imported.within("$base.ui")) {
+            return compatibilityKeys[imported] == packageName
+        }
+        val feature = featurePackage(packageName)
+        if (feature != null && packageName.within("$feature.ui") &&
+            imported.split('.').any { it == "navigation" || it == "navigation3" }
+        ) {
+            return false
+        }
+        if (packageName.within("$base.domain")) {
+            return imported.within("$base.domain") || imported.within("kotlin") ||
+                imported.within("java") ||
+                (imported.within("kotlinx.coroutines") &&
+                    !imported.within("kotlinx.coroutines.android"))
+        }
+        // Android and other library APIs are allowed outside the pure Kotlin domain.
+        if (!imported.within(base)) return true
+
+        return when {
+            packageName == base -> imported == "$base.app.LctApp"
+            packageName.within("$base.app") -> true
+            feature != null -> imported.within(feature) ||
+                imported.within("$base.domain") || imported.within("$base.core.ui") ||
+                imported.within("$base.R")
+            packageName.within("$base.core.ui") -> imported.within("$base.core.ui") ||
+                imported.within("$base.R")
+            packageName.within("$base.data") -> imported.within("$base.data") ||
+                imported.within("$base.domain")
+            else -> false
+        }
+    }
+
+    private fun featurePackage(packageName: String): String? {
+        val prefix = "$base.feature."
+        if (!packageName.startsWith(prefix)) return null
+        val name = packageName.removePrefix(prefix).substringBefore('.')
+        return name.takeIf { it.isNotEmpty() }?.let { "$prefix$it" }
+    }
+
+    private fun String.within(packageName: String): Boolean =
+        this == packageName || startsWith("$packageName.")
+
+    private companion object {
+        const val base = "ru.nksk.lctapp"
+        // Exact key + filename exceptions preserve Android NavKeySerializer's runtime names.
+        val compatibilityKeys = mapOf(
+            "$base.ui.menu.MainMenu" to "$base.feature.menu.navigation",
+            "$base.ui.coins.navigation.Coins" to "$base.feature.coins.navigation",
+            "$base.ui.day.navigation.Day" to "$base.feature.day.navigation",
+            "$base.ui.gear.navigation.Gear" to "$base.feature.gear.navigation",
+            "$base.ui.goal.navigation.Goal" to "$base.feature.goal.navigation",
+            "$base.ui.tasks.navigation.Tasks" to "$base.feature.tasks.navigation",
+            "$base.ui.village.navigation.Village" to "$base.feature.village.navigation",
+        )
+        val packageDeclaration = Regex("(?m)^[ \\t]*package[ \\t]+([\\w.]+)")
+        val importDeclaration = Regex("(?m)^[ \\t]*import[ \\t]+([\\w.*]+)")
+        val nonCode = Regex(
+            "\"\"\"[\\s\\S]*?\"\"\"|\"(?:\\\\.|[^\"\\\\])*\"|" +
+                "'(?:\\\\.|[^'\\\\])*'|//[^\\r\\n]*|/\\*[\\s\\S]*?\\*/"
+        )
+    }
+}

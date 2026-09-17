@@ -60,3 +60,9 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
+
+tasks.withType<Test>().configureEach {
+    val mainSources = layout.projectDirectory.dir("src/main/java")
+    inputs.dir(mainSources).withPathSensitivity(PathSensitivity.RELATIVE)
+    systemProperty("lctapp.mainSourceDir", mainSources.asFile.absolutePath)
+}
