@@ -1,4 +1,4 @@
-package ru.nksk.lctapp.ui.theme
+package ru.nksk.lctapp.core.ui.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme

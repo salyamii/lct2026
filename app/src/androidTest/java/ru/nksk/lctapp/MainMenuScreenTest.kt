@@ -31,7 +31,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import ru.nksk.lctapp.ui.menu.MainMenuScreen
 import ru.nksk.lctapp.ui.menu.MainMenuAction
-import ru.nksk.lctapp.ui.theme.LCTAppTheme
+import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
 
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)

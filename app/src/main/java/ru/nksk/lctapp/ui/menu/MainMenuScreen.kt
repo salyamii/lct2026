@@ -67,15 +67,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.roundToInt
 import ru.nksk.lctapp.R
-import ru.nksk.lctapp.ui.theme.AdventureLabel
-import ru.nksk.lctapp.ui.theme.AdventureLavender
-import ru.nksk.lctapp.ui.theme.AdventureLime
-import ru.nksk.lctapp.ui.theme.AdventureMuted
-import ru.nksk.lctapp.ui.theme.AdventureNight
-import ru.nksk.lctapp.ui.theme.AdventurePanel
-import ru.nksk.lctapp.ui.theme.LCTAppTheme
-import ru.nksk.lctapp.ui.theme.Nunito
-import ru.nksk.lctapp.ui.theme.Rubik
+import ru.nksk.lctapp.core.ui.theme.AdventureLabel
+import ru.nksk.lctapp.core.ui.theme.AdventureLavender
+import ru.nksk.lctapp.core.ui.theme.AdventureLime
+import ru.nksk.lctapp.core.ui.theme.AdventureMuted
+import ru.nksk.lctapp.core.ui.theme.AdventureNight
+import ru.nksk.lctapp.core.ui.theme.AdventurePanel
+import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
+import ru.nksk.lctapp.core.ui.theme.Nunito
+import ru.nksk.lctapp.core.ui.theme.Rubik
 
 /** Menu actions are placeholders until the game flows are implemented. */
 enum class MainMenuAction {
