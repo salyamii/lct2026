@@ -19,6 +19,11 @@
       "id": "56:65",
       "name": "Рыжик · MVP runtime kit v3 · 3 colors",
       "expected_assets": 55
+    },
+    {
+      "id": "87:2",
+      "name": "Рыжик-лисёнок · MVP runtime kit · 3 colors",
+      "expected_assets": 55
     }
   ],
   "scope": "Existing menu/font assets and the imported artwork collections listed in this manifest.",
@@ -2806,6 +2811,1877 @@
       "source_format": "png",
       "lossless_rgba_verified": true,
       "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_tired_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_base_no_accessory",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:22",
+        "node_name": "cub_body_base_no_accessory_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-22"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 119620,
+      "sha256": "056086ba02a3f24a948da9d95d71fd27e014df62c219e566075eaa340554f4d0",
+      "rgba_sha256": "38fd74b2c5fb0da4f60244d6910dc1628fb644a01c2d4ff6cad9f65342580360",
+      "alpha_bounds": [
+        113,
+        36,
+        448,
+        482
+      ],
+      "source_sha256": "df2371e7cc5500c6623ab2526d0448fbe04bd90c18c6f319c4d13578cdfcd064",
+      "source_bytes": 188555,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_base_no_accessory.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_bandana",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:26",
+        "node_name": "cub_body_accessory_bandana_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-26"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 123164,
+      "sha256": "e55110bbecf25ceab63aafd598bc8b0e904a6e12e75687d2844c961a784a3bbb",
+      "rgba_sha256": "78d93de75908b7381a48d04e01314f4a54ff3d89e783f0e3cb2cec4527a55e68",
+      "alpha_bounds": [
+        114,
+        36,
+        448,
+        482
+      ],
+      "source_sha256": "59af3aca586fca9c939079f38ded82f85c656c6968bb299ad27034ada88722f8",
+      "source_bytes": 190167,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_bandana.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_backpack",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:30",
+        "node_name": "cub_body_accessory_backpack_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-30"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 125590,
+      "sha256": "c2b4c90a187d7d43af6425e5980e79b5ea69bee537e8c16acc6f17e380e4c09f",
+      "rgba_sha256": "a6678e49f51953d59a629b7fa998817ca5208900c9886f3362c01a9cb781ad16",
+      "alpha_bounds": [
+        114,
+        36,
+        448,
+        482
+      ],
+      "source_sha256": "aa20b9f5b58b688c6008e50592d6942bda8a93eb9aa4f89657958c8ced41daca",
+      "source_bytes": 196088,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_backpack.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_route_patch",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:34",
+        "node_name": "cub_body_accessory_route_patch_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-34"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 118588,
+      "sha256": "7d45676165a12d427c26e1e9338c313d28723cb177f7b5e9fcf6994d72d3d83e",
+      "rgba_sha256": "cf2834e9ed75bd77c010b2ba7bed3c7dd1040ccecf25a7b0e10eaf1bfd6ff9d5",
+      "alpha_bounds": [
+        114,
+        36,
+        448,
+        482
+      ],
+      "source_sha256": "3214cd9a8d57ca5ba461ebd980714887ce255d2487a2323b372eb72f6f2546b6",
+      "source_bytes": 187820,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_route_patch.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_hat",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:38",
+        "node_name": "cub_body_accessory_hat_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-38"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 125344,
+      "sha256": "c6e4674ea9fb5f8d802b4e21bc50c240c6a37d5296c7f9d4fd17b1a13bb36777",
+      "rgba_sha256": "392e7353ae557167a645a7db244b88307c8619fdced6c1a15d25d3f9d6141d59",
+      "alpha_bounds": [
+        97,
+        36,
+        448,
+        482
+      ],
+      "source_sha256": "88c07039207f8b6091d5c1708e828556243883cfc21cd4cc983ee53195e85e93",
+      "source_bytes": 197635,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_hat.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_goggles",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:42",
+        "node_name": "cub_body_accessory_goggles_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-42"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 123848,
+      "sha256": "438af4ac09e7bbdc05000739629daf74dc62be8fe444b1cdcb684ce35003c45d",
+      "rgba_sha256": "fb85275f396efa17d7bbc4364dc9b6758dd69a20e09d9283824f175251e29c29",
+      "alpha_bounds": [
+        114,
+        36,
+        447,
+        482
+      ],
+      "source_sha256": "e0a8c4534bf814c784d0100204485d4f7e6dc4da5e69c51561a40bc164753fc9",
+      "source_bytes": 193338,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_goggles.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_compass",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:46",
+        "node_name": "cub_body_accessory_compass_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-46"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 120446,
+      "sha256": "a52b4b219d857e7c39089396b0ec31c494d86af45be106d48968f14903533753",
+      "rgba_sha256": "53344058989ab8adcfa3bb298dbcd2847f6829e88397360a590010d582c4a42d",
+      "alpha_bounds": [
+        114,
+        36,
+        448,
+        482
+      ],
+      "source_sha256": "10dae6d856880b3aec77cb721f737a011202ced3f63d678e9461b830b8b4f040",
+      "source_bytes": 188874,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_compass.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_lantern",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:50",
+        "node_name": "cub_body_accessory_lantern_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-50"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 127342,
+      "sha256": "2d6c95f2cd3efc94f8da4d5f908d0cacba028ddffb46c1ed0af9aba6517af2e8",
+      "rgba_sha256": "4c1ba58cfd922503adbea43846185e0f300ad4c1d891668e554738e0f9429ec9",
+      "alpha_bounds": [
+        114,
+        36,
+        448,
+        482
+      ],
+      "source_sha256": "a0bcdbc802e38e55abc2668193d16b3cedc87895f60cd5acffc3af272647cf8f",
+      "source_bytes": 197131,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_lantern.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_binoculars",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:54",
+        "node_name": "cub_body_accessory_binoculars_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-54"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 125084,
+      "sha256": "3658a85d57ab9babd8a1d038b6a1b0dff34a8f7f3b4cbaa0ae2a857d5689faf5",
+      "rgba_sha256": "7a27dcbf1743d5a4d861493aa3856ce6daddbf6617be5e5b09f80b9efc391ec9",
+      "alpha_bounds": [
+        114,
+        36,
+        447,
+        482
+      ],
+      "source_sha256": "02fd2f3ccd922cc21722b4608e6e9c79ec0764fb65f61e420d0cbb3414e452d7",
+      "source_bytes": 195664,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_binoculars.webp"
+    },
+    {
+      "resource": "ryzhik_cub_face_patch_neutral",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:58",
+        "node_name": "cub_face_patch_neutral_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-58"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 30196,
+      "sha256": "0b16134ceb5d9278a686279d5e96a09ba52ac4756ede03fbe6ee0c003cbce5fa",
+      "rgba_sha256": "606c21b22e5a6ba4e455110477868b342d10b74d5d38b467f04597f6d2f1a682",
+      "alpha_bounds": [
+        162,
+        74,
+        364,
+        223
+      ],
+      "source_sha256": "31e9d5e9b3773922538c352ced6ac8d74e74740dddcc7da34ec598a6e8451e35",
+      "source_bytes": 49791,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_face_patch_neutral.webp"
+    },
+    {
+      "resource": "ryzhik_cub_face_patch_curious",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:63",
+        "node_name": "cub_face_patch_curious_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-63"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 45578,
+      "sha256": "a6cff93b2fe52a87dad78285aae2ad18f172d48b9135208df46ed7a871dbe440",
+      "rgba_sha256": "298d5923a3fddbce1a40a94498216ea5889fcd37567d67fc1a3187dde530f0d3",
+      "alpha_bounds": [
+        148,
+        62,
+        366,
+        238
+      ],
+      "source_sha256": "df6e3ff350e4789eb3f3189a8b563d37fd40d9b297182b4907e7bd45f946664a",
+      "source_bytes": 74840,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_face_patch_curious.webp"
+    },
+    {
+      "resource": "ryzhik_cub_face_patch_confident",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:68",
+        "node_name": "cub_face_patch_confident_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-68"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 20612,
+      "sha256": "b4f3cb795a73fa012923eb0f63aa2bcdb30e71d4b51c51e40385288604255dfe",
+      "rgba_sha256": "2542ea81ba0af10eb38860ff6fa1b52ebd77be4fe4e22f8a1a8f0b275a82e5d4",
+      "alpha_bounds": [
+        168,
+        85,
+        342,
+        194
+      ],
+      "source_sha256": "fea30bf546882843796446c4ac1f25ad9db0bfccd013dfb065c744a5351ef0d6",
+      "source_bytes": 34259,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_face_patch_confident.webp"
+    },
+    {
+      "resource": "ryzhik_cub_face_patch_thoughtful",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:73",
+        "node_name": "cub_face_patch_thoughtful_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-73"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 24756,
+      "sha256": "3f357d844c112a5cfe8b49c216ae7466a88d8e5a35a33f4ef9383e33785804de",
+      "rgba_sha256": "518240f2eb0781d577c51e78bbc716ddcdb3ec7f0d0015d54e858aeb66cc03e4",
+      "alpha_bounds": [
+        173,
+        93,
+        330,
+        223
+      ],
+      "source_sha256": "c85c1d51c791b01c159da214bed945c35c4608b54c1f46e04bbd7d998f5bc849",
+      "source_bytes": 41331,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_face_patch_thoughtful.webp"
+    },
+    {
+      "resource": "ryzhik_cub_face_patch_joyful",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:78",
+        "node_name": "cub_face_patch_joyful_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-78"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 20560,
+      "sha256": "b0f6289641e414fc9b0c27eeb5208f1e791b35a5a8813b267677249ab9638252",
+      "rgba_sha256": "7b89ac58a4f8f7a97f806ef5d2247498410e97e06c3c16f3284c7b8d1090ffea",
+      "alpha_bounds": [
+        177,
+        98,
+        341,
+        223
+      ],
+      "source_sha256": "6697119258641ece8c059b8e858e7f6a79732aa1a2347d2a89c6166a05a835ee",
+      "source_bytes": 34232,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_face_patch_joyful.webp"
+    },
+    {
+      "resource": "ryzhik_cub_mask_fur_color",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:83",
+        "node_name": "cub_mask_fur_color_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-83"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 12330,
+      "sha256": "606799335a74b21b4ada306affa440a107373deec3467e2cc020a20dc65493a3",
+      "rgba_sha256": "ca429ee5caa9e5039060d313d1701ca8186f8c84048b76a4a7ab20c3f38b854e",
+      "alpha_bounds": [
+        114,
+        37,
+        447,
+        483
+      ],
+      "source_sha256": "bb319b0e68fc09a3687caea0d0a708f123f6fcfbf418ea8bfa311e44857cc2d3",
+      "source_bytes": 25875,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_mask_fur_color.webp"
+    },
+    {
+      "resource": "ryzhik_cub_mask_iris_color",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:87",
+        "node_name": "cub_mask_iris_color_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-87"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 115218,
+      "sha256": "384a139b64810b3246b296542d9ced15208fbc975215e993f08699a83f4f9a4f",
+      "rgba_sha256": "c0a631f9599b266f0b15956eb910b7374afef0746e13402f11526cd74bbb9679",
+      "alpha_bounds": [
+        114,
+        36,
+        448,
+        482
+      ],
+      "source_sha256": "2dd8774034cfc61a4fea0f74381d6661015416b602d95775151ba759710d8ad8",
+      "source_bytes": 182639,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_mask_iris_color.webp",
+      "source_notes": "Figma source is a full character with transparent iris holes; differs from the teen ellipse mask. Preserved unchanged; inspect before compositing."
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_bandana_sand",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:110",
+        "node_name": "cub_body_accessory_bandana_sand_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-110"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 121846,
+      "sha256": "b6b6d79400429a3f1d3c05106a7e21ef61eec5c6a282a6c2b3d2478ab4088d0a",
+      "rgba_sha256": "39eff6332b6333baa510da36d9c7651b65cd30257ff0c03cb85f9bdf0f992a14",
+      "alpha_bounds": [
+        114,
+        36,
+        448,
+        482
+      ],
+      "source_sha256": "42414131624b29aa4dd9ca659ed1f89c19dad56b444362245abc465aa545d9aa",
+      "source_bytes": 189839,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_bandana_sand.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_backpack_sand",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:114",
+        "node_name": "cub_body_accessory_backpack_sand_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-114"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 123562,
+      "sha256": "d738ebb10cf3792d4496a3b54a4085fbcbb85221a145fd5bcddd40eaed021067",
+      "rgba_sha256": "d6791205bad85eeeab673cf610a4328a701622ec500ac5e4a2f0bbe279f5464d",
+      "alpha_bounds": [
+        115,
+        36,
+        447,
+        482
+      ],
+      "source_sha256": "cbb98c60897ec89b711c5c9cc977b4621ae23fad5b20de7f52c02b8abe464f66",
+      "source_bytes": 195393,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_backpack_sand.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_route_patch_sand",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:118",
+        "node_name": "cub_body_accessory_route_patch_sand_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-118"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 120336,
+      "sha256": "4d3a80b5ba4eebc1c3544c5be884d0bbd48fd3300eed445e698039023c6d2552",
+      "rgba_sha256": "a65c9ac91bdc9a9679f2493ae8b43581d43f0d5b275a0ef660255de95a11ddae",
+      "alpha_bounds": [
+        114,
+        36,
+        447,
+        482
+      ],
+      "source_sha256": "e006c57092ce86832c3f10d9ee5607d317136488c1d304a039526e24aca0a2a1",
+      "source_bytes": 185660,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_route_patch_sand.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_hat_sand",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:122",
+        "node_name": "cub_body_accessory_hat_sand_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-122"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 123552,
+      "sha256": "787452c953d91367a7897812a9597cc3270d71456cfcbc6ba353d690a7265110",
+      "rgba_sha256": "01db1097261d9675d4ef81381c8c784718d81673061dfd71e6d2d62e77c5f81e",
+      "alpha_bounds": [
+        105,
+        36,
+        447,
+        482
+      ],
+      "source_sha256": "3b6e80597e863e5cbb1370850a5c8e0e201b9b71f959b710e06b9d030c3bfb56",
+      "source_bytes": 195566,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_hat_sand.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_goggles_sand",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:126",
+        "node_name": "cub_body_accessory_goggles_sand_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-126"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 120718,
+      "sha256": "56aaf511ae0540a95feced5c3754471c1e687d85c98af4fc68b9b65887609877",
+      "rgba_sha256": "d6357f6f2eadbc3090b162c438e6a121a63dc5a214780dd65d6a2b8b107c57c4",
+      "alpha_bounds": [
+        115,
+        36,
+        447,
+        482
+      ],
+      "source_sha256": "f566950dd8d06164666779f19ead3a1d50513467c177a6ea49e5dfe7ebcc38ea",
+      "source_bytes": 190615,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_goggles_sand.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_compass_sand",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:130",
+        "node_name": "cub_body_accessory_compass_sand_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-130"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 118750,
+      "sha256": "19ca89d1daaf672d28e9ce74b6678d62791bc5a720d106db20288af2432c4e64",
+      "rgba_sha256": "8ae329fa7e964637f0c021e3cc0825acedd0387b45c343dc9b973fefd5ad4552",
+      "alpha_bounds": [
+        115,
+        36,
+        448,
+        482
+      ],
+      "source_sha256": "630d271e996c693d5642a003aa6d7f7a3a74bc02d8b1095474c473cbc4a17473",
+      "source_bytes": 187096,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_compass_sand.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_lantern_sand",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:134",
+        "node_name": "cub_body_accessory_lantern_sand_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-134"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 125434,
+      "sha256": "75a0f0c0f1f127d39bb0278af417c0c2a55460e98ab20b19a6e1c7413573c15d",
+      "rgba_sha256": "c294e967dce32baed7ae0168af7de34cb03de7daada1609ad6d57a656db9900d",
+      "alpha_bounds": [
+        115,
+        36,
+        448,
+        482
+      ],
+      "source_sha256": "a0c0cf2e2fc78972d3aecc6faa22f1f7089dbe69ab4e69c1a78b749dfda4ea00",
+      "source_bytes": 195437,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_lantern_sand.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_binoculars_sand",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:138",
+        "node_name": "cub_body_accessory_binoculars_sand_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-138"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 119182,
+      "sha256": "f691be57c804c8cd356fdbbf1305ae64b649a4d12af15c3ccd2f5b5e9b1e03a9",
+      "rgba_sha256": "eebf6c7063932e68ab2ab4a39ad30e0d7c5d201c5d0b05305fe8e0270941f000",
+      "alpha_bounds": [
+        115,
+        36,
+        448,
+        482
+      ],
+      "source_sha256": "80e5f857eb9e7c8c83e907646382b4d1167566b3f4f420fd646e4300deff4b7c",
+      "source_bytes": 188351,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_binoculars_sand.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_bandana_dark_russet",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:143",
+        "node_name": "cub_body_accessory_bandana_dark_russet_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-143"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 115976,
+      "sha256": "db7131cdb79e351e805bca2ff84209897e92b3f13a3b788ec8fe6fb3b6bb9895",
+      "rgba_sha256": "be770cc77422444b43c0f937ba975b0838155b5824f4279ad051f564d21ef6cd",
+      "alpha_bounds": [
+        114,
+        36,
+        447,
+        482
+      ],
+      "source_sha256": "a147d1636d50b4baad730da1df5942c56bf921611de83aec0837cbd992b8d642",
+      "source_bytes": 182693,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_bandana_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_backpack_dark_russet",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:147",
+        "node_name": "cub_body_accessory_backpack_dark_russet_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-147"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 117780,
+      "sha256": "b7145498ee4a72a00c681acde1c9498d9cebcb73f109753348f04d8e20294cab",
+      "rgba_sha256": "c0229f0d472d80449ed31225e9a4a21895240e24d3674127f335d79f6d8cb6fd",
+      "alpha_bounds": [
+        114,
+        36,
+        447,
+        482
+      ],
+      "source_sha256": "3af321e770b069c6933c02f83b210984e8b23777c4253ece5c9b40b052b844bd",
+      "source_bytes": 188419,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_backpack_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_route_patch_dark_russet",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:151",
+        "node_name": "cub_body_accessory_route_patch_dark_russet_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-151"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 114164,
+      "sha256": "ee1930343569a3930e90e8969d2959b2f7bfe5e21c385bc981d9045ffabbffc6",
+      "rgba_sha256": "03210c9f3ecb259961b06aabb2a37c2e3cd6908048cdf485ab3ad30abc141f34",
+      "alpha_bounds": [
+        114,
+        36,
+        447,
+        482
+      ],
+      "source_sha256": "626b72ad9346f8d50abb2f9ef173472471e8e9b11c919b755bdc7ac6b8b048ec",
+      "source_bytes": 181846,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_route_patch_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_hat_dark_russet",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:155",
+        "node_name": "cub_body_accessory_hat_dark_russet_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-155"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 121808,
+      "sha256": "ac5a63f495aaae610893223c3f067df760e34bd022a897d6718f82a9de7eb702",
+      "rgba_sha256": "28c41966953837ba0f03622618bdfef056f20702b9a5c21d89408dfca195a24b",
+      "alpha_bounds": [
+        99,
+        36,
+        447,
+        482
+      ],
+      "source_sha256": "ab705e1724d25adcd5406993322e6a10eceddd87583290786a5a9bc24efc5307",
+      "source_bytes": 190868,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_hat_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_goggles_dark_russet",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:159",
+        "node_name": "cub_body_accessory_goggles_dark_russet_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-159"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 121180,
+      "sha256": "6fcb8ce9804903289749680bca6ab71039be764d7c27f12aeaeaaeb5374aefcb",
+      "rgba_sha256": "871a551ddaeaa89c384a72e9192438bbe9deabfc232aaed1998dd0d5d1bc1ef2",
+      "alpha_bounds": [
+        108,
+        36,
+        447,
+        482
+      ],
+      "source_sha256": "af4d5861922b98f075d33ace1b1becf531a3dd92e2c504085f5929a3eb969720",
+      "source_bytes": 189987,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_goggles_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_compass_dark_russet",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:163",
+        "node_name": "cub_body_accessory_compass_dark_russet_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-163"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 114250,
+      "sha256": "64e4f69e38acb9e51dc1ac0c76c2df26670ad09a5beaf69b462513bf8371b556",
+      "rgba_sha256": "38c225fa844a073663ed728e9aafb7de8f238f1de937a791dc136b296a734ffd",
+      "alpha_bounds": [
+        116,
+        36,
+        449,
+        482
+      ],
+      "source_sha256": "b6f979cf622ea264a4a79cd93fd01a82ff146b5eb66e17fc0c3669d05259f6e3",
+      "source_bytes": 180929,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_compass_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_lantern_dark_russet",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:167",
+        "node_name": "cub_body_accessory_lantern_dark_russet_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-167"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 124228,
+      "sha256": "9157d2775cd3f1c5ad925318948051057ac55cae5fd15f41b89306dab47c5db9",
+      "rgba_sha256": "4e9a6f4af3479d848208af0474f7401ab948ca32060d31c53cc7494c3e42880c",
+      "alpha_bounds": [
+        114,
+        36,
+        447,
+        482
+      ],
+      "source_sha256": "10df5475057172ae8ba68efd5c3626ca9d3f2573741fb472bc9b4567bfac0a1e",
+      "source_bytes": 195386,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_lantern_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_binoculars_dark_russet",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:171",
+        "node_name": "cub_body_accessory_binoculars_dark_russet_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-171"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 119552,
+      "sha256": "c6e6a61ed9ed779741406cd603ab19ae20cc8eff5cceca0d30a00f985ba3da72",
+      "rgba_sha256": "e8e996108e14f80144dd6ec8674fc8985d280cd0d8b715d0b3ff04c4c386d36d",
+      "alpha_bounds": [
+        114,
+        36,
+        447,
+        482
+      ],
+      "source_sha256": "f27cf3031b673a535acece8f46f5385a870273a89a4db98ba2ee99e5e42f9b7a",
+      "source_bytes": 185976,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_binoculars_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_base_sand",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:176",
+        "node_name": "cub_body_base_sand_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-176"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 114464,
+      "sha256": "35fa7600b28e2c8090358ad1b49005049c2eece7e9b48c2f8869a19114223c5b",
+      "rgba_sha256": "2f3d0aacb9ef15b0bdc82ca4036f0cbcf605eeb48e3d2131c9f38c05ecbefb89",
+      "alpha_bounds": [
+        114,
+        36,
+        447,
+        482
+      ],
+      "source_sha256": "e3fb359e9b1bdd410ce782ff9fab2fb1c58a80a53468bb8ecb50c5dcecdb721d",
+      "source_bytes": 183712,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_base_sand.webp"
+    },
+    {
+      "resource": "ryzhik_cub_body_base_dark_russet",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "87:180",
+        "node_name": "cub_body_base_dark_russet_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-180"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 112462,
+      "sha256": "027983ad459c03a6961c8955ae6d37554b4f3e1f9aab671ba03c99d750545601",
+      "rgba_sha256": "ae386b1c324843a8bf1c575ae63ce5b401ac3600d31388e0a9cb91a572b28f35",
+      "alpha_bounds": [
+        114,
+        36,
+        447,
+        482
+      ],
+      "source_sha256": "a15c513ec49dfc256b54fbdd532b26665bbc2cd10eb7640e2aced9ad4958c87c",
+      "source_bytes": 180383,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_base_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_sick_copper",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:55",
+        "node_name": "cub_state_sick_copper_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-55"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 121814,
+      "sha256": "cff8ebabc49323bb20787a4b69c61cc7b442acaf139c2399e13b6ed78ed43139",
+      "rgba_sha256": "960fd2a8d16f1efc52ca14b3b54b9b0ee3f0823039fdea4c5592175c68e66c04",
+      "alpha_bounds": [
+        118,
+        36,
+        453,
+        482
+      ],
+      "source_sha256": "9ae8766ce0ccfa818b4be7c0a85aab089340ce1c3da76f9de43d98e262ee0a35",
+      "source_bytes": 191238,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_sick_copper.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_satiated_copper",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:59",
+        "node_name": "cub_state_satiated_copper_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-59"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 116602,
+      "sha256": "415534f4a0b7fd7ace1114fbed5b3c61d6e5a0f030938862b456adce61d94ca6",
+      "rgba_sha256": "2faf6dca26fdbf44136bbb6e6f3e58742c9f53730222761882950c7132e43133",
+      "alpha_bounds": [
+        121,
+        44,
+        444,
+        483
+      ],
+      "source_sha256": "d5a2e4d31e6cea73223195261ba41c25c0bfa245cf6ba957c26b77d2b52c1e7d",
+      "source_bytes": 181616,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_satiated_copper.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_joy_copper",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:63",
+        "node_name": "cub_state_joy_copper_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-63"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 129034,
+      "sha256": "773d78f1889a338b3fa4e30489bcd291fc701f1c048f881c2728243ea24e2121",
+      "rgba_sha256": "7542443e359bf174152fcb37e4b1d50ae842819e1c9577a8b8f8481eb401548e",
+      "alpha_bounds": [
+        114,
+        36,
+        482,
+        482
+      ],
+      "source_sha256": "7a301abe8c31ce84e1284909008740e2a81470592560dafdda304c57cb098081",
+      "source_bytes": 203452,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_joy_copper.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_sad_copper",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:67",
+        "node_name": "cub_state_sad_copper_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-67"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 117468,
+      "sha256": "aa7f7a5d05f260fc026b7f3400d25632bf46290fa007552f4cf10b51c1a65772",
+      "rgba_sha256": "b249e3bd1905a7378e5fc96ca2b2d05243cd4afd6a775f7a4745bc1bb639d8b5",
+      "alpha_bounds": [
+        115,
+        40,
+        448,
+        482
+      ],
+      "source_sha256": "6eccd8924fd4ff4e3ac8f2a301eee652749b5e6ac7a243d7f876b6098387778f",
+      "source_bytes": 183520,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_sad_copper.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_sick_sand",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:71",
+        "node_name": "cub_state_sick_sand_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-71"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 124576,
+      "sha256": "aeacc055ee6fc7feb9c532205b75089084fba18abe6a5f3fb0968fe6d57d3d9d",
+      "rgba_sha256": "41a1857ddee098cb2dddf127d1f492f89d3378d81a4f370fa66ab33cf33f178b",
+      "alpha_bounds": [
+        115,
+        36,
+        448,
+        482
+      ],
+      "source_sha256": "f47157dc3ae741f3749b789ce80de528955f3c9d646f4cdeff3a087e7d796148",
+      "source_bytes": 192215,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_sick_sand.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_satiated_sand",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:75",
+        "node_name": "cub_state_satiated_sand_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-75"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 113064,
+      "sha256": "48c66ff0f3870f467bd70d0a8c002a26e605fd4b013538e36dfe46b67f810f92",
+      "rgba_sha256": "afa604219fc45b07264cac7b17784c29e642505fbb6b295b9c8fbe6d99457405",
+      "alpha_bounds": [
+        115,
+        36,
+        447,
+        482
+      ],
+      "source_sha256": "e34c8675a4088930914de143e6cf139905ec8dd6ba0098d52e724c9573f86448",
+      "source_bytes": 180780,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_satiated_sand.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_joy_sand",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:79",
+        "node_name": "cub_state_joy_sand_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-79"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 124916,
+      "sha256": "01cb4a7d940785bea05ec4e3df97afe4bb5c0dd3491ad35560d5b61c1480e649",
+      "rgba_sha256": "d63eb07b0f8bacb81b884bf57bc858cc42c2927e815908af8db3d58da2bcf3ed",
+      "alpha_bounds": [
+        116,
+        36,
+        466,
+        479
+      ],
+      "source_sha256": "dd653e77396ea328d6631f7f530dedbd14ec890aa5dfb217784b33bb8d2c5af7",
+      "source_bytes": 197618,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_joy_sand.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_sad_sand",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:83",
+        "node_name": "cub_state_sad_sand_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-83"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 116616,
+      "sha256": "1c29274ec94627236205520f6f250ff1af468a3b8bf7e4d27e86c7c2eb483771",
+      "rgba_sha256": "bc2f0c9148b592312ca8ce1d00a7965729da3850bb45596e4e3220a4b816776c",
+      "alpha_bounds": [
+        114,
+        36,
+        447,
+        482
+      ],
+      "source_sha256": "1f0f8fb6367d92f809e18dde579d14ad56538411ca471cea0d1752ae3ec2447f",
+      "source_bytes": 180237,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_sad_sand.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_sick_dark_russet",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:87",
+        "node_name": "cub_state_sick_dark_russet_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-87"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 119290,
+      "sha256": "45c7df1b82b1f905891ebce85fdb54a1f336e7fa98f9fae47213087153dcb531",
+      "rgba_sha256": "d8f1817186ea2cbd5a1b2d3132a5dfd8085cdf0ebb7f0a4550d26ffdce445b9f",
+      "alpha_bounds": [
+        116,
+        36,
+        449,
+        483
+      ],
+      "source_sha256": "8b5642cd1808d94c53ec9f0128e32b672e2838823feeb35c9ecdd5339f8ea716",
+      "source_bytes": 185207,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_sick_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_satiated_dark_russet",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:91",
+        "node_name": "cub_state_satiated_dark_russet_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-91"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 111306,
+      "sha256": "650f5e07630b1b49f8cdef96ca50aad7dacb0f6d7bf4146b334eaab24c390dac",
+      "rgba_sha256": "575bc66597e2699be59d5367528ac26c94e7b13124e263f90bd10cc469ac2fdb",
+      "alpha_bounds": [
+        110,
+        41,
+        444,
+        482
+      ],
+      "source_sha256": "56f83ec1372e573fd9dc76a3fa097ef368dac9cb15a487c594c34bea33e6d471",
+      "source_bytes": 179120,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_satiated_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_joy_dark_russet",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:95",
+        "node_name": "cub_state_joy_dark_russet_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-95"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 118702,
+      "sha256": "08d8499c80fbda724965a250a6f0cda410c9453686dde509f2fb29b8a2cc07ef",
+      "rgba_sha256": "b88023f5650e5f4bb6f7598b4db165c3ebf2c84cec211cf32c8a69ed9c6daafe",
+      "alpha_bounds": [
+        115,
+        36,
+        464,
+        482
+      ],
+      "source_sha256": "94d8b845b0f97230613030fc18f760cf2d054de509d5253090046d37ed3825ec",
+      "source_bytes": 190396,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_joy_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_sad_dark_russet",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "91:99",
+        "node_name": "cub_state_sad_dark_russet_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=91-99"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 111686,
+      "sha256": "91ee31ed308d6abf4c91d5306b8c6fd9ddc1f13366cb8a151176bad29c8b8ec9",
+      "rgba_sha256": "1325e5ab6a0c4f82aac2a5d42ae956d772936d826aff4577c05b435c6c04fae2",
+      "alpha_bounds": [
+        115,
+        37,
+        446,
+        482
+      ],
+      "source_sha256": "089681fee70da92e6fde0f2da313d748645c0c8630b696648d917e92f8eaa9ac",
+      "source_bytes": 175755,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_sad_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_hungry_copper",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "93:17",
+        "node_name": "cub_state_hungry_copper_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=93-17"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 114970,
+      "sha256": "deee9e26ca241cb7fe9ad9afd4c2d6271af53503de32f74d29053ac43e2330f9",
+      "rgba_sha256": "f0aef9f80ac1e40f3f56197c7cd6110770967ae6b847ebeb40b5f3a64a277196",
+      "alpha_bounds": [
+        96,
+        25,
+        451,
+        480
+      ],
+      "source_sha256": "e98f71fe0d55aec3837d7d1e978e17e4154931b66be8922322b9c32164f00980",
+      "source_bytes": 183134,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_hungry_copper.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_hungry_sand",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "93:21",
+        "node_name": "cub_state_hungry_sand_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=93-21"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 116790,
+      "sha256": "cef674b3da798a064aff007e1edf8a4b9ccba2c85ed1b423a9ba688a274fb99f",
+      "rgba_sha256": "02b786c2d94389eadedda78964678da7634b4e10b8e25b6bc1dda7ef85311ed5",
+      "alpha_bounds": [
+        115,
+        34,
+        466,
+        486
+      ],
+      "source_sha256": "5e34770261d287c181fc3f8851ad57e097f813ab7c461a776b51b1cf1ae2f22c",
+      "source_bytes": 185539,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_hungry_sand.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_hungry_dark_russet",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "93:25",
+        "node_name": "cub_state_hungry_dark_russet_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=93-25"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 113926,
+      "sha256": "d8361f9c8dc9ed390cf062dc787b27d2e814177d9b4d9808d343bd5d5de84a66",
+      "rgba_sha256": "dced614a3f5cb90ac5d3b578c58e0048d64ec5232365d5c970d77c3c9dc5ba3c",
+      "alpha_bounds": [
+        108,
+        26,
+        434,
+        481
+      ],
+      "source_sha256": "2b3d20ff63c51e014efc200e33f679c52ca64d511cbb989ddf2c980098928fdd",
+      "source_bytes": 179928,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_hungry_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_thoughtful_copper",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "94:29",
+        "node_name": "cub_state_thoughtful_copper_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-29"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 108424,
+      "sha256": "03fb543002d5e7c6a097f8016d98590dee2187cac19e56a2bfeeb959a4deaaac",
+      "rgba_sha256": "85b94548d22804a862b3b7f8ad09dd2f0598e304d668e1b6e81bc945915c3349",
+      "alpha_bounds": [
+        123,
+        58,
+        437,
+        484
+      ],
+      "source_sha256": "40e901303a6204be2b89671bd7773026ea3cde0e5de6fca6efbc46ccd7e9def5",
+      "source_bytes": 174310,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_thoughtful_copper.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_tired_copper",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "94:33",
+        "node_name": "cub_state_tired_copper_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-33"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 114206,
+      "sha256": "e2c4a6368f4e410c6a8242c4b3e6b2079f9dccd34519685c6c8b8eb5cb2261a9",
+      "rgba_sha256": "d74a218a1375d0c8b0ce5494f1b2bb45f29a6d61be3ee15895709ac73717fccc",
+      "alpha_bounds": [
+        115,
+        36,
+        448,
+        482
+      ],
+      "source_sha256": "d0163d3ac4d63183a77d69ffa973157d0c9397d6bfb8c24cbe4fc234f134226a",
+      "source_bytes": 183666,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_tired_copper.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_thoughtful_sand",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "94:37",
+        "node_name": "cub_state_thoughtful_sand_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-37"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 111584,
+      "sha256": "ec6bef373eb66976261c6bb150cdf8da9cbf314373d42310d5d5e8c845228c78",
+      "rgba_sha256": "e95ad893803d2417201123a551d4acad58a553cc59ed95c4125e2d3b8c7edbd8",
+      "alpha_bounds": [
+        127,
+        35,
+        451,
+        482
+      ],
+      "source_sha256": "e6397a228c9f3bdb05e3de51404e6804762e905bb26f74bfb1114597832c0dc6",
+      "source_bytes": 179232,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_thoughtful_sand.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_tired_sand",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "94:41",
+        "node_name": "cub_state_tired_sand_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-41"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 118620,
+      "sha256": "c9c1b3dcd685e6056f87de1fcf2e580586b54af2f4eb287e1532a36e8224cb8d",
+      "rgba_sha256": "f0b39d584e86cf69469a6ea484683dca8bedb32bada66c4f342f0e2c97cdfb57",
+      "alpha_bounds": [
+        115,
+        36,
+        448,
+        482
+      ],
+      "source_sha256": "5c75ef0d310c528111a2d9117170fc03da616161780cb2b0dd0cd3e2639db32c",
+      "source_bytes": 183990,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_tired_sand.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_thoughtful_dark_russet",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "94:45",
+        "node_name": "cub_state_thoughtful_dark_russet_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-45"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 110712,
+      "sha256": "3bbdfb21250d552859858583c99e27745f12fe410c7e197a94e17bbd58284e0b",
+      "rgba_sha256": "6bdcff229b266f4235d9861b7a00420b7edab4c6f15f324eaf26f59479d13a5b",
+      "alpha_bounds": [
+        119,
+        30,
+        446,
+        482
+      ],
+      "source_sha256": "b8cfc080a0d88969e16020dcdd946656f3fdb14ab24d3666367712fbce7eca22",
+      "source_bytes": 179722,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_thoughtful_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_tired_dark_russet",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "94:49",
+        "node_name": "cub_state_tired_dark_russet_512",
+        "collection_id": "87:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-49"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 110920,
+      "sha256": "c16c37cff2d9e51a76ade17e6e11ced23b1f8fcb7f88355848eababb81380b66",
+      "rgba_sha256": "68c4f178c08ce728a67d1224c8a3d1ae8b3e55aa7b7d95fa9f60ddb21fefa7e3",
+      "alpha_bounds": [
+        114,
+        36,
+        447,
+        482
+      ],
+      "source_sha256": "20c9893661c6581a4aae9ca5623350807ab10d7dc3341b25804f3b3807fe2de1",
+      "source_bytes": 178752,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_tired_dark_russet.webp"
     },
     {
       "resource": "menu_chevron",
