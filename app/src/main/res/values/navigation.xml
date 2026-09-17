@@ -1,0 +1,4 @@
+<resources>
+    <string name="navigation_placeholder_message">Этот раздел скоро появится.</string>
+    <string name="navigation_back">Назад</string>
+</resources>
