@@ -49,17 +49,22 @@ internal fun VillageBackdrop() {
 }
 
 @Composable
-internal fun CharacterScene(modifier: Modifier = Modifier) {
+internal fun CharacterScene(pet: MainMenuPetUiState, modifier: Modifier = Modifier) {
     BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
         val characterSize = minOf(maxWidth * 1.18f, maxHeight * 0.92f, 560.dp)
+        val artwork = pet.artworkRes
+        if (artwork == null) {
+            MenuText(stringResource(pet.descriptionRes), size = 18)
+            return@BoxWithConstraints
+        }
         Image(
             painterResource(R.drawable.menu_ground_shadow), null,
             Modifier.offset(x = characterSize * -0.03f, y = characterSize * 0.378f)
                 .size(characterSize * 0.328f, characterSize * 0.117f),
         )
         Image(
-            painterResource(R.drawable.menu_ryzhik),
-            contentDescription = stringResource(R.string.menu_fox_description),
+            painterResource(artwork),
+            contentDescription = stringResource(pet.descriptionRes),
             contentScale = ContentScale.Fit,
             modifier = Modifier.requiredSize(characterSize),
         )

@@ -8,6 +8,8 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import ru.nksk.lctapp.app.createInitialGameState
+import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.feature.coins.navigation.Coins
 import ru.nksk.lctapp.feature.coins.navigation.coinsEntry
 import ru.nksk.lctapp.feature.day.navigation.Day
@@ -26,7 +28,10 @@ import ru.nksk.lctapp.feature.village.navigation.villageEntry
 
 /** Navigation composition root. Features own their keys and entries; screens receive callbacks. */
 @Composable
-fun LctNavHost(modifier: Modifier = Modifier) {
+fun LctNavHost(
+    modifier: Modifier = Modifier,
+    initialGameState: GameState = createInitialGameState(),
+) {
     val backStack = rememberNavBackStack(AppNavigationSavedStateConfiguration, MainMenu)
     val navigator = remember(backStack) { AppNavigator(backStack) }
 
@@ -39,7 +44,7 @@ fun LctNavHost(modifier: Modifier = Modifier) {
             rememberViewModelStoreNavEntryDecorator(),
         ),
         entryProvider = entryProvider {
-            mainMenuEntry { source, action ->
+            mainMenuEntry(initialGameState) { source, action ->
                 navigator.navigate(
                     source = source,
                     destination = when (action) {

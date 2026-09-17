@@ -41,7 +41,7 @@ import ru.nksk.lctapp.core.ui.theme.AdventurePanel
 
 @Composable
 internal fun MenuHud(
-    coins: Int,
+    coins: Long,
     completedGoals: Int,
     totalGoals: Int,
     onAction: (MainMenuAction) -> Unit,
@@ -82,7 +82,7 @@ internal fun MenuHud(
 }
 
 @Composable
-private fun CoinsBadge(coins: Int, onClick: () -> Unit) {
+private fun CoinsBadge(coins: Long, onClick: () -> Unit) {
     val description = stringResource(R.string.menu_coins_accessibility, coins)
     Row(
         Modifier.clip(RoundedCornerShape(20.dp))

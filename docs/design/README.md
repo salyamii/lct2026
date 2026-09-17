@@ -19,6 +19,37 @@ The artwork below was exported from the supplied Figma design on 2026-09-17. It 
 
 The chevron and star are Android vector drawables with the exact SVG path, colors, opacity, and stroke settings. Their original SVGs are retained here. The shadow uses an SVG Gaussian blur unsupported by Android vector drawables; it was rendered directly from the original SVG to a transparent 604 × 216 PNG (4×) using librsvg through Sharp, then converted to lossless WebP. All raster resources are stored as WebP in `drawable-nodpi` to keep sizing under Compose's control. Conversion preserves the full decoded RGBA pixels and dimensions; the original PNG/SVG export links above remain source references.
 
+## Pet-state artwork
+
+The main menu now obtains its character appearance from `PetState.appearance`
+through `MainMenuPetUiState`. The initial state is NORMAL with BACKPACK selected,
+so it retains the original `menu_ryzhik` image and layout. Other mappings reuse
+visually inspected bundled artwork from the [asset catalog](assets/catalog.md):
+
+| Domain appearance | Android drawable |
+| --- | --- |
+| Plain | `ryzhik_teen_body_base_no_accessory` |
+| Bandana | `ryzhik_teen_body_accessory_bandana` |
+| Backpack | `menu_ryzhik` |
+| Glasses | `ryzhik_teen_body_accessory_goggles` |
+| Hat | `ryzhik_teen_body_accessory_hat` |
+| HUNGRY | `ryzhik_teen_state_hungry_copper` |
+| TIRED | `ryzhik_teen_state_tired_copper` |
+| THINKING | `ryzhik_teen_state_thoughtful_copper` |
+| UPSET | `ryzhik_teen_state_sad_copper` |
+| HAPPY | `ryzhik_teen_state_joy_copper` |
+
+WORRIED and NEEDS_HELP have no verified dedicated artwork mapping. Until that
+design decision is made, the menu displays their localized state label without
+substituting another pose or exposing the selected accessory. This is a current
+rendering limitation, not a change to the state-machine's final artwork contract.
+The manifest has no failed exports; these are unresolved semantic mappings, not
+missing files from an attempted import. No artwork is added or modified here.
+
+All character resources use the existing explicit square bounds and `Fit`
+scaling. The full 512 × 512 or 1024 × 1024 canvas is retained, including transparent
+margins. The resource mapping introduces no age or color gameplay rules.
+
 ## Typography
 
 The bundled static fonts are official Google Fonts TrueType files, downloaded via the [Google Fonts CSS API](https://fonts.googleapis.com/css2?family=Nunito:wght@800&family=Rubik:wght@800). Both have `usWeightClass=800`, contain all Russian Cyrillic letters (including `Ё`/`ё`), and do not require variable-font support.

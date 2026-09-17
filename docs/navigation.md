@@ -42,9 +42,12 @@ is not a persistent tab bar requiring independent stacks.
 
 The feature entries currently display a shared placeholder with Back. Replace
 that content as each feature is implemented; navigation already works. The menu
-artwork and UI state remain owned by the menu. Its entry explicitly supplies
-`MainMenuDemoState`; the coin/goal values are a design fixture, not persisted game
-data. See [project architecture](architecture.md) for layer ownership.
+artwork and UI state remain owned by the menu. The host passes an initial
+`GameState` snapshot to the menu entry, which creates its ViewModel and collects
+`uiState` with lifecycle awareness. The menu maps balance and pet appearance from
+that snapshot; the adventure goal counter remains a display fixture. Game state
+is not saved or restored in this initialization-only stage. Existing saved route
+behavior remains independent. See [project architecture](architecture.md) for ownership.
 
 ## Adding a screen
 

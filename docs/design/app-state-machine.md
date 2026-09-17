@@ -184,6 +184,12 @@ This includes HAPPY and UPSET: reopening restores the saved state until an
 explicit event changes it. Room is the approved persistent-data technology in
 AGENTS.md; this requirement does not define cloud backup or restore.
 
+**Approved implementation scope (2026-09-17):** the first menu integration uses
+initial in-memory game data only, with no game saving or restoration yet. Each
+new menu ViewModel receives an initial snapshot. Persistence requirements above
+remain future work; navigation keys do not store the game snapshot. This stage
+does not implement quest progression or new gameplay mechanics.
+
 ## 7. Source scenarios
 
 These scenarios describe successive states of a single quest. They do not

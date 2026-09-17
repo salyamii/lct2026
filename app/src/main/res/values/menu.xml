@@ -10,4 +10,15 @@
     <string name="menu_goal">Цель</string>
     <string name="menu_continue">Продолжить день</string>
     <string name="menu_fox_description">Рыжик — лисёнок с рюкзаком</string>
+    <string name="menu_pet_plain">Рыжик — лисёнок без аксессуаров</string>
+    <string name="menu_pet_bandana">Рыжик — лисёнок в бандане</string>
+    <string name="menu_pet_glasses">Рыжик — лисёнок в очках</string>
+    <string name="menu_pet_hat">Рыжик — лисёнок в шляпе</string>
+    <string name="menu_pet_needs_help">Рыжику нужна помощь</string>
+    <string name="menu_pet_hungry">Рыжик голоден</string>
+    <string name="menu_pet_tired">Рыжик устал</string>
+    <string name="menu_pet_worried">Рыжик обеспокоен</string>
+    <string name="menu_pet_thinking">Рыжик задумался</string>
+    <string name="menu_pet_upset">Рыжик расстроен</string>
+    <string name="menu_pet_happy">Рыжик радуется</string>
 </resources>

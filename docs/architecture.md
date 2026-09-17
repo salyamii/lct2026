@@ -2,8 +2,8 @@
 
 LCTApp uses one Android Gradle module (`:app`) with explicit package boundaries.
 The current UI is a menu and six navigable placeholders. Pure Kotlin game-state
-models are implemented; persistence and integration with screen state are not
-implemented yet. The [state-machine specification](design/app-state-machine.md)
+models feed the menu through an in-memory ViewModel; game persistence and
+restoration are not implemented yet. The [state-machine specification](design/app-state-machine.md)
 defines approved state behavior and records future gameplay decisions still open.
 
 ## Ownership
@@ -16,7 +16,7 @@ All paths below are relative to `app/src/main/java/ru/nksk/lctapp/`.
 | `app/LctApp.kt` | Theme and application composition | Features, shared UI |
 | `app/navigation` | Back stack, navigation policy, serializer registration, cross-feature wiring | Feature navigation contracts and UI actions |
 | `feature/<name>/navigation` | Stable route keys, entry registration, lifecycle-aware callbacks | Own feature, shared UI |
-| `feature/<name>/ui` | Screen state, actions, rendering, feature-specific components | Own UI, shared UI; future domain contracts |
+| `feature/<name>/ui` | ViewModels, screen state, actions, rendering, feature-specific components | Own UI, shared UI, domain contracts |
 | `core/ui/components` | Presentation shared by several features | Shared UI |
 | `core/ui/theme` | App typography, colors, and theme | Shared UI |
 
@@ -44,12 +44,29 @@ mutate a back stack. See [navigation](navigation.md) for registration and restor
 
 ## Current menu data
 
-`MainMenuScreen` requires `MainMenuUiState` and `onAction`. The entry supplies
-`MainMenuDemoState`, which explicitly preserves the existing design fixture:
-100 coins, zero completed goals, and four total goals. These values are sample
-presentation data, not initial economy balances or progression rules. They are
-not saved or modified by opening a destination. Resource-backed titles and
-artwork remain presentation concerns.
+`app/InitialGameState.kt` supplies temporary starting data: 100 coins, NORMAL
+Ryzhik with BACKPACK selected, no current chapter/event or recorded decisions,
+and empty financial details. These are initialization fixtures, not permanent
+economy rules or a registered first quest. `LctNavHost` accepts the snapshot and
+passes it to the menu entry's `MainMenuViewModel` constructor. The entry collects
+the ViewModel's read-only `StateFlow<MainMenuUiState>` with lifecycle awareness.
+
+`MainMenuUiStateMapper` projects the domain balance without narrowing its `Long`
+value and maps `PetState.appearance` to presentation resources. The existing
+adventure title and zero-of-four counter remain explicit display fixtures:
+neither financial savings nor the number of story decisions defines that
+counter. `MainMenuPreviewState` is used only by previews and UI tests.
+
+`MainMenuScreen` continues to receive state and callbacks. Character artwork and
+its localized description are now explicit inputs. The normal backpack reuses
+`menu_ryzhik`; other verified mappings reuse the bundled teen collection. WORRIED
+and NEEDS_HELP have no verified dedicated artwork mapping and currently render
+their state label. See [menu artwork mappings](design/README.md#pet-state-artwork).
+
+Every new menu ViewModel starts from its supplied snapshot. It has no game
+`SavedStateHandle`, database, or disk loading; normal ViewModel retention during
+configuration changes is not saved-game restoration. Opening destinations still
+does not mutate game state. Existing navigation-stack restoration is independent.
 
 The menu's layout, HUD, action panel, scene/background, text, and artwork decoder
 have separate files inside the feature. Their composables retain local visual
@@ -85,10 +102,10 @@ future content without registering placeholder quests. Collection properties
 use Kotlin read-only collection types; producers must not mutate their backing
 collections after publishing a snapshot.
 
-These domain models are neither Room entities nor screen `UiState`. A future
-working feature will add normalized persistence, repositories, and ViewModels
-that map the saved domain state to its own UI state. The current menu continues
-to receive its explicitly named demo fixture.
+These domain models are neither Room entities nor screen `UiState`. The menu
+ViewModel maps the initial snapshot today. A future working feature will add
+normalized persistence and repository observation instead of introducing an
+unused data layer for the initial-state binding.
 
 Add layers as a working feature requires them; do not create empty repositories,
 use cases, ViewModels, or dependency injection containers for placeholders.
@@ -117,9 +134,9 @@ when implementing the affected gameplay; they do not block the state foundation.
 ./gradlew :app:connectedDebugAndroidTest
 ```
 
-The first command checks pet-state appearance and explicit transitions, navigation
-policy, and package boundaries, builds the APK, and runs Android lint. Device
-coverage checks screen inputs, accessible
+The first command checks pet-state appearance, explicit transitions, menu mapping,
+navigation policy, and package boundaries, builds the APK, and runs Android lint.
+Device coverage checks the initial domain-to-menu binding, screen inputs, accessible
 actions, compact/landscape layouts, Back, recreation, and saved-state restoration.
 Legacy route and back-stack fixtures check decoding the original class names;
 encoding checks enforce stable route IDs. These checks and restoration within
