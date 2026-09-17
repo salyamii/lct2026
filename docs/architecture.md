@@ -1,9 +1,10 @@
 # Project architecture
 
 LCTApp uses one Android Gradle module (`:app`) with explicit package boundaries.
-The current implementation is a menu and six navigable placeholders. It has no
-persisted game model yet. The [state-machine specification](design/app-state-machine.md)
-defines product behavior for future features and records decisions still open.
+The current UI is a menu and six navigable placeholders. Pure Kotlin game-state
+models are implemented; persistence and integration with screen state are not
+implemented yet. The [state-machine specification](design/app-state-machine.md)
+defines approved state behavior and records future gameplay decisions still open.
 
 ## Ownership
 
@@ -56,10 +57,43 @@ state only, such as scroll position and background alignment.
 
 ## Adding real game data
 
+The state foundation is already available under `domain`:
+
+| Package / model | Responsibility |
+| --- | --- |
+| `domain/game/GameState` | Compose the pet, economy, and story snapshots |
+| `domain/pet/PetState` | One current visual state and the independently saved selected look |
+| `domain/pet/PetVisualState` | All eight states with the approved priority metadata |
+| `domain/pet/PetLook` | The five documented cosmetic looks |
+| `domain/pet/PetAppearance` | Select the saved look in NORMAL or a complete special-state appearance |
+| `domain/economy/EconomyState` | Balance, budget allocations, savings goal, reserve, and expenses |
+| `domain/story/StoryState` | Current chapter/event references and recorded decisions |
+
+`PetState.transitionTo` applies an explicit state outcome while retaining the
+selected look. It does not validate which quest may request that outcome or
+calculate rewards. All states, including HAPPY and UPSET, remain until an
+explicit update. Priority does not reject an update to a lower-ranked state.
+There are no hidden conditions, timers, reaction queues, or automatic resets.
+`PetAppearance` contains domain values only; Android drawable selection belongs
+to the consuming feature's presentation code.
+
+The snapshot constructors require their data explicitly. They supply no starting
+balance, initial quest, prices, or reward formulas. Economy amounts use `Long`
+virtual currency units; this representation does not define budget arithmetic
+or whether reserve/savings are included in total balance. Story IDs refer to
+future content without registering placeholder quests. Collection properties
+use Kotlin read-only collection types; producers must not mutate their backing
+collections after publishing a snapshot.
+
+These domain models are neither Room entities nor screen `UiState`. A future
+working feature will add normalized persistence, repositories, and ViewModels
+that map the saved domain state to its own UI state. The current menu continues
+to receive its explicitly named demo fixture.
+
 Add layers as a working feature requires them; do not create empty repositories,
 use cases, ViewModels, or dependency injection containers for placeholders.
 
-- `domain/<area>` will own pure Kotlin models, repository interfaces, and
+- `domain/<area>` owns pure Kotlin models and will own repository interfaces and
   business operations. No Android, Compose, navigation, database, or
   serialization annotations belong here. Coroutine/Flow APIs may be used.
 - `data/<area>` will implement those interfaces, coordinate data sources, and
@@ -74,7 +108,7 @@ use cases, ViewModels, or dependency injection containers for placeholders.
 Persistent game state belongs outside navigation keys. Keep selected appearance
 and visual state in PetState, financial state in EconomyState, and story
 progression in StoryState. Resolve the product specification's open decisions
-before implementing affected behavior. This cleanup makes no such decisions.
+when implementing the affected gameplay; they do not block the state foundation.
 
 ## Verification
 
@@ -83,8 +117,9 @@ before implementing affected behavior. This cleanup makes no such decisions.
 ./gradlew :app:connectedDebugAndroidTest
 ```
 
-The first command checks navigation policy and package boundaries, builds the
-APK, and runs Android lint. Device coverage checks screen inputs, accessible
+The first command checks pet-state appearance and explicit transitions, navigation
+policy, and package boundaries, builds the APK, and runs Android lint. Device
+coverage checks screen inputs, accessible
 actions, compact/landscape layouts, Back, recreation, and saved-state restoration.
 Legacy route and back-stack fixtures check decoding the original class names;
 encoding checks enforce stable route IDs. These checks and restoration within
