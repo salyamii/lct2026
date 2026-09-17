@@ -14,7 +14,11 @@ age or character without an explicit design decision.
 
 ## Imported collections
 
-The catalog covers the existing eight menu bitmaps, two vector icons and
+| Collection | Figma | Artwork entries |
+| --- | --- | --- |
+| MVP poses, colors and standalone equipment | [56:2](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-2) | 20 |
+
+The catalog also covers the existing eight menu bitmaps, two vector icons and
 two fonts. Further collections will be added with their matching provenance.
 
 ## Resource locations

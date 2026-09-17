@@ -9,7 +9,13 @@
     "method": 6,
     "pillow_version": "12.3.0"
   },
-  "collections": [],
+  "collections": [
+    {
+      "id": "56:2",
+      "name": "Рыжик · MVP asset pack · PNG 512",
+      "expected_assets": 20
+    }
+  ],
   "scope": "Existing menu/font assets and the imported artwork collections listed in this manifest.",
   "assets": [
     {
@@ -243,6 +249,686 @@
       "source_bytes": 3364085,
       "source_format": "png",
       "lossless_rgba_verified": true
+    },
+    {
+      "resource": "ryzhik_mvp_idle_copper",
+      "category": "Ryzhik mvp",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "56:7",
+        "node_name": "fox_ryzhik_idle_copper_512",
+        "collection_id": "56:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-7"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 83106,
+      "sha256": "199ef7c07dc108bd29f37e31ca636cc950f6f93d8facc57ad7109bb3d2853238",
+      "rgba_sha256": "de858890ba28a90e4994658ced63f3615cb97a03de58aedeea9a9b3e8c9dbe3f",
+      "alpha_bounds": [
+        148,
+        56,
+        432,
+        456
+      ],
+      "source_sha256": "333c7be11f80b9e25e3cb99c65b6f4386f0c8bc4204f0576ca05c9f5d6ed6a6a",
+      "source_bytes": 124764,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_mvp_idle_copper.webp"
+    },
+    {
+      "resource": "ryzhik_mvp_curious_copper",
+      "category": "Ryzhik mvp",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "56:10",
+        "node_name": "fox_ryzhik_curious_copper_512",
+        "collection_id": "56:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-10"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 85720,
+      "sha256": "cc76493846a70a970275c413a709577b36f994f13cde121f038b116d01132c9b",
+      "rgba_sha256": "63d68f966d456a36db79f5e9ec3d29cf4389d4df10b504aaaa994706efcce41f",
+      "alpha_bounds": [
+        124,
+        50,
+        478,
+        467
+      ],
+      "source_sha256": "fc03ec34624cb7dfb8300574a964be66673eea8060fd6043a00a44710a81d435",
+      "source_bytes": 127972,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_mvp_curious_copper.webp"
+    },
+    {
+      "resource": "ryzhik_mvp_confident_copper",
+      "category": "Ryzhik mvp",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "56:13",
+        "node_name": "fox_ryzhik_confident_copper_512",
+        "collection_id": "56:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-13"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 101410,
+      "sha256": "390fcfa33dc8e81ca3781822109f9c411e0eb04510416bd477ff7e3ea8460e1c",
+      "rgba_sha256": "2bf855d9e0b240c2fffb36e54ea53de17d0fb9b6fc12001f356b0d435d2edc89",
+      "alpha_bounds": [
+        76,
+        41,
+        370,
+        483
+      ],
+      "source_sha256": "9a69d1d3547827aff0ea66edbf896bf6b557a8a0289a9496d524bfcf587a9f61",
+      "source_bytes": 162053,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_mvp_confident_copper.webp"
+    },
+    {
+      "resource": "ryzhik_mvp_thoughtful_copper",
+      "category": "Ryzhik mvp",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "56:16",
+        "node_name": "fox_ryzhik_thoughtful_copper_512",
+        "collection_id": "56:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-16"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 85884,
+      "sha256": "e6eb2400219e8e287ee3b606a3d799669f9269d9dfe2ab4a4b75b4a6c1daf7b0",
+      "rgba_sha256": "1c490d5bd4985867d2d4570df540d03958131c5a3d3c61f1c22bbfe60183e4d1",
+      "alpha_bounds": [
+        165,
+        40,
+        427,
+        478
+      ],
+      "source_sha256": "b08ab9ab619bc4295a986f11581d90e775a9e375a01e2a4e51626fee548dd698",
+      "source_bytes": 133214,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_mvp_thoughtful_copper.webp"
+    },
+    {
+      "resource": "ryzhik_mvp_reward_copper",
+      "category": "Ryzhik mvp",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "56:19",
+        "node_name": "fox_ryzhik_reward_copper_512",
+        "collection_id": "56:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-19"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 65234,
+      "sha256": "016dbabe20acda662b5a2df1bf4af3c305d6d630f55bede0492e23888644bde9",
+      "rgba_sha256": "2509f9bb8f4b812bef69964ae01142ecb671db8db280ba9e2523762601892ce4",
+      "alpha_bounds": [
+        130,
+        93,
+        425,
+        413
+      ],
+      "source_sha256": "9d9d9111fab2d4813cd8cf29c38c54cbf865e1fba40dcc56ef21e720514d0d86",
+      "source_bytes": 99617,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_mvp_reward_copper.webp"
+    },
+    {
+      "resource": "ryzhik_mvp_color_amber",
+      "category": "Ryzhik mvp",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "56:22",
+        "node_name": "fox_ryzhik_color_amber_512",
+        "collection_id": "56:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-22"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 85900,
+      "sha256": "01f3333e5444fae0d0496108dd38b52088fc9c523c894482d81d2a673f34029f",
+      "rgba_sha256": "4e16d052ece441fceb4d1da7587bb65039db539ad9d4ad552ac2fb2e9d206672",
+      "alpha_bounds": [
+        151,
+        59,
+        447,
+        463
+      ],
+      "source_sha256": "9d7552299a4968d1a819605fdfeed28e0c5664b8c258fb986f7606e4df63fc5a",
+      "source_bytes": 133049,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_mvp_color_amber.webp"
+    },
+    {
+      "resource": "ryzhik_mvp_color_sand",
+      "category": "Ryzhik mvp",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "56:25",
+        "node_name": "fox_ryzhik_color_sand_512",
+        "collection_id": "56:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-25"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 75792,
+      "sha256": "82975d500fae1caac29e183924ee8d54a5903775fa22b00b76ee140f04a648e4",
+      "rgba_sha256": "5cad4ff7d6b7c65d259b00260cd6c5444410a587f4c11f7eb297c07966de8a14",
+      "alpha_bounds": [
+        164,
+        59,
+        427,
+        467
+      ],
+      "source_sha256": "e7bd5a3c1307b0eda4cc2bf8f70ddc56148785fcb7b15ddf7b4b845ae53cc84f",
+      "source_bytes": 116863,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_mvp_color_sand.webp"
+    },
+    {
+      "resource": "ryzhik_mvp_color_forest",
+      "category": "Ryzhik mvp",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "56:28",
+        "node_name": "fox_ryzhik_color_forest_512",
+        "collection_id": "56:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-28"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 78570,
+      "sha256": "f54a10be1044745db81a7d61c674208f56945d95670a746c62ef8f5408ccb73e",
+      "rgba_sha256": "3dde7075b62432f778014339f7350be8f167902e4fe6f49325720eb685776978",
+      "alpha_bounds": [
+        150,
+        47,
+        446,
+        469
+      ],
+      "source_sha256": "04330a24befaca5c016fcbe0ecb083dddd2a632b935d73e722c7cf1c7fcc4892",
+      "source_bytes": 117405,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_mvp_color_forest.webp"
+    },
+    {
+      "resource": "ryzhik_mvp_color_dark",
+      "category": "Ryzhik mvp",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "56:31",
+        "node_name": "fox_ryzhik_color_dark_512",
+        "collection_id": "56:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-31"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 80322,
+      "sha256": "7debdf20799ed95636ffce3f5ec5c0b1b603350f8102b63d021f92cb6382c8d2",
+      "rgba_sha256": "e4ec1a305ab793ef766dfa6e0322ce6c4177fd7d9d882c76f86e2574a0d144d9",
+      "alpha_bounds": [
+        90,
+        44,
+        364,
+        478
+      ],
+      "source_sha256": "21e14bcbdf1002fa9651660318ab1aff806eead2d26a5d654f123fe164db033b",
+      "source_bytes": 125017,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_mvp_color_dark.webp"
+    },
+    {
+      "resource": "ryzhik_mvp_eyes_curious",
+      "category": "Ryzhik mvp",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "56:34",
+        "node_name": "fox_ryzhik_eyes_curious_512",
+        "collection_id": "56:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-34"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 89164,
+      "sha256": "621cbf0b361e2166c2a3686575a9888a410924c30682e8d122565de989b2d654",
+      "rgba_sha256": "452640106680e80a06b0748975653f051bb773e83ce233f8d8ce9f7ca19a695a",
+      "alpha_bounds": [
+        107,
+        73,
+        405,
+        451
+      ],
+      "source_sha256": "052ebecbae341cda7e988f22a4db31fdc97bb7b3a6c8e91b4678730d52986a7d",
+      "source_bytes": 139034,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_mvp_eyes_curious.webp"
+    },
+    {
+      "resource": "ryzhik_mvp_eyes_brave",
+      "category": "Ryzhik mvp",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "56:37",
+        "node_name": "fox_ryzhik_eyes_brave_512",
+        "collection_id": "56:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-37"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 86856,
+      "sha256": "50838b817889dcaafba1f249ad51a7b728d78fd330c8606619bdeda3931a3997",
+      "rgba_sha256": "475f1b5e3829bc8d7e2a51cf024a16d6d5ed72a3b53eec6c57fda65353b5e960",
+      "alpha_bounds": [
+        105,
+        75,
+        405,
+        451
+      ],
+      "source_sha256": "c3a0c19257d588fcaef507b6b2768ad78ab7d2c0b5102790e974780730ca1ea8",
+      "source_bytes": 135851,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_mvp_eyes_brave.webp"
+    },
+    {
+      "resource": "ryzhik_mvp_eyes_cheerful",
+      "category": "Ryzhik mvp",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "56:40",
+        "node_name": "fox_ryzhik_eyes_cheerful_512",
+        "collection_id": "56:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-40"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 100354,
+      "sha256": "21d8de95b2947d99ca5c4df3005833abe1ca9b0f17e81fbaa6dbd60591e13cba",
+      "rgba_sha256": "bebf0f3b4779ae7cebee93b9225ccdf17aed2f11247d44c9e2ae45546986a8f8",
+      "alpha_bounds": [
+        70,
+        80,
+        419,
+        453
+      ],
+      "source_sha256": "5fcb5ee04638c395b0fcb0c6abbd4fadff090470e1a3a915d2a3c04e3c3d70c6",
+      "source_bytes": 157523,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_mvp_eyes_cheerful.webp"
+    },
+    {
+      "resource": "gear_blue_bandana",
+      "category": "Equipment",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "56:43",
+        "node_name": "gear_blue_bandana_512",
+        "collection_id": "56:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-43"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 89090,
+      "sha256": "fb89c8ead9bfe8da8e51627b2a3abe57f589772f32c22179ec675d196b298474",
+      "rgba_sha256": "694c80ef67ca2a36edc97decb04983a6d02659ac23118d901a384b9e6643873c",
+      "alpha_bounds": [
+        90,
+        75,
+        470,
+        432
+      ],
+      "source_sha256": "2ac7b3490a386570858a90b836ccc44b42b7e942716da49de72e9874e55df720",
+      "source_bytes": 136792,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/gear_blue_bandana.webp"
+    },
+    {
+      "resource": "gear_explorer_backpack",
+      "category": "Equipment",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "56:46",
+        "node_name": "gear_explorer_backpack_512",
+        "collection_id": "56:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-46"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 118982,
+      "sha256": "414612e9dfeeadc512abecdd12dd2ab4ccddcfeb58cbd786470603c0d59da7ab",
+      "rgba_sha256": "782f0a4d6ebb9fef68a00fe2d6f970c91276025bf926dc9b32f708d4636e0dd4",
+      "alpha_bounds": [
+        88,
+        76,
+        412,
+        437
+      ],
+      "source_sha256": "fd5929fd98a7785a7eb03a3df4779e818517e6846d4c75ce271cd1e0fd840112",
+      "source_bytes": 176683,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/gear_explorer_backpack.webp"
+    },
+    {
+      "resource": "gear_route_patch",
+      "category": "Equipment",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "56:49",
+        "node_name": "gear_route_patch_512",
+        "collection_id": "56:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-49"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 107848,
+      "sha256": "4a3b0310687f852d860120604a1adf01933439a7917e4539d7b1ef7ad651ec0b",
+      "rgba_sha256": "79c16921b6b6be2cdce93e47a6704993157269a54bee94a8d9ccdc4bfd72fcf6",
+      "alpha_bounds": [
+        108,
+        108,
+        404,
+        404
+      ],
+      "source_sha256": "fc480065f439cd51f9a3e6dd0609d5102e960d1230a24df864eea251623eebb5",
+      "source_bytes": 167561,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/gear_route_patch.webp"
+    },
+    {
+      "resource": "gear_explorer_hat",
+      "category": "Equipment",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "56:52",
+        "node_name": "gear_explorer_hat_512",
+        "collection_id": "56:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-52"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 79920,
+      "sha256": "79e6e60b47202c189c0c9af3bb489e7e91adecb5ed0113af18c256810dbbc127",
+      "rgba_sha256": "c5e3726866f2eeb5eb67ed399d3e2620d61482b7bff1379ec7376e184a75864c",
+      "alpha_bounds": [
+        59,
+        121,
+        453,
+        390
+      ],
+      "source_sha256": "43280a710fc1a1047e9baaa90d1995e60c1d1e8576f3120cbacc2ede10765f3e",
+      "source_bytes": 123745,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/gear_explorer_hat.webp"
+    },
+    {
+      "resource": "gear_pilot_goggles",
+      "category": "Equipment",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "56:55",
+        "node_name": "gear_pilot_goggles_512",
+        "collection_id": "56:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-55"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 91532,
+      "sha256": "af670ac90ff0b4d4d75aa29a59789c7f9b20c148e5b97fdaf0e765ed996ee252",
+      "rgba_sha256": "ae62d328311a60e84a52ef9ce859e07289c8312b21e092cbd316f677a2fbaac0",
+      "alpha_bounds": [
+        37,
+        124,
+        474,
+        387
+      ],
+      "source_sha256": "245674528122166b3247531ffbf0e31040300ff75153a078785f1dfa4f51333f",
+      "source_bytes": 140130,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/gear_pilot_goggles.webp"
+    },
+    {
+      "resource": "gear_compass_medallion",
+      "category": "Equipment",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "56:58",
+        "node_name": "gear_compass_medallion_512",
+        "collection_id": "56:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-58"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 61202,
+      "sha256": "f224f343fc3f6162ef2120ce7bfa9e19789f97fe7f89c5d28477469f0a1638f0",
+      "rgba_sha256": "419b627ff2f8fa0c56a52fa9dd9fc3aeee4f9867c303d29f0525f593524c6c9b",
+      "alpha_bounds": [
+        160,
+        0,
+        338,
+        437
+      ],
+      "source_sha256": "37be6553b99b1fe803e7638e30e2eb14e77cfa423528ab23f51c56e0bda760a8",
+      "source_bytes": 97528,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/gear_compass_medallion.webp"
+    },
+    {
+      "resource": "gear_lantern",
+      "category": "Equipment",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "56:61",
+        "node_name": "gear_lantern_512",
+        "collection_id": "56:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-61"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 73508,
+      "sha256": "c978f338e7034d984ee8f624a72516275598d12be5352e25a221b3353ce812ad",
+      "rgba_sha256": "90ce4a2d804d18070abf01cc46a460db53ca208f824f0aafb81e7a4f4e013429",
+      "alpha_bounds": [
+        157,
+        65,
+        354,
+        446
+      ],
+      "source_sha256": "1274d71e3517924a336f6f20bcf29f107a7333d01d7f2575c41981d6e8192c96",
+      "source_bytes": 110874,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/gear_lantern.webp"
+    },
+    {
+      "resource": "gear_binoculars",
+      "category": "Equipment",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "56:64",
+        "node_name": "gear_binoculars_512",
+        "collection_id": "56:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-64"
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 1,
+      "source_method": "figma_isolated_screenshot",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 70144,
+      "sha256": "c30bfc0279e483f5ea5f04ab3322146db010aa839e3189f1ea67cf919a80ee2f",
+      "rgba_sha256": "5bba4a727ea7a843510e60dccace3e74c2d7eee640ae48838605669cb7a5c7f2",
+      "alpha_bounds": [
+        54,
+        133,
+        458,
+        389
+      ],
+      "source_sha256": "f320046668582b7663266de5dfef17d5a9ca120f214f6089d41f476be7fe2b1b",
+      "source_bytes": 108567,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/gear_binoculars.webp"
     },
     {
       "resource": "menu_chevron",
