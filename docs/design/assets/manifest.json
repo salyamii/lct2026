@@ -1,0 +1,309 @@
+{
+  "schema_version": 1,
+  "imported_on": "2026-09-17",
+  "figma_file_key": "bAod1cKtTX9Q8omQ067q3q",
+  "raster_encoding": {
+    "format": "WebP",
+    "lossless": true,
+    "exact": true,
+    "method": 6,
+    "pillow_version": "12.3.0"
+  },
+  "collections": [],
+  "scope": "Existing menu/font assets and the imported artwork collections listed in this manifest.",
+  "assets": [
+    {
+      "resource": "menu_coin",
+      "category": "Existing menu",
+      "path": "app/src/main/res/drawable-nodpi/menu_coin.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 660432,
+      "sha256": "a247172bb5ea64d3a2508a89c31f32ed27c7bfc42ee9ff1833f289725cd4943c",
+      "rgba_sha256": "8796624e742623a95638f5f6a84c87dcf9c3401e11ed23c5f2a6c43ab3d2e568",
+      "alpha_bounds": [
+        0,
+        23,
+        1238,
+        1254
+      ],
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2214:42",
+        "node_name": "menu_coin",
+        "collection_id": "2101:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2214-42"
+      },
+      "source_method": "existing_project_resource",
+      "source_sha256": "6f60231ba439a50e9b6442e0bacf62d26b9f169a47814f2ad0f79588e8703659",
+      "source_bytes": 1357133,
+      "source_format": "png",
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "menu_gear",
+      "category": "Existing menu",
+      "path": "app/src/main/res/drawable-nodpi/menu_gear.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1044774,
+      "sha256": "b807fc7e1f97898c2d7c1c72e98b3718d4897ce2c96e0c79085cb897083a3a56",
+      "rgba_sha256": "1a10fce20919445794d98538556014b7fede4235fdfdd5b1c0ab7f00778922f2",
+      "alpha_bounds": [
+        47,
+        58,
+        1236,
+        1200
+      ],
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2214:33",
+        "node_name": "menu_gear",
+        "collection_id": "2101:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2214-33"
+      },
+      "source_method": "existing_project_resource",
+      "source_sha256": "9bc09f7eae996b6b5b927863344cff88f4a3d9100c55504aa2957f09656d2994",
+      "source_bytes": 1921364,
+      "source_format": "png",
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "menu_goal",
+      "category": "Existing menu",
+      "path": "app/src/main/res/drawable-nodpi/menu_goal.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 901092,
+      "sha256": "ce1f8293d9b47a3dac32612cd17119177fee08a4368a0dc9c057f35e3c2d61b9",
+      "rgba_sha256": "fe5c77ccc6dfe7d3a74941b00c6d92d75bfb00148b1357b7a472174a4d5af4bd",
+      "alpha_bounds": [
+        97,
+        47,
+        1145,
+        1182
+      ],
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2214:39",
+        "node_name": "menu_goal",
+        "collection_id": "2101:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2214-39"
+      },
+      "source_method": "existing_project_resource",
+      "source_sha256": "ad4533bf1aece55bc7de8ff34d7c77afd68272a4385dd260375980664fb1f862",
+      "source_bytes": 1695068,
+      "source_format": "png",
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "menu_ground_shadow",
+      "category": "Existing menu",
+      "path": "app/src/main/res/drawable-nodpi/menu_ground_shadow.webp",
+      "format": "webp",
+      "width": 604,
+      "height": 216,
+      "bytes": 10538,
+      "sha256": "2a631f638cea789ca0ed6318aec262638f0f7d6edf8542aab1298e906de154fe",
+      "rgba_sha256": "eb8e73b6289827065fe84872df4e77ca6c7bf8f9c2cdceb6455c13be9f6d0c9b",
+      "alpha_bounds": [
+        0,
+        0,
+        604,
+        216
+      ],
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2101:2",
+        "node_name": "menu_ground_shadow",
+        "collection_id": "2101:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2101-2"
+      },
+      "source_method": "existing_project_resource",
+      "source_sha256": "0fb137033b7c7ff6ce183a07e3057245cfa051ec207bc6dd1870e72d736aac7c",
+      "source_bytes": 16674,
+      "source_format": "png",
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "menu_location",
+      "category": "Existing menu",
+      "path": "app/src/main/res/drawable-nodpi/menu_location.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 269178,
+      "sha256": "ce6c38de84982031f383a71f6c9d49390b381792a877af7bb10eeb96de7d612b",
+      "rgba_sha256": "8fbb7bac9802ceb06c3b486885085255c6a9f95336fb5379f85fc5fad9b5084c",
+      "alpha_bounds": [
+        97,
+        23,
+        1058,
+        1180
+      ],
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2214:45",
+        "node_name": "menu_location",
+        "collection_id": "2101:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2214-45"
+      },
+      "source_method": "existing_project_resource",
+      "source_sha256": "aede829f583f81d059b41c8bb568987d050e310cfc8dc183775e868f864b1c9d",
+      "source_bytes": 576282,
+      "source_format": "png",
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "menu_ryzhik",
+      "category": "Existing menu",
+      "path": "app/src/main/res/drawable-nodpi/menu_ryzhik.webp",
+      "format": "webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 303282,
+      "sha256": "101ec2be7b5f3773aac460fcc0b63b36bf42f38316d93a7de39e878510ad02fb",
+      "rgba_sha256": "1e4766574166891283762e359036f3d30b604a12cada5c1b574c0a7a01d6b72f",
+      "alpha_bounds": [
+        297,
+        112,
+        864,
+        911
+      ],
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2101:30",
+        "node_name": "menu_ryzhik",
+        "collection_id": "2101:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2101-30"
+      },
+      "source_method": "existing_project_resource",
+      "source_sha256": "3dc7267a184622c36586c8dfd51ecd3d3ad5381d5f5e7a27b29ebf5600715df2",
+      "source_bytes": 451325,
+      "source_format": "png",
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "menu_tasks",
+      "category": "Existing menu",
+      "path": "app/src/main/res/drawable-nodpi/menu_tasks.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 670192,
+      "sha256": "e1f40b412aa82561bd83a23a9ef31ff26c7c9237d543ea46f0f409ab5581dd48",
+      "rgba_sha256": "df3977fda1770c7bb425b5a3746458e7d4e23aa47cd27987edfd1809f5a15590",
+      "alpha_bounds": [
+        0,
+        21,
+        1236,
+        1254
+      ],
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2214:36",
+        "node_name": "menu_tasks",
+        "collection_id": "2101:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2214-36"
+      },
+      "source_method": "existing_project_resource",
+      "source_sha256": "e400d7e9b2ae4adf33fd1e67ab493cd844952818de651d8c798a80f601f363e3",
+      "source_bytes": 1319912,
+      "source_format": "png",
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "menu_village",
+      "category": "Existing menu",
+      "path": "app/src/main/res/drawable-nodpi/menu_village.webp",
+      "format": "webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 2268534,
+      "sha256": "388bd1c32ec9347ad70751b1f44d95639e909b93c81dbef31609454ca7ec7d27",
+      "rgba_sha256": "085fe3bdc10f8fa4bb0965a5545c78766a9e16e9366055ab7951b4df538aedd4",
+      "alpha_bounds": [
+        0,
+        0,
+        941,
+        1672
+      ],
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2186:732",
+        "node_name": "menu_village",
+        "collection_id": "2101:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2186-732"
+      },
+      "source_method": "existing_project_resource",
+      "source_sha256": "d851946ba7678ebdc94215d421c4a12d60ada1dae9e8fd69e957c892b158f2f0",
+      "source_bytes": 3364085,
+      "source_format": "png",
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "menu_chevron",
+      "category": "Vector icons",
+      "format": "vector_xml",
+      "path": "app/src/main/res/drawable/menu_chevron.xml",
+      "bytes": 497,
+      "sha256": "6038693779bad9ccdf930ad1af5d88d3213eb0a60fa467c2c20a8e2c42789b1a",
+      "width": 14.0,
+      "height": 14.0,
+      "source_path": "docs/design/menu_chevron.svg",
+      "source_sha256": "748d02b55a6b65bdd3bd500ec5858300fa63c30491e1e5df698a3b9cbd5454ab",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2101:2",
+        "node_name": "menu_chevron",
+        "collection_id": "2101:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2101-2"
+      },
+      "source_method": "existing_svg_to_vector"
+    },
+    {
+      "resource": "menu_star",
+      "category": "Vector icons",
+      "format": "vector_xml",
+      "path": "app/src/main/res/drawable/menu_star.xml",
+      "bytes": 441,
+      "sha256": "75728e45455b9bf5690aa06ea8f4f22c9bbec4a85c3adac96c72509dfe3c6673",
+      "width": 7.0,
+      "height": 7.0,
+      "source_path": "docs/design/menu_star.svg",
+      "source_sha256": "997ce7bf294dcb08947dcb89d00148e22d95dda52560b52fef88040215a65830",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2101:2",
+        "node_name": "menu_star",
+        "collection_id": "2101:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2101-2"
+      },
+      "source_method": "existing_svg_to_vector"
+    },
+    {
+      "resource": "nunito_extrabold",
+      "category": "Fonts",
+      "format": "ttf",
+      "path": "app/src/main/res/font/nunito_extrabold.ttf",
+      "bytes": 125416,
+      "sha256": "c5776505c7b3df3c3ca763477b795d6bbc6517760bede0462ab77d1fb44954a6",
+      "license_path": "app/src/main/assets/licenses/nunito-ofl.txt",
+      "source_method": "existing_google_fonts_resource"
+    },
+    {
+      "resource": "rubik_extrabold",
+      "category": "Fonts",
+      "format": "ttf",
+      "path": "app/src/main/res/font/rubik_extrabold.ttf",
+      "bytes": 175524,
+      "sha256": "8933b99a948ee11f489bd38fe470f960bc76c624e15254a22a97c50a1d28e668",
+      "license_path": "app/src/main/assets/licenses/rubik-ofl.txt",
+      "source_method": "existing_google_fonts_resource"
+    }
+  ],
+  "missing": []
+}

@@ -58,3 +58,29 @@ navigation keys and keep UI callbacks separate from navigation ownership.
 - Documentation-only changes require checking local links and consistency;
   they do not require an Android build.
 
+## Assets
+
+Before adding or using artwork, read the [Android artwork guide](docs/design/assets/README.md)
+and search the [asset catalog](docs/design/assets/catalog.md) and
+[manifest](docs/design/assets/manifest.json). Reuse bundled resources first.
+The catalog distinguishes imported artwork from exports still unavailable.
+Resource paths below are under `app/src/main/` (for example,
+`app/src/main/res/drawable-nodpi/`).
+
+- Keep raster art as lossless exact WebP in `res/drawable-nodpi`, simple vectors
+  as XML in `res/drawable`, fonts in `res/font`, and launcher icons in `res/mipmap-*`.
+  Retain SVG originals and provenance in `docs/design`, and font licenses in
+  `app/src/main/assets/licenses`.
+- Preserve full canvas dimensions, transparent margins and shared coordinates
+  when importing characters or equipment. Set image bounds explicitly in
+  Compose. Preserve existing `menu_*` resource names and use drawable aliases
+  for verified exact duplicates.
+- Use the guide's semantic prefixes for new resources and update the manifest
+  and catalog with source node links, dimensions, hashes and conversion details.
+  Do not infer gameplay rules from asset names or silently substitute missing art.
+
+Development prompt: "Read the artwork guide and search the catalog before
+implementing this UI. Reuse existing Android resources; add missing artwork in
+the documented locations and update its provenance. Preserve full canvas
+alignment, report unavailable exports, and follow the state-machine
+specification for all behavior."

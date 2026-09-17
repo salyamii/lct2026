@@ -2,7 +2,7 @@
 
 Source: [«Питомец Дизайн», node 2101:2](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2101-2).
 
-The artwork below was exported from the supplied Figma design on 2026-09-17. It is bundled locally, so the menu does not depend on Figma or a network connection at runtime. Raster artwork preserves the original pixels, transparency, and canvas dimensions. The fox image deliberately includes the transparent margins from the design; the Compose layout reproduces the original image placement.
+The artwork below was exported from the supplied Figma design on 2026-09-17. It is bundled locally, so the menu does not depend on Figma or a network connection at runtime. Raster artwork is stored as lossless WebP, preserving the original pixels, transparency, and canvas dimensions. The fox image deliberately includes the transparent margins from the design; the Compose layout reproduces the original image placement. See the [Android artwork guide and catalog](assets/README.md) for resource conventions and additional artwork.
 
 | Android resource | Source dimensions | Figma asset |
 | --- | --- | --- |
@@ -17,7 +17,7 @@ The artwork below was exported from the supplied Figma design on 2026-09-17. It 
 | `drawable/menu_star` | 7 × 7 | [SVG](https://www.figma.com/api/mcp/asset/77a46b19-8b20-4500-8240-ed8eefa7fcee.svg) |
 | `drawable/menu_ground_shadow` | 151 × 54 | [SVG](https://www.figma.com/api/mcp/asset/356c72a0-baf9-4eec-b0fe-1f74ae8b0c5c.svg) |
 
-The chevron and star are Android vector drawables with the exact SVG path, colors, opacity, and stroke settings. Their original SVGs are retained here. The shadow uses an SVG Gaussian blur unsupported by Android vector drawables; it is rendered directly from the original SVG to a transparent 604 × 216 PNG (4×) using librsvg through Sharp. All PNG resources are stored in `drawable-nodpi` to keep sizing under Compose's control.
+The chevron and star are Android vector drawables with the exact SVG path, colors, opacity, and stroke settings. Their original SVGs are retained here. The shadow uses an SVG Gaussian blur unsupported by Android vector drawables; it was rendered directly from the original SVG to a transparent 604 × 216 PNG (4×) using librsvg through Sharp, then converted to lossless WebP. All raster resources are stored as WebP in `drawable-nodpi` to keep sizing under Compose's control. Conversion preserves the full decoded RGBA pixels and dimensions; the original PNG/SVG export links above remain source references.
 
 ## Typography
 
