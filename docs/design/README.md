@@ -32,10 +32,10 @@ Both fonts use the SIL Open Font License 1.1. Their complete copyright and licen
 
 ## Compose implementation
 
-`app/src/main/java/ru/nksk/lctapp/feature/menu/ui/MainMenuScreen.kt` implements the menu with native Compose layout, text and controls. All seven clickable entries are placeholders: the activity uses the default no-op action handler, so tapping only shows press feedback. There are no destination screens, dialogs, game-state changes or network requests.
+`app/src/main/java/ru/nksk/lctapp/feature/menu/ui/MainMenuScreen.kt` implements the menu with native Compose layout, text and controls. All seven clickable entries now use Navigation 3 to open six typed feature destinations (both goal controls open the same destination). Feature screens currently show placeholders with Back support; navigation does not change game state. See [app navigation](../navigation.md) for architecture and extension instructions.
 
 The background fills the window while controls respect Android system bars and display cutouts. Native Android status and navigation bars replace the iOS mockup chrome. Landscape uses a side-by-side layout; portrait keeps the fox between the HUD and bottom actions. The bundled fonts support system font scaling. The village pill deliberately uses its visible bounds for both press feedback and hit testing; its surrounding layout space is not interactive. Compose previews cover 390×844, a compact phone, landscape and larger text. Blur uses platform rendering on Android 12+; older versions retain translucent panels.
 
 The starter dependencies require compile SDK 37, so compileSdk was raised from 36.1 to 37.0; targetSdk 36 and minSdk 24 are unchanged.
 
-Validation: debug APK build and lint (no errors), plus emulator instrumentation tests covering menu callbacks, placeholder behavior, village hit bounds, and compact/landscape layouts at 150% text. Native rendering was visually checked on a Pixel 10 Pro emulator running API 36.
+Menu validation: debug APK build and lint (no errors), plus emulator instrumentation tests covering menu callbacks, village hit bounds, and compact/landscape layouts at 150% text. Native rendering was visually checked on a Pixel 10 Pro emulator running API 36. Navigation behavior has separate instrumentation coverage described in the navigation guide.

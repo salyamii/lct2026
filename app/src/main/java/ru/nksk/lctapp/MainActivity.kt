@@ -7,9 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import ru.nksk.lctapp.feature.menu.ui.MainMenuScreen
-import ru.nksk.lctapp.feature.menu.ui.MainMenuDemoState
-import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
+import ru.nksk.lctapp.app.LctApp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,9 +20,7 @@ class MainActivity : ComponentActivity() {
             window.isNavigationBarContrastEnforced = false
         }
         setContent {
-            LCTAppTheme {
-                MainMenuScreen(state = MainMenuDemoState, onAction = {})
-            }
+            LctApp()
         }
     }
 }

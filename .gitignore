@@ -16,6 +16,7 @@
 local.properties
 /docs/*
 !/docs/design/
+!/docs/navigation.md
 .pdf
 /*.pdf
 /tmp/*
