@@ -34,6 +34,11 @@
       "id": "89:185",
       "name": "Рыжик-старец · финальный этап · 3 colors",
       "expected_assets": 55
+    },
+    {
+      "id": "2144:9",
+      "name": "Локации",
+      "expected_assets": 14
     }
   ],
   "scope": "Existing menu/font assets and the imported artwork collections listed in this manifest.",
@@ -8433,6 +8438,427 @@
       "source_format": "png",
       "lossless_rgba_verified": true,
       "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_tired_dark_russet.webp"
+    },
+    {
+      "resource": "location_observatory",
+      "category": "Locations",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2144:27",
+        "node_name": "Обсерватория",
+        "collection_id": "2144:9",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-27"
+      },
+      "source_method": "figma_original_image_fill",
+      "figma_image_sha1": "ef98e712fe1ec0b7a466dd3382c271cafc037f6b",
+      "format": "webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 1902086,
+      "sha256": "076efda723d4a1d821f4a691a0cd451b267a1b47deeabcf2581658cadf406fe1",
+      "rgba_sha256": "12e682058eae4758766a7b5ca3bb950c3d8ac6dfbdf8f1aaf2a93cfcc4e7febf",
+      "alpha_bounds": [
+        0,
+        0,
+        941,
+        1672
+      ],
+      "source_sha256": "26d32d49e30b3e1e3f395d06aaabca0eff6fac5c1b219f6282cbf4c1a937c990",
+      "source_bytes": 2922714,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/location_observatory.webp"
+    },
+    {
+      "resource": "location_trail",
+      "category": "Locations",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2144:37",
+        "node_name": "Тропа",
+        "collection_id": "2144:9",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-37"
+      },
+      "source_method": "figma_original_image_fill",
+      "figma_image_sha1": "019ff8a422737014dd76283675aabd80191ecd49",
+      "format": "webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 2106088,
+      "sha256": "90419c5a8eb50521e4dea9cf60d47312161bccb75c45d11b5ffb6f4566c1da3e",
+      "rgba_sha256": "879f7e159eaa2f860eb9006fe8bcb1419d7d26a6c2e408b741681e6b307b6ec8",
+      "alpha_bounds": [
+        0,
+        0,
+        941,
+        1672
+      ],
+      "source_sha256": "b88c4c031c4b0079aef1676f7ce887d85d4c5cc2b8b43ce9018dacbdde350513",
+      "source_bytes": 3084710,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/location_trail.webp"
+    },
+    {
+      "resource": "location_pier",
+      "category": "Locations",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2144:44",
+        "node_name": "Причал",
+        "collection_id": "2144:9",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-44"
+      },
+      "source_method": "figma_original_image_fill",
+      "figma_image_sha1": "d56fc99361c8f0750f6d3cf5ede89876c7a20be3",
+      "format": "webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 1923282,
+      "sha256": "a36e5077079079ea72fbfbc37a18cced81fbd5c69740bff55fd7f8634cdc1f72",
+      "rgba_sha256": "0063fa5e3c7dfe4644fa992ff3bcefeeae45b01ac1f1d91fb2564d29126f3ba8",
+      "alpha_bounds": [
+        0,
+        0,
+        941,
+        1672
+      ],
+      "source_sha256": "7c4411c7f09a82df8feb81cd5fe8dcd9a86a1f17c0b8a5ac29a5049131518d3c",
+      "source_bytes": 2959518,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/location_pier.webp"
+    },
+    {
+      "resource": "location_pier_day",
+      "category": "Locations",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2144:74",
+        "node_name": "Причал день",
+        "collection_id": "2144:9",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-74"
+      },
+      "source_method": "figma_original_image_fill",
+      "figma_image_sha1": "5fd718be2a9652008542dc4a581e9e856d2d53cf",
+      "format": "webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 2209844,
+      "sha256": "7a9ba8752074f3f6c61e9a029a81c11a4c9cc51c661c3272f6d68c7aa8e246fd",
+      "rgba_sha256": "9b190281cbce77a76edd699790f9180b1c8c2c30c92efcb310b250a69609b07b",
+      "alpha_bounds": [
+        0,
+        0,
+        941,
+        1672
+      ],
+      "source_sha256": "2da677f09a230e69f1162faf1321b9ad2e9b5e9e1d0f259385b790bddb8a6737",
+      "source_bytes": 3314199,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/location_pier_day.webp"
+    },
+    {
+      "resource": "location_hill",
+      "category": "Locations",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2144:47",
+        "node_name": "Холм",
+        "collection_id": "2144:9",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-47"
+      },
+      "source_method": "figma_original_image_fill",
+      "figma_image_sha1": "c013e5e1991ec4c462190d42eefef42620fc1306",
+      "format": "webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 2024832,
+      "sha256": "cdccebd6871db7161b0dce7834828f60e5cf124f5963243cee0e25d94e689bf5",
+      "rgba_sha256": "e9bd1131459bdd772d095834c7639226b9f710ea92c7cfa1565a1a35a2362f36",
+      "alpha_bounds": [
+        0,
+        0,
+        941,
+        1672
+      ],
+      "source_sha256": "fdc4f4c3afea66e0b16986d775ded0906e9ff637b65ee5a1dfd8f3b98805c5e5",
+      "source_bytes": 2974640,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/location_hill.webp"
+    },
+    {
+      "resource": "location_hill_day",
+      "category": "Locations",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2144:77",
+        "node_name": "День",
+        "collection_id": "2144:9",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-77"
+      },
+      "source_method": "figma_original_image_fill",
+      "figma_image_sha1": "f2585b99a32374e7f3bd547d8d957575dd5482e2",
+      "format": "webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 2365652,
+      "sha256": "bb2fdefd29ff1b1462e9303da295e8e45bbfa0748285dff8e296f750572854ed",
+      "rgba_sha256": "32132c10b532dd07a31dc98fee59bed5d20ba1709d896037b7a7923857077d34",
+      "alpha_bounds": [
+        0,
+        0,
+        941,
+        1672
+      ],
+      "source_sha256": "972188d2ed6d358ee153cd6639e3d33259abe3df001158180856edfccf97509e",
+      "source_bytes": 3408921,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/location_hill_day.webp"
+    },
+    {
+      "resource": "location_gates",
+      "category": "Locations",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2144:89",
+        "node_name": "Ворота",
+        "collection_id": "2144:9",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-89"
+      },
+      "source_method": "figma_original_image_fill",
+      "figma_image_sha1": "54b83a7f96a51caea35f5bf94c19662677150146",
+      "format": "webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 2191888,
+      "sha256": "4d946bb899f3b68d4aaff57d7b77d276db71f9943713028612c0abd69f77d0be",
+      "rgba_sha256": "91efe217f8a7041016999edcb1302f844132a2e15883dfbf81fe7e7e923c2ec6",
+      "alpha_bounds": [
+        0,
+        0,
+        941,
+        1672
+      ],
+      "source_sha256": "f2a20e430d033c39264a0046db133f43e29f74aaff6fa80e19317e56d9f62995",
+      "source_bytes": 3225854,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/location_gates.webp"
+    },
+    {
+      "resource": "location_fair",
+      "category": "Locations",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2144:30",
+        "node_name": "Ярмарка",
+        "collection_id": "2144:9",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-30"
+      },
+      "source_method": "figma_original_image_fill",
+      "figma_image_sha1": "32108f75fe01ee05ddc2a7f5f38ae823463a3127",
+      "format": "webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 2085008,
+      "sha256": "6bd51c54facbe820753542097d1cf9ba417790c79e4b2fe86210bfb3b7050fc0",
+      "rgba_sha256": "ff201c7b0c2aed5d5dc35a90f677a40703940770eb2fab4b48d254c49f5dacc5",
+      "alpha_bounds": [
+        0,
+        0,
+        941,
+        1672
+      ],
+      "source_sha256": "d272354bac56da061cd00f3ad7ee4064f6de1478bb558fcc15d0575d1182e5ae",
+      "source_bytes": 3079095,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/location_fair.webp"
+    },
+    {
+      "resource": "location_fair_day",
+      "category": "Locations",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2144:80",
+        "node_name": "Ярмарка день",
+        "collection_id": "2144:9",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-80"
+      },
+      "source_method": "figma_original_image_fill",
+      "figma_image_sha1": "961186afc5b1247a366a7ef919999420d2f5618b",
+      "format": "webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 2319492,
+      "sha256": "9c8cd094112493c72b9a7de72bc443dcfcf69040087b8f04a91830530f7521a8",
+      "rgba_sha256": "df24d81d79c5f51eeeeddae64e233192d87da722c03ab6db94431c6503203494",
+      "alpha_bounds": [
+        0,
+        0,
+        941,
+        1672
+      ],
+      "source_sha256": "e1d913d10d7db0fe6b7e8fcfcb008e050d6f9f17e6fd21ac09ef6bc9123e615b",
+      "source_bytes": 3374638,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/location_fair_day.webp"
+    },
+    {
+      "resource": "location_city",
+      "category": "Locations",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2144:68",
+        "node_name": "Город",
+        "collection_id": "2144:9",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-68"
+      },
+      "source_method": "figma_original_image_fill",
+      "figma_image_sha1": "44df5e2a355761d90ff13274bd23b3d2bbe52ffb",
+      "format": "webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 2268534,
+      "sha256": "388bd1c32ec9347ad70751b1f44d95639e909b93c81dbef31609454ca7ec7d27",
+      "rgba_sha256": "085fe3bdc10f8fa4bb0965a5545c78766a9e16e9366055ab7951b4df538aedd4",
+      "alpha_bounds": [
+        0,
+        0,
+        941,
+        1672
+      ],
+      "source_sha256": "d851946ba7678ebdc94215d421c4a12d60ada1dae9e8fd69e957c892b158f2f0",
+      "source_bytes": 3364085,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "alias_of": "menu_village",
+      "path": "app/src/main/res/drawable-nodpi/menu_village.webp"
+    },
+    {
+      "resource": "location_trail_day",
+      "category": "Locations",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2144:71",
+        "node_name": "Тропа день",
+        "collection_id": "2144:9",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-71"
+      },
+      "source_method": "figma_original_image_fill",
+      "figma_image_sha1": "f0efc6ca4aede2f34d1d158924466ef32aa2e7f8",
+      "format": "webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 2576988,
+      "sha256": "a84f0293b44e2f6407836dd21652f2dbb2610d4578a29e9ffbaa982f53501d59",
+      "rgba_sha256": "b3f9e041bdcf136853e5d0a9c7e8422e4199c29a87f50e7315d339dd8cd631c8",
+      "alpha_bounds": [
+        0,
+        0,
+        941,
+        1672
+      ],
+      "source_sha256": "307574edda88150cc46a50499623e9c386170230798196fa67332f78e3b0e76f",
+      "source_bytes": 3579733,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/location_trail_day.webp"
+    },
+    {
+      "resource": "location_windmill",
+      "category": "Locations",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2144:86",
+        "node_name": "Мельница",
+        "collection_id": "2144:9",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-86"
+      },
+      "source_method": "figma_original_image_fill",
+      "figma_image_sha1": "0fa3467ab8396e152ddc17e56a4979c085b8ddeb",
+      "format": "webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 2237802,
+      "sha256": "df39c28495317d115c9e65a5c7d63b6f0be4a418a202a7e467182958dfce16fb",
+      "rgba_sha256": "36fc6c7a73646cf4220d772708595a345abc45dffb6940dead3e299f2fb17edc",
+      "alpha_bounds": [
+        0,
+        0,
+        941,
+        1672
+      ],
+      "source_sha256": "f9b0017638c8e4eca13d597888b6fb3b0bb61cdaea023bd357eb81af7ba393c3",
+      "source_bytes": 3282234,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/location_windmill.webp"
+    },
+    {
+      "resource": "location_workshop",
+      "category": "Locations",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2144:33",
+        "node_name": "Мастерская",
+        "collection_id": "2144:9",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-33"
+      },
+      "source_method": "figma_original_image_fill",
+      "figma_image_sha1": "142813a32739ee69810762ab1caa17cac30481a1",
+      "format": "webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 1874322,
+      "sha256": "03f7d499ad77d824f08249dd0e560f8df7a67266daa0c90aec6eeb04f861f307",
+      "rgba_sha256": "3c3cb0feeef5044ec3d680a3ef34c33031b02b656f84bf9edd5ddfedf2141c65",
+      "alpha_bounds": [
+        0,
+        0,
+        941,
+        1672
+      ],
+      "source_sha256": "31ba5a26125b9963cf4f05b2a004fdfc5421cf2f894578c054f3fd84e407889c",
+      "source_bytes": 2890145,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/location_workshop.webp"
+    },
+    {
+      "resource": "location_workshop_day",
+      "category": "Locations",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2144:83",
+        "node_name": "Мастерская день",
+        "collection_id": "2144:9",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-83"
+      },
+      "source_method": "figma_original_image_fill",
+      "figma_image_sha1": "cb786081b2e0b09555cf235e6c7bf884ceaaf633",
+      "format": "webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 2131500,
+      "sha256": "302e75e385c8b46ca4511299e8fb7c6915964f7de31a834a8acd9eecb3c6f467",
+      "rgba_sha256": "81fd734e1fb1aa0b1abe5c40097197096fed8fc411b128841f17bc455739e359",
+      "alpha_bounds": [
+        0,
+        0,
+        941,
+        1672
+      ],
+      "source_sha256": "37036fc5469f1ac9b5f1135c1a232d0ed1f6b9673191b5b0d029a81a71527aac",
+      "source_bytes": 3203202,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/location_workshop_day.webp"
     },
     {
       "resource": "menu_chevron",

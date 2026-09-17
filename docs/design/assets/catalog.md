@@ -2,7 +2,7 @@
 
 See [the guide](README.md) for storage and usage rules and [the manifest](manifest.json) for checksums and export details.
 
-252 logical assets; 2 exact drawable aliases; 0 unavailable exports.
+266 logical assets; 3 exact drawable aliases; 0 unavailable exports.
 
 Locations retain their original 941 × 1672 pixels. Character and equipment layers retain a 512 × 512 canvas. Names are artwork labels, not gameplay rules.
 
@@ -288,6 +288,25 @@ Locations retain their original 941 × 1672 pixels. Character and equipment laye
 | `R.drawable.ryzhik_senior_state_tired_sand` | 512 × 512 | [ryzhik_senior_state_tired_sand.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_senior_state_tired_sand.webp) | [94:91](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-91) |
 | `R.drawable.ryzhik_senior_state_thoughtful_dark_russet` | 512 × 512 | [ryzhik_senior_state_thoughtful_dark_russet.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_senior_state_thoughtful_dark_russet.webp) | [94:95](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-95) |
 | `R.drawable.ryzhik_senior_state_tired_dark_russet` | 512 × 512 | [ryzhik_senior_state_tired_dark_russet.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_senior_state_tired_dark_russet.webp) | [94:99](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=94-99) |
+
+## Locations
+
+| Android resource | Canvas | File / canonical asset | Figma source |
+| --- | --- | --- | --- |
+| `R.drawable.location_observatory` | 941 × 1672 | [location_observatory.webp](../../../app/src/main/res/drawable-nodpi/location_observatory.webp) | [2144:27](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-27) |
+| `R.drawable.location_trail` | 941 × 1672 | [location_trail.webp](../../../app/src/main/res/drawable-nodpi/location_trail.webp) | [2144:37](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-37) |
+| `R.drawable.location_pier` | 941 × 1672 | [location_pier.webp](../../../app/src/main/res/drawable-nodpi/location_pier.webp) | [2144:44](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-44) |
+| `R.drawable.location_pier_day` | 941 × 1672 | [location_pier_day.webp](../../../app/src/main/res/drawable-nodpi/location_pier_day.webp) | [2144:74](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-74) |
+| `R.drawable.location_hill` | 941 × 1672 | [location_hill.webp](../../../app/src/main/res/drawable-nodpi/location_hill.webp) | [2144:47](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-47) |
+| `R.drawable.location_hill_day` | 941 × 1672 | [location_hill_day.webp](../../../app/src/main/res/drawable-nodpi/location_hill_day.webp) | [2144:77](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-77) |
+| `R.drawable.location_gates` | 941 × 1672 | [location_gates.webp](../../../app/src/main/res/drawable-nodpi/location_gates.webp) | [2144:89](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-89) |
+| `R.drawable.location_fair` | 941 × 1672 | [location_fair.webp](../../../app/src/main/res/drawable-nodpi/location_fair.webp) | [2144:30](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-30) |
+| `R.drawable.location_fair_day` | 941 × 1672 | [location_fair_day.webp](../../../app/src/main/res/drawable-nodpi/location_fair_day.webp) | [2144:80](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-80) |
+| `R.drawable.location_city` | 941 × 1672 | [menu_village](../../../app/src/main/res/drawable-nodpi/menu_village.webp) | [2144:68](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-68) |
+| `R.drawable.location_trail_day` | 941 × 1672 | [location_trail_day.webp](../../../app/src/main/res/drawable-nodpi/location_trail_day.webp) | [2144:71](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-71) |
+| `R.drawable.location_windmill` | 941 × 1672 | [location_windmill.webp](../../../app/src/main/res/drawable-nodpi/location_windmill.webp) | [2144:86](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-86) |
+| `R.drawable.location_workshop` | 941 × 1672 | [location_workshop.webp](../../../app/src/main/res/drawable-nodpi/location_workshop.webp) | [2144:33](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-33) |
+| `R.drawable.location_workshop_day` | 941 × 1672 | [location_workshop_day.webp](../../../app/src/main/res/drawable-nodpi/location_workshop_day.webp) | [2144:83](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-83) |
 
 ## Vector icons
 
