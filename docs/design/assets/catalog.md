@@ -2,7 +2,7 @@
 
 See [the guide](README.md) for storage and usage rules and [the manifest](manifest.json) for checksums and export details.
 
-266 logical assets; 3 exact drawable aliases; 0 unavailable exports.
+280 logical assets; 3 exact drawable aliases; 0 unavailable exports.
 
 Locations retain their original 941 × 1672 pixels. Character and equipment layers retain a 512 × 512 canvas. Names are artwork labels, not gameplay rules.
 
@@ -307,6 +307,25 @@ Locations retain their original 941 × 1672 pixels. Character and equipment laye
 | `R.drawable.location_windmill` | 941 × 1672 | [location_windmill.webp](../../../app/src/main/res/drawable-nodpi/location_windmill.webp) | [2144:86](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-86) |
 | `R.drawable.location_workshop` | 941 × 1672 | [location_workshop.webp](../../../app/src/main/res/drawable-nodpi/location_workshop.webp) | [2144:33](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-33) |
 | `R.drawable.location_workshop_day` | 941 × 1672 | [location_workshop_day.webp](../../../app/src/main/res/drawable-nodpi/location_workshop_day.webp) | [2144:83](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-83) |
+
+## NPCs and event art
+
+| Android resource | Canvas | File / canonical asset | Figma source |
+| --- | --- | --- | --- |
+| `R.drawable.npc_tiko_body` | 1024 × 1024 | [npc_tiko_body.webp](../../../app/src/main/res/drawable-nodpi/npc_tiko_body.webp) | [2163:42](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2163-42) |
+| `R.drawable.npc_luna_body` | 1024 × 1024 | [npc_luna_body.webp](../../../app/src/main/res/drawable-nodpi/npc_luna_body.webp) | [2165:42](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2165-42) |
+| `R.drawable.npc_caretaker_cleaning_lens` | 1086 × 1448 | [npc_caretaker_cleaning_lens.webp](../../../app/src/main/res/drawable-nodpi/npc_caretaker_cleaning_lens.webp) | [2238:141](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2238-141) |
+| `R.drawable.event_star_plate_1` | 1254 × 1254 | [event_star_plate_1.webp](../../../app/src/main/res/drawable-nodpi/event_star_plate_1.webp) | [2163:123](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2163-123) |
+| `R.drawable.event_signal_glow_3` | 683 × 693 | [event_signal_glow_3.webp](../../../app/src/main/res/drawable-nodpi/event_signal_glow_3.webp) | [2173:9](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2173-9) |
+| `R.drawable.npc_luna_portrait` | 1024 × 1024 | [npc_luna_portrait.webp](../../../app/src/main/res/drawable-nodpi/npc_luna_portrait.webp) | [2219:19](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2219-19) |
+| `R.drawable.npc_tiko_portrait` | 1024 × 1024 | [npc_tiko_portrait.webp](../../../app/src/main/res/drawable-nodpi/npc_tiko_portrait.webp) | [2219:28](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2219-28) |
+| `R.drawable.npc_caretaker_neutral` | 1086 × 1448 | [npc_caretaker_neutral.webp](../../../app/src/main/res/drawable-nodpi/npc_caretaker_neutral.webp) | [2140:6](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2140-6) |
+| `R.drawable.npc_caretaker_explaining` | 1086 × 1448 | [npc_caretaker_explaining.webp](../../../app/src/main/res/drawable-nodpi/npc_caretaker_explaining.webp) | [2140:10](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2140-10) |
+| `R.drawable.npc_caretaker_binoculars` | 1000 × 1300 | [npc_caretaker_binoculars.webp](../../../app/src/main/res/drawable-nodpi/npc_caretaker_binoculars.webp) | [2140:14](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2140-14) |
+| `R.drawable.npc_carpenter_neutral` | 1254 × 1254 | [npc_carpenter_neutral.webp](../../../app/src/main/res/drawable-nodpi/npc_carpenter_neutral.webp) | [2174:153](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2174-153) |
+| `R.drawable.npc_carpenter_explaining` | 1254 × 1254 | [npc_carpenter_explaining.webp](../../../app/src/main/res/drawable-nodpi/npc_carpenter_explaining.webp) | [2174:157](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2174-157) |
+| `R.drawable.npc_carpenter_pointing` | 1294 × 1300 | [npc_carpenter_pointing.webp](../../../app/src/main/res/drawable-nodpi/npc_carpenter_pointing.webp) | [2174:161](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2174-161) |
+| `R.drawable.event_broken_wheel` | 1254 × 1254 | [event_broken_wheel.webp](../../../app/src/main/res/drawable-nodpi/event_broken_wheel.webp) | [2164:86](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2164-86) |
 
 ## Vector icons
 

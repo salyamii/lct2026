@@ -41,7 +41,7 @@
       "expected_assets": 14
     }
   ],
-  "scope": "Existing menu/font assets and the imported artwork collections listed in this manifest.",
+  "scope": "Five character/equipment packs (240 export layers), all 14 locations, additional NPC/event art, and existing menu/font assets. Design mockup screens and hidden RAW work areas are excluded.",
   "assets": [
     {
       "resource": "menu_coin",
@@ -8859,6 +8859,440 @@
       "source_format": "png",
       "lossless_rgba_verified": true,
       "path": "app/src/main/res/drawable-nodpi/location_workshop_day.webp"
+    },
+    {
+      "resource": "npc_tiko_body",
+      "category": "NPCs and event art",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2163:42",
+        "node_name": "Tiko · existing asset",
+        "collection_id": "2162:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2163-42"
+      },
+      "source_method": "figma_get_design_context_original_image_bytes",
+      "source_notes": "Exact original Figma image bytes; SHA-1 matches the recorded image fill hash. Full source canvas retained; no card labels, clipping, preview opacity, or corner radius baked in.",
+      "figma_image_sha1": "b74c82e8a4854d4295e495e26d40f5d87da01db0",
+      "format": "webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 301532,
+      "sha256": "d0e55000c43b21a46b441b3631f002ae44178854462823e0983365c56d1e5aa9",
+      "rgba_sha256": "5440f0833e2c71d560ac0ada3d5b28f6f00ab6f8d60ff08d6640ebac7a7334d0",
+      "alpha_bounds": [
+        225,
+        140,
+        914,
+        905
+      ],
+      "source_sha256": "bf2b4f8a807f59d79cd2294eab35ea95ae70de692b5c52984a0e2a358ebf67e8",
+      "source_bytes": 439706,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/npc_tiko_body.webp"
+    },
+    {
+      "resource": "npc_luna_body",
+      "category": "NPCs and event art",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2165:42",
+        "node_name": "Luna · existing asset",
+        "collection_id": "2162:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2165-42"
+      },
+      "source_method": "figma_get_design_context_original_image_bytes",
+      "source_notes": "Exact original Figma image bytes; SHA-1 matches the recorded image fill hash. Full source canvas retained; no card labels, clipping, preview opacity, or corner radius baked in.",
+      "figma_image_sha1": "4e644a3c9d4b693908dbdb029b54bdda4d1d88ef",
+      "format": "webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 331848,
+      "sha256": "6c005b1e55babffc0fe16b721a829b18eb8d57d1f34b667100830f9a3ab72bef",
+      "rgba_sha256": "08892205f27c11c9ce0c58eda629238292f4a3d00931b6d8e7859298935ae0b5",
+      "alpha_bounds": [
+        253,
+        174,
+        764,
+        912
+      ],
+      "source_sha256": "eb63ba9cae782d89c8270b0038e5f6f54b4d5ef6a13b60d45b872183b6fe14d1",
+      "source_bytes": 521117,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/npc_luna_body.webp"
+    },
+    {
+      "resource": "npc_caretaker_cleaning_lens",
+      "category": "NPCs and event art",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2238:141",
+        "node_name": "Смотритель · чистит линзу",
+        "collection_id": "2162:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2238-141"
+      },
+      "source_method": "figma_get_design_context_original_image_bytes",
+      "source_notes": "Exact original Figma image bytes; SHA-1 matches the recorded image fill hash. Full source canvas retained; no card labels, clipping, preview opacity, or corner radius baked in.",
+      "figma_image_sha1": "1b5709289a1d56422176adaf61982807747d2527",
+      "format": "webp",
+      "width": 1086,
+      "height": 1448,
+      "bytes": 1081362,
+      "sha256": "36c66553803b53bbad6463c0b92791a3ab65065a0b40ff61eb6779fe6d0512a6",
+      "rgba_sha256": "3803e7d08c5a83bccb870b8d9f67a271e498744ba15d927a32f6890bba1b1f0e",
+      "alpha_bounds": [
+        0,
+        0,
+        1066,
+        1430
+      ],
+      "source_sha256": "82faff563009a1769e919256efb738cdee1675d5acfbead5ca1eda4f90a38343",
+      "source_bytes": 1776273,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/npc_caretaker_cleaning_lens.webp"
+    },
+    {
+      "resource": "event_star_plate_1",
+      "category": "NPCs and event art",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2163:123",
+        "node_name": "Star plate 1",
+        "collection_id": "2162:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2163-123"
+      },
+      "source_method": "figma_get_design_context_original_image_bytes",
+      "source_notes": "Exact original Figma image bytes; SHA-1 matches the recorded image fill hash. Full source canvas retained; no card labels, clipping, preview opacity, or corner radius baked in.",
+      "figma_image_sha1": "c872e388202e25802aeaf1b6361abcc393b29711",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1327020,
+      "sha256": "b4641271726c3e079dfe75583e5b0362ffac7292e24f50b6984b4650cf93b2ac",
+      "rgba_sha256": "926ca2eb2ae7907ca7aea9d81024823e6ef61fedf400b1541a9087e48339e5a5",
+      "alpha_bounds": [
+        0,
+        0,
+        1209,
+        1204
+      ],
+      "source_sha256": "ba393c06125c296f140fbb63cdf4ad75cc0847b179131dda0bcbc80889174c79",
+      "source_bytes": 2262163,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/event_star_plate_1.webp"
+    },
+    {
+      "resource": "event_signal_glow_3",
+      "category": "NPCs and event art",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2173:9",
+        "node_name": "Signal glow 3",
+        "collection_id": "2162:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2173-9"
+      },
+      "source_method": "figma_get_design_context_isolated_node_png",
+      "source_notes": "Figma supplied an isolated transparent node PNG at approximately 2x the natural node bounds. Node rendering preserves artwork clipping/mask; bytes are not the original image fill. Downloaded without local recreation or resampling.",
+      "figma_image_sha1": "22bd76bef604d9add9101dec2f307a5c20943212",
+      "format": "webp",
+      "width": 683,
+      "height": 693,
+      "bytes": 317298,
+      "sha256": "d0f37d91f96b6d0ed6253cfa7321bc238c165a01690b688c6d8758b1c6e876f8",
+      "rgba_sha256": "d6a97a7d2e0d76df867be0687da8cf729df83ecd81c8c7393d2ebc89b07f093f",
+      "alpha_bounds": [
+        22,
+        4,
+        640,
+        685
+      ],
+      "source_sha256": "60b9505bc6cc270276a7d24332c66ab7b2e11645cbc252fa794ed9a6b96e7b03",
+      "source_bytes": 459689,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/event_signal_glow_3.webp"
+    },
+    {
+      "resource": "npc_luna_portrait",
+      "category": "NPCs and event art",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2219:19",
+        "node_name": "Portrait",
+        "collection_id": "2186:316",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2219-19"
+      },
+      "source_method": "figma_get_design_context_original_image_bytes",
+      "source_notes": "Exact original Figma image bytes; SHA-1 matches the recorded image fill hash. Full source canvas retained; no card labels, clipping, preview opacity, or corner radius baked in. Portrait has its original opaque illustrated background; source UI opacity is not baked into the raw image.",
+      "figma_image_sha1": "7d40d63ad0e209a20836aaa10f97adbbab06046e",
+      "format": "webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 937308,
+      "sha256": "e65517a479e999abdacd22e0f0038c52757286c648bdf34cf466444b1dfebd94",
+      "rgba_sha256": "7db052443985d76a8857058ec24570f1ae469d01ea2f9a34a42e68a2ee6ca15f",
+      "alpha_bounds": [
+        0,
+        0,
+        1024,
+        1024
+      ],
+      "source_sha256": "53e71a7b78915e96e675e8f4a87f3651000502461caf7264a526eebd69deebf7",
+      "source_bytes": 1271383,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/npc_luna_portrait.webp"
+    },
+    {
+      "resource": "npc_tiko_portrait",
+      "category": "NPCs and event art",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2219:28",
+        "node_name": "Portrait",
+        "collection_id": "2186:316",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2219-28"
+      },
+      "source_method": "figma_get_design_context_original_image_bytes",
+      "source_notes": "Exact original Figma image bytes; SHA-1 matches the recorded image fill hash. Full source canvas retained; no card labels, clipping, preview opacity, or corner radius baked in. Portrait has its original opaque illustrated background; source UI opacity is not baked into the raw image.",
+      "figma_image_sha1": "07c9155ef8d9806f07567b696365e3a9df616147",
+      "format": "webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 845794,
+      "sha256": "aaea0c3ea47b77eb82f2f42b0f0334ba13f99f28249e1af2077c784d0c43628b",
+      "rgba_sha256": "1bf5131342e6e286cbc99d4746bedc12f2b3fb8b951eddc02e59ad2307877326",
+      "alpha_bounds": [
+        0,
+        0,
+        1024,
+        1024
+      ],
+      "source_sha256": "36f80b12b3f2ff27050699d3ad3c0382c7f2e66d633f2f3146e0394280f63b74",
+      "source_bytes": 1133594,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/npc_tiko_portrait.webp"
+    },
+    {
+      "resource": "npc_caretaker_neutral",
+      "category": "NPCs and event art",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2140:6",
+        "node_name": "PNG asset",
+        "collection_id": "2140:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2140-6"
+      },
+      "source_method": "figma_get_design_context_original_image_bytes",
+      "source_notes": "Exact original Figma image bytes; SHA-1 matches the recorded image fill hash. Full source canvas retained; no card labels, clipping, preview opacity, or corner radius baked in.",
+      "figma_image_sha1": "5a632d6251469171a58449198e7dda2b5c81a647",
+      "format": "webp",
+      "width": 1086,
+      "height": 1448,
+      "bytes": 1013800,
+      "sha256": "006dc4488db85c00f7ac4bf3c57e2048f355068df4d668edf4a7063bad91182f",
+      "rgba_sha256": "6804054cfdd5e234b4f1f7df1b82ba5f548a65da096a0a3cc21ca485abfc0746",
+      "alpha_bounds": [
+        0,
+        17,
+        1060,
+        1430
+      ],
+      "source_sha256": "d939d370783c1bb17f83950198d1d3d3c975bd024763faed491b28925707eba6",
+      "source_bytes": 1803933,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/npc_caretaker_neutral.webp"
+    },
+    {
+      "resource": "npc_caretaker_explaining",
+      "category": "NPCs and event art",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2140:10",
+        "node_name": "PNG asset",
+        "collection_id": "2140:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2140-10"
+      },
+      "source_method": "figma_get_design_context_original_image_bytes",
+      "source_notes": "Exact original Figma image bytes; SHA-1 matches the recorded image fill hash. Full source canvas retained; no card labels, clipping, preview opacity, or corner radius baked in.",
+      "figma_image_sha1": "5fbec853991936573a304d3f8fda4d95aa28a66e",
+      "format": "webp",
+      "width": 1086,
+      "height": 1448,
+      "bytes": 1091672,
+      "sha256": "b2d54db54c1ca13a92df3607df251612c0935ad03c58dbe4f4cb1f87307c180d",
+      "rgba_sha256": "bc877302640fdb7c8cd584248686f24b399193256f26801ae9bd7e230aaca8cb",
+      "alpha_bounds": [
+        0,
+        0,
+        1070,
+        1428
+      ],
+      "source_sha256": "d2b8042ab617eac5e66496fc08c109b93df5eea27798be0c2ed7ceb02725e678",
+      "source_bytes": 1945807,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/npc_caretaker_explaining.webp"
+    },
+    {
+      "resource": "npc_caretaker_binoculars",
+      "category": "NPCs and event art",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2140:14",
+        "node_name": "PNG asset",
+        "collection_id": "2140:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2140-14"
+      },
+      "source_method": "figma_get_design_context_isolated_node_png",
+      "source_notes": "Figma supplied an isolated transparent node PNG at approximately 2x the natural node bounds. Node rendering preserves artwork clipping/mask; bytes are not the original image fill. Downloaded without local recreation or resampling.",
+      "figma_image_sha1": "9c6d74c6704dd7c05e52a0319c33223ccac07108",
+      "format": "webp",
+      "width": 1000,
+      "height": 1300,
+      "bytes": 889896,
+      "sha256": "cb4d2cc2d5443eab78cd71feab89ceddab1eef605f3b93ddddddbdc211dda250",
+      "rgba_sha256": "1a014686e98c650a558253e94ddc4798983cee5faf5c4dd67a6c783712ec1cfa",
+      "alpha_bounds": [
+        0,
+        0,
+        955,
+        1294
+      ],
+      "source_sha256": "c9b3fe705f5c93b3e7cb1830728a29435b6bebe4a69e016dbb783aa8e601d9e9",
+      "source_bytes": 1360788,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/npc_caretaker_binoculars.webp"
+    },
+    {
+      "resource": "npc_carpenter_neutral",
+      "category": "NPCs and event art",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2174:153",
+        "node_name": "PNG asset",
+        "collection_id": "2174:149",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2174-153"
+      },
+      "source_method": "figma_get_design_context_original_image_bytes",
+      "source_notes": "Exact original Figma image bytes; SHA-1 matches the recorded image fill hash. Full source canvas retained; no card labels, clipping, preview opacity, or corner radius baked in.",
+      "figma_image_sha1": "7f5728852e576e3a27b9e465749e325c70558578",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1165886,
+      "sha256": "0c2d768f593bfb4143ef26c0af243a23fe86c01b7304df25d051a6d1e288cd16",
+      "rgba_sha256": "05d0fbf93ae09af3953f1273713a43428889df87083f427f181345302ae3336c",
+      "alpha_bounds": [
+        0,
+        1,
+        1214,
+        1222
+      ],
+      "source_sha256": "7d75f839458887036d488695e13b23930da74e39c19a7a9880c097e0b39a9336",
+      "source_bytes": 1977790,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/npc_carpenter_neutral.webp"
+    },
+    {
+      "resource": "npc_carpenter_explaining",
+      "category": "NPCs and event art",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2174:157",
+        "node_name": "PNG asset",
+        "collection_id": "2174:149",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2174-157"
+      },
+      "source_method": "figma_get_design_context_original_image_bytes",
+      "source_notes": "Exact original Figma image bytes; SHA-1 matches the recorded image fill hash. Full source canvas retained; no card labels, clipping, preview opacity, or corner radius baked in.",
+      "figma_image_sha1": "fbdf4b722451d5fba2bb20d0ecb5e76ec16f6eb1",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1181304,
+      "sha256": "1eab7d432838d84eaeadc46983e577da5222006d71a385f712a80efcd0523b57",
+      "rgba_sha256": "8d1e0efb142d1260d92a934a5d166220464d5dffcb94a381ba9a1b55a28ec53e",
+      "alpha_bounds": [
+        0,
+        9,
+        1224,
+        1208
+      ],
+      "source_sha256": "0e2d2bbb09cbd2713ed56c94b5852ecc45811885b32659a74e208c52d42d3c9f",
+      "source_bytes": 1991542,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/npc_carpenter_explaining.webp"
+    },
+    {
+      "resource": "npc_carpenter_pointing",
+      "category": "NPCs and event art",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2174:161",
+        "node_name": "PNG asset",
+        "collection_id": "2174:149",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2174-161"
+      },
+      "source_method": "figma_get_design_context_isolated_node_png",
+      "source_notes": "Figma supplied an isolated transparent node PNG at approximately 2x the natural node bounds. Node rendering preserves artwork clipping/mask; bytes are not the original image fill. Downloaded without local recreation or resampling.",
+      "figma_image_sha1": "739838e77dcd45a018bea35efc5f16ea2f99f722",
+      "format": "webp",
+      "width": 1294,
+      "height": 1300,
+      "bytes": 1153664,
+      "sha256": "3a9248059b353be9eecb2c899d9dea1b59eb966fc0a3af0228cc9b23bf0006fa",
+      "rgba_sha256": "1efa17adfdf8469612c947149e10f7dbe68fd64f71f5d1f3ffa1fd0b14209424",
+      "alpha_bounds": [
+        78,
+        0,
+        1235,
+        1234
+      ],
+      "source_sha256": "6c4f9b69768013380b86525a18f12d4525daa407789144b92b9b0b0937fd5ab6",
+      "source_bytes": 1744096,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/npc_carpenter_pointing.webp"
+    },
+    {
+      "resource": "event_broken_wheel",
+      "category": "NPCs and event art",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2164:86",
+        "node_name": "Tiko · existing asset",
+        "collection_id": "2162:2",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2164-86"
+      },
+      "source_method": "figma_get_design_context_original_image_bytes",
+      "source_notes": "Exact original Figma image bytes; SHA-1 matches the image fill hash and full source canvas is unchanged. Visually verified as a broken wooden wheel; source node retains the copied name Tiko · existing asset.",
+      "figma_image_sha1": "0e2619a5b8a68412b55af43576e55b5a925db159",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1157050,
+      "sha256": "f5354582c5d21c7b574f3791ff3c5c7947f313c0391def414196160010cab0f6",
+      "rgba_sha256": "3824ccb84961fa96b4b4aea652f88565e4238d8740e8ad82d0c14b255349925a",
+      "alpha_bounds": [
+        0,
+        37,
+        1216,
+        1224
+      ],
+      "source_sha256": "1b5b59ad7d02ce0ec8289457d48062978caa6ff01883f451184219be5721db90",
+      "source_bytes": 2002334,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/event_broken_wheel.webp"
     },
     {
       "resource": "menu_chevron",

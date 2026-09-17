@@ -22,9 +22,13 @@ age or character without an explicit design decision.
 | Adult runtime layers | [89:2](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-2) | 55 |
 | Senior runtime layers | [89:185](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-185) | 55 |
 | Location originals | [2144:9](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-9) | 14 |
+| NPCs, companion portraits and event objects | Individual links in the catalog | 14 |
 
+The original Assets1, Assets2 and Assets3 links all target `56:2`; that pack is
+imported once. The teen and cub collections were discovered in the same file.
 The catalog also covers the existing eight menu bitmaps, two vector icons and
-two fonts. Further collections will be added with their matching provenance.
+two fonts. Older screen mockups, hidden RAW working layers and presentation
+labels are not runtime artwork and are excluded.
 
 ## Resource locations
 
