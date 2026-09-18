@@ -40,8 +40,13 @@ is not a persistent tab bar requiring independent stacks.
 | Village | `Village` |
 | Continue day | `Day` |
 
-The feature entries currently display a shared placeholder with Back. Replace
-that content as each feature is implemented; navigation already works. The menu
+Five feature entries display a shared placeholder with Back. Tasks displays the
+mini-game hub and registers `StarPlates`, `PriceCheck` and `Telescope` with stable
+IDs `tasks_star_plates`, `tasks_price_check` and `tasks_telescope`. The app host
+maps `DeedsAction` to those keys. Each game entry obtains its Hilt ViewModel and
+collects its state with lifecycle awareness. Back pops the game entry to Tasks;
+leaving that entry discards its demo session. Navigation keys contain no scores
+or domain snapshots. The menu
 artwork and UI state remain owned by the menu. The entry obtains its ViewModel
 with `hiltViewModel()`; Hilt injects the domain `GameRepository` and new-save fixture.
 The ViewModel initializes
@@ -82,7 +87,8 @@ Multiple stacks, custom scenes and deep links should be added when needed.
 ```
 
 Instrumentation covers all seven menu entry points, UI/system Back, activity
-recreation and saved-state restoration of all six feature routes. Existing menu
+recreation and saved-state restoration of all six feature routes and the three
+mini-game routes. Existing menu
 tests cover accessible callbacks and compact/landscape layouts at large text.
 Serialization tests check stable IDs and legacy route/back-stack payloads.
 Payload compatibility and restoration within the current build do not prove

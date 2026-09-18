@@ -1,7 +1,8 @@
 # Project architecture
 
 LCTApp uses one Android Gradle module (`:app`) with explicit package boundaries.
-The current UI is a menu and six navigable placeholders. Pure Kotlin game-state
+The current UI is a menu, the Tasks hub with three demo mini-games, and five
+navigable placeholders. Pure Kotlin game-state
 models feed the menu through a repository-backed ViewModel. Room persists the
 game and reference catalog locally; Hilt owns their application-scoped instances. The [state-machine specification](design/app-state-machine.md)
 defines approved state behavior and records future gameplay decisions still open.
@@ -71,6 +72,29 @@ WORRIED and NEEDS_HELP still show their labels without substitute artwork.
 Navigation changes do not mutate game data. Route restoration is separate from
 Room restoration. Screen UI receives immutable values and callbacks; no Room,
 repository writes or navigation objects belong in screen rendering.
+
+## Demo mini-games
+
+`domain/minigame` owns the pure Kotlin memory, price-comparison and target-stop
+rules. These models are independent of Compose, Android, Hilt and persisted game
+state. `feature/tasks/ui` owns immutable screen state and three Hilt ViewModels;
+entry-scoped ViewModels coordinate domain actions and cancellable feedback jobs.
+Screens receive state and explicit actions. Only the telescope animation stays
+in composition; it runs while the entry is RESUMED and uses the same coordinate
+system as the domain hit check.
+
+Each mini-game has a stable Navigation 3 key registered by the Tasks feature.
+The app host wires the hub actions to those keys. System/UI Back both return to
+the hub. Small bounded session fields are kept in `SavedStateHandle`: card order,
+opened/matched indices and moves; quiz amounts, question index and answer result;
+current telescope zone, round, hits and stopped position. Reconstruction resumes
+pending feedback once. This supports configuration changes and Android saved-state
+restoration, not durable game saves after dismissing the task or force-stopping.
+
+The section retains the original PR's demo mechanics. Demo coins never update
+Room, the shared balance, pet state, fatigue or story progress. See
+[mini-game scope and open rules](design/mini-games.md). Actual earnings still need
+approved gameplay rules and an atomic aggregate repository operation.
 
 ## Domain and persistence
 

@@ -7,6 +7,8 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dagger.hilt.android.testing.BindValue
@@ -63,4 +65,23 @@ class NavigationRestorationTest {
                 .assertIsDisplayed()
         }
     }
+    @Test
+    fun miniGameRoutesRestoreWithTheHubBelowThem() {
+        val restoration = StateRestorationTester(compose)
+        restoration.setContent { LCTAppTheme { LctNavHost() } }
+        val games = listOf(R.string.deeds_star_title, R.string.deeds_price_title, R.string.deeds_target_title)
+        games.forEach { title ->
+            compose.onNodeWithText(compose.activity.getString(R.string.menu_tasks)).performClick()
+            compose.onNodeWithText(compose.activity.getString(title)).performScrollTo().performClick()
+            compose.mainClock.advanceTimeBy(1_000)
+            restoration.emulateSavedInstanceStateRestore()
+            compose.mainClock.advanceTimeBy(1_000)
+            compose.onNodeWithText(compose.activity.getString(title)).assertIsDisplayed()
+            compose.onNodeWithContentDescription(compose.activity.getString(R.string.navigation_back)).performClick()
+            compose.mainClock.advanceTimeBy(1_000)
+            compose.onNodeWithText(compose.activity.getString(R.string.menu_tasks)).performScrollTo().assertIsDisplayed()
+            compose.onNodeWithContentDescription(compose.activity.getString(R.string.navigation_back)).performClick()
+        }
+    }
+
 }

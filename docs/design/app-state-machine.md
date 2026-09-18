@@ -270,6 +270,15 @@ restoration and error handling. The [current model](game-data-schema.md) and
 product questions. An active event ID still does not encode an event's detailed
 stage or interruption context; these mechanics remain future work.
 
+### Demo mini-games boundary
+
+The Tasks section includes three standalone demos described in
+[mini-games](mini-games.md). Their scores and short feedback delays do not update
+persistent game state, grant actual money or alter the pet. They are not an
+implementation of the earning-event scenario below. Integrating real rewards
+requires authored effects and the still-open earning rules; restoring a demo
+session must not execute a gameplay outcome.
+
 ## 7. Source scenarios
 
 These scenarios describe successive states of a single quest. They do not
