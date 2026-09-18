@@ -107,6 +107,15 @@ ViewModel maps the initial snapshot today. A future working feature will add
 normalized persistence and repository observation instead of introducing an
 unused data layer for the initial-state binding.
 
+The [current data model](design/game-data-schema.md) describes the agreed gameplay
+requirements and remaining questions. The [normalized schema](design/schema-normalization.md)
+defines proposed tables, keys, and dependencies; the
+[decision register](design/decisions.md) distinguishes approved rules from those
+technical proposals. Follow the [persistence requirements](design/room-persistence.md)
+for atomic writes, data integrity, restoration, and migrations. The app still uses
+the in-memory path described above; existing Kotlin classes do not constrain the
+new database design.
+
 Add layers as a working feature requires them; do not create empty repositories,
 use cases, ViewModels, or dependency injection containers for placeholders.
 

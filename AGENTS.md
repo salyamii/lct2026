@@ -35,6 +35,27 @@ These are approved defaults, not a claim that every library is installed. Add
 Room, DataStore, Hilt, networking, and WorkManager when a working feature needs
 them; do not scaffold unused layers or dependencies for placeholders.
 
+## Game persistence
+
+Before implementing, changing, reviewing, or testing game persistence, Room
+schemas/DAOs, repository writes, initialization, or migrations, read and follow
+the [current data model](docs/design/game-data-schema.md),
+[normalized schema](docs/design/schema-normalization.md),
+[persistence requirements](docs/design/room-persistence.md), and
+[decision register](docs/design/decisions.md). The normalized schema is the single
+source for the proposed tables, fields, keys, and dependencies. Preserve the
+distinction between approved product rules and technical proposals. Room is not
+implemented merely because the design is documented.
+
+- Persist one complete game snapshot through the aggregate repository; one
+  gameplay outcome must commit its pet, economy, and story changes atomically.
+- Read the latest state inside the write transaction. Never overwrite an
+  existing save with a startup fixture or a stale UI snapshot.
+- Preserve current model values, list order, and repeated entries. Do not invent
+  uniqueness constraints or financial rules to simplify the schema.
+- Export schemas and test data-preserving migrations. Never recover from a
+  storage error by deleting the database or silently returning initial data.
+
 ## App state machine and behavior
 
 Before implementing, changing, reviewing, or testing any app state machine,
@@ -52,6 +73,13 @@ navigation keys and keep UI callbacks separate from navigation ownership.
 - Preserve existing uncommitted work and limit changes to the requested scope.
 - Keep the local state-machine specification consistent with approved behavior
   changes. Record unresolved design decisions rather than silently guessing.
+- Use the [decision register](docs/design/decisions.md) to distinguish Figma
+  requirements, user-approved decisions, agent proposals, and open questions.
+  Mark each newly confirmed decision **Принято пользователем** with its date,
+  stable ID, and scope. Keep documentation focused on the current model (D-042),
+  retain active approval IDs and dates, and never reuse removed IDs. When a rule
+  changes, update its current wording and cite the decision that now governs it.
+  Never infer approval from silence or from an agent-written draft.
 - Validate behavior changes with relevant tests. Common checks are
   `./gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug`;
   use `./gradlew :app:connectedDebugAndroidTest` when device coverage is needed.
