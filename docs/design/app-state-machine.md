@@ -257,16 +257,18 @@ This includes HAPPY and UPSET: reopening restores the saved state until an
 explicit event changes it. Room is the approved persistent-data technology in
 AGENTS.md; this requirement does not define cloud backup or restore.
 
-**Принято пользователем · D-007 · 2026-09-17 (initial menu scope):** the first menu integration uses
-initial in-memory game data only, with no game saving or restoration yet. Each
-new menu ViewModel receives an initial snapshot. Persistence requirements above
-remain future work; navigation keys do not store the game snapshot. This stage
-does not implement quest progression or new gameplay mechanics.
+**Принято пользователем · D-007 · 2026-09-17 (initial menu scope):** the original
+menu integration used an in-memory fixture without game restoration. The next
+stage, **D-043 · Принято пользователем · 2026-09-19**, requests Room implementation
+according to the current model. The menu now observes the saved game through a
+repository. Initial data is inserted only when no save exists; errors do not
+reset it. Quest progression and recurring income are not implemented by loading.
 
-The [persistence requirements](room-persistence.md) define atomic writes,
-restoration guarantees, data integrity, and migration requirements. The
-[current model](game-data-schema.md) and normalized schema describe the proposed
-data structure. The app's in-memory menu remains the implemented scope.
+The [persistence contract](room-persistence.md) defines implemented transactions,
+restoration and error handling. The [current model](game-data-schema.md) and
+[normalized schema](schema-normalization.md) describe stored data and remaining
+product questions. An active event ID still does not encode an event's detailed
+stage or interruption context; these mechanics remain future work.
 
 ## 7. Source scenarios
 

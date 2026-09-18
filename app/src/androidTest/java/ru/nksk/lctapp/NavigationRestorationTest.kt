@@ -24,7 +24,8 @@ class NavigationRestorationTest {
     @Test
     fun allFeatureRoutesRestoreFromSavedStateWithMenuUnderneath() {
         val restoration = StateRestorationTester(compose)
-        restoration.setContent { LCTAppTheme { LctNavHost() } }
+        val repository = TestGameRepository()
+        restoration.setContent { LCTAppTheme { LctNavHost(gameRepository = repository) } }
         fun label(id: Int) = hasText(compose.activity.getString(id))
         val actions = listOf(
             label(R.string.menu_gear) to R.string.menu_gear,

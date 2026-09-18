@@ -4,9 +4,15 @@ import ru.nksk.lctapp.domain.economy.EconomyState
 import ru.nksk.lctapp.domain.pet.PetState
 import ru.nksk.lctapp.domain.story.StoryState
 
-/** Domain snapshot; persistence and screen-specific UiState are separate representations. */
+/** Immutable aggregate. Producers must not mutate backing lists after publishing a snapshot. */
 data class GameState(
     val pet: PetState,
     val economy: EconomyState,
     val story: StoryState,
+    val satiety: Int,
+    val fatigue: Int,
+    val ownedItems: List<OwnedItem>,
 )
+
+/** One ownership occurrence; duplicate item IDs are allowed and list order is significant. */
+data class OwnedItem(val id: String, val itemId: String)

@@ -8,6 +8,8 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.Before
+import androidx.compose.ui.test.onAllNodesWithText
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,6 +18,14 @@ import org.junit.runner.RunWith
 class MainMenuNavigationTest {
     @get:Rule
     val compose = createAndroidComposeRule<MainActivity>()
+
+    @Before
+    fun waitForSavedGame() {
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText(compose.activity.getString(R.string.menu_current_goal))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+    }
 
     @Test
     fun everyMenuActionOpensItsDestinationAndReturnsToTheMenu() {

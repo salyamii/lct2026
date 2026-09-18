@@ -1,30 +1,9 @@
 package ru.nksk.lctapp.domain.economy
 
-/**
- * Financial snapshot. Amounts use integral virtual currency units.
- * Callers supply values; this model defines no starting balance, prices, rewards,
- * or arithmetic relationship between balance, allocations, savings, and reserve.
- */
-data class EconomyState(
-    val balance: Long,
-    val budgetAllocations: List<BudgetAllocation>,
-    val savingsGoal: SavingsGoal?,
-    val reserve: Long,
-    val expenses: List<Expense>,
-)
+/** One actual wallet. Plan sections are independent allocations, not extra balances. */
+data class EconomyState(val balance: Long, val plan: BudgetPlan)
 
-data class BudgetAllocation(
-    val categoryId: String,
-    val amount: Long,
-)
+/** Integral plan values; no sum, range, period or spending limit is imposed here. */
+data class BudgetPlan(val needs: Long, val wants: Long, val savings: Long, val reserve: Long)
 
-data class SavingsGoal(
-    val id: String,
-    val targetAmount: Long,
-    val savedAmount: Long,
-)
-
-data class Expense(
-    val id: String,
-    val amount: Long,
-)
+enum class BudgetSection { NEEDS, WANTS, SAVINGS, RESERVE }
