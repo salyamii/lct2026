@@ -42,8 +42,9 @@ is not a persistent tab bar requiring independent stacks.
 
 The feature entries currently display a shared placeholder with Back. Replace
 that content as each feature is implemented; navigation already works. The menu
-artwork and UI state remain owned by the menu. The host passes the domain
-`GameRepository` and a new-save fixture to the menu entry. Its ViewModel initializes
+artwork and UI state remain owned by the menu. The entry obtains its ViewModel
+with `hiltViewModel()`; Hilt injects the domain `GameRepository` and new-save fixture.
+The ViewModel initializes
 only a missing save and observes persisted state, with explicit loading and error
 states and retry. The entry collects `uiState` with lifecycle awareness. The menu
 maps saved balance and pet appearance; the adventure counter remains a display
@@ -70,8 +71,8 @@ fixture. Navigation keys contain no game snapshot. See
    behavior changes. Reserve the no-argument `goBack()` for `NavDisplay` system Back.
 
 This structure can move into feature `api` (keys) and `impl` (entries/screens)
-Gradle modules later. Dependency injection, multiple stacks, custom scenes and
-deep links should be added when a real feature needs them.
+Gradle modules later. Hilt provides the menu ViewModel within its entry scope.
+Multiple stacks, custom scenes and deep links should be added when needed.
 
 ## Verification
 

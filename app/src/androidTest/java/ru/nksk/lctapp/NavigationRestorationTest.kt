@@ -1,6 +1,5 @@
 package ru.nksk.lctapp
 
-import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
@@ -10,22 +9,36 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import dagger.hilt.android.testing.BindValue
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import dagger.hilt.android.testing.UninstallModules
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import ru.nksk.lctapp.app.di.GameRepositoryModule
 import ru.nksk.lctapp.app.navigation.LctNavHost
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
+import ru.nksk.lctapp.domain.game.GameRepository
 
+@UninstallModules(GameRepositoryModule::class)
+@HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class NavigationRestorationTest {
-    @get:Rule
-    val compose = createAndroidComposeRule<ComponentActivity>()
+    @get:Rule(order = 0)
+    val hilt = HiltAndroidRule(this)
+
+    @get:Rule(order = 1)
+    val compose = createAndroidComposeRule<HiltTestActivity>()
+
+    @BindValue
+    @JvmField
+    val repository: GameRepository = TestGameRepository()
 
     @Test
     fun allFeatureRoutesRestoreFromSavedStateWithMenuUnderneath() {
         val restoration = StateRestorationTester(compose)
-        val repository = TestGameRepository()
-        restoration.setContent { LCTAppTheme { LctNavHost(gameRepository = repository) } }
+        restoration.setContent { LCTAppTheme { LctNavHost() } }
         fun label(id: Int) = hasText(compose.activity.getString(id))
         val actions = listOf(
             label(R.string.menu_gear) to R.string.menu_gear,

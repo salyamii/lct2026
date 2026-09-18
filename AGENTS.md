@@ -22,8 +22,13 @@ screen UI receives state and callbacks instead of navigation objects.
 - Use Room for persistent app data. Design schemas in Boyce–Codd normal form
   (BCNF / НФБК, stronger than 3NF); document reasons for any denormalization.
   Use Preferences DataStore for small device preferences.
-- Use constructor injection with Hilt for the real dependency graph, and
-  Retrofit + OkHttp + Kotlin serialization for backend HTTP/JSON calls.
+- Use Hilt for dependency injection in this project (D-044). Hilt is already
+  integrated; extend the existing graph using constructor injection. Keep
+  bindings in `app/di` and follow the
+  [DI architecture](docs/architecture.md#dependency-injection). Obtain injected
+  ViewModels at feature navigation entries; screens receive state and callbacks,
+  and domain models remain free of DI annotations.
+- Use Retrofit + OkHttp + Kotlin serialization for backend HTTP/JSON calls.
 - Keep the app offline-first: UI observes local persisted data through repositories.
   Future backend integration primarily provides cloud backup and restore;
   use WorkManager for durable background backups and retries. Multi-device merging
@@ -31,9 +36,9 @@ screen UI receives state and callbacks instead of navigation objects.
 - Keep JUnit 4, Compose UI tests, and AndroidX Test/Espresso. Add coroutine,
   database migration, and backup/restore tests as those features are introduced.
 
-These are approved defaults, not a claim that every library is installed. Add
-Room, DataStore, Hilt, networking, and WorkManager when a working feature needs
-them; do not scaffold unused layers or dependencies for placeholders.
+Room and Hilt are already integrated. Add DataStore, networking, and WorkManager
+when a working feature needs them; do not scaffold unused layers or dependencies
+for placeholders.
 
 ## Game persistence
 

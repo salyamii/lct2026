@@ -12,7 +12,7 @@ All paths below are relative to `app/src/main/java/ru/nksk/lctapp/`.
 
 | Package / file | Responsibility | App dependencies allowed |
 | --- | --- | --- |
-| `MainActivity.kt` | Android activity, system bars, Hilt entry point | `app`, `domain/game/GameRepository` |
+| `MainActivity.kt` | Android activity, system bars, Hilt entry point | `app` |
 | `app/LctApp.kt` | Theme and application composition | Features, shared UI, domain contracts |
 | `app/di`, `app/LctApplication.kt` | Hilt application graph and singleton database/repositories | Data and domain |
 | `domain` | Pure Kotlin game snapshots, reference content, repository contracts | Kotlin, coroutines/Flow |
@@ -47,11 +47,12 @@ mutate a back stack. See [navigation](navigation.md) for registration and restor
 
 ## Current menu data
 
-`MainActivity` is a Hilt entry point and passes the domain `GameRepository` to
-`LctApp` and `LctNavHost`. The host supplies it and `createInitialGameState()` to
-the entry-scoped `MainMenuViewModel` by constructor. The ViewModel initializes a
-save only if absent, then observes Room through the repository. The entry collects
-its immutable `StateFlow<MainMenuLoadState>` with lifecycle awareness.
+`MainActivity` is a Hilt entry point. The menu entry obtains its entry-scoped
+`MainMenuViewModel` through `hiltViewModel()`. Hilt supplies the domain
+`GameRepository` and the new-save fixture from `InitialGameStateModule` through
+constructor injection. The ViewModel initializes a save only if absent, then
+observes Room through the repository. The entry collects its immutable
+`StateFlow<MainMenuLoadState>` with lifecycle awareness.
 
 Loading, ready and error are explicit presentation states. A failed read or write
 shows retry; it never substitutes the initial fixture for saved data. The current
@@ -128,6 +129,33 @@ See the [current model](design/game-data-schema.md),
 [persistence contract](design/room-persistence.md). Open questions such as event
 stages, prices, time/effort units and completion guards remain open. No unused
 networking, WorkManager or DataStore dependencies were added.
+
+## Dependency injection
+
+Use Hilt for the application's dependency graph (D-044). `app/LctApplication`
+is registered in the manifest with `@HiltAndroidApp`; `MainActivity` is an
+`@AndroidEntryPoint`. Keep bindings in `app/di`, prefer constructor injection,
+and use `@Binds` for repository interfaces and `@Provides` for constructed objects.
+Domain models and contracts remain free of DI annotations.
+
+The menu entry uses `androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()`.
+Navigation 3's ViewModel-store decorator scopes the ViewModel to its entry;
+screens and previews receive state and callbacks without accessing Hilt.
+`GameDatabaseModule` and `GameRepositoryModule` in `GameStorageModule.kt` provide
+singleton database/repository instances.
+`InitialGameStateModule` supplies an unscoped new-save fixture in
+`ViewModelComponent`; initialization still reads the database transactionally
+and never replaces an existing save. Hilt manages dependencies; Room persists data.
+
+Versions live in the version catalog. KSP processes production and instrumentation
+sources. JVM tests construct ViewModels directly. Device tests use `HiltTestRunner`
+and place `HiltAndroidRule` before the activity rule; a debug-only Hilt activity
+hosts test Compose content. Tests replace repository bindings with `@BindValue`
+for isolated navigation, initial-state injection, and in-memory Room menu coverage.
+
+References: [Google's Hilt guide](https://developer.android.com/training/dependency-injection/hilt-android),
+[Hilt build setup](https://dagger.dev/hilt/gradle-setup.html),
+[Hilt testing](https://developer.android.com/training/dependency-injection/hilt-testing).
 
 ## Verification
 

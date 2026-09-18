@@ -6,7 +6,7 @@ import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.domain.game.GameState
 
 /** In-memory double for navigation tests; real persistence is covered by GamePersistenceTest. */
-internal class TestGameRepository(initial: GameState = createInitialGameState()) : GameRepository {
+internal class TestGameRepository(initial: GameState? = createInitialGameState()) : GameRepository {
     private val state = MutableStateFlow<GameState?>(initial)
     override fun observe() = state
     override suspend fun read() = state.value

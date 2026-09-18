@@ -2,6 +2,8 @@ package ru.nksk.lctapp.feature.menu.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +20,8 @@ internal sealed interface MainMenuLoadState {
 }
 
 /** Repository observation owns runtime data; a fixture is used only for a genuinely absent save. */
-internal class MainMenuViewModel(
+@HiltViewModel
+internal class MainMenuViewModel @Inject constructor(
     private val repository: GameRepository,
     private val initialGameState: GameState,
 ) : ViewModel() {
