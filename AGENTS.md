@@ -22,8 +22,13 @@ screen UI receives state and callbacks instead of navigation objects.
 - Use Room for persistent app data. Design schemas in Boyce–Codd normal form
   (BCNF / НФБК, stronger than 3NF); document reasons for any denormalization.
   Use Preferences DataStore for small device preferences.
-- Use constructor injection with Hilt for the real dependency graph, and
-  Retrofit + OkHttp + Kotlin serialization for backend HTTP/JSON calls.
+- Use Hilt for dependency injection in this project (D-044). Hilt is already
+  integrated; extend the existing graph using constructor injection. Keep
+  bindings in `app/di` and follow the
+  [DI architecture](docs/architecture.md#dependency-injection). Obtain injected
+  ViewModels at feature navigation entries; screens receive state and callbacks,
+  and domain models remain free of DI annotations.
+- Use Retrofit + OkHttp + Kotlin serialization for backend HTTP/JSON calls.
 - Keep the app offline-first: UI observes local persisted data through repositories.
   Future backend integration primarily provides cloud backup and restore;
   use WorkManager for durable background backups and retries. Multi-device merging
@@ -31,9 +36,31 @@ screen UI receives state and callbacks instead of navigation objects.
 - Keep JUnit 4, Compose UI tests, and AndroidX Test/Espresso. Add coroutine,
   database migration, and backup/restore tests as those features are introduced.
 
-These are approved defaults, not a claim that every library is installed. Add
-Room, DataStore, Hilt, networking, and WorkManager when a working feature needs
-them; do not scaffold unused layers or dependencies for placeholders.
+Room and Hilt are already integrated. Add DataStore, networking, and WorkManager
+when a working feature needs them; do not scaffold unused layers or dependencies
+for placeholders.
+
+## Game persistence
+
+Before implementing, changing, reviewing, or testing game persistence, Room
+schemas/DAOs, repository writes, initialization, or migrations, read and follow
+the [current data model](docs/design/game-data-schema.md),
+[normalized schema](docs/design/schema-normalization.md),
+[persistence requirements](docs/design/room-persistence.md), and
+[decision register](docs/design/decisions.md). The normalized schema is the single
+source for the tables, fields, keys, and dependencies implemented in Room v1
+(D-043). Preserve the distinction between approved product rules, implementation
+choices, and open gameplay questions. Read the exported schema before changing
+entities and provide data-preserving migrations for subsequent versions.
+
+- Persist one complete game snapshot through the aggregate repository; one
+  gameplay outcome must commit its pet, economy, and story changes atomically.
+- Read the latest state inside the write transaction. Never overwrite an
+  existing save with a startup fixture or a stale UI snapshot.
+- Preserve current model values, list order, and repeated entries. Do not invent
+  uniqueness constraints or financial rules to simplify the schema.
+- Export schemas and test data-preserving migrations. Never recover from a
+  storage error by deleting the database or silently returning initial data.
 
 ## App state machine and behavior
 
@@ -52,6 +79,13 @@ navigation keys and keep UI callbacks separate from navigation ownership.
 - Preserve existing uncommitted work and limit changes to the requested scope.
 - Keep the local state-machine specification consistent with approved behavior
   changes. Record unresolved design decisions rather than silently guessing.
+- Use the [decision register](docs/design/decisions.md) to distinguish Figma
+  requirements, user-approved decisions, agent proposals, and open questions.
+  Mark each newly confirmed decision **Принято пользователем** with its date,
+  stable ID, and scope. Keep documentation focused on the current model (D-042),
+  retain active approval IDs and dates, and never reuse removed IDs. When a rule
+  changes, update its current wording and cite the decision that now governs it.
+  Never infer approval from silence or from an agent-written draft.
 - Validate behavior changes with relevant tests. Common checks are
   `./gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug`;
   use `./gradlew :app:connectedDebugAndroidTest` when device coverage is needed.

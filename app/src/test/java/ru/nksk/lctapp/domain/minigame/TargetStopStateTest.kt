@@ -1,4 +1,4 @@
-package ru.nksk.lctapp.feature.tasks.logic
+package ru.nksk.lctapp.domain.minigame
 
 import kotlin.random.Random
 import org.junit.Assert.assertEquals
@@ -8,6 +8,14 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class TargetStopStateTest {
+    @Test
+    fun stoppedRoundKeepsTheZoneUsedToJudgeItsHit() {
+        val state = TargetStopState(zoneStart = 40)
+        val stopped = state.stop(50)
+        assertEquals(40, stopped.zoneStart)
+        assertEquals(true, stopped.lastHit)
+    }
+
     @Test
     fun create_preparesFirstRound() {
         val state = TargetStopState.create(random = Random(7))

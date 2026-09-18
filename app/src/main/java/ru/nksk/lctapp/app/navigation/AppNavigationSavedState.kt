@@ -10,6 +10,9 @@ import ru.nksk.lctapp.feature.day.navigation.Day
 import ru.nksk.lctapp.feature.gear.navigation.Gear
 import ru.nksk.lctapp.feature.goal.navigation.Goal
 import ru.nksk.lctapp.feature.menu.navigation.MainMenu
+import ru.nksk.lctapp.feature.tasks.navigation.StarPlates
+import ru.nksk.lctapp.feature.tasks.navigation.PriceCheck
+import ru.nksk.lctapp.feature.tasks.navigation.Telescope
 import ru.nksk.lctapp.feature.tasks.navigation.Tasks
 import ru.nksk.lctapp.feature.village.navigation.Village
 
@@ -23,6 +26,9 @@ internal val AppNavigationSavedStateConfiguration = SavedStateConfiguration {
             subclass(Gear::class, Gear.serializer())
             subclass(Goal::class, Goal.serializer())
             subclass(Tasks::class, Tasks.serializer())
+            subclass(StarPlates::class, StarPlates.serializer())
+            subclass(PriceCheck::class, PriceCheck.serializer())
+            subclass(Telescope::class, Telescope.serializer())
             subclass(Village::class, Village.serializer())
 
             // Read-only migration; new saves always use each key's @SerialName.

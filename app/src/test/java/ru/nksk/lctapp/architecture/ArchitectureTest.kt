@@ -84,7 +84,8 @@ class ArchitectureTest {
         if (!imported.within(base)) return true
 
         return when {
-            packageName == base -> imported == "$base.app.LctApp"
+            packageName == base -> imported == "$base.app.LctApp" ||
+                imported == "$base.domain.game.GameRepository"
             packageName.within("$base.app") -> true
             feature != null -> imported.within(feature) ||
                 imported.within("$base.domain") || imported.within("$base.core.ui") ||

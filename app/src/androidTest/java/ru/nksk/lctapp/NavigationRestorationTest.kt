@@ -1,6 +1,5 @@
 package ru.nksk.lctapp
 
-import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
@@ -8,18 +7,35 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import dagger.hilt.android.testing.BindValue
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import dagger.hilt.android.testing.UninstallModules
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import ru.nksk.lctapp.app.di.GameRepositoryModule
 import ru.nksk.lctapp.app.navigation.LctNavHost
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
+import ru.nksk.lctapp.domain.game.GameRepository
 
+@UninstallModules(GameRepositoryModule::class)
+@HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class NavigationRestorationTest {
-    @get:Rule
-    val compose = createAndroidComposeRule<ComponentActivity>()
+    @get:Rule(order = 0)
+    val hilt = HiltAndroidRule(this)
+
+    @get:Rule(order = 1)
+    val compose = createAndroidComposeRule<HiltTestActivity>()
+
+    @BindValue
+    @JvmField
+    val repository: GameRepository = TestGameRepository()
 
     @Test
     fun allFeatureRoutesRestoreFromSavedStateWithMenuUnderneath() {
@@ -49,4 +65,23 @@ class NavigationRestorationTest {
                 .assertIsDisplayed()
         }
     }
+    @Test
+    fun miniGameRoutesRestoreWithTheHubBelowThem() {
+        val restoration = StateRestorationTester(compose)
+        restoration.setContent { LCTAppTheme { LctNavHost() } }
+        val games = listOf(R.string.deeds_star_title, R.string.deeds_price_title, R.string.deeds_target_title)
+        games.forEach { title ->
+            compose.onNodeWithText(compose.activity.getString(R.string.menu_tasks)).performClick()
+            compose.onNodeWithText(compose.activity.getString(title)).performScrollTo().performClick()
+            compose.mainClock.advanceTimeBy(1_000)
+            restoration.emulateSavedInstanceStateRestore()
+            compose.mainClock.advanceTimeBy(1_000)
+            compose.onNodeWithText(compose.activity.getString(title)).assertIsDisplayed()
+            compose.onNodeWithContentDescription(compose.activity.getString(R.string.navigation_back)).performClick()
+            compose.mainClock.advanceTimeBy(1_000)
+            compose.onNodeWithText(compose.activity.getString(R.string.menu_tasks)).performScrollTo().assertIsDisplayed()
+            compose.onNodeWithContentDescription(compose.activity.getString(R.string.navigation_back)).performClick()
+        }
+    }
+
 }

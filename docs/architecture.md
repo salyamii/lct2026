@@ -1,9 +1,11 @@
 # Project architecture
 
 LCTApp uses one Android Gradle module (`:app`) with explicit package boundaries.
-The current implementation is a menu and six navigable placeholders. It has no
-persisted game model yet. The [state-machine specification](design/app-state-machine.md)
-defines product behavior for future features and records decisions still open.
+The current UI is a menu, the Tasks hub with three demo mini-games, and five
+navigable placeholders. Pure Kotlin game-state
+models feed the menu through a repository-backed ViewModel. Room persists the
+game and reference catalog locally; Hilt owns their application-scoped instances. The [state-machine specification](design/app-state-machine.md)
+defines approved state behavior and records future gameplay decisions still open.
 
 ## Ownership
 
@@ -11,11 +13,14 @@ All paths below are relative to `app/src/main/java/ru/nksk/lctapp/`.
 
 | Package / file | Responsibility | App dependencies allowed |
 | --- | --- | --- |
-| `MainActivity.kt` | Android activity and system bars | `app` |
-| `app/LctApp.kt` | Theme and application composition | Features, shared UI |
+| `MainActivity.kt` | Android activity, system bars, Hilt entry point | `app` |
+| `app/LctApp.kt` | Theme and application composition | Features, shared UI, domain contracts |
+| `app/di`, `app/LctApplication.kt` | Hilt application graph and singleton database/repositories | Data and domain |
+| `domain` | Pure Kotlin game snapshots, reference content, repository contracts | Kotlin, coroutines/Flow |
+| `data/game` | Room repositories, mapping, atomic writes, immutable content installation | Data and domain |
 | `app/navigation` | Back stack, navigation policy, serializer registration, cross-feature wiring | Feature navigation contracts and UI actions |
 | `feature/<name>/navigation` | Stable route keys, entry registration, lifecycle-aware callbacks | Own feature, shared UI |
-| `feature/<name>/ui` | Screen state, actions, rendering, feature-specific components | Own UI, shared UI; future domain contracts |
+| `feature/<name>/ui` | ViewModels, screen state, actions, rendering, feature-specific components | Own UI, shared UI, domain contracts |
 | `core/ui/components` | Presentation shared by several features | Shared UI |
 | `core/ui/theme` | App typography, colors, and theme | Shared UI |
 
@@ -43,38 +48,138 @@ mutate a back stack. See [navigation](navigation.md) for registration and restor
 
 ## Current menu data
 
-`MainMenuScreen` requires `MainMenuUiState` and `onAction`. The entry supplies
-`MainMenuDemoState`, which explicitly preserves the existing design fixture:
-100 coins, zero completed goals, and four total goals. These values are sample
-presentation data, not initial economy balances or progression rules. They are
-not saved or modified by opening a destination. Resource-backed titles and
-artwork remain presentation concerns.
+`MainActivity` is a Hilt entry point. The menu entry obtains its entry-scoped
+`MainMenuViewModel` through `hiltViewModel()`. Hilt supplies the domain
+`GameRepository` and the new-save fixture from `InitialGameStateModule` through
+constructor injection. The ViewModel initializes a save only if absent, then
+observes Room through the repository. The entry collects its immutable
+`StateFlow<MainMenuLoadState>` with lifecycle awareness.
 
-The menu's layout, HUD, action panel, scene/background, text, and artwork decoder
-have separate files inside the feature. Their composables retain local visual
-state only, such as scroll position and background alignment.
+Loading, ready and error are explicit presentation states. A failed read or write
+shows retry; it never substitutes the initial fixture for saved data. The current
+fixture is 100 coins, NORMAL/BACKPACK, zero satiety/fatigue and plan allocations,
+no story references, decisions or owned items. These values are technical starting
+data, not approved parameter ranges, weekly income or authored story content.
+The catalog starts empty until actual definitions are installed.
 
-## Adding real game data
+`MainMenuUiStateMapper` projects the saved `Long` balance and pet appearance.
+The adventure title and zero-of-four counter remain display fixtures; they are
+not calculated from savings or decision counts. `MainMenuPreviewState` is only
+for previews and UI tests. The loading/error wrapper does not alter menu artwork.
+Normal backpack uses `menu_ryzhik`; other verified mappings use bundled teen art.
+WORRIED and NEEDS_HELP still show their labels without substitute artwork.
 
-Add layers as a working feature requires them; do not create empty repositories,
-use cases, ViewModels, or dependency injection containers for placeholders.
+Navigation changes do not mutate game data. Route restoration is separate from
+Room restoration. Screen UI receives immutable values and callbacks; no Room,
+repository writes or navigation objects belong in screen rendering.
 
-- `domain/<area>` will own pure Kotlin models, repository interfaces, and
-  business operations. No Android, Compose, navigation, database, or
-  serialization annotations belong here. Coroutine/Flow APIs may be used.
-- `data/<area>` will implement those interfaces, coordinate data sources, and
-  map storage/network representations into domain models. It must not depend
-  on features, shared UI, or app wiring.
-- A feature's ViewModel will consume domain contracts and map results into UI
-  state. Collect observable state with lifecycle awareness at its entry/route;
-  continue passing values and callbacks to stateless screens.
-- Wire concrete dependencies in `app`. Use constructor injection with Hilt when
-  a working feature needs a real dependency graph; do not add it for placeholders.
+## Demo mini-games
 
-Persistent game state belongs outside navigation keys. Keep selected appearance
-and visual state in PetState, financial state in EconomyState, and story
-progression in StoryState. Resolve the product specification's open decisions
-before implementing affected behavior. This cleanup makes no such decisions.
+`domain/minigame` owns the pure Kotlin memory, price-comparison and target-stop
+rules. These models are independent of Compose, Android, Hilt and persisted game
+state. `feature/tasks/ui` owns immutable screen state and three Hilt ViewModels;
+entry-scoped ViewModels coordinate domain actions and cancellable feedback jobs.
+Screens receive state and explicit actions. Only the telescope animation stays
+in composition; it runs while the entry is RESUMED and uses the same coordinate
+system as the domain hit check.
+
+Each mini-game has a stable Navigation 3 key registered by the Tasks feature.
+The app host wires the hub actions to those keys. System/UI Back both return to
+the hub. Small bounded session fields are kept in `SavedStateHandle`: card order,
+opened/matched indices and moves; quiz amounts, question index and answer result;
+current telescope zone, round, hits and stopped position. Reconstruction resumes
+pending feedback once. This supports configuration changes and Android saved-state
+restoration, not durable game saves after dismissing the task or force-stopping.
+
+The section retains the original PR's demo mechanics. Demo coins never update
+Room, the shared balance, pet state, fatigue or story progress. See
+[mini-game scope and open rules](design/mini-games.md). Actual earnings still need
+approved gameplay rules and an atomic aggregate repository operation.
+
+## Domain and persistence
+
+| Package / model | Responsibility |
+| --- | --- |
+| `domain/game/GameState` | Pet, economy, story, satiety, fatigue and ordered owned-item occurrences |
+| `domain/game/GameRepository` | Observe/read, initialize-if-absent, transactional aggregate update |
+| `domain/pet` | One persistent visual state, independent selected look and appearance projection |
+| `domain/economy` | Shared balance and four independent budget-plan values |
+| `domain/story` | Current day, script position, active event and ordered decision occurrences |
+| `domain/content` | Reference definitions and the content repository interface |
+| `data/game/local` | 13 Room entities, DAO primitives, explicit codes and mapping |
+| `data/game` | Aggregate transactions and immutable reference-content installation |
+
+`PetState.transitionTo` retains the selected look and explicitly replaces the one
+visual state. HAPPY/UPSET persist until another explicit change. There are no
+hidden states, timers, automatic resets or automatic event effects.
+
+The Room v1 schema follows the [normalized model](design/schema-normalization.md).
+`GAME_STATE` combines scalar pet, economy and progression fields;
+`OWNED_ITEM` and `PLAYER_DECISION` hold ordered occurrences. Chapter and goal are
+resolved through reference relationships; event and impact come from the selected
+choice. These values are not duplicated in the save. Repository contracts and
+Kotlin domain models carry no Android or Room annotations.
+
+`GameRepository.update(transform)` reads the latest complete state inside a
+write transaction. The caller supplies a pure transformation of that argument;
+all resulting pet, money, story, item and decision changes commit together.
+Callers must not close over a stale UI snapshot or perform external effects in
+the transform. Gameplay guards and occurrence/idempotency rules belong to future
+domain operations, not this generic storage primitive. UI observation and
+initialization never execute content effects or grant recurring income.
+
+`StoryContentRepository.install` atomically adds definitions and accepts repeated
+identical rows. It rejects replacing existing IDs or adding choices/effects to an
+existing event, effects to a choice, requirements to a goal, or schedule entries
+to an existing day. Install each complete definition with its children. Revised
+content requires new IDs; old definitions remain readable for saved decisions.
+The combined catalog is checked against the STORY/goal-item restriction D-038.
+
+Hilt provides one `GameDatabase` using Room 3 and `BundledSQLiteDriver`, plus the
+two repository implementations. Suspend DAO queries and transactional reads keep
+SQLite work off the UI thread. Database invalidation reloads the entire saved
+aggregate in a read transaction; independent table flows are not combined into
+partially updated game snapshots. Storage errors propagate to callers.
+
+The exported [version 1 schema](../app/schemas/ru.nksk.lctapp.data.game.local.GameDatabase/1.json)
+is the migration baseline. There is no earlier on-disk Room schema to migrate.
+Every future version requires explicit, data-preserving migrations and tests;
+no destructive fallback is configured. Database files are excluded from Android
+cloud backup and device transfer until their policy is designed. Local app
+reopening restores the existing database without using real elapsed time.
+
+See the [current model](design/game-data-schema.md),
+[decision register](design/decisions.md) and
+[persistence contract](design/room-persistence.md). Open questions such as event
+stages, prices, time/effort units and completion guards remain open. No unused
+networking, WorkManager or DataStore dependencies were added.
+
+## Dependency injection
+
+Use Hilt for the application's dependency graph (D-044). `app/LctApplication`
+is registered in the manifest with `@HiltAndroidApp`; `MainActivity` is an
+`@AndroidEntryPoint`. Keep bindings in `app/di`, prefer constructor injection,
+and use `@Binds` for repository interfaces and `@Provides` for constructed objects.
+Domain models and contracts remain free of DI annotations.
+
+The menu entry uses `androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel()`.
+Navigation 3's ViewModel-store decorator scopes the ViewModel to its entry;
+screens and previews receive state and callbacks without accessing Hilt.
+`GameDatabaseModule` and `GameRepositoryModule` in `GameStorageModule.kt` provide
+singleton database/repository instances.
+`InitialGameStateModule` supplies an unscoped new-save fixture in
+`ViewModelComponent`; initialization still reads the database transactionally
+and never replaces an existing save. Hilt manages dependencies; Room persists data.
+
+Versions live in the version catalog. KSP processes production and instrumentation
+sources. JVM tests construct ViewModels directly. Device tests use `HiltTestRunner`
+and place `HiltAndroidRule` before the activity rule; a debug-only Hilt activity
+hosts test Compose content. Tests replace repository bindings with `@BindValue`
+for isolated navigation, initial-state injection, and in-memory Room menu coverage.
+
+References: [Google's Hilt guide](https://developer.android.com/training/dependency-injection/hilt-android),
+[Hilt build setup](https://dagger.dev/hilt/gradle-setup.html),
+[Hilt testing](https://developer.android.com/training/dependency-injection/hilt-testing).
 
 ## Verification
 
@@ -83,8 +188,12 @@ before implementing affected behavior. This cleanup makes no such decisions.
 ./gradlew :app:connectedDebugAndroidTest
 ```
 
-The first command checks navigation policy and package boundaries, builds the
-APK, and runs Android lint. Device coverage checks screen inputs, accessible
+The first command checks pet-state appearance, explicit transitions, menu mapping,
+repository-driven loading/retry, navigation policy and package boundaries; it
+builds the APK and runs Android lint.
+Device coverage checks Room round trips, transactions, FK rollback, concurrency,
+immutable content, schema compatibility and failure preservation, live saved-game
+menu updates, screen inputs, accessible
 actions, compact/landscape layouts, Back, recreation, and saved-state restoration.
 Legacy route and back-stack fixtures check decoding the original class names;
 encoding checks enforce stable route IDs. These checks and restoration within

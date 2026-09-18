@@ -19,14 +19,20 @@ import ru.nksk.lctapp.feature.goal.navigation.goalEntry
 import ru.nksk.lctapp.feature.menu.navigation.MainMenu
 import ru.nksk.lctapp.feature.menu.navigation.mainMenuEntry
 import ru.nksk.lctapp.feature.menu.ui.MainMenuAction
+import ru.nksk.lctapp.feature.tasks.navigation.StarPlates
+import ru.nksk.lctapp.feature.tasks.navigation.PriceCheck
+import ru.nksk.lctapp.feature.tasks.navigation.Telescope
 import ru.nksk.lctapp.feature.tasks.navigation.Tasks
 import ru.nksk.lctapp.feature.tasks.navigation.tasksEntry
+import ru.nksk.lctapp.feature.tasks.ui.DeedsAction
 import ru.nksk.lctapp.feature.village.navigation.Village
 import ru.nksk.lctapp.feature.village.navigation.villageEntry
 
 /** Navigation composition root. Features own their keys and entries; screens receive callbacks. */
 @Composable
-fun LctNavHost(modifier: Modifier = Modifier) {
+fun LctNavHost(
+    modifier: Modifier = Modifier,
+) {
     val backStack = rememberNavBackStack(AppNavigationSavedStateConfiguration, MainMenu)
     val navigator = remember(backStack) { AppNavigator(backStack) }
 
@@ -53,7 +59,16 @@ fun LctNavHost(modifier: Modifier = Modifier) {
                 )
             }
             gearEntry(onBack = navigator::goBack)
-            tasksEntry(onBack = navigator::goBack)
+            tasksEntry(
+                onOpen = { source, action ->
+                    navigator.navigate(source, when (action) {
+                        DeedsAction.StarPlates -> StarPlates
+                        DeedsAction.PriceCheck -> PriceCheck
+                        DeedsAction.Telescope -> Telescope
+                    })
+                },
+                onBack = navigator::goBack,
+            )
             goalEntry(onBack = navigator::goBack)
             coinsEntry(onBack = navigator::goBack)
             villageEntry(onBack = navigator::goBack)

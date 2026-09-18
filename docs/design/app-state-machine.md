@@ -8,7 +8,8 @@ captured on 2026-09-17. Scope: the complete requested board (102:672), including
 all 102 text nodes, eight state cards, priority rules, architecture, and three
 end-to-end examples. Other boards and screens are outside this specification.
 
-Sections 1–7 organize explicit board requirements. English identifiers below are
+Sections 1–7 organize explicit board requirements and clearly labeled subsequent
+product decisions approved by the user. English identifiers below are
 documentation aliases, not prescribed Kotlin names or existing implementation.
 Section 8 records unspecified decisions; section 9 derives verification cases
 from the requirements. The appendix preserves every source text verbatim,
@@ -18,6 +19,19 @@ annotations, and no additional node descriptions. It does not supply state artwo
 
 When changing app state behavior, follow the requirements here. Do not promote
 an example into an exhaustive rule or silently resolve an unspecified decision.
+Explicit subsequent user decisions take precedence over conflicting board
+requirements. The source appendix remains unchanged as historical provenance.
+
+**Принято пользователем · D-008 · 2026-09-17:** Figma remains the base source,
+with the user's explicit refinements retained. The [decision register](decisions.md)
+records those approvals and distinguishes them from agent proposals. Apply the
+same provenance labels to subsequent decisions.
+
+**Принято пользователем · D-023 · 2026-09-18:** event eligibility must account
+for satiety and fatigue parameters, with requirements described by the event.
+The [current data-model draft](game-data-schema.md) proposes threshold fields.
+Their ranges, comparisons and relationship to the single visual state remain
+unresolved. Do not infer automatic visual transitions or unspecified thresholds.
 
 ## 1. Separate appearance from visual state
 
@@ -32,6 +46,72 @@ a special state restores that look when the resolved state is ОБЫЧНОЕ.
 
 Do not create combined states such as ГОЛОДЕН_С_БАНДАНОЙ,
 ГОЛОДЕН_С_РЮКЗАКОМ, or РАДУЕТСЯ_В_ОЧКАХ.
+
+**Принято пользователем · D-005 · 2026-09-17:** changing cosmetics updates the
+selected look; items already owned remain in the player's gear. Changing the
+selection does not remove previously owned items. The rendering contract below
+still applies: during a special state, the selected look is saved, and NORMAL
+displays the current selection.
+
+**Принято пользователем · D-017 · 2026-09-18:** an event can cause the player
+to acquire or lose an item. Reference story content must describe this consequence;
+the resulting ownership belongs to the saved player data. D-005 still governs
+cosmetic selection: changing the look alone does not remove an item. Explicit
+event-driven loss is a separate action. The selected-look policy when an equipped
+item is lost remains open; do not silently choose a fallback or infer automatic
+equipping when an item is acquired.
+
+**Принято пользователем · D-018 · 2026-09-18:** item consequences are optional.
+An event can grant and remove no items; in that case ownership remains unchanged.
+Other authored consequences, such as money or pet-state changes, are separate.
+
+**Принято пользователем · D-026 · 2026-09-18:** collecting the required items
+is sufficient for an item-collection goal; completing it does not consume or
+remove those items. They remain owned; D-029 describes subsequent item loss.
+
+**Принято пользователем · D-029 · 2026-09-19:** if a required item is later lost
+and the required set is no longer owned, the goal becomes incomplete again.
+Completion is reversible. Story rollback and an automatic visual change are
+not specified by this rule; D-030 defines when the active goal changes.
+
+**Принято пользователем · D-030 · 2026-09-19:** the next goal becomes active
+when the story advances to the next chapter.
+
+**Принято пользователем · D-031 · 2026-09-19:** advancing to the next chapter
+requires the current goal to be complete: the required items must still be owned
+when advancing. This is a necessary condition, not an automatic transition upon
+collecting the last item. Other chapter-transition conditions are not specified.
+
+**Принято пользователем · D-032 · 2026-09-19:** an authored story timeline
+contains a final lore event that advances to the next chapter; the active goal
+changes with the chapter. The completed-goal requirement from D-031 applies.
+The precise event stage and whether
+an incomplete goal blocks event entry or only the transition remain unspecified.
+This does not define how non-lore events are selected.
+
+**Принято пользователем · D-033–D-036 · 2026-09-19:** events are described by
+five content categories: state/need, random circumstance, wants, earning, and
+story progression. A want is a legitimate pleasant purchase; its category does
+not determine the fixed impact rating of a particular choice. Earning exchanges
+effort and game time for money; units and amounts remain open. D-037 specifies
+when earning is offered. Story
+events must be passed in their prerequisite order, and need not involve an item.
+Mentioning health does not define a numeric health meter or another visual state.
+The [current schema discussion](game-data-schema.md#23-типы-появление-и-прохождение-событий)
+separates these requirements from proposed event fields and activation rules.
+
+**Принято пользователем · D-037 · 2026-09-19:** the game offers an earning
+event when money is insufficient for a particular action. Actual money is shared
+according to D-040. Automatic acceptance, repeat offers, and returning to the
+original action remain unspecified.
+
+**Принято пользователем · D-038 · 2026-09-19:** goal-required items are not
+awarded by story-progression events; they can be purchased in the goal tab.
+This refines D-036 and restricts the general event-item consequences from D-017
+for this combination of event and item. Story progress and buying goal items
+are separate actions; payment uses the common balance from D-040. Prices,
+purchase availability, and obtaining goal items from other event categories
+remain unspecified.
 
 ## 2. Rendering contract
 
@@ -50,25 +130,38 @@ retained and appears again on return to ОБЫЧНОЕ.
 
 ## 3. State catalog and lifecycle
 
-Every exit below is subject to section 5: if another state is still applicable,
-transition directly to that state instead of forcing ОБЫЧНОЕ.
+**Принято пользователем · D-001 · 2026-09-17:** only one pet state is active at a
+time. There are no hidden conditions, suppressed reactions, or pending reaction
+queues. Explicitly clearing the current condition returns the pet to NORMAL.
+A quest may explicitly transition between
+its decision, need, and result states as in the source scenarios; each new state
+replaces the previous one rather than hiding it. See section 5 for the distinction
+between an explicit transition and the board's superseded fallback rule.
+
+**Принято пользователем · D-002 · 2026-09-17:** the current pet state,
+including HAPPY and UPSET, remains until an explicit gameplay event updates it.
+There is no automatic reset after a duration, animation, or generic Continue
+action. A later event can explicitly change UPSET to NORMAL, for example; the
+pet need not become NORMAL before that event is processed. This supersedes the
+board's description of HAPPY and UPSET as brief reactions. Event-specific
+mechanics are outside the initial state-model foundation.
 
 | Source state / English alias | Entry condition | Duration and exit |
 | --- | --- | --- |
 | ОБЫЧНОЕ / NORMAL | No active special state | Display the saved cosmetic look until a relevant event activates another state. |
-| ЗАДУМАЛСЯ / THINKING | Before an important financial decision; for example, buy an item now or save money toward a goal | After the decision, process its result and move to NORMAL or another applicable state. |
-| ГОЛОДЕН / HUNGRY | A story event says food is needed, or a planned food need remains uncovered | Remains active until the need is met. Food received → positive reaction → NORMAL. Controlled by game logic, never real elapsed time. |
-| УСТАЛ / TIRED | A consequence of a story decision, such as additional work for virtual money | Rest or event completion → NORMAL. The earnings example also names the next story event as an exit. No continuous energy meter or real-time energy consumption. |
-| ОБЕСПОКОЕН / WORRIED | Before the child's choice, when an unexpected mandatory expense, insufficient funds for a need, or a financial story problem occurs | After the decision, show the result reaction, then NORMAL or another applicable state. An unresolved food need can lead directly to HUNGRY. |
-| РАДУЕТСЯ / HAPPY | Brief positive reaction: goal reached, problem solved, desired item received, or adventure stage succeeded | Appropriate event → HAPPY → NORMAL. Never permanent; NORMAL restores the selected look. |
-| РАССТРОЕН / UPSET | Brief reaction: goal postponed, less advantageous option chosen, or part of the adventure temporarily unavailable | Unfavorable result → UPSET → NORMAL. Not punishment or a moral judgment. |
+| ЗАДУМАЛСЯ / THINKING | Before an important financial decision; for example, buy an item now or save money toward a goal | After the decision, an explicit outcome can replace it with another state or NORMAL. No hidden decision state remains. |
+| ГОЛОДЕН / HUNGRY | A story event says food is needed, or a planned food need remains uncovered | Remains active until the need is met. The food scenario explicitly changes it to HAPPY; a later explicit update can return it to NORMAL. Controlled by game logic, never real elapsed time. |
+| УСТАЛ / TIRED | A consequence of a story decision, such as additional work for virtual money | Rest or an explicitly defined fatigue-clearing event → NORMAL. Exact events are deferred; do not make every next event clear fatigue. No continuous energy meter or real-time energy consumption. |
+| ОБЕСПОКОЕН / WORRIED | Before the child's choice, when an unexpected mandatory expense, insufficient funds for a need, or a financial story problem occurs | After the decision, follow its explicit result transition, such as a reaction followed by NORMAL or the source example leading to HUNGRY. WORRIED does not remain hidden afterward. |
+| РАДУЕТСЯ / HAPPY | Positive outcome: goal reached, problem solved, desired item received, or adventure stage succeeded | Remains HAPPY until an explicit gameplay event changes the state. An explicit change to NORMAL restores the selected look. |
+| РАССТРОЕН / UPSET | Outcome: goal postponed, less advantageous option chosen, or part of the adventure temporarily unavailable | Remains UPSET until an explicit gameplay event changes the state, for example to NORMAL. Not punishment or a moral judgment. |
 | НУЖНА ПОМОЩЬ / NEEDS_HELP | Only an external story event, such as a twisted paw | Event → financial need → child decides where to obtain money. After resolution or event completion → NORMAL. Never caused by “bad spending.” |
 
 ## 4. Explicit event mappings and time rules
 
 These are semantic event labels from the board, not API definitions.
 
-| Event category | Event | Candidate visual state |
+| Event category | Event | Resulting visual state |
 | --- | --- | --- |
 | Story event | Food needed | ГОЛОДЕН |
 | Story event | Important choice | ЗАДУМАЛСЯ |
@@ -81,23 +174,37 @@ These are semantic event labels from the board, not API definitions.
 Game time and real-world clocks are unrelated. Do not use real-clock timers to
 drive these conditions, automatic hunger after real hours, or deterioration
 while the app is closed. Do not introduce a continuously depleting energy bar.
-Brief reactions are specified, but their exact completion mechanism is not.
+All pet states, including HAPPY and UPSET, change only through explicit event
+updates. Animation completion, screen navigation, and elapsed time do not clear
+them by themselves.
 
 ## 5. Priority and routing
 
-If several states are applicable simultaneously, display the highest-priority
-state. Lower rank numbers have higher priority.
+The approved priority order is listed below; lower rank numbers have higher
+priority. It does not authorize multiple active states.
 
-| Rank | Category | States |
+The source board orders categories but leaves ties within a category open.
+**Принято пользователем · D-003 · 2026-09-17:** the user specified the following
+complete order, resolving those ties while preserving the board's category order.
+
+| Rank | Category | State |
 | --- | --- | --- |
-| 1 | Special story condition | НУЖНА ПОМОЩЬ |
-| 2 | Active need | ГОЛОДЕН, УСТАЛ |
-| 3 | Decision state | ЗАДУМАЛСЯ, ОБЕСПОКОЕН |
-| 4 | Brief reaction | РАДУЕТСЯ, РАССТРОЕН |
-| 5 | Default appearance | ОБЫЧНОЕ |
+| 1 | Special story condition | НУЖНА ПОМОЩЬ / NEEDS_HELP |
+| 2 | Active need | ГОЛОДЕН / HUNGRY |
+| 3 | Active need | УСТАЛ / TIRED |
+| 4 | Decision state | ОБЕСПОКОЕН / WORRIED |
+| 5 | Decision state | ЗАДУМАЛСЯ / THINKING |
+| 6 | Event outcome | РАССТРОЕН / UPSET |
+| 7 | Event outcome | РАДУЕТСЯ / HAPPY |
+| 8 | Default appearance | ОБЫЧНОЕ / NORMAL |
 
-After an event, go directly to another applicable state rather than passing
-through NORMAL. Explicit example:
+**Принято пользователем · D-001 · 2026-09-17:** only one state can affect
+Ryzhik at a time. The board's simultaneous-condition selection and fallback
+rules are superseded. Do not retain a lower-priority condition to reveal later,
+and do not suppress, queue, or replay reactions. Clearing the active condition
+returns to NORMAL; it never reveals a previously hidden state.
+
+The board also gives an explicit decision-result transition:
 
 ```text
 ОБЕСПОКОЕН
@@ -105,38 +212,78 @@ through NORMAL. Explicit example:
   → ГОЛОДЕН
 ```
 
-The ordering is between categories; the board does not specify a winner between
-states within the same category. Do not infer such a winner from table order.
-Likewise, it does not define whether a suppressed brief reaction is queued,
-discarded, or resumed.
+Such a transition replaces WORRIED with HUNGRY as the result of the current
+quest's decision; it is not the activation of a hidden hunger condition. The
+same replacement principle applies to HUNGRY → HAPPY in the food scenario.
+
+Sequential event updates do not need a resolver over multiple active conditions.
+Priority does not block an explicit update to a lower-priority state, including
+NORMAL. It does not select quest outcomes or define a concurrent event-input
+policy. Future event handlers decide their explicit outcome under approved
+story rules; the state foundation only represents and applies that result.
 
 ## 6. Game-state ownership
 
+**Принято пользователем · D-039–D-040 · 2026-09-19:** the budget has four
+sections: «Нужно», «Хочу», «Коплю», and «На всякий случай». These are spending-plan
+sections; actual money is shared in one balance. The economy is part of the
+combined `GAME_STATE` from D-024. Plan units and period, overspending rules,
+actual expense tracking, and plan editing remain unspecified.
+
+The current persisted aggregate follows D-024, D-039, and D-040. Exact proposed
+columns and foreign keys are defined in the [normalized schema](schema-normalization.md).
+This layout does not prescribe merging the domain Kotlin classes.
+
 ```text
-GameState / Состояние игры
-├── PetState / Состояние питомца
-│   ├── selectedLook / выбранный образ
-│   └── visualState / визуальное состояние
-├── EconomyState / Состояние экономики
-│   ├── total balance / общий баланс
-│   ├── budget allocation / распределение бюджета
-│   ├── savings goal / накопительная цель
-│   ├── reserve / резерв
-│   └── expenses / расходы
-└── StoryState / Состояние сюжета
-    ├── current chapter / текущая глава
-    ├── current event / текущее событие
-    └── decisions made / принятые решения
+Persisted game / Сохраняемая игра
+├── GAME_STATE
+│   ├── selected look and visual state / образ и визуальное состояние
+│   ├── satiety and fatigue / сытость и усталость
+│   ├── common balance / общий денежный остаток
+│   ├── four plan sections / четыре секции плана
+│   └── story position and active event / прогресс и активное событие
+├── OWNED_ITEM / принадлежащие вещи
+└── PLAYER_DECISION / история решений
 ```
 
-Money, budget, and the savings goal must not live inside PetState.
-One story event may change EconomyState, change StoryState, and set the
-visual state together. Visual state is therefore not the whole game state.
+One outcome may change money, story position, ownership, and the visual state
+together. These changes belong to one atomic saved-game update. The pet's
+visual state is only one part of that aggregate.
 
-The board defines these responsibilities but does not prescribe data types,
-storage technology, reducer interfaces, transaction mechanics, or navigation.
+**Принято пользователем · D-004 · 2026-09-17:** closing and reopening the app must
+preserve the current game and pet state. Owned gear is also retained. Reopening
+does not reset the pet to NORMAL or advance the story merely because time passed.
+This includes HAPPY and UPSET: reopening restores the saved state until an
+explicit event changes it. Room is the approved persistent-data technology in
+AGENTS.md; this requirement does not define cloud backup or restore.
+
+**Принято пользователем · D-007 · 2026-09-17 (initial menu scope):** the original
+menu integration used an in-memory fixture without game restoration. The next
+stage, **D-043 · Принято пользователем · 2026-09-19**, requests Room implementation
+according to the current model. The menu now observes the saved game through a
+repository. Initial data is inserted only when no save exists; errors do not
+reset it. Quest progression and recurring income are not implemented by loading.
+
+The [persistence contract](room-persistence.md) defines implemented transactions,
+restoration and error handling. The [current model](game-data-schema.md) and
+[normalized schema](schema-normalization.md) describe stored data and remaining
+product questions. An active event ID still does not encode an event's detailed
+stage or interruption context; these mechanics remain future work.
+
+### Demo mini-games boundary
+
+The Tasks section includes three standalone demos described in
+[mini-games](mini-games.md). Their scores and short feedback delays do not update
+persistent game state, grant actual money or alter the pet. They are not an
+implementation of the earning-event scenario below. Integrating real rewards
+requires authored effects and the still-open earning rules; restoring a demo
+session must not execute a gameplay outcome.
 
 ## 7. Source scenarios
+
+These scenarios describe successive states of a single quest. They do not
+create concurrent or hidden conditions. Apply the subsequent decisions in
+sections 1, 3, 5, and 6 when implementing them.
 
 ### 7.1 Hunger and cosmetic restoration
 
@@ -144,11 +291,13 @@ storage technology, reducer interfaces, transaction mechanics, or navigation.
 2. Food-needed event occurs.
 3. HUNGRY: show hungry Ryzhik without the bandana.
 4. Child buys food and covers the need.
-5. Show HAPPY as a brief positive reaction.
-6. Return to NORMAL and show Ryzhik wearing the same saved bandana.
+5. An explicit food-result update changes the state to HAPPY.
+6. A later explicit update returns to NORMAL and shows Ryzhik wearing the saved
+   bandana, or the current selection if the player changed it in the meantime.
 
 The shorter cosmetic example omits the reaction step; the full hunger example
-explicitly includes it.
+explicitly includes it. Under the subsequent user decision, HAPPY remains until
+another explicit event update; there is no timed reset.
 
 ### 7.2 Financial problem
 
@@ -157,7 +306,7 @@ explicitly includes it.
 3. WORRIED.
 4. Child chooses where to get the money.
 5. Show UPSET or HAPPY depending on the result.
-6. Return to NORMAL, subject to the applicable-state routing rule.
+6. A later explicit event update returns to NORMAL.
 
 The board does not define the calculation that classifies each financial result.
 
@@ -167,20 +316,27 @@ The board does not define the calculation that classifies each financial result.
 2. Child chooses additional work.
 3. Child receives virtual money.
 4. TIRED.
-5. Next story event or rest.
-6. NORMAL, subject to the applicable-state routing rule.
+5. An explicitly defined fatigue-clearing story event or rest.
+6. NORMAL.
+
+**Принято пользователем · D-006 · 2026-09-17:** the board says "next story event / rest." The user has explicitly deferred the
+identities of fatigue-clearing events to future story design. Do not infer that
+an arbitrary next quest or opening another screen clears fatigue.
 
 ## 8. Unspecified decisions — do not invent product rules
 
-- Tie-breaking between HUNGRY and TIRED, THINKING and WORRIED, or HAPPY and UPSET.
-- Exact reaction duration and completion event, including behavior across interruption.
-- Whether lower-priority conditions/reactions are retained, queued, consumed, or replayed.
-- What happens if the selected cosmetic look changes during a special state.
-- Persistence and restoration mechanics across app/process/device restarts; the
-  requirement is to remember the selected look, not a prescribed storage solution.
-- Financial amounts, budgets, reward formulas, item costs, goal thresholds, and
-  the conditions distinguishing advantageous from unfavorable outcomes.
-- Exact story-event identities and which next event clears fatigue.
+The [decision register](decisions.md) contains current approvals. The
+[data model](game-data-schema.md#5-открытые-вопросы) lists unresolved data and
+gameplay rules. Weekly income is fixed at 100 coins; day and event counts remain
+provisional.
+
+- Detailed restoration boundaries for uncommitted UI input. Preservation of the
+  current game, every pet state including HAPPY/UPSET, and owned gear is decided;
+  cloud/device restore policy is a separate future concern.
+- Item prices, reward amounts, budget-plan period and editing rules, and
+  event-specific definitions of the fixed choice-impact ratings.
+- Exact story-event identities and fatigue-clearing events, explicitly deferred
+  to future story design. Their absence must not be filled by a generic rule.
 - Asset files for each state; the board has labeled placeholders only.
 - Navigation destinations and UI affordances for making each choice.
 
@@ -196,17 +352,30 @@ new state rules.
 - NORMAL renders each of the five documented saved looks.
 - Each of the seven special states replaces the selected cosmetic appearance.
 - Entering/exiting a special state does not erase the saved look.
+- Changing the selected look retains owned gear; NORMAL displays the current
+  selection after the special state finishes.
 - Hunger persists while the food need is unmet; buying food follows scenario 7.1.
 - Extra work grants virtual money and produces fatigue as in scenario 7.3.
-- Resolved decisions can lead directly to an applicable state without a NORMAL
-  intermediate state, including WORRIED → HUNGRY.
-- Higher-priority categories override lower-priority categories.
-- HAPPY and UPSET are brief; UPSET does not represent punishment or moral blame.
+- Exactly one pet state is active; no hidden conditions or reaction queues exist.
+- Explicit quest transitions replace the current state, including the source
+  examples WORRIED → HUNGRY and HUNGRY → HAPPY; the previous state is not retained.
+- Explicitly clearing the current condition returns to NORMAL without revealing
+  another condition. An explicit state update can replace any current state,
+  including with a lower-priority state.
+- The documented priority order is NEEDS_HELP > HUNGRY > TIRED > WORRIED >
+  THINKING > UPSET > HAPPY > NORMAL; it does not enable concurrent states.
+- Reopening preserves the current saved game and pet state, including owned gear,
+  without advancing the story or clearing the active state due to elapsed time.
+- HAPPY and UPSET persist until an explicit event changes the state, including
+  across reopening; no timer, animation completion, or generic Continue action
+  clears them. UPSET does not represent punishment or moral blame.
 - Injury comes from an external story event, never a spending penalty.
 - Real elapsed time and time while the app is closed do not cause deterioration.
 - No combined accessory-and-emotion state or continuous energy depletion exists.
-- Economy data belongs to EconomyState; story progression belongs to StoryState.
-- All three source scenarios remain supported, subject to priority/routing rules.
+- The saved aggregate contains the combined GAME_STATE, owned items and decisions;
+  chapter and goal are derived through the normalized references.
+- All three source scenarios remain supported as sequential states, subject to
+  the approved subsequent decisions and future fatigue-event definitions.
 
 ## Appendix: complete source text
 

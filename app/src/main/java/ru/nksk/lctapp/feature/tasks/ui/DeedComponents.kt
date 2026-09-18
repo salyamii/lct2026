@@ -7,17 +7,20 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,12 +31,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
@@ -46,6 +52,7 @@ fun DeedHeader(
     modifier: Modifier = Modifier,
     trailing: @Composable () -> Unit = {},
 ) {
+    val backDescription = stringResource(R.string.navigation_back)
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -60,7 +67,7 @@ fun DeedHeader(
                 .background(Color.Black.copy(alpha = 0.42f))
                 .clickable(onClick = onBack)
                 .padding(horizontal = 18.dp, vertical = 10.dp)
-                .semantics { contentDescription = "Назад" },
+                .semantics { contentDescription = backDescription },
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -131,14 +138,14 @@ fun CoinChip(text: String, modifier: Modifier = Modifier, lime: Boolean = false)
 
 /** Лаймовая пилюля-действие. */
 @Composable
-fun DeedButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun DeedButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(52.dp)
             .clip(RoundedCornerShape(30.dp))
             .background(DeedColors.Lime)
-            .clickable(onClick = onClick),
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -176,12 +183,13 @@ fun DeedButtonSoft(text: String, onClick: () -> Unit, modifier: Modifier = Modif
 
 /** Кремовый лист события с закруглённым верхом поверх ночной сцены. */
 @Composable
-fun DeedSheet(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+fun DeedSheet(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
             .background(DeedColors.Cream)
+            .navigationBarsPadding()
             .padding(horizontal = 20.dp, vertical = 18.dp),
     ) {
         content()
@@ -247,7 +255,7 @@ fun DeedCard(
                 color = DeedColors.Text.copy(alpha = 0.85f),
             )
             Spacer(Modifier.height(12.dp))
-            DeedButton("Взяться за дело", onOpen)
+            DeedButton(stringResource(R.string.deeds_start), onOpen)
         }
     }
 }
@@ -261,16 +269,11 @@ fun DeedResultSheet(
     onAgain: () -> Unit,
     onHub: () -> Unit,
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.45f)),
-        contentAlignment = Alignment.Center,
-    ) {
+    Dialog(onDismissRequest = onHub) {
         Column(
             modifier = Modifier
-                .padding(24.dp)
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .clip(RoundedCornerShape(28.dp))
                 .background(DeedColors.Cream)
                 .padding(24.dp),
@@ -287,11 +290,11 @@ fun DeedResultSheet(
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(12.dp))
-            CoinChip("+$reward монет", lime = true)
+            CoinChip(stringResource(R.string.deeds_demo_reward, reward), lime = true)
             Spacer(Modifier.height(20.dp))
-            DeedButton("Сделать ещё раз", onAgain)
+            DeedButton(stringResource(R.string.deeds_again), onAgain)
             Spacer(Modifier.height(10.dp))
-            DeedButtonSoft("К списку дел", onHub)
+            DeedButtonSoft(stringResource(R.string.deeds_back_to_list), onHub)
         }
     }
 }

@@ -5,17 +5,42 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import dagger.hilt.android.testing.BindValue
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import dagger.hilt.android.testing.UninstallModules
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import ru.nksk.lctapp.app.di.GameRepositoryModule
+import ru.nksk.lctapp.domain.game.GameRepository
 
+@UninstallModules(GameRepositoryModule::class)
+@HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class MainMenuNavigationTest {
-    @get:Rule
+    @get:Rule(order = 0)
+    val hilt = HiltAndroidRule(this)
+
+    @get:Rule(order = 1)
     val compose = createAndroidComposeRule<MainActivity>()
+
+    @Before
+    fun waitForSavedGame() {
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText(compose.activity.getString(R.string.menu_current_goal))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    @BindValue
+    @JvmField
+    val repository: GameRepository = TestGameRepository()
 
     @Test
     fun everyMenuActionOpensItsDestinationAndReturnsToTheMenu() {

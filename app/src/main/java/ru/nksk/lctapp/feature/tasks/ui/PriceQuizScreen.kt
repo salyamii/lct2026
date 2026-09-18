@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,45 +14,37 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
-import ru.nksk.lctapp.feature.tasks.logic.PriceQuizState
+import ru.nksk.lctapp.domain.minigame.PriceQuizState
 
 private val GOODS_EMOJI = listOf("🗺️", "📜", "🕯️", "🧭", "⚗️", "🏮")
 
 /** Дело «Сверка счетов»: пять вопросов, найди самую дорогую покупку. */
 @Composable
-fun PriceQuizScreen(onBack: () -> Unit, onFinish: (Int) -> Unit) {
-    var state by remember { mutableStateOf(PriceQuizState.create()) }
-
-    LaunchedEffect(state.current, state.lastCorrect) {
-        if (state.lastCorrect != null) {
-            delay(750)
-            state = state.next()
-        }
-    }
-    LaunchedEffect(state.finished) {
-        if (state.finished) onFinish(state.reward)
-    }
+fun PriceQuizScreen(
+    uiState: PriceQuizUiState,
+    onAction: (PriceQuizAction) -> Unit,
+    onBack: () -> Unit,
+) {
+    val state = uiState.game
 
     Column(
         modifier = Modifier
@@ -65,20 +58,23 @@ fun PriceQuizScreen(onBack: () -> Unit, onFinish: (Int) -> Unit) {
                 modifier = Modifier.fillMaxWidth().height(150.dp),
                 contentScale = ContentScale.Crop,
             )
-            DeedHeader("Сверка счетов", onBack = onBack)
+            DeedHeader(stringResource(R.string.deeds_price_title), onBack = onBack)
         }
-        DeedSheet(modifier = Modifier.weight(1f)) {
+        DeedSheet(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             Text(
-                "Какая покупка дороже?",
+                stringResource(R.string.deeds_price_prompt),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = Rubik,
                 color = DeedColors.Text,
             )
             Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                DeedChip("Счёт ${minOf(state.current + 1, PriceQuizState.QUESTION_COUNT)} из ${PriceQuizState.QUESTION_COUNT}")
-                CoinChip("Награда · +${state.reward}")
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                DeedChip(stringResource(R.string.deeds_question, minOf(state.current + 1, PriceQuizState.QUESTION_COUNT), PriceQuizState.QUESTION_COUNT))
+                CoinChip(stringResource(R.string.deeds_demo_reward, state.reward))
             }
             Spacer(Modifier.height(14.dp))
             if (!state.finished) {
@@ -89,24 +85,26 @@ fun PriceQuizScreen(onBack: () -> Unit, onFinish: (Int) -> Unit) {
                     InvoiceCard(
                         emoji = GOODS_EMOJI[state.current % GOODS_EMOJI.size],
                         amount = state.question.leftAmount,
-                        showAsAnswer = state.lastCorrect != null && !state.question.leftIsBigger,
-                        onClick = { state = state.answer(pickedLeft = true) },
+                        enabled = state.lastCorrect == null,
+                        showAsAnswer = uiState.leftIsAnswer,
+                        onClick = { onAction(PriceQuizAction.Answer(pickedLeft = true)) },
                         modifier = Modifier.weight(1f),
                     )
                     InvoiceCard(
                         emoji = GOODS_EMOJI[(state.current + 3) % GOODS_EMOJI.size],
                         amount = state.question.rightAmount,
-                        showAsAnswer = state.lastCorrect != null && state.question.leftIsBigger,
-                        onClick = { state = state.answer(pickedLeft = false) },
+                        enabled = state.lastCorrect == null,
+                        showAsAnswer = uiState.rightIsAnswer,
+                        onClick = { onAction(PriceQuizAction.Answer(pickedLeft = false)) },
                         modifier = Modifier.weight(1f),
                     )
                 }
                 Spacer(Modifier.height(14.dp))
                 Text(
                     when (state.lastCorrect) {
-                        true -> "Верно! Счета сходятся 🎉"
-                        false -> "Не сходится — гляди внимательнее"
-                        null -> "Тапни по товару с большей ценой"
+                        true -> stringResource(R.string.deeds_correct)
+                        false -> stringResource(R.string.deeds_incorrect)
+                        null -> stringResource(R.string.deeds_price_hint)
                     },
                     fontSize = 14.sp,
                     fontFamily = Nunito,
@@ -119,9 +117,9 @@ fun PriceQuizScreen(onBack: () -> Unit, onFinish: (Int) -> Unit) {
     if (state.finished) {
         DeedResultSheet(
             emoji = "🪙",
-            title = "Счета сверены!",
+            title = stringResource(R.string.deeds_price_complete),
             reward = state.reward,
-            onAgain = { state = PriceQuizState.create() },
+            onAgain = { onAction(PriceQuizAction.Restart) },
             onHub = onBack,
         )
     }
@@ -132,6 +130,7 @@ private fun InvoiceCard(
     emoji: String,
     amount: Int,
     showAsAnswer: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -144,12 +143,13 @@ private fun InvoiceCard(
                 if (showAsAnswer) Modifier.border(3.dp, DeedColors.Lime, shape)
                 else Modifier.border(1.dp, DeedColors.Border, shape)
             )
-            .clickable(onClick = onClick)
+            .clickable(enabled = enabled, onClick = onClick)
+            .semantics { selected = showAsAnswer }
             .padding(vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(emoji, fontSize = 44.sp)
         Spacer(Modifier.height(12.dp))
-        CoinChip("$amount монет")
+        CoinChip(stringResource(R.string.deeds_amount, amount))
     }
 }

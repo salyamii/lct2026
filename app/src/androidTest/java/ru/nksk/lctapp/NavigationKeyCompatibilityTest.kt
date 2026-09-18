@@ -19,6 +19,9 @@ import ru.nksk.lctapp.feature.day.navigation.Day
 import ru.nksk.lctapp.feature.gear.navigation.Gear
 import ru.nksk.lctapp.feature.goal.navigation.Goal
 import ru.nksk.lctapp.feature.menu.navigation.MainMenu
+import ru.nksk.lctapp.feature.tasks.navigation.StarPlates
+import ru.nksk.lctapp.feature.tasks.navigation.PriceCheck
+import ru.nksk.lctapp.feature.tasks.navigation.Telescope
 import ru.nksk.lctapp.feature.tasks.navigation.Tasks
 import ru.nksk.lctapp.feature.village.navigation.Village
 
@@ -63,6 +66,9 @@ class NavigationKeyCompatibilityTest {
             "gear" to Gear,
             "goal" to Goal,
             "tasks" to Tasks,
+            "tasks_star_plates" to StarPlates,
+            "tasks_price_check" to PriceCheck,
+            "tasks_telescope" to Telescope,
             "village" to Village,
         )
         for ((id, route) in stableRoutes) {

@@ -40,7 +40,7 @@ fun MainMenuScreen(
                     Modifier.fillMaxSize().padding(horizontal = 24.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    CharacterScene(Modifier.weight(1f).fillMaxSize())
+                    CharacterScene(state.pet, Modifier.weight(1f).fillMaxSize())
                     Column(
                         Modifier.width(sidePanelWidth)
                             .verticalScroll(rememberScrollState()),
@@ -55,7 +55,7 @@ fun MainMenuScreen(
                     Modifier.widthIn(max = 480.dp).fillMaxSize().align(Alignment.TopCenter),
                 ) {
                     MenuHud(state.coins, state.completedGoals, state.totalGoals, onAction)
-                    CharacterScene(Modifier.weight(1f).fillMaxWidth())
+                    CharacterScene(state.pet, Modifier.weight(1f).fillMaxWidth())
                     MenuActions(onAction, viewport)
                 }
             }
@@ -69,5 +69,5 @@ fun MainMenuScreen(
 @Preview(name = "Large text", widthDp = 390, heightDp = 844, fontScale = 1.5f)
 @Composable
 private fun MainMenuPreview() {
-    LCTAppTheme { MainMenuScreen(state = MainMenuDemoState, onAction = {}) }
+    LCTAppTheme { MainMenuScreen(state = MainMenuPreviewState, onAction = {}) }
 }

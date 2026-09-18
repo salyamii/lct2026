@@ -1,57 +1,49 @@
 package ru.nksk.lctapp.feature.tasks.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.Image
-import kotlinx.coroutines.delay
 import ru.nksk.lctapp.R
-import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
-import ru.nksk.lctapp.feature.tasks.logic.MemoryState
+import ru.nksk.lctapp.domain.minigame.MemoryState
 
 private val PLATE_FACES = listOf("🌙", "⭐", "🪐", "✨", "🌠", "🔭", "☄️", "🌌")
 
 /** Дело «Звёздные пласты»: сетка 4×4, собери пары созвездий — награда фиксированная. */
 @Composable
-fun MemoryGameScreen(onBack: () -> Unit, onFinish: (Int) -> Unit) {
-    var state by remember { mutableStateOf(MemoryState.deal()) }
-
-    LaunchedEffect(state.moves) {
-        if (state.pending != null) {
-            delay(700)
-            state = state.resolvePending()
-        }
-    }
-    LaunchedEffect(state.won) {
-        if (state.won) onFinish(MemoryState.REWARD)
-    }
+fun MemoryGameScreen(
+    uiState: MemoryGameUiState,
+    onAction: (MemoryGameAction) -> Unit,
+    onBack: () -> Unit,
+) {
+    val state = uiState.game
 
     Column(
         modifier = Modifier
@@ -65,45 +57,44 @@ fun MemoryGameScreen(onBack: () -> Unit, onFinish: (Int) -> Unit) {
                 modifier = Modifier.fillMaxWidth().height(150.dp),
                 contentScale = ContentScale.Crop,
             )
-            DeedHeader("Звёздные пласты", onBack = onBack)
+            DeedHeader(stringResource(R.string.deeds_star_title), onBack = onBack)
         }
-        DeedSheet(modifier = Modifier.weight(1f)) {
+        DeedSheet(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             Text(
-                "Найди пары созвездий",
+                stringResource(R.string.deeds_memory_prompt),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = Rubik,
                 color = DeedColors.Text,
             )
             Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                DeedChip("Ходы: ${state.moves}")
-                CoinChip("Награда · +${MemoryState.REWARD}")
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                DeedChip(stringResource(R.string.deeds_moves, state.moves))
+                CoinChip(stringResource(R.string.deeds_demo_reward, MemoryState.REWARD))
             }
             Spacer(Modifier.height(12.dp))
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 state.faces.chunked(4).forEachIndexed { rowIndex, rowFaces ->
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         rowFaces.forEachIndexed { columnIndex, face ->
                             val index = rowIndex * 4 + columnIndex
                             StarPlateView(
+                                index = index,
                                 face = PLATE_FACES[face],
                                 revealed = index in state.faceUp || index in state.matched,
                                 matched = index in state.matched,
                                 enabled = state.pending == null && !state.won,
                                 onClick = {
-                                    val resolved = if (state.pending != null) state.resolvePending() else state
-                                    state = resolved.tap(index)
+                                    onAction(MemoryGameAction.Tap(index))
                                 },
                                 modifier = Modifier.weight(1f),
                             )
@@ -118,9 +109,9 @@ fun MemoryGameScreen(onBack: () -> Unit, onFinish: (Int) -> Unit) {
     if (state.won) {
         DeedResultSheet(
             emoji = "🌌",
-            title = "Все созвездия на местах!",
+            title = stringResource(R.string.deeds_memory_complete),
             reward = MemoryState.REWARD,
-            onAgain = { state = MemoryState.deal() },
+            onAgain = { onAction(MemoryGameAction.Restart) },
             onHub = onBack,
         )
     }
@@ -128,6 +119,7 @@ fun MemoryGameScreen(onBack: () -> Unit, onFinish: (Int) -> Unit) {
 
 @Composable
 private fun StarPlateView(
+    index: Int,
     face: String,
     revealed: Boolean,
     matched: Boolean,
@@ -135,6 +127,11 @@ private fun StarPlateView(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val description = when {
+        matched -> stringResource(R.string.deeds_card_matched, index + 1, face)
+        revealed -> stringResource(R.string.deeds_card_open, index + 1, face)
+        else -> stringResource(R.string.deeds_card_hidden, index + 1)
+    }
     val shape = RoundedCornerShape(14.dp)
     val background = when {
         matched -> DeedColors.Lime.copy(alpha = 0.30f)
@@ -144,6 +141,7 @@ private fun StarPlateView(
     Box(
         modifier = modifier
             .aspectRatio(1f)
+            .semantics { contentDescription = description }
             .clip(shape)
             .background(background)
             .then(if (revealed && !matched) Modifier.border(1.5.dp, DeedColors.Border, shape) else Modifier)

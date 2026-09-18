@@ -1,4 +1,4 @@
-package ru.nksk.lctapp.feature.tasks.logic
+package ru.nksk.lctapp.domain.minigame
 
 import kotlin.random.Random
 
@@ -20,14 +20,14 @@ data class TargetStopState(
 
     /**
      * Остановка маркера в позиции [position] (0..100). Фиксирует результат
-     * раунда и готовит новую зону; переход к следующему раунду — через [next].
+     * раунда, сохраняя его зону до перехода к следующему раунду через [next].
      */
-    fun stop(position: Int, random: Random = Random.Default): TargetStopState {
+    fun stop(position: Int): TargetStopState {
         if (finished || lastHit != null) return this
         val clamped = position.coerceIn(0, 100)
         val hit = clamped >= zoneStart && clamped < zoneStart + ZONE_WIDTH
         return TargetStopState(
-            zoneStart = random.nextInt(MIN_ZONE_START, MAX_ZONE_START + 1),
+            zoneStart = zoneStart,
             round = round + 1,
             hits = if (hit) hits + 1 else hits,
             lastHit = hit,
@@ -35,9 +35,9 @@ data class TargetStopState(
     }
 
     /** Переход к следующему раунду после показа результата. */
-    fun next(): TargetStopState {
+    fun next(random: Random = Random.Default): TargetStopState {
         if (finished || lastHit == null) return this
-        return copy(lastHit = null)
+        return copy(lastHit = null, zoneStart = random.nextInt(MIN_ZONE_START, MAX_ZONE_START + 1))
     }
 
     companion object {

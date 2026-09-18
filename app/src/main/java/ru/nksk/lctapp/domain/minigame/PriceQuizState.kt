@@ -1,4 +1,4 @@
-package ru.nksk.lctapp.feature.tasks.logic
+package ru.nksk.lctapp.domain.minigame
 
 import kotlin.random.Random
 

@@ -40,11 +40,21 @@ is not a persistent tab bar requiring independent stacks.
 | Village | `Village` |
 | Continue day | `Day` |
 
-The feature entries currently display a shared placeholder with Back. Replace
-that content as each feature is implemented; navigation already works. The menu
-artwork and UI state remain owned by the menu. Its entry explicitly supplies
-`MainMenuDemoState`; the coin/goal values are a design fixture, not persisted game
-data. See [project architecture](architecture.md) for layer ownership.
+Five feature entries display a shared placeholder with Back. Tasks displays the
+mini-game hub and registers `StarPlates`, `PriceCheck` and `Telescope` with stable
+IDs `tasks_star_plates`, `tasks_price_check` and `tasks_telescope`. The app host
+maps `DeedsAction` to those keys. Each game entry obtains its Hilt ViewModel and
+collects its state with lifecycle awareness. Back pops the game entry to Tasks;
+leaving that entry discards its demo session. Navigation keys contain no scores
+or domain snapshots. The menu
+artwork and UI state remain owned by the menu. The entry obtains its ViewModel
+with `hiltViewModel()`; Hilt injects the domain `GameRepository` and new-save fixture.
+The ViewModel initializes
+only a missing save and observes persisted state, with explicit loading and error
+states and retry. The entry collects `uiState` with lifecycle awareness. The menu
+maps saved balance and pet appearance; the adventure counter remains a display
+fixture. Navigation keys contain no game snapshot. See
+[project architecture](architecture.md) for ownership.
 
 ## Adding a screen
 
@@ -66,8 +76,8 @@ data. See [project architecture](architecture.md) for layer ownership.
    behavior changes. Reserve the no-argument `goBack()` for `NavDisplay` system Back.
 
 This structure can move into feature `api` (keys) and `impl` (entries/screens)
-Gradle modules later. Dependency injection, multiple stacks, custom scenes and
-deep links should be added when a real feature needs them.
+Gradle modules later. Hilt provides the menu ViewModel within its entry scope.
+Multiple stacks, custom scenes and deep links should be added when needed.
 
 ## Verification
 
@@ -77,7 +87,8 @@ deep links should be added when a real feature needs them.
 ```
 
 Instrumentation covers all seven menu entry points, UI/system Back, activity
-recreation and saved-state restoration of all six feature routes. Existing menu
+recreation and saved-state restoration of all six feature routes and the three
+mini-game routes. Existing menu
 tests cover accessible callbacks and compact/landscape layouts at large text.
 Serialization tests check stable IDs and legacy route/back-stack payloads.
 Payload compatibility and restoration within the current build do not prove

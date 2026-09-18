@@ -1,0 +1,41 @@
+package ru.nksk.lctapp.data.game.local
+
+import android.content.Context
+import androidx.room3.Database
+import androidx.room3.Room
+import androidx.room3.RoomDatabase
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+
+@Database(
+    entities = [
+        GoalEntity::class,
+        ItemEntity::class,
+        ChapterEntity::class,
+        GameDayEntity::class,
+        EventEntity::class,
+        DayEventEntity::class,
+        EventChoiceEntity::class,
+        GoalRequiredItemEntity::class,
+        EventItemEffectEntity::class,
+        ChoiceItemEffectEntity::class,
+        GameStateEntity::class,
+        PlayerDecisionEntity::class,
+        OwnedItemEntity::class,
+    ],
+    version = 1,
+    exportSchema = true,
+)
+internal abstract class GameDatabase : RoomDatabase() {
+    abstract fun gameStateDao(): GameStateDao
+    abstract fun storyContentDao(): StoryContentDao
+
+    companion object {
+        const val FILE_NAME = "ryzhik-game.db"
+
+        fun open(context: Context, name: String = FILE_NAME): GameDatabase =
+            Room.databaseBuilder<GameDatabase>(context.applicationContext, name)
+                .setDriver(BundledSQLiteDriver())
+                // Future versions must register tested, data-preserving migrations here.
+                .build()
+    }
+}
