@@ -1,0 +1,26 @@
+package ru.nksk.lctapp.data.game.local
+
+import androidx.room3.ColumnInfo
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
+import androidx.room3.ForeignKey
+import androidx.room3.Index
+
+@Entity(
+    tableName = "OWNED_ITEM",
+    foreignKeys = [
+        ForeignKey(entity = GameStateEntity::class, parentColumns = ["id"], childColumns = ["game_state_id"]),
+        ForeignKey(entity = ItemEntity::class, parentColumns = ["id"], childColumns = ["item_id"]),
+    ],
+    indices = [
+        Index(value = ["game_state_id", "position"], unique = true),
+        Index(value = ["item_id"]),
+    ],
+)
+internal data class OwnedItemEntity(
+    @PrimaryKey
+    @ColumnInfo(name = "id") val id: String,
+    @ColumnInfo(name = "game_state_id") val gameStateId: String,
+    @ColumnInfo(name = "position") val position: Int,
+    @ColumnInfo(name = "item_id") val itemId: String,
+)

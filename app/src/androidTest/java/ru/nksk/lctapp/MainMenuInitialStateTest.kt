@@ -31,8 +31,9 @@ class MainMenuInitialStateTest {
             economy = initial.economy.copy(balance = 3_000_000_000L),
             pet = PetState(PetLook.BANDANA, PetVisualState.HUNGRY),
         )
+        val repository = TestGameRepository(game)
         compose.setContent {
-            LCTAppTheme { LctNavHost(initialGameState = game) }
+            LCTAppTheme { LctNavHost(gameRepository = repository, initialGameState = initial) }
         }
 
         compose.onNodeWithText("3000000000", useUnmergedTree = true).assertIsDisplayed()

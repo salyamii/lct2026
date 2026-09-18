@@ -11,7 +11,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import ru.nksk.lctapp.feature.menu.ui.MainMenuAction
 import ru.nksk.lctapp.domain.game.GameState
-import ru.nksk.lctapp.feature.menu.ui.MainMenuScreen
+import ru.nksk.lctapp.feature.menu.ui.MainMenuContent
+import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.feature.menu.ui.MainMenuViewModel
 
 @Serializable
@@ -19,15 +20,17 @@ import ru.nksk.lctapp.feature.menu.ui.MainMenuViewModel
 data object MainMenu : NavKey
 
 fun EntryProviderScope<NavKey>.mainMenuEntry(
+    gameRepository: GameRepository,
     initialGameState: GameState,
     onAction: (MainMenu, MainMenuAction) -> Unit,
 ) {
     entry<MainMenu> { source ->
         val lifecycle = LocalLifecycleOwner.current.lifecycle
-        val viewModel = viewModel { MainMenuViewModel(initialGameState) }
+        val viewModel = viewModel { MainMenuViewModel(gameRepository, initialGameState) }
         val state by viewModel.uiState.collectAsStateWithLifecycle()
-        MainMenuScreen(
+        MainMenuContent(
             state = state,
+            onRetry = viewModel::retry,
             onAction = { action ->
                 // Ignore events from an outgoing entry while a transition is in progress.
                 if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {

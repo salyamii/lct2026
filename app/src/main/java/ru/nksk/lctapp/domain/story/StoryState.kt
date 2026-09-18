@@ -1,14 +1,18 @@
 package ru.nksk.lctapp.domain.story
 
-/** Progress references; story content and progression rules are defined by future features. */
+/** Chapter and goal are resolved through day -> chapter -> goal in the content catalog. */
 data class StoryState(
-    val currentChapterId: String?,
-    val currentEventId: String?,
+    val currentDayId: String?,
+    val nextScriptPosition: Int?,
+    val activeEventId: String?,
     val decisions: List<StoryDecision>,
-)
+) {
+    init {
+        require(currentDayId != null || nextScriptPosition == null) {
+            "A script position requires a current day"
+        }
+    }
+}
 
-/** Identifies a recorded choice without interpreting its financial or pet-state outcome. */
-data class StoryDecision(
-    val eventId: String,
-    val choiceId: String,
-)
+/** Stable occurrence ID. Repeating a choice creates another occurrence, not another definition. */
+data class StoryDecision(val id: String, val choiceId: String)

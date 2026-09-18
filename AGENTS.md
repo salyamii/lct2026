@@ -43,9 +43,10 @@ the [current data model](docs/design/game-data-schema.md),
 [normalized schema](docs/design/schema-normalization.md),
 [persistence requirements](docs/design/room-persistence.md), and
 [decision register](docs/design/decisions.md). The normalized schema is the single
-source for the proposed tables, fields, keys, and dependencies. Preserve the
-distinction between approved product rules and technical proposals. Room is not
-implemented merely because the design is documented.
+source for the tables, fields, keys, and dependencies implemented in Room v1
+(D-043). Preserve the distinction between approved product rules, implementation
+choices, and open gameplay questions. Read the exported schema before changing
+entities and provide data-preserving migrations for subsequent versions.
 
 - Persist one complete game snapshot through the aggregate repository; one
   gameplay outcome must commit its pet, economy, and story changes atomically.

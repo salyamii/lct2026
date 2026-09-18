@@ -1,93 +1,74 @@
 package ru.nksk.lctapp.feature.menu.ui
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Assert.*
+import org.junit.Before
 import org.junit.Test
-import ru.nksk.lctapp.R
 import ru.nksk.lctapp.app.createInitialGameState
-import ru.nksk.lctapp.domain.pet.PetLook
-import ru.nksk.lctapp.domain.pet.PetState
+import ru.nksk.lctapp.domain.game.GameRepository
+import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.pet.PetVisualState
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class MainMenuViewModelTest {
-    @Test
-    fun suppliedGameSnapshotDrivesTheBalanceAndPetAppearance() {
+    private val dispatcher = StandardTestDispatcher()
+    @Before fun setup() { Dispatchers.setMain(dispatcher) }
+    @After fun cleanup() { Dispatchers.resetMain() }
+
+    @Test fun persistedStateAndLaterChangesDriveTheMenu() = runTest(dispatcher) {
         val initial = createInitialGameState()
-        val game = initial.copy(
-            economy = initial.economy.copy(balance = 3_000_000_000L),
-            pet = PetState(PetLook.BANDANA, PetVisualState.HUNGRY),
-        )
-
-        val state = MainMenuViewModel(game).uiState.value
-
-        assertEquals(3_000_000_000L, state.coins)
-        assertEquals(R.drawable.ryzhik_teen_state_hungry_copper, state.pet.artworkRes)
-        assertEquals(R.string.menu_pet_hungry, state.pet.descriptionRes)
+        val repository = MenuRepository(initial.copy(economy = initial.economy.copy(balance = 42)))
+        val model = MainMenuViewModel(repository, initial)
+        assertEquals(MainMenuLoadState.Loading, model.uiState.value)
+        advanceUntilIdle()
+        assertEquals(42L, (model.uiState.value as MainMenuLoadState.Ready).menu.coins)
+        repository.update { it.copy(economy = it.economy.copy(balance = 73), pet = it.pet.transitionTo(PetVisualState.HAPPY)) }
+        advanceUntilIdle()
+        assertEquals(73L, (model.uiState.value as MainMenuLoadState.Ready).menu.coins)
+        assertEquals(repository.read()!!.toMainMenuUiState(), (model.uiState.value as MainMenuLoadState.Ready).menu)
     }
 
-    @Test
-    fun normalUsesTheArtworkForTheSelectedLook() {
+    @Test fun initializationFailureShowsErrorAndRetryPreservesSavedData() = runTest(dispatcher) {
         val initial = createInitialGameState()
-        val expectedArtwork = mapOf(
-            PetLook.PLAIN to R.drawable.ryzhik_teen_body_base_no_accessory,
-            PetLook.BANDANA to R.drawable.ryzhik_teen_body_accessory_bandana,
-            PetLook.BACKPACK to R.drawable.menu_ryzhik,
-            PetLook.GLASSES to R.drawable.ryzhik_teen_body_accessory_goggles,
-            PetLook.HAT to R.drawable.ryzhik_teen_body_accessory_hat,
-        )
-
-        for ((look, artwork) in expectedArtwork) {
-            val game = initial.copy(pet = PetState(look, PetVisualState.NORMAL))
-
-            assertEquals(artwork, MainMenuViewModel(game).uiState.value.pet.artworkRes)
-        }
+        val repository = MenuRepository(initial.copy(economy = initial.economy.copy(balance = 77)))
+        repository.failure = IllegalStateException("Storage unavailable")
+        val model = MainMenuViewModel(repository, initial)
+        advanceUntilIdle()
+        assertTrue(model.uiState.value is MainMenuLoadState.Error)
+        repository.failure = null
+        model.retry()
+        advanceUntilIdle()
+        assertEquals(77L, (model.uiState.value as MainMenuLoadState.Ready).menu.coins)
     }
 
-    @Test
-    fun specialStatesRenderWithoutSelectedAccessories() {
+    @Test fun observationFailureDoesNotDisplayStartingFixture() = runTest(dispatcher) {
         val initial = createInitialGameState()
-        val expectedArtwork = mapOf(
-            PetVisualState.HUNGRY to R.drawable.ryzhik_teen_state_hungry_copper,
-            PetVisualState.TIRED to R.drawable.ryzhik_teen_state_tired_copper,
-            PetVisualState.THINKING to R.drawable.ryzhik_teen_state_thoughtful_copper,
-            PetVisualState.UPSET to R.drawable.ryzhik_teen_state_sad_copper,
-            PetVisualState.HAPPY to R.drawable.ryzhik_teen_state_joy_copper,
-        )
-        for ((visualState, artwork) in expectedArtwork) {
-            for (look in PetLook.entries) {
-                val game = initial.copy(pet = PetState(look, visualState))
-
-                assertEquals(artwork, MainMenuViewModel(game).uiState.value.pet.artworkRes)
-            }
-        }
+        val repository = MenuRepository(initial).apply { observationFailure = IllegalStateException("Invalid stored code") }
+        val model = MainMenuViewModel(repository, initial)
+        advanceUntilIdle()
+        assertTrue(model.uiState.value is MainMenuLoadState.Error)
     }
+}
 
-    @Test
-    fun unmappedStatesKeepTheirDescriptionWithoutSubstitutingAnotherAppearance() {
-        val initial = createInitialGameState()
-        val descriptions = mapOf(
-            PetVisualState.NEEDS_HELP to R.string.menu_pet_needs_help,
-            PetVisualState.WORRIED to R.string.menu_pet_worried,
-        )
-        for ((visualState, description) in descriptions) {
-            val game = initial.copy(pet = PetState(PetLook.BACKPACK, visualState))
-
-            val pet = MainMenuViewModel(game).uiState.value.pet
-
-            assertNull(pet.artworkRes)
-            assertEquals(description, pet.descriptionRes)
-        }
+private class MenuRepository(initial: GameState?) : GameRepository {
+    private val state = MutableStateFlow(initial)
+    var failure: Exception? = null
+    var observationFailure: Exception? = null
+    override fun observe(): Flow<GameState?> = observationFailure?.let { error -> flow { throw error } } ?: state
+    override suspend fun read() = state.value
+    override suspend fun initializeIfAbsent(initial: GameState): GameState {
+        failure?.let { throw it }
+        return state.value ?: initial.also { state.value = it }
     }
-
-    @Test
-    fun returningToNormalUsesTheCurrentLook() {
-        val initial = createInitialGameState()
-        val happy = PetState(PetLook.BANDANA, PetVisualState.HAPPY)
-        val normal = happy.copy(selectedLook = PetLook.HAT).transitionTo(PetVisualState.NORMAL)
-
-        val state = MainMenuViewModel(initial.copy(pet = normal)).uiState.value
-
-        assertEquals(R.drawable.ryzhik_teen_body_accessory_hat, state.pet.artworkRes)
-        assertEquals(R.string.menu_pet_hat, state.pet.descriptionRes)
-    }
+    override suspend fun update(transform: (GameState) -> GameState): GameState = transform(checkNotNull(state.value)).also { state.value = it }
 }

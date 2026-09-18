@@ -2,8 +2,8 @@
 
 LCTApp uses one Android Gradle module (`:app`) with explicit package boundaries.
 The current UI is a menu and six navigable placeholders. Pure Kotlin game-state
-models feed the menu through an in-memory ViewModel; game persistence and
-restoration are not implemented yet. The [state-machine specification](design/app-state-machine.md)
+models feed the menu through a repository-backed ViewModel. Room persists the
+game and reference catalog locally; Hilt owns their application-scoped instances. The [state-machine specification](design/app-state-machine.md)
 defines approved state behavior and records future gameplay decisions still open.
 
 ## Ownership
@@ -12,8 +12,11 @@ All paths below are relative to `app/src/main/java/ru/nksk/lctapp/`.
 
 | Package / file | Responsibility | App dependencies allowed |
 | --- | --- | --- |
-| `MainActivity.kt` | Android activity and system bars | `app` |
-| `app/LctApp.kt` | Theme and application composition | Features, shared UI |
+| `MainActivity.kt` | Android activity, system bars, Hilt entry point | `app`, `domain/game/GameRepository` |
+| `app/LctApp.kt` | Theme and application composition | Features, shared UI, domain contracts |
+| `app/di`, `app/LctApplication.kt` | Hilt application graph and singleton database/repositories | Data and domain |
+| `domain` | Pure Kotlin game snapshots, reference content, repository contracts | Kotlin, coroutines/Flow |
+| `data/game` | Room repositories, mapping, atomic writes, immutable content installation | Data and domain |
 | `app/navigation` | Back stack, navigation policy, serializer registration, cross-feature wiring | Feature navigation contracts and UI actions |
 | `feature/<name>/navigation` | Stable route keys, entry registration, lifecycle-aware callbacks | Own feature, shared UI |
 | `feature/<name>/ui` | ViewModels, screen state, actions, rendering, feature-specific components | Own UI, shared UI, domain contracts |
@@ -44,97 +47,87 @@ mutate a back stack. See [navigation](navigation.md) for registration and restor
 
 ## Current menu data
 
-`app/InitialGameState.kt` supplies temporary starting data: 100 coins, NORMAL
-Ryzhik with BACKPACK selected, no current chapter/event or recorded decisions,
-and empty financial details. These are initialization fixtures, not permanent
-economy rules or a registered first quest. `LctNavHost` accepts the snapshot and
-passes it to the menu entry's `MainMenuViewModel` constructor. The entry collects
-the ViewModel's read-only `StateFlow<MainMenuUiState>` with lifecycle awareness.
+`MainActivity` is a Hilt entry point and passes the domain `GameRepository` to
+`LctApp` and `LctNavHost`. The host supplies it and `createInitialGameState()` to
+the entry-scoped `MainMenuViewModel` by constructor. The ViewModel initializes a
+save only if absent, then observes Room through the repository. The entry collects
+its immutable `StateFlow<MainMenuLoadState>` with lifecycle awareness.
 
-`MainMenuUiStateMapper` projects the domain balance without narrowing its `Long`
-value and maps `PetState.appearance` to presentation resources. The existing
-adventure title and zero-of-four counter remain explicit display fixtures:
-neither financial savings nor the number of story decisions defines that
-counter. `MainMenuPreviewState` is used only by previews and UI tests.
+Loading, ready and error are explicit presentation states. A failed read or write
+shows retry; it never substitutes the initial fixture for saved data. The current
+fixture is 100 coins, NORMAL/BACKPACK, zero satiety/fatigue and plan allocations,
+no story references, decisions or owned items. These values are technical starting
+data, not approved parameter ranges, weekly income or authored story content.
+The catalog starts empty until actual definitions are installed.
 
-`MainMenuScreen` continues to receive state and callbacks. Character artwork and
-its localized description are now explicit inputs. The normal backpack reuses
-`menu_ryzhik`; other verified mappings reuse the bundled teen collection. WORRIED
-and NEEDS_HELP have no verified dedicated artwork mapping and currently render
-their state label. See [menu artwork mappings](design/README.md#pet-state-artwork).
+`MainMenuUiStateMapper` projects the saved `Long` balance and pet appearance.
+The adventure title and zero-of-four counter remain display fixtures; they are
+not calculated from savings or decision counts. `MainMenuPreviewState` is only
+for previews and UI tests. The loading/error wrapper does not alter menu artwork.
+Normal backpack uses `menu_ryzhik`; other verified mappings use bundled teen art.
+WORRIED and NEEDS_HELP still show their labels without substitute artwork.
 
-Every new menu ViewModel starts from its supplied snapshot. It has no game
-`SavedStateHandle`, database, or disk loading; normal ViewModel retention during
-configuration changes is not saved-game restoration. Opening destinations still
-does not mutate game state. Existing navigation-stack restoration is independent.
+Navigation changes do not mutate game data. Route restoration is separate from
+Room restoration. Screen UI receives immutable values and callbacks; no Room,
+repository writes or navigation objects belong in screen rendering.
 
-The menu's layout, HUD, action panel, scene/background, text, and artwork decoder
-have separate files inside the feature. Their composables retain local visual
-state only, such as scroll position and background alignment.
-
-## Adding real game data
-
-The state foundation is already available under `domain`:
+## Domain and persistence
 
 | Package / model | Responsibility |
 | --- | --- |
-| `domain/game/GameState` | Compose the pet, economy, and story snapshots |
-| `domain/pet/PetState` | One current visual state and the independently saved selected look |
-| `domain/pet/PetVisualState` | All eight states with the approved priority metadata |
-| `domain/pet/PetLook` | The five documented cosmetic looks |
-| `domain/pet/PetAppearance` | Select the saved look in NORMAL or a complete special-state appearance |
-| `domain/economy/EconomyState` | Balance, budget allocations, savings goal, reserve, and expenses |
-| `domain/story/StoryState` | Current chapter/event references and recorded decisions |
+| `domain/game/GameState` | Pet, economy, story, satiety, fatigue and ordered owned-item occurrences |
+| `domain/game/GameRepository` | Observe/read, initialize-if-absent, transactional aggregate update |
+| `domain/pet` | One persistent visual state, independent selected look and appearance projection |
+| `domain/economy` | Shared balance and four independent budget-plan values |
+| `domain/story` | Current day, script position, active event and ordered decision occurrences |
+| `domain/content` | Reference definitions and the content repository interface |
+| `data/game/local` | 13 Room entities, DAO primitives, explicit codes and mapping |
+| `data/game` | Aggregate transactions and immutable reference-content installation |
 
-`PetState.transitionTo` applies an explicit state outcome while retaining the
-selected look. It does not validate which quest may request that outcome or
-calculate rewards. All states, including HAPPY and UPSET, remain until an
-explicit update. Priority does not reject an update to a lower-ranked state.
-There are no hidden conditions, timers, reaction queues, or automatic resets.
-`PetAppearance` contains domain values only; Android drawable selection belongs
-to the consuming feature's presentation code.
+`PetState.transitionTo` retains the selected look and explicitly replaces the one
+visual state. HAPPY/UPSET persist until another explicit change. There are no
+hidden states, timers, automatic resets or automatic event effects.
 
-The snapshot constructors require their data explicitly. They supply no starting
-balance, initial quest, prices, or reward formulas. Economy amounts use `Long`
-virtual currency units; this representation does not define budget arithmetic
-or whether reserve/savings are included in total balance. Story IDs refer to
-future content without registering placeholder quests. Collection properties
-use Kotlin read-only collection types; producers must not mutate their backing
-collections after publishing a snapshot.
+The Room v1 schema follows the [normalized model](design/schema-normalization.md).
+`GAME_STATE` combines scalar pet, economy and progression fields;
+`OWNED_ITEM` and `PLAYER_DECISION` hold ordered occurrences. Chapter and goal are
+resolved through reference relationships; event and impact come from the selected
+choice. These values are not duplicated in the save. Repository contracts and
+Kotlin domain models carry no Android or Room annotations.
 
-These domain models are neither Room entities nor screen `UiState`. The menu
-ViewModel maps the initial snapshot today. A future working feature will add
-normalized persistence and repository observation instead of introducing an
-unused data layer for the initial-state binding.
+`GameRepository.update(transform)` reads the latest complete state inside a
+write transaction. The caller supplies a pure transformation of that argument;
+all resulting pet, money, story, item and decision changes commit together.
+Callers must not close over a stale UI snapshot or perform external effects in
+the transform. Gameplay guards and occurrence/idempotency rules belong to future
+domain operations, not this generic storage primitive. UI observation and
+initialization never execute content effects or grant recurring income.
 
-The [current data model](design/game-data-schema.md) describes the agreed gameplay
-requirements and remaining questions. The [normalized schema](design/schema-normalization.md)
-defines proposed tables, keys, and dependencies; the
-[decision register](design/decisions.md) distinguishes approved rules from those
-technical proposals. Follow the [persistence requirements](design/room-persistence.md)
-for atomic writes, data integrity, restoration, and migrations. The app still uses
-the in-memory path described above; existing Kotlin classes do not constrain the
-new database design.
+`StoryContentRepository.install` atomically adds definitions and accepts repeated
+identical rows. It rejects replacing existing IDs or adding choices/effects to an
+existing event, effects to a choice, requirements to a goal, or schedule entries
+to an existing day. Install each complete definition with its children. Revised
+content requires new IDs; old definitions remain readable for saved decisions.
+The combined catalog is checked against the STORY/goal-item restriction D-038.
 
-Add layers as a working feature requires them; do not create empty repositories,
-use cases, ViewModels, or dependency injection containers for placeholders.
+Hilt provides one `GameDatabase` using Room 3 and `BundledSQLiteDriver`, plus the
+two repository implementations. Suspend DAO queries and transactional reads keep
+SQLite work off the UI thread. Database invalidation reloads the entire saved
+aggregate in a read transaction; independent table flows are not combined into
+partially updated game snapshots. Storage errors propagate to callers.
 
-- `domain/<area>` owns pure Kotlin models and will own repository interfaces and
-  business operations. No Android, Compose, navigation, database, or
-  serialization annotations belong here. Coroutine/Flow APIs may be used.
-- `data/<area>` will implement those interfaces, coordinate data sources, and
-  map storage/network representations into domain models. It must not depend
-  on features, shared UI, or app wiring.
-- A feature's ViewModel will consume domain contracts and map results into UI
-  state. Collect observable state with lifecycle awareness at its entry/route;
-  continue passing values and callbacks to stateless screens.
-- Wire concrete dependencies in `app`. Use constructor injection with Hilt when
-  a working feature needs a real dependency graph; do not add it for placeholders.
+The exported [version 1 schema](../app/schemas/ru.nksk.lctapp.data.game.local.GameDatabase/1.json)
+is the migration baseline. There is no earlier on-disk Room schema to migrate.
+Every future version requires explicit, data-preserving migrations and tests;
+no destructive fallback is configured. Database files are excluded from Android
+cloud backup and device transfer until their policy is designed. Local app
+reopening restores the existing database without using real elapsed time.
 
-Persistent game state belongs outside navigation keys. Keep selected appearance
-and visual state in PetState, financial state in EconomyState, and story
-progression in StoryState. Resolve the product specification's open decisions
-when implementing the affected gameplay; they do not block the state foundation.
+See the [current model](design/game-data-schema.md),
+[decision register](design/decisions.md) and
+[persistence contract](design/room-persistence.md). Open questions such as event
+stages, prices, time/effort units and completion guards remain open. No unused
+networking, WorkManager or DataStore dependencies were added.
 
 ## Verification
 
@@ -144,8 +137,11 @@ when implementing the affected gameplay; they do not block the state foundation.
 ```
 
 The first command checks pet-state appearance, explicit transitions, menu mapping,
-navigation policy, and package boundaries, builds the APK, and runs Android lint.
-Device coverage checks the initial domain-to-menu binding, screen inputs, accessible
+repository-driven loading/retry, navigation policy and package boundaries; it
+builds the APK and runs Android lint.
+Device coverage checks Room round trips, transactions, FK rollback, concurrency,
+immutable content, schema compatibility and failure preservation, live saved-game
+menu updates, screen inputs, accessible
 actions, compact/landscape layouts, Back, recreation, and saved-state restoration.
 Legacy route and back-stack fixtures check decoding the original class names;
 encoding checks enforce stable route IDs. These checks and restoration within
