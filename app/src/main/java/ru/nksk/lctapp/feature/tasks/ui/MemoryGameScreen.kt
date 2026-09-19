@@ -47,18 +47,15 @@ private val PAIR_ART = listOf(
     R.drawable.deed_pair_backpack,
 )
 
-/** Дело «Звёздные пласты»: сетка 4×4, собери пары созвездий — награда фиксированная. */
+/** Shared pair-finding board for training and offered deeds. */
 @Composable
 fun MemoryGameScreen(
     uiState: MemoryGameUiState,
     onAction: (MemoryGameAction) -> Unit,
     onBack: () -> Unit,
+    deed: DeedGamePresentation? = null,
 ) {
     val state = uiState.game
-    androidx.activity.compose.BackHandler(enabled = uiState.session.saving) { }
-    if (!state.won && MiniGameAccessGate(
-        uiState.session, { onAction(MemoryGameAction.Retry) }, onBack,
-    )) return
 
     Column(
         modifier = Modifier
@@ -72,11 +69,11 @@ fun MemoryGameScreen(
                 modifier = Modifier.fillMaxWidth().height(150.dp),
                 contentScale = ContentScale.Crop,
             )
-            DeedHeader(stringResource(R.string.deeds_star_title), onBack = onBack)
+            DeedHeader(deed?.title ?: stringResource(R.string.deeds_star_title), onBack = onBack)
         }
         DeedSheet(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             Text(
-                stringResource(R.string.deeds_memory_prompt),
+                if (deed != null) "Найди одинаковые пары. Чем меньше ошибок, тем больше награда." else stringResource(R.string.deeds_memory_prompt),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = Rubik,
@@ -88,7 +85,8 @@ fun MemoryGameScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 DeedChip(stringResource(R.string.deeds_moves, state.moves))
-                CoinChip(stringResource(R.string.deeds_demo_reward, MemoryState.REWARD))
+                CoinChip(deed?.let { "Награда до ${it.maximumReward} монет" }
+                    ?: stringResource(R.string.deeds_demo_reward, MemoryState.REWARD))
             }
             Spacer(Modifier.height(12.dp))
             Column(
@@ -107,7 +105,7 @@ fun MemoryGameScreen(
                                 face = PAIR_ART[face],
                                 revealed = index in state.faceUp || index in state.matched,
                                 matched = index in state.matched,
-                                enabled = state.pending == null && !state.won,
+                                enabled = state.pending == null && !state.won && deed?.canPlay != false,
                                 onClick = {
                                     onAction(MemoryGameAction.Tap(index))
                                 },
@@ -121,15 +119,13 @@ fun MemoryGameScreen(
         }
     }
 
-    if (state.won) {
+    if (state.won && deed == null) {
         DeedResultSheet(
             emoji = "🌌",
             title = stringResource(R.string.deeds_memory_complete),
             reward = MemoryState.REWARD,
             onAgain = { onAction(MemoryGameAction.Restart) },
             onHub = onBack,
-            session = uiState.session,
-            onRetry = { onAction(MemoryGameAction.Retry) },
         )
     }
 }

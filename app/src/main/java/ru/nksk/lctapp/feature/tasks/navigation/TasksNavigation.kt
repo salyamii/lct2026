@@ -1,6 +1,9 @@
 package ru.nksk.lctapp.feature.tasks.navigation
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.repeatOnLifecycle
+import ru.nksk.lctapp.feature.tasks.ui.DeedsViewModel
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -11,7 +14,6 @@ import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import ru.nksk.lctapp.feature.tasks.ui.DeedsAction
-import ru.nksk.lctapp.feature.tasks.ui.DeedsViewModel
 import ru.nksk.lctapp.feature.tasks.ui.DeedsScreen
 import ru.nksk.lctapp.feature.tasks.ui.MemoryGameScreen
 import ru.nksk.lctapp.feature.tasks.ui.MemoryGameViewModel
@@ -39,16 +41,26 @@ data object Telescope : NavKey
 fun EntryProviderScope<NavKey>.tasksEntry(
     onOpen: (Tasks, DeedsAction) -> Unit,
     onBack: (NavKey) -> Unit,
+    onEvent: (Tasks) -> Unit,
+    onGame: (Tasks, String) -> Unit,
 ) {
     entry<Tasks> { source ->
+        val lifecycle = LocalLifecycleOwner.current.lifecycle
         val viewModel = hiltViewModel<DeedsViewModel>()
         val state by viewModel.uiState.collectAsStateWithLifecycle()
-        val lifecycle = LocalLifecycleOwner.current.lifecycle
+        LaunchedEffect(viewModel, lifecycle) {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.openEvent.collect { onGame(source, it) }
+            }
+        }
         DeedsScreen(
             state = state,
+            onStart = { if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) viewModel.start(it) },
+            onFeed = { if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) viewModel.feed(it) },
             onRetry = viewModel::retry,
+            onCurrentEvent = dropUnlessResumed { onEvent(source) },
             onOpen = { action ->
-                if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) && action.kind in state.available) onOpen(source, action)
+                if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) onOpen(source, action)
             },
             onExit = dropUnlessResumed { onBack(source) },
         )

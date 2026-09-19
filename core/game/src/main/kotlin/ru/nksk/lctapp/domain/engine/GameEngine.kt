@@ -7,6 +7,7 @@ import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.game.OwnedItem
 import ru.nksk.lctapp.domain.story.StoryDecision
 import ru.nksk.lctapp.domain.pet.PetVisualState
+import ru.nksk.lctapp.domain.minigame.DeedGameScore
 
 /** A single domain entry point. Room supplies the latest aggregate inside its write transaction. */
 class GameEngine(
@@ -26,11 +27,21 @@ class GameEngine(
         return try {
             require(current.engine == null || current.engine.rulesId == rules.id) { "Saved engine uses a different rules version" }
             val next = when (val command = request.command) {
-                is EngineCommand.BeginDay -> beginDay(current, command, request.id)
+                is EngineCommand.BeginDay -> beginDay(current, command, request.id).let {
+                    if (command.openFirst) openNext(it, request.id) else it
+                }
                 EngineCommand.OpenNextEvent -> openNext(current, request.id)
                 is EngineCommand.Choose -> choose(current, command)
+                is EngineCommand.CompleteEvent -> acknowledge(
+                    choose(current, EngineCommand.Choose(command.occurrenceId, command.choiceId)),
+                    command.occurrenceId,
+                )
                 is EngineCommand.AcknowledgeResult -> acknowledge(current, command.occurrenceId)
                 is EngineCommand.StartDeed -> startDeed(current, command.offerId, request.id)
+                is EngineCommand.AcceptDeedProposal -> acceptProposal(current, command, request.id)
+                is EngineCommand.CompleteDeed -> completeDeed(current, command)
+                is EngineCommand.DismissDeedProposal -> dismissProposal(current, command.occurrenceId)
+                is EngineCommand.PauseEvent -> pause(current, command.occurrenceId)
                 is EngineCommand.Feed -> feed(current, command.mealId)
                 EngineCommand.FinishDay -> finishDay(current)
             }
@@ -43,6 +54,12 @@ class GameEngine(
             reject(BlockReason.InvalidContent("Numeric overflow"))
         }
     }
+
+    /** The UI can explain a guard without changing the save. Dispatch checks it again atomically. */
+    fun blockReason(state: GameState, command: EngineCommand): BlockReason? = try {
+        transition(state, EngineRequest("preview:${state.engine?.revision}", state.engine?.revision, command))
+        null
+    } catch (blocked: Rejected) { blocked.reason }
 
     fun availableDeeds(state: GameState): List<DeedOffer> = state.engine?.let { engine ->
         if (engine.phase == DayPhase.FINISHED) emptyList() else engine.deeds.filter { it.isAvailable(engine.day) }
@@ -67,22 +84,26 @@ class GameEngine(
             val currentDay = requireNotNull(factory.content.days.find { it.id == currentDayId })
             require(currentDay.chapterId == nextStoryDay.chapterId) { "Chapter changes require a completed final event" }
         }
-        val carried = previous?.events?.filter { it.status == EventStatus.CARRIED }?.toMutableList() ?: mutableListOf()
+        val carried = previous?.events?.filter { it.status == EventStatus.CARRIED || it.status == EventStatus.CARRIED_ACTIVE }?.toMutableList() ?: mutableListOf()
+        ensure(command.eventIds.take(carried.size) == carried.map { it.eventId }, BlockReason.MissingCarriedLore)
         val occurrences = command.eventIds.mapIndexed { position, eventId ->
             val existing = carried.firstOrNull { it.eventId == eventId }
             if (existing != null) {
                 carried.remove(existing)
-                existing.copy(status = EventStatus.PENDING)
+                existing.copy(status = if (existing.status == EventStatus.CARRIED_ACTIVE) EventStatus.PAUSED else EventStatus.PENDING)
             } else factory.create(eventId, "$requestId:event:$position")
         }
         ensure(carried.isEmpty(), BlockReason.MissingCarriedLore)
-        return state.copy(
+        val dayNumber = Math.addExact(previous?.day ?: 0, 1)
+        // The first week's money already belongs to the new-save initializer; never re-grant it.
+        val funded = if (previous != null && (dayNumber - 1) % 7 == 0) money(state, rules.weeklyIncome) else state
+        return funded.copy(
             pet = if (previous != null && state.pet.visualState == PetVisualState.TIRED) state.pet.transitionTo(PetVisualState.NORMAL) else state.pet,
             story = state.story.copy(currentDayId = command.storyDayId, nextScriptPosition = null),
             engine = EngineState(
                 rulesId = rules.id,
                 revision = previous?.revision ?: 0,
-                day = Math.addExact(previous?.day ?: 0, 1),
+                day = dayNumber,
                 phase = DayPhase.RUNNING,
                 steps = 0,
                 energy = previous?.nextMorningEnergy ?: rules.fullEnergy,
@@ -98,36 +119,40 @@ class GameEngine(
     private fun openNext(state: GameState, requestId: String): GameState {
         val day = running(state)
         ensure(day.currentEvent == null, BlockReason.EventInProgress)
-        val occurrence = day.events.firstOrNull { it.status == EventStatus.PENDING } ?: reject(BlockReason.NoNextEvent)
+        val paused = day.events.firstOrNull { it.status == EventStatus.PAUSED && it.origin == EventOrigin.SCHEDULE }
+        val occurrence = paused ?: day.events.firstOrNull { it.status == EventStatus.PENDING } ?: reject(BlockReason.NoNextEvent)
         val event = factory.event(occurrence.eventId)
         entryGuard(state, occurrence.eventId)
         if (event.type == EventType.EARNING) {
             foodGuard(day)
             val cost = factory.policy(event.id).energyCost
-            val offer = DeedOffer("$requestId:offer", event.id, Math.addExact(day.day, cost - 1))
+            val offer = DeedOffer("${occurrence.id}:offer", event.id, Math.addExact(day.day, cost - 1))
             return replaceEvent(state, occurrence.copy(status = EventStatus.RESULT)).let { next ->
                 next.copy(engine = next.engine!!.copy(steps = Math.addExact(day.steps, 1), deeds = day.deeds + offer))
             }
         }
-        actionGuard(day, factory.policy(event.id).energyCost)
+        actionGuard(day, minimumEnergy(state, occurrence))
         val next = replaceEvent(state, occurrence.copy(status = EventStatus.ACTIVE))
-        return if (factory.policy(event.id).startEffectsTiming == EffectTiming.OPEN) {
+        return if (paused == null && factory.policy(event.id).startEffectsTiming == EffectTiming.OPEN) {
             eventEffects(next, occurrence)
         } else next
     }
 
-    private fun choose(state: GameState, command: EngineCommand.Choose): GameState {
+    private fun choose(state: GameState, command: EngineCommand.Choose, score: DeedGameScore? = null): GameState {
         val day = running(state)
         val occurrence = day.currentEvent
         ensure(occurrence?.id == command.occurrenceId && occurrence.status == EventStatus.ACTIVE, BlockReason.InvalidEventAction)
         checkNotNull(occurrence)
         val event = factory.event(occurrence.eventId)
         val policy = factory.policy(event.id)
+        ensure(policy.deedGameKind == null ||
+            (occurrence.origin == EventOrigin.DEED && score?.kind == policy.deedGameKind), BlockReason.InvalidEventAction)
         val choice = factory.choices(event.id).find { it.id == command.choiceId } ?: reject(BlockReason.InvalidEventAction)
         entryGuard(state, event.id)
-        actionGuard(day, policy.energyCost)
+        val energyCost = policy.energyFor(choice.id)
+        actionGuard(day, energyCost)
         var next = if (policy.startEffectsTiming == EffectTiming.COMPLETE) eventEffects(state, occurrence) else state
-        next = money(next, choice.moneyDelta)
+        next = money(next, score?.reward(choice.moneyDelta) ?: choice.moneyDelta)
         choice.petStateAfter?.let { next = next.copy(pet = next.pet.transitionTo(it)) }
         factory.content.choiceItemEffects.filter { it.choiceId == choice.id }.sortedBy { it.position }.forEach {
             next = item(next, it.itemId, it.operation, "${occurrence.id}:choice-item:${it.id}")
@@ -139,7 +164,7 @@ class GameEngine(
         next = next.copy(
             story = next.story.copy(decisions = next.story.decisions + StoryDecision("${occurrence.id}:decision", choice.id)),
             engine = day.copy(
-                energy = day.energy - policy.energyCost,
+                energy = day.energy - energyCost,
                 steps = Math.addExact(day.steps, 1),
                 deeds = day.deeds.map { if (it.id == occurrence.deedOfferId) it.copy(completed = true) else it },
             ),
@@ -152,19 +177,61 @@ class GameEngine(
         val event = day.currentEvent
         ensure(event?.id == id && event.status == EventStatus.RESULT, BlockReason.InvalidEventAction)
         val next = replaceEvent(state, checkNotNull(event).copy(status = EventStatus.COMPLETED))
-        return next.copy(engine = next.engine!!.copy(phase = if (next.engine.events.any { it.status == EventStatus.PENDING }) {
+        return next.copy(engine = next.engine!!.copy(phase = if (next.engine.events.any {
+            it.status == EventStatus.PENDING || (it.status == EventStatus.PAUSED && it.origin == EventOrigin.SCHEDULE)
+        }) {
             DayPhase.RUNNING
         } else DayPhase.READY_TO_END))
     }
 
+    private fun acceptProposal(state: GameState, command: EngineCommand.AcceptDeedProposal, requestId: String): GameState {
+        val occurrenceId = command.occurrenceId
+        val occurrence = running(state).currentEvent
+        ensure(occurrence?.id == occurrenceId && occurrence.origin == EventOrigin.SCHEDULE &&
+            factory.event(occurrence.eventId).type == EventType.EARNING, BlockReason.InvalidEventAction)
+        return startDeed(acknowledge(state, occurrenceId), "$occurrenceId:offer", requestId)
+    }
+
+    private fun completeDeed(state: GameState, command: EngineCommand.CompleteDeed): GameState {
+        val occurrence = running(state).currentEvent
+        ensure(occurrence?.id == command.occurrenceId && occurrence.origin == EventOrigin.DEED,
+            BlockReason.InvalidEventAction)
+        val eventId = checkNotNull(occurrence).eventId
+        ensure(factory.policy(eventId).deedGameKind == command.score.kind, BlockReason.InvalidEventAction)
+        val choice = factory.choices(eventId).singleOrNull() ?: reject(BlockReason.InvalidEventAction)
+        return acknowledge(choose(state, EngineCommand.Choose(occurrence.id, choice.id), command.score), occurrence.id)
+    }
+
+    private fun pause(state: GameState, occurrenceId: String): GameState {
+        val occurrence = running(state).currentEvent
+        ensure(occurrence?.id == occurrenceId && occurrence.status == EventStatus.ACTIVE, BlockReason.InvalidEventAction)
+        return replaceEvent(state, checkNotNull(occurrence).copy(status = EventStatus.PAUSED))
+    }
+
+    private fun dismissProposal(state: GameState, occurrenceId: String): GameState {
+        val occurrence = running(state).currentEvent
+        ensure(occurrence?.id == occurrenceId && occurrence.origin == EventOrigin.SCHEDULE &&
+            factory.event(occurrence.eventId).type == EventType.EARNING, BlockReason.InvalidEventAction)
+        val next = acknowledge(state, occurrenceId)
+        return if (factory.policy(checkNotNull(occurrence).eventId).discardOfferOnDismiss) {
+            next.copy(engine = next.engine!!.copy(deeds = next.engine.deeds.filterNot { it.id == "$occurrenceId:offer" }))
+        } else next
+    }
+
     private fun startDeed(state: GameState, offerId: String, requestId: String): GameState {
         val day = running(state)
-        ensure(day.currentEvent == null, BlockReason.EventInProgress)
+        val active = day.currentEvent
+        ensure(active == null || (active.origin == EventOrigin.DEED && active.deedOfferId == offerId &&
+            active.status == EventStatus.ACTIVE), BlockReason.EventInProgress)
         val offer = day.deeds.find { it.id == offerId && it.isAvailable(day.day) } ?: reject(BlockReason.DeedUnavailable)
         val policy = factory.policy(offer.eventId)
         ensure(day.phase != DayPhase.READY_TO_END || policy.energyCost <= rules.shortDeedMaxEnergy, BlockReason.OnlyShortDeedsAfterSchedule)
         entryGuard(state, offer.eventId)
         actionGuard(day, policy.energyCost)
+        if (active != null) return state
+        day.events.find { it.deedOfferId == offer.id && it.status == EventStatus.PAUSED }?.let {
+            return replaceEvent(state, it.copy(status = EventStatus.ACTIVE))
+        }
         val event = factory.create(offer.eventId, "$requestId:deed", EventOrigin.DEED)
             .copy(status = EventStatus.ACTIVE, deedOfferId = offer.id)
         return state.copy(
@@ -188,15 +255,40 @@ class GameEngine(
         val day = running(state)
         ensure(day.currentEvent == null, BlockReason.EventInProgress)
         ensure(day.ateToday, BlockReason.MustEat)
-        val pending = day.events.filter { it.status == EventStatus.PENDING }
+        val pending = day.events.filter { it.status == EventStatus.PENDING ||
+            (it.status == EventStatus.PAUSED && it.origin == EventOrigin.SCHEDULE) }
         if (pending.isNotEmpty()) {
-            ensure(pending.all { factory.event(it.eventId).type == EventType.STORY }, BlockReason.UnfinishedEvents)
-            ensure(day.energy == 0 || factory.policy(pending.first().eventId).energyCost > day.energy, BlockReason.UnfinishedEvents)
+            val next = pending.firstOrNull { it.status == EventStatus.PAUSED } ?: pending.first()
+            ensure(day.energy == 0 || minimumEnergy(state, next) > day.energy, BlockReason.UnfinishedEvents)
         }
         return state.copy(engine = day.copy(
             phase = DayPhase.FINISHED,
-            events = day.events.map { if (it.status == EventStatus.PENDING) it.copy(status = EventStatus.CARRIED) else it },
+            events = day.events.map { if (it in pending) it.copy(status =
+                if (it.status == EventStatus.PAUSED) EventStatus.CARRIED_ACTIVE else EventStatus.CARRIED
+            ) else it },
         ))
+    }
+
+    /** The paid option cannot prevent rest when only the work alternative is affordable. */
+    private fun minimumEnergy(state: GameState, occurrence: EventOccurrence): Int {
+        val policy = factory.policy(occurrence.eventId)
+        if (policy.choiceEnergyCosts.isEmpty()) return policy.energyCost
+        val event = factory.event(occurrence.eventId)
+        val choices = factory.choices(event.id)
+        val affordable = choices.filter { choice ->
+            try {
+                val priceOnStart = if (policy.startEffectsTiming == EffectTiming.COMPLETE ||
+                    (policy.startEffectsTiming == EffectTiming.OPEN && occurrence.status == EventStatus.PENDING)) {
+                    event.moneyDeltaOnStart
+                } else 0L
+                money(money(state, priceOnStart), choice.moneyDelta)
+                true
+            } catch (blocked: Rejected) {
+                if (blocked.reason !is BlockReason.InsufficientMoney) throw blocked
+                false
+            }
+        }
+        return affordable.ifEmpty { choices }.minOf { policy.energyFor(it.id) }
     }
 
     private fun entryGuard(state: GameState, eventId: String) {

@@ -2,14 +2,14 @@ package ru.nksk.lctapp.domain.minigame
 
 import ru.nksk.lctapp.domain.game.GameState
 
-/** Costs of the three bundled mini-games; story deeds have their own rules. */
+/** Legacy standalone costs; active game days use GameEngine and never apply these costs too. */
 enum class MiniGameKind(val fatigueCost: Int) {
     MEMORY(30), PRICE_QUIZ(50), TELESCOPE(40);
 
     val hungerCost: Int get() = 20
 
     fun canPlay(state: GameState): Boolean =
-        state.satiety in 0..(100 - hungerCost) && state.fatigue in 0..(100 - fatigueCost)
+        state.engine == null && state.satiety in 0..(100 - hungerCost) && state.fatigue in 0..(100 - fatigueCost)
 
     /** Apply only after success, inside the aggregate repository's write transaction. */
     fun complete(state: GameState, attemptId: String): GameState {

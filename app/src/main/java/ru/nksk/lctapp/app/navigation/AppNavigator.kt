@@ -20,6 +20,18 @@ internal class AppNavigator(private val backStack: MutableList<NavKey>) {
         }
     }
 
+    fun returnToRoot(source: NavKey) {
+        if (backStack.lastOrNull() == source && backStack.size > 1) {
+            backStack.subList(1, backStack.size).clear()
+        }
+    }
+
+    fun replace(source: NavKey, destination: NavKey) {
+        if (backStack.lastOrNull() == source && backStack.size > 1) {
+            backStack[backStack.lastIndex] = destination
+        }
+    }
+
     /** System Back targets the current stack, independently of an entry callback. */
     fun goBack() {
         // NavDisplay lets the activity handle Back at the root; never empty its stack.

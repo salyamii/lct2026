@@ -3,48 +3,102 @@ package ru.nksk.lctapp.feature.tasks.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import ru.nksk.lctapp.domain.game.GameRepository
-import ru.nksk.lctapp.domain.minigame.MiniGameKind
+import ru.nksk.lctapp.core.ui.game.playerMessage
+import ru.nksk.lctapp.domain.engine.*
+import ru.nksk.lctapp.domain.game.GameState
 
+data class OfferedDeedUiState(val id: String, val title: String, val description: String, val reward: String,
+    val effort: String, val deadline: String, val scene: String)
+data class DeedsMealUiState(val id: String, val label: String, val enabled: Boolean)
 data class DeedsUiState(
-    val loading: Boolean = true,
-    val error: Boolean = false,
-    val hunger: Int = 0,
-    val fatigue: Int = 0,
-    val available: Set<MiniGameKind> = emptySet(),
+    val loading: Boolean = true, val failed: Boolean = false, val busy: Boolean = false,
+    val offers: List<OfferedDeedUiState> = emptyList(), val message: String? = null,
+    val meals: List<DeedsMealUiState> = emptyList(), val hasCurrentEvent: Boolean = false,
 )
 
 @HiltViewModel
-class DeedsViewModel @Inject constructor(private val repository: GameRepository) : ViewModel() {
+internal class DeedsViewModel @Inject constructor(private val session: GameSession) : ViewModel() {
     private val mutableState = MutableStateFlow(DeedsUiState())
     val uiState = mutableState.asStateFlow()
-    private var observer: Job? = null
+    private val eventNavigation = Channel<String>(Channel.BUFFERED)
+    val openEvent = eventNavigation.receiveAsFlow()
+    private var game: GameState? = null
+    private var loading: Job? = null
+    private var busy = false
+    private var message: String? = null
+    private var needsFood = false
 
     init { retry() }
 
     fun retry() {
-        observer?.cancel()
-        mutableState.value = DeedsUiState()
-        observer = viewModelScope.launch {
+        if (loading?.isActive == true) return
+        loading = viewModelScope.launch {
+            mutableState.value = DeedsUiState()
             try {
-                repository.observe().collect { saved ->
-                    val game = checkNotNull(saved)
-                    mutableState.value = DeedsUiState(
-                        loading = false, hunger = game.satiety, fatigue = game.fatigue,
-                        available = MiniGameKind.entries.filter { it.canPlay(game) }.toSet(),
-                    )
+                session.prepare()
+                session.observe().collect {
+                    if (game != it) { message = null; needsFood = false }
+                    game = checkNotNull(it)
+                    render()
                 }
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (_: Exception) {
-                mutableState.value = DeedsUiState(loading = false, error = true)
-            }
+            } catch (cancelled: CancellationException) { throw cancelled
+            } catch (_: Exception) { mutableState.value = DeedsUiState(loading = false, failed = true) }
         }
     }
+
+    fun start(offerId: String) = execute(EngineCommand.StartDeed(offerId), navigate = true)
+    fun feed(mealId: String) = execute(EngineCommand.Feed(mealId), navigate = false)
+
+    private fun execute(command: EngineCommand, navigate: Boolean) {
+        val saved = game ?: return
+        if (busy) return
+        busy = true; message = null; render()
+        viewModelScope.launch {
+            try {
+                when (val result = session.dispatch(EngineRequest(UUID.randomUUID().toString(), saved.engine?.revision, command))) {
+                    is EngineResult.Applied -> {
+                        game = result.state; needsFood = false
+                        if (navigate) eventNavigation.send(checkNotNull(result.state.engine?.currentEvent).id)
+                    }
+                    is EngineResult.Blocked -> { message = result.reason.playerMessage(); needsFood = result.reason == BlockReason.MustEat }
+                }
+            } catch (cancelled: CancellationException) { throw cancelled
+            } catch (_: Exception) { message = "Не удалось сохранить действие. Попробуй ещё раз." }
+            finally { busy = false; render() }
+        }
+    }
+
+    private fun render() {
+        val saved = game ?: return
+        val catalog = session.catalog
+        mutableState.value = DeedsUiState(
+            loading = false, busy = busy, message = message,
+            hasCurrentEvent = saved.engine?.currentEvent != null,
+            offers = session.engine.availableDeeds(saved).map { offer ->
+                val event = catalog.content.events.single { it.id == offer.eventId }
+                val card = catalog.cards.getValue(event.id)
+                val reward = catalog.content.choices.single { it.eventId == event.id }.moneyDelta
+                OfferedDeedUiState(offer.id, event.title, event.description, "До $reward монет",
+                    card.effort,
+                    deedDeadline(saved.engine!!.day, offer.expiresDay), card.scene)
+            },
+            meals = if (!needsFood) emptyList() else catalog.meals.filter { it.price > 0 || saved.economy.balance < catalog.meals.first().price }.map {
+                DeedsMealUiState(it.id, if (it.price == 0L) "Бесплатная столовая · завтра меньше сил" else "Поесть · ${it.price} монет", saved.economy.balance >= it.price)
+            },
+        )
+    }
+}
+
+internal fun deedDeadline(currentDay: Int, expiresDay: Int): String = when (expiresDay - currentDay + 1) {
+    1 -> "Сегодня — последний день"
+    2 -> "Осталось 2 дня: сегодня и завтра"
+    3 -> "Осталось 3 дня, включая сегодня"
+    else -> "До конца дня $expiresDay"
 }

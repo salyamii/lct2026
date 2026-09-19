@@ -4,7 +4,6 @@ import androidx.navigation3.runtime.NavKey
 import androidx.savedstate.serialization.SavedStateConfiguration
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
 import ru.nksk.lctapp.feature.coins.navigation.Coins
 import ru.nksk.lctapp.feature.day.navigation.Day
 import ru.nksk.lctapp.feature.gear.navigation.Gear
@@ -14,6 +13,7 @@ import ru.nksk.lctapp.feature.tasks.navigation.StarPlates
 import ru.nksk.lctapp.feature.tasks.navigation.PriceCheck
 import ru.nksk.lctapp.feature.tasks.navigation.Telescope
 import ru.nksk.lctapp.feature.tasks.navigation.Tasks
+import ru.nksk.lctapp.feature.tasks.navigation.DeedGame
 import ru.nksk.lctapp.feature.village.navigation.Village
 
 /** Saves stable route IDs and can read the former Android serializer's JVM class names. */
@@ -26,6 +26,7 @@ internal val AppNavigationSavedStateConfiguration = SavedStateConfiguration {
             subclass(Gear::class, Gear.serializer())
             subclass(Goal::class, Goal.serializer())
             subclass(Tasks::class, Tasks.serializer())
+            subclass(DeedGame::class, DeedGame.serializer())
             subclass(StarPlates::class, StarPlates.serializer())
             subclass(PriceCheck::class, PriceCheck.serializer())
             subclass(Telescope::class, Telescope.serializer())

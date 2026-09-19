@@ -12,6 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedButton
+import ru.nksk.lctapp.core.ui.components.gameScene
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -24,14 +28,13 @@ import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 
-enum class DeedsAction(val kind: ru.nksk.lctapp.domain.minigame.MiniGameKind) {
-    StarPlates(ru.nksk.lctapp.domain.minigame.MiniGameKind.MEMORY),
-    PriceCheck(ru.nksk.lctapp.domain.minigame.MiniGameKind.PRICE_QUIZ),
-    Telescope(ru.nksk.lctapp.domain.minigame.MiniGameKind.TELESCOPE),
-}
+enum class DeedsAction { StarPlates, PriceCheck, Telescope }
 
 @Composable
-fun DeedsScreen(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit, state: DeedsUiState, onRetry: () -> Unit) {
+fun DeedsScreen(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit,
+    state: DeedsUiState = DeedsUiState(), onStart: (String) -> Unit = {}, onRetry: () -> Unit = {},
+    onFeed: (String) -> Unit = {}, onCurrentEvent: () -> Unit = {},
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -58,22 +61,38 @@ fun DeedsScreen(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit, state: DeedsU
                     color = DeedColors.Text,
                 )
                 Spacer(Modifier.height(2.dp))
+                if (state.loading) CircularProgressIndicator()
+                if (state.failed) {
+                    Text("Не удалось загрузить дела.", color = DeedColors.Text)
+                    Button(onRetry) { Text("Повторить") }
+                }
+                state.message?.let { Text(it, color = DeedColors.Text) }
+                if (state.hasCurrentEvent) OutlinedButton(onCurrentEvent, enabled = !state.busy) { Text("Вернуться к событию") }
+                state.meals.forEach { meal ->
+                    Button({ onFeed(meal.id) }, enabled = meal.enabled && !state.busy) { Text(meal.label) }
+                }
+                if (!state.loading && !state.failed && state.offers.isEmpty()) {
+                    Text("Пока нет предложенных дел. Продолжи день, чтобы встретить новые поручения.", color = DeedColors.TextSoft)
+                }
+                state.offers.forEach { offer ->
+                    Spacer(Modifier.height(12.dp))
+                    DeedCard(
+                        title = offer.title,
+                        description = "${offer.description}\n${offer.effort}",
+                        rewardLabel = offer.reward,
+                        deadline = offer.deadline,
+                        scene = painterResource(gameScene(offer.scene)),
+                        onOpen = { if (!state.busy) onStart(offer.id) },
+                    )
+                }
+                Spacer(Modifier.height(24.dp))
+                Text("Мини-игры · тренировка", fontFamily = Rubik, fontWeight = FontWeight.Bold, color = DeedColors.Text)
                 Text(
                     stringResource(R.string.deeds_subtitle),
                     fontSize = 13.sp,
                     fontFamily = Nunito,
                     color = DeedColors.TextSoft,
                 )
-                Spacer(Modifier.height(14.dp))
-                Text(
-                    stringResource(R.string.deeds_resources, state.hunger, state.fatigue),
-                    color = DeedColors.Text, fontFamily = Nunito,
-                )
-                if (state.loading) Text(stringResource(R.string.game_loading), color = DeedColors.Text)
-                if (state.error) {
-                    Text(stringResource(R.string.game_load_error), color = DeedColors.Text)
-                    DeedButton(stringResource(R.string.game_retry), onRetry)
-                }
                 Spacer(Modifier.height(14.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     DeedCard(
@@ -82,9 +101,6 @@ fun DeedsScreen(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit, state: DeedsU
                         rewardLabel = stringResource(R.string.deeds_demo_max),
                         scene = painterResource(R.drawable.location_hill),
                         onOpen = { onOpen(DeedsAction.StarPlates) },
-                        costLabel = stringResource(R.string.deeds_cost, DeedsAction.StarPlates.kind.hungerCost, DeedsAction.StarPlates.kind.fatigueCost),
-                        enabled = DeedsAction.StarPlates.kind in state.available,
-                        unavailableLabel = if (state.loading || state.error) null else stringResource(R.string.deeds_unavailable),
                     )
                     DeedCard(
                         title = stringResource(R.string.deeds_price_title),
@@ -92,9 +108,6 @@ fun DeedsScreen(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit, state: DeedsU
                         rewardLabel = stringResource(R.string.deeds_demo_max),
                         scene = painterResource(R.drawable.location_workshop),
                         onOpen = { onOpen(DeedsAction.PriceCheck) },
-                        costLabel = stringResource(R.string.deeds_cost, DeedsAction.PriceCheck.kind.hungerCost, DeedsAction.PriceCheck.kind.fatigueCost),
-                        enabled = DeedsAction.PriceCheck.kind in state.available,
-                        unavailableLabel = if (state.loading || state.error) null else stringResource(R.string.deeds_unavailable),
                     )
                     DeedCard(
                         title = stringResource(R.string.deeds_target_title),
@@ -102,9 +115,6 @@ fun DeedsScreen(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit, state: DeedsU
                         rewardLabel = stringResource(R.string.deeds_demo_max),
                         scene = painterResource(R.drawable.location_trail),
                         onOpen = { onOpen(DeedsAction.Telescope) },
-                        costLabel = stringResource(R.string.deeds_cost, DeedsAction.Telescope.kind.hungerCost, DeedsAction.Telescope.kind.fatigueCost),
-                        enabled = DeedsAction.Telescope.kind in state.available,
-                        unavailableLabel = if (state.loading || state.error) null else stringResource(R.string.deeds_unavailable),
                     )
                 }
                 Spacer(Modifier.height(14.dp))

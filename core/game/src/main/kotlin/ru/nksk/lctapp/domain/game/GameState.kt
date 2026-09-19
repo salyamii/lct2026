@@ -10,8 +10,9 @@ data class GameState(
     val pet: PetState,
     val economy: EconomyState,
     val story: StoryState,
-    /** Hunger (0 = none, 100 = full), retaining the existing persisted name. */
+    /** Legacy content value preserved for compatibility; active-day hunger uses engine.ateToday/steps. */
     val satiety: Int,
+    /** Legacy content value preserved for compatibility; available effort uses engine.energy. */
     val fatigue: Int,
     val ownedItems: List<OwnedItem>,
     val engine: EngineState? = null,

@@ -1,0 +1,37 @@
+package ru.nksk.lctapp.domain.minigame
+
+/** Supported mechanics, not a closed list of authored deeds or content IDs. */
+enum class DeedGameKind { MEMORY, COMPARISON, PRECISION }
+
+/** A completed round set; incomplete boards cannot be submitted for payment. */
+class DeedGameScore private constructor(
+    val kind: DeedGameKind,
+    val correct: Int,
+    val attempts: Int,
+) {
+    /** Whole coins rounded down, without overflowing when the configured maximum is large. */
+    fun reward(maximum: Long): Long {
+        require(maximum >= 0)
+        return maximum / attempts * correct + maximum % attempts * correct / attempts
+    }
+
+    companion object {
+        fun fromMemory(state: MemoryState): DeedGameScore? =
+            if (state.won && state.faces.size == MemoryState.PAIRS * 2 &&
+                state.faces.groupingBy { it }.eachCount().values.all { it == 2 } &&
+                state.matched == state.faces.indices.toSet() && state.pending == null &&
+                state.faceUp.isEmpty() && state.moves >= MemoryState.PAIRS
+            ) DeedGameScore(DeedGameKind.MEMORY, MemoryState.PAIRS, state.moves) else null
+
+        fun fromComparison(state: PriceQuizState): DeedGameScore? =
+            if (state.questions.size == PriceQuizState.QUESTION_COUNT &&
+                state.current == PriceQuizState.QUESTION_COUNT && state.lastCorrect == null &&
+                state.correctAnswers in 0..PriceQuizState.QUESTION_COUNT
+            ) DeedGameScore(DeedGameKind.COMPARISON, state.correctAnswers, PriceQuizState.QUESTION_COUNT) else null
+
+        fun fromPrecision(state: TargetStopState): DeedGameScore? =
+            if (state.round == TargetStopState.ROUNDS && state.lastHit != null &&
+                state.hits in 0..TargetStopState.ROUNDS
+            ) DeedGameScore(DeedGameKind.PRECISION, state.hits, TargetStopState.ROUNDS) else null
+    }
+}

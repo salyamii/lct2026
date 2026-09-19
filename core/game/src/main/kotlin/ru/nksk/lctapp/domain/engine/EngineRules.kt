@@ -1,6 +1,7 @@
 package ru.nksk.lctapp.domain.engine
 
 import ru.nksk.lctapp.domain.pet.PetVisualState
+import ru.nksk.lctapp.domain.minigame.DeedGameKind
 
 /** Required authored parameters: there is deliberately no production default for unresolved values. */
 data class EngineRules(
@@ -8,11 +9,13 @@ data class EngineRules(
     val fullEnergy: Int,
     val hungerBlocksAtStep: Int,
     val shortDeedMaxEnergy: Int,
+    val weeklyIncome: Long = 0,
 ) {
     init {
         require(id.isNotBlank())
         require(fullEnergy > 0 && hungerBlocksAtStep > 0)
         require(shortDeedMaxEnergy in 1..3)
+        require(weeklyIncome >= 0)
     }
 }
 
@@ -23,8 +26,16 @@ data class EventPolicy(
     val previousLoreEventId: String? = null,
     val startEffectsTiming: EffectTiming? = null,
     val chapterEntryDayId: String? = null,
+    val discardOfferOnDismiss: Boolean = false,
+    val deedGameKind: DeedGameKind? = null,
+    val choiceEnergyCosts: Map<String, Int> = emptyMap(),
 ) {
-    init { require(energyCost in 0..3) }
+    init {
+        require(energyCost in 0..3)
+        require(choiceEnergyCosts.values.all { it in 0..3 })
+    }
+
+    fun energyFor(choiceId: String): Int = choiceEnergyCosts[choiceId] ?: energyCost
 }
 
 enum class EffectTiming { OPEN, COMPLETE }

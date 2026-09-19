@@ -205,19 +205,17 @@ fun DeedCard(
     title: String,
     description: String,
     rewardLabel: String,
-    costLabel: String,
-    enabled: Boolean,
-    unavailableLabel: String?,
     scene: Painter,
     onOpen: () -> Unit,
     modifier: Modifier = Modifier,
+    deadline: String? = null,
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
             .background(DeedColors.Cream)
-            .clickable(enabled = enabled, onClick = onOpen),
+            .clickable(onClick = onOpen),
     ) {
         Box(modifier = Modifier.fillMaxWidth().height(140.dp)) {
             Image(
@@ -258,12 +256,11 @@ fun DeedCard(
                 color = DeedColors.Text.copy(alpha = 0.85f),
             )
             Spacer(Modifier.height(12.dp))
-            Text(costLabel, fontFamily = Nunito, color = DeedColors.Text, fontSize = 13.sp)
-            if (unavailableLabel != null && !enabled) {
-                Text(unavailableLabel, fontFamily = Nunito, color = DeedColors.TextSoft, fontSize = 13.sp)
+            DeedButton(stringResource(R.string.deeds_start), onOpen)
+            deadline?.let {
+                Spacer(Modifier.height(8.dp))
+                DeedChip(it)
             }
-            Spacer(Modifier.height(8.dp))
-            DeedButton(stringResource(R.string.deeds_start), onOpen, enabled = enabled)
         }
     }
 }
@@ -276,10 +273,8 @@ fun DeedResultSheet(
     reward: Int,
     onAgain: () -> Unit,
     onHub: () -> Unit,
-    session: MiniGameSessionUiState,
-    onRetry: () -> Unit,
 ) {
-    Dialog(onDismissRequest = { if (!session.saving) onHub() }) {
+    Dialog(onDismissRequest = onHub) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -302,47 +297,9 @@ fun DeedResultSheet(
             Spacer(Modifier.height(12.dp))
             CoinChip(stringResource(R.string.deeds_demo_reward, reward), lime = true)
             Spacer(Modifier.height(20.dp))
-            Text(
-                stringResource(when {
-                    session.error -> R.string.deeds_save_error
-                    session.saving || !session.resultReady -> R.string.deeds_saving
-                    session.successful -> R.string.deeds_cost_applied
-                    else -> R.string.deeds_no_cost
-                }),
-                fontFamily = Nunito, color = DeedColors.TextSoft, textAlign = TextAlign.Center,
-            )
-            if (session.error) DeedButton(stringResource(R.string.game_retry), onRetry)
-            if (session.resultReady && !session.available) {
-                Text(stringResource(R.string.deeds_unavailable), fontFamily = Nunito, color = DeedColors.TextSoft)
-            }
-            Spacer(Modifier.height(12.dp))
-            DeedButton(stringResource(R.string.deeds_again), onAgain, enabled = session.resultReady && session.canRestart)
+            DeedButton(stringResource(R.string.deeds_again), onAgain)
             Spacer(Modifier.height(10.dp))
-            DeedButton(stringResource(R.string.deeds_back_to_list), onHub, enabled = !session.saving)
+            DeedButtonSoft(stringResource(R.string.deeds_back_to_list), onHub)
         }
     }
-}
-
-/** Restored or directly opened entries must obey the same guard as the hub. */
-@Composable
-internal fun MiniGameAccessGate(
-    state: MiniGameSessionUiState,
-    onRetry: () -> Unit,
-    onBack: () -> Unit,
-): Boolean {
-    if (state.canPlay) return false
-    Column(Modifier.fillMaxSize().background(DeedColors.Cream).padding(24.dp)) {
-        Text(
-            stringResource(when {
-                state.loading -> R.string.game_loading
-                state.error -> R.string.game_load_error
-                else -> R.string.deeds_unavailable
-            }),
-            fontFamily = Nunito, color = DeedColors.Text,
-        )
-        Spacer(Modifier.height(16.dp))
-        if (state.error) DeedButton(stringResource(R.string.game_retry), onRetry)
-        DeedButton(stringResource(R.string.deeds_back_to_list), onBack)
-    }
-    return true
 }

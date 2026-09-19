@@ -24,7 +24,6 @@ import ru.nksk.lctapp.app.di.GameRepositoryModule
 import ru.nksk.lctapp.app.navigation.LctNavHost
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
 import ru.nksk.lctapp.data.game.local.GameDatabase
-import ru.nksk.lctapp.domain.content.StoryContentRepository
 import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.domain.pet.PetVisualState
 
@@ -39,8 +38,9 @@ class PersistedMenuTest {
     @BindValue
     @JvmField
     val games: GameRepository = RoomGameRepository(db)
+
     @BindValue @JvmField
-    val content: StoryContentRepository = RoomStoryContentRepository(db)
+    val content: ru.nksk.lctapp.domain.content.StoryContentRepository = RoomStoryContentRepository(db)
 
     @After fun close() { db.close() }
 
@@ -49,17 +49,16 @@ class PersistedMenuTest {
         runBlocking {
             games.initializeIfAbsent(initial.copy(
                 economy = initial.economy.copy(balance = 247),
-                satiety = 20,
                 pet = initial.pet.copy(selectedLookId = "HAT", visualState = PetVisualState.UPSET),
             ))
         }
         compose.setContent { LCTAppTheme { LctNavHost() } }
-        awaitDescription(R.string.menu_hunger_accessibility, 20L)
+        awaitDescription(R.string.menu_coins_accessibility, 247L)
         compose.onNode(hasContentDescription(compose.activity.getString(R.string.menu_pet_upset))).assertIsDisplayed()
         runBlocking {
-            games.update { it.copy(satiety = 40, economy = it.economy.copy(balance = 37), pet = it.pet.transitionTo(PetVisualState.NORMAL)) }
+            games.update { it.copy(economy = it.economy.copy(balance = 37), pet = it.pet.transitionTo(PetVisualState.NORMAL)) }
         }
-        awaitDescription(R.string.menu_hunger_accessibility, 40L)
+        awaitDescription(R.string.menu_coins_accessibility, 37L)
         compose.onNode(hasContentDescription(compose.activity.getString(R.string.menu_pet_hat))).assertIsDisplayed()
     }
 

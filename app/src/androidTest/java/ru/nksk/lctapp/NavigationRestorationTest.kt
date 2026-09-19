@@ -50,7 +50,7 @@ class NavigationRestorationTest {
             label(R.string.menu_gear) to R.string.gear_title,
             label(R.string.menu_tasks) to R.string.menu_tasks,
             label(R.string.menu_goal) to R.string.menu_goal,
-            hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility)) to
+            hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility, 100)) to
                 R.string.menu_coins,
             label(R.string.menu_village) to R.string.menu_village,
             label(R.string.menu_continue) to R.string.menu_continue,
@@ -62,7 +62,7 @@ class NavigationRestorationTest {
 
             restoration.emulateSavedInstanceStateRestore()
 
-            compose.onNodeWithText(compose.activity.getString(title)).assertIsDisplayed()
+            compose.onNodeWithText(if (title == R.string.menu_continue) "Ночь наблюдений" else compose.activity.getString(title)).assertIsDisplayed()
             compose.onNodeWithText(compose.activity.getString(R.string.navigation_back))
                 .assertIsDisplayed().performClick()
             compose.onNodeWithText(compose.activity.getString(R.string.menu_current_goal))

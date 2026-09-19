@@ -5,6 +5,8 @@ import org.junit.Test
 import ru.nksk.lctapp.domain.economy.BudgetPlan
 import ru.nksk.lctapp.domain.economy.EconomyState
 import ru.nksk.lctapp.domain.game.GameState
+import ru.nksk.lctapp.domain.engine.EngineState
+import ru.nksk.lctapp.domain.engine.DayPhase
 import ru.nksk.lctapp.domain.pet.PetState
 import ru.nksk.lctapp.domain.pet.PetVisualState
 import ru.nksk.lctapp.domain.story.StoryState
@@ -37,6 +39,19 @@ class MiniGameCostsTest {
             assertFalse(kind.canPlay(initial.copy(fatigue = 101 - cost, satiety = 80)))
             assertFalse(kind.canPlay(initial.copy(satiety = 81)))
         }
+    }
+
+    @Test fun legacyCostsCannotAlsoChargeAnActiveEngineDay() {
+        val active = initial.copy(engine = EngineState("rules", 0, 1, DayPhase.RUNNING,
+            0, 5, false, null, 100, emptyList(), emptyList()))
+        assertFalse(MiniGameKind.MEMORY.canPlay(active))
+        try {
+            MiniGameKind.MEMORY.complete(active, "new-attempt")
+            fail("Day completion must use GameEngine")
+        } catch (_: MiniGameUnavailableException) { }
+        assertEquals(17, active.satiety)
+        assertEquals(5, active.engine!!.energy)
+        assertTrue(active.completedMiniGames.isEmpty())
     }
 
     @Test fun latestStatePreventsOverdraft() {

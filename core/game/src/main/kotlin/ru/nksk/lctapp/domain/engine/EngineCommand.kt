@@ -1,6 +1,7 @@
 package ru.nksk.lctapp.domain.engine
 
 import ru.nksk.lctapp.domain.game.GameState
+import ru.nksk.lctapp.domain.minigame.DeedGameScore
 
 /** Revision is captured with the UI state. A stale command never changes a newer save. */
 data class EngineRequest(val id: String, val expectedRevision: Long?, val command: EngineCommand) {
@@ -9,11 +10,18 @@ data class EngineRequest(val id: String, val expectedRevision: Long?, val comman
 
 sealed interface EngineCommand {
     /** Explicit authored day plan, including the event IDs of any carried lore. */
-    data class BeginDay(val storyDayId: String, val eventIds: List<String>) : EngineCommand
+    data class BeginDay(val storyDayId: String, val eventIds: List<String>, val openFirst: Boolean = false) : EngineCommand
     data object OpenNextEvent : EngineCommand
     data class Choose(val occurrenceId: String, val choiceId: String) : EngineCommand
+    /** Commit a choice and close its result atomically when no authored result screen is needed. */
+    data class CompleteEvent(val occurrenceId: String, val choiceId: String) : EngineCommand
     data class AcknowledgeResult(val occurrenceId: String) : EngineCommand
     data class StartDeed(val offerId: String) : EngineCommand
+    data class AcceptDeedProposal(val occurrenceId: String) : EngineCommand
+    data class CompleteDeed(val occurrenceId: String, val score: DeedGameScore) : EngineCommand
+    data class DismissDeedProposal(val occurrenceId: String) : EngineCommand
+    /** Leave without recording a choice, spending effort or completing the story. */
+    data class PauseEvent(val occurrenceId: String) : EngineCommand
     data class Feed(val mealId: String) : EngineCommand
     data object FinishDay : EngineCommand
 }

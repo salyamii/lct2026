@@ -10,39 +10,30 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import ru.nksk.lctapp.domain.game.GameRepository
-import ru.nksk.lctapp.domain.minigame.MiniGameKind
 import ru.nksk.lctapp.domain.minigame.MemoryState
 import ru.nksk.lctapp.domain.minigame.PendingPair
 
-data class MemoryGameUiState(val game: MemoryState, val session: MiniGameSessionUiState = MiniGameSessionUiState())
+data class MemoryGameUiState(val game: MemoryState)
 
 sealed interface MemoryGameAction {
     data class Tap(val index: Int) : MemoryGameAction
-    data object Retry : MemoryGameAction
     data object Restart : MemoryGameAction
 }
 
 @HiltViewModel
-class MemoryGameViewModel @Inject constructor(private val savedState: SavedStateHandle, repository: GameRepository) : ViewModel() {
+class MemoryGameViewModel @Inject constructor(private val savedState: SavedStateHandle) : ViewModel() {
     private val mutableUiState = MutableStateFlow(MemoryGameUiState(restore()))
     val uiState = mutableUiState.asStateFlow()
     private var feedbackJob: Job? = null
-    private val session = MiniGameSession(MiniGameKind.MEMORY, repository, savedState, viewModelScope) {
-        mutableUiState.value = mutableUiState.value.copy(session = it)
-    }
 
     init {
-        session.observe()
         publish(uiState.value.game)
         resolveAfterFeedback()
     }
 
     fun onAction(action: MemoryGameAction) {
         when (action) {
-            MemoryGameAction.Retry -> session.retry()
             is MemoryGameAction.Tap -> {
-                if (!session.state.canPlay) return
                 val before = uiState.value.game
                 val after = before.tap(action.index)
                 if (before != after) {
@@ -51,7 +42,6 @@ class MemoryGameViewModel @Inject constructor(private val savedState: SavedState
                 }
             }
             MemoryGameAction.Restart -> {
-                if (!session.restart()) return
                 feedbackJob?.cancel()
                 publish(MemoryState.deal())
             }
@@ -73,8 +63,7 @@ class MemoryGameViewModel @Inject constructor(private val savedState: SavedState
         savedState["face_up"] = game.faceUp.toIntArray()
         savedState["matched"] = game.matched.toIntArray()
         savedState["moves"] = game.moves
-        mutableUiState.value = MemoryGameUiState(game, session.state)
-        if (game.won) session.finish(success = true)
+        mutableUiState.value = MemoryGameUiState(game)
     }
 
     private fun restore(): MemoryState {

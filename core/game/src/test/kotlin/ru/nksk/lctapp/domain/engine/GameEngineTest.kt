@@ -18,8 +18,158 @@ import ru.nksk.lctapp.domain.game.OwnedItem
 import ru.nksk.lctapp.domain.pet.PetState
 import ru.nksk.lctapp.domain.pet.PetVisualState
 import ru.nksk.lctapp.domain.story.StoryState
+import ru.nksk.lctapp.domain.minigame.DeedGameKind
+import ru.nksk.lctapp.domain.minigame.DeedGameScore
+import ru.nksk.lctapp.domain.minigame.PriceQuizState
+import ru.nksk.lctapp.domain.minigame.TargetStopState
 
 class GameEngineTest {
+    @Test fun realDeedRequiresItsGameAndCommitsTheReducedRewardOnlyOnce() = runTest {
+        val f = Fixture(deedKind = DeedGameKind.COMPARISON)
+        f.begin(listOf("small", "quiet", "quiet", "quiet"))
+        f.apply(EngineCommand.OpenNextEvent)
+        f.apply(EngineCommand.AcceptDeedProposal(f.day.currentEvent!!.id))
+        val id = f.day.currentEvent!!.id
+        val before = f.state
+        assertEquals(BlockReason.InvalidEventAction, f.blocked(EngineCommand.CompleteEvent(id, "small-choice")))
+        val wrongGame = checkNotNull(DeedGameScore.fromPrecision(TargetStopState(10, round = 5, hits = 5, lastHit = true)))
+        assertEquals(BlockReason.InvalidEventAction, f.blocked(EngineCommand.CompleteDeed(id, wrongGame)))
+        assertEquals(before, f.state)
+
+        val score = checkNotNull(DeedGameScore.fromComparison(PriceQuizState.create().copy(current = 5, correctAnswers = 3)))
+        val command = EngineCommand.CompleteDeed(id, score)
+        f.repo.failCommit = true
+        try { f.apply(command); fail("A failed commit must propagate") } catch (_: IOException) { }
+        assertEquals(before, f.state)
+        f.repo.failCommit = false
+        f.apply(command)
+        assertEquals(106L, f.state.economy.balance)
+        assertEquals(4, f.day.energy)
+        assertEquals(2, f.day.steps)
+        assertTrue(f.day.deeds.single().completed)
+        assertNull(f.day.currentEvent)
+        assertEquals(1, f.state.story.decisions.size)
+        val completed = f.state
+        assertEquals(BlockReason.InvalidEventAction, f.blocked(command))
+        assertEquals(completed, f.state)
+    }
+
+    @Test fun completionClosesTheEventAndCommitsItsEffectsOnlyOnce() = runTest {
+        val f = Fixture()
+        f.begin(listOf("small", "quiet", "quiet", "quiet"))
+        f.apply(EngineCommand.OpenNextEvent)
+        f.ack()
+        f.apply(EngineCommand.StartDeed(f.day.deeds.single().id))
+        val request = f.request(EngineCommand.CompleteEvent(f.day.currentEvent!!.id, "small-choice"))
+        val result = f.engine.dispatch(request) as EngineResult.Applied
+        assertEquals(110L, result.state.economy.balance)
+        assertEquals(2, result.state.engine!!.steps)
+        assertEquals(4, result.state.engine!!.energy)
+        assertNull(result.state.engine!!.currentEvent)
+        assertTrue(result.state.engine!!.deeds.single().completed)
+        assertEquals(1, result.state.story.decisions.size)
+        assertEquals(EngineResult.Blocked(BlockReason.StaleRevision), f.engine.dispatch(request))
+    }
+
+    @Test fun explicitRefusalDiscardsOfferButDeferringKeepsIt() = runTest {
+        val f = Fixture()
+        f.begin(listOf("small", "medium", "quiet", "quiet"))
+        f.apply(EngineCommand.OpenNextEvent)
+        val factory = EventFactory(f.content, f.policies + ("small" to f.policies.getValue("small").copy(discardOfferOnDismiss = true)), emptyList())
+        val engine = GameEngine(f.repo, factory, f.rules)
+        assertTrue(engine.dispatch(f.request(EngineCommand.DismissDeedProposal(f.day.currentEvent!!.id))) is EngineResult.Applied)
+        assertTrue(f.day.deeds.isEmpty())
+        assertEquals(1, f.day.steps)
+        assertEquals(100L, f.state.economy.balance)
+        f.apply(EngineCommand.OpenNextEvent)
+        f.apply(EngineCommand.DismissDeedProposal(f.day.currentEvent!!.id))
+        assertEquals("medium", f.day.deeds.single().eventId)
+        assertEquals(2, f.day.steps)
+    }
+
+    @Test fun acceptingAnOfferStartsExecutionWithoutPayingOrSpendingEnergy() = runTest {
+        val f = Fixture()
+        f.begin(listOf("small", "quiet", "quiet", "quiet"))
+        f.apply(EngineCommand.OpenNextEvent)
+        val request = f.request(EngineCommand.AcceptDeedProposal(f.day.currentEvent!!.id))
+        val result = f.engine.dispatch(request) as EngineResult.Applied
+        assertEquals(100L, result.state.economy.balance)
+        assertEquals(1, result.state.engine!!.steps)
+        assertEquals(5, result.state.engine!!.energy)
+        assertEquals(EventOrigin.DEED, result.state.engine!!.currentEvent!!.origin)
+        assertEquals(EventStatus.ACTIVE, result.state.engine!!.currentEvent!!.status)
+        assertFalse(result.state.engine!!.deeds.single().completed)
+        assertEquals(EngineResult.Blocked(BlockReason.StaleRevision), f.engine.dispatch(request))
+    }
+
+    @Test fun rejectedOfferExecutionLeavesTheOfferScreenAndMoneyUnchanged() = runTest {
+        val f = Fixture(hunger = 1)
+        f.begin(listOf("small", "quiet", "quiet", "quiet"))
+        f.apply(EngineCommand.OpenNextEvent)
+        val before = f.state
+        assertEquals(BlockReason.MustEat, f.blocked(EngineCommand.AcceptDeedProposal(f.day.currentEvent!!.id)))
+        assertEquals(before, f.state)
+    }
+
+    @Test fun pausedLoreDoesNotGrantCompletionAndResumesAfterOtherWork() = runTest {
+        val f = Fixture()
+        f.begin(listOf("small", "lore", "quiet", "quiet"))
+        f.completeOne()
+        f.apply(EngineCommand.OpenNextEvent)
+        val id = f.day.currentEvent!!.id
+        f.apply(EngineCommand.PauseEvent(id))
+        assertTrue(f.state.story.decisions.isEmpty())
+        assertNull(f.state.story.activeEventId)
+        f.apply(EngineCommand.StartDeed(f.day.deeds.single().id))
+        f.choose(); f.ack()
+        assertEquals(DayPhase.RUNNING, f.day.phase)
+        f.apply(EngineCommand.OpenNextEvent)
+        assertEquals(id, f.day.currentEvent!!.id)
+        f.choose()
+        assertEquals(1, f.state.story.decisions.count { it.choiceId == "lore-choice" })
+    }
+
+    @Test fun earlySleepCarriesAllUnseenEventsInOrderIncludingRepeatedDefinitions() = runTest {
+        val f = Fixture(energy = 1)
+        f.begin(listOf("drain", "lore", "quiet", "quiet"))
+        f.completeOne(); f.endFedDay()
+        val carried = f.day.events.drop(1)
+        assertTrue(carried.all { it.status == EventStatus.CARRIED })
+        assertEquals(BlockReason.MissingCarriedLore, f.blocked(EngineCommand.BeginDay("day", listOf("quiet", "lore", "quiet", "quiet"))))
+        f.begin(listOf("lore", "quiet", "quiet", "small"))
+        assertEquals(carried.map { it.id }, f.day.events.take(3).map { it.id })
+        assertTrue(f.day.events.all { it.status == EventStatus.PENDING })
+    }
+
+    @Test fun pausedDeedResumesTheSameOccurrenceAndCannotBePaidTwice() = runTest {
+        val f = Fixture()
+        f.begin(listOf("small", "quiet", "quiet", "quiet")); f.completeOne()
+        val offer = f.day.deeds.single()
+        f.apply(EngineCommand.StartDeed(offer.id))
+        val id = f.day.currentEvent!!.id
+        f.apply(EngineCommand.PauseEvent(id))
+        f.apply(EngineCommand.StartDeed(offer.id))
+        assertEquals(id, f.day.currentEvent!!.id)
+        f.choose(); f.ack()
+        assertEquals(110L, f.state.economy.balance)
+        assertEquals(BlockReason.DeedUnavailable, f.blocked(EngineCommand.StartDeed(offer.id)))
+    }
+
+    @Test fun weeklyIncomeIsGrantedOnceOnBeginningDayEightAndNotOnReadingSummary() = runTest {
+        val f = Fixture()
+        f.begin()
+        repeat(6) { f.completePlan(); f.endFedDay(); f.begin() }
+        f.completePlan(); f.endFedDay()
+        val balance = f.state.economy.balance
+        val engine = GameEngine(f.repo, f.factory, f.rules.copy(weeklyIncome = 100))
+        assertNotNull(engine.daySummary(f.state))
+        assertEquals(balance, f.state.economy.balance)
+        val request = f.request(EngineCommand.BeginDay("day", List(4) { "quiet" }))
+        assertTrue(engine.dispatch(request) is EngineResult.Applied)
+        assertEquals(balance + 100, f.state.economy.balance)
+        assertEquals(EngineResult.Blocked(BlockReason.StaleRevision), engine.dispatch(request))
+    }
+
     @Test fun offerAndItsLaterExecutionAreSeparateSteps() = runTest {
         val f = Fixture()
         f.begin(listOf("small", "quiet", "quiet", "quiet"))
@@ -243,13 +393,14 @@ class GameEngineTest {
         try { EventFactory(forbidden, f.policies, emptyList()); fail() } catch (_: IllegalArgumentException) { }
     }
 
-    private class Fixture(energy: Int = 5, hunger: Int = 50, balance: Long = 100) {
+    private class Fixture(energy: Int = 5, hunger: Int = 50, balance: Long = 100, deedKind: DeedGameKind? = null) {
         val content = content()
         val policies = content.events.associate { event -> event.id to EventPolicy(
             energyCost = when (event.id) { "small", "drain" -> 1; "medium" -> 2; "large" -> 3; else -> 0 },
             requiredItemIds = if (event.id == "locked") setOf("rope") else emptySet(),
             previousLoreEventId = if (event.id == "locked") "lore" else null,
             chapterEntryDayId = if (event.id == "final") "next-day" else null,
+            deedGameKind = if (event.id == "small") deedKind else null,
         ) }
         val factory = EventFactory(content, policies, listOf(
             MealDefinition("basic", 4, null),

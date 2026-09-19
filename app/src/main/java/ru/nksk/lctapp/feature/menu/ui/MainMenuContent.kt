@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -17,7 +19,8 @@ import androidx.compose.ui.unit.dp
 import ru.nksk.lctapp.R
 
 @Composable
-internal fun MainMenuContent(state: MainMenuLoadState, onRetry: () -> Unit, onAction: (MainMenuAction) -> Unit) {
+internal fun MainMenuContent(state: MainMenuLoadState, onRetry: () -> Unit, onAction: (MainMenuAction) -> Unit,
+    onFreeMeal: () -> Unit, onDismissMeal: () -> Unit) {
     when (state) {
         is MainMenuLoadState.Ready -> MainMenuScreen(state = state.menu, onAction = onAction)
         else -> Surface(modifier = Modifier.fillMaxSize()) {
@@ -35,5 +38,19 @@ internal fun MainMenuContent(state: MainMenuLoadState, onRetry: () -> Unit, onAc
                 }
             }
         }
+    }
+    if (state is MainMenuLoadState.Ready && state.menu.showFreeMeal) {
+        AlertDialog(
+            onDismissRequest = { if (!state.menu.busy) onDismissMeal() },
+            title = { Text("Бесплатная столовая") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("На обычный обед не хватает монет. Можно поесть бесплатно, но завтра у Рыжика будет меньше сил.")
+                    state.menu.notice?.let { Text(it) }
+                }
+            },
+            confirmButton = { Button(onFreeMeal, enabled = !state.menu.busy) { Text("Поесть бесплатно") } },
+            dismissButton = { TextButton(onDismissMeal, enabled = !state.menu.busy) { Text("Вернуться") } },
+        )
     }
 }

@@ -23,6 +23,7 @@ import ru.nksk.lctapp.feature.tasks.navigation.StarPlates
 import ru.nksk.lctapp.feature.tasks.navigation.PriceCheck
 import ru.nksk.lctapp.feature.tasks.navigation.Telescope
 import ru.nksk.lctapp.feature.tasks.navigation.Tasks
+import ru.nksk.lctapp.feature.tasks.navigation.DeedGame
 import ru.nksk.lctapp.feature.village.navigation.Village
 
 /** Compatibility with the Navigation 3 Android serializer used before the package cleanup. */
@@ -69,6 +70,7 @@ class NavigationKeyCompatibilityTest {
             "tasks_star_plates" to StarPlates,
             "tasks_price_check" to PriceCheck,
             "tasks_telescope" to Telescope,
+            "deed_game" to DeedGame("day-1:proposal:offer:execution"),
             "village" to Village,
         )
         for ((id, route) in stableRoutes) {

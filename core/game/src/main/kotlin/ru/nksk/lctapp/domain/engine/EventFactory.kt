@@ -20,15 +20,25 @@ class EventFactory(
         val goalItems = content.requiredItems.map { it.itemId }.toSet()
         for ((id, policy) in this.policies) {
             val definition = requireNotNull(events[id]) { "Unknown event policy: $id" }
+            val eventChoices = content.choices.filter { it.eventId == id }
+            require(policy.choiceEnergyCosts.keys.all { choice -> eventChoices.any { it.id == choice } }) {
+                "Energy override must belong to this event: $id"
+            }
             require(definition.minSatiety == null && definition.maxFatigue == null) {
                 "Translate legacy satiety/fatigue thresholds to the selected rules before activating $id"
             }
             require(policy.requiredItemIds.all { item -> content.items.any { it.id == item } })
             require(policy.previousLoreEventId == null || events[policy.previousLoreEventId]?.type == EventType.STORY)
+            if (policy.deedGameKind != null) {
+                require(definition.type == EventType.EARNING)
+                val reward = content.choices.singleOrNull { it.eventId == id }
+                require(reward != null && reward.moneyDelta >= 0) { "A mini-game needs one maximum reward: $id" }
+            }
             val startItems = content.eventItemEffects.filter { it.eventId == id }
             val hasStartEffects = definition.moneyDeltaOnStart != 0L || definition.petStateOnStart != null || startItems.isNotEmpty()
             require(!hasStartEffects || policy.startEffectsTiming != null) { "Specify timing of event effects: $id" }
             if (definition.type == EventType.EARNING) {
+                require(policy.choiceEnergyCosts.isEmpty()) { "A deed's fixed effort also defines its deadline" }
                 require(policy.energyCost in 1..3) { "A deed needs a cost of 1, 2 or 3" }
                 require(!hasStartEffects || policy.startEffectsTiming == EffectTiming.COMPLETE) {
                     "Offering a deed must not apply its earnings or other effects"

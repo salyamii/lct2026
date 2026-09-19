@@ -18,6 +18,7 @@ import ru.nksk.lctapp.domain.content.*
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.game.OwnedItem
+import ru.nksk.lctapp.data.game.content.bundledGameCatalog
 
 @RunWith(AndroidJUnit4::class)
 class GameEnginePersistenceTest {
@@ -37,6 +38,51 @@ class GameEnginePersistenceTest {
     }
 
     @After fun close() { db.close(); context.deleteDatabase(name) }
+
+    @Test fun bundledSessionInstallsIdempotentlyAndResumesTheRealIntroduction() = runBlocking {
+        val catalog = bundledGameCatalog()
+        val session = GameSession(games, RoomStoryContentRepository(db), catalog, createInitialGameState())
+        session.prepare()
+        val before = games.read()!!
+        val result = session.dispatch(request(checkNotNull(session.advanceCommand(before)))) as EngineResult.Applied
+        val intro = result.state.engine!!.currentEvent!!
+        assertEquals(catalog.introductionId, intro.eventId)
+        assertEquals(100L, result.state.economy.balance)
+        val choiceId = catalog.content.choices.single { it.eventId == intro.eventId }.id
+        val chosen = session.dispatch(request(EngineCommand.Choose(intro.id, choiceId))) as EngineResult.Applied
+        reopen()
+        val restored = GameSession(games, RoomStoryContentRepository(db), catalog, createInitialGameState())
+        restored.prepare()
+        assertEquals(chosen.state, games.read())
+        assertEquals(14, RoomStoryContentRepository(db).read().events.count { it.id.startsWith("figma-") })
+        assertTrue(restored.dispatch(request(EngineCommand.AcknowledgeResult(intro.id))) is EngineResult.Applied)
+        assertEquals(100L, games.read()!!.economy.balance)
+    }
+
+    @Test fun pausedAndCarriedActiveEventsRoundTripWithoutLosingTheirIdentity() = runBlocking {
+        send(EngineCommand.BeginDay("day", listOf("event", "job", "event", "event")))
+        val opened = send(EngineCommand.OpenNextEvent)
+        val id = opened.engine!!.currentEvent!!.id
+        var state = send(EngineCommand.PauseEvent(id))
+        reopen()
+        assertEquals(state, games.read())
+        assertTrue(state.story.decisions.isEmpty())
+        send(EngineCommand.Feed("basic"))
+        games.update { it.copy(engine = it.engine!!.copy(energy = 0)) }
+        state = send(EngineCommand.FinishDay)
+        assertEquals(EventStatus.CARRIED_ACTIVE, state.engine!!.events.first().status)
+        reopen()
+        assertEquals(state, games.read())
+        state = send(EngineCommand.BeginDay("day", listOf("event", "job", "event", "event")))
+        assertEquals(EventStatus.PAUSED, state.engine!!.events.first().status)
+        reopen()
+        assertEquals(state, games.read())
+        state = send(EngineCommand.OpenNextEvent)
+        assertEquals(id, state.engine!!.currentEvent!!.id)
+        state = send(EngineCommand.Choose(id, "event-choice"))
+        assertEquals(99L, state.economy.balance)
+        assertEquals(1, state.story.decisions.size)
+    }
 
     @Test fun offerActiveDeedAndSavedResultSurviveReopeningWithoutDuplicateReward() = runBlocking {
         send(EngineCommand.BeginDay("day", listOf("job", "event", "event", "event")))
