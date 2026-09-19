@@ -445,8 +445,8 @@ SQL остаётся на v2. Новые значения статуса и пе
 
 ## Room v7: шаг аксессуаров — 2026-09-20
 
-CUST-D-016 переносит завершение на Accessories. `ONBOARDING_DRAFT` содержит
-`step` (PROFILE/ACCESSORIES) и `accessory_id` (выбранная примерка, включая закрытые).
+CUST-D-018 переносит завершение на Introduction после подтверждения аксессуара. `ONBOARDING_DRAFT` содержит
+`step` (PROFILE/ACCESSORIES/INTRODUCTION) и `accessory_id` (выбранная примерка, включая закрытые).
 Единая миграция 6→7 от схемы main создаёт таблицу черновика сразу с NOT NULL
 полями step и accessory_id (defaults PROFILE и BACKPACK), сохраняя все игры. Функциональная зависимость: id → все поля; НФБК
 сохранена, вычисляемые признаки доступности не хранятся.

@@ -76,13 +76,13 @@ class CustomizationPersistenceTest {
         val profile = PetCustomization("Искорка", PetTemperament.Joyful, PetFur.Russet)
         var db = GameDatabase.open(context, name)
         try {
-            RoomOnboardingDraftRepository(db).save(OnboardingDraft(profile, OnboardingStep.Accessories, "BANDANA"))
+            RoomOnboardingDraftRepository(db).save(OnboardingDraft(profile, OnboardingStep.Introduction, "BANDANA"))
             assertNull(RoomGameRepository(db).read())
         } finally { db.close() }
         db = GameDatabase.open(context, name)
         val initial = createInitialGameState().copy(pet = PetState("BANDANA", PetVisualState.NORMAL, profile))
         try {
-            assertEquals(OnboardingDraft(profile, OnboardingStep.Accessories, "BANDANA"), RoomOnboardingDraftRepository(db).read())
+            assertEquals(OnboardingDraft(profile, OnboardingStep.Introduction, "BANDANA"), RoomOnboardingDraftRepository(db).read())
             RoomGameRepository(db).initializeIfAbsent(initial)
             assertNull(RoomOnboardingDraftRepository(db).read())
             // Completion and late text edits cannot overwrite/recreate the now-completed onboarding.
@@ -105,7 +105,7 @@ class CustomizationPersistenceTest {
             val profile = PetCustomization(fur = PetFur.Sand)
             val drafts = RoomOnboardingDraftRepository(db)
             val games = RoomGameRepository(db)
-            drafts.save(OnboardingDraft(profile, OnboardingStep.Accessories, "BANDANA"))
+            drafts.save(OnboardingDraft(profile, OnboardingStep.Introduction, "BANDANA"))
             val invalid = createInitialGameState().copy(
                 pet = PetState("BANDANA", PetVisualState.NORMAL, profile),
                 ownedItems = listOf(ru.nksk.lctapp.domain.game.OwnedItem("missing", "unknown-item")),
@@ -114,7 +114,7 @@ class CustomizationPersistenceTest {
             try { games.initializeIfAbsent(invalid) } catch (_: Exception) { failed = true }
             assertTrue(failed)
             assertNull(games.read())
-            assertEquals(OnboardingDraft(profile, OnboardingStep.Accessories, "BANDANA"), drafts.read())
+            assertEquals(OnboardingDraft(profile, OnboardingStep.Introduction, "BANDANA"), drafts.read())
         } finally { db.close() }
     }
 }

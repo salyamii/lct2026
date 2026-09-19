@@ -392,3 +392,14 @@ differs from `npc_tiko_body`; the fox has no backpack, unlike `menu_ryzhik`.
 SVG-оригиналы лежат рядом с каталогом. Контуры и размеры сохранены; круг и
 скруглённый прямоугольник замочка переведены в эквивалентные дуги VectorDrawable.
 Лицензия Lucide: `app/src/main/assets/licenses/lucide.txt`. Хеши в manifest.
+
+### Иконки знакомства — 2026-09-20
+
+| Ресурс | Формат | Источник |
+| --- | --- | --- |
+| `introduction_basket` | Vector XML, 30 × 30 | [Figma 2186:658](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2186-658) |
+| `introduction_diamond` | Vector XML, 30 × 30 | [Figma 2186:665](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2186-665) |
+| `introduction_goal` | Vector XML, 30 × 30 | [Figma 2186:672](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2186-672) |
+| `introduction_reserve` | Vector XML, 30 × 30 | [Figma 2186:679](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2186-679) |
+
+SVG-оригиналы сохранены рядом; точные контуры перенесены в Android XML. Хеши в manifest.

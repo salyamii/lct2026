@@ -24,6 +24,7 @@ internal sealed interface AppStartupState {
     data class Choose(val saving: Boolean = false, val failed: Boolean = false) : AppStartupState
     data class Customize(val draft: PetCustomization, val saving: Boolean = false, val failed: Boolean = false) : AppStartupState
     data class Accessories(val draft: OnboardingDraft, val saving: Boolean = false, val failed: Boolean = false) : AppStartupState
+    data class Introduction(val draft: OnboardingDraft, val saving: Boolean = false, val failed: Boolean = false) : AppStartupState
     data object Ready : AppStartupState
     data object Error : AppStartupState
 }
@@ -53,6 +54,7 @@ internal class AppStartupViewModel @Inject constructor(
                     when (it.step) {
                         OnboardingStep.Profile -> AppStartupState.Customize(it.profile)
                         OnboardingStep.Accessories -> AppStartupState.Accessories(it)
+                        OnboardingStep.Introduction -> AppStartupState.Introduction(it)
                     }
                 } ?: AppStartupState.Choose()
             } catch (cancelled: CancellationException) {
@@ -165,8 +167,36 @@ internal class AppStartupViewModel @Inject constructor(
         }
     }
 
-    fun finishOnboarding() {
+    fun confirmAccessory() {
         val current = state.value as? AppStartupState.Accessories ?: return
+        if (current.saving || work?.isActive == true || !current.draft.hasValidChoices) return
+        state.value = current.copy(saving = true, failed = false)
+        work = viewModelScope.launch {
+            try {
+                val draft = current.draft.copy(step = OnboardingStep.Introduction)
+                writes.withLock { drafts.save(draft) }
+                state.value = AppStartupState.Introduction(draft)
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (_: Exception) { state.value = current.copy(failed = true) }
+        }
+    }
+
+    fun backToAccessories() {
+        val current = state.value as? AppStartupState.Introduction ?: return
+        if (current.saving || work?.isActive == true) return
+        state.value = current.copy(saving = true, failed = false)
+        work = viewModelScope.launch {
+            try {
+                val draft = current.draft.copy(step = OnboardingStep.Accessories)
+                writes.withLock { drafts.save(draft) }
+                state.value = AppStartupState.Accessories(draft)
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (_: Exception) { state.value = current.copy(failed = true) }
+        }
+    }
+
+    fun finishOnboarding() {
+        val current = state.value as? AppStartupState.Introduction ?: return
         if (current.saving || work?.isActive == true || !current.draft.canFinish) return
         state.value = current.copy(saving = true, failed = false)
         work = viewModelScope.launch {

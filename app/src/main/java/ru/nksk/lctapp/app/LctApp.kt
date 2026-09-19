@@ -21,6 +21,7 @@ import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 import ru.nksk.lctapp.feature.onboarding.navigation.OnboardingEntry
 import ru.nksk.lctapp.feature.onboarding.ui.OnboardingArtwork
+import ru.nksk.lctapp.feature.onboarding.ui.AdventureIntroductionScreen
 import ru.nksk.lctapp.feature.onboarding.ui.CustomizationScreen
 import ru.nksk.lctapp.feature.onboarding.ui.AccessoryCustomizationScreen
 import ru.nksk.lctapp.feature.onboarding.ui.AccessoryCustomizationUiState
@@ -90,7 +91,22 @@ private fun LctAppContent() {
                     accessories = accessoryArtwork(art),
                     onSelect = { startup.selectAccessory(it.id) },
                     onBack = startup::backToCustomization,
-                    onApply = startup::finishOnboarding,
+                    onApply = startup::confirmAccessory,
+                    saving = current.saving,
+                    saveFailed = current.failed,
+                )
+            }
+            is AppStartupState.Introduction -> {
+                BackHandler { startup.backToAccessories() }
+                val art = customizationArtwork()
+                val accessory = OnboardingAccessory.entries.first { it.id == current.draft.accessoryId }
+                val fur = CharacterFur.valueOf(current.draft.profile.fur.name)
+                AdventureIntroductionScreen(
+                    artwork = art,
+                    portrait = accessoryArtwork(art).portraits.getValue(accessory).getValue(fur),
+                    icons = introductionIcons(),
+                    onBack = startup::backToAccessories,
+                    onStart = startup::finishOnboarding,
                     saving = current.saving,
                     saveFailed = current.failed,
                 )
