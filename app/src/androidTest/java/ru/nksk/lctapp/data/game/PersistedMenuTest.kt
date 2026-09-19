@@ -25,7 +25,6 @@ import ru.nksk.lctapp.app.navigation.LctNavHost
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
 import ru.nksk.lctapp.data.game.local.GameDatabase
 import ru.nksk.lctapp.domain.game.GameRepository
-import ru.nksk.lctapp.domain.pet.PetLook
 import ru.nksk.lctapp.domain.pet.PetVisualState
 
 @HiltAndroidTest
@@ -47,7 +46,7 @@ class PersistedMenuTest {
         runBlocking {
             games.initializeIfAbsent(initial.copy(
                 economy = initial.economy.copy(balance = 247),
-                pet = initial.pet.copy(selectedLook = PetLook.HAT, visualState = PetVisualState.UPSET),
+                pet = initial.pet.copy(selectedLookId = "HAT", visualState = PetVisualState.UPSET),
             ))
         }
         compose.setContent { LCTAppTheme { LctNavHost() } }

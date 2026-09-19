@@ -5,7 +5,6 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.app.createInitialGameState
-import ru.nksk.lctapp.domain.pet.PetLook
 import ru.nksk.lctapp.domain.pet.PetState
 import ru.nksk.lctapp.domain.pet.PetVisualState
 
@@ -15,7 +14,7 @@ class MainMenuUiStateMapperTest {
         val initial = createInitialGameState()
         val game = initial.copy(
             economy = initial.economy.copy(balance = 3_000_000_000L),
-            pet = PetState(PetLook.BANDANA, PetVisualState.HUNGRY),
+            pet = PetState("BANDANA", PetVisualState.HUNGRY),
         )
 
         val state = game.toMainMenuUiState()
@@ -29,11 +28,11 @@ class MainMenuUiStateMapperTest {
     fun normalUsesTheArtworkForTheSelectedLook() {
         val initial = createInitialGameState()
         val expectedArtwork = mapOf(
-            PetLook.PLAIN to R.drawable.ryzhik_teen_body_base_no_accessory,
-            PetLook.BANDANA to R.drawable.ryzhik_teen_body_accessory_bandana,
-            PetLook.BACKPACK to R.drawable.menu_ryzhik,
-            PetLook.GLASSES to R.drawable.ryzhik_teen_body_accessory_goggles,
-            PetLook.HAT to R.drawable.ryzhik_teen_body_accessory_hat,
+            "PLAIN" to R.drawable.ryzhik_teen_body_base_no_accessory,
+            "BANDANA" to R.drawable.ryzhik_teen_body_accessory_bandana,
+            "BACKPACK" to R.drawable.menu_ryzhik,
+            "GLASSES" to R.drawable.ryzhik_teen_body_accessory_goggles,
+            "HAT" to R.drawable.ryzhik_teen_body_accessory_hat,
         )
 
         for ((look, artwork) in expectedArtwork) {
@@ -41,6 +40,17 @@ class MainMenuUiStateMapperTest {
 
             assertEquals(artwork, game.toMainMenuUiState().pet.artworkRes)
         }
+    }
+
+    @Test
+    fun unknownLookKeepsAnExplicitMissingArtworkDescription() {
+        val initial = createInitialGameState()
+        val game = initial.copy(pet = PetState("backend:new-look", PetVisualState.NORMAL))
+
+        val pet = game.toMainMenuUiState().pet
+
+        assertNull(pet.artworkRes)
+        assertEquals(R.string.menu_pet_look_unavailable, pet.descriptionRes)
     }
 
     @Test
@@ -54,7 +64,7 @@ class MainMenuUiStateMapperTest {
             PetVisualState.HAPPY to R.drawable.ryzhik_teen_state_joy_copper,
         )
         for ((visualState, artwork) in expectedArtwork) {
-            for (look in PetLook.entries) {
+            for (look in listOf("PLAIN", "BANDANA", "BACKPACK", "GLASSES", "HAT", "backend:new-look")) {
                 val game = initial.copy(pet = PetState(look, visualState))
 
                 assertEquals(artwork, game.toMainMenuUiState().pet.artworkRes)
@@ -70,7 +80,7 @@ class MainMenuUiStateMapperTest {
             PetVisualState.WORRIED to R.string.menu_pet_worried,
         )
         for ((visualState, description) in descriptions) {
-            val game = initial.copy(pet = PetState(PetLook.BACKPACK, visualState))
+            val game = initial.copy(pet = PetState("BACKPACK", visualState))
 
             val pet = game.toMainMenuUiState().pet
 
@@ -82,8 +92,8 @@ class MainMenuUiStateMapperTest {
     @Test
     fun returningToNormalUsesTheCurrentLook() {
         val initial = createInitialGameState()
-        val happy = PetState(PetLook.BANDANA, PetVisualState.HAPPY)
-        val normal = happy.copy(selectedLook = PetLook.HAT).transitionTo(PetVisualState.NORMAL)
+        val happy = PetState("BANDANA", PetVisualState.HAPPY)
+        val normal = happy.copy(selectedLookId = "HAT").transitionTo(PetVisualState.NORMAL)
 
         val state = initial.copy(pet = normal).toMainMenuUiState()
 

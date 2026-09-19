@@ -13,7 +13,7 @@ internal const val CURRENT_GAME_ID = "current"
 internal fun GameState.toEntity() = GameStateEntity(
     id = CURRENT_GAME_ID,
     visualState = StoredCodes.visual.encode(pet.visualState),
-    selectedLook = StoredCodes.look.encode(pet.selectedLook),
+    selectedLook = pet.selectedLookId,
     satiety = satiety,
     fatigue = fatigue,
     balance = economy.balance,
@@ -30,7 +30,7 @@ internal fun GameStateEntity.toDomain(
     decisions: List<PlayerDecisionEntity>,
     items: List<OwnedItemEntity>,
 ) = GameState(
-    pet = PetState(StoredCodes.look.decode(selectedLook), StoredCodes.visual.decode(visualState)),
+    pet = PetState(selectedLook, StoredCodes.visual.decode(visualState)),
     economy = EconomyState(balance, BudgetPlan(plannedNeeds, plannedWants, plannedSavings, plannedReserve)),
     story = StoryState(currentDayId, nextScriptPosition, activeEventId, decisions.map { StoryDecision(it.id, it.choiceId) }),
     satiety = satiety,

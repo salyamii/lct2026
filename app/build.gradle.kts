@@ -46,6 +46,7 @@ room3 {
 }
 
 dependencies {
+    implementation(project(":core:game"))
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.sqlite.bundled)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
@@ -86,4 +87,7 @@ tasks.withType<Test>().configureEach {
     val mainSources = layout.projectDirectory.dir("src/main/java")
     inputs.dir(mainSources).withPathSensitivity(PathSensitivity.RELATIVE)
     systemProperty("lctapp.mainSourceDir", mainSources.asFile.absolutePath)
+    val domainSources = rootProject.layout.projectDirectory.dir("core/game/src/main/kotlin")
+    inputs.dir(domainSources).withPathSensitivity(PathSensitivity.RELATIVE)
+    systemProperty("lctapp.domainSourceDir", domainSources.asFile.absolutePath)
 }

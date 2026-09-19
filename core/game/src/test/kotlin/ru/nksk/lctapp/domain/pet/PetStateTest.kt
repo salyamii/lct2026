@@ -6,8 +6,8 @@ import org.junit.Test
 class PetStateTest {
     @Test
     fun normalDisplaysEachSelectedLook() {
-        for (look in PetLook.entries) {
-            val pet = PetState(selectedLook = look, visualState = PetVisualState.NORMAL)
+        for (look in listOf("PLAIN", "BANDANA", "BACKPACK", "GLASSES", "HAT", "backend:new-look")) {
+            val pet = PetState(selectedLookId = look, visualState = PetVisualState.NORMAL)
 
             assertEquals(PetAppearance.SelectedLook(look), pet.appearance)
         }
@@ -24,14 +24,14 @@ class PetStateTest {
             PetVisualState.UPSET,
             PetVisualState.HAPPY,
         )
-        for (look in PetLook.entries) {
+        for (look in listOf("PLAIN", "BANDANA", "BACKPACK", "GLASSES", "HAT", "backend:new-look")) {
             for (specialState in specialStates) {
                 val normal = PetState(look, PetVisualState.NORMAL)
 
                 val special = normal.transitionTo(specialState)
 
                 assertEquals(PetAppearance.SpecialState(specialState), special.appearance)
-                assertEquals(look, special.selectedLook)
+                assertEquals(look, special.selectedLookId)
                 assertEquals(
                     PetAppearance.SelectedLook(look),
                     special.transitionTo(PetVisualState.NORMAL).appearance,
@@ -43,7 +43,7 @@ class PetStateTest {
 
     @Test
     fun explicitUpdatesReplaceTheStateEvenWhenTheNewPriorityIsLower() {
-        val worried = PetState(PetLook.BANDANA, PetVisualState.WORRIED)
+        val worried = PetState("BANDANA", PetVisualState.WORRIED)
 
         val hungry = worried.transitionTo(PetVisualState.HUNGRY)
         val happy = hungry.transitionTo(PetVisualState.HAPPY)
@@ -51,19 +51,19 @@ class PetStateTest {
 
         assertEquals(PetAppearance.SpecialState(PetVisualState.HUNGRY), hungry.appearance)
         assertEquals(PetAppearance.SpecialState(PetVisualState.HAPPY), happy.appearance)
-        assertEquals(PetAppearance.SelectedLook(PetLook.BANDANA), normal.appearance)
+        assertEquals(PetAppearance.SelectedLook("BANDANA"), normal.appearance)
     }
 
     @Test
     fun changingLookKeepsHappyAndUpsetUntilAnExplicitStateUpdate() {
         for (outcome in listOf(PetVisualState.HAPPY, PetVisualState.UPSET)) {
-            val pet = PetState(PetLook.BANDANA, outcome)
+            val pet = PetState("BANDANA", outcome)
 
-            val changedLook = pet.copy(selectedLook = PetLook.BACKPACK)
+            val changedLook = pet.copy(selectedLookId = "BACKPACK")
 
             assertEquals(PetAppearance.SpecialState(outcome), changedLook.appearance)
             assertEquals(
-                PetAppearance.SelectedLook(PetLook.BACKPACK),
+                PetAppearance.SelectedLook("BACKPACK"),
                 changedLook.transitionTo(PetVisualState.NORMAL).appearance,
             )
         }

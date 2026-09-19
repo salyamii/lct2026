@@ -21,8 +21,11 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
         GameStateEntity::class,
         PlayerDecisionEntity::class,
         OwnedItemEntity::class,
+        EngineStateEntity::class,
+        EngineEventEntity::class,
+        EngineDeedEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 internal abstract class GameDatabase : RoomDatabase() {
@@ -35,7 +38,7 @@ internal abstract class GameDatabase : RoomDatabase() {
         fun open(context: Context, name: String = FILE_NAME): GameDatabase =
             Room.databaseBuilder<GameDatabase>(context.applicationContext, name)
                 .setDriver(BundledSQLiteDriver())
-                // Future versions must register tested, data-preserving migrations here.
+                .addMigrations(MIGRATION_1_2)
                 .build()
     }
 }

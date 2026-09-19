@@ -20,7 +20,6 @@ import ru.nksk.lctapp.app.navigation.LctNavHost
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
 import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.domain.game.GameState
-import ru.nksk.lctapp.domain.pet.PetLook
 import ru.nksk.lctapp.domain.pet.PetState
 import ru.nksk.lctapp.domain.pet.PetVisualState
 import ru.nksk.lctapp.feature.menu.ui.MainMenuScreen
@@ -41,7 +40,7 @@ class MainMenuInitialStateTest {
     val game: GameState = createInitialGameState().let { initial ->
         initial.copy(
             economy = initial.economy.copy(balance = 3_000_000_000L),
-            pet = PetState(PetLook.BANDANA, PetVisualState.HUNGRY),
+            pet = PetState("BANDANA", PetVisualState.HUNGRY),
         )
     }
 
@@ -71,7 +70,7 @@ class MainMenuInitialStateTest {
     fun screenUpdatesFromSpecialAppearanceToTheLatestSelectedLook() {
         val initial = createInitialGameState()
         val state = mutableStateOf(initial.copy(
-            pet = PetState(PetLook.BANDANA, PetVisualState.HAPPY),
+            pet = PetState("BANDANA", PetVisualState.HAPPY),
         ).toMainMenuUiState())
         compose.setContent {
             LCTAppTheme { MainMenuScreen(state = state.value, onAction = {}) }
@@ -82,7 +81,7 @@ class MainMenuInitialStateTest {
 
         compose.runOnIdle {
             state.value = initial.copy(
-                pet = PetState(PetLook.HAT, PetVisualState.NORMAL),
+                pet = PetState("HAT", PetVisualState.NORMAL),
             ).toMainMenuUiState()
         }
 
@@ -97,7 +96,7 @@ class MainMenuInitialStateTest {
     @Test
     fun unmappedStateDisplaysItsLabelWithoutTheBackpackImage() {
         val game = createInitialGameState().copy(
-            pet = PetState(PetLook.BACKPACK, PetVisualState.NEEDS_HELP),
+            pet = PetState("BACKPACK", PetVisualState.NEEDS_HELP),
         )
         compose.setContent {
             LCTAppTheme { MainMenuScreen(state = game.toMainMenuUiState(), onAction = {}) }

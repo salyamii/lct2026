@@ -1,5 +1,22 @@
 # Ryzhik: app state-machine specification
 
+> Implementation addition, 2026-09-19: the original specification below is
+> retained. The implemented day/event kernel is documented in
+> [game-engine.md](game-engine.md), including its explicit configuration and
+> unsupported/open operations. It lives in `:core:game` and persists via Room v2.
+> `RUNNING → READY_TO_END → FINISHED` describes the day; event occurrences use
+> `PENDING → ACTIVE → RESULT → COMPLETED` with `CARRIED` for postponed lore.
+> Offering a deed goes directly to `RESULT` and consumes one step without
+> spending effort or granting its reward; later execution is a separate step.
+> These are implementation stages, not an internal multi-step story graph.
+>
+> Pet visual state remains an explicit single-state replacement in `PetState`.
+> Hunger/effort guards are currently owned by `GameEngine`; there is no separate
+> pet behavioral FSM. Food changes the fed status, not current energy; configured
+> free food can limit next morning's energy. Wake-up clears TIRED explicitly;
+> acknowledging an event does not reset moods. Cosmetic selection is now the
+> open string `selectedLookId` (D-070), independently preserved through transitions.
+
 ## Scope and authority
 
 This is a self-contained transcription and structured interpretation of the
@@ -378,6 +395,25 @@ new state rules.
   the approved subsequent decisions and future fatigue-event definitions.
 
 ## Appendix: complete source text
+
+**Дополнение к применению спецификации · 2026-09-19:** исходные формулировки
+и расшифровка ниже сохраняются без изменений. Последующие пояснения пользователя
+D-045–D-065 находятся в [реестре решений](decisions.md) и дополнениях
+[модели игры](game-data-schema.md). Они отдельно описывают фабрику событий,
+шаг как выполнение события, 4–5 событий в дне, перенос лора при нехватке сил,
+сроки отложенных дел, питание, подвижный бюджет и автоматическую трату на еду.
+Новые числовые ресурсы не создают скрытых визуальных состояний питомца.
+Точная связь ресурсов с визуальными переходами остаётся открытой.
+Многошаговое устройство событий поставлено пользователем под вопрос;
+его нельзя считать обязательным на основании примера агента.
+Новые правила не реализованы автоматически существующим Room или навигацией.
+
+**Последующее дополнение · 2026-09-19:** D-066 считает предложение дела шагом,
+D-067 разрешает выполнить оставшееся короткое дело после основного расписания
+до нажатия «Закончить день». Достижение 4–5 событий не завершает день само по
+себе. Предложение D-068 уточняет обсуждение D-064: питомец просит покормить его
+и объясняет расход накоплений; автоматическое списание не выводится из этой
+реплики. Статусы и границы этих уточнений указаны в реестре решений.
 
 The following entries preserve all 102 text nodes in board traversal order.
 Node identifiers are provenance labels, not links. Russian wording is verbatim,

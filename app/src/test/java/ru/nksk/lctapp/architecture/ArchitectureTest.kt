@@ -5,25 +5,25 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Early feedback for package boundaries while production code shares one Gradle module.
+ * Early feedback for package boundaries across app and the pure Kotlin game module.
  * Checks declared packages and explicit imports, including aliases and wildcards; it does
  * not resolve fully qualified references, same-package access, or transitive dependencies.
- * Compiler-enforced boundaries will require separate modules when the app needs them.
+ * The game module additionally enforces its dependency boundary through Gradle.
  */
 class ArchitectureTest {
     @Test
     fun productionSourcesRespectPackageBoundaries() {
-        val sourceRoot = File(requireNotNull(System.getProperty("lctapp.mainSourceDir")) {
-            "Configure lctapp.mainSourceDir for the JVM test task"
-        })
-        val sources = sourceRoot.walkTopDown()
-            .filter { it.isFile && it.extension == "kt" }
-            .sortedBy { it.path }
-            .toList()
-        assertTrue("No production Kotlin sources found in $sourceRoot", sources.isNotEmpty())
+        val sourceRoots = listOf("lctapp.mainSourceDir", "lctapp.domainSourceDir").map { property ->
+            File(requireNotNull(System.getProperty(property)) { "Configure $property for the JVM test task" })
+        }
+        val sources = sourceRoots.flatMap { root ->
+            val files = root.walkTopDown().filter { it.isFile && it.extension == "kt" }.sortedBy { it.path }.toList()
+            assertTrue("No production Kotlin sources found in $root", files.isNotEmpty())
+            files.map { root to it }
+        }
 
         val violations = buildList {
-            for (file in sources) {
+            for ((sourceRoot, file) in sources) {
                 val path = file.relativeTo(sourceRoot).invariantSeparatorsPath
                 // Exclude comments and string examples from the package/import scan.
                 val code = nonCode.replace(file.readText()) { match ->
