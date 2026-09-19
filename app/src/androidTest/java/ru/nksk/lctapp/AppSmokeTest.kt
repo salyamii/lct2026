@@ -32,6 +32,10 @@ class AppSmokeTest {
     @get:Rule(order = 0)
     val hilt = HiltAndroidRule(this)
     @BindValue @JvmField
+    val onboardingDrafts: ru.nksk.lctapp.domain.onboarding.OnboardingDraftRepository =
+        ru.nksk.lctapp.TestOnboardingDraftRepository()
+
+    @BindValue @JvmField
     val repository: GameRepository = TestGameRepository()
 
     @BindValue @JvmField

@@ -6,6 +6,9 @@ import ru.nksk.lctapp.domain.content.ItemOperation
 import ru.nksk.lctapp.domain.content.ItemCategory
 import ru.nksk.lctapp.domain.economy.BudgetSection
 import ru.nksk.lctapp.domain.pet.PetVisualState
+import ru.nksk.lctapp.domain.pet.PetAge
+import ru.nksk.lctapp.domain.pet.PetFur
+import ru.nksk.lctapp.domain.pet.PetTemperament
 
 /** Persisted strings are explicit contracts, independent of enum names and ordinal order. */
 internal class StoredCode<T : Any>(private val values: Map<T, String>) {
@@ -15,6 +18,14 @@ internal class StoredCode<T : Any>(private val values: Map<T, String>) {
 }
 
 internal object StoredCodes {
+    val petAge = StoredCode(mapOf(PetAge.Cub to "Cub"))
+    val petFur = StoredCode(mapOf(
+        PetFur.Copper to "Copper", PetFur.Sand to "Sand", PetFur.Russet to "Russet",
+    ))
+    val petTemperament = StoredCode(mapOf(
+        PetTemperament.Curious to "Curious", PetTemperament.Confident to "Confident",
+        PetTemperament.Joyful to "Joyful",
+    ))
     val itemCategory = StoredCode(mapOf(
         ItemCategory.STORY to "STORY", ItemCategory.ACCESSORY to "ACCESSORY",
     ))

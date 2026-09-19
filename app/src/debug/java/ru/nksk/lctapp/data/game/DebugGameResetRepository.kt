@@ -11,7 +11,7 @@ internal class DebugGameResetRepository @Inject constructor(private val database
             // Children first: the schema intentionally has no cascading deletes.
             for (table in listOf(
                 "ENGINE_EVENT", "ENGINE_DEED", "ENGINE_STATE", "MINI_GAME_COMPLETION",
-                "PLAYER_DECISION", "OWNED_ITEM", "LEGACY_EXPENSE_STATE", "GAME_STATE",
+                "PLAYER_DECISION", "OWNED_ITEM", "LEGACY_EXPENSE_STATE", "GAME_STATE", "ONBOARDING_DRAFT",
             )) {
                 usePrepared("DELETE FROM $table") { it.step() }
             }

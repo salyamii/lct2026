@@ -35,6 +35,10 @@ class PersistedMenuTest {
     @get:Rule(order = 1) val compose = createAndroidComposeRule<HiltTestActivity>()
     private val db = Room.inMemoryDatabaseBuilder<GameDatabase>(ApplicationProvider.getApplicationContext<android.content.Context>())
         .setDriver(BundledSQLiteDriver()).build()
+    @BindValue @JvmField
+    val onboardingDrafts: ru.nksk.lctapp.domain.onboarding.OnboardingDraftRepository =
+        ru.nksk.lctapp.TestOnboardingDraftRepository()
+
     @BindValue
     @JvmField
     val games: GameRepository = RoomGameRepository(db)

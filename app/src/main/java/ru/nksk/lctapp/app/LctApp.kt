@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.app
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.foundation.background
@@ -20,6 +21,15 @@ import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 import ru.nksk.lctapp.feature.onboarding.navigation.OnboardingEntry
 import ru.nksk.lctapp.feature.onboarding.ui.OnboardingArtwork
+import ru.nksk.lctapp.feature.onboarding.ui.CustomizationScreen
+import ru.nksk.lctapp.feature.onboarding.ui.AccessoryCustomizationScreen
+import ru.nksk.lctapp.feature.onboarding.ui.AccessoryCustomizationUiState
+import ru.nksk.lctapp.feature.onboarding.ui.OnboardingAccessory
+import ru.nksk.lctapp.feature.onboarding.ui.CustomizationUiState
+import ru.nksk.lctapp.feature.onboarding.ui.CharacterFur
+import ru.nksk.lctapp.feature.onboarding.ui.CharacterTemperament
+import ru.nksk.lctapp.domain.pet.PetFur
+import ru.nksk.lctapp.domain.pet.PetTemperament
 
 /** Composition root for shared presentation and app-owned navigation. */
 @Composable
@@ -51,6 +61,40 @@ private fun LctAppContent() {
                 saveFailed = current.failed,
                 onStartAdventure = startup::startAdventure,
             )
+            is AppStartupState.Customize -> {
+                BackHandler { startup.backToCharacters() }
+                CustomizationScreen(
+                    state = CustomizationUiState(current.draft.name,
+                        CharacterTemperament.valueOf(current.draft.temperament.name),
+                        CharacterFur.valueOf(current.draft.fur.name)),
+                    artwork = customizationArtwork(),
+                    onNameChange = startup::editName,
+                    onTemperamentChange = { startup.editTemperament(PetTemperament.valueOf(it.name)) },
+                    onFurChange = { startup.editFur(PetFur.valueOf(it.name)) },
+                    onBack = startup::backToCharacters,
+                    onContinue = startup::finishCustomization,
+                    saving = current.saving,
+                    saveFailed = current.failed,
+                )
+            }
+            is AppStartupState.Accessories -> {
+                BackHandler { startup.backToCustomization() }
+                val art = customizationArtwork()
+                AccessoryCustomizationScreen(
+                    state = AccessoryCustomizationUiState(
+                        name = current.draft.profile.name,
+                        fur = CharacterFur.valueOf(current.draft.profile.fur.name),
+                        accessory = OnboardingAccessory.entries.first { it.id == current.draft.accessoryId },
+                    ),
+                    artwork = art,
+                    accessories = accessoryArtwork(art),
+                    onSelect = { startup.selectAccessory(it.id) },
+                    onBack = startup::backToCustomization,
+                    onApply = startup::finishOnboarding,
+                    saving = current.saving,
+                    saveFailed = current.failed,
+                )
+            }
             else -> Box(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding(),
                 contentAlignment = Alignment.Center) {
                 if (current == AppStartupState.Loading) CircularProgressIndicator()

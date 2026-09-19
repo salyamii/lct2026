@@ -4,6 +4,7 @@ package ru.nksk.lctapp.domain.pet
 data class PetState(
     val selectedLookId: String,
     val visualState: PetVisualState,
+    val customization: PetCustomization? = null,
 ) {
     val appearance: PetAppearance
         get() = if (visualState == PetVisualState.NORMAL) {

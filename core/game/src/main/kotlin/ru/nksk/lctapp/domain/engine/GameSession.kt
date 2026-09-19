@@ -6,6 +6,7 @@ import ru.nksk.lctapp.domain.content.StoryContent
 import ru.nksk.lctapp.domain.content.StoryContentRepository
 import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.domain.game.GameState
+import ru.nksk.lctapp.domain.pet.PetState
 
 /** Authored copy and artwork keys stay open data, independently of Android resources. */
 data class EventCardCopy(
@@ -72,10 +73,10 @@ class GameSession(
     private var prepared = false
     val engine = GameEngine(games, EventFactory(catalog.content, catalog.policies, catalog.meals), catalog.rules)
 
-    suspend fun prepare() = preparation.withLock {
+    suspend fun prepare(pet: PetState? = null) = preparation.withLock {
         if (!prepared) {
             content.install(catalog.content)
-            games.initializeIfAbsent(initial)
+            games.initializeIfAbsent(if (pet == null) initial else initial.copy(pet = pet))
             prepared = true
         }
     }

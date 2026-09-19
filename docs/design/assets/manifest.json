@@ -9555,6 +9555,72 @@
       "source_path": "docs/design/assets/debug_settings.svg",
       "source_sha256": "83dbfbeabe462e85a827f1c2ebd7181f6cb0307fabb74fa589ed277e86bc773b",
       "source_notes": "Original geometric eight-tooth gear for debug UI; no Figma source. SVG path copied exactly to Android vector, 24x24 viewport, evenOdd fill; no raster conversion."
+    },
+    {
+      "resource": "customization_courtyard",
+      "category": "Customization preview",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2223:51",
+        "node_name": "image 19",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2223-51"
+      },
+      "source_method": "figma_get_design_context_asset",
+      "source_notes": "Full original canvas. Pillow lossless=True, exact=True, method=6; RGBA verified.",
+      "format": "webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 1655348,
+      "sha256": "eb9d7944d8a03a374e224c35b9c8a38dc1db24017738e9921ba6c9657ec662c8",
+      "rgba_sha256": "fdf271b7fcc40a68f1f2e5d7a324f334fae4112730637ccdbe6d192873d25985",
+      "alpha_bounds": [
+        0,
+        0,
+        941,
+        1672
+      ],
+      "source_sha256": "643b8ab6858105764dc2a7f61962d754f8aeba1f93254e986596663c2bc3132a",
+      "source_bytes": 2715496,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/customization_courtyard.webp"
+    },
+    {
+      "resource": "customization_none",
+      "category": "Customization icons",
+      "path": "app/src/main/res/drawable/customization_none.xml",
+      "format": "vector_xml",
+      "width": 22,
+      "height": 22,
+      "bytes": 563,
+      "sha256": "264f0849fe2cff05226eeac5250375e1603e40dd172fe2b26619c59e7020c970",
+      "source": {
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2186-201",
+        "path": "docs/design/assets/customization_none.svg",
+        "sha256": "8ac7fb449ee04b9d6676cf9a3cf30c6f526c87c2cbb0df00b1a35c6e2ecfc643"
+      },
+      "conversion": "SVG strokes preserved; circle and rounded rect converted to equivalent Android path arcs. Tint supplied by Compose.",
+      "source_path": "docs/design/assets/customization_none.svg",
+      "source_sha256": "8ac7fb449ee04b9d6676cf9a3cf30c6f526c87c2cbb0df00b1a35c6e2ecfc643"
+    },
+    {
+      "resource": "customization_lock",
+      "category": "Customization icons",
+      "path": "app/src/main/res/drawable/customization_lock.xml",
+      "format": "vector_xml",
+      "width": 24,
+      "height": 24,
+      "bytes": 917,
+      "sha256": "e0e9eaa210c48c7ef80fbab9866491f66b3c0cc623e467a35838c047e1896ac4",
+      "source": {
+        "url": "https://github.com/lucide-icons/lucide/blob/main/icons/lock-keyhole.svg",
+        "path": "docs/design/assets/customization_lock.svg",
+        "sha256": "fc0b8b7590d1d9e9bb0112c5c2e15a78ade0bfeca6d6f8c79fbbe149236d74be"
+      },
+      "conversion": "SVG strokes preserved; circle and rounded rect converted to equivalent Android path arcs. Tint supplied by Compose.",
+      "source_path": "docs/design/assets/customization_lock.svg",
+      "source_sha256": "fc0b8b7590d1d9e9bb0112c5c2e15a78ade0bfeca6d6f8c79fbbe149236d74be",
+      "license_path": "app/src/main/assets/licenses/lucide.txt"
     }
   ],
   "missing": []

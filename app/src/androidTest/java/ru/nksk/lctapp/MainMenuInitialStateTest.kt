@@ -35,6 +35,10 @@ class MainMenuInitialStateTest {
     @get:Rule(order = 1)
     val compose = createAndroidComposeRule<HiltTestActivity>()
 
+    @BindValue @JvmField
+    val onboardingDrafts: ru.nksk.lctapp.domain.onboarding.OnboardingDraftRepository =
+        ru.nksk.lctapp.TestOnboardingDraftRepository()
+
     @BindValue
     @JvmField
     val game: GameState = createInitialGameState().let { initial ->

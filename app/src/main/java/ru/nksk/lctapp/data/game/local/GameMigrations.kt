@@ -105,3 +105,20 @@ internal val MIGRATION_5_6 = object : Migration(5, 6) {
         connection.execSQL("ALTER TABLE GAME_STATE DROP COLUMN hunger")
     }
 }
+
+/** Existing games keep their appearance; only newly customized games receive a profile. */
+internal val MIGRATION_6_7 = object : Migration(6, 7) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        listOf("pet_name", "pet_temperament", "pet_fur", "pet_age").forEach {
+            connection.execSQL("ALTER TABLE GAME_STATE ADD COLUMN $it TEXT")
+        }
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS ONBOARDING_DRAFT (
+                id TEXT NOT NULL PRIMARY KEY, name TEXT NOT NULL,
+                temperament TEXT NOT NULL, fur TEXT NOT NULL,
+                step TEXT NOT NULL DEFAULT 'PROFILE',
+                accessory_id TEXT NOT NULL DEFAULT 'BACKPACK'
+            )
+        """.trimIndent())
+    }
+}

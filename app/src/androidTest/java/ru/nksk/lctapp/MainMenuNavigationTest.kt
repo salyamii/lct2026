@@ -39,6 +39,10 @@ class MainMenuNavigationTest {
         }
     }
 
+    @BindValue @JvmField
+    val onboardingDrafts: ru.nksk.lctapp.domain.onboarding.OnboardingDraftRepository =
+        ru.nksk.lctapp.TestOnboardingDraftRepository()
+
     @BindValue
     @JvmField
     val repository: GameRepository = TestGameRepository()

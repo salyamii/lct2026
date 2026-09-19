@@ -9,7 +9,7 @@ internal fun GameState.toMainMenuUiState(fullEnergy: Int = 5): MainMenuUiState =
     // The existing adventure counter is a display fixture, not savings or decision arithmetic.
     completedGoals = 0,
     totalGoals = 4,
-    pet = pet.appearance.toMainMenuPetUiState(),
+    pet = pet.toMainMenuPetUiState(),
     dayStatus = engine?.let { "День ${it.day} · ${energyDescription(it.energy, fullEnergy)} · " + if (it.ateToday) "Сыт" else "Ещё не ел" },
     continueLabel = engine?.let { when {
         it.phase == DayPhase.FINISHED -> "Итоги дня"

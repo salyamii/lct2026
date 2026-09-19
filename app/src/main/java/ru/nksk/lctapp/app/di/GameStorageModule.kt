@@ -9,10 +9,12 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import ru.nksk.lctapp.data.game.RoomGameRepository
+import ru.nksk.lctapp.data.game.RoomOnboardingDraftRepository
 import ru.nksk.lctapp.data.game.RoomStoryContentRepository
 import ru.nksk.lctapp.data.game.local.GameDatabase
 import ru.nksk.lctapp.domain.content.StoryContentRepository
 import ru.nksk.lctapp.domain.game.GameRepository
+import ru.nksk.lctapp.domain.onboarding.OnboardingDraftRepository
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -28,6 +30,11 @@ internal abstract class GameRepositoryModule {
     @Binds
     @Singleton
     abstract fun games(implementation: RoomGameRepository): GameRepository
+
+    @Binds
+    @Singleton
+    abstract fun drafts(implementation: RoomOnboardingDraftRepository):
+        OnboardingDraftRepository
 
     @Binds
     @Singleton

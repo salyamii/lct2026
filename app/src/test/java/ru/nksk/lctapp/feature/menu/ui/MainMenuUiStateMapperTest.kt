@@ -5,10 +5,50 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.app.createInitialGameState
+import ru.nksk.lctapp.domain.pet.PetCustomization
+import ru.nksk.lctapp.domain.pet.PetFur
 import ru.nksk.lctapp.domain.pet.PetState
 import ru.nksk.lctapp.domain.pet.PetVisualState
 
 class MainMenuUiStateMapperTest {
+    @Test fun customizedNewGameDisplaysCubInItsSavedColor() {
+        val expected = mapOf(
+            PetFur.Copper to R.drawable.ryzhik_cub_body_base_no_accessory,
+            PetFur.Sand to R.drawable.ryzhik_cub_body_base_sand,
+            PetFur.Russet to R.drawable.ryzhik_cub_body_base_dark_russet,
+        )
+        expected.forEach { (fur, resource) ->
+            val game = createInitialGameState().copy(pet = PetState("PLAIN", PetVisualState.NORMAL,
+                PetCustomization(fur = fur)))
+            assertEquals(resource, game.toMainMenuUiState().pet.artworkRes)
+        }
+    }
+
+    @Test fun onboardingAccessoriesRenderWithTheSavedCubFur() {
+        val expected = mapOf(
+            "BANDANA" to listOf(R.drawable.ryzhik_cub_body_accessory_bandana,
+                R.drawable.ryzhik_cub_body_accessory_bandana_sand, R.drawable.ryzhik_cub_body_accessory_bandana_dark_russet),
+            "BACKPACK" to listOf(R.drawable.ryzhik_cub_body_accessory_backpack,
+                R.drawable.ryzhik_cub_body_accessory_backpack_sand, R.drawable.ryzhik_cub_body_accessory_backpack_dark_russet),
+        )
+        expected.forEach { (look, artwork) ->
+            PetFur.entries.forEachIndexed { index, fur ->
+                val pet = PetState(look, PetVisualState.NORMAL, PetCustomization(fur = fur))
+                assertEquals(artwork[index], pet.toMainMenuPetUiState().artworkRes)
+            }
+        }
+    }
+
+    @Test fun moodChangePreservesCustomizedAgeColorAndSelectedAccessory() {
+        val profile = PetCustomization(name = "Искорка", fur = PetFur.Sand)
+        val pet = PetState("HAT", PetVisualState.NORMAL, profile)
+        val happy = pet.transitionTo(PetVisualState.HAPPY)
+        assertEquals(R.drawable.ryzhik_cub_state_joy_sand, happy.toMainMenuPetUiState().artworkRes)
+        val normal = happy.transitionTo(PetVisualState.NORMAL)
+        assertEquals(R.drawable.ryzhik_cub_body_accessory_hat_sand, normal.toMainMenuPetUiState().artworkRes)
+        assertEquals(profile, normal.customization)
+    }
+
     @Test
     fun suppliedGameSnapshotDrivesTheBalanceAndPetAppearance() {
         val initial = createInitialGameState()

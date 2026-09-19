@@ -2,7 +2,7 @@
 
 See [the guide](README.md) for storage and usage rules and [the manifest](manifest.json) for checksums and export details.
 
-292 logical assets; 3 exact drawable aliases; 0 unavailable exports.
+293 logical assets; 3 exact drawable aliases; 0 unavailable exports.
 
 Locations retain their original 941 × 1672 pixels. Character and equipment layers retain a 512 × 512 canvas. Names are artwork labels, not gameplay rules.
 
@@ -375,3 +375,20 @@ differs from `npc_tiko_body`; the fox has no backpack, unlike `menu_ryzhik`.
 | Resource | Canvas | Android resource | Source |
 | --- | --- | --- | --- |
 | `debug_settings` | 24 × 24 | [Vector XML](../../../feature/debug/src/main/res/drawable/debug_settings.xml) | [Original SVG](debug_settings.svg), locally authored geometric gear, no Figma node; identical path and evenOdd fill. Displayed at 20 dp on a gray 40 dp button. |
+
+## Customization preview
+
+| Resource | Canvas | File | Source |
+| --- | --- | --- | --- |
+| `customization_courtyard` | 941 × 1672 | [customization_courtyard.webp](../../../app/src/main/res/drawable-nodpi/customization_courtyard.webp) | [2223:51](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2223-51) |
+
+### Иконки кастомизации — 2026-09-20
+
+| Ресурс | Формат и размер | Источник |
+| --- | --- | --- |
+| `customization_none` | Vector XML, 22 × 22 | [Figma 2186:201](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2186-201) |
+| `customization_lock` | Vector XML, 24 × 24 | [Lucide lock-keyhole](https://github.com/lucide-icons/lucide/blob/main/icons/lock-keyhole.svg) |
+
+SVG-оригиналы лежат рядом с каталогом. Контуры и размеры сохранены; круг и
+скруглённый прямоугольник замочка переведены в эквивалентные дуги VectorDrawable.
+Лицензия Lucide: `app/src/main/assets/licenses/lucide.txt`. Хеши в manifest.

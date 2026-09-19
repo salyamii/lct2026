@@ -32,6 +32,7 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
         readInTransaction() ?: run {
             dao.insertState(initial.toEntity())
             writeChildren(initial)
+            database.onboardingDraftDao().clear()
             checkNotNull(readInTransaction())
         }
     }
