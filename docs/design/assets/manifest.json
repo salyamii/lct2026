@@ -9456,6 +9456,93 @@
       "note": "Designer export (PNG source), Figma node-id not provided"
     },
     {
+      "resource": "onboarding_castle",
+      "category": "Onboarding",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2199:753",
+        "node_name": "background",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2199-753"
+      },
+      "source_method": "figma_get_design_context_asset",
+      "source_notes": "Full exported image canvas retained, no crop or recoloring. Pillow 12.3.0; lossless=True, exact=True, method=6.",
+      "format": "webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 2068492,
+      "sha256": "e90fcb1c21acebbed50e067bef2197157f174c251b498ce2fc29477445baf0e2",
+      "rgba_sha256": "7680c882e9bbaac3667a3f66978b723504d0344a61e427e48aa256d6dfc6aa2e",
+      "alpha_bounds": [
+        0,
+        0,
+        941,
+        1672
+      ],
+      "source_sha256": "a0dfc04bf36278a2b1a71ae68ed560bf212a87d0b0e81fafcb57a51f4c6964de",
+      "source_bytes": 3180182,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/onboarding_castle.webp"
+    },
+    {
+      "resource": "onboarding_ryzhik",
+      "category": "Onboarding",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2186:722",
+        "node_name": "fox",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2186-722"
+      },
+      "source_method": "figma_get_design_context_asset",
+      "source_notes": "Full exported image canvas retained, no crop or recoloring. Pillow 12.3.0; lossless=True, exact=True, method=6.",
+      "format": "webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 269550,
+      "sha256": "92b89ed9d6095ae13200b32b5434f5c74112a2dde3b37bc72e7e73f251ceac42",
+      "rgba_sha256": "bbeab2962295ae5902d672b73c4a45a277889de42e424049798bd04d0fb3ca20",
+      "alpha_bounds": [
+        297,
+        112,
+        864,
+        912
+      ],
+      "source_sha256": "ac2e712c9a808e96efba540b4b4597b1959d3eca6c1fcccb65e99f10e1bca2ee",
+      "source_bytes": 407142,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/onboarding_ryzhik.webp"
+    },
+    {
+      "resource": "onboarding_tiko_unavailable",
+      "category": "Onboarding",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2186:720",
+        "node_name": "axolotl",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2186-720"
+      },
+      "source_method": "figma_get_design_context_asset",
+      "source_notes": "Full exported image canvas retained, no crop or recoloring. Pillow 12.3.0; lossless=True, exact=True, method=6.",
+      "format": "webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 89466,
+      "sha256": "9da067f41f53a4832f3709ca095fd9f932a751428a72540fa14ff3380b5b8d6e",
+      "rgba_sha256": "1874410d2a37d25929087e885321565ad44c41620cdae0aa9002c98f5a9f12d3",
+      "alpha_bounds": [
+        266,
+        235,
+        955,
+        804
+      ],
+      "source_sha256": "2d4fae581e4f191e8fde660558c372e39a35b1e1a4bf9ddc17aeb2ca09e500e2",
+      "source_bytes": 178766,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/onboarding_tiko_unavailable.webp"
+    },
+    {
       "resource": "debug_settings",
       "category": "Debug tooling",
       "path": "feature/debug/src/main/res/drawable/debug_settings.xml",

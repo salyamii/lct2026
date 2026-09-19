@@ -1,0 +1,16 @@
+<resources>
+    <string name="onboarding_brand">Лапки &amp; Монеты</string>
+    <string name="onboarding_title">Выбери спутника и\nотправляйся в приключение!</string>
+    <string name="onboarding_description">Решай, на что потратить монеты, помогай друзьям и исследуй волшебный мир вместе с героями</string>
+    <string name="onboarding_start">Начать приключение</string>
+    <string name="onboarding_starting">Начинаем…</string>
+    <string name="onboarding_choose_first">Сначала выберите персонажа</string>
+    <string name="onboarding_selection_required">Чтобы начать приключение, выбери персонажа нажав на него</string>
+    <string name="onboarding_understood">Понятно</string>
+    <string name="onboarding_unavailable">Персонаж пока недоступен\nОткроется во время приключения</string>
+    <string name="onboarding_owl">Сова. Пока недоступна</string>
+    <string name="onboarding_fox">Лисёнок</string>
+    <string name="onboarding_axolotl">Аксолотль. Пока недоступен</string>
+    <string name="onboarding_save_error">Не удалось сохранить начало приключения. Нажми кнопку ещё раз.</string>
+    <string name="onboarding_art_retry">Не удалось загрузить персонажей. Повторить</string>
+</resources>

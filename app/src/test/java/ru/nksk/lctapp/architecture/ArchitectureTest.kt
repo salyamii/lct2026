@@ -13,7 +13,7 @@ import org.junit.Test
 class ArchitectureTest {
     @Test
     fun productionSourcesRespectPackageBoundaries() {
-        val sourceRoots = listOf("lctapp.mainSourceDir", "lctapp.domainSourceDir").map { property ->
+        val sourceRoots = listOf("lctapp.mainSourceDir", "lctapp.domainSourceDir", "lctapp.onboardingSourceDir").map { property ->
             File(requireNotNull(System.getProperty(property)) { "Configure $property for the JVM test task" })
         }
         val sources = sourceRoots.flatMap { root ->
