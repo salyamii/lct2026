@@ -4,7 +4,6 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.domain.pet.PetAppearance
-import ru.nksk.lctapp.domain.pet.PetLook
 import ru.nksk.lctapp.domain.pet.PetVisualState
 
 data class MainMenuPetUiState(
@@ -13,22 +12,23 @@ data class MainMenuPetUiState(
 )
 
 internal fun PetAppearance.toMainMenuPetUiState(): MainMenuPetUiState = when (this) {
-    is PetAppearance.SelectedLook -> when (look) {
-        PetLook.PLAIN -> MainMenuPetUiState(
+    is PetAppearance.SelectedLook -> when (lookId) {
+        "PLAIN" -> MainMenuPetUiState(
             R.drawable.ryzhik_teen_body_base_no_accessory, R.string.menu_pet_plain,
         )
-        PetLook.BANDANA -> MainMenuPetUiState(
+        "BANDANA" -> MainMenuPetUiState(
             R.drawable.ryzhik_teen_body_accessory_bandana, R.string.menu_pet_bandana,
         )
-        PetLook.BACKPACK -> MainMenuPetUiState(
+        "BACKPACK" -> MainMenuPetUiState(
             R.drawable.menu_ryzhik, R.string.menu_fox_description,
         )
-        PetLook.GLASSES -> MainMenuPetUiState(
+        "GLASSES" -> MainMenuPetUiState(
             R.drawable.ryzhik_teen_body_accessory_goggles, R.string.menu_pet_glasses,
         )
-        PetLook.HAT -> MainMenuPetUiState(
+        "HAT" -> MainMenuPetUiState(
             R.drawable.ryzhik_teen_body_accessory_hat, R.string.menu_pet_hat,
         )
+        else -> MainMenuPetUiState(null, R.string.menu_pet_look_unavailable)
     }
     is PetAppearance.SpecialState -> when (state) {
         // No verified artwork mapping exists for these two states. Render their state label.

@@ -4,7 +4,6 @@ import ru.nksk.lctapp.domain.content.EventType
 import ru.nksk.lctapp.domain.content.GoalImpact
 import ru.nksk.lctapp.domain.content.ItemOperation
 import ru.nksk.lctapp.domain.economy.BudgetSection
-import ru.nksk.lctapp.domain.pet.PetLook
 import ru.nksk.lctapp.domain.pet.PetVisualState
 
 /** Persisted strings are explicit contracts, independent of enum names and ordinal order. */
@@ -20,10 +19,6 @@ internal object StoredCodes {
         PetVisualState.UPSET to "UPSET", PetVisualState.THINKING to "THINKING",
         PetVisualState.WORRIED to "WORRIED", PetVisualState.TIRED to "TIRED",
         PetVisualState.HUNGRY to "HUNGRY", PetVisualState.NEEDS_HELP to "NEEDS_HELP",
-    ))
-    val look = StoredCode(mapOf(
-        PetLook.PLAIN to "PLAIN", PetLook.BANDANA to "BANDANA", PetLook.BACKPACK to "BACKPACK",
-        PetLook.GLASSES to "GLASSES", PetLook.HAT to "HAT",
     ))
     val event = StoredCode(mapOf(
         EventType.STATE to "STATE", EventType.RANDOM to "RANDOM", EventType.WANT to "WANT",

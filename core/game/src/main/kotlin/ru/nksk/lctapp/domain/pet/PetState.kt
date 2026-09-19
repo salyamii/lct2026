@@ -2,12 +2,12 @@ package ru.nksk.lctapp.domain.pet
 
 /** One current state and a separate saved look. No timers, hidden states, or queues. */
 data class PetState(
-    val selectedLook: PetLook,
+    val selectedLookId: String,
     val visualState: PetVisualState,
 ) {
     val appearance: PetAppearance
         get() = if (visualState == PetVisualState.NORMAL) {
-            PetAppearance.SelectedLook(selectedLook)
+            PetAppearance.SelectedLook(selectedLookId)
         } else {
             PetAppearance.SpecialState(visualState)
         }

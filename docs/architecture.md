@@ -1,5 +1,10 @@
 # Project architecture
 
+> Implementation update, 2026-09-19: the game domain now lives in the JVM
+> module `:core:game`; Room is at v2. The original description below is retained.
+> See the dated addition at the end and the [engine implementation](design/game-engine.md)
+> for the current paths and scope.
+
 LCTApp uses one Android Gradle module (`:app`) with explicit package boundaries.
 The current UI is a menu, the Tasks hub with three demo mini-games, and five
 navigable placeholders. Pure Kotlin game-state
@@ -210,3 +215,32 @@ This project follows the clean-architecture skill's dependency inversion:
 repository interfaces belong to `domain` and implementations to `data`. Google's
 domain-layer guide uses a different convention; its advice to add use cases
 when they address real complexity is applicable without changing our ownership.
+
+## Game module addition — 2026-09-19
+
+`:app` depends on `:core:game`. The latter is a Kotlin/JVM library with only
+Kotlin/JDK and coroutines in production dependencies. All former `domain`
+sources and their unit tests moved there with package names preserved:
+`core/game/src/main/kotlin/ru/nksk/lctapp/domain/`. This includes the existing
+mini-game models; their demo behavior has not been integrated into earnings.
+This split is an implementation choice for the requested engine.
+
+Three main components own gameplay: `EventFactory` validates content and
+creates event occurrences, `GameEngine` evaluates commands and outcomes, and
+`GameRepository` commits the aggregate. `GameEngineProvider` loads the catalog
+before constructing the engine. Its Hilt binding stays in
+`app/di/GameEngineModule.kt`; the core module has no DI annotations.
+
+`GameState.engine` contains the optional saved runtime. Room v2 adds three
+tables to the v1 baseline and migrates without changing the original rows.
+`PetState.selectedLookId` is an open string identifier. Known bundled artwork
+is resolved in menu presentation; an unknown look retains its ID and gets a
+missing-artwork description. There is no closed cosmetic enum.
+
+The menu still observes the existing save. Gameplay controls are not connected
+to production content yet. Authoring the rules/content and connecting feature
+actions are subsequent work. See [engine boundaries](design/game-engine.md).
+`ArchitectureTest` now scans both source roots. Core tests live in `:core:game`.
+
+The user's current verification preference (2026-09-19) is build checks only:
+do not launch the app, emulator or instrumented tests; the user runs the app.

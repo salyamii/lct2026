@@ -24,4 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "LCT App"
 include(":app")
- 
+include(":core:game")

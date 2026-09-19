@@ -23,7 +23,6 @@ import ru.nksk.lctapp.data.game.local.GameDatabase
 import ru.nksk.lctapp.domain.content.*
 import ru.nksk.lctapp.domain.economy.BudgetPlan
 import ru.nksk.lctapp.domain.game.OwnedItem
-import ru.nksk.lctapp.domain.pet.PetLook
 import ru.nksk.lctapp.domain.pet.PetVisualState
 import ru.nksk.lctapp.domain.story.StoryDecision
 import ru.nksk.lctapp.domain.story.StoryState
@@ -193,10 +192,10 @@ class GamePersistenceTest {
 
     @Test fun allPetStatesAndLooksPersistWithoutChangingIndependentParameters() = runBlocking {
         games.initializeIfAbsent(createInitialGameState())
-        for (state in PetVisualState.entries) for (look in PetLook.entries) {
-            games.update { it.copy(pet = it.pet.copy(visualState = state, selectedLook = look), satiety = -7, fatigue = 1234) }
+        for (state in PetVisualState.entries) for (look in listOf("PLAIN", "BANDANA", "BACKPACK", "GLASSES", "HAT", "backend:new-look")) {
+            games.update { it.copy(pet = it.pet.copy(visualState = state, selectedLookId = look), satiety = -7, fatigue = 1234) }
             assertEquals(state, games.read()!!.pet.visualState)
-            assertEquals(look, games.read()!!.pet.selectedLook)
+            assertEquals(look, games.read()!!.pet.selectedLookId)
             assertEquals(-7, games.read()!!.satiety)
             assertEquals(1234, games.read()!!.fatigue)
         }
@@ -212,7 +211,7 @@ class GamePersistenceTest {
 }
 
 internal fun savedGame() = createInitialGameState().let { initial -> initial.copy(
-    pet = initial.pet.copy(selectedLook = PetLook.HAT, visualState = PetVisualState.UPSET),
+    pet = initial.pet.copy(selectedLookId = "HAT", visualState = PetVisualState.UPSET),
     satiety = 17,
     fatigue = 29,
     economy = initial.economy.copy(balance = 3_000_000_000L, plan = BudgetPlan(5, 6, 7, 8)),
