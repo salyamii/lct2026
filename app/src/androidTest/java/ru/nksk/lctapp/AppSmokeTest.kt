@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -57,7 +58,7 @@ class AppSmokeTest {
     fun miniGames_hubListsThreeGames() {
         openMiniGames()
         compose.onNodeWithText("Дела").assertIsDisplayed()
-        compose.onNodeWithText("Звёздные пласты").assertIsDisplayed()
+        compose.onNodeWithText("Перепутанные находки").assertIsDisplayed()
         compose.onNodeWithText("Сверка счетов").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Настрой телескоп").performScrollTo().assertIsDisplayed()
     }
@@ -65,7 +66,7 @@ class AppSmokeTest {
     @Test
     fun miniGames_openMemoryAndReturnBack() {
         openMiniGames()
-        compose.onNodeWithText("Звёздные пласты").performClick()
+        compose.onNodeWithText("Перепутанные находки").performClick()
         compose.onNodeWithContentDescription("Назад").performClick()
         compose.onNodeWithText("Дела").assertIsDisplayed()
         compose.onNodeWithContentDescription("Назад").performClick()
@@ -75,11 +76,11 @@ class AppSmokeTest {
     @Test
     fun openMemoryCardSurvivesActivityRecreation() {
         openMiniGames()
-        compose.onNodeWithText("Звёздные пласты").performClick()
-        compose.onAllNodesWithText("✦")[0].performClick()
-        compose.onAllNodesWithText("✦").assertCountEquals(15)
+        compose.onNodeWithText("Перепутанные находки").performClick()
+        compose.onAllNodesWithContentDescription("Рубашка пласта")[0].performClick()
+        compose.onAllNodesWithContentDescription("Рубашка пласта").assertCountEquals(15)
         compose.activityRule.scenario.recreate()
-        compose.onAllNodesWithText("✦").assertCountEquals(15)
+        compose.onAllNodesWithContentDescription("Рубашка пласта").assertCountEquals(15)
     }
 
     private fun openMiniGames() {

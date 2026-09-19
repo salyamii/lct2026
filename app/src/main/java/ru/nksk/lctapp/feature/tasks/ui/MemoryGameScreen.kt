@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -34,7 +35,17 @@ import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.Rubik
 import ru.nksk.lctapp.domain.minigame.MemoryState
 
-private val PLATE_FACES = listOf("🌙", "⭐", "🪐", "✨", "🌠", "🔭", "☄️", "🌌")
+// Порядок не важен: лица — предметы находок, пары ищутся по одинаковым картинкам.
+private val PAIR_ART = listOf(
+    R.drawable.deed_pair_key,
+    R.drawable.deed_pair_armillary,
+    R.drawable.deed_pair_star_plate,
+    R.drawable.deed_pair_astrolabe,
+    R.drawable.deed_pair_tag,
+    R.drawable.deed_pair_telescope,
+    R.drawable.deed_pair_loupe,
+    R.drawable.deed_pair_backpack,
+)
 
 /** Дело «Звёздные пласты»: сетка 4×4, собери пары созвездий — награда фиксированная. */
 @Composable
@@ -89,7 +100,7 @@ fun MemoryGameScreen(
                             val index = rowIndex * 4 + columnIndex
                             StarPlateView(
                                 index = index,
-                                face = PLATE_FACES[face],
+                                face = PAIR_ART[face],
                                 revealed = index in state.faceUp || index in state.matched,
                                 matched = index in state.matched,
                                 enabled = state.pending == null && !state.won,
@@ -120,7 +131,7 @@ fun MemoryGameScreen(
 @Composable
 private fun StarPlateView(
     index: Int,
-    face: String,
+    face: Int,
     revealed: Boolean,
     matched: Boolean,
     enabled: Boolean,
@@ -140,7 +151,7 @@ private fun StarPlateView(
     }
     Box(
         modifier = modifier
-            .aspectRatio(1f)
+            .aspectRatio(0.75f)
             .semantics { contentDescription = description }
             .clip(shape)
             .background(background)
@@ -149,12 +160,17 @@ private fun StarPlateView(
         contentAlignment = Alignment.Center,
     ) {
         if (revealed) {
-            Text(face, fontSize = 26.sp)
+            Image(
+                painterResource(face),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize().padding(6.dp),
+            )
         } else {
-            Text(
-                "✦",
-                fontSize = 18.sp,
-                color = DeedColors.Lime.copy(alpha = 0.8f),
+            Image(
+                painterResource(R.drawable.deed_star_plate_back),
+                contentDescription = "Рубашка пласта",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
             )
         }
     }

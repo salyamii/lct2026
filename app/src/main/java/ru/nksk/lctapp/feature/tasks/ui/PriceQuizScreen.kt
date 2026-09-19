@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -35,7 +36,15 @@ import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 import ru.nksk.lctapp.domain.minigame.PriceQuizState
 
-private val GOODS_EMOJI = listOf("🗺️", "📜", "🕯️", "🧭", "⚗️", "🏮")
+// Порядок важен для пар вопросов: вопрос берёт товар [i] и [i+3].
+private val GOODS_ART = listOf(
+    R.drawable.deed_goods_map,
+    R.drawable.deed_goods_scroll,
+    R.drawable.deed_goods_lens,
+    R.drawable.deed_goods_compass,
+    R.drawable.deed_goods_star_plate,
+    R.drawable.deed_goods_lantern,
+)
 
 /** Дело «Сверка счетов»: пять вопросов, найди самую дорогую покупку. */
 @Composable
@@ -83,7 +92,7 @@ fun PriceQuizScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     InvoiceCard(
-                        emoji = GOODS_EMOJI[state.current % GOODS_EMOJI.size],
+                        art = GOODS_ART[state.current % GOODS_ART.size],
                         amount = state.question.leftAmount,
                         enabled = state.lastCorrect == null,
                         showAsAnswer = uiState.leftIsAnswer,
@@ -91,7 +100,7 @@ fun PriceQuizScreen(
                         modifier = Modifier.weight(1f),
                     )
                     InvoiceCard(
-                        emoji = GOODS_EMOJI[(state.current + 3) % GOODS_EMOJI.size],
+                        art = GOODS_ART[(state.current + 3) % GOODS_ART.size],
                         amount = state.question.rightAmount,
                         enabled = state.lastCorrect == null,
                         showAsAnswer = uiState.rightIsAnswer,
@@ -127,7 +136,7 @@ fun PriceQuizScreen(
 
 @Composable
 private fun InvoiceCard(
-    emoji: String,
+    art: Int,
     amount: Int,
     showAsAnswer: Boolean,
     enabled: Boolean,
@@ -148,7 +157,11 @@ private fun InvoiceCard(
             .padding(vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(emoji, fontSize = 44.sp)
+        Image(
+            painterResource(art),
+            contentDescription = null,
+            modifier = Modifier.size(96.dp),
+        )
         Spacer(Modifier.height(12.dp))
         CoinChip(stringResource(R.string.deeds_amount, amount))
     }
