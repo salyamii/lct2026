@@ -17,6 +17,15 @@ data class StoryContent(
 data class ChapterDefinition(val id: String, val title: String, val goalId: String)
 data class GameDayDefinition(val id: String, val chapterId: String, val dayNumber: Int)
 data class ScheduledEvent(val id: String, val dayId: String, val position: Int, val eventId: String)
-data class ItemDefinition(val id: String, val name: String, val description: String)
+/** Catalog price, not a purchase receipt. Null preserves older content with no authored price. */
+data class ItemDefinition(
+    val id: String,
+    val name: String,
+    val description: String,
+    val category: ItemCategory = ItemCategory.STORY,
+    val priceCoins: Long? = null,
+)
+
+enum class ItemCategory { STORY, ACCESSORY }
 data class GoalDefinition(val id: String, val title: String, val description: String)
 data class GoalRequiredItem(val goalId: String, val itemId: String)

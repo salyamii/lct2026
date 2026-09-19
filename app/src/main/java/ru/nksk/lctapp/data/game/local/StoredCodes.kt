@@ -3,6 +3,7 @@ package ru.nksk.lctapp.data.game.local
 import ru.nksk.lctapp.domain.content.EventType
 import ru.nksk.lctapp.domain.content.GoalImpact
 import ru.nksk.lctapp.domain.content.ItemOperation
+import ru.nksk.lctapp.domain.content.ItemCategory
 import ru.nksk.lctapp.domain.economy.BudgetSection
 import ru.nksk.lctapp.domain.pet.PetVisualState
 
@@ -14,6 +15,9 @@ internal class StoredCode<T : Any>(private val values: Map<T, String>) {
 }
 
 internal object StoredCodes {
+    val itemCategory = StoredCode(mapOf(
+        ItemCategory.STORY to "STORY", ItemCategory.ACCESSORY to "ACCESSORY",
+    ))
     val visual = StoredCode(mapOf(
         PetVisualState.NORMAL to "NORMAL", PetVisualState.HAPPY to "HAPPY",
         PetVisualState.UPSET to "UPSET", PetVisualState.THINKING to "THINKING",

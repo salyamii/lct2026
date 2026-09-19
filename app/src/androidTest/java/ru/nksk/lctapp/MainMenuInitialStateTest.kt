@@ -18,6 +18,7 @@ import ru.nksk.lctapp.app.di.GameRepositoryModule
 import ru.nksk.lctapp.app.di.InitialGameStateModule
 import ru.nksk.lctapp.app.navigation.LctNavHost
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
+import ru.nksk.lctapp.domain.content.StoryContentRepository
 import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.pet.PetState
@@ -47,6 +48,9 @@ class MainMenuInitialStateTest {
     @BindValue
     @JvmField
     val repository: GameRepository = TestGameRepository(null)
+
+    @BindValue @JvmField
+    val content: StoryContentRepository = TestStoryContentRepository()
 
     @Test
     fun menuEntryDisplaysTheHiltProvidedDomainSnapshot() {

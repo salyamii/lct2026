@@ -16,6 +16,7 @@ internal fun GameState.toEntity() = GameStateEntity(
     selectedLook = pet.selectedLookId,
     satiety = satiety,
     fatigue = fatigue,
+    hunger = hunger,
     balance = economy.balance,
     plannedNeeds = economy.plan.needs,
     plannedWants = economy.plan.wants,
@@ -35,5 +36,6 @@ internal fun GameStateEntity.toDomain(
     story = StoryState(currentDayId, nextScriptPosition, activeEventId, decisions.map { StoryDecision(it.id, it.choiceId) }),
     satiety = satiety,
     fatigue = fatigue,
+    hunger = hunger,
     ownedItems = items.map { OwnedItem(it.id, it.itemId) },
 )

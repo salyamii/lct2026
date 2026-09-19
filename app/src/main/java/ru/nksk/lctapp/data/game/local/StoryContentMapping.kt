@@ -27,12 +27,16 @@ internal fun ItemDefinition.toEntity() = ItemEntity(
     id = id,
     name = name,
     description = description,
+    category = StoredCodes.itemCategory.encode(category),
+    priceCoins = priceCoins,
 )
 
 internal fun ItemEntity.toDomain() = ItemDefinition(
     id = id,
     name = name,
     description = description,
+    category = StoredCodes.itemCategory.decode(category),
+    priceCoins = priceCoins,
 )
 
 internal fun ChapterDefinition.toEntity() = ChapterEntity(

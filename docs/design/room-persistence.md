@@ -202,3 +202,16 @@ instrumentation. Виртуальное время `runTest` оставлено 
 - [Тестирование базы](https://developer.android.com/training/data-storage/room/testing-db).
 - [Hilt](https://developer.android.com/training/dependency-injection/hilt-android).
 - [Правила Android Auto Backup](https://developer.android.com/identity/data/autobackup).
+
+
+## Room v5: инвентарь — 2026-09-19
+
+`MIGRATION_4_5` добавляет в ITEM категорию отображения и nullable справочную цену.
+Старые определения получают STORY и null; никакие предметы не выдаются, деньги
+не меняются. [Нормализованная схема v5](schema-normalization.md#room-v5-категория-и-цена-предмета--2026-09-19)
+и [экспорт](../../app/schemas/ru.nksk.lctapp.data.game.local.GameDatabase/5.json).
+Неизменяемость каталога распространяется на новые поля; изменять определения
+под существующими ID через install по-прежнему нельзя.
+`InventoryMigrationTest` проверяет переход из v4, сохранение повторного владения
+и баланса, а также запись и восстановление категории и цены после переоткрытия.
+Тест добавлен и компилируется, запуск на устройстве не выполняется по настройке пользователя.

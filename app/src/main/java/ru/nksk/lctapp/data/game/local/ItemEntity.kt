@@ -12,4 +12,6 @@ internal data class ItemEntity(
     @ColumnInfo(name = "id") val id: String,
     @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "description") val description: String,
+    @ColumnInfo(name = "category", defaultValue = "'STORY'") val category: String = "STORY",
+    @ColumnInfo(name = "price_coins") val priceCoins: Long? = null,
 )

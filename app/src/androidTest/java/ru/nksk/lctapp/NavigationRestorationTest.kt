@@ -21,6 +21,7 @@ import org.junit.runner.RunWith
 import ru.nksk.lctapp.app.di.GameRepositoryModule
 import ru.nksk.lctapp.app.navigation.LctNavHost
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
+import ru.nksk.lctapp.domain.content.StoryContentRepository
 import ru.nksk.lctapp.domain.game.GameRepository
 
 @UninstallModules(GameRepositoryModule::class)
@@ -37,13 +38,16 @@ class NavigationRestorationTest {
     @JvmField
     val repository: GameRepository = TestGameRepository()
 
+    @BindValue @JvmField
+    val content: StoryContentRepository = TestStoryContentRepository()
+
     @Test
     fun allFeatureRoutesRestoreFromSavedStateWithMenuUnderneath() {
         val restoration = StateRestorationTester(compose)
         restoration.setContent { LCTAppTheme { LctNavHost() } }
         fun label(id: Int) = hasText(compose.activity.getString(id))
         val actions = listOf(
-            label(R.string.menu_gear) to R.string.menu_gear,
+            label(R.string.menu_gear) to R.string.gear_title,
             label(R.string.menu_tasks) to R.string.menu_tasks,
             label(R.string.menu_goal) to R.string.menu_goal,
             hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility, 100)) to

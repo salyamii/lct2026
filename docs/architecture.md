@@ -1,12 +1,12 @@
 # Project architecture
 
 > Implementation update, 2026-09-19: the game domain now lives in the JVM
-> module `:core:game`; Room is at v2. The original description below is retained.
+> module `:core:game`; Room is at v5 (including storage compatibility and inventory metadata). The original description below is retained.
 > See the dated addition at the end and the [engine implementation](design/game-engine.md)
 > for the current paths and scope.
 
 LCTApp uses one Android Gradle module (`:app`) with explicit package boundaries.
-The current UI is a menu, the Tasks hub with three demo mini-games, and five
+The current UI is a menu, the Tasks hub with three demo mini-games, inventory, and four
 navigable placeholders. Pure Kotlin game-state
 models feed the menu through a repository-backed ViewModel. Room persists the
 game and reference catalog locally; Hilt owns their application-scoped instances. The [state-machine specification](design/app-state-machine.md)
@@ -244,3 +244,16 @@ actions are subsequent work. See [engine boundaries](design/game-engine.md).
 
 The user's current verification preference (2026-09-19) is build checks only:
 do not launch the app, emulator or instrumented tests; the user runs the app.
+
+
+## Inventory — 2026-09-19
+
+`feature/gear` replaces the Gear placeholder with the read-only inventory (D-075).
+Its Hilt ViewModel observes `GameRepository` and reads immutable item definitions
+through `StoryContentRepository` after each saved aggregate. Only `ownedItems`
+produce cards; repeated occurrences retain their IDs and relative order.
+`ItemDefinition.category` selects the display section and `priceCoins` supplies
+the catalog price. These are persisted in Room v5 with an additive migration.
+No content is installed and no game is initialized or mutated by this screen.
+Loading, error/retry and empty sections are distinct. Preview examples stay in
+Compose previews. See [inventory](design/inventory.md).

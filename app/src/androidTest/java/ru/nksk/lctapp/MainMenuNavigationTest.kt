@@ -18,6 +18,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import ru.nksk.lctapp.app.di.GameRepositoryModule
+import ru.nksk.lctapp.domain.content.StoryContentRepository
 import ru.nksk.lctapp.domain.game.GameRepository
 
 @UninstallModules(GameRepositoryModule::class)
@@ -42,6 +43,9 @@ class MainMenuNavigationTest {
     @JvmField
     val repository: GameRepository = TestGameRepository()
 
+    @BindValue @JvmField
+    val content: StoryContentRepository = TestStoryContentRepository()
+
     @Test
     fun everyMenuActionOpensItsDestinationAndReturnsToTheMenu() {
         fun label(id: Int) = hasText(compose.activity.getString(id))
@@ -49,7 +53,7 @@ class MainMenuNavigationTest {
             label(R.string.menu_current_goal) to R.string.menu_goal,
             hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility, 100)) to
                 R.string.menu_coins,
-            label(R.string.menu_gear) to R.string.menu_gear,
+            label(R.string.menu_gear) to R.string.gear_title,
             label(R.string.menu_tasks) to R.string.menu_tasks,
             label(R.string.menu_goal) to R.string.menu_goal,
             label(R.string.menu_village) to R.string.menu_village,

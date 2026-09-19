@@ -6,6 +6,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import ru.nksk.lctapp.data.game.local.MiniGameCompletionEntity
 import ru.nksk.lctapp.data.game.local.CURRENT_GAME_ID
 import ru.nksk.lctapp.data.game.local.GameDatabase
 import ru.nksk.lctapp.data.game.local.OwnedItemEntity
@@ -21,7 +22,7 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
     private val dao = database.gameStateDao()
 
     override fun observe(): Flow<GameState?> = database.invalidationTracker
-        .createFlow("GAME_STATE", "OWNED_ITEM", "PLAYER_DECISION", "ENGINE_STATE", "ENGINE_EVENT", "ENGINE_DEED")
+        .createFlow("GAME_STATE", "OWNED_ITEM", "PLAYER_DECISION", "ENGINE_STATE", "ENGINE_EVENT", "ENGINE_DEED", "MINI_GAME_COMPLETION")
         .map { read() }
         .distinctUntilChanged()
 
@@ -39,6 +40,7 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
         val current = checkNotNull(readInTransaction()) { "Game has not been initialized" }
         val next = transform(current)
         check(dao.updateState(next.toEntity()) == 1) { "Saved game disappeared during update" }
+        dao.deleteMiniGameCompletions(CURRENT_GAME_ID)
         dao.deleteDecisions(CURRENT_GAME_ID)
         dao.deleteOwnedItems(CURRENT_GAME_ID)
         dao.deleteEngineEvents(CURRENT_GAME_ID)
@@ -54,11 +56,13 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
         val row = rows.singleOrNull() ?: return null
         check(row.id == CURRENT_GAME_ID) { "Unknown saved game identity: ${row.id}" }
         return row.toDomain(dao.readDecisions(row.id), dao.readOwnedItems(row.id)).copy(
+            completedMiniGames = dao.readMiniGameCompletions(row.id).map { it.attemptId }.toSet(),
             engine = dao.readEngine(row.id)?.toDomain(dao.readEngineEvents(row.id), dao.readEngineDeeds(row.id)),
         )
     }
 
     private suspend fun writeChildren(state: GameState) {
+        dao.insertMiniGameCompletions(state.completedMiniGames.map { MiniGameCompletionEntity(it, CURRENT_GAME_ID) })
         state.engine?.let { engine ->
             dao.insertEngine(engine.toEntity())
             dao.insertEngineDeeds(engine.deeds.mapIndexed { position, offer ->

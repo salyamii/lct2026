@@ -1,0 +1,15 @@
+<resources>
+    <string name="gear_title">Инвентарь</string>
+    <string name="gear_subtitle">Всё, что уже есть у тебя</string>
+    <string name="gear_story_title">Сюжетные предметы</string>
+    <string name="gear_accessories_title">Аксессуары</string>
+    <string name="gear_story_empty_title">Здесь будут твои находки</string>
+    <string name="gear_story_empty_description">Приобретённые сюжетные предметы появятся в этом разделе.</string>
+    <string name="gear_accessories_empty_title">Пока нет аксессуаров</string>
+    <string name="gear_accessories_empty_description">Здесь будут храниться приобретённые украшения и другие косметические предметы.</string>
+    <string name="gear_loading">Загружаем твои вещи…</string>
+    <string name="gear_error">Не удалось загрузить инвентарь. Попробуй ещё раз.</string>
+    <string name="gear_art_placeholder">Иллюстрация предмета</string>
+    <string name="gear_price">%1$d монет</string>
+    <string name="gear_price_unknown">Цена не указана</string>
+</resources>

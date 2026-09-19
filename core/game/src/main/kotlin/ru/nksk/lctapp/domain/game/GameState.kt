@@ -14,6 +14,8 @@ data class GameState(
     val fatigue: Int,
     val ownedItems: List<OwnedItem>,
     val engine: EngineState? = null,
+    val hunger: Int = 0,
+    val completedMiniGames: Set<String> = emptySet(),
 ) {
     init {
         require(engine == null || engine.currentEvent?.eventId == story.activeEventId) {

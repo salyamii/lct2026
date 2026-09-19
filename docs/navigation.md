@@ -40,7 +40,9 @@ is not a persistent tab bar requiring independent stacks.
 | Village | `Village` |
 | Continue day | `Day` |
 
-Five feature entries display a shared placeholder with Back. Tasks displays the
+Four feature entries display a shared placeholder with Back. Gear displays the inventory
+with two sections, owned items only, and an entry-scoped Hilt ViewModel. Its saved
+route ID remains `gear`; Back returns to the menu without changing game state. Tasks displays the
 mini-game hub and registers `StarPlates`, `PriceCheck` and `Telescope` with stable
 IDs `tasks_star_plates`, `tasks_price_check` and `tasks_telescope`. The app host
 maps `DeedsAction` to those keys. Each game entry obtains its Hilt ViewModel and

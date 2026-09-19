@@ -18,6 +18,7 @@ import org.junit.Before
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.assertCountEquals
 import ru.nksk.lctapp.app.di.GameRepositoryModule
+import ru.nksk.lctapp.domain.content.StoryContentRepository
 import ru.nksk.lctapp.domain.game.GameRepository
 import org.junit.Rule
 import org.junit.Test
@@ -32,6 +33,9 @@ class AppSmokeTest {
     val hilt = HiltAndroidRule(this)
     @BindValue @JvmField
     val repository: GameRepository = TestGameRepository()
+
+    @BindValue @JvmField
+    val content: StoryContentRepository = TestStoryContentRepository()
 
     @Before fun waitForMenu() {
         compose.waitUntil(10_000) {

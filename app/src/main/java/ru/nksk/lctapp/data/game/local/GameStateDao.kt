@@ -8,6 +8,14 @@ import androidx.room3.Update
 /** No REPLACE or parent deletion: references and unrelated rows must survive writes. */
 @Dao
 internal interface GameStateDao {
+    @Query("SELECT * FROM MINI_GAME_COMPLETION WHERE game_state_id = :gameId")
+    suspend fun readMiniGameCompletions(gameId: String): List<MiniGameCompletionEntity>
+
+    @Insert suspend fun insertMiniGameCompletions(rows: List<MiniGameCompletionEntity>)
+
+    @Query("DELETE FROM MINI_GAME_COMPLETION WHERE game_state_id = :gameId")
+    suspend fun deleteMiniGameCompletions(gameId: String)
+
     @Query("SELECT * FROM ENGINE_STATE WHERE game_state_id = :gameId")
     suspend fun readEngine(gameId: String): EngineStateEntity?
 

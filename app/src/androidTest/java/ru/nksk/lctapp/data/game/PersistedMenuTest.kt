@@ -24,6 +24,7 @@ import ru.nksk.lctapp.app.di.GameRepositoryModule
 import ru.nksk.lctapp.app.navigation.LctNavHost
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
 import ru.nksk.lctapp.data.game.local.GameDatabase
+import ru.nksk.lctapp.domain.content.StoryContentRepository
 import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.domain.pet.PetVisualState
 
@@ -38,6 +39,9 @@ class PersistedMenuTest {
     @BindValue
     @JvmField
     val games: GameRepository = RoomGameRepository(db)
+
+    @BindValue @JvmField
+    val content: StoryContentRepository = RoomStoryContentRepository(db)
 
     @After fun close() { db.close() }
 

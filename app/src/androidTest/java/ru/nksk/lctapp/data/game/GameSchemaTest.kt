@@ -14,6 +14,9 @@ import org.junit.runner.RunWith
 import ru.nksk.lctapp.app.createInitialGameState
 import ru.nksk.lctapp.data.game.local.GameDatabase
 import ru.nksk.lctapp.data.game.local.MIGRATION_1_2
+import ru.nksk.lctapp.data.game.local.MIGRATION_4_5
+import ru.nksk.lctapp.data.game.local.MIGRATION_3_4
+import ru.nksk.lctapp.data.game.local.MIGRATION_2_3
 import ru.nksk.lctapp.domain.pet.PetVisualState
 
 /** Upgrade from the exported v1 baseline without losing existing values or relationships. */
@@ -48,7 +51,7 @@ class GameSchemaTest {
             assertEquals(PetVisualState.HUNGRY, state.pet.visualState)
             assertEquals("BANDANA", state.pet.selectedLookId)
         }
-        schemas.runMigrationsAndValidate(2, listOf(MIGRATION_1_2)).close()
+        schemas.runMigrationsAndValidate(5, listOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)).close()
     }
 
     @Test fun migrationPreservesEveryV1TableAndRepeatedOccurrences() = runBlocking {
@@ -88,6 +91,91 @@ class GameSchemaTest {
         }
     }
 
+    @Test fun engineVersionTwoMigrationPreservesRuntimeAndOccurrences() = runBlocking {
+        val tables = listOf("GAME_STATE", "EVENT", "ENGINE_STATE", "ENGINE_DEED", "ENGINE_EVENT")
+        val before = schemas.createDatabase(2).use { connection ->
+            connection.execSQL("INSERT INTO GAME_STATE VALUES ('current', 'HAPPY', 'HAT', 17, 29, 247, 10, 20, 30, 40, NULL, NULL, NULL)")
+            connection.execSQL("INSERT INTO EVENT VALUES ('event', 'EARNING', 'Work', 'Description', NULL, NULL, NULL, 0, NULL, NULL)")
+            connection.execSQL("INSERT INTO ENGINE_STATE VALUES ('current', 'rules', 9, 3, 'RUNNING', 2, 4, 1, NULL, 300)")
+            connection.execSQL("INSERT INTO ENGINE_DEED VALUES ('offer', 'current', 0, 'event', 5, 0)")
+            connection.execSQL("INSERT INTO ENGINE_EVENT VALUES ('occurrence', 'current', 0, NULL, 'RESULT', 'offer')")
+            tables.associateWith { dump(connection, it) }
+        }
+        schemas.runMigrationsAndValidate(3, listOf(MIGRATION_2_3)).use { connection ->
+            tables.forEach { assertEquals(it, before[it], dump(connection, it)) }
+            assertTrue(dump(connection, "LEGACY_EXPENSE_STATE").isEmpty())
+            connection.prepare("PRAGMA foreign_key_check").use { assertFalse(it.step()) }
+        }
+    }
+
+    @Test fun expensesBranchVersionTwoOpensAndPreservesItsSaveAndContent() = runBlocking {
+        context.getDatabasePath(name).parentFile!!.mkdirs()
+        BundledSQLiteDriver().open(context.getDatabasePath(name).absolutePath).use { connection ->
+            val sql = instrumentation.context.assets.open("legacy-expenses-v2.sql")
+                .bufferedReader().use { it.readText() }
+            sql.split(';').filter { it.isNotBlank() }.forEach { connection.execSQL(it) }
+            connection.execSQL("INSERT INTO ARTWORK VALUES ('art', 'old_art')")
+            connection.execSQL("INSERT INTO EFFORT_LEVEL VALUES ('effort', 'Medium', 2)")
+            connection.execSQL("INSERT INTO EVENT VALUES ('event', 'RANDOM', 'Event', 'Description', NULL, NULL, NULL, 0, NULL, NULL)")
+            connection.execSQL("INSERT INTO EVENT_CHOICE VALUES ('choice', 'event', 0, 'Choice', -3, NULL, NULL, 'NEUTRAL')")
+            connection.execSQL("INSERT INTO EXPENSE VALUES ('event', 1, 'art', 'Needs', 'Footer')")
+            connection.execSQL("INSERT INTO EXPENSE_CHOICE_RULE VALUES ('choice', 'PAY', 'effort')")
+            connection.execSQL("INSERT INTO EVENT_ARTWORK_LAYER VALUES ('event', 0, 'art', 1, 2, 3, 4)")
+            connection.execSQL("INSERT INTO GAME_STATE VALUES ('current', 'NORMAL', 'BACKPACK', 20, 0, 82, 1, 2, 3, 4, NULL, NULL, 'event', 2, 'CHOOSING', 7)")
+            connection.execSQL("INSERT INTO PLAYER_DECISION VALUES ('decision', 'current', 0, 'choice')")
+        }
+        val retainedTables = listOf("ARTWORK", "EFFORT_LEVEL", "EXPENSE", "EXPENSE_CHOICE_RULE", "EVENT_ARTWORK_LAYER", "EVENT", "EVENT_CHOICE", "PLAYER_DECISION")
+        val before = BundledSQLiteDriver().open(context.getDatabasePath(name).absolutePath).use { connection ->
+            retainedTables.associateWith { dump(connection, it) }
+        }
+        withDatabase { database ->
+            val repository = RoomGameRepository(database)
+            val saved = repository.initializeIfAbsent(createInitialGameState())
+            assertEquals(82L, saved.economy.balance)
+            assertEquals(20, saved.satiety)
+            assertEquals("event", saved.story.activeEventId)
+            assertNull(saved.engine)
+            repository.update { it.copy(satiety = 21) }
+        }
+        BundledSQLiteDriver().open(context.getDatabasePath(name).absolutePath).use { connection ->
+            retainedTables.forEach { assertEquals(it, before[it], dump(connection, it)) }
+            assertEquals(listOf(listOf("current", "2", "CHOOSING", "7")), dump(connection, "LEGACY_EXPENSE_STATE"))
+            assertTrue(dump(connection, "ENGINE_STATE").isEmpty())
+            connection.prepare("PRAGMA foreign_key_check").use { assertFalse(it.step()) }
+        }
+        withDatabase { database ->
+            assertEquals(21, RoomGameRepository(database).read()!!.satiety)
+        }
+    }
+
+    @Test fun versionThreeAddsHungerWithoutReinterpretingExistingValues() = runBlocking {
+        schemas.createDatabase(3).use { connection ->
+            connection.execSQL("INSERT INTO GAME_STATE VALUES ('current', 'HAPPY', 'HAT', 17, 29, 247, 10, 20, 30, 40, NULL, NULL, NULL)")
+        }
+        schemas.runMigrationsAndValidate(4, listOf(MIGRATION_3_4)).use { connection ->
+            connection.prepare("SELECT hunger, satiety, fatigue, balance FROM GAME_STATE").use { row ->
+                assertTrue(row.step())
+                assertEquals(0, row.getInt(0))
+                assertEquals(17, row.getInt(1))
+                assertEquals(29, row.getInt(2))
+                assertEquals(247L, row.getLong(3))
+            }
+            assertTrue(dump(connection, "MINI_GAME_COMPLETION").isEmpty())
+        }
+        withDatabase { db ->
+            RoomGameRepository(db).update {
+                it.copy(hunger = 20, fatigue = 59, completedMiniGames = setOf("persisted-attempt"))
+            }
+        }
+        withDatabase { db ->
+            val restored = RoomGameRepository(db).read()!!
+            assertEquals(17, restored.satiety)
+            assertEquals(20, restored.hunger)
+            assertEquals(59, restored.fatigue)
+            assertEquals(setOf("persisted-attempt"), restored.completedMiniGames)
+        }
+    }
+
     private fun dump(connection: androidx.sqlite.SQLiteConnection, table: String): List<List<String?>> =
         connection.prepare("SELECT * FROM $table ORDER BY rowid").use { statement ->
             buildList {
@@ -123,7 +211,7 @@ class GameSchemaTest {
 
     @Test fun unsupportedSchemaVersionFailsWithoutDestructiveFallback() = runBlocking {
         schemas.createDatabase(1).use { connection ->
-            connection.execSQL("INSERT INTO ITEM VALUES ('kept', 'Retained', 'Do not delete')")
+            connection.execSQL("INSERT INTO ITEM (id, name, description) VALUES ('kept', 'Retained', 'Do not delete')")
             connection.execSQL("PRAGMA user_version = 99")
         }
         withDatabase { db ->
