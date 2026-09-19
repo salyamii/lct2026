@@ -24,6 +24,14 @@ import ru.nksk.lctapp.feature.onboarding.ui.OnboardingArtwork
 /** Composition root for shared presentation and app-owned navigation. */
 @Composable
 fun LctApp() {
+    Box(Modifier.fillMaxSize()) {
+        LctAppContent()
+        AppDebugOverlay()
+    }
+}
+
+@Composable
+private fun LctAppContent() {
     LCTAppTheme {
         val startup: AppStartupViewModel = hiltViewModel()
         val state by startup.uiState.collectAsStateWithLifecycle()

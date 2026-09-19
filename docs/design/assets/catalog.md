@@ -2,7 +2,7 @@
 
 See [the guide](README.md) for storage and usage rules and [the manifest](manifest.json) for checksums and export details.
 
-291 logical assets; 3 exact drawable aliases; 0 unavailable exports.
+292 logical assets; 3 exact drawable aliases; 0 unavailable exports.
 
 Locations retain their original 941 × 1672 pixels. Character and equipment layers retain a 512 × 512 canvas. Names are artwork labels, not gameplay rules.
 
@@ -369,3 +369,9 @@ Figma node-id не передан — уточнить при следующей
 The owl reuses `npc_luna_body` with a zero-saturation presentation filter.
 Its full 1024 × 1024 canvas and pose match node 2186:718. The axolotl pose
 differs from `npc_tiko_body`; the fox has no backpack, unlike `menu_ryzhik`.
+
+## Debug tooling
+
+| Resource | Canvas | Android resource | Source |
+| --- | --- | --- | --- |
+| `debug_settings` | 24 × 24 | [Vector XML](../../../feature/debug/src/main/res/drawable/debug_settings.xml) | [Original SVG](debug_settings.svg), locally authored geometric gear, no Figma node; identical path and evenOdd fill. Displayed at 20 dp on a gray 40 dp button. |

@@ -9541,6 +9541,20 @@
       "source_format": "png",
       "lossless_rgba_verified": true,
       "path": "app/src/main/res/drawable-nodpi/onboarding_tiko_unavailable.webp"
+    },
+    {
+      "resource": "debug_settings",
+      "category": "Debug tooling",
+      "path": "feature/debug/src/main/res/drawable/debug_settings.xml",
+      "format": "vector_xml",
+      "width": 24,
+      "height": 24,
+      "bytes": 891,
+      "sha256": "7aeb48b8aa2b5cd3c2f65a48e596f3bf82f2948439733a6953fd8c3d7c6a246e",
+      "source_method": "locally_authored_svg",
+      "source_path": "docs/design/assets/debug_settings.svg",
+      "source_sha256": "83dbfbeabe462e85a827f1c2ebd7181f6cb0307fabb74fa589ed277e86bc773b",
+      "source_notes": "Original geometric eight-tooth gear for debug UI; no Figma source. SVG path copied exactly to Android vector, 24x24 viewport, evenOdd fill; no raster conversion."
     }
   ],
   "missing": []

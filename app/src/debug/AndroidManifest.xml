@@ -1,5 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application>
+        <activity
+            android:name=".app.DebugResetActivity"
+            android:exported="false"
+            android:process=":debug_reset"
+            android:taskAffinity="${applicationId}.debugReset"
+            android:excludeFromRecents="true"
+            android:theme="@style/Theme.LCTApp" />
         <activity android:name=".HiltTestActivity" android:exported="false"
             android:theme="@style/Theme.LCTApp" />
     </application>

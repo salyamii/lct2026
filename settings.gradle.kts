@@ -26,3 +26,4 @@ rootProject.name = "LCT App"
 include(":app")
 include(":core:game")
 include(":feature:onboarding")
+include(":feature:debug")
