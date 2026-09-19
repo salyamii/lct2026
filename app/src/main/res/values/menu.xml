@@ -1,14 +1,17 @@
 <resources>
-    <string name="menu_goal_label">ЦЕЛЬ</string>
-    <string name="menu_current_goal">Наблюдение за звёздами</string>
-    <string name="menu_goal_progress">%1$d из %2$d</string>
-    <string name="menu_coins">МОНЕТЫ</string>
-    <string name="menu_coins_accessibility">Монеты: %1$d</string>
-    <string name="menu_village">Деревня</string>
+    <string name="menu_current_goal">Текущая цель</string>
+    <string name="menu_value_placeholder">—</string>
+    <string name="menu_coins">НАКОПЛЕНИЯ</string>
+    <string name="menu_coins_accessibility">Накопления: данные пока недоступны</string>
+    <string name="menu_hunger">ГОЛОД</string>
+    <string name="menu_hunger_accessibility">Голод: %1$d</string>
+    <string name="menu_fatigue">УСТАЛОСТЬ</string>
+    <string name="menu_fatigue_accessibility">Усталость: %1$d</string>
+    <string name="menu_village">Карта</string>
     <string name="menu_gear">Снаряжение</string>
     <string name="menu_tasks">Дела</string>
     <string name="menu_goal">Цель</string>
-    <string name="menu_continue">Продолжить день</string>
+    <string name="menu_continue">Название ивента</string>
     <string name="menu_fox_description">Рыжик — лисёнок с рюкзаком</string>
     <string name="menu_pet_plain">Рыжик — лисёнок без аксессуаров</string>
     <string name="menu_pet_bandana">Рыжик — лисёнок в бандане</string>

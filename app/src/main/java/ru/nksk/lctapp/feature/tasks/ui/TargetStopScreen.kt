@@ -60,6 +60,10 @@ fun TargetStopScreen(
     onBack: () -> Unit,
 ) {
     val state = uiState.game
+    androidx.activity.compose.BackHandler(enabled = uiState.session.saving) { }
+    if (!state.finished && MiniGameAccessGate(
+        uiState.session, { onAction(TargetStopAction.Retry) }, onBack,
+    )) return
     val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
     val markerPosition = if (lifecycleState.isAtLeast(Lifecycle.State.RESUMED) &&
         state.lastHit == null && !state.finished
@@ -149,6 +153,8 @@ fun TargetStopScreen(
             reward = state.reward,
             onAgain = { onAction(TargetStopAction.Restart) },
             onHub = onBack,
+            session = uiState.session,
+            onRetry = { onAction(TargetStopAction.Retry) },
         )
     }
 }

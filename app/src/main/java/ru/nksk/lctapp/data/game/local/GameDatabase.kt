@@ -27,7 +27,7 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
         LegacyExpenseStateEntity::class,
         MiniGameCompletionEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
 )
 internal abstract class GameDatabase : RoomDatabase() {
@@ -40,7 +40,7 @@ internal abstract class GameDatabase : RoomDatabase() {
         fun open(context: Context, name: String = FILE_NAME): GameDatabase =
             Room.databaseBuilder<GameDatabase>(context.applicationContext, name)
                 .setDriver(BundledSQLiteDriver())
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                 .build()
     }
 }

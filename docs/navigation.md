@@ -54,8 +54,10 @@ with `hiltViewModel()`; Hilt injects the domain `GameRepository` and new-save fi
 The ViewModel initializes
 only a missing save and observes persisted state, with explicit loading and error
 states and retry. The entry collects `uiState` with lifecycle awareness. The menu
-maps saved balance and pet appearance; the adventure counter remains a display
-fixture. Navigation keys contain no game snapshot. See
+maps saved hunger, fatigue and pet appearance. Savings, current goal and event
+use temporary labels under D-074; the former adventure counter is removed.
+The labels for Coins, Village and ContinueDay are now savings, map and event
+name; route keys remain stable. Navigation keys contain no game snapshot. See
 [project architecture](architecture.md) for ownership.
 
 ## Adding a screen

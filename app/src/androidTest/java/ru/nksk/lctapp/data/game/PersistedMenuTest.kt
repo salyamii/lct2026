@@ -39,7 +39,6 @@ class PersistedMenuTest {
     @BindValue
     @JvmField
     val games: GameRepository = RoomGameRepository(db)
-
     @BindValue @JvmField
     val content: StoryContentRepository = RoomStoryContentRepository(db)
 
@@ -50,16 +49,17 @@ class PersistedMenuTest {
         runBlocking {
             games.initializeIfAbsent(initial.copy(
                 economy = initial.economy.copy(balance = 247),
+                satiety = 20,
                 pet = initial.pet.copy(selectedLookId = "HAT", visualState = PetVisualState.UPSET),
             ))
         }
         compose.setContent { LCTAppTheme { LctNavHost() } }
-        awaitDescription(R.string.menu_coins_accessibility, 247L)
+        awaitDescription(R.string.menu_hunger_accessibility, 20L)
         compose.onNode(hasContentDescription(compose.activity.getString(R.string.menu_pet_upset))).assertIsDisplayed()
         runBlocking {
-            games.update { it.copy(economy = it.economy.copy(balance = 37), pet = it.pet.transitionTo(PetVisualState.NORMAL)) }
+            games.update { it.copy(satiety = 40, economy = it.economy.copy(balance = 37), pet = it.pet.transitionTo(PetVisualState.NORMAL)) }
         }
-        awaitDescription(R.string.menu_coins_accessibility, 37L)
+        awaitDescription(R.string.menu_hunger_accessibility, 40L)
         compose.onNode(hasContentDescription(compose.activity.getString(R.string.menu_pet_hat))).assertIsDisplayed()
     }
 

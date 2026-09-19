@@ -51,7 +51,7 @@ class MainMenuNavigationTest {
         fun label(id: Int) = hasText(compose.activity.getString(id))
         val actions = listOf(
             label(R.string.menu_current_goal) to R.string.menu_goal,
-            hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility, 100)) to
+            hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility)) to
                 R.string.menu_coins,
             label(R.string.menu_gear) to R.string.gear_title,
             label(R.string.menu_tasks) to R.string.menu_tasks,
@@ -94,10 +94,8 @@ class MainMenuNavigationTest {
 
     private fun assertMenuIsDisplayed() {
         compose.onNodeWithText(compose.activity.getString(R.string.menu_current_goal)).assertIsDisplayed()
-        compose.onNodeWithText(compose.activity.getString(R.string.menu_goal_progress, 0, 4))
-            .assertIsDisplayed()
         compose.onNode(
-            hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility, 100)),
+            hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility)),
         ).assertIsDisplayed()
     }
 }

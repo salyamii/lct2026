@@ -10,11 +10,11 @@ data class GameState(
     val pet: PetState,
     val economy: EconomyState,
     val story: StoryState,
+    /** Hunger (0 = none, 100 = full), retaining the existing persisted name. */
     val satiety: Int,
     val fatigue: Int,
     val ownedItems: List<OwnedItem>,
     val engine: EngineState? = null,
-    val hunger: Int = 0,
     val completedMiniGames: Set<String> = emptySet(),
 ) {
     init {

@@ -54,6 +54,10 @@ fun PriceQuizScreen(
     onBack: () -> Unit,
 ) {
     val state = uiState.game
+    androidx.activity.compose.BackHandler(enabled = uiState.session.saving) { }
+    if (!state.finished && MiniGameAccessGate(
+        uiState.session, { onAction(PriceQuizAction.Retry) }, onBack,
+    )) return
 
     Column(
         modifier = Modifier
@@ -130,6 +134,8 @@ fun PriceQuizScreen(
             reward = state.reward,
             onAgain = { onAction(PriceQuizAction.Restart) },
             onHub = onBack,
+            session = uiState.session,
+            onRetry = { onAction(PriceQuizAction.Retry) },
         )
     }
 }

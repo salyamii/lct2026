@@ -46,7 +46,7 @@ fun MainMenuScreen(
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                     ) {
-                        MenuHud(state.coins, state.completedGoals, state.totalGoals, onAction)
+                        MenuHud(state, onAction)
                         MenuActions(onAction, viewport)
                     }
                 }
@@ -54,7 +54,7 @@ fun MainMenuScreen(
                 Column(
                     Modifier.widthIn(max = 480.dp).fillMaxSize().align(Alignment.TopCenter),
                 ) {
-                    MenuHud(state.coins, state.completedGoals, state.totalGoals, onAction)
+                    MenuHud(state, onAction)
                     CharacterScene(state.pet, Modifier.weight(1f).fillMaxWidth())
                     MenuActions(onAction, viewport)
                 }

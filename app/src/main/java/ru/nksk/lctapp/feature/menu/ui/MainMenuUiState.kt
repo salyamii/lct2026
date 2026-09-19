@@ -4,17 +4,15 @@ import ru.nksk.lctapp.R
 
 /** Values rendered by the menu; this is presentation state, not a saved game. */
 data class MainMenuUiState(
-    val coins: Long,
-    val completedGoals: Int,
-    val totalGoals: Int,
+    val hunger: Int,
+    val fatigue: Int,
     val pet: MainMenuPetUiState,
 )
 
 /** Preview-only presentation fixture. Runtime state comes from MainMenuViewModel. */
 internal val MainMenuPreviewState = MainMenuUiState(
-    coins = 100L,
-    completedGoals = 0,
-    totalGoals = 4,
+    hunger = 0,
+    fatigue = 0,
     pet = MainMenuPetUiState(R.drawable.menu_ryzhik, R.string.menu_fox_description),
 )
 

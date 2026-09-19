@@ -14,6 +14,7 @@ import org.junit.runner.RunWith
 import ru.nksk.lctapp.app.createInitialGameState
 import ru.nksk.lctapp.data.game.local.GameDatabase
 import ru.nksk.lctapp.data.game.local.MIGRATION_1_2
+import ru.nksk.lctapp.data.game.local.MIGRATION_5_6
 import ru.nksk.lctapp.data.game.local.MIGRATION_4_5
 import ru.nksk.lctapp.data.game.local.MIGRATION_3_4
 import ru.nksk.lctapp.data.game.local.MIGRATION_2_3
@@ -51,7 +52,7 @@ class GameSchemaTest {
             assertEquals(PetVisualState.HUNGRY, state.pet.visualState)
             assertEquals("BANDANA", state.pet.selectedLookId)
         }
-        schemas.runMigrationsAndValidate(5, listOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)).close()
+        schemas.runMigrationsAndValidate(6, listOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)).close()
     }
 
     @Test fun migrationPreservesEveryV1TableAndRepeatedOccurrences() = runBlocking {
@@ -164,15 +165,18 @@ class GameSchemaTest {
         }
         withDatabase { db ->
             RoomGameRepository(db).update {
-                it.copy(hunger = 20, fatigue = 59, completedMiniGames = setOf("persisted-attempt"))
+                ru.nksk.lctapp.domain.minigame.MiniGameKind.MEMORY.complete(it, "persisted-attempt")
             }
         }
         withDatabase { db ->
-            val restored = RoomGameRepository(db).read()!!
-            assertEquals(17, restored.satiety)
-            assertEquals(20, restored.hunger)
+            val repository = RoomGameRepository(db)
+            val restored = repository.read()!!
+            assertEquals(37, restored.satiety)
             assertEquals(59, restored.fatigue)
             assertEquals(setOf("persisted-attempt"), restored.completedMiniGames)
+            assertEquals(restored, repository.update {
+                ru.nksk.lctapp.domain.minigame.MiniGameKind.MEMORY.complete(it, "persisted-attempt")
+            })
         }
     }
 

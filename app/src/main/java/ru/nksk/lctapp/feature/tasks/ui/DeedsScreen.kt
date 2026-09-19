@@ -24,10 +24,14 @@ import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 
-enum class DeedsAction { StarPlates, PriceCheck, Telescope }
+enum class DeedsAction(val kind: ru.nksk.lctapp.domain.minigame.MiniGameKind) {
+    StarPlates(ru.nksk.lctapp.domain.minigame.MiniGameKind.MEMORY),
+    PriceCheck(ru.nksk.lctapp.domain.minigame.MiniGameKind.PRICE_QUIZ),
+    Telescope(ru.nksk.lctapp.domain.minigame.MiniGameKind.TELESCOPE),
+}
 
 @Composable
-fun DeedsScreen(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit) {
+fun DeedsScreen(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit, state: DeedsUiState, onRetry: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -61,6 +65,16 @@ fun DeedsScreen(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit) {
                     color = DeedColors.TextSoft,
                 )
                 Spacer(Modifier.height(14.dp))
+                Text(
+                    stringResource(R.string.deeds_resources, state.hunger, state.fatigue),
+                    color = DeedColors.Text, fontFamily = Nunito,
+                )
+                if (state.loading) Text(stringResource(R.string.game_loading), color = DeedColors.Text)
+                if (state.error) {
+                    Text(stringResource(R.string.game_load_error), color = DeedColors.Text)
+                    DeedButton(stringResource(R.string.game_retry), onRetry)
+                }
+                Spacer(Modifier.height(14.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     DeedCard(
                         title = stringResource(R.string.deeds_star_title),
@@ -68,6 +82,9 @@ fun DeedsScreen(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit) {
                         rewardLabel = stringResource(R.string.deeds_demo_max),
                         scene = painterResource(R.drawable.location_hill),
                         onOpen = { onOpen(DeedsAction.StarPlates) },
+                        costLabel = stringResource(R.string.deeds_cost, DeedsAction.StarPlates.kind.hungerCost, DeedsAction.StarPlates.kind.fatigueCost),
+                        enabled = DeedsAction.StarPlates.kind in state.available,
+                        unavailableLabel = if (state.loading || state.error) null else stringResource(R.string.deeds_unavailable),
                     )
                     DeedCard(
                         title = stringResource(R.string.deeds_price_title),
@@ -75,6 +92,9 @@ fun DeedsScreen(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit) {
                         rewardLabel = stringResource(R.string.deeds_demo_max),
                         scene = painterResource(R.drawable.location_workshop),
                         onOpen = { onOpen(DeedsAction.PriceCheck) },
+                        costLabel = stringResource(R.string.deeds_cost, DeedsAction.PriceCheck.kind.hungerCost, DeedsAction.PriceCheck.kind.fatigueCost),
+                        enabled = DeedsAction.PriceCheck.kind in state.available,
+                        unavailableLabel = if (state.loading || state.error) null else stringResource(R.string.deeds_unavailable),
                     )
                     DeedCard(
                         title = stringResource(R.string.deeds_target_title),
@@ -82,6 +102,9 @@ fun DeedsScreen(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit) {
                         rewardLabel = stringResource(R.string.deeds_demo_max),
                         scene = painterResource(R.drawable.location_trail),
                         onOpen = { onOpen(DeedsAction.Telescope) },
+                        costLabel = stringResource(R.string.deeds_cost, DeedsAction.Telescope.kind.hungerCost, DeedsAction.Telescope.kind.fatigueCost),
+                        enabled = DeedsAction.Telescope.kind in state.available,
+                        unavailableLabel = if (state.loading || state.error) null else stringResource(R.string.deeds_unavailable),
                     )
                 }
                 Spacer(Modifier.height(14.dp))

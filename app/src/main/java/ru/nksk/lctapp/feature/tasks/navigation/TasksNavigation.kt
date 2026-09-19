@@ -11,6 +11,7 @@ import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import ru.nksk.lctapp.feature.tasks.ui.DeedsAction
+import ru.nksk.lctapp.feature.tasks.ui.DeedsViewModel
 import ru.nksk.lctapp.feature.tasks.ui.DeedsScreen
 import ru.nksk.lctapp.feature.tasks.ui.MemoryGameScreen
 import ru.nksk.lctapp.feature.tasks.ui.MemoryGameViewModel
@@ -40,10 +41,14 @@ fun EntryProviderScope<NavKey>.tasksEntry(
     onBack: (NavKey) -> Unit,
 ) {
     entry<Tasks> { source ->
+        val viewModel = hiltViewModel<DeedsViewModel>()
+        val state by viewModel.uiState.collectAsStateWithLifecycle()
         val lifecycle = LocalLifecycleOwner.current.lifecycle
         DeedsScreen(
+            state = state,
+            onRetry = viewModel::retry,
             onOpen = { action ->
-                if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) onOpen(source, action)
+                if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) && action.kind in state.available) onOpen(source, action)
             },
             onExit = dropUnlessResumed { onBack(source) },
         )

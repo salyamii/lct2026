@@ -48,8 +48,7 @@ class InventoryMigrationTest {
             val saved = games.read()!!
             assertEquals(listOf(OwnedItem("owned-2", "map"), OwnedItem("owned-1", "map")), saved.ownedItems)
             assertEquals(247L, saved.economy.balance)
-            assertEquals(20, saved.hunger)
-            assertEquals(17, saved.satiety)
+            assertEquals(37, saved.satiety)
             assertEquals(29, saved.fatigue)
             val content = RoomStoryContentRepository(database)
             assertEquals(ItemDefinition("map", "Карта", "Старинная карта"), content.read().items.single())

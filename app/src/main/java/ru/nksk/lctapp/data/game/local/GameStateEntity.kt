@@ -25,7 +25,6 @@ internal data class GameStateEntity(
     @ColumnInfo(name = "visual_state") val visualState: String,
     @ColumnInfo(name = "selected_look") val selectedLook: String,
     @ColumnInfo(name = "satiety") val satiety: Int,
-    @ColumnInfo(name = "hunger", defaultValue = "0") val hunger: Int,
     @ColumnInfo(name = "fatigue") val fatigue: Int,
     @ColumnInfo(name = "balance") val balance: Long,
     @ColumnInfo(name = "planned_needs") val plannedNeeds: Long,

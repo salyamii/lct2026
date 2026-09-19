@@ -55,6 +55,10 @@ fun MemoryGameScreen(
     onBack: () -> Unit,
 ) {
     val state = uiState.game
+    androidx.activity.compose.BackHandler(enabled = uiState.session.saving) { }
+    if (!state.won && MiniGameAccessGate(
+        uiState.session, { onAction(MemoryGameAction.Retry) }, onBack,
+    )) return
 
     Column(
         modifier = Modifier
@@ -124,6 +128,8 @@ fun MemoryGameScreen(
             reward = MemoryState.REWARD,
             onAgain = { onAction(MemoryGameAction.Restart) },
             onHub = onBack,
+            session = uiState.session,
+            onRetry = { onAction(MemoryGameAction.Retry) },
         )
     }
 }

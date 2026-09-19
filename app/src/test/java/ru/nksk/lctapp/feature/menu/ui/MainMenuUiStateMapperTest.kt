@@ -10,16 +10,18 @@ import ru.nksk.lctapp.domain.pet.PetVisualState
 
 class MainMenuUiStateMapperTest {
     @Test
-    fun suppliedGameSnapshotDrivesTheBalanceAndPetAppearance() {
+    fun suppliedGameSnapshotDrivesResourcesAndPetAppearance() {
         val initial = createInitialGameState()
         val game = initial.copy(
             economy = initial.economy.copy(balance = 3_000_000_000L),
+            satiety = 40, fatigue = 80,
             pet = PetState("BANDANA", PetVisualState.HUNGRY),
         )
 
         val state = game.toMainMenuUiState()
 
-        assertEquals(3_000_000_000L, state.coins)
+        assertEquals(40, state.hunger)
+        assertEquals(80, state.fatigue)
         assertEquals(R.drawable.ryzhik_teen_state_hungry_copper, state.pet.artworkRes)
         assertEquals(R.string.menu_pet_hungry, state.pet.descriptionRes)
     }

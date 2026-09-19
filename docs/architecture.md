@@ -1,7 +1,7 @@
 # Project architecture
 
 > Implementation update, 2026-09-19: the game domain now lives in the JVM
-> module `:core:game`; Room is at v5 (including storage compatibility and inventory metadata). The original description below is retained.
+> module `:core:game`; Room is at v6 (including compatibility with both v2 branches, mini-game costs and inventory metadata). The original description below is retained.
 > See the dated addition at the end and the [engine implementation](design/game-engine.md)
 > for the current paths and scope.
 
@@ -67,9 +67,10 @@ no story references, decisions or owned items. These values are technical starti
 data, not approved parameter ranges, weekly income or authored story content.
 The catalog starts empty until actual definitions are installed.
 
-`MainMenuUiStateMapper` projects the saved `Long` balance and pet appearance.
-The adventure title and zero-of-four counter remain display fixtures; they are
-not calculated from savings or decision counts. `MainMenuPreviewState` is only
+`MainMenuUiStateMapper` projects saved hunger, fatigue and pet appearance.
+Under D-074 the menu shows temporary labels for savings, current goal, event
+and map. Savings display a dash; the shared balance is not presented as savings.
+The former adventure title and zero-of-four fixture counter have been removed. `MainMenuPreviewState` is only
 for previews and UI tests. The loading/error wrapper does not alter menu artwork.
 Normal backpack uses `menu_ryzhik`; other verified mappings use bundled teen art.
 WORRIED and NEEDS_HELP still show their labels without substitute artwork.
@@ -96,10 +97,10 @@ current telescope zone, round, hits and stopped position. Reconstruction resumes
 pending feedback once. This supports configuration changes and Android saved-state
 restoration, not durable game saves after dismissing the task or force-stopping.
 
-The section retains the original PR's demo mechanics. Demo coins never update
-Room, the shared balance, pet state, fatigue or story progress. See
-[mini-game scope and open rules](design/mini-games.md). Actual earnings still need
-approved gameplay rules and an atomic aggregate repository operation.
+The section retains the original PR's demo mechanics. Demo coins never update the shared balance. Under D-072, successful mini-games
+atomically increase saved hunger/fatigue and record a durable attempt receipt;
+pet appearance and story progress are unchanged. See
+[mini-game scope and open rules](design/mini-games.md). Actual monetary earnings still need approved gameplay rules.
 
 ## Domain and persistence
 
@@ -257,3 +258,7 @@ the catalog price. These are persisted in Room v5 with an additive migration.
 No content is installed and no game is initialized or mutated by this screen.
 Loading, error/retry and empty sections are distinct. Preview examples stay in
 Compose previews. See [inventory](design/inventory.md).
+
+D-076: hunger is stored only as `GameState.satiety`; UI hunger values project
+that field. Room v6 merges the v4/v5 hunger increments into satiety and removes
+the duplicate column while retaining completion receipts.

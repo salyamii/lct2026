@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -34,16 +33,12 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import ru.nksk.lctapp.R
-import ru.nksk.lctapp.core.ui.theme.AdventureLavender
-import ru.nksk.lctapp.core.ui.theme.AdventureLime
 import ru.nksk.lctapp.core.ui.theme.AdventureMuted
 import ru.nksk.lctapp.core.ui.theme.AdventurePanel
 
 @Composable
 internal fun MenuHud(
-    coins: Long,
-    completedGoals: Int,
-    totalGoals: Int,
+    state: MainMenuUiState,
     onAction: (MainMenuAction) -> Unit,
 ) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
@@ -58,16 +53,7 @@ internal fun MenuHud(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            MenuText(stringResource(R.string.menu_goal_label), 11, color = AdventureLavender, letterSpacing = 0.44f)
             MenuText(stringResource(R.string.menu_current_goal), 13, modifier = Modifier.weight(1f))
-            MenuText(
-                stringResource(R.string.menu_goal_progress, completedGoals, totalGoals),
-                size = 11,
-                color = AdventureLime,
-                modifier = Modifier.clip(RoundedCornerShape(50))
-                    .background(Color.White.copy(alpha = 0.15f))
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-            )
         }
         Spacer(Modifier.height(8.dp))
         Row(
@@ -75,29 +61,61 @@ internal fun MenuHud(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            CoinsBadge(coins) { onAction(MainMenuAction.Coins) }
+            SavingsPlaceholderBadge() { onAction(MainMenuAction.Coins) }
             LocationEntry { onAction(MainMenuAction.Village) }
+        }
+        Spacer(Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            MenuStatBadge(
+                label = stringResource(R.string.menu_hunger),
+                value = state.hunger.toString(),
+                description = stringResource(R.string.menu_hunger_accessibility, state.hunger),
+                modifier = Modifier.weight(1f),
+            )
+            MenuStatBadge(
+                label = stringResource(R.string.menu_fatigue),
+                value = state.fatigue.toString(),
+                description = stringResource(R.string.menu_fatigue_accessibility, state.fatigue),
+                modifier = Modifier.weight(1f),
+            )
         }
     }
 }
 
 @Composable
-private fun CoinsBadge(coins: Long, onClick: () -> Unit) {
-    val description = stringResource(R.string.menu_coins_accessibility, coins)
+private fun SavingsPlaceholderBadge(onClick: () -> Unit) {
+    MenuStatBadge(
+        label = stringResource(R.string.menu_coins),
+        value = stringResource(R.string.menu_value_placeholder),
+        description = stringResource(R.string.menu_coins_accessibility),
+        onClick = onClick,
+        artwork = { MenuArtwork(R.drawable.menu_coin, 27.dp) },
+    )
+}
+
+@Composable
+private fun MenuStatBadge(
+    label: String,
+    value: String,
+    description: String,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
+    artwork: (@Composable () -> Unit)? = null,
+) {
     Row(
-        Modifier.clip(RoundedCornerShape(20.dp))
+        modifier.clip(RoundedCornerShape(20.dp))
             .background(AdventurePanel.copy(alpha = 0.63f))
             .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(20.dp))
-            .clickable(role = Role.Button, onClick = onClick)
+            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
             .clearAndSetSemantics { contentDescription = description }
             .padding(horizontal = 12.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        MenuArtwork(R.drawable.menu_coin, 27.dp)
+        artwork?.invoke()
         Column {
-            MenuText(stringResource(R.string.menu_coins), 9, color = AdventureMuted)
-            MenuText(coins.toString(), 14)
+            MenuText(label, 9, color = AdventureMuted)
+            MenuText(value, 14)
         }
     }
 }

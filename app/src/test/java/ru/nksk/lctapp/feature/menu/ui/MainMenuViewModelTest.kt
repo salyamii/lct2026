@@ -27,20 +27,20 @@ class MainMenuViewModelTest {
 
     @Test fun persistedStateAndLaterChangesDriveTheMenu() = runTest(dispatcher) {
         val initial = createInitialGameState()
-        val repository = MenuRepository(initial.copy(economy = initial.economy.copy(balance = 42)))
+        val repository = MenuRepository(initial.copy(satiety = 42))
         val model = MainMenuViewModel(repository, initial)
         assertEquals(MainMenuLoadState.Loading, model.uiState.value)
         advanceUntilIdle()
-        assertEquals(42L, (model.uiState.value as MainMenuLoadState.Ready).menu.coins)
-        repository.update { it.copy(economy = it.economy.copy(balance = 73), pet = it.pet.transitionTo(PetVisualState.HAPPY)) }
+        assertEquals(42, (model.uiState.value as MainMenuLoadState.Ready).menu.hunger)
+        repository.update { it.copy(satiety = 73, pet = it.pet.transitionTo(PetVisualState.HAPPY)) }
         advanceUntilIdle()
-        assertEquals(73L, (model.uiState.value as MainMenuLoadState.Ready).menu.coins)
+        assertEquals(73, (model.uiState.value as MainMenuLoadState.Ready).menu.hunger)
         assertEquals(repository.read()!!.toMainMenuUiState(), (model.uiState.value as MainMenuLoadState.Ready).menu)
     }
 
     @Test fun initializationFailureShowsErrorAndRetryPreservesSavedData() = runTest(dispatcher) {
         val initial = createInitialGameState()
-        val repository = MenuRepository(initial.copy(economy = initial.economy.copy(balance = 77)))
+        val repository = MenuRepository(initial.copy(satiety = 77))
         repository.failure = IllegalStateException("Storage unavailable")
         val model = MainMenuViewModel(repository, initial)
         advanceUntilIdle()
@@ -48,7 +48,7 @@ class MainMenuViewModelTest {
         repository.failure = null
         model.retry()
         advanceUntilIdle()
-        assertEquals(77L, (model.uiState.value as MainMenuLoadState.Ready).menu.coins)
+        assertEquals(77, (model.uiState.value as MainMenuLoadState.Ready).menu.hunger)
     }
 
     @Test fun observationFailureDoesNotDisplayStartingFixture() = runTest(dispatcher) {

@@ -82,7 +82,7 @@ internal val MIGRATION_2_3 = object : Migration(2, 3) {
     }
 }
 
-/** Hunger is new data, not a reinterpretation of legacy satiety. */
+/** Historical v4 split; v6 merges mini-game increments back into satiety. */
 internal val MIGRATION_3_4 = object : Migration(3, 4) {
     override suspend fun migrate(connection: SQLiteConnection) {
         connection.execSQL("ALTER TABLE GAME_STATE ADD COLUMN hunger INTEGER NOT NULL DEFAULT 0")
@@ -94,5 +94,14 @@ internal val MIGRATION_3_4 = object : Migration(3, 4) {
             )
         """.trimIndent())
         connection.execSQL("CREATE INDEX IF NOT EXISTS index_MINI_GAME_COMPLETION_game_state_id ON MINI_GAME_COMPLETION(game_state_id)")
+    }
+}
+
+/** Fold v4/v5 mini-game increments into the original hunger parameter (D-076). */
+internal val MIGRATION_5_6 = object : Migration(5, 6) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("UPDATE GAME_STATE SET satiety = satiety + hunger")
+        // Bundled SQLite supports DROP COLUMN; preserve the parent row and its incoming FKs.
+        connection.execSQL("ALTER TABLE GAME_STATE DROP COLUMN hunger")
     }
 }
