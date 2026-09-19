@@ -46,6 +46,7 @@ room3 {
 }
 
 dependencies {
+    implementation(project(":feature:onboarding"))
     implementation(project(":core:game"))
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.sqlite.bundled)
@@ -90,4 +91,7 @@ tasks.withType<Test>().configureEach {
     val domainSources = rootProject.layout.projectDirectory.dir("core/game/src/main/kotlin")
     inputs.dir(domainSources).withPathSensitivity(PathSensitivity.RELATIVE)
     systemProperty("lctapp.domainSourceDir", domainSources.asFile.absolutePath)
+    val onboardingSources = rootProject.layout.projectDirectory.dir("feature/onboarding/src/main/java")
+    inputs.dir(onboardingSources).withPathSensitivity(PathSensitivity.RELATIVE)
+    systemProperty("lctapp.onboardingSourceDir", onboardingSources.asFile.absolutePath)
 }

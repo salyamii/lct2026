@@ -2,7 +2,7 @@
 
 See [the guide](README.md) for storage and usage rules and [the manifest](manifest.json) for checksums and export details.
 
-280 logical assets; 3 exact drawable aliases; 0 unavailable exports.
+291 logical assets; 3 exact drawable aliases; 0 unavailable exports.
 
 Locations retain their original 941 × 1672 pixels. Character and equipment layers retain a 512 × 512 canvas. Names are artwork labels, not gameplay rules.
 
@@ -357,3 +357,15 @@ Figma node-id не передан — уточнить при следующей
 | `R.drawable.deed_goods_lantern` | 256 × 256 | [deed_goods_lantern.webp](../../../app/src/main/res/drawable-nodpi/deed_goods_lantern.webp) |
 | `R.drawable.deed_star_plate_back` | 600 × 800 | [deed_star_plate_back.webp](../../../app/src/main/res/drawable-nodpi/deed_star_plate_back.webp) |
 | `R.drawable.deed_gear_marker` | 128 × 128 | [deed_gear_marker.webp](../../../app/src/main/res/drawable-nodpi/deed_gear_marker.webp) |
+
+## Onboarding
+
+| Android resource | Canvas | File | Figma source |
+| --- | --- | --- | --- |
+| `R.drawable.onboarding_castle` | 941 × 1672 | [onboarding_castle.webp](../../../app/src/main/res/drawable-nodpi/onboarding_castle.webp) | [2199:753](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2199-753) |
+| `R.drawable.onboarding_ryzhik` | 1024 × 1024 | [onboarding_ryzhik.webp](../../../app/src/main/res/drawable-nodpi/onboarding_ryzhik.webp) | [2186:722](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2186-722) |
+| `R.drawable.onboarding_tiko_unavailable` | 1024 × 1024 | [onboarding_tiko_unavailable.webp](../../../app/src/main/res/drawable-nodpi/onboarding_tiko_unavailable.webp) | [2186:720](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2186-720) |
+
+The owl reuses `npc_luna_body` with a zero-saturation presentation filter.
+Its full 1024 × 1024 canvas and pose match node 2186:718. The axolotl pose
+differs from `npc_tiko_body`; the fox has no backpack, unlike `menu_ryzhik`.

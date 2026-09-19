@@ -296,3 +296,17 @@ Real deeds reuse the three mini-game mechanics with catalog assignments.
 CompleteDeed applies the result-dependent payout and all effects atomically;
 training routes retain their separate demo behavior. Explicit exit restarts the
 board on the next launch while preserving the offer and its original deadline.
+
+## Onboarding module — 2026-09-19
+
+`:app` also depends on the Android library `:feature:onboarding` (ONB-D-001–004).
+The library owns selection UiState/StateFlow, its Hilt ViewModel, a lifecycle-aware
+entry and the screen. It has no dependency on app, game data or other features.
+App supplies drawable IDs and existing fonts through OnboardingArtwork, keeping
+the catalogued artwork beside existing app resources without duplicating it.
+
+`app/navigation/AppStartupViewModel` reads GameSession before composing the menu.
+No save means onboarding; existing save means the normal navigation host; a read
+error offers retry. Start creates an absent snapshot through session.prepare()
+before opening the menu. Room schema and gameplay are unchanged. There is no
+second completion flag. See [onboarding](design/onboarding.md).
