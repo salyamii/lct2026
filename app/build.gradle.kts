@@ -46,6 +46,7 @@ room3 {
 }
 
 dependencies {
+    debugImplementation(project(":feature:debug"))
     implementation(project(":core:game"))
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.sqlite.bundled)

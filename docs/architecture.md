@@ -296,3 +296,24 @@ Real deeds reuse the three mini-game mechanics with catalog assignments.
 CompleteDeed applies the result-dependent payout and all effects atomically;
 training routes retain their separate demo behavior. Explicit exit restarts the
 board on the next launch while preserving the offer and its original deadline.
+
+## Debug overlay — 2026-09-19
+
+`:feature:debug` is an Android Compose library included by `:app` only through
+`debugImplementation` (DBG-D-001). The debug source set supplies `AppDebugOverlay`;
+the release source set supplies an empty composable with no feature dependency.
+The app composition hosts it outside the game theme and navigation. A non-focusable
+popup exposes the Debug button; only the button handles taps, leaving the app
+interactive. It opens a standard Material 3 bottom sheet. Sheet visibility is local
+saveable UI state, independent of navigation. The default Material styling is
+independent of app artwork.
+
+DBG-D-002 adds an explicit reset action. The feature emits a callback; debug app
+wiring starts a private `DebugResetActivity` in `:debug_reset`. Its Hilt ViewModel
+waits for the old main process to stop, then calls the debug-only aggregate reset
+repository. All eight save tables are cleared in one Room transaction, in foreign
+key order; immutable content and the database/schema remain. Failure shows retry.
+After commit, the helper starts MainActivity in a fresh task and ends its own
+process. This clears singleton GameSession preparation, ViewModels and saved UI
+state, restoring the normal first-launch flow. The helper, manifest entry and reset repository are
+all in `app/src/debug`; the release build includes none of them.
