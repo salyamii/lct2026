@@ -357,3 +357,9 @@ Figma node-id не передан — уточнить при следующей
 | `R.drawable.deed_goods_lantern` | 256 × 256 | [deed_goods_lantern.webp](../../../app/src/main/res/drawable-nodpi/deed_goods_lantern.webp) |
 | `R.drawable.deed_star_plate_back` | 600 × 800 | [deed_star_plate_back.webp](../../../app/src/main/res/drawable-nodpi/deed_star_plate_back.webp) |
 | `R.drawable.deed_gear_marker` | 128 × 128 | [deed_gear_marker.webp](../../../app/src/main/res/drawable-nodpi/deed_gear_marker.webp) |
+
+## Debug tooling
+
+| Resource | Canvas | Android resource | Source |
+| --- | --- | --- | --- |
+| `debug_settings` | 24 × 24 | [Vector XML](../../../feature/debug/src/main/res/drawable/debug_settings.xml) | [Original SVG](debug_settings.svg), locally authored geometric gear, no Figma node; identical path and evenOdd fill. Displayed at 20 dp on a gray 40 dp button. |
