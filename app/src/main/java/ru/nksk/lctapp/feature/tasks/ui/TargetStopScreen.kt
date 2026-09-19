@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.lifecycle.compose.currentStateAsState
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.foundation.border
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -34,6 +35,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -152,26 +155,70 @@ fun TargetStopScreen(
 
 @Composable
 private fun Track(zoneStart: Int, markerPosition: Float, modifier: Modifier = Modifier) {
+    val pulse = rememberInfiniteTransition(label = "zone")
+    val zoneGlow by pulse.animateFloat(
+        initialValue = 0.55f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(650), RepeatMode.Reverse),
+        label = "zoneGlow",
+    )
     BoxWithConstraints(
         modifier = modifier
-            .height(40.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(DeedColors.Board),
+            .height(48.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(DeedColors.Board)
+            .border(1.5.dp, Color.White.copy(alpha = 0.14f), RoundedCornerShape(24.dp)),
         contentAlignment = Alignment.CenterStart,
     ) {
+        // Линейка: деления каждые 10%
+        Row(
+            modifier = Modifier.fillMaxWidth().height(48.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            repeat(9) { tick ->
+                Box(
+                    modifier = Modifier
+                        .width(1.5.dp)
+                        .height(if (tick == 4) 22.dp else 12.dp)
+                        .background(Color.White.copy(alpha = if (tick == 4) 0.30f else 0.16f)),
+                )
+            }
+        }
+        // Зона-ловушка: свечение, скобы-кронштейны, лёгкая пульсация
         Box(
             modifier = Modifier
-                .width((maxWidth - MARKER_SIZE_DP.dp) * (TargetStopState.ZONE_WIDTH / 100f))
-                .height(40.dp)
-                .offset(x = MARKER_SIZE_DP.dp / 2 + (maxWidth - MARKER_SIZE_DP.dp) * (zoneStart / 100f))
-                .background(DeedColors.Lime),
-        )
-        Box(
+                .width(maxWidth * (TargetStopState.ZONE_WIDTH / 100f))
+                .height(48.dp)
+                .offset(x = maxWidth * (zoneStart / 100f)),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(DeedColors.Lime.copy(alpha = 0.85f * zoneGlow)),
+            )
+            Box(
+                Modifier
+                    .width(4.dp)
+                    .height(48.dp)
+                    .background(DeedColors.Lime),
+            )
+            Box(
+                Modifier
+                    .width(4.dp)
+                    .height(48.dp)
+                    .align(Alignment.CenterEnd)
+                    .background(DeedColors.Lime),
+            )
+        }
+        // Шестерёнка-бегунок
+        Image(
+            painter = painterResource(R.drawable.deed_gear_marker),
+            contentDescription = null,
             modifier = Modifier
                 .size(MARKER_SIZE_DP.dp)
                 .offset(x = (maxWidth - MARKER_SIZE_DP.dp) * markerPosition)
-                .clip(CircleShape)
-                .background(DeedColors.Chip),
+                .graphicsLayer { rotationZ = markerPosition * 720f },
         )
     }
 }

@@ -341,3 +341,19 @@ Locations retain their original 941 × 1672 pixels. Character and equipment laye
 | `R.font.nunito_extrabold` | — | [nunito_extrabold.ttf](../../../app/src/main/res/font/nunito_extrabold.ttf) | [font provenance](../README.md#typography) |
 | `R.font.rubik_extrabold` | — | [rubik_extrabold.ttf](../../../app/src/main/res/font/rubik_extrabold.ttf) | [font provenance](../README.md#typography) |
 
+
+## Deeds goods
+
+Предметные арты и текстуры раздела «Дела». Designer export (PNG source → WebP lossless);
+Figma node-id не передан — уточнить при следующей синхронизации.
+
+| Android resource | Canvas | Файл |
+| --- | --- | --- |
+| `R.drawable.deed_goods_map` | 256 × 256 | [deed_goods_map.webp](../../../app/src/main/res/drawable-nodpi/deed_goods_map.webp) |
+| `R.drawable.deed_goods_scroll` | 256 × 256 | [deed_goods_scroll.webp](../../../app/src/main/res/drawable-nodpi/deed_goods_scroll.webp) |
+| `R.drawable.deed_goods_lens` | 256 × 256 | [deed_goods_lens.webp](../../../app/src/main/res/drawable-nodpi/deed_goods_lens.webp) |
+| `R.drawable.deed_goods_compass` | 256 × 256 | [deed_goods_compass.webp](../../../app/src/main/res/drawable-nodpi/deed_goods_compass.webp) |
+| `R.drawable.deed_goods_star_plate` | 256 × 256 | [deed_goods_star_plate.webp](../../../app/src/main/res/drawable-nodpi/deed_goods_star_plate.webp) |
+| `R.drawable.deed_goods_lantern` | 256 × 256 | [deed_goods_lantern.webp](../../../app/src/main/res/drawable-nodpi/deed_goods_lantern.webp) |
+| `R.drawable.deed_star_plate_back` | 600 × 800 | [deed_star_plate_back.webp](../../../app/src/main/res/drawable-nodpi/deed_star_plate_back.webp) |
+| `R.drawable.deed_gear_marker` | 128 × 128 | [deed_gear_marker.webp](../../../app/src/main/res/drawable-nodpi/deed_gear_marker.webp) |

@@ -3,10 +3,10 @@
     <string name="deeds_subtitle">Три мини-игры с пробными наградами</string>
     <string name="deeds_demo_notice">Демо-монеты не меняют общий баланс</string>
     <string name="deeds_demo_max">До 10 демо-монет</string>
-    <string name="deeds_star_title">Звёздные пласты</string>
+    <string name="deeds_star_title">Перепутанные находки</string>
     <string name="deeds_price_title">Сверка счетов</string>
     <string name="deeds_target_title">Настрой телескоп</string>
-    <string name="deeds_star_description">Ночью Смотритель снял небо. Разложи пласты по парам созвездий, пока они не перепутались.</string>
+    <string name="deeds_star_description">Смотритель свалил находки в кучу. Открывай пласты и собирай пары одинаковых предметов.</string>
     <string name="deeds_price_description">Гонец привёз счета из деревенской лавки. Помоги Рыжику найти самую дорогую покупку.</string>
     <string name="deeds_target_description">Ловящий сигнал уходит в сторону. Останови бегунок в зелёной зоне — и башня снова найдёт звезду.</string>
     <string name="deeds_start">Взяться за дело</string>
@@ -28,7 +28,7 @@
     <string name="deeds_target_hint">Тапни «Стоп», когда центр бегунка в зелёной зоне</string>
     <string name="deeds_stop">Стоп!</string>
     <string name="deeds_target_complete">Телескоп настроен!</string>
-    <string name="deeds_memory_prompt">Найди пары созвездий</string>
+    <string name="deeds_memory_prompt">Найди пары предметов</string>
     <string name="deeds_moves">Ходы: %1$d</string>
     <string name="deeds_memory_complete">Все созвездия на местах!</string>
     <string name="deeds_card_hidden">Карта %1$d, закрыта</string>
