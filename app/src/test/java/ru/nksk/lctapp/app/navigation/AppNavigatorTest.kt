@@ -8,6 +8,38 @@ class AppNavigatorTest {
     private data object Home : NavKey
     private data class Detail(val id: String) : NavKey
 
+    @Test fun startingAGameReplacesItsProposalAndIgnoresTheOldCallback() {
+        val proposal = Detail("day")
+        val game = Detail("game")
+        val stack = mutableListOf<NavKey>(Home, proposal)
+        val navigator = AppNavigator(stack)
+        navigator.replace(proposal, game)
+        navigator.replace(proposal, Detail("duplicate"))
+        navigator.replace(Home, Detail("cannot-replace-root"))
+        assertEquals(listOf(Home, game), stack)
+        navigator.returnToRoot(game)
+        navigator.replace(Home, proposal)
+        assertEquals(listOf(Home), stack)
+    }
+
+    @Test fun finishingFromANestedScreenReturnsDirectlyToTheRoot() {
+        val tasks = Detail("tasks")
+        val game = Detail("game")
+        val stack = mutableListOf<NavKey>(Home, tasks, game)
+        AppNavigator(stack).returnToRoot(game)
+        assertEquals(listOf(Home), stack)
+    }
+
+    @Test fun staleCompletionCannotCloseAnotherScreenOrRemoveTheRoot() {
+        val stack = mutableListOf<NavKey>(Home, Detail("current"))
+        val navigator = AppNavigator(stack)
+        navigator.returnToRoot(Detail("old"))
+        assertEquals(listOf(Home, Detail("current")), stack)
+        navigator.returnToRoot(Detail("current"))
+        navigator.returnToRoot(Home)
+        assertEquals(listOf(Home), stack)
+    }
+
     @Test
     fun twoDifferentMenuCallbacksOnlyOpenTheFirstDestination() {
         val stack = mutableListOf<NavKey>(Home)

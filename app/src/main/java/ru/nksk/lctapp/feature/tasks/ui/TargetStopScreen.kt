@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
@@ -58,15 +57,12 @@ fun TargetStopScreen(
     uiState: TargetStopUiState,
     onAction: (TargetStopAction) -> Unit,
     onBack: () -> Unit,
+    deed: DeedGamePresentation? = null,
 ) {
     val state = uiState.game
-    androidx.activity.compose.BackHandler(enabled = uiState.session.saving) { }
-    if (!state.finished && MiniGameAccessGate(
-        uiState.session, { onAction(TargetStopAction.Retry) }, onBack,
-    )) return
     val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
     val markerPosition = if (lifecycleState.isAtLeast(Lifecycle.State.RESUMED) &&
-        state.lastHit == null && !state.finished
+        state.lastHit == null && !state.finished && deed?.canPlay != false
     ) {
         key(state.round) {
             val transition = rememberInfiniteTransition(label = "telescope")
@@ -99,11 +95,11 @@ fun TargetStopScreen(
                     modifier = Modifier.fillMaxWidth().height(sceneHeight),
                     contentScale = ContentScale.Crop,
                 )
-                DeedHeader(stringResource(R.string.deeds_target_title), onBack = onBack)
+                DeedHeader(deed?.title ?: stringResource(R.string.deeds_target_title), onBack = onBack)
             }
             DeedSheet(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
                 Text(
-                    stringResource(R.string.deeds_target_prompt),
+                    if (deed != null) "Останови маркер в зелёной зоне. Ошибки уменьшают награду." else stringResource(R.string.deeds_target_prompt),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = Rubik,
@@ -115,7 +111,8 @@ fun TargetStopScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     DeedChip(stringResource(R.string.deeds_round, uiState.roundNumber, TargetStopState.ROUNDS))
-                    CoinChip(stringResource(R.string.deeds_demo_reward, state.reward))
+                    CoinChip(deed?.let { "Награда до ${it.maximumReward} монет" }
+                        ?: stringResource(R.string.deeds_demo_reward, state.reward))
                 }
                 Spacer(Modifier.height(18.dp))
                 Track(
@@ -126,13 +123,13 @@ fun TargetStopScreen(
                 Spacer(Modifier.height(8.dp))
                 DeedButton(
                     text = stringResource(R.string.deeds_stop),
-                    enabled = state.lastHit == null && !state.finished,
+                    enabled = state.lastHit == null && !state.finished && deed?.canPlay != false,
                     onClick = { onAction(TargetStopAction.Stop(markerPosition)) },
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
                     when (state.lastHit) {
-                        true -> stringResource(R.string.deeds_hit, TargetStopState.REWARD_PER_HIT)
+                        true -> if (deed != null) "Попадание!" else stringResource(R.string.deeds_hit, TargetStopState.REWARD_PER_HIT)
                         false -> stringResource(R.string.deeds_miss)
                         null -> if (state.finished) stringResource(R.string.deeds_ready) else stringResource(R.string.deeds_target_hint)
                     },
@@ -146,15 +143,13 @@ fun TargetStopScreen(
         }
     }
 
-    if (state.finished) {
+    if (state.finished && deed == null) {
         DeedResultSheet(
             emoji = "🔭",
             title = stringResource(R.string.deeds_target_complete),
             reward = state.reward,
             onAgain = { onAction(TargetStopAction.Restart) },
             onHub = onBack,
-            session = uiState.session,
-            onRetry = { onAction(TargetStopAction.Retry) },
         )
     }
 }

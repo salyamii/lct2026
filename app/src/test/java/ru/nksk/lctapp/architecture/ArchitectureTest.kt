@@ -91,7 +91,7 @@ class ArchitectureTest {
                 imported.within("$base.domain") || imported.within("$base.core.ui") ||
                 imported.within("$base.R")
             packageName.within("$base.core.ui") -> imported.within("$base.core.ui") ||
-                imported.within("$base.R")
+                imported.within("$base.R") || (packageName.within("$base.core.ui.game") && imported.within("$base.domain"))
             packageName.within("$base.data") -> imported.within("$base.data") ||
                 imported.within("$base.domain")
             else -> false

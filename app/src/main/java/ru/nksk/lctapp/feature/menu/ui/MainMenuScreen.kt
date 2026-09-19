@@ -28,6 +28,7 @@ fun MainMenuScreen(
     onAction: (MainMenuAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val dispatch: (MainMenuAction) -> Unit = { if (!state.busy) onAction(it) }
     BoxWithConstraints(modifier = modifier.fillMaxSize().background(AdventureNight)) {
         val viewport = DpSize(maxWidth, maxHeight)
         VillageBackdrop()
@@ -46,17 +47,17 @@ fun MainMenuScreen(
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                     ) {
-                        MenuHud(state, onAction)
-                        MenuActions(onAction, viewport)
+                        MenuHud(state.coins, state.completedGoals, state.totalGoals, dispatch)
+                        MenuActions(dispatch, viewport, state)
                     }
                 }
             } else {
                 Column(
                     Modifier.widthIn(max = 480.dp).fillMaxSize().align(Alignment.TopCenter),
                 ) {
-                    MenuHud(state, onAction)
+                    MenuHud(state.coins, state.completedGoals, state.totalGoals, dispatch)
                     CharacterScene(state.pet, Modifier.weight(1f).fillMaxWidth())
-                    MenuActions(onAction, viewport)
+                    MenuActions(dispatch, viewport, state)
                 }
             }
         }

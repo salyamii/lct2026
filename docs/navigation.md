@@ -55,7 +55,7 @@ The ViewModel initializes
 only a missing save and observes persisted state, with explicit loading and error
 states and retry. The entry collects `uiState` with lifecycle awareness. The menu
 maps saved hunger, fatigue and pet appearance. Savings, current goal and event
-use temporary labels under D-074; the former adventure counter is removed.
+use temporary labels under MAIN-D-074; the former adventure counter is removed.
 The labels for Coins, Village and ContinueDay are now savings, map and event
 name; route keys remain stable. Navigation keys contain no game snapshot. See
 [project architecture](architecture.md) for ownership.
@@ -104,3 +104,76 @@ or saved-state registry identity.
 - [Navigation 3 setup](https://developer.android.com/guide/navigation/navigation-3/get-started)
 - [Save and manage navigation state](https://developer.android.com/guide/navigation/navigation-3/save-state)
 - [Modularize navigation code](https://developer.android.com/guide/navigation/navigation-3/modularize)
+
+
+## Game actions on existing routes — 2026-09-19
+
+MainMenu, Day and Tasks retain their serialized route IDs. A menu click dispatches
+an explicit domain action before navigation; reopening an active event or saved
+day summary performs no transition. Day loading and navigation restoration only
+observe the save. Starting the next day remains an explicit button in the summary.
+Tasks reports successful StartDeed through an entry callback; the app host opens
+DeedGame. Acknowledging a result or choosing to return later reports an entry exit.
+Navigation carries no game snapshot, reward, offer deadline or revision.
+
+When a Day action saves a pause, dismisses a proposal or acknowledges a result
+and then leaves the entry, its outgoing card stays visible with controls disabled
+until navigation removes it. Repository observation still receives the saved
+state, but does not replace that card with the generic day screen during exit.
+Blocked or failed commands unlock the card and show the error without navigating.
+
+Successful Day exits use `AppNavigator.returnToRoot(source)` to return directly
+to the existing menu entry, including when the event was opened from Tasks.
+Ordinary Back still pops one screen. Stale completion callbacks cannot clear
+the stack of a newer destination, and the root is never removed.
+
+## Illustrated screen transitions — 2026-09-19
+
+The host uses opaque horizontal slides (160 ms) for forward, Back and predictive
+Back transitions. This replaces Navigation 3's default 700 ms crossfade, which
+blended the Tasks and menu artwork and text during a return. The host fills the
+window with the shared night background. Route order and entry-scoped state
+retention are unchanged; predictive Back still follows the gesture.
+
+## Offered deed mini-games — 2026-09-19
+
+The new stable `deed_game` route carries only the occurrence ID. Its serializer
+is registered alongside all existing keys. Starting from a Day proposal replaces
+that entry; starting from Tasks pushes the game. Completion returns directly to
+the menu. Both system and UI Back first save PauseEvent, then return to the menu.
+A failed save leaves the game visible with retry; it does not silently navigate.
+
+DeedGameViewModel observes the aggregate; the existing board ViewModels belong
+to this game's entry and retain their small SavedStateHandle state on recreation.
+Explicit exit removes the entry, so the next start creates a new board. Restoring
+a route whose occurrence was already completed or paused only exits; it grants
+no rewards and does not execute a new event. Outgoing Day cards remain frozen
+until replacement to avoid showing the intermediate generic day screen.
+
+## Transient completion confirmation — 2026-09-19
+
+Day and DeedGame exit callbacks optionally carry presentation text after a
+successful completion command. The app host accepts it only from the current
+destination, returns to the menu, then shows a short Snackbar after the slide.
+The snackbar uses the light game-card palette and disappears automatically.
+Leaving the menu cancels it. Each delivery has its own in-memory identity, so
+two distinct completions with the same text remain distinct confirmations.
+
+No snackbar state is serialized in route keys or Room. Pausing, deferring,
+failed writes and restoring an already completed occurrence send no success
+text. Deed payout text uses the committed balance delta of the revision-checked
+command. Screens and the menu ViewModel do not recalculate or grant this reward.
+
+## Waking and feeding — 2026-09-19
+
+The summary's start-day action commits BeginDay with openFirst=false and exits
+to the menu. The next Continue action opens the first pending/carried event.
+Loading the morning or returning from the summary does not show an event or
+create an offered deed. The outgoing summary remains frozen until navigation
+removes it, just like other successful exits. Starting a day sends no event-
+completion snackbar. Failed writes keep the summary open for retry.
+
+Optional feeding is available on the menu. If the paid meal is unaffordable,
+the menu offers the free meal in place, with its next-morning consequence.
+Event cards have no secondary feeding link; hunger replaces the blocked action
+with feeding. Feeding never automatically executes the original action.

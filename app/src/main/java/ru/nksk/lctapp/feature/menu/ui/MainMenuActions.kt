@@ -44,14 +44,32 @@ import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.AdventureLabel
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
 import ru.nksk.lctapp.core.ui.theme.AdventureNight
+import ru.nksk.lctapp.core.ui.theme.AdventurePanel
 import ru.nksk.lctapp.core.ui.theme.Rubik
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 
 @Composable
-internal fun MenuActions(onAction: (MainMenuAction) -> Unit, viewport: DpSize) {
+internal fun MenuActions(onAction: (MainMenuAction) -> Unit, viewport: DpSize, state: MainMenuUiState) {
     var panelPosition by remember { mutableStateOf(Offset.Zero) }
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        state.dayStatus?.let { status ->
+            Text(
+                text = status,
+                modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth()
+                    .shadow(8.dp, RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(AdventurePanel.copy(alpha = 0.63f))
+                    .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(24.dp))
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                color = AdventureLabel,
+                fontFamily = Rubik,
+            )
+        }
+        state.notice?.let { Text(it, Modifier.padding(horizontal = 20.dp), color = AdventureLabel, fontFamily = Rubik) }
+        if (state.canFeed) Button({ onAction(MainMenuAction.Feed) }, Modifier.padding(horizontal = 18.dp).fillMaxWidth(), enabled = !state.busy) {
+            Text(state.mealPrice?.let { "Покормить · $it монет" } ?: "Покормить")
+        }
         Box(
             Modifier.padding(horizontal = 12.dp).fillMaxWidth()
                 .shadow(12.dp, RoundedCornerShape(34.dp))
@@ -84,13 +102,14 @@ internal fun MenuActions(onAction: (MainMenuAction) -> Unit, viewport: DpSize) {
         }
         Button(
             onClick = { onAction(MainMenuAction.ContinueDay) },
+            enabled = !state.busy,
             modifier = Modifier.padding(horizontal = 18.dp).fillMaxWidth().heightIn(min = 60.dp)
                 .shadow(12.dp, RoundedCornerShape(30.dp)),
             shape = RoundedCornerShape(30.dp),
             colors = ButtonDefaults.buttonColors(containerColor = AdventureLime, contentColor = AdventureNight),
         ) {
             Text(
-                stringResource(R.string.menu_continue),
+                state.continueLabel ?: stringResource(R.string.menu_continue),
                 fontFamily = Rubik, fontWeight = FontWeight.ExtraBold,
                 fontSize = 16.sp, lineHeight = 22.sp, textAlign = TextAlign.Center,
             )

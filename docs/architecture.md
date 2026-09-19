@@ -68,7 +68,7 @@ data, not approved parameter ranges, weekly income or authored story content.
 The catalog starts empty until actual definitions are installed.
 
 `MainMenuUiStateMapper` projects saved hunger, fatigue and pet appearance.
-Under D-074 the menu shows temporary labels for savings, current goal, event
+Under MAIN-D-074 the menu shows temporary labels for savings, current goal, event
 and map. Savings display a dash; the shared balance is not presented as savings.
 The former adventure title and zero-of-four fixture counter have been removed. `MainMenuPreviewState` is only
 for previews and UI tests. The loading/error wrapper does not alter menu artwork.
@@ -97,7 +97,7 @@ current telescope zone, round, hits and stopped position. Reconstruction resumes
 pending feedback once. This supports configuration changes and Android saved-state
 restoration, not durable game saves after dismissing the task or force-stopping.
 
-The section retains the original PR's demo mechanics. Demo coins never update the shared balance. Under D-072, successful mini-games
+The section retains the original PR's demo mechanics. Demo coins never update the shared balance. Under MAIN-D-072, successful mini-games
 atomically increase saved hunger/fatigue and record a durable attempt receipt;
 pet appearance and story progress are unchanged. See
 [mini-game scope and open rules](design/mini-games.md). Actual monetary earnings still need approved gameplay rules.
@@ -249,7 +249,7 @@ do not launch the app, emulator or instrumented tests; the user runs the app.
 
 ## Inventory — 2026-09-19
 
-`feature/gear` replaces the Gear placeholder with the read-only inventory (D-075).
+`feature/gear` replaces the Gear placeholder with the read-only inventory (MAIN-D-075).
 Its Hilt ViewModel observes `GameRepository` and reads immutable item definitions
 through `StoryContentRepository` after each saved aggregate. Only `ownedItems`
 produce cards; repeated occurrences retain their IDs and relative order.
@@ -259,6 +259,40 @@ No content is installed and no game is initialized or mutated by this screen.
 Loading, error/retry and empty sections are distinct. Preview examples stay in
 Compose previews. See [inventory](design/inventory.md).
 
-D-076: hunger is stored only as `GameState.satiety`; UI hunger values project
+MAIN-D-076: hunger is stored only as `GameState.satiety`; UI hunger values project
 that field. Room v6 merges the v4/v5 hunger increments into satiety and removes
 the duplicate column while retaining completion receipts.
+
+
+
+## Screen integration — 2026-09-19
+
+GameSession in `:core:game` prepares immutable content and coordinates the
+existing GameEngine. Its application-scoped Hilt binding receives repositories,
+the bundled catalog and the initial snapshot. The initial snapshot provider is
+now installed in SingletonComponent; it is not mutable application state.
+
+Menu, Day and Tasks each own a ViewModel. Screens receive immutable presentation
+state and callbacks; entries collect StateFlow with lifecycle awareness and own
+navigation effects. App wiring connects the Tasks deed callback to DeedGame and
+story callbacks to Day. No feature imports another feature or the concrete content adapter.
+
+`core/ui/game` holds shared presentation adapters for read-only domain values
+(such as human-readable guard messages). This package may import domain models;
+`core/ui/components` remains domain-independent. The architecture check records
+this specific boundary. No repository writes or business rules live in either.
+The reference texts and numeric content live in the data catalog, not ViewModels.
+
+## Shared game snapshot and offered mini-games — 2026-09-19
+
+All connected game features use GameSession.observe(); GameSession.read() reads
+one committed snapshot from the same repository. There is no separate mutable
+global state store. Room remains authoritative, and GameEngine reads the latest
+aggregate within each write transaction. UiState and transient board state are
+projections/local interaction state, not alternative balances or energy budgets.
+See [state access and examples](design/game-state-access.md).
+
+Real deeds reuse the three mini-game mechanics with catalog assignments.
+CompleteDeed applies the result-dependent payout and all effects atomically;
+training routes retain their separate demo behavior. Explicit exit restarts the
+board on the next launch while preserving the offer and its original deadline.

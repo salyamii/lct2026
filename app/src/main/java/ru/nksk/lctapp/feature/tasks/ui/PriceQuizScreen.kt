@@ -52,12 +52,9 @@ fun PriceQuizScreen(
     uiState: PriceQuizUiState,
     onAction: (PriceQuizAction) -> Unit,
     onBack: () -> Unit,
+    deed: DeedGamePresentation? = null,
 ) {
     val state = uiState.game
-    androidx.activity.compose.BackHandler(enabled = uiState.session.saving) { }
-    if (!state.finished && MiniGameAccessGate(
-        uiState.session, { onAction(PriceQuizAction.Retry) }, onBack,
-    )) return
 
     Column(
         modifier = Modifier
@@ -71,11 +68,11 @@ fun PriceQuizScreen(
                 modifier = Modifier.fillMaxWidth().height(150.dp),
                 contentScale = ContentScale.Crop,
             )
-            DeedHeader(stringResource(R.string.deeds_price_title), onBack = onBack)
+            DeedHeader(deed?.title ?: stringResource(R.string.deeds_price_title), onBack = onBack)
         }
         DeedSheet(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             Text(
-                stringResource(R.string.deeds_price_prompt),
+                if (deed != null) "Сравни значения и выбери большее. Ошибки уменьшают награду." else stringResource(R.string.deeds_price_prompt),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = Rubik,
@@ -87,7 +84,8 @@ fun PriceQuizScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 DeedChip(stringResource(R.string.deeds_question, minOf(state.current + 1, PriceQuizState.QUESTION_COUNT), PriceQuizState.QUESTION_COUNT))
-                CoinChip(stringResource(R.string.deeds_demo_reward, state.reward))
+                CoinChip(deed?.let { "Награда до ${it.maximumReward} монет" }
+                    ?: stringResource(R.string.deeds_demo_reward, state.reward))
             }
             Spacer(Modifier.height(14.dp))
             if (!state.finished) {
@@ -98,7 +96,7 @@ fun PriceQuizScreen(
                     InvoiceCard(
                         art = GOODS_ART[state.current % GOODS_ART.size],
                         amount = state.question.leftAmount,
-                        enabled = state.lastCorrect == null,
+                        enabled = state.lastCorrect == null && deed?.canPlay != false,
                         showAsAnswer = uiState.leftIsAnswer,
                         onClick = { onAction(PriceQuizAction.Answer(pickedLeft = true)) },
                         modifier = Modifier.weight(1f),
@@ -106,7 +104,7 @@ fun PriceQuizScreen(
                     InvoiceCard(
                         art = GOODS_ART[(state.current + 3) % GOODS_ART.size],
                         amount = state.question.rightAmount,
-                        enabled = state.lastCorrect == null,
+                        enabled = state.lastCorrect == null && deed?.canPlay != false,
                         showAsAnswer = uiState.rightIsAnswer,
                         onClick = { onAction(PriceQuizAction.Answer(pickedLeft = false)) },
                         modifier = Modifier.weight(1f),
@@ -127,15 +125,13 @@ fun PriceQuizScreen(
         }
     }
 
-    if (state.finished) {
+    if (state.finished && deed == null) {
         DeedResultSheet(
             emoji = "🪙",
             title = stringResource(R.string.deeds_price_complete),
             reward = state.reward,
             onAgain = { onAction(PriceQuizAction.Restart) },
             onHub = onBack,
-            session = uiState.session,
-            onRetry = { onAction(PriceQuizAction.Retry) },
         )
     }
 }

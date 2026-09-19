@@ -25,7 +25,7 @@ data class EngineState(
         val executingOffers = events.mapNotNull { it.deedOfferId }
         require(executingOffers.distinct().size == executingOffers.size)
         require(events.all { event -> event.deedOfferId == null || deeds.any { it.id == event.deedOfferId && it.eventId == event.eventId } })
-        require(events.none { it.origin == EventOrigin.DEED && (it.status == EventStatus.PENDING || it.status == EventStatus.CARRIED) })
+        require(events.none { it.origin == EventOrigin.DEED && (it.status == EventStatus.PENDING || it.status == EventStatus.CARRIED || it.status == EventStatus.CARRIED_ACTIVE) })
         require(phase != DayPhase.FINISHED || currentEvent == null)
     }
 
@@ -34,7 +34,7 @@ data class EngineState(
 }
 
 enum class DayPhase { RUNNING, READY_TO_END, FINISHED }
-enum class EventStatus { PENDING, ACTIVE, RESULT, COMPLETED, CARRIED }
+enum class EventStatus { PENDING, ACTIVE, RESULT, COMPLETED, CARRIED, PAUSED, CARRIED_ACTIVE }
 enum class EventOrigin { SCHEDULE, DEED }
 
 data class EventOccurrence(

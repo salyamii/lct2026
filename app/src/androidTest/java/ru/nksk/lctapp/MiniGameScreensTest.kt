@@ -32,14 +32,13 @@ import ru.nksk.lctapp.feature.tasks.ui.*
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
 class MiniGameScreensTest {
-    private val ready = MiniGameSessionUiState(loading = false, available = true)
     @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
 
     @Test fun quizMarksTheMoreExpensiveCardAfterAnAnswer() {
         compose.setContent {
             LCTAppTheme {
                 PriceQuizScreen(
-                    PriceQuizUiState(PriceQuizState(listOf(QuizQuestion(80, 20))).answer(true), session = ready),
+                    PriceQuizUiState(PriceQuizState(listOf(QuizQuestion(80, 20))).answer(true)),
                     onAction = {}, onBack = {},
                 )
             }
@@ -57,7 +56,7 @@ class MiniGameScreensTest {
             ) {
                 LCTAppTheme {
                     MemoryGameScreen(
-                        MemoryGameUiState(MemoryState(faces = (0..7).toList() + (0..7).toList()), session = ready),
+                        MemoryGameUiState(MemoryState(faces = (0..7).toList() + (0..7).toList())),
                         onAction = actions::add, onBack = {},
                     )
                 }
@@ -76,7 +75,7 @@ class MiniGameScreensTest {
                     DeviceConfigurationOverride.FontScale(2f),
             ) {
                 LCTAppTheme {
-                    TargetStopScreen(TargetStopUiState(TargetStopState(zoneStart = 40), session = ready), actions::add, {})
+                    TargetStopScreen(TargetStopUiState(TargetStopState(zoneStart = 40)), actions::add, {})
                 }
             }
         }

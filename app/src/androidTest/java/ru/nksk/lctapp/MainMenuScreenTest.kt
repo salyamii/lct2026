@@ -43,20 +43,29 @@ class MainMenuScreenTest {
     val compose = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun resourcesUpdateWhileGoalAndSavingsRemainPlaceholders() {
-        val state = mutableStateOf(MainMenuPreviewState.copy(hunger = 20, fatigue = 30))
+    fun suppliedStateUpdatesVisibleProgressAndAccessibleCoinBalance() {
+        val state = mutableStateOf(MainMenuPreviewState.copy(coins = 275L, completedGoals = 2, totalGoals = 7))
         compose.setContent {
-            LCTAppTheme { MainMenuScreen(state = state.value, onAction = {}) }
+            LCTAppTheme {
+                MainMenuScreen(state = state.value, onAction = {})
+            }
         }
-        fun assertValues(hunger: Int, fatigue: Int) {
-            compose.onNode(hasContentDescription(compose.activity.getString(R.string.menu_hunger_accessibility, hunger))).assertIsDisplayed()
-            compose.onNode(hasContentDescription(compose.activity.getString(R.string.menu_fatigue_accessibility, fatigue))).assertIsDisplayed()
-            compose.onNode(hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility))).assertIsDisplayed()
-            compose.onNodeWithText(compose.activity.getString(R.string.menu_current_goal)).assertIsDisplayed()
+
+        fun assertValues(coins: Int, completedGoals: Int, totalGoals: Int) {
+            compose.onNodeWithText(coins.toString(), useUnmergedTree = true).assertIsDisplayed()
+            compose.onNode(
+                hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility, coins)),
+            ).assertIsDisplayed()
+            compose.onNodeWithText(
+                compose.activity.getString(R.string.menu_goal_progress, completedGoals, totalGoals),
+            ).assertIsDisplayed()
         }
-        assertValues(20, 30)
-        compose.runOnIdle { state.value = state.value.copy(hunger = 40, fatigue = 80) }
-        assertValues(40, 80)
+
+        assertValues(coins = 275, completedGoals = 2, totalGoals = 7)
+        compose.runOnIdle {
+            state.value = MainMenuPreviewState.copy(coins = 40L, completedGoals = 3, totalGoals = 8)
+        }
+        assertValues(coins = 40, completedGoals = 3, totalGoals = 8)
     }
 
     @Test
@@ -128,7 +137,7 @@ class MainMenuScreenTest {
         fun label(id: Int) = hasText(compose.activity.getString(id))
         val actions = listOf(
             label(R.string.menu_current_goal) to MainMenuAction.Goal,
-            hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility)) to
+            hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility, 100)) to
                 MainMenuAction.Coins,
             label(R.string.menu_village) to MainMenuAction.Village,
             label(R.string.menu_gear) to MainMenuAction.Gear,

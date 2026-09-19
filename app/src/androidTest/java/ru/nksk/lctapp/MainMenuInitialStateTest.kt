@@ -19,7 +19,6 @@ import ru.nksk.lctapp.app.di.InitialGameStateModule
 import ru.nksk.lctapp.app.navigation.LctNavHost
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
 import ru.nksk.lctapp.domain.game.GameRepository
-import ru.nksk.lctapp.domain.content.StoryContentRepository
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.pet.PetState
 import ru.nksk.lctapp.domain.pet.PetVisualState
@@ -50,7 +49,7 @@ class MainMenuInitialStateTest {
     val repository: GameRepository = TestGameRepository(null)
 
     @BindValue @JvmField
-    val content: StoryContentRepository = TestStoryContentRepository()
+    val content: ru.nksk.lctapp.domain.content.StoryContentRepository = TestStoryContentRepository()
 
     @Test
     fun menuEntryDisplaysTheHiltProvidedDomainSnapshot() {
@@ -58,9 +57,9 @@ class MainMenuInitialStateTest {
             LCTAppTheme { LctNavHost() }
         }
 
-        compose.onNodeWithText("3000000000", useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithText("3000000000", useUnmergedTree = true).assertIsDisplayed()
         compose.onNode(hasContentDescription(
-            compose.activity.getString(R.string.menu_coins_accessibility),
+            compose.activity.getString(R.string.menu_coins_accessibility, 3_000_000_000L),
         )).assertIsDisplayed()
         compose.onNode(hasContentDescription(
             compose.activity.getString(R.string.menu_pet_hungry),

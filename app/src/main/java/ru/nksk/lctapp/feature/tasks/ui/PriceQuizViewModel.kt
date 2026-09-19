@@ -10,42 +10,33 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import ru.nksk.lctapp.domain.game.GameRepository
-import ru.nksk.lctapp.domain.minigame.MiniGameKind
 import ru.nksk.lctapp.domain.minigame.PriceQuizState
 import ru.nksk.lctapp.domain.minigame.QuizQuestion
 
-data class PriceQuizUiState(val game: PriceQuizState, val session: MiniGameSessionUiState = MiniGameSessionUiState()) {
+data class PriceQuizUiState(val game: PriceQuizState) {
     val leftIsAnswer: Boolean get() = !game.finished && game.lastCorrect != null && game.question.leftIsBigger
     val rightIsAnswer: Boolean get() = !game.finished && game.lastCorrect != null && !game.question.leftIsBigger
 }
 
 sealed interface PriceQuizAction {
     data class Answer(val pickedLeft: Boolean) : PriceQuizAction
-    data object Retry : PriceQuizAction
     data object Restart : PriceQuizAction
 }
 
 @HiltViewModel
-class PriceQuizViewModel @Inject constructor(private val savedState: SavedStateHandle, repository: GameRepository) : ViewModel() {
+class PriceQuizViewModel @Inject constructor(private val savedState: SavedStateHandle) : ViewModel() {
     private val mutableUiState = MutableStateFlow(PriceQuizUiState(restore()))
     val uiState = mutableUiState.asStateFlow()
     private var feedbackJob: Job? = null
-    private val session = MiniGameSession(MiniGameKind.PRICE_QUIZ, repository, savedState, viewModelScope) {
-        mutableUiState.value = mutableUiState.value.copy(session = it)
-    }
 
     init {
-        session.observe()
         publish(uiState.value.game)
         advanceAfterFeedback()
     }
 
     fun onAction(action: PriceQuizAction) {
         when (action) {
-            PriceQuizAction.Retry -> session.retry()
             is PriceQuizAction.Answer -> {
-                if (!session.state.canPlay) return
                 val before = uiState.value.game
                 val after = before.answer(action.pickedLeft)
                 if (before != after) {
@@ -54,7 +45,6 @@ class PriceQuizViewModel @Inject constructor(private val savedState: SavedStateH
                 }
             }
             PriceQuizAction.Restart -> {
-                if (!session.restart()) return
                 feedbackJob?.cancel()
                 publish(PriceQuizState.create())
             }
@@ -75,8 +65,7 @@ class PriceQuizViewModel @Inject constructor(private val savedState: SavedStateH
         savedState["current"] = game.current
         savedState["correct"] = game.correctAnswers
         savedState["last_correct"] = game.lastCorrect
-        mutableUiState.value = PriceQuizUiState(game, session.state)
-        if (game.finished) session.finish(success = true)
+        mutableUiState.value = PriceQuizUiState(game)
     }
 
     private fun restore(): PriceQuizState {

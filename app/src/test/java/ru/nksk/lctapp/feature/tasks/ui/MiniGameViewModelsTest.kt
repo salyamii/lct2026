@@ -6,7 +6,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -19,7 +18,6 @@ import ru.nksk.lctapp.domain.minigame.QuizQuestion
 @OptIn(ExperimentalCoroutinesApi::class)
 class MiniGameViewModelsTest {
     private val dispatcher = StandardTestDispatcher()
-    private val repository = MiniGameTestRepository()
     @Before fun setup() { Dispatchers.setMain(dispatcher) }
     @After fun cleanup() { Dispatchers.resetMain() }
 
@@ -37,12 +35,11 @@ class MiniGameViewModelsTest {
 
     @Test fun memoryRestoresOpenCardsAndResolvesThePendingPairOnce() = runTest(dispatcher) {
         val saved = SavedStateHandle(mapOf("faces" to intArrayOf(0, 0, 1, 1)))
-        val model = MemoryGameViewModel(saved, repository)
-        runCurrent()
+        val model = MemoryGameViewModel(saved)
         model.onAction(MemoryGameAction.Tap(0))
         model.onAction(MemoryGameAction.Tap(1))
         model.onAction(MemoryGameAction.Tap(2)) // Ignore input while feedback is visible.
-        val restored = MemoryGameViewModel(copyOf(saved), repository)
+        val restored = MemoryGameViewModel(copyOf(saved))
         assertEquals(setOf(0, 1), restored.uiState.value.game.faceUp)
         assertEquals(1, restored.uiState.value.game.moves)
         advanceUntilIdle()
@@ -52,8 +49,7 @@ class MiniGameViewModelsTest {
     }
 
     @Test fun memoryRestartCancelsPendingFeedback() = runTest(dispatcher) {
-        val model = MemoryGameViewModel(SavedStateHandle(mapOf("faces" to intArrayOf(0, 0))), repository)
-        runCurrent()
+        val model = MemoryGameViewModel(SavedStateHandle(mapOf("faces" to intArrayOf(0, 0))))
         model.onAction(MemoryGameAction.Tap(0))
         model.onAction(MemoryGameAction.Tap(1))
         model.onAction(MemoryGameAction.Restart)
@@ -66,11 +62,10 @@ class MiniGameViewModelsTest {
 
     @Test fun quizRestoresAnswerAndAdvancesWithoutCountingRepeatedTaps() = runTest(dispatcher) {
         val saved = SavedStateHandle(mapOf("questions" to intArrayOf(80, 20, 15, 60)))
-        val model = PriceQuizViewModel(saved, repository)
-        runCurrent()
+        val model = PriceQuizViewModel(saved)
         model.onAction(PriceQuizAction.Answer(true))
         model.onAction(PriceQuizAction.Answer(true))
-        val restored = PriceQuizViewModel(copyOf(saved), repository)
+        val restored = PriceQuizViewModel(copyOf(saved))
         assertTrue(restored.uiState.value.leftIsAnswer)
         assertEquals(2, restored.uiState.value.game.reward)
         advanceUntilIdle()
@@ -84,8 +79,7 @@ class MiniGameViewModelsTest {
     }
 
     @Test fun quizRestartCancelsThePreviousQuestionsFeedback() = runTest(dispatcher) {
-        val model = PriceQuizViewModel(SavedStateHandle(), repository)
-        runCurrent()
+        val model = PriceQuizViewModel(SavedStateHandle())
         model.onAction(PriceQuizAction.Answer(true))
         model.onAction(PriceQuizAction.Restart)
         val fresh = model.uiState.value
@@ -97,11 +91,10 @@ class MiniGameViewModelsTest {
 
     @Test fun telescopeRestoresStoppedMarkerAndZoneUntilFeedbackEnds() = runTest(dispatcher) {
         val saved = SavedStateHandle(mapOf("zone" to 40))
-        val model = TargetStopViewModel(saved, repository)
-        runCurrent()
+        val model = TargetStopViewModel(saved)
         model.onAction(TargetStopAction.Stop(0.5f))
         model.onAction(TargetStopAction.Stop(0.5f))
-        val restored = TargetStopViewModel(copyOf(saved), repository)
+        val restored = TargetStopViewModel(copyOf(saved))
         assertEquals(1, restored.uiState.value.roundNumber)
         assertEquals(40, restored.uiState.value.game.zoneStart)
         assertEquals(0.5f, restored.uiState.value.stoppedPosition)
@@ -114,8 +107,7 @@ class MiniGameViewModelsTest {
     }
 
     @Test fun telescopeRestartCancelsPreviousFeedbackAndRejectsInvalidInput() = runTest(dispatcher) {
-        val model = TargetStopViewModel(SavedStateHandle(mapOf("zone" to 40)), repository)
-        runCurrent()
+        val model = TargetStopViewModel(SavedStateHandle(mapOf("zone" to 40)))
         model.onAction(TargetStopAction.Stop(Float.NaN))
         assertEquals(0, model.uiState.value.game.round)
         model.onAction(TargetStopAction.Stop(0.5f))
@@ -128,76 +120,13 @@ class MiniGameViewModelsTest {
 
     @Test fun completedTelescopeRestoresWithoutStartingAnotherRound() = runTest(dispatcher) {
         val saved = SavedStateHandle(mapOf("zone" to 40, "round" to 4, "hits" to 4))
-        val model = TargetStopViewModel(saved, repository)
-        runCurrent()
+        val model = TargetStopViewModel(saved)
         model.onAction(TargetStopAction.Stop(0.5f))
-        val restored = TargetStopViewModel(copyOf(saved), repository)
+        val restored = TargetStopViewModel(copyOf(saved))
         advanceUntilIdle()
         assertTrue(restored.uiState.value.game.finished)
         assertEquals(10, restored.uiState.value.game.reward)
         assertEquals(40, restored.uiState.value.game.zoneStart)
-    }
-
-    @Test fun allFiveWrongQuizAnswersStillChargeOnlyAfterLastRound() = runTest(dispatcher) {
-        val saved = SavedStateHandle(mapOf("questions" to intArrayOf(80, 20, 80, 20, 80, 20, 80, 20, 80, 20)))
-        val model = PriceQuizViewModel(saved, repository)
-        runCurrent()
-        repeat(4) {
-            model.onAction(PriceQuizAction.Answer(false))
-            advanceUntilIdle()
-        }
-        assertEquals(0, repository.read()!!.satiety)
-        assertEquals(0, repository.read()!!.fatigue)
-        model.onAction(PriceQuizAction.Answer(false))
-        advanceUntilIdle()
-        assertTrue(model.uiState.value.session.resultReady)
-        assertTrue(model.uiState.value.session.successful)
-        assertEquals(0, model.uiState.value.game.correctAnswers)
-        assertEquals(20, repository.read()!!.satiety)
-        assertEquals(50, repository.read()!!.fatigue)
-        PriceQuizViewModel(copyOf(saved), repository)
-        advanceUntilIdle()
-        assertEquals(50, repository.read()!!.fatigue)
-    }
-
-    @Test fun allFiveTelescopeMissesStillChargeOnlyAfterLastRound() = runTest(dispatcher) {
-        val saved = SavedStateHandle()
-        val model = TargetStopViewModel(saved, repository)
-        runCurrent()
-        repeat(4) {
-            model.onAction(TargetStopAction.Stop(0f))
-            advanceUntilIdle()
-        }
-        assertEquals(0, repository.read()!!.fatigue)
-        model.onAction(TargetStopAction.Stop(0f))
-        advanceUntilIdle()
-        assertTrue(model.uiState.value.session.resultReady)
-        assertTrue(model.uiState.value.session.successful)
-        assertEquals(0, model.uiState.value.game.hits)
-        assertEquals(20, repository.read()!!.satiety)
-        assertEquals(40, repository.read()!!.fatigue)
-        TargetStopViewModel(copyOf(saved), repository)
-        advanceUntilIdle()
-        assertEquals(40, repository.read()!!.fatigue)
-    }
-
-    @Test fun memoryChargesOnceAfterTheLastPair() = runTest(dispatcher) {
-        val saved = SavedStateHandle(mapOf("faces" to intArrayOf(0, 0, 1, 1)))
-        val model = MemoryGameViewModel(saved, repository)
-        runCurrent()
-        model.onAction(MemoryGameAction.Tap(0))
-        model.onAction(MemoryGameAction.Tap(1))
-        advanceUntilIdle()
-        assertEquals(0, repository.read()!!.satiety)
-        model.onAction(MemoryGameAction.Tap(2))
-        model.onAction(MemoryGameAction.Tap(3))
-        advanceUntilIdle()
-        assertTrue(model.uiState.value.session.resultReady)
-        assertEquals(20, repository.read()!!.satiety)
-        assertEquals(30, repository.read()!!.fatigue)
-        MemoryGameViewModel(copyOf(saved), repository)
-        advanceUntilIdle()
-        assertEquals(30, repository.read()!!.fatigue)
     }
 
     private fun copyOf(handle: SavedStateHandle) =
