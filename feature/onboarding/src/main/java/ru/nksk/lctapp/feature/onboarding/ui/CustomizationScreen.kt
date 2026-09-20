@@ -25,6 +25,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusChanged
@@ -97,7 +98,7 @@ fun CustomizationScreen(
             Row(Modifier.fillMaxSize()) {
                 BoxWithConstraints(Modifier.weight(1f).fillMaxHeight()) {
                     Image(painterResource(artwork.background), null,
-                        Modifier.matchParentSize(), contentScale = ContentScale.Crop)
+                        Modifier.matchParentSize().testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
                     CharacterStage(state, artwork,
                         Modifier.size(minOf(maxWidth * .95f, maxHeight * .75f, 520.dp))
                             .align(Alignment.Center), maxCanvas = 520.dp)
@@ -120,7 +121,7 @@ fun CustomizationScreen(
             Column(Modifier.fillMaxSize()) {
                 Box(Modifier.fillMaxWidth()) {
                     Image(painterResource(artwork.background), null,
-                        Modifier.matchParentSize(), contentScale = ContentScale.Crop)
+                        Modifier.matchParentSize().testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
                     Column {
                         CustomizationHeader(onBack, artwork, saving)
                         CharacterStage(state, artwork, Modifier.fillMaxWidth().height(stageHeight))
@@ -157,9 +158,8 @@ private fun CustomizationEditor(
     var actionHeight by remember { mutableStateOf(84.dp) }
     val scroll = rememberScrollState()
     val scope = rememberCoroutineScope()
-    Box(modifier) {
-        Column(Modifier.fillMaxSize().verticalScroll(scroll)
-            .padding(bottom = actionHeight)) {
+    Box(modifier.testTag("customization_editor")) {
+        Column(Modifier.fillMaxSize().padding(bottom = actionHeight).verticalScroll(scroll)) {
             CustomizationFields(state, artwork, onNameChange, onTemperamentChange, onFurChange, saving, nameError)
         }
         CustomizationContinue(artwork, saving, saveFailed, {

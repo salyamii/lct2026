@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
@@ -43,7 +44,7 @@ fun AdventureIntroductionScreen(
             if (maxWidth >= 720.dp) {
                 Row(Modifier.fillMaxSize()) {
                     BoxWithConstraints(Modifier.weight(1f).fillMaxHeight()) {
-                        Image(painterResource(artwork.background), null, Modifier.matchParentSize(), contentScale = ContentScale.Crop)
+                        Image(painterResource(artwork.background), null, Modifier.matchParentSize().testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
                         Image(painterResource(portrait), "Твой спутник готов к приключениям",
                             Modifier.size(minOf(maxWidth * .95f, maxHeight * .75f, 520.dp)).align(Alignment.Center))
                         CustomizationHeader(onBack, artwork, saving = saving, title = "Всё готово!", backDescription = "Назад к аксессуарам")
@@ -55,7 +56,7 @@ fun AdventureIntroductionScreen(
                 val stageHeight = (maxHeight * .27f).coerceIn(110.dp, 280.dp)
                 Column(Modifier.fillMaxSize()) {
                     Box(Modifier.fillMaxWidth()) {
-                        Image(painterResource(artwork.background), null, Modifier.matchParentSize(), contentScale = ContentScale.Crop)
+                        Image(painterResource(artwork.background), null, Modifier.matchParentSize().testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
                         Column {
                             CustomizationHeader(onBack, artwork, saving = saving, title = "Всё готово!", backDescription = "Назад к аксессуарам")
                             Box(Modifier.fillMaxWidth().height(stageHeight), contentAlignment = Alignment.Center) {

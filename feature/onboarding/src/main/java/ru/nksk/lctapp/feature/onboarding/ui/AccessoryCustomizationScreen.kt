@@ -27,6 +27,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -96,7 +97,7 @@ fun AccessoryCustomizationScreen(
             Row(Modifier.fillMaxSize()) {
                 BoxWithConstraints(Modifier.weight(1f).fillMaxHeight()) {
                     Image(painterResource(artwork.background), null,
-                        Modifier.matchParentSize(), contentScale = ContentScale.Crop)
+                        Modifier.matchParentSize().testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
                     Image(painterResource(accessories.portraits.getValue(state.accessory).getValue(state.fur)),
                         "${state.name}: ${state.accessory.label}",
                         Modifier.size(minOf(maxWidth * .95f, maxHeight * .75f, 520.dp))
@@ -117,7 +118,7 @@ fun AccessoryCustomizationScreen(
             Column(Modifier.fillMaxSize()) {
                 Box(Modifier.fillMaxWidth()) {
                     Image(painterResource(artwork.background), null,
-                        Modifier.matchParentSize(), contentScale = ContentScale.Crop)
+                        Modifier.matchParentSize().testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
                     Column {
                         CustomizationHeader(onBack, artwork, saving = saving, title = "Выбор аксессуара",
                             backDescription = "Назад к образу спутника")
@@ -210,7 +211,7 @@ private fun AccessoryCarousel(
     }
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         // Measure both messages so their longest wrapping reserves space before swiping.
-        Box(Modifier.fillMaxWidth().padding(bottom = 4.dp), contentAlignment = Alignment.TopCenter) {
+        Box(Modifier.fillMaxWidth().testTag("accessory_hint").padding(bottom = 4.dp), contentAlignment = Alignment.TopCenter) {
             listOf(
                 true to "Листай, чтобы примерить аксессуар",
                 false to "Этот предмет сейчас недоступен. Ты сможешь получить его во время прохождения.",
@@ -236,7 +237,7 @@ private fun AccessoryCarousel(
             HorizontalPager(
                 state = pager,
                 userScrollEnabled = !saving,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().testTag("accessory_pager"),
                 pageSize = PageSize.Fixed(pageWidth),
                 contentPadding = PaddingValues(horizontal = (maxWidth - pageWidth) / 2),
                 pageSpacing = 8.dp,
