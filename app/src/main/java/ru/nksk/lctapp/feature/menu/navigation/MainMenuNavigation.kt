@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.feature.menu.navigation
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.repeatOnLifecycle
@@ -14,6 +15,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import ru.nksk.lctapp.feature.menu.ui.MainMenuAction
 import ru.nksk.lctapp.feature.menu.ui.MainMenuContent
+import ru.nksk.lctapp.feature.menu.ui.MainMenuLoadState
 import ru.nksk.lctapp.feature.menu.ui.MainMenuViewModel
 
 @Serializable
@@ -27,6 +29,13 @@ fun EntryProviderScope<NavKey>.mainMenuEntry(
         val lifecycle = LocalLifecycleOwner.current.lifecycle
         val viewModel = hiltViewModel<MainMenuViewModel>()
         val state by viewModel.uiState.collectAsStateWithLifecycle()
+        LaunchedEffect(state::class) {
+            when (val current = state) {
+                MainMenuLoadState.Loading -> Log.d("MainMenu", "Loading saved game")
+                is MainMenuLoadState.Ready -> Log.d("MainMenu", "Rendering main menu")
+                is MainMenuLoadState.Error -> Log.e("MainMenu", "Failed to load saved game", current.cause)
+            }
+        }
         LaunchedEffect(viewModel, lifecycle) {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.openDay.collect { onAction(source, MainMenuAction.ContinueDay) }

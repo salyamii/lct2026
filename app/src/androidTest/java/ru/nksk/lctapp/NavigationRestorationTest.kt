@@ -56,7 +56,7 @@ class NavigationRestorationTest {
             label(R.string.menu_goal) to R.string.menu_goal,
             hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility, 100)) to
                 R.string.menu_coins,
-            label(R.string.menu_village) to R.string.menu_village,
+            hasContentDescription(compose.activity.getString(R.string.menu_village)) to R.string.menu_village,
             label(R.string.menu_continue) to R.string.menu_continue,
         )
 

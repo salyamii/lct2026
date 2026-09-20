@@ -75,8 +75,8 @@ class OnboardingJourneyTest {
         compose.waitUntil(10_000) { runBlocking { repository.read() } != null }
         compose.runOnIdle {
             val pet = runBlocking { repository.read() }!!.pet
-            assertEquals("Искорка", pet.customization!!.name)
-            assertEquals(PetFur.Sand, pet.customization!!.fur)
+            assertEquals("Искорка", pet.name)
+            assertEquals(ru.nksk.lctapp.domain.pet.PetColor.SAND, pet.color)
             assertEquals("BANDANA", pet.selectedLookId)
         }
         compose.activityRule.scenario.recreate()

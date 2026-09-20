@@ -56,8 +56,8 @@ class AppStartupViewModelTest {
         model.finishOnboarding()
         advanceUntilIdle()
         assertEquals(AppStartupState.Ready, model.uiState.value)
-        assertEquals(profile, repository.read()!!.pet.customization)
-        assertEquals(PetAge.Cub, repository.read()!!.pet.customization!!.age)
+        assertEquals(profile.toPetState("BANDANA"), repository.read()!!.pet)
+        assertEquals(PetAge.CUB, repository.read()!!.pet.age)
         assertEquals("BANDANA", repository.read()!!.pet.selectedLookId)
         assertNull(repository.read()!!.engine)
         assertEquals(1, repository.initializations)
@@ -188,7 +188,7 @@ class AppStartupViewModelTest {
         intro.finishOnboarding()
         advanceUntilIdle()
         assertEquals("PLAIN", repository.read()!!.pet.selectedLookId)
-        assertEquals("Искорка", repository.read()!!.pet.customization!!.name)
+        assertEquals("Искорка", repository.read()!!.pet.name)
     }
 
     private fun model(repository: GameRepository, drafts: OnboardingDraftRepository = MemoryDrafts()) = AppStartupViewModel(GameSession(

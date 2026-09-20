@@ -16,7 +16,7 @@ class GearUiStateTest {
     @Test fun onlyOwnedOccurrencesAppearAndOrderAndDuplicatesArePreserved() {
         val state = gearUiState(
             listOf(OwnedItem("hat-1", "hat"), OwnedItem("map-2", "map"), OwnedItem("map-1", "map")),
-            catalog,
+            catalog, "Тоша",
         )
         assertEquals(listOf("map-2", "map-1"), state.storyItems.map { it.occurrenceId })
         assertEquals(listOf("hat-1"), state.accessories.map { it.occurrenceId })
@@ -25,20 +25,27 @@ class GearUiStateTest {
     }
 
     @Test fun emptyOwnershipDoesNotShowCatalogOrSelectedLook() {
-        val state = gearUiState(emptyList(), catalog)
+        val state = gearUiState(emptyList(), catalog, "Тоша")
         assertTrue(state.storyItems.isEmpty())
         assertTrue(state.accessories.isEmpty())
     }
 
+    @Test fun itemTemplatesUseTheCurrentPetNameWithoutChangingTheCatalog() {
+        val item = ItemDefinition("map", "Карта", "{petName} отмечает созвездия")
+        val state = gearUiState(listOf(OwnedItem("owned", item.id)), listOf(item), "Тоша")
+        assertEquals("Тоша отмечает созвездия", state.storyItems.single().description)
+        assertEquals("{petName} отмечает созвездия", item.description)
+    }
+
     @Test fun arbitraryAccessoryIdsUseTheirExplicitCategory() {
         val item = ItemDefinition("new-cosmetic", "Брошь", "Звезда", ItemCategory.ACCESSORY)
-        val state = gearUiState(listOf(OwnedItem("owned", item.id)), listOf(item))
+        val state = gearUiState(listOf(OwnedItem("owned", item.id)), listOf(item), "Тоша")
         assertEquals("Брошь", state.accessories.single().name)
         assertNull(state.accessories.single().priceCoins)
     }
 
     @Test(expected = IllegalStateException::class)
     fun missingDefinitionIsAnErrorInsteadOfSilentlyDroppingOwnedItem() {
-        gearUiState(listOf(OwnedItem("owned", "missing")), catalog)
+        gearUiState(listOf(OwnedItem("owned", "missing")), catalog, "Тоша")
     }
 }

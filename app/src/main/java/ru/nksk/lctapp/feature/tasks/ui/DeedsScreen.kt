@@ -81,7 +81,8 @@ fun DeedsScreen(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit,
                         description = "${offer.description}\n${offer.effort}",
                         rewardLabel = offer.reward,
                         deadline = offer.deadline,
-                        scene = painterResource(gameScene(offer.scene)),
+                        scene = gameScene(offer.scene)?.let { painterResource(it) }
+                            ?: androidx.compose.ui.graphics.painter.ColorPainter(DeedColors.Cream),
                         onOpen = { if (!state.busy) onStart(offer.id) },
                     )
                 }
@@ -104,7 +105,7 @@ fun DeedsScreen(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit,
                     )
                     DeedCard(
                         title = stringResource(R.string.deeds_price_title),
-                        description = stringResource(R.string.deeds_price_description),
+                        description = stringResource(R.string.deeds_price_description, state.petName),
                         rewardLabel = stringResource(R.string.deeds_demo_max),
                         scene = painterResource(R.drawable.location_workshop),
                         onOpen = { onOpen(DeedsAction.PriceCheck) },

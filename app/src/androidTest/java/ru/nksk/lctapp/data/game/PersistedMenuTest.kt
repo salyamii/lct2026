@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
 import androidx.room3.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.test.core.app.ApplicationProvider
@@ -25,6 +26,7 @@ import ru.nksk.lctapp.app.navigation.LctNavHost
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
 import ru.nksk.lctapp.data.game.local.GameDatabase
 import ru.nksk.lctapp.domain.game.GameRepository
+import ru.nksk.lctapp.domain.pet.PetAge
 import ru.nksk.lctapp.domain.pet.PetVisualState
 
 @HiltAndroidTest
@@ -53,17 +55,23 @@ class PersistedMenuTest {
         runBlocking {
             games.initializeIfAbsent(initial.copy(
                 economy = initial.economy.copy(balance = 247),
-                pet = initial.pet.copy(selectedLookId = "HAT", visualState = PetVisualState.UPSET),
+                pet = initial.pet.copy(selectedLookId = "HAT", visualState = PetVisualState.UPSET, name = "Тоша"),
             ))
         }
         compose.setContent { LCTAppTheme { LctNavHost() } }
         awaitDescription(R.string.menu_coins_accessibility, 247L)
-        compose.onNode(hasContentDescription(compose.activity.getString(R.string.menu_pet_upset))).assertIsDisplayed()
+        compose.onNode(hasContentDescription(compose.activity.getString(R.string.menu_pet_upset, "Тоша"))).assertIsDisplayed()
+        compose.onNodeWithText("Тоша").assertIsDisplayed()
+        compose.onNodeWithText("Ребёнок").assertDoesNotExist()
         runBlocking {
-            games.update { it.copy(economy = it.economy.copy(balance = 37), pet = it.pet.transitionTo(PetVisualState.NORMAL)) }
+            games.update { it.copy(economy = it.economy.copy(balance = 37),
+                pet = it.pet.transitionTo(PetVisualState.NORMAL).copy(name = "Мика", age = PetAge.TEEN)) }
         }
         awaitDescription(R.string.menu_coins_accessibility, 37L)
-        compose.onNode(hasContentDescription(compose.activity.getString(R.string.menu_pet_hat))).assertIsDisplayed()
+        compose.onNode(hasContentDescription(compose.activity.getString(R.string.menu_pet_hat, "Мика"))).assertIsDisplayed()
+        compose.onNodeWithText("Мика").assertIsDisplayed()
+        compose.onNodeWithText("Подросток").assertDoesNotExist()
+        compose.onNodeWithText("Тоша").assertDoesNotExist()
     }
 
     private fun awaitDescription(resource: Int, amount: Long) {

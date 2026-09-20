@@ -60,7 +60,7 @@ class MainMenuNavigationTest {
             label(R.string.menu_gear) to R.string.gear_title,
             label(R.string.menu_tasks) to R.string.menu_tasks,
             label(R.string.menu_goal) to R.string.menu_goal,
-            label(R.string.menu_village) to R.string.menu_village,
+            hasContentDescription(compose.activity.getString(R.string.menu_village)) to R.string.menu_village,
             label(R.string.menu_continue) to R.string.menu_continue,
         )
 
@@ -85,7 +85,7 @@ class MainMenuNavigationTest {
 
     @Test
     fun destinationAndBackStackSurviveActivityRecreation() {
-        compose.onNodeWithText(compose.activity.getString(R.string.menu_village)).performClick()
+        compose.onNode(hasContentDescription(compose.activity.getString(R.string.menu_village))).performClick()
         compose.onNodeWithText(compose.activity.getString(R.string.navigation_back)).assertIsDisplayed()
 
         compose.activityRule.scenario.recreate()

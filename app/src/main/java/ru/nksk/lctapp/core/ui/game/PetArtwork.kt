@@ -1,0 +1,188 @@
+package ru.nksk.lctapp.core.ui.game
+
+import androidx.annotation.DrawableRes
+import ru.nksk.lctapp.R
+import ru.nksk.lctapp.domain.pet.PetAge
+import ru.nksk.lctapp.domain.pet.PetColor
+
+/** Verified full-canvas variants. All pet screens resolve the same saved age and fur color. */
+internal data class PetArtwork(
+    @param:DrawableRes val plain: Int,
+    @param:DrawableRes val bandana: Int,
+    @param:DrawableRes val backpack: Int,
+    @param:DrawableRes val glasses: Int,
+    @param:DrawableRes val hat: Int,
+    @param:DrawableRes val hungry: Int,
+    @param:DrawableRes val tired: Int,
+    @param:DrawableRes val thinking: Int,
+    @param:DrawableRes val upset: Int,
+    @param:DrawableRes val happy: Int,
+    @param:DrawableRes val sleep: Int,
+)
+
+internal fun petArtwork(age: PetAge, color: PetColor): PetArtwork = when (age) {
+    PetAge.CUB -> when (color) {
+        PetColor.COPPER -> PetArtwork(
+            plain = R.drawable.ryzhik_cub_body_base_no_accessory,
+            bandana = R.drawable.ryzhik_cub_body_accessory_bandana,
+            backpack = R.drawable.ryzhik_cub_body_accessory_backpack,
+            glasses = R.drawable.ryzhik_cub_body_accessory_goggles,
+            hat = R.drawable.ryzhik_cub_body_accessory_hat,
+            hungry = R.drawable.ryzhik_cub_state_hungry_copper,
+            tired = R.drawable.ryzhik_cub_state_tired_copper,
+            thinking = R.drawable.ryzhik_cub_state_thoughtful_copper,
+            upset = R.drawable.ryzhik_cub_state_sad_copper,
+            happy = R.drawable.ryzhik_cub_state_joy_copper,
+            sleep = R.drawable.ryzhik_cub_state_sleep_copper,
+        )
+        PetColor.SAND -> PetArtwork(
+            plain = R.drawable.ryzhik_cub_body_base_sand,
+            bandana = R.drawable.ryzhik_cub_body_accessory_bandana_sand,
+            backpack = R.drawable.ryzhik_cub_body_accessory_backpack_sand,
+            glasses = R.drawable.ryzhik_cub_body_accessory_goggles_sand,
+            hat = R.drawable.ryzhik_cub_body_accessory_hat_sand,
+            hungry = R.drawable.ryzhik_cub_state_hungry_sand,
+            tired = R.drawable.ryzhik_cub_state_tired_sand,
+            thinking = R.drawable.ryzhik_cub_state_thoughtful_sand,
+            upset = R.drawable.ryzhik_cub_state_sad_sand,
+            happy = R.drawable.ryzhik_cub_state_joy_sand,
+            sleep = R.drawable.ryzhik_cub_state_sleep_sand,
+        )
+        PetColor.DARK_RUSSET -> PetArtwork(
+            plain = R.drawable.ryzhik_cub_body_base_dark_russet,
+            bandana = R.drawable.ryzhik_cub_body_accessory_bandana_dark_russet,
+            backpack = R.drawable.ryzhik_cub_body_accessory_backpack_dark_russet,
+            glasses = R.drawable.ryzhik_cub_body_accessory_goggles_dark_russet,
+            hat = R.drawable.ryzhik_cub_body_accessory_hat_dark_russet,
+            hungry = R.drawable.ryzhik_cub_state_hungry_dark_russet,
+            tired = R.drawable.ryzhik_cub_state_tired_dark_russet,
+            thinking = R.drawable.ryzhik_cub_state_thoughtful_dark_russet,
+            upset = R.drawable.ryzhik_cub_state_sad_dark_russet,
+            happy = R.drawable.ryzhik_cub_state_joy_dark_russet,
+            sleep = R.drawable.ryzhik_cub_state_sleep_dark_russet,
+        )
+    }
+    PetAge.TEEN -> when (color) {
+        PetColor.COPPER -> PetArtwork(
+            plain = R.drawable.ryzhik_teen_body_base_no_accessory,
+            bandana = R.drawable.ryzhik_teen_body_accessory_bandana,
+            backpack = R.drawable.ryzhik_teen_body_accessory_backpack,
+            glasses = R.drawable.ryzhik_teen_body_accessory_goggles,
+            hat = R.drawable.ryzhik_teen_body_accessory_hat,
+            hungry = R.drawable.ryzhik_teen_state_hungry_copper,
+            tired = R.drawable.ryzhik_teen_state_tired_copper,
+            thinking = R.drawable.ryzhik_teen_state_thoughtful_copper,
+            upset = R.drawable.ryzhik_teen_state_sad_copper,
+            happy = R.drawable.ryzhik_teen_state_joy_copper,
+            sleep = R.drawable.ryzhik_teen_state_sleep_copper,
+        )
+        PetColor.SAND -> PetArtwork(
+            plain = R.drawable.ryzhik_teen_body_base_sand,
+            bandana = R.drawable.ryzhik_teen_body_accessory_bandana_sand,
+            backpack = R.drawable.ryzhik_teen_body_accessory_backpack_sand,
+            glasses = R.drawable.ryzhik_teen_body_accessory_goggles_sand,
+            hat = R.drawable.ryzhik_teen_body_accessory_hat_sand,
+            hungry = R.drawable.ryzhik_teen_state_hungry_sand,
+            tired = R.drawable.ryzhik_teen_state_tired_sand,
+            thinking = R.drawable.ryzhik_teen_state_thoughtful_sand,
+            upset = R.drawable.ryzhik_teen_state_sad_sand,
+            happy = R.drawable.ryzhik_teen_state_joy_sand,
+            sleep = R.drawable.ryzhik_teen_state_sleep_sand,
+        )
+        PetColor.DARK_RUSSET -> PetArtwork(
+            plain = R.drawable.ryzhik_teen_body_base_dark_russet,
+            bandana = R.drawable.ryzhik_teen_body_accessory_bandana_dark_russet,
+            backpack = R.drawable.ryzhik_teen_body_accessory_backpack_dark_russet,
+            glasses = R.drawable.ryzhik_teen_body_accessory_goggles_dark_russet,
+            hat = R.drawable.ryzhik_teen_body_accessory_hat_dark_russet,
+            hungry = R.drawable.ryzhik_teen_state_hungry_dark_russet,
+            tired = R.drawable.ryzhik_teen_state_tired_dark_russet,
+            thinking = R.drawable.ryzhik_teen_state_thoughtful_dark_russet,
+            upset = R.drawable.ryzhik_teen_state_sad_dark_russet,
+            happy = R.drawable.ryzhik_teen_state_joy_dark_russet,
+            sleep = R.drawable.ryzhik_teen_state_sleep_dark_russet,
+        )
+    }
+    PetAge.ADULT -> when (color) {
+        PetColor.COPPER -> PetArtwork(
+            plain = R.drawable.ryzhik_adult_body_base_no_accessory,
+            bandana = R.drawable.ryzhik_adult_body_accessory_bandana,
+            backpack = R.drawable.ryzhik_adult_body_accessory_backpack,
+            glasses = R.drawable.ryzhik_adult_body_accessory_goggles,
+            hat = R.drawable.ryzhik_adult_body_accessory_hat,
+            hungry = R.drawable.ryzhik_adult_state_hungry_copper,
+            tired = R.drawable.ryzhik_adult_state_tired_copper,
+            thinking = R.drawable.ryzhik_adult_state_thoughtful_copper,
+            upset = R.drawable.ryzhik_adult_state_sad_copper,
+            happy = R.drawable.ryzhik_adult_state_joy_copper,
+            sleep = R.drawable.ryzhik_adult_state_sleep_copper,
+        )
+        PetColor.SAND -> PetArtwork(
+            plain = R.drawable.ryzhik_adult_body_base_sand,
+            bandana = R.drawable.ryzhik_adult_body_accessory_bandana_sand,
+            backpack = R.drawable.ryzhik_adult_body_accessory_backpack_sand,
+            glasses = R.drawable.ryzhik_adult_body_accessory_goggles_sand,
+            hat = R.drawable.ryzhik_adult_body_accessory_hat_sand,
+            hungry = R.drawable.ryzhik_adult_state_hungry_sand,
+            tired = R.drawable.ryzhik_adult_state_tired_sand,
+            thinking = R.drawable.ryzhik_adult_state_thoughtful_sand,
+            upset = R.drawable.ryzhik_adult_state_sad_sand,
+            happy = R.drawable.ryzhik_adult_state_joy_sand,
+            sleep = R.drawable.ryzhik_adult_state_sleep_sand,
+        )
+        PetColor.DARK_RUSSET -> PetArtwork(
+            plain = R.drawable.ryzhik_adult_body_base_dark_russet,
+            bandana = R.drawable.ryzhik_adult_body_accessory_bandana_dark_russet,
+            backpack = R.drawable.ryzhik_adult_body_accessory_backpack_dark_russet,
+            glasses = R.drawable.ryzhik_adult_body_accessory_goggles_dark_russet,
+            hat = R.drawable.ryzhik_adult_body_accessory_hat_dark_russet,
+            hungry = R.drawable.ryzhik_adult_state_hungry_dark_russet,
+            tired = R.drawable.ryzhik_adult_state_tired_dark_russet,
+            thinking = R.drawable.ryzhik_adult_state_thoughtful_dark_russet,
+            upset = R.drawable.ryzhik_adult_state_sad_dark_russet,
+            happy = R.drawable.ryzhik_adult_state_joy_dark_russet,
+            sleep = R.drawable.ryzhik_adult_state_sleep_dark_russet,
+        )
+    }
+    PetAge.SENIOR -> when (color) {
+        PetColor.COPPER -> PetArtwork(
+            plain = R.drawable.ryzhik_senior_body_base_no_accessory,
+            bandana = R.drawable.ryzhik_senior_body_accessory_bandana,
+            backpack = R.drawable.ryzhik_senior_body_accessory_backpack,
+            glasses = R.drawable.ryzhik_senior_body_accessory_goggles,
+            hat = R.drawable.ryzhik_senior_body_accessory_hat,
+            hungry = R.drawable.ryzhik_senior_state_hungry_copper,
+            tired = R.drawable.ryzhik_senior_state_tired_copper,
+            thinking = R.drawable.ryzhik_senior_state_thoughtful_copper,
+            upset = R.drawable.ryzhik_senior_state_sad_copper,
+            happy = R.drawable.ryzhik_senior_state_joy_copper,
+            sleep = R.drawable.ryzhik_senior_state_sleep_copper,
+        )
+        PetColor.SAND -> PetArtwork(
+            plain = R.drawable.ryzhik_senior_body_base_sand,
+            bandana = R.drawable.ryzhik_senior_body_accessory_bandana_sand,
+            backpack = R.drawable.ryzhik_senior_body_accessory_backpack_sand,
+            glasses = R.drawable.ryzhik_senior_body_accessory_goggles_sand,
+            hat = R.drawable.ryzhik_senior_body_accessory_hat_sand,
+            hungry = R.drawable.ryzhik_senior_state_hungry_sand,
+            tired = R.drawable.ryzhik_senior_state_tired_sand,
+            thinking = R.drawable.ryzhik_senior_state_thoughtful_sand,
+            upset = R.drawable.ryzhik_senior_state_sad_sand,
+            happy = R.drawable.ryzhik_senior_state_joy_sand,
+            sleep = R.drawable.ryzhik_senior_state_sleep_sand,
+        )
+        PetColor.DARK_RUSSET -> PetArtwork(
+            plain = R.drawable.ryzhik_senior_body_base_dark_russet,
+            bandana = R.drawable.ryzhik_senior_body_accessory_bandana_dark_russet,
+            backpack = R.drawable.ryzhik_senior_body_accessory_backpack_dark_russet,
+            glasses = R.drawable.ryzhik_senior_body_accessory_goggles_dark_russet,
+            hat = R.drawable.ryzhik_senior_body_accessory_hat_dark_russet,
+            hungry = R.drawable.ryzhik_senior_state_hungry_dark_russet,
+            tired = R.drawable.ryzhik_senior_state_tired_dark_russet,
+            thinking = R.drawable.ryzhik_senior_state_thoughtful_dark_russet,
+            upset = R.drawable.ryzhik_senior_state_sad_dark_russet,
+            happy = R.drawable.ryzhik_senior_state_joy_dark_russet,
+            sleep = R.drawable.ryzhik_senior_state_sleep_dark_russet,
+        )
+    }
+}

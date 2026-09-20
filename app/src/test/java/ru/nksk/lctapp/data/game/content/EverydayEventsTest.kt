@@ -20,7 +20,7 @@ class EverydayEventsTest {
         val plan = catalog.plan(initial)
         assertEquals(4, plan.size)
         assertEquals(plan, catalog.plan(initial))
-        assertEquals(listOf(EventType.STORY, EventType.EARNING, EventType.WANT, EventType.RANDOM),
+        assertEquals(listOf(EventType.EARNING, EventType.WANT, EventType.RANDOM, EventType.EARNING),
             plan.map { id -> catalog.content.events.single { it.id == id }.type })
     }
 
@@ -139,7 +139,7 @@ class EverydayEventsTest {
                 choiceEnergyCosts = mapOf("${catalog.deedPool.first()}:complete" to 2))),
         )
         for (policies in invalid) {
-            try { EventFactory(catalog.content, policies, catalog.meals); fail("Invalid policy accepted") }
+            try { EventFactory(catalog.content, policies, catalog.meals, catalog.goals, catalog.storyCampaign); fail("Invalid policy accepted") }
             catch (_: IllegalArgumentException) { }
         }
     }

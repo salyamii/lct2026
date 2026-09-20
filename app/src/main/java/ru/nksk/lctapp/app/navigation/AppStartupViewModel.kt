@@ -13,6 +13,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import ru.nksk.lctapp.domain.engine.GameSession
 import ru.nksk.lctapp.domain.onboarding.*
+import ru.nksk.lctapp.domain.pet.toPetState
 import ru.nksk.lctapp.domain.pet.PetCustomization
 import ru.nksk.lctapp.domain.pet.PetFur
 import ru.nksk.lctapp.domain.pet.PetState
@@ -203,8 +204,7 @@ internal class AppStartupViewModel @Inject constructor(
             try {
                 writes.withLock {
                     // Profile and accessory commit with the game; startup never replaces an existing save.
-                    session.prepare(PetState(current.draft.accessoryId, PetVisualState.NORMAL,
-                        current.draft.profile.copy(name = current.draft.profile.name.trim())))
+                    session.prepare(current.draft.profile.toPetState(current.draft.accessoryId))
                 }
                 state.value = AppStartupState.Ready
             } catch (cancelled: CancellationException) { throw cancelled }

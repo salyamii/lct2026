@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "72a9dc5565d5834ef02d0c0057106e01",
+    "identityHash": "faf20b53240d76335a72e861845bfa24",
     "entities": [
       {
         "tableName": "GOAL",
@@ -675,7 +675,7 @@
       },
       {
         "tableName": "GAME_STATE",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `visual_state` TEXT NOT NULL, `selected_look` TEXT NOT NULL, `satiety` INTEGER NOT NULL, `fatigue` INTEGER NOT NULL, `balance` INTEGER NOT NULL, `planned_needs` INTEGER NOT NULL, `planned_wants` INTEGER NOT NULL, `planned_savings` INTEGER NOT NULL, `planned_reserve` INTEGER NOT NULL, `current_day_id` TEXT, `next_script_position` INTEGER, `active_event_id` TEXT, `pet_name` TEXT, `pet_temperament` TEXT, `pet_fur` TEXT, `pet_age` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`current_day_id`) REFERENCES `GAME_DAY`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`current_day_id`, `next_script_position`) REFERENCES `DAY_EVENT`(`day_id`, `position`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`active_event_id`) REFERENCES `EVENT`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `visual_state` TEXT NOT NULL, `selected_look` TEXT NOT NULL, `satiety` INTEGER NOT NULL, `fatigue` INTEGER NOT NULL, `balance` INTEGER NOT NULL, `planned_needs` INTEGER NOT NULL, `planned_wants` INTEGER NOT NULL, `planned_savings` INTEGER NOT NULL, `planned_reserve` INTEGER NOT NULL, `current_day_id` TEXT, `next_script_position` INTEGER, `active_event_id` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`current_day_id`) REFERENCES `GAME_DAY`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`current_day_id`, `next_script_position`) REFERENCES `DAY_EVENT`(`day_id`, `position`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`active_event_id`) REFERENCES `EVENT`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
         "fields": [
           {
             "fieldPath": "id",
@@ -750,26 +750,6 @@
           {
             "fieldPath": "activeEventId",
             "columnName": "active_event_id",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "petName",
-            "columnName": "pet_name",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "petTemperament",
-            "columnName": "pet_temperament",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "petFur",
-            "columnName": "pet_fur",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "petAge",
-            "columnName": "pet_age",
             "affinity": "TEXT"
           }
         ],
@@ -1395,59 +1375,68 @@
         ]
       },
       {
-        "tableName": "ONBOARDING_DRAFT",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `temperament` TEXT NOT NULL, `fur` TEXT NOT NULL, `step` TEXT NOT NULL DEFAULT 'PROFILE', `accessory_id` TEXT NOT NULL DEFAULT 'BACKPACK', PRIMARY KEY(`id`))",
+        "tableName": "GOAL_SELECTION",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`game_state_id` TEXT NOT NULL, `goal_id` TEXT NOT NULL, PRIMARY KEY(`game_state_id`), FOREIGN KEY(`game_state_id`) REFERENCES `GAME_STATE`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`goal_id`) REFERENCES `GOAL`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
         "fields": [
           {
-            "fieldPath": "id",
-            "columnName": "id",
+            "fieldPath": "gameStateId",
+            "columnName": "game_state_id",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "name",
-            "columnName": "name",
+            "fieldPath": "goalId",
+            "columnName": "goal_id",
             "affinity": "TEXT",
             "notNull": true
-          },
-          {
-            "fieldPath": "temperament",
-            "columnName": "temperament",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "fur",
-            "columnName": "fur",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "step",
-            "columnName": "step",
-            "affinity": "TEXT",
-            "notNull": true,
-            "defaultValue": "'PROFILE'"
-          },
-          {
-            "fieldPath": "accessoryId",
-            "columnName": "accessory_id",
-            "affinity": "TEXT",
-            "notNull": true,
-            "defaultValue": "'BACKPACK'"
           }
         ],
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "id"
+            "game_state_id"
           ]
-        }
+        },
+        "indices": [
+          {
+            "name": "index_GOAL_SELECTION_goal_id",
+            "unique": false,
+            "columnNames": [
+              "goal_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_GOAL_SELECTION_goal_id` ON `${TABLE_NAME}` (`goal_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "GAME_STATE",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_state_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "GOAL",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "goal_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '72a9dc5565d5834ef02d0c0057106e01')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'faf20b53240d76335a72e861845bfa24')"
     ]
   }
 }

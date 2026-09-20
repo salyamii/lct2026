@@ -18,6 +18,9 @@ data class EventCardCopy(
     val sourceUrl: String,
     val scene: String,
     val character: String?,
+    val variants: List<EventCardVariant> = emptyList(),
+    /** Short past-tense outcomes keyed by the choice actually made, for the day recap. */
+    val summaryByChoiceId: Map<String, String> = emptyMap(),
 )
 
 data class GameCatalog(
@@ -31,22 +34,30 @@ data class GameCatalog(
     val deedPool: List<String>,
     val dailyEventPool: List<String> = emptyList(),
     val oneTimeEventIds: Set<String> = emptySet(),
+    val goals: List<GoalCampaign> = emptyList(),
+    val storyCampaign: StoryCampaign? = null,
 ) {
+    fun storyProgress(state: GameState) = StoryProgress(content, policies, goals, storyCampaign, state)
+
+    // Existing saves keep their current day reference; only a finale changes its chapter.
+    fun dayId(state: GameState): String = state.story.currentDayId ?: storyDayId
+
     /** Temporary deterministic content rotation; the selected plan is persisted by BeginDay. */
     fun plan(state: GameState): List<String> {
         val carried = state.engine?.events.orEmpty().filter {
             it.status == EventStatus.CARRIED || it.status == EventStatus.CARRIED_ACTIVE
-        }.map { it.eventId }
+        }.map { it.eventId }.take(5)
         val introductionCompleted = state.story.decisions.any { decision ->
             content.choices.any { it.id == decision.choiceId && it.eventId == introductionId }
         }
-        val remaining = carried + if (introductionCompleted || introductionId in carried || carried.size >= 5)
-            emptyList() else listOf(introductionId)
+        val storyEvent = if (storyCampaign != null) storyProgress(state).nextEvent(carried.toSet())
+            else introductionId.takeUnless { (goals.isNotEmpty() && goals.selectedGoal(state) == null) || introductionCompleted || it in carried }
+        val remaining = carried + if (carried.size < 5 && storyEvent != null) listOf(storyEvent) else emptyList()
         require(remaining.size <= 5 && deedPool.isNotEmpty())
         val offset = (state.engine?.day ?: 0) * 3L
         val completed = state.story.decisions.map { it.choiceId }.toSet()
         val everyday = dailyEventPool.filter { id ->
-            id !in remaining && (id !in oneTimeEventIds ||
+            id !in remaining && storyProgress(state).eligible(id) && (id !in oneTimeEventIds ||
                 content.choices.none { it.eventId == id && it.id in completed })
         }
         val extras = if (everyday.isEmpty()) emptyList() else List(minOf(2, everyday.size)) {
@@ -55,7 +66,10 @@ data class GameCatalog(
         val slots = (4 - remaining.size).coerceAtLeast(0)
         // Keep an earning opportunity before expenses; carried entries always keep their prefix.
         val fill = mutableListOf<String>()
-        if (slots > 0) fill += deedPool[(offset % deedPool.size).toInt()]
+        val helpfulDeed = storyCampaign?.deedHints?.firstOrNull {
+            goals.selectedGoal(state) != null && storyProgress(state).meets(it.condition)
+        }?.eventId
+        if (slots > 0) fill += helpfulDeed ?: deedPool[(offset % deedPool.size).toInt()]
         fill += extras.take((slots - fill.size).coerceAtLeast(0))
         while (fill.size < slots) fill += deedPool[((offset + fill.size) % deedPool.size).toInt()]
         return remaining + fill
@@ -71,12 +85,13 @@ class GameSession(
 ) {
     private val preparation = Mutex()
     private var prepared = false
-    val engine = GameEngine(games, EventFactory(catalog.content, catalog.policies, catalog.meals), catalog.rules)
+    val engine = GameEngine(games, EventFactory(catalog.content, catalog.policies, catalog.meals, catalog.goals, catalog.storyCampaign), catalog.rules)
 
     suspend fun prepare(pet: PetState? = null) = preparation.withLock {
         if (!prepared) {
             content.install(catalog.content)
             games.initializeIfAbsent(if (pet == null) initial else initial.copy(pet = pet))
+            engine.synchronizeStoryAge()
             prepared = true
         }
     }
@@ -92,14 +107,24 @@ class GameSession(
         return engine.dispatch(request)
     }
 
+    fun selectGoalCommand(state: GameState, goalId: String) = EngineCommand.SelectGoal(goalId,
+        if (state.engine == null) EngineCommand.BeginDay(catalog.dayId(state), catalog.plan(state)) else null)
+
+    private fun awaitsIntroduction(state: GameState): Boolean = catalog.goals.selectedGoal(state)?.let { goal ->
+        state.story.decisions.none { decision -> catalog.content.choices.any {
+            it.id == decision.choiceId && it.eventId == goal.introductionEventId
+        } }
+    } == true
+
     fun advanceCommand(state: GameState): EngineCommand? = when {
         state.engine == null || state.engine.phase == DayPhase.FINISHED ->
             // The first Continue starts a new save; waking after a summary only prepares the day.
-            EngineCommand.BeginDay(catalog.storyDayId, catalog.plan(state), openFirst = state.engine == null)
+            EngineCommand.BeginDay(catalog.dayId(state), catalog.plan(state), openFirst = state.engine == null)
         state.engine.currentEvent != null -> null
         state.engine.energy == 0 -> EngineCommand.FinishDay
         state.engine.phase == DayPhase.READY_TO_END -> EngineCommand.FinishDay
-        engine.blockReason(state, EngineCommand.OpenNextEvent) == BlockReason.MustSleep -> EngineCommand.FinishDay
+        catalog.storyCampaign == null && awaitsIntroduction(state) -> EngineCommand.OpenNextEvent
+        engine.blockReason(state, EngineCommand.OpenNextEvent) in setOf(BlockReason.MustSleep, BlockReason.NoNextEvent) -> EngineCommand.FinishDay
         else -> EngineCommand.OpenNextEvent
     }
 }

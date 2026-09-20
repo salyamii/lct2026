@@ -19,6 +19,12 @@ def sha256(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def catalog_bytes(path):
+    data = path.read_bytes()
+    # Git may check text artwork out with CRLF on Windows. Its canonical bytes use LF.
+    return data.replace(b"\r\n", b"\n") if path.suffix.lower() in (".xml", ".svg") else data
+
+
 def main():
     manifest = json.loads((DOCS / "manifest.json").read_text())
     assets = manifest["assets"]
@@ -28,10 +34,14 @@ def main():
         errors.append("Duplicate catalog resource names")
     by_name = {asset["resource"]: asset for asset in assets}
     for collection in manifest["collections"]:
-        entries = [asset for asset in assets if asset.get("figma", {}).get("collection_id") == collection["id"]]
+        # User-supplied packs have no Figma collection ID; do not group every unlinked asset together.
+        entries = [asset for asset in assets if (
+            asset.get("figma", {}).get("collection_id") == collection["id"]
+            if collection["id"] is not None else asset["category"] == collection["name"]
+        )]
         if len(entries) != collection["expected_assets"]:
             errors.append(f"Incomplete Figma collection {collection['id']}: {len(entries)}/{collection['expected_assets']}")
-        nodes = [asset["figma"]["node_id"] for asset in entries]
+        nodes = [asset["figma"]["node_id"] for asset in entries if asset.get("figma", {}).get("node_id")]
         if len(nodes) != len(set(nodes)):
             errors.append(f"Repeated Figma source in collection {collection['id']}")
     alias_file = ROOT / "app/src/main/res/values/artwork_aliases.xml"
@@ -57,8 +67,8 @@ def main():
             errors.append(f"Missing file: {asset['path']}")
             continue
         if path not in checked:
-            checked[path] = sha256(path.read_bytes())
-        if checked[path] != asset["sha256"] or path.stat().st_size != asset["bytes"]:
+            checked[path] = sha256(catalog_bytes(path))
+        if checked[path] != asset["sha256"] or len(catalog_bytes(path)) != asset["bytes"]:
             errors.append(f"File checksum/size mismatch: {name}")
         if "alias_of" in asset:
             canonical = by_name.get(asset["alias_of"])
@@ -91,7 +101,7 @@ def main():
             if key in asset and not (ROOT / asset[key]).is_file():
                 errors.append(f"Missing {key}: {name}")
         if "source_path" in asset and (ROOT / asset["source_path"]).is_file():
-            if sha256((ROOT / asset["source_path"]).read_bytes()) != asset["source_sha256"]:
+            if sha256(catalog_bytes(ROOT / asset["source_path"])) != asset["source_sha256"]:
                 errors.append(f"Source checksum mismatch: {name}")
 
     catalog_paths = {str(ROOT / a["path"]) for a in assets}

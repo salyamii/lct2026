@@ -5,22 +5,38 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.absoluteOffset
+import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import ru.nksk.lctapp.core.ui.theme.AdventureNight
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
+
+private val MapButtonWidth = 176.dp
+private val MapButtonOverflow = 56.dp
+private val MapButtonHeight = MapButtonWidth * (2f / 3f)
 
 @Composable
 fun MainMenuScreen(
@@ -29,7 +45,12 @@ fun MainMenuScreen(
     modifier: Modifier = Modifier,
 ) {
     val dispatch: (MainMenuAction) -> Unit = { if (!state.busy) onAction(it) }
-    BoxWithConstraints(modifier = modifier.fillMaxSize().background(AdventureNight)) {
+    val density = LocalDensity.current
+    var screenTop by remember { mutableStateOf(0f) }
+    var characterTop by remember { mutableStateOf<Float?>(null) }
+    val characterPosition = Modifier.onGloballyPositioned { characterTop = it.positionInRoot().y }
+    BoxWithConstraints(modifier = modifier.fillMaxSize().clipToBounds().background(AdventureNight)
+        .onGloballyPositioned { screenTop = it.positionInRoot().y }) {
         val viewport = DpSize(maxWidth, maxHeight)
         VillageBackdrop()
         // Only the foreground observes insets: the village extends behind native system bars.
@@ -38,16 +59,17 @@ fun MainMenuScreen(
             val sidePanelWidth = 360.dp.coerceAtMost(maxWidth * 0.52f)
             if (useSideBySide) {
                 Row(
-                    Modifier.fillMaxSize().padding(horizontal = 24.dp),
+                    // Reserve the screen-edge map's visible width beside the scrollable controls.
+                    Modifier.fillMaxSize().absolutePadding(left = 24.dp, right = MapButtonWidth - MapButtonOverflow + 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    CharacterScene(state.pet, Modifier.weight(1f).fillMaxSize())
+                    CharacterScene(state.pet, Modifier.weight(1f).fillMaxSize(), characterPosition)
                     Column(
                         Modifier.width(sidePanelWidth)
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                     ) {
-                        MenuHud(state.coins, state.completedGoals, state.totalGoals, dispatch)
+                        MenuHud(state.pet.name, state.coins, state.completedGoals, state.totalGoals, dispatch, state.goalTitle)
                         MenuActions(dispatch, viewport, state)
                     }
                 }
@@ -55,11 +77,21 @@ fun MainMenuScreen(
                 Column(
                     Modifier.widthIn(max = 480.dp).fillMaxSize().align(Alignment.TopCenter),
                 ) {
-                    MenuHud(state.coins, state.completedGoals, state.totalGoals, dispatch)
-                    CharacterScene(state.pet, Modifier.weight(1f).fillMaxWidth())
+                    MenuHud(state.pet.name, state.coins, state.completedGoals, state.totalGoals, dispatch, state.goalTitle)
+                    CharacterScene(state.pet, Modifier.weight(1f).fillMaxWidth(), characterPosition)
                     MenuActions(dispatch, viewport, state)
                 }
             }
+        }
+        characterTop?.let { top ->
+            // Keep the map above the character's full canvas, including its current scale and offset.
+            val mapTop = (with(density) { (top - screenTop).toDp() } - MapButtonHeight - 8.dp).coerceAtLeast(0.dp)
+            VillageMapButton(
+                onClick = { dispatch(MainMenuAction.Village) },
+                modifier = Modifier.align(AbsoluteAlignment.TopRight)
+                    .absoluteOffset(x = MapButtonOverflow, y = mapTop)
+                    .size(MapButtonWidth, MapButtonHeight),
+            )
         }
     }
 }

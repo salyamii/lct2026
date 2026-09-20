@@ -21,6 +21,7 @@ import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
 import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.pet.PetState
+import ru.nksk.lctapp.domain.pet.PetDefaults
 import ru.nksk.lctapp.domain.pet.PetVisualState
 import ru.nksk.lctapp.feature.menu.ui.MainMenuScreen
 import ru.nksk.lctapp.feature.menu.ui.toMainMenuUiState
@@ -66,10 +67,10 @@ class MainMenuInitialStateTest {
             compose.activity.getString(R.string.menu_coins_accessibility, 3_000_000_000L),
         )).assertIsDisplayed()
         compose.onNode(hasContentDescription(
-            compose.activity.getString(R.string.menu_pet_hungry),
+            compose.activity.getString(R.string.menu_pet_hungry, PetDefaults.FOX_NAME),
         )).assertIsDisplayed()
         compose.onNode(hasContentDescription(
-            compose.activity.getString(R.string.menu_pet_bandana),
+            compose.activity.getString(R.string.menu_pet_bandana, PetDefaults.FOX_NAME),
         )).assertDoesNotExist()
     }
 
@@ -83,7 +84,7 @@ class MainMenuInitialStateTest {
             LCTAppTheme { MainMenuScreen(state = state.value, onAction = {}) }
         }
         compose.onNode(hasContentDescription(
-            compose.activity.getString(R.string.menu_pet_happy),
+            compose.activity.getString(R.string.menu_pet_happy, PetDefaults.FOX_NAME),
         )).assertIsDisplayed()
 
         compose.runOnIdle {
@@ -93,10 +94,10 @@ class MainMenuInitialStateTest {
         }
 
         compose.onNode(hasContentDescription(
-            compose.activity.getString(R.string.menu_pet_hat),
+            compose.activity.getString(R.string.menu_pet_hat, PetDefaults.FOX_NAME),
         )).assertIsDisplayed()
         compose.onNode(hasContentDescription(
-            compose.activity.getString(R.string.menu_pet_happy),
+            compose.activity.getString(R.string.menu_pet_happy, PetDefaults.FOX_NAME),
         )).assertDoesNotExist()
     }
 
@@ -109,10 +110,10 @@ class MainMenuInitialStateTest {
             LCTAppTheme { MainMenuScreen(state = game.toMainMenuUiState(), onAction = {}) }
         }
 
-        compose.onNodeWithText(compose.activity.getString(R.string.menu_pet_needs_help))
+        compose.onNodeWithText(compose.activity.getString(R.string.menu_pet_needs_help, PetDefaults.FOX_NAME))
             .assertIsDisplayed()
         compose.onNode(hasContentDescription(
-            compose.activity.getString(R.string.menu_fox_description),
+            compose.activity.getString(R.string.menu_fox_description, PetDefaults.FOX_NAME),
         )).assertDoesNotExist()
     }
 }

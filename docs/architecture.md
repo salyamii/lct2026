@@ -62,7 +62,7 @@ observes Room through the repository. The entry collects its immutable
 
 Loading, ready and error are explicit presentation states. A failed read or write
 shows retry; it never substitutes the initial fixture for saved data. The current
-fixture is 100 coins, NORMAL/BACKPACK, zero satiety/fatigue and plan allocations,
+fixture is 100 coins, NORMAL/CUB/PLAIN (D-091/D-092), zero satiety/fatigue and plan allocations,
 no story references, decisions or owned items. These values are technical starting
 data, not approved parameter ranges, weekly income or authored story content.
 The catalog starts empty until actual definitions are installed.
@@ -72,7 +72,8 @@ Under MAIN-D-074 the menu shows temporary labels for savings, current goal, even
 and map. Savings display a dash; the shared balance is not presented as savings.
 The former adventure title and zero-of-four fixture counter have been removed. `MainMenuPreviewState` is only
 for previews and UI tests. The loading/error wrapper does not alter menu artwork.
-Normal backpack uses `menu_ryzhik`; other verified mappings use bundled teen art.
+Current artwork uses the saved age and selected look. The cub starts without
+accessories and renders at 80% of the previous menu size (D-092).
 WORRIED and NEEDS_HELP still show their labels without substitute artwork.
 
 Navigation changes do not mutate game data. Route restoration is separate from
@@ -297,6 +298,35 @@ CompleteDeed applies the result-dependent payout and all effects atomically;
 training routes retain their separate demo behavior. Explicit exit restarts the
 board on the next launch while preserving the offer and its original deadline.
 
+## Goal feature — 2026-09-19
+
+`feature/goal` now has an entry-scoped Hilt ViewModel and lifecycle-aware state
+collection. GoalScreen renders immutable values and explicit actions. GameSession
+and GameEngine own selection/purchases; GameRepository persists the full aggregate.
+Both the menu HUD and Goal use the same GoalProgress projection from ownership.
+Room v7 adds the optional selection relation; no percentages or duplicated balance.
+See [first goal](design/first-goal.md).
+
+## Saved pet identity — 2026-09-19
+
+`PetState.name` and `age` join the aggregate in Room v8 (D-090/D-091). Main menu
+artwork is resolved by both saved age and appearance, with CUB as the initial
+stage. Under D-094 the menu name badge is read-only, below the goal; the village
+action is a floating button beside the pet. The domain's RenamePet command remains
+available for a future name-entry flow, including before the first day. Runtime
+text templates use `{petName}` and are rendered from the same observed snapshot.
+See [state access](design/game-state-access.md#имя-и-возраст-питомца) and
+[storage](design/schema-normalization.md#room-v8-имя-и-возраст-питомца--2026-09-19).
+
+## Saved pet palette and story age — 2026-09-20
+
+PetState.color joins the aggregate in Room v12 (D-109); SetPetColor is the domain
+entry point for a future selection UI. core/ui/game/PetArtwork maps saved age
+and color to explicit Android resources, shared by the main menu and sleep.
+StoryAct.petAge defines the authored stage; successful finales atomically update
+pet.age (D-110). GameSession.prepare reconciles older saves through the engine,
+without replacing any other state. UI continues to read the persisted pet.
+
 ## Onboarding module — 2026-09-19
 
 `:app` also depends on the Android library `:feature:onboarding` (ONB-D-001–004).
@@ -310,6 +340,13 @@ No save means onboarding; existing save means the normal navigation host; a read
 error offers retry. Start creates an absent snapshot through session.prepare()
 before opening the menu. Room schema and gameplay are unchanged. There is no
 second completion flag. See [onboarding](design/onboarding.md).
+
+Feature modules resolve their own compile and runtime dependencies. Their constraints use
+the shared version catalog to align Core, Activity, NavigationEvent, Compose Runtime,
+Lifecycle, SavedState and serialization with the versions already selected by app.
+In particular, Navigation 3 selects a newer Compose Runtime than the BOM alone.
+App dependencies alone do not align the libraries' classpaths. These
+constraints apply to existing transitive dependencies without adding unused libraries.
 
 ## Debug overlay — 2026-09-19
 
@@ -325,7 +362,7 @@ independent of app artwork.
 DBG-D-002 adds an explicit reset action. The feature emits a callback; debug app
 wiring starts a private `DebugResetActivity` in `:debug_reset`. Its Hilt ViewModel
 waits for the old main process to stop, then calls the debug-only aggregate reset
-repository. All eight save tables are cleared in one Room transaction, in foreign
+repository. All eleven save tables in Room v12 are cleared in one transaction, in foreign
 key order; immutable content and the database/schema remain. Failure shows retry.
 After commit, the helper starts MainActivity in a fresh task and ends its own
 process. This clears singleton GameSession preparation, ViewModels and saved UI

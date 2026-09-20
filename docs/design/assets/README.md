@@ -17,15 +17,19 @@ age or character without an explicit design decision.
 | Collection | Figma | Artwork entries |
 | --- | --- | --- |
 | MVP poses, colors and standalone equipment | [56:2](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-2) | 20 |
-| Teen runtime layers | [56:65](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-65) | 55 |
-| Cub runtime layers | [87:2](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-2) | 55 |
-| Adult runtime layers | [89:2](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-2) | 55 |
-| Senior runtime layers | [89:185](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-185) | 55 |
+| Teen runtime layers | [56:65](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-65) | 58 |
+| Cub runtime layers | [87:2](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-2) | 58 |
+| Adult runtime layers | [89:2](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-2) | 58 |
+| Senior runtime layers | [89:185](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-185) | 58 |
 | Location originals | [2144:9](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-9) | 14 |
 | NPCs, companion portraits and event objects | Individual links in the catalog | 14 |
 
 The original Assets1, Assets2 and Assets3 links all target `56:2`; that pack is
-imported once. The teen and cub collections were discovered in the same file.
+imported once. The 2026-09-20 sleep additions use the active transparent PNG
+fills at their original 1024 × 1024 size (2× the 512-square Figma frame),
+without trimming or resizing. The manifest records the active image hashes;
+hidden opaque fills and the board background are excluded.
+The teen and cub collections were discovered in the same file.
 The catalog also covers the existing eight menu bitmaps, two vector icons and
 two fonts. Older screen mockups, hidden RAW working layers and presentation
 labels are not runtime artwork and are excluded.

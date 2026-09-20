@@ -13,7 +13,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import ru.nksk.lctapp.app.createInitialGameState
 import ru.nksk.lctapp.data.game.local.GameDatabase
-import ru.nksk.lctapp.data.game.local.MIGRATION_6_7
+import ru.nksk.lctapp.data.game.local.MIGRATION_12_13
 import ru.nksk.lctapp.domain.onboarding.*
 import ru.nksk.lctapp.domain.pet.*
 
@@ -29,22 +29,25 @@ class CustomizationPersistenceTest {
     @After fun cleanup() { context.deleteDatabase(name) }
 
     @Test fun migrationPreservesLegacySaveAndRepeatedItems() = runBlocking {
-        schemas.createDatabase(6).use { connection ->
+        schemas.createDatabase(12).use { connection ->
             connection.execSQL("""
                 INSERT INTO GAME_STATE (id, visual_state, selected_look, satiety, fatigue,
-                    balance, planned_needs, planned_wants, planned_savings, planned_reserve)
-                VALUES ('current', 'HAPPY', 'BACKPACK', 17, 30, 247, 10, 20, 30, 40)
+                    balance, planned_needs, planned_wants, planned_savings, planned_reserve, pet_name, pet_age, pet_color)
+                VALUES ('current', 'HAPPY', 'BACKPACK', 17, 30, 247, 10, 20, 30, 40, 'Искорка', 'ADULT', 'SAND')
             """.trimIndent())
             connection.execSQL("INSERT INTO MINI_GAME_COMPLETION VALUES ('done', 'current')")
             connection.execSQL("INSERT INTO ITEM VALUES ('map', 'Map', 'Description', 'STORY', 15)")
             connection.execSQL("INSERT INTO OWNED_ITEM VALUES ('second', 'current', 0, 'map')")
             connection.execSQL("INSERT INTO OWNED_ITEM VALUES ('first', 'current', 1, 'map')")
         }
-        schemas.runMigrationsAndValidate(7, listOf(MIGRATION_6_7)).close()
+        schemas.runMigrationsAndValidate(13, listOf(MIGRATION_12_13)).close()
         val db = GameDatabase.open(context, name)
         try {
             val saved = RoomGameRepository(db).read()!!
-            assertNull(saved.pet.customization)
+            assertNull(saved.pet.temperament)
+            assertEquals("Искорка", saved.pet.name)
+            assertEquals(PetAge.ADULT, saved.pet.age)
+            assertEquals(PetColor.SAND, saved.pet.color)
             assertEquals(PetVisualState.HAPPY, saved.pet.visualState)
             assertEquals("BACKPACK", saved.pet.selectedLookId)
             assertEquals(247L, saved.economy.balance)
@@ -56,9 +59,9 @@ class CustomizationPersistenceTest {
         } finally { db.close() }
     }
 
-    @Test fun migrationFromEmptyV6CreatesCompleteDraftTable() = runBlocking {
-        schemas.createDatabase(6).close()
-        schemas.runMigrationsAndValidate(7, listOf(MIGRATION_6_7)).use { connection ->
+    @Test fun migrationFromEmptyV12CreatesCompleteDraftTable() = runBlocking {
+        schemas.createDatabase(12).close()
+        schemas.runMigrationsAndValidate(13, listOf(MIGRATION_12_13)).use { connection ->
             connection.execSQL("INSERT INTO ONBOARDING_DRAFT (id, name, temperament, fur) VALUES ('current', 'Искорка', 'Joyful', 'Sand')")
         }
         val db = GameDatabase.open(context, name)
@@ -80,7 +83,7 @@ class CustomizationPersistenceTest {
             assertNull(RoomGameRepository(db).read())
         } finally { db.close() }
         db = GameDatabase.open(context, name)
-        val initial = createInitialGameState().copy(pet = PetState("BANDANA", PetVisualState.NORMAL, profile))
+        val initial = createInitialGameState().copy(pet = profile.toPetState("BANDANA"))
         try {
             assertEquals(OnboardingDraft(profile, OnboardingStep.Introduction, "BANDANA"), RoomOnboardingDraftRepository(db).read())
             RoomGameRepository(db).initializeIfAbsent(initial)
@@ -95,7 +98,7 @@ class CustomizationPersistenceTest {
             val games = RoomGameRepository(db)
             assertEquals(initial, games.read())
             games.update { it.copy(pet = it.pet.transitionTo(PetVisualState.HAPPY)) }
-            assertEquals(profile, games.read()!!.pet.customization)
+            assertEquals(profile.toPetState("BANDANA").transitionTo(PetVisualState.HAPPY), games.read()!!.pet)
         } finally { db.close() }
     }
 
@@ -107,7 +110,7 @@ class CustomizationPersistenceTest {
             val games = RoomGameRepository(db)
             drafts.save(OnboardingDraft(profile, OnboardingStep.Introduction, "BANDANA"))
             val invalid = createInitialGameState().copy(
-                pet = PetState("BANDANA", PetVisualState.NORMAL, profile),
+                pet = profile.toPetState("BANDANA"),
                 ownedItems = listOf(ru.nksk.lctapp.domain.game.OwnedItem("missing", "unknown-item")),
             )
             var failed = false
