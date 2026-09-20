@@ -10483,6 +10483,159 @@
       "source_path": "docs/design/assets/introduction_reserve.svg",
       "source_sha256": "2d8bab9e719fc9a218e0aaeb1721070e84f9a72e70fbf2c2520e1d42150931b5",
       "conversion": "Exact SVG path data, stroke colors, widths and caps copied to VectorDrawable; 30 × 30 viewport preserved."
+    },
+    {
+      "resource": "map_adventure_day",
+      "category": "Generated map background",
+      "path": "app/src/main/res/drawable-nodpi/map_adventure_day.webp",
+      "format": "webp",
+      "width": 853,
+      "height": 1844,
+      "bytes": 2824976,
+      "sha256": "b9432076e3d9ce626df71d9272342ca852fa2fc93755a70e04cfa9026edd3047",
+      "rgba_sha256": "d25e5d2c76517413d9c9b66f8f8db4cf926d64217dcdadd355f3f7283370d649",
+      "alpha_bounds": [
+        0,
+        0,
+        853,
+        1844
+      ],
+      "source_path": "docs/design/assets/sources/map_adventure_day.png",
+      "source_sha256": "ba3393383f0758c874325b6d668438bcee42ca3ede0d02ddf35e3b35c741c5f3",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-09-20",
+        "reference": "User-selected generated concept exec-f2f3ee09-b9bc-4ae0-a547-2e13a311f10f.png; style reference only",
+        "prompt_path": "docs/design/assets/sources/map_adventure_day.md",
+        "figma_source": null
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false
+      }
+    },
+    {
+      "resource": "location_city_evening",
+      "category": "Generated evening locations",
+      "path": "app/src/main/res/drawable-nodpi/location_city_evening.webp",
+      "format": "webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 2064584,
+      "sha256": "c6712043ca1efd24bfb2402d7c02340ab8a87dab7138945519d4ce91fce26720",
+      "rgba_sha256": "c57bbff64ed8ca7e143eb89b3ac250d488436f5aa295fc259d8883256b02d038",
+      "alpha_bounds": [
+        0,
+        0,
+        941,
+        1672
+      ],
+      "source_path": "docs/design/assets/sources/location_city_evening.png",
+      "source_sha256": "11c129523e29975c9f3603dc68aed71714a336aaca7b90d3247fd8b8f054502c",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-09-20",
+        "reference_resource": "location_city",
+        "reference_sha256": "388bd1c32ec9347ad70751b1f44d95639e909b93c81dbef31609454ca7ec7d27",
+        "reference_figma": {
+          "file_key": "bAod1cKtTX9Q8omQ067q3q",
+          "node_id": "2144:68",
+          "node_name": "Город",
+          "collection_id": "2144:9",
+          "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-68"
+        },
+        "prompt_path": "docs/design/assets/sources/location-evenings.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false
+      }
+    },
+    {
+      "resource": "location_gates_evening",
+      "category": "Generated evening locations",
+      "path": "app/src/main/res/drawable-nodpi/location_gates_evening.webp",
+      "format": "webp",
+      "width": 941,
+      "height": 1671,
+      "bytes": 2010506,
+      "sha256": "62372b81f7b13ea43474c8dea5292fe51fa0a28f9c6e3bccb7477d5c6aa754e5",
+      "rgba_sha256": "a597d7e4c4557e6f0978200d0ec08893324b328b5bd991c0faeac5813f1f0a66",
+      "alpha_bounds": [
+        0,
+        0,
+        941,
+        1671
+      ],
+      "source_path": "docs/design/assets/sources/location_gates_evening.png",
+      "source_sha256": "a190a85f067c47e66e1ae071fe61bcd4f113104a62b50d8bae6c96d9b542ac0f",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-09-20",
+        "reference_resource": "location_gates",
+        "reference_sha256": "4d946bb899f3b68d4aaff57d7b77d276db71f9943713028612c0abd69f77d0be",
+        "reference_figma": {
+          "file_key": "bAod1cKtTX9Q8omQ067q3q",
+          "node_id": "2144:89",
+          "node_name": "Ворота",
+          "collection_id": "2144:9",
+          "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-89"
+        },
+        "prompt_path": "docs/design/assets/sources/location-evenings.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false
+      }
+    },
+    {
+      "resource": "location_windmill_evening",
+      "category": "Generated evening locations",
+      "path": "app/src/main/res/drawable-nodpi/location_windmill_evening.webp",
+      "format": "webp",
+      "width": 941,
+      "height": 1672,
+      "bytes": 2038412,
+      "sha256": "8fd480934a244d8f05ec276d997f3d3820ef41d055cd0dcdbd498e822d426052",
+      "rgba_sha256": "91c11c74f1c50bed291dc4da2c511175d4906e3a6deff564646ee2a1bf4ec51c",
+      "alpha_bounds": [
+        0,
+        0,
+        941,
+        1672
+      ],
+      "source_path": "docs/design/assets/sources/location_windmill_evening.png",
+      "source_sha256": "79fd2f0f8d8b2eac5d53cb3130b910a2efe39c99eb1176881bf56d66ead3a637",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-09-20",
+        "reference_resource": "location_windmill",
+        "reference_sha256": "df39c28495317d115c9e65a5c7d63b6f0be4a418a202a7e467182958dfce16fb",
+        "reference_figma": {
+          "file_key": "bAod1cKtTX9Q8omQ067q3q",
+          "node_id": "2144:86",
+          "node_name": "Мельница",
+          "collection_id": "2144:9",
+          "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-86"
+        },
+        "prompt_path": "docs/design/assets/sources/location-evenings.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false
+      }
     }
   ],
   "missing": []

@@ -31,12 +31,12 @@ import kotlin.math.roundToInt
 import ru.nksk.lctapp.R
 
 @Composable
-internal fun VillageBackdrop() {
+internal fun VillageBackdrop(@androidx.annotation.DrawableRes artworkRes: Int) {
     BoxWithConstraints(Modifier.fillMaxSize()) {
         // Figma crops a 483 × 858 image at x=-72 in a 390 × 844 frame.
         val scale = maxOf(maxWidth / 390.dp, maxHeight / 844.dp)
         Image(
-            painter = painterResource(R.drawable.menu_village),
+            painter = painterResource(artworkRes),
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier.align(Alignment.Center)
@@ -77,8 +77,8 @@ internal fun CharacterScene(
 }
 
 @Composable
-internal fun FrostedVillagePanel(viewport: DpSize, position: Offset, modifier: Modifier) {
-    val village = ImageBitmap.imageResource(R.drawable.menu_village)
+internal fun FrostedVillagePanel(viewport: DpSize, position: Offset, modifier: Modifier, @androidx.annotation.DrawableRes artworkRes: Int) {
+    val village = ImageBitmap.imageResource(artworkRes)
     Box(modifier) {
         Box(
             Modifier.matchParentSize().blur(9.dp).drawWithCache {

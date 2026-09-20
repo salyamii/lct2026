@@ -48,8 +48,8 @@ import ru.nksk.lctapp.feature.tasks.navigation.DeedGame
 import ru.nksk.lctapp.feature.tasks.navigation.deedGameEntry
 import ru.nksk.lctapp.feature.tasks.navigation.tasksEntry
 import ru.nksk.lctapp.feature.tasks.ui.DeedsAction
-import ru.nksk.lctapp.feature.village.navigation.Village
-import ru.nksk.lctapp.feature.village.navigation.villageEntry
+import ru.nksk.lctapp.feature.map.navigation.GameMap
+import ru.nksk.lctapp.feature.map.navigation.mapEntry
 
 private const val NavigationTransitionMillis = 160
 
@@ -114,7 +114,7 @@ fun LctNavHost(
                             MainMenuAction.Tasks -> Tasks
                             MainMenuAction.Goal -> Goal
                             MainMenuAction.Coins -> Coins
-                            MainMenuAction.Village -> Village
+                            MainMenuAction.Village -> GameMap
                             MainMenuAction.ContinueDay, MainMenuAction.Feed -> Day
                         },
                     )
@@ -134,7 +134,7 @@ fun LctNavHost(
                 )
                 goalEntry(onBack = navigator::goBack)
                 coinsEntry(onBack = navigator::goBack)
-                villageEntry(onBack = navigator::goBack)
+                mapEntry(onBack = navigator::goBack, onSelected = navigator::returnToRoot)
                 dayEntry(onBack = navigator::goBack, onFinished = finish,
                     onGame = { source, id -> navigator.replace(source, DeedGame(id)) })
                 deedGameEntry(onFinished = finish)

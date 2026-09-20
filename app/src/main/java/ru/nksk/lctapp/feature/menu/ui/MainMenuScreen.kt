@@ -53,7 +53,7 @@ fun MainMenuScreen(
     BoxWithConstraints(modifier = modifier.fillMaxSize().clipToBounds().background(AdventureNight)
         .onGloballyPositioned { screenTop = it.positionInRoot().y }) {
         val viewport = DpSize(maxWidth, maxHeight)
-        VillageBackdrop()
+        VillageBackdrop(state.backgroundRes)
         // Only the foreground observes insets: the village extends behind native system bars.
         BoxWithConstraints(Modifier.fillMaxSize().safeDrawingPadding().padding(vertical = 12.dp)) {
             val useSideBySide = maxWidth > maxHeight || maxWidth >= 840.dp

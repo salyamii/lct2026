@@ -368,3 +368,10 @@ After commit, the helper starts MainActivity in a fresh task and ends its own
 process. This clears singleton GameSession preparation, ViewModels and saved UI
 state, restoring the normal first-launch flow. The helper, manifest entry and reset repository are
 all in `app/src/debug`; the release build includes none of them.
+
+## Карта — 2026-09-20
+
+Фича `feature/map` подключена вместо заглушки `feature/village`. Контроллер
+локации и интерфейс доступности находятся в `:core:game`, DI — в app/di,
+resolver иллюстраций — в core/ui/location. Room v14 сохраняет локацию и явное
+освещение; усталость на них не влияет. См. [карту](design/map-preview.md).

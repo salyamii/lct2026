@@ -192,3 +192,11 @@ internal val MIGRATION_12_13 = object : Migration(12, 13) {
         """.trimIndent())
     }
 }
+
+/** Preserve the whole save; previous menu always showed the daytime city. */
+internal val MIGRATION_13_14 = object : Migration(13, 14) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE GAME_STATE ADD COLUMN location_id TEXT NOT NULL DEFAULT 'city'")
+        connection.execSQL("ALTER TABLE GAME_STATE ADD COLUMN location_lighting TEXT NOT NULL DEFAULT 'DAY'")
+    }
+}

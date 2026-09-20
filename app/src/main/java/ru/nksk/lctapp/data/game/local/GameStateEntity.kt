@@ -38,4 +38,6 @@ internal data class GameStateEntity(
     @ColumnInfo(name = "pet_name", defaultValue = "'Рыжик'") val petName: String,
     @ColumnInfo(name = "pet_age", defaultValue = "'CUB'") val petAge: String,
     @ColumnInfo(name = "pet_color", defaultValue = "'COPPER'") val petColor: String,
+    @ColumnInfo(name = "location_id", defaultValue = "'city'") val locationId: String = "city",
+    @ColumnInfo(name = "location_lighting", defaultValue = "'DAY'") val locationLighting: String = "DAY",
 )

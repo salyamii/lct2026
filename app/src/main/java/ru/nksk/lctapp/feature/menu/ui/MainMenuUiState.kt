@@ -6,6 +6,7 @@ import ru.nksk.lctapp.domain.pet.PetVisualState
 /** Values rendered by the menu; this is presentation state, not a saved game. */
 data class MainMenuUiState(
     val coins: Long,
+    val backgroundRes: Int = ru.nksk.lctapp.R.drawable.menu_village,
     val completedGoals: Int,
     val totalGoals: Int,
     val pet: MainMenuPetUiState,

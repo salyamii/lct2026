@@ -641,3 +641,10 @@ selected_look, без выдачи предметов инвентаря. Поз
 [Экспорт v13](../../app/schemas/ru.nksk.lctapp.data.game.local.GameDatabase/13.json).
 CustomizationPersistenceTest покрывает 12→13, повторные предметы, восстановление
 черновика и атомарный откат; в этой проверке тесты только компилируются.
+
+## Room v14: фон выбранной локации
+
+`GAME_STATE` дополнен `location_id TEXT NOT NULL DEFAULT 'city'` и
+`location_lighting TEXT NOT NULL DEFAULT 'DAY'`. Ключ `id` определяет оба
+атрибута; место не определяет освещение, зависимости от усталости нет.
+НФБК сохраняется; новых таблиц или денормализации нет.

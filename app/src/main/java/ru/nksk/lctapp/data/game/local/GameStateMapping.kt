@@ -2,6 +2,7 @@ package ru.nksk.lctapp.data.game.local
 
 import ru.nksk.lctapp.domain.economy.BudgetPlan
 import ru.nksk.lctapp.domain.economy.EconomyState
+import ru.nksk.lctapp.domain.location.*
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.game.OwnedItem
 import ru.nksk.lctapp.domain.pet.PetState
@@ -28,6 +29,8 @@ internal fun GameState.toEntity() = GameStateEntity(
     petName = pet.name,
     petAge = StoredCodes.petAge.encode(pet.age),
     petColor = StoredCodes.petColor.encode(pet.color),
+    locationId = locationScene.location.code,
+    locationLighting = StoredCodes.locationLighting.encode(locationScene.lighting),
 )
 
 internal fun GameStateEntity.toDomain(
@@ -41,4 +44,5 @@ internal fun GameStateEntity.toDomain(
     satiety = satiety,
     fatigue = fatigue,
     ownedItems = items.map { OwnedItem(it.id, it.itemId) },
+    locationScene = LocationScene(GameLocation.fromCode(locationId), StoredCodes.locationLighting.decode(locationLighting)),
 )

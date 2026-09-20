@@ -66,8 +66,8 @@ class MainMenuNavigationTest {
 
         actions.forEach { (action, title) ->
             compose.onNode(action and hasClickAction()).assertIsDisplayed().performClick()
-            compose.onNodeWithText(when (title) { R.string.menu_continue -> "Смотритель просит помочь"; R.string.menu_goal -> "Большие цели"; else -> compose.activity.getString(title) }).assertIsDisplayed()
-            compose.onNodeWithText(compose.activity.getString(R.string.navigation_back))
+            compose.onNodeWithText(when (title) { R.string.menu_village -> "Карта приключений"; R.string.menu_continue -> "Смотритель просит помочь"; R.string.menu_goal -> "Большие цели"; else -> compose.activity.getString(title) }).assertIsDisplayed()
+            compose.onNode(hasText(compose.activity.getString(R.string.navigation_back)) or hasContentDescription(compose.activity.getString(R.string.navigation_back)))
                 .assertIsDisplayed().performClick()
             assertMenuIsDisplayed()
         }
@@ -76,7 +76,7 @@ class MainMenuNavigationTest {
     @Test
     fun systemBackReturnsToMenu() {
         compose.onNodeWithText(compose.activity.getString(R.string.menu_tasks)).performClick()
-        compose.onNodeWithText(compose.activity.getString(R.string.navigation_back)).assertIsDisplayed()
+        compose.onNode(hasText(compose.activity.getString(R.string.navigation_back)) or hasContentDescription(compose.activity.getString(R.string.navigation_back))).assertIsDisplayed()
 
         compose.runOnIdle { compose.activity.onBackPressedDispatcher.onBackPressed() }
 
@@ -86,12 +86,12 @@ class MainMenuNavigationTest {
     @Test
     fun destinationAndBackStackSurviveActivityRecreation() {
         compose.onNode(hasContentDescription(compose.activity.getString(R.string.menu_village))).performClick()
-        compose.onNodeWithText(compose.activity.getString(R.string.navigation_back)).assertIsDisplayed()
+        compose.onNode(hasText(compose.activity.getString(R.string.navigation_back)) or hasContentDescription(compose.activity.getString(R.string.navigation_back))).assertIsDisplayed()
 
         compose.activityRule.scenario.recreate()
 
-        compose.onNodeWithText(compose.activity.getString(R.string.menu_village)).assertIsDisplayed()
-        compose.onNodeWithText(compose.activity.getString(R.string.navigation_back))
+        compose.onNodeWithText("Карта приключений").assertIsDisplayed()
+        compose.onNode(hasText(compose.activity.getString(R.string.navigation_back)) or hasContentDescription(compose.activity.getString(R.string.navigation_back)))
             .assertIsDisplayed().performClick()
         assertMenuIsDisplayed()
     }

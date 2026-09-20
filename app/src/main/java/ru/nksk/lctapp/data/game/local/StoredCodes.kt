@@ -19,6 +19,10 @@ internal class StoredCode<T : Any>(private val values: Map<T, String>) {
 }
 
 internal object StoredCodes {
+    val locationLighting = StoredCode(mapOf(
+        ru.nksk.lctapp.domain.location.LocationLighting.DAY to "DAY",
+        ru.nksk.lctapp.domain.location.LocationLighting.EVENING to "EVENING",
+    ))
     val petFur = StoredCode(mapOf(
         PetFur.Copper to "Copper", PetFur.Sand to "Sand", PetFur.Russet to "Russet",
     ))
