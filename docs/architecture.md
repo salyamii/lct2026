@@ -341,6 +341,13 @@ error offers retry. Start creates an absent snapshot through session.prepare()
 before opening the menu. Room schema and gameplay are unchanged. There is no
 second completion flag. See [onboarding](design/onboarding.md).
 
+Feature modules resolve their own compile and runtime dependencies. Their constraints use
+the shared version catalog to align Core, Activity, NavigationEvent, Compose Runtime,
+Lifecycle, SavedState and serialization with the versions already selected by app.
+In particular, Navigation 3 selects a newer Compose Runtime than the BOM alone.
+App dependencies alone do not align the libraries' classpaths. These
+constraints apply to existing transitive dependencies without adding unused libraries.
+
 ## Debug overlay — 2026-09-19
 
 `:feature:debug` is an Android Compose library included by `:app` only through
