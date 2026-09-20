@@ -326,3 +326,38 @@ and color to explicit Android resources, shared by the main menu and sleep.
 StoryAct.petAge defines the authored stage; successful finales atomically update
 pet.age (D-110). GameSession.prepare reconciles older saves through the engine,
 without replacing any other state. UI continues to read the persisted pet.
+
+## Onboarding module — 2026-09-19
+
+`:app` also depends on the Android library `:feature:onboarding` (ONB-D-001–004).
+The library owns selection UiState/StateFlow, its Hilt ViewModel, a lifecycle-aware
+entry and the screen. It has no dependency on app, game data or other features.
+App supplies drawable IDs and existing fonts through OnboardingArtwork, keeping
+the catalogued artwork beside existing app resources without duplicating it.
+
+`app/navigation/AppStartupViewModel` reads GameSession before composing the menu.
+No save means onboarding; existing save means the normal navigation host; a read
+error offers retry. Start creates an absent snapshot through session.prepare()
+before opening the menu. Room schema and gameplay are unchanged. There is no
+second completion flag. See [onboarding](design/onboarding.md).
+
+## Debug overlay — 2026-09-19
+
+`:feature:debug` is an Android Compose library included by `:app` only through
+`debugImplementation` (DBG-D-001). The debug source set supplies `AppDebugOverlay`;
+the release source set supplies an empty composable with no feature dependency.
+The app composition hosts it outside the game theme and navigation. A non-focusable
+popup exposes the Debug button; only the button handles taps, leaving the app
+interactive. It opens a standard Material 3 bottom sheet. Sheet visibility is local
+saveable UI state, independent of navigation. The default Material styling is
+independent of app artwork.
+
+DBG-D-002 adds an explicit reset action. The feature emits a callback; debug app
+wiring starts a private `DebugResetActivity` in `:debug_reset`. Its Hilt ViewModel
+waits for the old main process to stop, then calls the debug-only aggregate reset
+repository. All eleven save tables in Room v12 are cleared in one transaction, in foreign
+key order; immutable content and the database/schema remain. Failure shows retry.
+After commit, the helper starts MainActivity in a fresh task and ends its own
+process. This clears singleton GameSession preparation, ViewModels and saved UI
+state, restoring the normal first-launch flow. The helper, manifest entry and reset repository are
+all in `app/src/debug`; the release build includes none of them.

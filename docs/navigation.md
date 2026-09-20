@@ -218,3 +218,14 @@ state only. Back from details returns to the list; the explicit main-screen
 button leaves the feature. System Back follows the same detail/list behavior.
 Select/Buy carry catalog IDs into GameSession commands; no game snapshot or
 progress flag is added to route keys. [Campaign rules](design/campaign-choice.md).
+
+## First-launch gate — 2026-09-19
+
+LctApp checks AppStartupViewModel before composing LctNavHost. The onboarding
+entry belongs to `:feature:onboarding` and receives an app-owned start callback.
+It is outside the game back stack: completion exposes LctNavHost with MainMenu
+as root, so Back cannot return to character selection. Existing saves skip
+onboarding and restore the normal Navigation 3 stack. No existing route IDs
+change. The feature uses SavedStateHandle for the local fox selection only;
+persistent completion is the existence of the aggregate save. Read errors do
+not substitute a new game. See [onboarding](design/onboarding.md).

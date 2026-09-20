@@ -2,7 +2,7 @@
 
 See [the guide](README.md) for storage and usage rules and [the manifest](manifest.json) for checksums and export details.
 
-309 logical assets; 3 exact drawable aliases; 0 unavailable exports.
+313 logical assets; 3 exact drawable aliases; 0 unavailable exports.
 
 Locations retain their original 941 × 1672 pixels. Earlier character and equipment layers retain a 512 × 512 canvas; new sleep originals retain 1024 × 1024 (2× Figma frame). Names are artwork labels, not gameplay rules.
 
@@ -404,3 +404,21 @@ Already tracked mini-game artwork, indexed without changing its bytes. Original 
 | `R.drawable.deed_pair_star_plate` | 920 × 1120 | [deed_pair_star_plate.webp](../../../app/src/main/res/drawable-nodpi/deed_pair_star_plate.webp) |
 | `R.drawable.deed_pair_tag` | 920 × 1120 | [deed_pair_tag.webp](../../../app/src/main/res/drawable-nodpi/deed_pair_tag.webp) |
 | `R.drawable.deed_pair_telescope` | 920 × 1120 | [deed_pair_telescope.webp](../../../app/src/main/res/drawable-nodpi/deed_pair_telescope.webp) |
+
+## Onboarding
+
+| Android resource | Canvas | File | Figma source |
+| --- | --- | --- | --- |
+| `R.drawable.onboarding_castle` | 941 × 1672 | [onboarding_castle.webp](../../../app/src/main/res/drawable-nodpi/onboarding_castle.webp) | [2199:753](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2199-753) |
+| `R.drawable.onboarding_ryzhik` | 1024 × 1024 | [onboarding_ryzhik.webp](../../../app/src/main/res/drawable-nodpi/onboarding_ryzhik.webp) | [2186:722](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2186-722) |
+| `R.drawable.onboarding_tiko_unavailable` | 1024 × 1024 | [onboarding_tiko_unavailable.webp](../../../app/src/main/res/drawable-nodpi/onboarding_tiko_unavailable.webp) | [2186:720](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2186-720) |
+
+The owl reuses `npc_luna_body` with a zero-saturation presentation filter.
+Its full 1024 × 1024 canvas and pose match node 2186:718. The axolotl pose
+differs from `npc_tiko_body`; the fox has no backpack, unlike `menu_ryzhik`.
+
+## Debug tooling
+
+| Resource | Canvas | Android resource | Source |
+| --- | --- | --- | --- |
+| `debug_settings` | 24 × 24 | [Vector XML](../../../feature/debug/src/main/res/drawable/debug_settings.xml) | [Original SVG](debug_settings.svg), locally authored geometric gear, no Figma node; identical path and evenOdd fill. Displayed at 20 dp on a gray 40 dp button. |
