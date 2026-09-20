@@ -103,9 +103,11 @@ internal class MainMenuViewModel @Inject constructor(
             try {
                 val result = command?.let { session.dispatch(EngineRequest(UUID.randomUUID().toString(), game.engine?.revision, it)) }
                 when (result) {
-                    is EngineResult.Applied -> { saved = result.state; freeMealRequested = false }
+                    is EngineResult.Applied -> {
+                        saved = result.state; freeMealRequested = false
+                    }
                     is EngineResult.Blocked -> {
-                        notice = result.reason.playerMessage()
+                        notice = result.reason.playerMessage(game.pet.name)
                         if (command is EngineCommand.Feed && result.reason is BlockReason.InsufficientMoney) {
                             freeMealRequested = true
                             notice = null
@@ -115,20 +117,24 @@ internal class MainMenuViewModel @Inject constructor(
                 }
                 if (open) dayNavigation.send(Unit)
             } catch (cancelled: CancellationException) { throw cancelled
-            } catch (_: Exception) { notice = "Не удалось сохранить действие. Попробуй ещё раз." }
+            } catch (_: Exception) {
+                notice = "Не удалось сохранить действие. Попробуй ещё раз."
+            }
             finally { busy = false; render() }
         }
     }
 
     private fun render() {
         saved?.let {
-            val menu = it.toMainMenuUiState(session.catalog.rules.fullEnergy)
+            val menu = it.toMainMenuUiState(session.catalog.rules.fullEnergy, session.catalog)
             mutableState.value = MainMenuLoadState.Ready(menu.copy(
                 busy = busy, notice = notice, mealPrice = session.catalog.meals.first { meal -> meal.price > 0 }.price,
                 showFreeMeal = offersFreeMeal(it),
-                continueLabel = if (it.engine?.phase != DayPhase.FINISHED &&
-                    session.advanceCommand(it) == EngineCommand.FinishDay) "Закончить день"
-                    else menu.continueLabel,
+                continueLabel = if (it.engine?.phase == DayPhase.FINISHED) menu.continueLabel else when (session.advanceCommand(it)) {
+                    EngineCommand.FinishDay -> "Закончить день"
+                    EngineCommand.OpenNextEvent -> "Продолжить день"
+                    else -> menu.continueLabel
+                },
             ))
         }
     }

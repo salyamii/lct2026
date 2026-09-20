@@ -1,5 +1,7 @@
 package ru.nksk.lctapp.feature.tasks.ui
 
+import ru.nksk.lctapp.domain.pet.renderPetText
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -100,7 +102,7 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
                         exits.send(if (command is EngineCommand.CompleteDeed)
                             deedCompletionMessage(result.state.economy.balance - game.economy.balance) else null)
                     }
-                    is EngineResult.Blocked -> message = result.reason.playerMessage()
+                    is EngineResult.Blocked -> message = result.reason.playerMessage(game.pet.name)
                 }
             } catch (cancelled: CancellationException) { throw cancelled
             } catch (_: Exception) { message = "Не удалось сохранить результат. Нажми «Повторить»."
@@ -139,7 +141,7 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
                 DeedGameKind.COMPARISON -> DeedGameType.COMPARISON
                 DeedGameKind.PRECISION -> DeedGameType.PRECISION
             },
-            presentation = DeedGamePresentation(event.title, reward, pending == null && message == null),
+            presentation = DeedGamePresentation(renderPetText(event.title, game.pet.name), reward, pending == null && message == null),
             message = message,
             canRetry = pending != null,
         )

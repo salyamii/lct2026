@@ -1,5 +1,5 @@
 <resources>
-    <string name="menu_pet_look_unavailable">Изображение выбранного образа пока недоступно</string>
+    <string name="menu_pet_look_unavailable">%1$s: изображение выбранного образа пока недоступно</string>
     <string name="app_name">LCT App</string>
     <string name="game_loading">Загружаем игру…</string>
     <string name="game_load_error">Не удалось загрузить игру. Попробуйте ещё раз.</string>

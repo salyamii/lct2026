@@ -62,7 +62,7 @@ observes Room through the repository. The entry collects its immutable
 
 Loading, ready and error are explicit presentation states. A failed read or write
 shows retry; it never substitutes the initial fixture for saved data. The current
-fixture is 100 coins, NORMAL/BACKPACK, zero satiety/fatigue and plan allocations,
+fixture is 100 coins, NORMAL/CUB/PLAIN (D-091/D-092), zero satiety/fatigue and plan allocations,
 no story references, decisions or owned items. These values are technical starting
 data, not approved parameter ranges, weekly income or authored story content.
 The catalog starts empty until actual definitions are installed.
@@ -72,7 +72,8 @@ Under MAIN-D-074 the menu shows temporary labels for savings, current goal, even
 and map. Savings display a dash; the shared balance is not presented as savings.
 The former adventure title and zero-of-four fixture counter have been removed. `MainMenuPreviewState` is only
 for previews and UI tests. The loading/error wrapper does not alter menu artwork.
-Normal backpack uses `menu_ryzhik`; other verified mappings use bundled teen art.
+Current artwork uses the saved age and selected look. The cub starts without
+accessories and renders at 80% of the previous menu size (D-092).
 WORRIED and NEEDS_HELP still show their labels without substitute artwork.
 
 Navigation changes do not mutate game data. Route restoration is separate from
@@ -296,3 +297,32 @@ Real deeds reuse the three mini-game mechanics with catalog assignments.
 CompleteDeed applies the result-dependent payout and all effects atomically;
 training routes retain their separate demo behavior. Explicit exit restarts the
 board on the next launch while preserving the offer and its original deadline.
+
+## Goal feature — 2026-09-19
+
+`feature/goal` now has an entry-scoped Hilt ViewModel and lifecycle-aware state
+collection. GoalScreen renders immutable values and explicit actions. GameSession
+and GameEngine own selection/purchases; GameRepository persists the full aggregate.
+Both the menu HUD and Goal use the same GoalProgress projection from ownership.
+Room v7 adds the optional selection relation; no percentages or duplicated balance.
+See [first goal](design/first-goal.md).
+
+## Saved pet identity — 2026-09-19
+
+`PetState.name` and `age` join the aggregate in Room v8 (D-090/D-091). Main menu
+artwork is resolved by both saved age and appearance, with CUB as the initial
+stage. Under D-094 the menu name badge is read-only, below the goal; the village
+action is a floating button beside the pet. The domain's RenamePet command remains
+available for a future name-entry flow, including before the first day. Runtime
+text templates use `{petName}` and are rendered from the same observed snapshot.
+See [state access](design/game-state-access.md#имя-и-возраст-питомца) and
+[storage](design/schema-normalization.md#room-v8-имя-и-возраст-питомца--2026-09-19).
+
+## Saved pet palette and story age — 2026-09-20
+
+PetState.color joins the aggregate in Room v12 (D-109); SetPetColor is the domain
+entry point for a future selection UI. core/ui/game/PetArtwork maps saved age
+and color to explicit Android resources, shared by the main menu and sleep.
+StoryAct.petAge defines the authored stage; successful finales atomically update
+pet.age (D-110). GameSession.prepare reconciles older saves through the engine,
+without replacing any other state. UI continues to read the persisted pet.

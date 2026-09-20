@@ -2,9 +2,9 @@
 
 See [the guide](README.md) for storage and usage rules and [the manifest](manifest.json) for checksums and export details.
 
-280 logical assets; 3 exact drawable aliases; 0 unavailable exports.
+309 logical assets; 3 exact drawable aliases; 0 unavailable exports.
 
-Locations retain their original 941 × 1672 pixels. Character and equipment layers retain a 512 × 512 canvas. Names are artwork labels, not gameplay rules.
+Locations retain their original 941 × 1672 pixels. Earlier character and equipment layers retain a 512 × 512 canvas; new sleep originals retain 1024 × 1024 (2× Figma frame). Names are artwork labels, not gameplay rules.
 
 ## Existing menu
 
@@ -18,6 +18,17 @@ Locations retain their original 941 × 1672 pixels. Character and equipment laye
 | `R.drawable.menu_ryzhik` | 1024 × 1024 | [menu_ryzhik.webp](../../../app/src/main/res/drawable-nodpi/menu_ryzhik.webp) | [2101:30](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2101-30) |
 | `R.drawable.menu_tasks` | 1254 × 1254 | [menu_tasks.webp](../../../app/src/main/res/drawable-nodpi/menu_tasks.webp) | [2214:36](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2214-36) |
 | `R.drawable.menu_village` | 941 × 1672 | [menu_village.webp](../../../app/src/main/res/drawable-nodpi/menu_village.webp) | [2186:732](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2186-732) |
+
+## User-supplied menu artwork — 2026-09-20
+
+| Android resource | Canvas | File | Source |
+| --- | --- | --- | --- |
+| `R.drawable.menu_map` | 1536 × 1024 | [menu_map.webp](../../../app/src/main/res/drawable-nodpi/menu_map.webp) | Supplied by the user; original design/Figma node not provided |
+
+Moved byte-for-byte from `res/drawable` to `res/drawable-nodpi`. The supplied
+WebP already uses lossy VP8 with alpha; it was not recompressed or edited.
+The full canvas and transparency are retained. The screen clips the illustration
+at its right edge as requested in D-095; the source file is not cropped.
 
 ## Ryzhik mvp
 
@@ -357,3 +368,39 @@ Figma node-id не передан — уточнить при следующей
 | `R.drawable.deed_goods_lantern` | 256 × 256 | [deed_goods_lantern.webp](../../../app/src/main/res/drawable-nodpi/deed_goods_lantern.webp) |
 | `R.drawable.deed_star_plate_back` | 600 × 800 | [deed_star_plate_back.webp](../../../app/src/main/res/drawable-nodpi/deed_star_plate_back.webp) |
 | `R.drawable.deed_gear_marker` | 128 × 128 | [deed_gear_marker.webp](../../../app/src/main/res/drawable-nodpi/deed_gear_marker.webp) |
+
+
+## Sleeping foxes — 2026-09-20
+
+Twelve verified active transparent image fills: four ages × three colors. Full original 1024 × 1024 canvases map to Figma’s 512 × 512 frames at 2×; all transparent margins are preserved. Presentation resolves the saved PetState age and color through the shared PetArtwork adapter (D-109/D-110). New and migrated saves default to copper.
+
+| Android resource | Canvas | File | Figma source |
+| --- | --- | --- | --- |
+| `R.drawable.ryzhik_teen_state_sleep_copper` | 1024 × 1024 | [ryzhik_teen_state_sleep_copper.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_teen_state_sleep_copper.webp) | [2736:5](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-5) |
+| `R.drawable.ryzhik_teen_state_sleep_sand` | 1024 × 1024 | [ryzhik_teen_state_sleep_sand.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_teen_state_sleep_sand.webp) | [2736:9](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-9) |
+| `R.drawable.ryzhik_teen_state_sleep_dark_russet` | 1024 × 1024 | [ryzhik_teen_state_sleep_dark_russet.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_teen_state_sleep_dark_russet.webp) | [2736:13](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-13) |
+| `R.drawable.ryzhik_cub_state_sleep_copper` | 1024 × 1024 | [ryzhik_cub_state_sleep_copper.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_cub_state_sleep_copper.webp) | [2736:19](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-19) |
+| `R.drawable.ryzhik_cub_state_sleep_sand` | 1024 × 1024 | [ryzhik_cub_state_sleep_sand.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_cub_state_sleep_sand.webp) | [2736:23](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-23) |
+| `R.drawable.ryzhik_cub_state_sleep_dark_russet` | 1024 × 1024 | [ryzhik_cub_state_sleep_dark_russet.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_cub_state_sleep_dark_russet.webp) | [2736:27](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-27) |
+| `R.drawable.ryzhik_adult_state_sleep_copper` | 1024 × 1024 | [ryzhik_adult_state_sleep_copper.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_adult_state_sleep_copper.webp) | [2736:33](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-33) |
+| `R.drawable.ryzhik_adult_state_sleep_sand` | 1024 × 1024 | [ryzhik_adult_state_sleep_sand.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_adult_state_sleep_sand.webp) | [2736:37](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-37) |
+| `R.drawable.ryzhik_adult_state_sleep_dark_russet` | 1024 × 1024 | [ryzhik_adult_state_sleep_dark_russet.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_adult_state_sleep_dark_russet.webp) | [2736:41](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-41) |
+| `R.drawable.ryzhik_senior_state_sleep_copper` | 1024 × 1024 | [ryzhik_senior_state_sleep_copper.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_senior_state_sleep_copper.webp) | [2736:47](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-47) |
+| `R.drawable.ryzhik_senior_state_sleep_sand` | 1024 × 1024 | [ryzhik_senior_state_sleep_sand.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_senior_state_sleep_sand.webp) | [2736:51](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-51) |
+| `R.drawable.ryzhik_senior_state_sleep_dark_russet` | 1024 × 1024 | [ryzhik_senior_state_sleep_dark_russet.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_senior_state_sleep_dark_russet.webp) | [2736:55](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-55) |
+
+
+## Existing deed pairs
+
+Already tracked mini-game artwork, indexed without changing its bytes. Original Figma node/export provenance is not recorded.
+
+| Android resource | Canvas | File |
+| --- | --- | --- |
+| `R.drawable.deed_pair_armillary` | 920 × 1120 | [deed_pair_armillary.webp](../../../app/src/main/res/drawable-nodpi/deed_pair_armillary.webp) |
+| `R.drawable.deed_pair_astrolabe` | 920 × 1120 | [deed_pair_astrolabe.webp](../../../app/src/main/res/drawable-nodpi/deed_pair_astrolabe.webp) |
+| `R.drawable.deed_pair_backpack` | 920 × 1120 | [deed_pair_backpack.webp](../../../app/src/main/res/drawable-nodpi/deed_pair_backpack.webp) |
+| `R.drawable.deed_pair_key` | 920 × 1120 | [deed_pair_key.webp](../../../app/src/main/res/drawable-nodpi/deed_pair_key.webp) |
+| `R.drawable.deed_pair_loupe` | 920 × 1120 | [deed_pair_loupe.webp](../../../app/src/main/res/drawable-nodpi/deed_pair_loupe.webp) |
+| `R.drawable.deed_pair_star_plate` | 920 × 1120 | [deed_pair_star_plate.webp](../../../app/src/main/res/drawable-nodpi/deed_pair_star_plate.webp) |
+| `R.drawable.deed_pair_tag` | 920 × 1120 | [deed_pair_tag.webp](../../../app/src/main/res/drawable-nodpi/deed_pair_tag.webp) |
+| `R.drawable.deed_pair_telescope` | 920 × 1120 | [deed_pair_telescope.webp](../../../app/src/main/res/drawable-nodpi/deed_pair_telescope.webp) |

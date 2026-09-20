@@ -7,7 +7,7 @@
     <string name="deeds_price_title">Сверка счетов</string>
     <string name="deeds_target_title">Настрой телескоп</string>
     <string name="deeds_star_description">Смотритель свалил находки в кучу. Открывай пласты и собирай пары одинаковых предметов.</string>
-    <string name="deeds_price_description">Гонец привёз счета из деревенской лавки. Помоги Рыжику найти самую дорогую покупку.</string>
+    <string name="deeds_price_description">Гонец привёз счета из деревенской лавки. %1$s ищет самую дорогую покупку. Помоги сравнить суммы.</string>
     <string name="deeds_target_description">Ловящий сигнал уходит в сторону. Останови бегунок в зелёной зоне — и башня снова найдёт звезду.</string>
     <string name="deeds_start">Взяться за дело</string>
     <string name="deeds_again">Сделать ещё раз</string>

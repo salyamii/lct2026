@@ -8,6 +8,30 @@ import androidx.room3.Update
 /** No REPLACE or parent deletion: references and unrelated rows must survive writes. */
 @Dao
 internal interface GameStateDao {
+    @Query("SELECT * FROM DAY_JOURNAL WHERE game_state_id = :gameId ORDER BY position")
+    suspend fun readDayJournal(gameId: String): List<DayJournalEntity>
+
+    @Insert suspend fun insertDayJournal(rows: List<DayJournalEntity>)
+
+    @Query("DELETE FROM DAY_JOURNAL WHERE game_state_id = :gameId")
+    suspend fun deleteDayJournal(gameId: String)
+
+    @Query("SELECT project.* FROM COMPLETED_GOAL_PROJECT project INNER JOIN PLAYER_DECISION decision ON decision.id = project.decision_id WHERE decision.game_state_id = :gameId ORDER BY decision.position")
+    suspend fun readCompletedGoalProjects(gameId: String): List<CompletedGoalProjectEntity>
+
+    @Insert suspend fun insertCompletedGoalProjects(rows: List<CompletedGoalProjectEntity>)
+
+    @Query("DELETE FROM COMPLETED_GOAL_PROJECT WHERE decision_id IN (SELECT id FROM PLAYER_DECISION WHERE game_state_id = :gameId)")
+    suspend fun deleteCompletedGoalProjects(gameId: String)
+
+    @Query("SELECT * FROM GOAL_SELECTION WHERE game_state_id = :gameId")
+    suspend fun readGoalSelection(gameId: String): GoalSelectionEntity?
+
+    @Insert suspend fun insertGoalSelection(row: GoalSelectionEntity)
+
+    @Query("DELETE FROM GOAL_SELECTION WHERE game_state_id = :gameId")
+    suspend fun deleteGoalSelection(gameId: String)
+
     @Query("SELECT * FROM MINI_GAME_COMPLETION WHERE game_state_id = :gameId")
     suspend fun readMiniGameCompletions(gameId: String): List<MiniGameCompletionEntity>
 

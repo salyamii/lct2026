@@ -105,3 +105,75 @@ internal val MIGRATION_5_6 = object : Migration(5, 6) {
         connection.execSQL("ALTER TABLE GAME_STATE DROP COLUMN hunger")
     }
 }
+
+/** Add an optional goal choice without changing any existing game or reference rows. */
+internal val MIGRATION_6_7 = object : Migration(6, 7) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS GOAL_SELECTION (
+                game_state_id TEXT NOT NULL PRIMARY KEY,
+                goal_id TEXT NOT NULL,
+                FOREIGN KEY(game_state_id) REFERENCES GAME_STATE(id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+                FOREIGN KEY(goal_id) REFERENCES GOAL(id) ON UPDATE NO ACTION ON DELETE NO ACTION
+            )
+        """.trimIndent())
+        connection.execSQL("CREATE INDEX IF NOT EXISTS index_GOAL_SELECTION_goal_id ON GOAL_SELECTION(goal_id)")
+    }
+}
+
+/** Prior saves had no name or age: correct the old hardcoded teen artwork without resetting progress. */
+internal val MIGRATION_7_8 = object : Migration(7, 8) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE GAME_STATE ADD COLUMN pet_name TEXT NOT NULL DEFAULT 'Рыжик'")
+        connection.execSQL("ALTER TABLE GAME_STATE ADD COLUMN pet_age TEXT NOT NULL DEFAULT 'CUB'")
+    }
+}
+
+/** Adopt D-092 for the former cub starter look; keep owned gear and all gameplay progress. */
+internal val MIGRATION_8_9 = object : Migration(8, 9) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("UPDATE GAME_STATE SET selected_look = 'PLAIN' WHERE pet_age = 'CUB' AND selected_look = 'BACKPACK'")
+    }
+}
+
+/** Preserve every v9 row; previous builds could not finish a goal's story chapter. */
+internal val MIGRATION_9_10 = object : Migration(9, 10) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS COMPLETED_GOAL_PROJECT (
+                decision_id TEXT NOT NULL PRIMARY KEY,
+                goal_id TEXT NOT NULL,
+                FOREIGN KEY(decision_id) REFERENCES PLAYER_DECISION(id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+                FOREIGN KEY(goal_id) REFERENCES GOAL(id) ON UPDATE NO ACTION ON DELETE NO ACTION
+            )
+        """.trimIndent())
+        connection.execSQL("CREATE INDEX IF NOT EXISTS index_COMPLETED_GOAL_PROJECT_goal_id ON COMPLETED_GOAL_PROJECT(goal_id)")
+    }
+}
+
+/** Earlier spending cannot be reconstructed reliably; leave its journal empty, preserve the save. */
+internal val MIGRATION_10_11 = object : Migration(10, 11) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE ENGINE_STATE ADD COLUMN opening_energy INTEGER")
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS DAY_JOURNAL (
+                id TEXT NOT NULL PRIMARY KEY,
+                game_state_id TEXT NOT NULL,
+                position INTEGER NOT NULL,
+                kind TEXT NOT NULL,
+                source_id TEXT NOT NULL,
+                money_delta INTEGER NOT NULL,
+                energy_delta INTEGER NOT NULL,
+                FOREIGN KEY(game_state_id) REFERENCES ENGINE_STATE(game_state_id) ON UPDATE NO ACTION ON DELETE NO ACTION
+            )
+        """.trimIndent())
+        connection.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_DAY_JOURNAL_game_state_id_position ON DAY_JOURNAL(game_state_id, position)")
+    }
+}
+
+/** Before color selection all displayed foxes used copper. Preserve every existing field and row. */
+internal val MIGRATION_11_12 = object : Migration(11, 12) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE GAME_STATE ADD COLUMN pet_color TEXT NOT NULL DEFAULT 'COPPER'")
+    }
+}

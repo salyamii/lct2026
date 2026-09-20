@@ -19,7 +19,7 @@ internal fun bundledGameCatalog(): GameCatalog {
             title = "Смотритель просит помочь",
             body = "Перед отплытием нужно пересчитать ящики и подтянуть крепления у лодки. Небольшое дело — и немного монет.",
             action = "Выполнить · +8", reward = 8L, effort = 1,
-            card = EventCardCopy("Короткое дело", "+8 монет", "Рыжик немного устанет", "Не сейчас", "Короткое дело · Причал", "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2163-2", "pier", "caretaker"),
+            card = EventCardCopy("Короткое дело", "+8 монет", "{petName} немного устанет", "Не сейчас", "Короткое дело · Причал", "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2163-2", "pier", "caretaker"),
         ),
         Entry(
             id = "figma-2163-43-v1", type = EventType.EARNING,
@@ -142,7 +142,7 @@ internal fun bundledGameCatalog(): GameCatalog {
         ),
         storyDayId = day, introductionId = entries.first().id,
         deedPool = entries.filter { it.type == EventType.EARNING }.map { it.id },
-    ).withEverydayEvents()
+    ).withEverydayEvents().withFirstGoal().withGoalProjects().withStoryCampaign().withDayRecapCopy()
 }
 
 private data class Entry(

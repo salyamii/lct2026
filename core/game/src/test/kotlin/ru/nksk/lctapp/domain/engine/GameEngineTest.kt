@@ -15,6 +15,7 @@ import ru.nksk.lctapp.domain.economy.EconomyState
 import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.game.OwnedItem
+import ru.nksk.lctapp.domain.pet.PetColor
 import ru.nksk.lctapp.domain.pet.PetState
 import ru.nksk.lctapp.domain.pet.PetVisualState
 import ru.nksk.lctapp.domain.story.StoryState
@@ -24,6 +25,155 @@ import ru.nksk.lctapp.domain.minigame.PriceQuizState
 import ru.nksk.lctapp.domain.minigame.TargetStopState
 
 class GameEngineTest {
+    @Test fun recapRecoversActualCompletedChoicesFromOldSavesAndExcludesOffersAndCarriedWork() = runTest {
+        val f = Fixture(energy = 1)
+        f.begin(listOf("large", "quiet", "small", "lore"))
+        f.apply(EngineCommand.OpenNextEvent)
+        f.apply(EngineCommand.DismissDeedProposal(f.day.currentEvent!!.id))
+        f.completeOne()
+        f.apply(EngineCommand.OpenNextEvent)
+        val offered = f.day.deeds.last().id
+        f.ack()
+        f.apply(EngineCommand.StartDeed(offered))
+        f.choose()
+        f.ack()
+        f.apply(EngineCommand.Feed("basic"))
+        f.apply(EngineCommand.FinishDay)
+        // Older games have all decisions and occurrences, even when receipts are absent.
+        f.repo.update { it.copy(engine = it.engine!!.copy(journal = emptyList())) }
+        val before = f.state
+        val summary = f.newEngine().daySummary(before)!!
+        assertEquals(listOf("quiet-choice", "small-choice"), summary.completedDecisions.map { it.choiceId })
+        assertTrue(summary.completedLoreEventIds.isEmpty())
+        assertEquals(before, f.state)
+    }
+
+    @Test fun journalKeepsRepeatedMealsAndResetsOnlyWhenTheNextDayBegins() = runTest {
+        val f = Fixture()
+        f.begin()
+        f.apply(EngineCommand.Feed("basic"))
+        val secondMeal = f.request(EngineCommand.Feed("basic"))
+        assertTrue(f.engine.dispatch(secondMeal) is EngineResult.Applied)
+        assertEquals(EngineResult.Blocked(BlockReason.StaleRevision), f.engine.dispatch(secondMeal))
+        assertEquals(listOf(-4L, -4L), f.day.journal.map { it.moneyDelta })
+        assertEquals(2, f.day.journal.map { it.id }.distinct().size)
+        f.completePlan()
+        f.apply(EngineCommand.FinishDay)
+        assertEquals(f.day.journal, f.engine.daySummary(f.state)!!.journal)
+        assertEquals(-8L, f.state.economy.balance - f.day.openingBalance)
+        f.begin()
+        assertTrue(f.day.journal.isEmpty())
+        assertEquals(92L, f.day.openingBalance)
+        assertEquals(5, f.day.openingEnergy)
+    }
+
+    @Test fun journalKeepsOpposingStartCostAndRewardEvenWhenTheNetChangeIsZero() = runTest {
+        for (timing in EffectTiming.entries) {
+            val f = Fixture()
+            val content = f.content.copy(events = f.content.events.map {
+                if (it.id == "reward") it.copy(moneyDeltaOnStart = -7) else it
+            })
+            val engine = GameEngine(f.repo, EventFactory(content,
+                f.policies + ("reward" to EventPolicy(0, startEffectsTiming = timing)), emptyList()), f.rules)
+            f.begin(listOf("reward", "quiet", "quiet", "quiet"))
+            assertTrue(engine.dispatch(f.request(EngineCommand.OpenNextEvent)) is EngineResult.Applied)
+            val id = f.day.currentEvent!!.id
+            if (timing == EffectTiming.OPEN) {
+                assertTrue(engine.dispatch(f.request(EngineCommand.PauseEvent(id))) is EngineResult.Applied)
+                assertTrue(engine.dispatch(f.request(EngineCommand.OpenNextEvent)) is EngineResult.Applied)
+            }
+            assertTrue(engine.dispatch(f.request(EngineCommand.CompleteEvent(id, "reward-choice"))) is EngineResult.Applied)
+            assertEquals(100L, f.state.economy.balance)
+            assertEquals(listOf(-7L, 7L), f.day.journal.map { it.moneyDelta })
+            assertEquals(listOf(DayJournalKind.EVENT_START, DayJournalKind.EVENT_CHOICE), f.day.journal.map { it.kind })
+        }
+    }
+
+    @Test fun restingFromAnActiveCardCommitsCarryAtomicallyAndResumesOnlyOnContinue() = runTest {
+        val f = Fixture()
+        val plan = listOf("lore", "quiet", "quiet", "small")
+        f.begin(plan)
+        f.apply(EngineCommand.OpenNextEvent)
+        f.apply(EngineCommand.Feed("basic"))
+        f.repo.update { it.copy(engine = it.engine!!.copy(energy = 0)) }
+        val before = f.state
+        val occurrence = f.day.currentEvent!!
+        val request = f.request(EngineCommand.FinishDayFromEvent(occurrence.id))
+
+        f.repo.failCommit = true
+        try { f.engine.dispatch(request); fail("Storage failure must propagate") } catch (_: IOException) { }
+        assertEquals(before, f.state)
+        f.repo.failCommit = false
+        assertTrue(f.engine.dispatch(request) is EngineResult.Applied)
+        assertEquals(DayPhase.FINISHED, f.day.phase)
+        assertNull(f.day.currentEvent)
+        assertNull(f.state.story.activeEventId)
+        assertEquals(before.economy, f.state.economy)
+        assertEquals(before.story.decisions, f.state.story.decisions)
+        assertEquals(before.engine!!.steps, f.day.steps)
+        assertEquals(before.engine!!.revision + 1, f.day.revision)
+        assertEquals(before.engine!!.events.map { it.id }, f.day.events.map { it.id })
+        assertEquals(listOf(EventStatus.CARRIED_ACTIVE, EventStatus.CARRIED, EventStatus.CARRIED, EventStatus.CARRIED),
+            f.day.events.map { it.status })
+        assertTrue(f.engine.daySummary(f.state)!!.completedLoreEventIds.isEmpty())
+        assertEquals(EngineResult.Blocked(BlockReason.StaleRevision), f.engine.dispatch(request))
+
+        f.begin(plan)
+        assertEquals(5, f.day.energy)
+        assertNull(f.day.currentEvent)
+        assertEquals(EventStatus.PAUSED, f.day.events.first().status)
+        f.apply(EngineCommand.OpenNextEvent)
+        assertEquals(occurrence.id, f.day.currentEvent!!.id)
+        f.choose()
+        assertEquals(1, f.state.story.decisions.size)
+    }
+
+    @Test fun restingFromADeedProposalRequiresFoodAndKeepsItsOriginalDeadline() = runTest {
+        val f = Fixture(energy = 1)
+        f.begin(listOf("large", "quiet", "quiet", "quiet"))
+        f.apply(EngineCommand.OpenNextEvent)
+        val proposal = f.day.currentEvent!!
+        val offer = f.day.deeds.single()
+        val command = EngineCommand.FinishDayFromEvent(proposal.id)
+        val unfed = f.state
+        assertEquals(BlockReason.MustEat, f.blocked(command))
+        assertEquals(unfed, f.state)
+        f.apply(EngineCommand.Feed("basic"))
+        val before = f.state
+        f.apply(command)
+        assertEquals(DayPhase.FINISHED, f.day.phase)
+        assertEquals(offer, f.day.deeds.single())
+        assertEquals(EventStatus.COMPLETED, f.day.events.first().status)
+        assertTrue(f.day.events.drop(1).all { it.status == EventStatus.CARRIED })
+        assertEquals(before.economy, f.state.economy)
+        assertEquals(1, f.day.steps)
+        assertEquals(1, f.day.energy)
+        assertTrue(f.state.story.decisions.isEmpty())
+
+        f.begin(listOf("quiet", "quiet", "quiet", "small"))
+        assertEquals(offer, f.engine.availableDeeds(f.state).single())
+        assertEquals(3, offer.expiresDay)
+        assertFalse(f.day.events.any { it.id == proposal.id })
+        assertEquals(0, f.day.steps)
+        assertNull(f.day.currentEvent)
+    }
+
+    @Test fun restFromCardRejectsWrongIdentityViableActionAndCompletedResults() = runTest {
+        val f = Fixture()
+        f.begin(listOf("lore", "quiet", "quiet", "quiet"))
+        f.apply(EngineCommand.OpenNextEvent)
+        val command = EngineCommand.FinishDayFromEvent(f.day.currentEvent!!.id)
+        val before = f.state
+        assertEquals(BlockReason.InvalidEventAction, f.blocked(EngineCommand.FinishDayFromEvent("another-card")))
+        assertEquals(BlockReason.UnfinishedEvents, f.blocked(command))
+        assertEquals(before, f.state)
+        f.choose()
+        f.repo.update { it.copy(engine = it.engine!!.copy(energy = 0, ateToday = true)) }
+        val completed = f.state
+        assertEquals(BlockReason.InvalidEventAction, f.blocked(command))
+        assertEquals(completed, f.state)
+    }
+
     @Test fun realDeedRequiresItsGameAndCommitsTheReducedRewardOnlyOnce() = runTest {
         val f = Fixture(deedKind = DeedGameKind.COMPARISON)
         f.begin(listOf("small", "quiet", "quiet", "quiet"))
@@ -44,6 +194,8 @@ class GameEngineTest {
         f.repo.failCommit = false
         f.apply(command)
         assertEquals(106L, f.state.economy.balance)
+        assertEquals(6L, f.day.journal.single { it.kind == DayJournalKind.DEED }.moneyDelta)
+        assertEquals(-1, f.day.journal.single { it.kind == DayJournalKind.DEED }.energyDelta)
         assertEquals(4, f.day.energy)
         assertEquals(2, f.day.steps)
         assertTrue(f.day.deeds.single().completed)
@@ -167,6 +319,7 @@ class GameEngineTest {
         val request = f.request(EngineCommand.BeginDay("day", List(4) { "quiet" }))
         assertTrue(engine.dispatch(request) is EngineResult.Applied)
         assertEquals(balance + 100, f.state.economy.balance)
+        assertEquals(100L, f.day.journal.single { it.kind == DayJournalKind.WEEKLY_INCOME }.moneyDelta)
         assertEquals(EngineResult.Blocked(BlockReason.StaleRevision), engine.dispatch(request))
     }
 
@@ -391,6 +544,67 @@ class GameEngineTest {
         try { EventFactory(changed, f.policies, emptyList()); fail() } catch (_: IllegalArgumentException) { }
         val forbidden = f.content.copy(choiceItemEffects = listOf(ChoiceItemEffect("gift", "lore-choice", 0, "rope", ItemOperation.ADD)))
         try { EventFactory(forbidden, f.policies, emptyList()); fail() } catch (_: IllegalArgumentException) { }
+    }
+
+    @Test fun namingBeforeTheFirstDayOnlyChangesTheNameAndRejectsStaleEditors() = runTest {
+        val f = Fixture()
+        val before = f.state
+        f.apply(EngineCommand.RenamePet("  Тоша  ", before.pet.name))
+        assertEquals(before.copy(pet = before.pet.copy(name = "Тоша")), f.state)
+        assertNull(f.state.engine)
+        assertEquals(BlockReason.StaleRevision, f.blocked(EngineCommand.RenamePet("Лис", before.pet.name)))
+        assertEquals("Тоша", f.state.pet.name)
+    }
+
+    @Test fun renamingDoesNotCompleteTheActiveEventOrChangeAnyGameplayValues() = runTest {
+        val f = Fixture()
+        f.begin()
+        f.apply(EngineCommand.OpenNextEvent)
+        val before = f.state
+        val request = f.request(EngineCommand.RenamePet("Тоша", before.pet.name))
+        assertTrue(f.engine.dispatch(request) is EngineResult.Applied)
+        assertEquals(before.copy(pet = before.pet.copy(name = "Тоша"),
+            engine = before.engine!!.copy(revision = before.engine.revision + 1)), f.state)
+        assertEquals(EngineResult.Blocked(BlockReason.StaleRevision), f.engine.dispatch(request))
+    }
+
+    @Test fun invalidNameOrCommitFailurePreservesTheWholeSnapshot() = runTest {
+        val f = Fixture()
+        val before = f.state
+        for (invalid in listOf("   ", "Тоша\nЛис", "Тоша\u2028Лис")) {
+            assertEquals(BlockReason.InvalidPetName, f.blocked(EngineCommand.RenamePet(invalid, before.pet.name)))
+            assertEquals(before, f.state)
+        }
+        f.repo.failCommit = true
+        try {
+            f.apply(EngineCommand.RenamePet("Тоша", before.pet.name))
+            fail("Failed commit must propagate")
+        } catch (_: IOException) { }
+        assertEquals(before, f.state)
+    }
+
+    @Test fun colorSelectionBeforeDayAndDuringEventOnlyChangesColorAndRejectsStaleWrites() = runTest {
+        val f = Fixture()
+        val initial = f.state
+        f.apply(EngineCommand.SetPetColor(PetColor.SAND, initial.pet.color))
+        assertEquals(initial.copy(pet = initial.pet.copy(color = PetColor.SAND)), f.state)
+        val chosen = f.state
+        assertEquals(BlockReason.StaleRevision, f.blocked(EngineCommand.SetPetColor(
+            PetColor.DARK_RUSSET, initial.pet.color)))
+        assertEquals(chosen, f.state)
+        f.begin()
+        f.apply(EngineCommand.OpenNextEvent)
+        val before = f.state
+        val request = f.request(EngineCommand.SetPetColor(PetColor.DARK_RUSSET, before.pet.color))
+        assertTrue(f.engine.dispatch(request) is EngineResult.Applied)
+        val after = before.copy(pet = before.pet.copy(color = PetColor.DARK_RUSSET),
+            engine = before.engine!!.copy(revision = before.engine.revision + 1))
+        assertEquals(after, f.state)
+        assertEquals(EngineResult.Blocked(BlockReason.StaleRevision), f.engine.dispatch(request))
+        f.repo.failCommit = true
+        try { f.apply(EngineCommand.SetPetColor(initial.pet.color, after.pet.color)); fail("Expected commit error") }
+        catch (_: IOException) { }
+        assertEquals(after, f.state)
     }
 
     private class Fixture(energy: Int = 5, hunger: Int = 50, balance: Long = 100, deedKind: DeedGameKind? = null) {

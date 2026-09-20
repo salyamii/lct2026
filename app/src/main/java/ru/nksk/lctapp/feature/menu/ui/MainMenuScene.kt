@@ -49,12 +49,17 @@ internal fun VillageBackdrop() {
 }
 
 @Composable
-internal fun CharacterScene(pet: MainMenuPetUiState, modifier: Modifier = Modifier) {
-    BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
-        val characterSize = minOf(maxWidth * 1.18f, maxHeight * 0.92f, 560.dp)
+internal fun CharacterScene(
+    pet: MainMenuPetUiState,
+    modifier: Modifier = Modifier,
+    artworkModifier: Modifier = Modifier,
+) {
+    BoxWithConstraints(modifier.offset(y = 64.dp), contentAlignment = Alignment.Center) {
+        // Scale the full shared canvas and its ground shadow together.
+        val characterSize = minOf(maxWidth * 1.18f, maxHeight * 0.92f, 560.dp) * pet.artworkScale
         val artwork = pet.artworkRes
         if (artwork == null) {
-            MenuText(stringResource(pet.descriptionRes), size = 18)
+            MenuText(stringResource(pet.descriptionRes, pet.name), size = 18, modifier = artworkModifier)
             return@BoxWithConstraints
         }
         Image(
@@ -64,9 +69,9 @@ internal fun CharacterScene(pet: MainMenuPetUiState, modifier: Modifier = Modifi
         )
         Image(
             painterResource(artwork),
-            contentDescription = stringResource(pet.descriptionRes),
+            contentDescription = stringResource(pet.descriptionRes, pet.name),
             contentScale = ContentScale.Fit,
-            modifier = Modifier.requiredSize(characterSize),
+            modifier = Modifier.requiredSize(characterSize).then(artworkModifier),
         )
     }
 }

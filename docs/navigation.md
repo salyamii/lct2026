@@ -177,3 +177,44 @@ Optional feeding is available on the menu. If the paid meal is unaffordable,
 the menu offers the free meal in place, with its next-morning consequence.
 Event cards have no secondary feeding link; hunger replaces the blocked action
 with feeding. Feeding never automatically executes the original action.
+
+## Goal screen — 2026-09-19
+
+The `goal` key is unchanged. Its entry obtains GoalViewModel and collects state
+with lifecycle awareness. Selecting a goal and buying parts stay on that screen;
+Back returns to the existing menu without executing a new event. The next explicit
+Continue dispatches the goal introduction through GameSession. Purchase feedback
+is transient local presentation state, never a saved route or domain event.
+
+Both the goal header and lower Goal shortcut dispatch MainMenuAction.Goal through
+the menu entry to LctNavHost, which pushes Goal and renders GoalScreen. The
+GoalNavigationTest covers both paths, Back, recreation, and opening without
+selecting a goal or advancing the day. It is compiled only under the user's
+current verification preference; this does not claim an on-device result.
+
+## Pet name and floating village action — 2026-09-19
+
+Under D-093/D-094 the name badge is read-only, below the goal and to the right
+of the coins. It has no click action, age label or menu editor. The saved name
+still comes from the observed aggregate; the future name-entry flow is separate.
+
+Under D-095/D-096 the village action uses the supplied menu_map illustration at
+the physical right edge, directly above the status/actions block. Its vertical
+position follows that block's measured top edge with an 8 dp gap. Part of the full canvas
+extends outside the viewport and is clipped by the screen. Under D-099 it has
+no separate panel, border or added shadow. There is no text label; accessibility
+still names the action Village.
+The landscape side panel reserves space beside it. It emits the same Village
+action and opens the existing route, outside the side panel's scroll area.
+Name and age are never navigation keys; moving these controls adds no game
+transitions or travel costs.
+
+
+## Goal chooser — 2026-09-20
+
+The same Goal route now hosts the catalog list and a project's detail view.
+GoalViewModel's SavedStateHandle keeps viewed_goal/show_list as presentation
+state only. Back from details returns to the list; the explicit main-screen
+button leaves the feature. System Back follows the same detail/list behavior.
+Select/Buy carry catalog IDs into GameSession commands; no game snapshot or
+progress flag is added to route keys. [Campaign rules](design/campaign-choice.md).

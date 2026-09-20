@@ -1,5 +1,7 @@
 package ru.nksk.lctapp.feature.tasks.ui
 
+import ru.nksk.lctapp.domain.pet.renderPetText
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,6 +23,7 @@ data class DeedsUiState(
     val loading: Boolean = true, val failed: Boolean = false, val busy: Boolean = false,
     val offers: List<OfferedDeedUiState> = emptyList(), val message: String? = null,
     val meals: List<DeedsMealUiState> = emptyList(), val hasCurrentEvent: Boolean = false,
+    val petName: String = "",
 )
 
 @HiltViewModel
@@ -67,7 +70,7 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
                         game = result.state; needsFood = false
                         if (navigate) eventNavigation.send(checkNotNull(result.state.engine?.currentEvent).id)
                     }
-                    is EngineResult.Blocked -> { message = result.reason.playerMessage(); needsFood = result.reason == BlockReason.MustEat }
+                    is EngineResult.Blocked -> { message = result.reason.playerMessage(saved.pet.name); needsFood = result.reason == BlockReason.MustEat }
                 }
             } catch (cancelled: CancellationException) { throw cancelled
             } catch (_: Exception) { message = "Не удалось сохранить действие. Попробуй ещё раз." }
@@ -79,14 +82,14 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
         val saved = game ?: return
         val catalog = session.catalog
         mutableState.value = DeedsUiState(
-            loading = false, busy = busy, message = message,
+            loading = false, busy = busy, message = message, petName = saved.pet.name,
             hasCurrentEvent = saved.engine?.currentEvent != null,
             offers = session.engine.availableDeeds(saved).map { offer ->
                 val event = catalog.content.events.single { it.id == offer.eventId }
                 val card = catalog.cards.getValue(event.id)
                 val reward = catalog.content.choices.single { it.eventId == event.id }.moneyDelta
-                OfferedDeedUiState(offer.id, event.title, event.description, "До $reward монет",
-                    card.effort,
+                OfferedDeedUiState(offer.id, renderPetText(event.title, saved.pet.name), renderPetText(event.description, saved.pet.name), "До $reward монет",
+                    renderPetText(card.effort, saved.pet.name),
                     deedDeadline(saved.engine!!.day, offer.expiresDay), card.scene)
             },
             meals = if (!needsFood) emptyList() else catalog.meals.filter { it.price > 0 || saved.economy.balance < catalog.meals.first().price }.map {

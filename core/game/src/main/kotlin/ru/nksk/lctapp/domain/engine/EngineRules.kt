@@ -29,6 +29,11 @@ data class EventPolicy(
     val discardOfferOnDismiss: Boolean = false,
     val deedGameKind: DeedGameKind? = null,
     val choiceEnergyCosts: Map<String, Int> = emptyMap(),
+    val goalId: String? = null,
+    val condition: StoryCondition = StoryCondition.Always,
+    val factsByChoiceId: Map<String, Set<String>> = emptyMap(),
+    val storyActId: String? = null,
+    val finishesStoryAct: Boolean = false,
 ) {
     init {
         require(energyCost in 0..3)

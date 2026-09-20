@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import ru.nksk.lctapp.core.ui.components.*
 
 @Composable
@@ -23,14 +24,37 @@ internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
         }
         return
     }
-    GameCardLayout(state.category, gameScene(state.scene), gameCharacter(state.character), onBack) {
-        GameBody(state.status)
+    GameCardLayout(state.category, gameScene(state.scene), state.restingPetRes ?: gameCharacter(state.character), onBack,
+        sceneDim = if (state.summary != null) 0.78f else 0f,
+        characterDescription = state.restingPetRes?.let { "${state.petName} спит" },
+    ) {
+        if (state.status.isNotBlank()) GameBody(state.status)
         state.weeklyReminder?.let { GameBody(it) }
         GameTitle(state.title)
         GameBody(state.body)
+        state.summary?.let { summary ->
+            if (summary.activities.isNotEmpty()) {
+                Text("Что сделали за день", color = GameInk, style = MaterialTheme.typography.titleMedium)
+                summary.activities.forEach { activity ->
+                    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        GameBody(activity.label)
+                        if (activity.value.isNotBlank()) Text(activity.value,
+                            color = GameInk, style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
+            Surface(color = GameInk.copy(alpha = 0.06f), shape = RoundedCornerShape(20.dp)) {
+                Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    summary.moneyLines.forEach { GameBody(it) }
+                    GameTitle(summary.remaining)
+                    summary.detailsNote?.let { GameBody(it) }
+                }
+            }
+        }
         if (state.impact.isNotBlank()) GameBody(state.impact)
         if (state.effort.isNotBlank()) GameBody(state.effort)
         state.message?.let { GameBody(it) }
+        state.actionNotice?.let { GameBody(it) }
         if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
         if (state.options.any { it.needsFood }) {
             GameButton("Покормить", !state.busy) { onAction(DayAction.ShowMeals) }
@@ -55,7 +79,7 @@ internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
     }
     if (state.showMeals) AlertDialog(
         onDismissRequest = { if (!state.busy) onAction(DayAction.CloseMeals) },
-        title = { Text("Рыжик проголодался") },
+        title = { Text("${state.petName} проголодался") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("Нужно поесть. Если деньги на нужды закончились, придётся взять из накоплений. В следующий раз спланируем бюджет внимательнее. Еда не восстанавливает силы.")

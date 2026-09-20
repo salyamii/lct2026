@@ -9,7 +9,7 @@ import ru.nksk.lctapp.domain.story.StoryState
 
 /** Technical new-save fixture, not weekly income, authored content, or pet parameter limits. */
 internal fun createInitialGameState(): GameState = GameState(
-    pet = PetState(selectedLookId = "BACKPACK", visualState = PetVisualState.NORMAL),
+    pet = PetState(selectedLookId = "PLAIN", visualState = PetVisualState.NORMAL),
     economy = EconomyState(balance = 100L, plan = BudgetPlan(0, 0, 0, 0)),
     story = StoryState(null, null, null, emptyList()),
     satiety = 0,

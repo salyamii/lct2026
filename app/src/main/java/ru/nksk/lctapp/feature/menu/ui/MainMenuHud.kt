@@ -11,39 +11,43 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalViewConfiguration
-import androidx.compose.ui.platform.ViewConfiguration
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.AdventureLavender
+import ru.nksk.lctapp.core.ui.theme.AdventureLabel
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
 import ru.nksk.lctapp.core.ui.theme.AdventureMuted
 import ru.nksk.lctapp.core.ui.theme.AdventurePanel
+import ru.nksk.lctapp.core.ui.theme.Rubik
 
 @Composable
 internal fun MenuHud(
+    petName: String,
     coins: Long,
     completedGoals: Int,
     totalGoals: Int,
     onAction: (MainMenuAction) -> Unit,
+    goalTitle: String = "Выбрать большую цель",
 ) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Row(
@@ -58,8 +62,8 @@ internal fun MenuHud(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             MenuText(stringResource(R.string.menu_goal_label), 11, color = AdventureLavender, letterSpacing = 0.44f)
-            MenuText(stringResource(R.string.menu_current_goal), 13, modifier = Modifier.weight(1f))
-            MenuText(
+            MenuText(goalTitle, 13, modifier = Modifier.weight(1f))
+            if (totalGoals > 0) MenuText(
                 stringResource(R.string.menu_goal_progress, completedGoals, totalGoals),
                 size = 11,
                 color = AdventureLime,
@@ -75,7 +79,22 @@ internal fun MenuHud(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             CoinsBadge(coins) { onAction(MainMenuAction.Coins) }
-            LocationEntry { onAction(MainMenuAction.Village) }
+            Spacer(Modifier.width(12.dp))
+            Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+                Text(
+                    text = petName,
+                    modifier = Modifier.clip(RoundedCornerShape(20.dp))
+                        .background(AdventurePanel.copy(alpha = 0.85f))
+                        .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(20.dp))
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    color = AdventureLabel,
+                    fontFamily = Rubik,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
     }
 }
@@ -102,32 +121,11 @@ private fun CoinsBadge(coins: Long, onClick: () -> Unit) {
 }
 
 @Composable
-private fun LocationEntry(onClick: () -> Unit) {
-    val viewConfiguration = LocalViewConfiguration.current
-    val pillViewConfiguration = remember(viewConfiguration) {
-        object : ViewConfiguration by viewConfiguration {
-            // This pill's hit area must match its visible bounds, without implicit expansion.
-            override val minimumTouchTargetSize = DpSize.Zero
-        }
-    }
-    CompositionLocalProvider(LocalViewConfiguration provides pillViewConfiguration) {
-        Box(
-            Modifier.heightIn(min = 48.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Row(
-                Modifier.clip(RoundedCornerShape(17.dp))
-                    .background(AdventurePanel.copy(alpha = 0.74f))
-                    .border(1.dp, Color(0xFFD1CCFF).copy(alpha = 0.24f), RoundedCornerShape(17.dp))
-                    .clickable(role = Role.Button, onClick = onClick)
-                    .padding(horizontal = 14.dp, vertical = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                MenuText(stringResource(R.string.menu_village), 13)
-                MenuArtwork(R.drawable.menu_location, 22.dp)
-                Image(painterResource(R.drawable.menu_chevron), null, Modifier.size(14.dp))
-            }
-        }
-    }
+internal fun VillageMapButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Image(
+        painter = painterResource(R.drawable.menu_map),
+        contentDescription = stringResource(R.string.menu_village),
+        contentScale = ContentScale.Fit,
+        modifier = modifier.alpha(0.92f).clickable(role = Role.Button, onClick = onClick),
+    )
 }

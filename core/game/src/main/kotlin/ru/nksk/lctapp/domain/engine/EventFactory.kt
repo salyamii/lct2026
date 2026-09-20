@@ -1,26 +1,76 @@
 package ru.nksk.lctapp.domain.engine
 
 import ru.nksk.lctapp.domain.content.*
+import ru.nksk.lctapp.domain.game.GameState
 
 /** Compiles validated, immutable authored content; creating an occurrence never grants an outcome. */
 class EventFactory(
     internal val content: StoryContent,
     policies: Map<String, EventPolicy>,
     meals: List<MealDefinition>,
+    internal val goals: List<GoalCampaign> = emptyList(),
+    internal val campaign: StoryCampaign? = null,
 ) {
     private val events = content.events.associateBy { it.id }
     private val policies = policies.toMap()
     private val meals = meals.associateBy { it.id }
 
     init {
+        require(goals.map { it.goalId }.distinct().size == goals.size)
+        goals.forEach { goal ->
+            require(goal.availableAfterProjects >= 0)
+            require(goal.goalId !in goal.requiredCompletedGoalIds && goal.requiredCompletedGoalIds.all { required -> goals.any { it.goalId == required } })
+            require(content.goals.any { it.id == goal.goalId })
+            require(goal.itemIds.isNotEmpty() && goal.itemIds.distinct().size == goal.itemIds.size)
+            require(goal.itemIds.toSet() == content.requiredItems.filter { it.goalId == goal.goalId }.map { it.itemId }.toSet())
+            require(goal.itemIds.all { id -> content.items.any { it.id == id && it.priceCoins != null && it.priceCoins > 0 } })
+            require(content.events.any { it.id == goal.introductionEventId && it.type == EventType.STORY })
+        }
         require(events.size == content.events.size) { "Duplicate event identity" }
         require(this.meals.size == meals.size) { "Duplicate meal identity" }
         require(content.choices.map { it.id }.distinct().size == content.choices.size)
         require(content.choices.all { it.eventId in events })
         val goalItems = content.requiredItems.map { it.itemId }.toSet()
+        val knownFacts = policies.values.flatMap { it.factsByChoiceId.values.flatten() }.toSet()
+        fun validate(condition: StoryCondition) {
+            when (condition) {
+                StoryCondition.Always, StoryCondition.SelectedGoalCollected -> Unit
+                is StoryCondition.All -> { require(condition.conditions.isNotEmpty()); condition.conditions.forEach(::validate) }
+                is StoryCondition.Any -> { require(condition.conditions.isNotEmpty()); condition.conditions.forEach(::validate) }
+                is StoryCondition.Not -> validate(condition.condition)
+                is StoryCondition.Fact -> require(condition.id in knownFacts) { "No producer for story fact: ${condition.id}" }
+                is StoryCondition.EventCompleted -> require(condition.eventId in events)
+                is StoryCondition.EventCompletions -> require(condition.minimum > 0 && condition.eventIds.isNotEmpty() && condition.eventIds.all { it in events })
+                is StoryCondition.OwnsItem -> require(content.items.any { it.id == condition.itemId })
+                is StoryCondition.GoalCollected -> require(goals.any { it.goalId == condition.goalId })
+                is StoryCondition.FactsAtLeast -> require(condition.minimum in 1..condition.factIds.size && condition.factIds.all { it in knownFacts })
+                is StoryCondition.DayStepsAtLeast -> require(condition.minimum >= 0)
+                is StoryCondition.SelectedGoal -> require(goals.any { it.goalId == condition.goalId })
+            }
+        }
+        campaign?.let { story ->
+            story.deedHints.forEach {
+                validate(it.condition)
+                require(events[it.eventId]?.type == EventType.EARNING)
+            }
+            story.acts.forEach { act ->
+                require(content.days.any { it.id == act.dayId })
+                require(act.eventIds.all { it in events && policies[it]?.storyActId == act.id })
+                require(policies[act.finaleId]?.finishesStoryAct == true)
+                require(act.eventIds.count { policies[it]?.finishesStoryAct == true } == 1)
+            }
+            require(story.completionAliases.keys.all { it in events })
+            require(story.completionAliases.values.flatten().all { id -> content.choices.any { it.id == id } })
+        }
         for ((id, policy) in this.policies) {
             val definition = requireNotNull(events[id]) { "Unknown event policy: $id" }
+            require(policy.goalId == null || content.goals.any { it.id == policy.goalId })
             val eventChoices = content.choices.filter { it.eventId == id }
+            validate(policy.condition)
+            require(policy.factsByChoiceId.keys.all { choice -> eventChoices.any { it.id == choice } })
+            require(policy.factsByChoiceId.values.flatten().all { it.isNotBlank() })
+            require(policy.storyActId == null || campaign?.acts?.any { it.id == policy.storyActId && id in it.eventIds } == true)
+            require(!policy.finishesStoryAct || campaign?.acts?.any { it.finaleId == id } == true)
             require(policy.choiceEnergyCosts.keys.all { choice -> eventChoices.any { it.id == choice } }) {
                 "Energy override must belong to this event: $id"
             }
@@ -68,8 +118,10 @@ class EventFactory(
     }
 
     internal fun event(id: String) = requireNotNull(events[id]) { "Unknown event: $id" }
+    internal fun storyProgress(state: GameState) = StoryProgress(content, policies, goals, campaign, state)
     internal fun policy(id: String) = requireNotNull(policies[id]) { "Missing authored event policy: $id" }
     internal fun meal(id: String) = requireNotNull(meals[id]) { "Unknown meal: $id" }
+    internal fun basicMealPrice() = meals.values.filter { it.price > 0 }.minOf { it.price }
     internal fun choices(id: String) = content.choices.filter { it.eventId == id }.sortedBy { it.position }
     internal fun goalItemsForDay(dayId: String?): Set<String> {
         val day = requireNotNull(content.days.find { it.id == dayId }) { "Unknown story day: $dayId" }
