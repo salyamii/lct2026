@@ -90,7 +90,7 @@ class DebugGameResetTest {
             pet = saved.pet.copy(name = "Искорка", age = PetAge.ADULT, color = PetColor.SAND),
             story = saved.story.copy(activeEventId = "earning"),
             selectedGoalId = "next-goal",
-            completedGoalProjects = listOf(CompletedGoalProject("d3", "goal")),
+            completedGoalProjects = listOf(CompletedGoalProject(goalId = "goal", decisionId = "d3")),
             completedMiniGames = setOf("done"),
             engine = EngineState(
                 rulesId = "rules", revision = 9, day = 3, phase = DayPhase.RUNNING,

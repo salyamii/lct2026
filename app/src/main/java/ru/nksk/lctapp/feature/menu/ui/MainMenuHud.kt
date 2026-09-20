@@ -48,8 +48,9 @@ internal fun MenuHud(
     totalGoals: Int,
     onAction: (MainMenuAction) -> Unit,
     goalTitle: String = "Выбрать большую цель",
+    modifier: Modifier = Modifier,
 ) {
-    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+    Column(modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth()
                 .shadow(8.dp, RoundedCornerShape(24.dp))

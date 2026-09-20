@@ -66,10 +66,10 @@ class NavigationRestorationTest {
 
             restoration.emulateSavedInstanceStateRestore()
 
-            compose.onNodeWithText(if (title == R.string.menu_continue) "Ночь наблюдений" else compose.activity.getString(title)).assertIsDisplayed()
+            compose.onNodeWithText(when (title) { R.string.menu_continue -> "Смотритель просит помочь"; R.string.menu_goal -> "Большие цели"; else -> compose.activity.getString(title) }).assertIsDisplayed()
             compose.onNodeWithText(compose.activity.getString(R.string.navigation_back))
                 .assertIsDisplayed().performClick()
-            compose.onNodeWithText(compose.activity.getString(R.string.menu_current_goal))
+            compose.onNodeWithText("Выбрать большую цель")
                 .assertIsDisplayed()
         }
     }
