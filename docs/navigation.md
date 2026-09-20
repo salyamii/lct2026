@@ -229,3 +229,22 @@ onboarding and restore the normal Navigation 3 stack. No existing route IDs
 change. The feature uses SavedStateHandle for the local fox selection only;
 persistent completion is the existence of the aggregate save. Read errors do
 not substitute a new game. See [onboarding](design/onboarding.md).
+
+### Customization step — 2026-09-20
+
+The startup gate now has Choose, Customize, Accessories and Introduction steps (CUST-D-018). Start from the character
+screen persists a Room draft and opens CustomizationScreen in the onboarding
+module. AppStartupViewModel owns the step and persisted draft; UI receives values
+and callbacks. Back from Customize clears the draft before returning to Choose.
+Successful introduction confirmation commits the new aggregate and only then exposes the
+normal Navigation 3 host. Existing saves bypass all onboarding steps; no route key contains
+pet data. Failed writes keep the editor visible. Drafts resume after cold starts.
+
+CUST-D-016: Customize confirms the profile into the accessory step. Accessories
+uses the same feature module and state/callback boundary. Back from Accessories
+returns to Customize without resetting the profile. The draft persists both step
+and selected accessory; only Start on Introduction commits a game and opens LctNavHost.
+
+Introduction follows accessory confirmation (CUST-D-018); Back returns to
+Accessories. The persisted INTRODUCTION step uses the Room v13 text
+column. No additional migration or Navigation 3 key is needed.

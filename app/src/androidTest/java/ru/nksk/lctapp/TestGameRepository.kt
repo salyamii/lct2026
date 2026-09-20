@@ -13,3 +13,10 @@ internal class TestGameRepository(initial: GameState? = createInitialGameState()
     override suspend fun initializeIfAbsent(initial: GameState) = state.value ?: initial.also { state.value = it }
     override suspend fun update(transform: (GameState) -> GameState) = transform(checkNotNull(state.value)).also { state.value = it }
 }
+
+internal class TestOnboardingDraftRepository : ru.nksk.lctapp.domain.onboarding.OnboardingDraftRepository {
+    private var draft: ru.nksk.lctapp.domain.onboarding.OnboardingDraft? = null
+    override suspend fun read() = draft
+    override suspend fun save(draft: ru.nksk.lctapp.domain.onboarding.OnboardingDraft) { this.draft = draft }
+    override suspend fun clear() { draft = null }
+}

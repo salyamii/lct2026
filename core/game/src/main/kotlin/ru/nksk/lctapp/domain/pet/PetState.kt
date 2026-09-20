@@ -7,6 +7,7 @@ data class PetState(
     val name: String = PetDefaults.FOX_NAME,
     val age: PetAge = PetAge.CUB,
     val color: PetColor = PetColor.COPPER,
+    val temperament: PetTemperament? = null,
 ) {
     init { require(isValidPetName(name)) { "A pet name must be nonblank single-line text" } }
     val appearance: PetAppearance

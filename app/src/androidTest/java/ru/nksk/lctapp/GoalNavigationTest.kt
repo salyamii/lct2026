@@ -28,6 +28,7 @@ class GoalNavigationTest {
     @get:Rule(order = 0) val hilt = HiltAndroidRule(this)
     @get:Rule(order = 1) val compose = createAndroidComposeRule<MainActivity>()
     @BindValue @JvmField val repository: GameRepository = TestGameRepository()
+    @BindValue @JvmField val drafts: ru.nksk.lctapp.domain.onboarding.OnboardingDraftRepository = TestOnboardingDraftRepository()
     @BindValue @JvmField val content: StoryContentRepository = TestStoryContentRepository()
 
     @Test fun goalShortcutOpensTheSelectionScreenAndBackPreservesTheGame() {

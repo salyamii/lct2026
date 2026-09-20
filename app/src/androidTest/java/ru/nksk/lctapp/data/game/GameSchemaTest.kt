@@ -43,6 +43,7 @@ class GameSchemaTest {
                 ('current', 'HUNGRY', 'BANDANA', 17, 29, 247, 10, 20, 30, 40, NULL, NULL, NULL)
             """.trimIndent())
         }
+        schemas.runMigrationsAndValidate(6, listOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)).close()
         withDatabase { db ->
             val state = RoomGameRepository(db).read()!!
             assertEquals(247L, state.economy.balance)
@@ -52,7 +53,6 @@ class GameSchemaTest {
             assertEquals(PetVisualState.HUNGRY, state.pet.visualState)
             assertEquals("BANDANA", state.pet.selectedLookId)
         }
-        schemas.runMigrationsAndValidate(6, listOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)).close()
     }
 
     @Test fun migrationPreservesEveryV1TableAndRepeatedOccurrences() = runBlocking {

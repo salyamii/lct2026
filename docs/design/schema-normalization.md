@@ -611,3 +611,33 @@ UI читает его без собственного каталога/расч
 не SQL-таблица возраста по дню. Подготовка старой игры согласует проекцию через
 движок; миграция SQL прежний pet_age не переписывает.
 [Экспорт v12](../../app/schemas/ru.nksk.lctapp.data.game.local.GameDatabase/12.json).
+
+
+## Room v13: характер и черновик onboarding — 2026-09-20
+
+При слиянии базой служит актуальная схема main v12. Миграции и экспорты v1–v12
+сохранены; MIGRATION_12_13 добавляет только nullable TEXT `GAME_STATE.pet_temperament`
+и таблицу `ONBOARDING_DRAFT`. Имя, возраст и цвет используют существующие
+`pet_name`, `pet_age`, `pet_color`: второй профиль в сохранении отсутствует.
+Характер хранит Curious/Confident/Joyful; null означает отсутствие выбора в прежней
+игре. Характер не добавляет игровых эффектов. Возраст развивается по D-110.
+
+`ONBOARDING_DRAFT(id TEXT PK, name TEXT NOT NULL, temperament TEXT NOT NULL,
+fur TEXT NOT NULL, step TEXT NOT NULL DEFAULT 'PROFILE',
+accessory_id TEXT NOT NULL DEFAULT 'BACKPACK')` хранит единственный черновик
+с id=current. Коды цвета черновика Copper/Sand/Russet преобразуются в
+COPPER/SAND/DARK_RUSSET при завершении. Возраст черновику не нужен: новая игра
+всегда начинает с CUB. Step: PROFILE/ACCESSORIES/INTRODUCTION.
+
+По CUST-D-018 только кнопка Introduction создаёт полный агрегат и удаляет черновик
+в одной транзакции. Допустимы PLAIN/BACKPACK/BANDANA; выбор записывается в
+selected_look, без выдачи предметов инвентаря. Поздняя запись черновика после
+создания игры игнорируется. Back из образа и явный debug-сброс удаляют черновик.
+Ошибки не подменяются новой игрой или defaults.
+
+НФБК: id определяет все поля каждой таблицы; завершённый профиль не дублируется
+в черновике. Миграция не меняет существующие имя, возраст, цвет, прогресс,
+покупки или журнал. Промежуточная onboarding-v7 не является схемой main.
+[Экспорт v13](../../app/schemas/ru.nksk.lctapp.data.game.local.GameDatabase/13.json).
+CustomizationPersistenceTest покрывает 12→13, повторные предметы, восстановление
+черновика и атомарный откат; в этой проверке тесты только компилируются.

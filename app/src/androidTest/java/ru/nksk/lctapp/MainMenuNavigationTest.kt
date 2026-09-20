@@ -34,10 +34,14 @@ class MainMenuNavigationTest {
     @Before
     fun waitForSavedGame() {
         compose.waitUntil(10_000) {
-            compose.onAllNodesWithText(compose.activity.getString(R.string.menu_current_goal))
+            compose.onAllNodesWithText("Выбрать большую цель")
                 .fetchSemanticsNodes().isNotEmpty()
         }
     }
+
+    @BindValue @JvmField
+    val onboardingDrafts: ru.nksk.lctapp.domain.onboarding.OnboardingDraftRepository =
+        ru.nksk.lctapp.TestOnboardingDraftRepository()
 
     @BindValue
     @JvmField
@@ -50,7 +54,7 @@ class MainMenuNavigationTest {
     fun everyMenuActionOpensItsDestinationAndReturnsToTheMenu() {
         fun label(id: Int) = hasText(compose.activity.getString(id))
         val actions = listOf(
-            label(R.string.menu_current_goal) to R.string.menu_goal,
+            hasText("Выбрать большую цель") to R.string.menu_goal,
             hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility, 100)) to
                 R.string.menu_coins,
             label(R.string.menu_gear) to R.string.gear_title,
@@ -62,7 +66,7 @@ class MainMenuNavigationTest {
 
         actions.forEach { (action, title) ->
             compose.onNode(action and hasClickAction()).assertIsDisplayed().performClick()
-            compose.onNodeWithText(if (title == R.string.menu_continue) "Ночь наблюдений" else compose.activity.getString(title)).assertIsDisplayed()
+            compose.onNodeWithText(when (title) { R.string.menu_continue -> "Смотритель просит помочь"; R.string.menu_goal -> "Большие цели"; else -> compose.activity.getString(title) }).assertIsDisplayed()
             compose.onNodeWithText(compose.activity.getString(R.string.navigation_back))
                 .assertIsDisplayed().performClick()
             assertMenuIsDisplayed()
@@ -93,7 +97,7 @@ class MainMenuNavigationTest {
     }
 
     private fun assertMenuIsDisplayed() {
-        compose.onNodeWithText(compose.activity.getString(R.string.menu_current_goal)).assertIsDisplayed()
+        compose.onNodeWithText("Выбрать большую цель").assertIsDisplayed()
         compose.onNode(
             hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility, 100)),
         ).assertIsDisplayed()

@@ -177,3 +177,18 @@ internal val MIGRATION_11_12 = object : Migration(11, 12) {
         connection.execSQL("ALTER TABLE GAME_STATE ADD COLUMN pet_color TEXT NOT NULL DEFAULT 'COPPER'")
     }
 }
+
+/** Extend the latest main schema without replacing any saved identity or progress. */
+internal val MIGRATION_12_13 = object : Migration(12, 13) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE GAME_STATE ADD COLUMN pet_temperament TEXT")
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS ONBOARDING_DRAFT (
+                id TEXT NOT NULL PRIMARY KEY, name TEXT NOT NULL,
+                temperament TEXT NOT NULL, fur TEXT NOT NULL,
+                step TEXT NOT NULL DEFAULT 'PROFILE',
+                accessory_id TEXT NOT NULL DEFAULT 'BACKPACK'
+            )
+        """.trimIndent())
+    }
+}

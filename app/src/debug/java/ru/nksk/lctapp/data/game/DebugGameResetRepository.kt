@@ -12,7 +12,7 @@ internal class DebugGameResetRepository @Inject constructor(private val database
             for (table in listOf(
                 "DAY_JOURNAL", "ENGINE_EVENT", "ENGINE_DEED", "ENGINE_STATE", "MINI_GAME_COMPLETION",
                 "GOAL_SELECTION", "COMPLETED_GOAL_PROJECT",
-                "PLAYER_DECISION", "OWNED_ITEM", "LEGACY_EXPENSE_STATE", "GAME_STATE",
+                "PLAYER_DECISION", "OWNED_ITEM", "LEGACY_EXPENSE_STATE", "GAME_STATE", "ONBOARDING_DRAFT",
             )) {
                 usePrepared("DELETE FROM $table") { it.step() }
             }

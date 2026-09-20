@@ -110,6 +110,8 @@ class PetIdentityPersistenceTest {
                 while (it.step()) looks[it.getText(0)] = it.getText(1)
             }
             assertEquals(mapOf("current" to "PLAIN", "custom" to "backend:hat", "older" to "BACKPACK"), looks)
+            // Extra rows exercise SQL predicates only; the aggregate supports one saved game.
+            connection.execSQL("DELETE FROM GAME_STATE WHERE id != 'current'")
             connection.prepare("PRAGMA foreign_key_check").use { assertFalse(it.step()) }
         }
         val database = GameDatabase.open(context, name)

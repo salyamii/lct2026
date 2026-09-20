@@ -55,7 +55,8 @@ class GameEnginePersistenceTest {
         val restored = GameSession(games, RoomStoryContentRepository(db), catalog, createInitialGameState())
         restored.prepare()
         assertEquals(chosen.state, games.read())
-        assertEquals(catalog.content.events.size, RoomStoryContentRepository(db).read().events.count { it.id.startsWith("figma-") })
+        assertEquals(catalog.content.events.toSet(), RoomStoryContentRepository(db).read().events
+            .filter { stored -> catalog.content.events.any { it.id == stored.id } }.toSet())
         assertTrue(restored.dispatch(request(EngineCommand.AcknowledgeResult(intro.id))) is EngineResult.Applied)
         assertEquals(100L, games.read()!!.economy.balance)
     }

@@ -6,6 +6,8 @@ import ru.nksk.lctapp.domain.content.ItemOperation
 import ru.nksk.lctapp.domain.content.ItemCategory
 import ru.nksk.lctapp.domain.economy.BudgetSection
 import ru.nksk.lctapp.domain.pet.PetVisualState
+import ru.nksk.lctapp.domain.pet.PetFur
+import ru.nksk.lctapp.domain.pet.PetTemperament
 import ru.nksk.lctapp.domain.pet.PetAge
 import ru.nksk.lctapp.domain.pet.PetColor
 
@@ -17,6 +19,13 @@ internal class StoredCode<T : Any>(private val values: Map<T, String>) {
 }
 
 internal object StoredCodes {
+    val petFur = StoredCode(mapOf(
+        PetFur.Copper to "Copper", PetFur.Sand to "Sand", PetFur.Russet to "Russet",
+    ))
+    val petTemperament = StoredCode(mapOf(
+        PetTemperament.Curious to "Curious", PetTemperament.Confident to "Confident",
+        PetTemperament.Joyful to "Joyful",
+    ))
     val petColor = StoredCode(mapOf(
         PetColor.COPPER to "COPPER", PetColor.SAND to "SAND", PetColor.DARK_RUSSET to "DARK_RUSSET",
     ))

@@ -47,6 +47,7 @@ fun MainMenuScreen(
     val dispatch: (MainMenuAction) -> Unit = { if (!state.busy) onAction(it) }
     val density = LocalDensity.current
     var screenTop by remember { mutableStateOf(0f) }
+    var hudBottom by remember { mutableStateOf(0f) }
     var characterTop by remember { mutableStateOf<Float?>(null) }
     val characterPosition = Modifier.onGloballyPositioned { characterTop = it.positionInRoot().y }
     BoxWithConstraints(modifier = modifier.fillMaxSize().clipToBounds().background(AdventureNight)
@@ -77,15 +78,18 @@ fun MainMenuScreen(
                 Column(
                     Modifier.widthIn(max = 480.dp).fillMaxSize().align(Alignment.TopCenter),
                 ) {
-                    MenuHud(state.pet.name, state.coins, state.completedGoals, state.totalGoals, dispatch, state.goalTitle)
+                    MenuHud(state.pet.name, state.coins, state.completedGoals, state.totalGoals, dispatch, state.goalTitle,
+                        Modifier.onGloballyPositioned { hudBottom = it.positionInRoot().y + it.size.height })
                     CharacterScene(state.pet, Modifier.weight(1f).fillMaxWidth(), characterPosition)
                     MenuActions(dispatch, viewport, state)
                 }
             }
         }
         characterTop?.let { top ->
-            // Keep the map above the character's full canvas, including its current scale and offset.
-            val mapTop = (with(density) { (top - screenTop).toDp() } - MapButtonHeight - 8.dp).coerceAtLeast(0.dp)
+            // Prefer above the character, but keep the portrait HUD clear at larger font scales.
+            val portrait = maxWidth <= maxHeight && maxWidth < 840.dp
+            val minimumTop = if (portrait) with(density) { (hudBottom - screenTop).toDp() } + 8.dp else 0.dp
+            val mapTop = (with(density) { (top - screenTop).toDp() } - MapButtonHeight - 8.dp).coerceAtLeast(minimumTop)
             VillageMapButton(
                 onClick = { dispatch(MainMenuAction.Village) },
                 modifier = Modifier.align(AbsoluteAlignment.TopRight)

@@ -24,6 +24,7 @@ internal fun GameState.toEntity() = GameStateEntity(
     currentDayId = story.currentDayId,
     nextScriptPosition = story.nextScriptPosition,
     activeEventId = story.activeEventId,
+    petTemperament = pet.temperament?.let(StoredCodes.petTemperament::encode),
     petName = pet.name,
     petAge = StoredCodes.petAge.encode(pet.age),
     petColor = StoredCodes.petColor.encode(pet.color),
@@ -34,7 +35,7 @@ internal fun GameStateEntity.toDomain(
     items: List<OwnedItemEntity>,
 ) = GameState(
     pet = PetState(selectedLook, StoredCodes.visual.decode(visualState), petName,
-        StoredCodes.petAge.decode(petAge), StoredCodes.petColor.decode(petColor)),
+        StoredCodes.petAge.decode(petAge), StoredCodes.petColor.decode(petColor), petTemperament?.let(StoredCodes.petTemperament::decode)),
     economy = EconomyState(balance, BudgetPlan(plannedNeeds, plannedWants, plannedSavings, plannedReserve)),
     story = StoryState(currentDayId, nextScriptPosition, activeEventId, decisions.map { StoryDecision(it.id, it.choiceId) }),
     satiety = satiety,
