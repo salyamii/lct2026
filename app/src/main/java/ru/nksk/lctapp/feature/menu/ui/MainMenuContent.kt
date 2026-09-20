@@ -7,10 +7,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,7 +45,7 @@ internal fun MainMenuContent(state: MainMenuLoadState, onRetry: () -> Unit, onAc
             title = { Text("Бесплатная столовая") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("На обычный обед не хватает монет. Можно поесть бесплатно, но завтра у Рыжика будет меньше сил.")
+                    Text("На обычный обед не хватает монет. Можно поесть бесплатно, но завтра ${state.menu.pet.name} будет быстрее уставать.")
                     state.menu.notice?.let { Text(it) }
                 }
             },

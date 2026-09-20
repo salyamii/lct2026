@@ -1,5 +1,7 @@
 package ru.nksk.lctapp.feature.gear.ui
 
+import ru.nksk.lctapp.domain.pet.renderPetText
+
 import ru.nksk.lctapp.domain.content.ItemCategory
 import ru.nksk.lctapp.domain.content.ItemDefinition
 import ru.nksk.lctapp.domain.game.OwnedItem
@@ -25,13 +27,14 @@ internal sealed interface GearLoadState {
 }
 
 /** Ownership drives the list. Catalog-only items and the pet's selected look never grant items. */
-internal fun gearUiState(owned: List<OwnedItem>, definitions: List<ItemDefinition>): GearUiState {
+internal fun gearUiState(owned: List<OwnedItem>, definitions: List<ItemDefinition>, petName: String): GearUiState {
     val catalog = definitions.associateBy { it.id }
     val story = mutableListOf<GearItemUiState>()
     val accessories = mutableListOf<GearItemUiState>()
     owned.forEach { occurrence ->
         val item = checkNotNull(catalog[occurrence.itemId]) { "Missing owned item: ${occurrence.itemId}" }
-        val card = GearItemUiState(occurrence.id, item.name, item.description, item.priceCoins)
+        val card = GearItemUiState(occurrence.id, renderPetText(item.name, petName),
+            renderPetText(item.description, petName), item.priceCoins)
         when (item.category) {
             ItemCategory.STORY -> story.add(card)
             ItemCategory.ACCESSORY -> accessories.add(card)

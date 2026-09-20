@@ -1,5 +1,7 @@
 package ru.nksk.lctapp.domain.engine
 
+import ru.nksk.lctapp.domain.story.StoryDecision
+
 /** Calendar days are independent of authored story days and of the number of actions. */
 data class EngineState(
     val rulesId: String,
@@ -13,11 +15,16 @@ data class EngineState(
     val openingBalance: Long,
     val events: List<EventOccurrence>,
     val deeds: List<DeedOffer>,
+    /** Unknown for a day already in progress when migrating an older save. */
+    val openingEnergy: Int? = null,
+    val journal: List<DayJournalEntry> = emptyList(),
 ) {
     init {
         require(rulesId.isNotBlank())
         require(revision >= 0 && day >= 1 && steps >= 0 && energy >= 0)
         require(nextMorningEnergy == null || nextMorningEnergy >= 0)
+        require(openingEnergy == null || openingEnergy >= 0)
+        require(journal.map { it.id }.distinct().size == journal.size)
         require(events.map { it.id }.distinct().size == events.size)
         require(deeds.map { it.id }.distinct().size == deeds.size)
         require(events.count { it.status == EventStatus.ACTIVE || it.status == EventStatus.RESULT } <= 1)
@@ -61,4 +68,9 @@ data class DaySummary(
     val closingBalance: Long,
     val completedLoreEventIds: List<String>,
     val steps: Int,
+    val openingEnergy: Int? = null,
+    val closingEnergy: Int = 0,
+    val journal: List<DayJournalEntry> = emptyList(),
+    /** Actual choices of occurrences completed today, in decision order; proposals are excluded. */
+    val completedDecisions: List<StoryDecision> = emptyList(),
 )

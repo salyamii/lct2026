@@ -18,22 +18,22 @@
     {
       "id": "56:65",
       "name": "Рыжик · MVP runtime kit v3 · 3 colors",
-      "expected_assets": 55
+      "expected_assets": 58
     },
     {
       "id": "87:2",
       "name": "Рыжик-лисёнок · MVP runtime kit · 3 colors",
-      "expected_assets": 55
+      "expected_assets": 58
     },
     {
       "id": "89:2",
       "name": "Рыжик-мужчина · MVP runtime kit · 3 colors",
-      "expected_assets": 55
+      "expected_assets": 58
     },
     {
       "id": "89:185",
       "name": "Рыжик-старец · финальный этап · 3 colors",
-      "expected_assets": 55
+      "expected_assets": 58
     },
     {
       "id": "2144:9",
@@ -46,7 +46,7 @@
       "expected_assets": 8
     }
   ],
-  "scope": "Five character/equipment packs (240 export layers), all 14 locations, additional NPC/event art, and existing menu/font assets. Design mockup screens and hidden RAW work areas are excluded.",
+  "scope": "Five character/equipment packs (252 layers including 12 sleeping foxes), all 14 locations, additional NPC/event art, and existing menu/font assets, onboarding artwork and the debug settings vector. Design mockup screens and hidden RAW work areas are excluded.",
   "assets": [
     {
       "resource": "menu_coin",
@@ -192,6 +192,32 @@
       "source_bytes": 576282,
       "source_format": "png",
       "lossless_rgba_verified": true
+    },
+    {
+      "resource": "menu_map",
+      "category": "User-supplied menu",
+      "path": "app/src/main/res/drawable-nodpi/menu_map.webp",
+      "format": "webp",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 100788,
+      "sha256": "38bfd12f76f9f5913c13d5c951ad8d5ee116fda96bb63c036d2ae762f8e77805",
+      "rgba_sha256": "bf6ce12e0a474d4e3590a7bd31aab9ee3fd42709cc81b72afce7ae87fc69fae8",
+      "alpha_bounds": [
+        33,
+        115,
+        1418,
+        1024
+      ],
+      "source_method": "user_supplied_resource",
+      "provided_on": "2026-09-20",
+      "source_sha256": "38bfd12f76f9f5913c13d5c951ad8d5ee116fda96bb63c036d2ae762f8e77805",
+      "source_format": "webp",
+      "encoding": {
+        "lossless": false,
+        "reencoded": false
+      },
+      "note": "User supplied menu_map.webp in res/drawable. Moved byte-for-byte to drawable-nodpi. Full 1536 x 1024 canvas and alpha preserved. The supplied WebP uses lossy VP8 with alpha; no further compression or image edits. Original design source and Figma node were not provided."
     },
     {
       "resource": "menu_ryzhik",
@@ -9369,7 +9395,14 @@
       "bytes": 70266,
       "sha256": "3095176e60162796f2003aad31f5b86fedf3e7649f79c63977f22e20f95e80c0",
       "figma_node": null,
-      "note": "Designer export (PNG source), Figma node-id not provided"
+      "note": "Designer export (PNG source), Figma node-id not provided",
+      "rgba_sha256": "52b2779812be727331af4786f903caada6c4f9e68e927c9fc96b3983111db332",
+      "alpha_bounds": [
+        2,
+        39,
+        253,
+        210
+      ]
     },
     {
       "resource": "deed_goods_scroll",
@@ -9381,7 +9414,14 @@
       "bytes": 56106,
       "sha256": "15abdbe2acbb8faa6c6a9804a0616f12d1703ecac1b525cccd452f2274445edb",
       "figma_node": null,
-      "note": "Designer export (PNG source), Figma node-id not provided"
+      "note": "Designer export (PNG source), Figma node-id not provided",
+      "rgba_sha256": "8e37b7c3db9e34a14a3979fba8a3cbe62c0f015cdd6fbc26aa5b1c0fb24baea6",
+      "alpha_bounds": [
+        20,
+        10,
+        246,
+        256
+      ]
     },
     {
       "resource": "deed_goods_lens",
@@ -9393,7 +9433,14 @@
       "bytes": 59724,
       "sha256": "4323312dd1d3f1b5005e208d27a608d6e000f7dc3e63e346ba8aaab3b22923cd",
       "figma_node": null,
-      "note": "Designer export (PNG source), Figma node-id not provided"
+      "note": "Designer export (PNG source), Figma node-id not provided",
+      "rgba_sha256": "f768b1a9966e8c0ded87cc63fc09fb9e6a034bef3f6a5d3daed025719cadf5d2",
+      "alpha_bounds": [
+        10,
+        18,
+        251,
+        238
+      ]
     },
     {
       "resource": "deed_goods_compass",
@@ -9405,7 +9452,14 @@
       "bytes": 53876,
       "sha256": "b3d2542bee0dab42a17fe8fd87af2831c2b66ef56e32141264dd87f163d891d5",
       "figma_node": null,
-      "note": "Designer export (PNG source), Figma node-id not provided"
+      "note": "Designer export (PNG source), Figma node-id not provided",
+      "rgba_sha256": "8d561d30dec7edb56f34530be9d4b9c1571281e9513262608053b9dd72ec114c",
+      "alpha_bounds": [
+        32,
+        2,
+        224,
+        250
+      ]
     },
     {
       "resource": "deed_goods_star_plate",
@@ -9417,7 +9471,14 @@
       "bytes": 51692,
       "sha256": "bced4dea227644efc25f975ceeeed8a5e5392bf102f3086555c71e7d553b2a77",
       "figma_node": null,
-      "note": "Designer export (PNG source), Figma node-id not provided"
+      "note": "Designer export (PNG source), Figma node-id not provided",
+      "rgba_sha256": "4038f9bddb82613bb6c4d59603bdb8921f6c1a99f8b800e21dd39b9ce651eddc",
+      "alpha_bounds": [
+        16,
+        46,
+        246,
+        224
+      ]
     },
     {
       "resource": "deed_goods_lantern",
@@ -9429,7 +9490,14 @@
       "bytes": 51206,
       "sha256": "7b1bde4dc8b864b56be6f14938a4c0e7849a227c91ae4ccc6912657ff7ff6768",
       "figma_node": null,
-      "note": "Designer export (PNG source), Figma node-id not provided"
+      "note": "Designer export (PNG source), Figma node-id not provided",
+      "rgba_sha256": "b3a6d52b82a8315348848d33d21c5bb7a8a94cf9f4ba4900aca22e06d43ea525",
+      "alpha_bounds": [
+        6,
+        3,
+        220,
+        250
+      ]
     },
     {
       "resource": "deed_star_plate_back",
@@ -9441,7 +9509,14 @@
       "bytes": 637762,
       "sha256": "852886e0995578cbc2732d26819857f705397649a7544af46963c299747a9b6a",
       "figma_node": null,
-      "note": "Designer export (PNG source), Figma node-id not provided"
+      "note": "Designer export (PNG source), Figma node-id not provided",
+      "rgba_sha256": "beabd8d623d848b4e9e35983596fd01562b6a9f69dc018aae5c536099900c556",
+      "alpha_bounds": [
+        0,
+        0,
+        600,
+        800
+      ]
     },
     {
       "resource": "deed_gear_marker",
@@ -9453,7 +9528,722 @@
       "bytes": 22142,
       "sha256": "e55e5152d536ca8654ef6e2a57e9789724b70a8e3ab7a0834ebdd8922d85d932",
       "figma_node": null,
-      "note": "Designer export (PNG source), Figma node-id not provided"
+      "note": "Designer export (PNG source), Figma node-id not provided",
+      "rgba_sha256": "f73418795d0855597433b2555ff1ab80ef2e800ca86922ec37c3d32bcf306177",
+      "alpha_bounds": [
+        4,
+        3,
+        124,
+        122
+      ]
+    },
+    {
+      "resource": "ryzhik_teen_state_sleep_copper",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2736:5",
+        "node_name": "teen_state_sleep_copper_512",
+        "collection_id": "56:65",
+        "image_hash": "451274ae6e37b1c25da26691a1997f4d9d7a38db",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-5"
+      },
+      "design_canvas": [
+        1024,
+        1024
+      ],
+      "figma_node_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 2,
+      "source_method": "figma_active_original_image_fill",
+      "imported_on": "2026-09-20",
+      "notes": "Original active transparent PNG, SHA-1 matched to visible Figma fill. Full 1024 canvas maps to the 512-square frame; no trimming, recentering or resizing. Hidden opaque source and preview background excluded.",
+      "format": "webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 290842,
+      "sha256": "347e5ba7b4bac7cef1befe23606f1a9dcf4a4136fe59bf8789d8dfcaea33fbb2",
+      "rgba_sha256": "d30e0bb1de0f907016ae9999e7d8c5e8981ba7169f7b8edb1d47cdf3e3cf1191",
+      "alpha_bounds": [
+        131,
+        218,
+        897,
+        866
+      ],
+      "source_sha256": "0f377a6b8af7b63155f40d42487fceffa82a2bf222d41ead80298ac45d849b74",
+      "source_bytes": 426473,
+      "source_format": "png",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "10.2.0"
+      },
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_sleep_copper.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_sleep_sand",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2736:9",
+        "node_name": "teen_state_sleep_sand_512",
+        "collection_id": "56:65",
+        "image_hash": "83f02bc23b7a8a22cee3afd3f5be644de4576ba9",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-9"
+      },
+      "design_canvas": [
+        1024,
+        1024
+      ],
+      "figma_node_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 2,
+      "source_method": "figma_active_original_image_fill",
+      "imported_on": "2026-09-20",
+      "notes": "Original active transparent PNG, SHA-1 matched to visible Figma fill. Full 1024 canvas maps to the 512-square frame; no trimming, recentering or resizing. Hidden opaque source and preview background excluded.",
+      "format": "webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 204214,
+      "sha256": "c21866142438c4aa16382bc1f094f41ee59cdfd9ee0b5d2ff3352eb0add0fc64",
+      "rgba_sha256": "2ca5aac24839258bcbd5a136aa08159d7a9d6045eb22819a96bb3c4e53c24e91",
+      "alpha_bounds": [
+        183,
+        356,
+        816,
+        802
+      ],
+      "source_sha256": "f833f8e59af9f0fab75d9c7c17dbe727db2e1ec3e44a779f1517d368fd02fd6b",
+      "source_bytes": 292227,
+      "source_format": "png",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "10.2.0"
+      },
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_sleep_sand.webp"
+    },
+    {
+      "resource": "ryzhik_teen_state_sleep_dark_russet",
+      "category": "Ryzhik teen",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2736:13",
+        "node_name": "teen_state_sleep_dark_russet_512",
+        "collection_id": "56:65",
+        "image_hash": "f86426f1f28f685ced585a6304550c276582787b",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-13"
+      },
+      "design_canvas": [
+        1024,
+        1024
+      ],
+      "figma_node_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 2,
+      "source_method": "figma_active_original_image_fill",
+      "imported_on": "2026-09-20",
+      "notes": "Original active transparent PNG, SHA-1 matched to visible Figma fill. Full 1024 canvas maps to the 512-square frame; no trimming, recentering or resizing. Hidden opaque source and preview background excluded.",
+      "format": "webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 382352,
+      "sha256": "e4bcd6687a97f4329c3a2d73d88a016dd0a5f5547f1fcdd4d9d58766f72436b1",
+      "rgba_sha256": "63e0f27bcf3e0356e6ea4bfe9af4b8e80bd0f72e1e52369ff621b00c0685bf89",
+      "alpha_bounds": [
+        63,
+        289,
+        964,
+        972
+      ],
+      "source_sha256": "ed8d500425becade9019479ee4e46df3bb3b1b8fda1ba97d7621259224df3484",
+      "source_bytes": 566074,
+      "source_format": "png",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "10.2.0"
+      },
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_state_sleep_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_sleep_copper",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2736:19",
+        "node_name": "cub_state_sleep_copper_512",
+        "collection_id": "87:2",
+        "image_hash": "f04a1046876be01f73b4d7523a1330f17ee09e5f",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-19"
+      },
+      "design_canvas": [
+        1024,
+        1024
+      ],
+      "figma_node_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 2,
+      "source_method": "figma_active_original_image_fill",
+      "imported_on": "2026-09-20",
+      "notes": "Original active transparent PNG, SHA-1 matched to visible Figma fill. Full 1024 canvas maps to the 512-square frame; no trimming, recentering or resizing. Hidden opaque source and preview background excluded.",
+      "format": "webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 381890,
+      "sha256": "1b388895131d5648460c77bc516c30f0496ae2f1462340a15de86bfc8f58e90b",
+      "rgba_sha256": "9f11528a02042eb3ccbd59c5a9cce9fb405ba526c1cc09d14fb99e201c5ec8e2",
+      "alpha_bounds": [
+        134,
+        0,
+        1024,
+        885
+      ],
+      "source_sha256": "c99c1be3e2caed2346e5fcb79677e0f7b21e31a12b6cac32d3f8b7647c9d1dcd",
+      "source_bytes": 563715,
+      "source_format": "png",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "10.2.0"
+      },
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_sleep_copper.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_sleep_sand",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2736:23",
+        "node_name": "cub_state_sleep_sand_512",
+        "collection_id": "87:2",
+        "image_hash": "5c21c1b09f56f445f25fab4d0360fe70465af728",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-23"
+      },
+      "design_canvas": [
+        1024,
+        1024
+      ],
+      "figma_node_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 2,
+      "source_method": "figma_active_original_image_fill",
+      "imported_on": "2026-09-20",
+      "notes": "Original active transparent PNG, SHA-1 matched to visible Figma fill. Full 1024 canvas maps to the 512-square frame; no trimming, recentering or resizing. Hidden opaque source and preview background excluded.",
+      "format": "webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 386444,
+      "sha256": "f734ece17074411c4d6f7cc8e9701f5445247ebe5cf0f2de4fd6873f6b0da0ee",
+      "rgba_sha256": "5adb98e0afac9afbc76fb7e1e25966e11da7abe9c9632eb2c2f21b05f4566ac4",
+      "alpha_bounds": [
+        157,
+        129,
+        869,
+        974
+      ],
+      "source_sha256": "81e066bd150cd8d210f4a723bfad4fe388b5ab9e934465a20fe021c497860831",
+      "source_bytes": 594241,
+      "source_format": "png",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "10.2.0"
+      },
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_sleep_sand.webp"
+    },
+    {
+      "resource": "ryzhik_cub_state_sleep_dark_russet",
+      "category": "Ryzhik cub",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2736:27",
+        "node_name": "cub_state_sleep_dark_russet_512",
+        "collection_id": "87:2",
+        "image_hash": "1d4b18443a03d2e87efc2579fa579c06487db3f3",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-27"
+      },
+      "design_canvas": [
+        1024,
+        1024
+      ],
+      "figma_node_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 2,
+      "source_method": "figma_active_original_image_fill",
+      "imported_on": "2026-09-20",
+      "notes": "Original active transparent PNG, SHA-1 matched to visible Figma fill. Full 1024 canvas maps to the 512-square frame; no trimming, recentering or resizing. Hidden opaque source and preview background excluded.",
+      "format": "webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 367538,
+      "sha256": "f07a67007282551203e632a36a98e929314464ba7adfd3c3c6bb94896e768677",
+      "rgba_sha256": "63e55c47095f7f3b11966a04bd93151f907cd69dcf1cb4f05d2db29849e1cd7e",
+      "alpha_bounds": [
+        141,
+        205,
+        880,
+        883
+      ],
+      "source_sha256": "01b72f7eac06240119fea004174bdd8a52c2ef30d1f8563ff77221a26ac53215",
+      "source_bytes": 551183,
+      "source_format": "png",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "10.2.0"
+      },
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_state_sleep_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_sleep_copper",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2736:33",
+        "node_name": "adult_state_sleep_copper_512",
+        "collection_id": "89:2",
+        "image_hash": "926567de6a4e9b72e6bbd6318255754e2b692adc",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-33"
+      },
+      "design_canvas": [
+        1024,
+        1024
+      ],
+      "figma_node_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 2,
+      "source_method": "figma_active_original_image_fill",
+      "imported_on": "2026-09-20",
+      "notes": "Original active transparent PNG, SHA-1 matched to visible Figma fill. Full 1024 canvas maps to the 512-square frame; no trimming, recentering or resizing. Hidden opaque source and preview background excluded.",
+      "format": "webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 336234,
+      "sha256": "f1afb21fc393fcffa5269f706ed551ce9431be75fac5c07b22a713fa751394b7",
+      "rgba_sha256": "6df775488705069456a70bed9472a246781e8d857048eef9710fda0be2541295",
+      "alpha_bounds": [
+        113,
+        226,
+        915,
+        890
+      ],
+      "source_sha256": "954a9214b4fe6ca2ce219cc63afe67a94b63106eb5dc5191ee8976ca1febf28c",
+      "source_bytes": 523168,
+      "source_format": "png",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "10.2.0"
+      },
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sleep_copper.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_sleep_sand",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2736:37",
+        "node_name": "adult_state_sleep_sand_512",
+        "collection_id": "89:2",
+        "image_hash": "0237178803a9bab4c1a7970b100f9dbb5e254039",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-37"
+      },
+      "design_canvas": [
+        1024,
+        1024
+      ],
+      "figma_node_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 2,
+      "source_method": "figma_active_original_image_fill",
+      "imported_on": "2026-09-20",
+      "notes": "Original active transparent PNG, SHA-1 matched to visible Figma fill. Full 1024 canvas maps to the 512-square frame; no trimming, recentering or resizing. Hidden opaque source and preview background excluded.",
+      "format": "webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 338940,
+      "sha256": "24f164ef807d6f4749c7ac5e5ff7e896e28e8f5cefb3c026f9ff3163de1b36b5",
+      "rgba_sha256": "cadd54334213099098d47dae0835f4c3bdfad2306a2ff050fe0aae80c1db11bd",
+      "alpha_bounds": [
+        82,
+        241,
+        907,
+        834
+      ],
+      "source_sha256": "9db2d6e3c2f9bd0df9f0fda6cadccecc8116b718057a93fd92a8d9d9d67ae3fb",
+      "source_bytes": 497393,
+      "source_format": "png",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "10.2.0"
+      },
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sleep_sand.webp"
+    },
+    {
+      "resource": "ryzhik_adult_state_sleep_dark_russet",
+      "category": "Ryzhik adult",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2736:41",
+        "node_name": "adult_state_sleep_dark_russet_512",
+        "collection_id": "89:2",
+        "image_hash": "b2129cbe466c49b9a7f88b8a9b98f749301e93f0",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-41"
+      },
+      "design_canvas": [
+        1024,
+        1024
+      ],
+      "figma_node_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 2,
+      "source_method": "figma_active_original_image_fill",
+      "imported_on": "2026-09-20",
+      "notes": "Original active transparent PNG, SHA-1 matched to visible Figma fill. Full 1024 canvas maps to the 512-square frame; no trimming, recentering or resizing. Hidden opaque source and preview background excluded.",
+      "format": "webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 425718,
+      "sha256": "aeb0bcfaa2821dc5f6de6d10bdf13efd6424bd7f989822586449da175270ca80",
+      "rgba_sha256": "a7e27103b66b6214a990d84b2cbf60b8004ce86e5c64c6bc3f6ddb050862a34c",
+      "alpha_bounds": [
+        127,
+        123,
+        954,
+        942
+      ],
+      "source_sha256": "9070e8407431c06e97cea745cdbf6b966815209405a8262d331047d122c979c8",
+      "source_bytes": 633735,
+      "source_format": "png",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "10.2.0"
+      },
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sleep_dark_russet.webp"
+    },
+    {
+      "resource": "ryzhik_senior_state_sleep_copper",
+      "category": "Ryzhik senior",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2736:47",
+        "node_name": "senior_state_sleep_copper_512",
+        "collection_id": "89:185",
+        "image_hash": "7af9054176f70bfe54e7ddf45246cf200bc6fc6f",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-47"
+      },
+      "design_canvas": [
+        1024,
+        1024
+      ],
+      "figma_node_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 2,
+      "source_method": "figma_active_original_image_fill",
+      "imported_on": "2026-09-20",
+      "notes": "Original active transparent PNG, SHA-1 matched to visible Figma fill. Full 1024 canvas maps to the 512-square frame; no trimming, recentering or resizing. Hidden opaque source and preview background excluded.",
+      "format": "webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 244560,
+      "sha256": "33b8320829f339468b012f6ae4767bc0d76bdbcdfe330d652904ae1ae6dafd54",
+      "rgba_sha256": "5cddf209025cb7172897eb915caf085ea50cdf747442e1626517cdff7453b74d",
+      "alpha_bounds": [
+        221,
+        257,
+        804,
+        790
+      ],
+      "source_sha256": "befc8954c462d9773d16a3765a92b6e5dd8ab5966de056dbe6e14eab70735de7",
+      "source_bytes": 369124,
+      "source_format": "png",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "10.2.0"
+      },
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sleep_copper.webp"
+    },
+    {
+      "resource": "ryzhik_senior_state_sleep_sand",
+      "category": "Ryzhik senior",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2736:51",
+        "node_name": "senior_state_sleep_sand_512",
+        "collection_id": "89:185",
+        "image_hash": "babba01d3fe97c39ca5e9f37665d966674a7c9df",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-51"
+      },
+      "design_canvas": [
+        1024,
+        1024
+      ],
+      "figma_node_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 2,
+      "source_method": "figma_active_original_image_fill",
+      "imported_on": "2026-09-20",
+      "notes": "Original active transparent PNG, SHA-1 matched to visible Figma fill. Full 1024 canvas maps to the 512-square frame; no trimming, recentering or resizing. Hidden opaque source and preview background excluded.",
+      "format": "webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 355216,
+      "sha256": "49f61edabf717b3c4a43fa0ce47cc20304f2af43f96addfb4a8d2a48ef958548",
+      "rgba_sha256": "47261ec85b9a01722f790c759b03a628655dc424fde88c9775b499581d6aef75",
+      "alpha_bounds": [
+        137,
+        183,
+        900,
+        881
+      ],
+      "source_sha256": "bdad5cfc8695408653fc17de2c3c825579402aa87bb015a49491391074164f03",
+      "source_bytes": 540329,
+      "source_format": "png",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "10.2.0"
+      },
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sleep_sand.webp"
+    },
+    {
+      "resource": "ryzhik_senior_state_sleep_dark_russet",
+      "category": "Ryzhik senior",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2736:55",
+        "node_name": "senior_state_sleep_dark_russet_512",
+        "collection_id": "89:185",
+        "image_hash": "7a7b7cb7e8a23db4fb15019d319512b36ab97bad",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-55"
+      },
+      "design_canvas": [
+        1024,
+        1024
+      ],
+      "figma_node_canvas": [
+        512,
+        512
+      ],
+      "export_scale": 2,
+      "source_method": "figma_active_original_image_fill",
+      "imported_on": "2026-09-20",
+      "notes": "Original active transparent PNG, SHA-1 matched to visible Figma fill. Full 1024 canvas maps to the 512-square frame; no trimming, recentering or resizing. Hidden opaque source and preview background excluded.",
+      "format": "webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 383206,
+      "sha256": "0bb7f20e1f8916cf20165ca3bf185993d8e5651c709077a1b23293c960bd8985",
+      "rgba_sha256": "7fb12014986d656a99d75304a649843a87a48b5af17f21a3dbd86c565054c93f",
+      "alpha_bounds": [
+        180,
+        134,
+        887,
+        965
+      ],
+      "source_sha256": "01ff05edc14fc1bf3d72a572b03eae9481a5cbff4af0e1cd830e29c82015d993",
+      "source_bytes": 585091,
+      "source_format": "png",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "10.2.0"
+      },
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sleep_dark_russet.webp"
+    },
+    {
+      "resource": "deed_pair_armillary",
+      "category": "Existing deed pairs",
+      "path": "app/src/main/res/drawable-nodpi/deed_pair_armillary.webp",
+      "format": "webp",
+      "width": 920,
+      "height": 1120,
+      "bytes": 649340,
+      "sha256": "2e09abef6cbe1bcf6f8443c2fabf3696ec9ff07b618be5c5fa82a28c44799a85",
+      "rgba_sha256": "559fe2f3e92eaf5fc66eb541c2a4e395f771afd734c46430ad1c805d02d977aa",
+      "alpha_bounds": [
+        1,
+        116,
+        910,
+        1020
+      ],
+      "note": "Existing tracked repository artwork, catalogued without changing resource bytes. Original Figma node/export provenance not recorded."
+    },
+    {
+      "resource": "deed_pair_astrolabe",
+      "category": "Existing deed pairs",
+      "path": "app/src/main/res/drawable-nodpi/deed_pair_astrolabe.webp",
+      "format": "webp",
+      "width": 920,
+      "height": 1120,
+      "bytes": 805644,
+      "sha256": "559996a02009161dec915ba956e39d8c33d807ed5eba6b623ddc7cf7eee0c02f",
+      "rgba_sha256": "9a0b4d6ea167684538aaee1c86837eb55e074c1d267f29c9781d854b414c3e7b",
+      "alpha_bounds": [
+        0,
+        115,
+        896,
+        1020
+      ],
+      "note": "Existing tracked repository artwork, catalogued without changing resource bytes. Original Figma node/export provenance not recorded."
+    },
+    {
+      "resource": "deed_pair_backpack",
+      "category": "Existing deed pairs",
+      "path": "app/src/main/res/drawable-nodpi/deed_pair_backpack.webp",
+      "format": "webp",
+      "width": 920,
+      "height": 1120,
+      "bytes": 326860,
+      "sha256": "47d098096645296c35dfbc1822f3b715a80bd31403ba907c948433efe750a46d",
+      "rgba_sha256": "6bbdee969ba50d4bd918c20a87bcfe8f0136c69fd9dec4b0a7a4d923995015f0",
+      "alpha_bounds": [
+        159,
+        236,
+        740,
+        886
+      ],
+      "note": "Existing tracked repository artwork, catalogued without changing resource bytes. Original Figma node/export provenance not recorded."
+    },
+    {
+      "resource": "deed_pair_key",
+      "category": "Existing deed pairs",
+      "path": "app/src/main/res/drawable-nodpi/deed_pair_key.webp",
+      "format": "webp",
+      "width": 920,
+      "height": 1120,
+      "bytes": 264096,
+      "sha256": "bc96d9dd6f8ae384a72ee2d57a8a80dcd04c025a1bb82465ed28752f1073800c",
+      "rgba_sha256": "b4facdc856c9d925f8ed2e9a444bfebafaf324c063690af4c70cb98518135378",
+      "alpha_bounds": [
+        35,
+        135,
+        875,
+        1001
+      ],
+      "note": "Existing tracked repository artwork, catalogued without changing resource bytes. Original Figma node/export provenance not recorded."
+    },
+    {
+      "resource": "deed_pair_loupe",
+      "category": "Existing deed pairs",
+      "path": "app/src/main/res/drawable-nodpi/deed_pair_loupe.webp",
+      "format": "webp",
+      "width": 920,
+      "height": 1120,
+      "bytes": 422506,
+      "sha256": "ecb5c20c5ea19a0e181c0b01e245e70273803816bcab8b8ad2ce7ea836800cd8",
+      "rgba_sha256": "fad85ce0fdc918319896618ab6809c5fcd4812676442059d5a63b8f116d9a64a",
+      "alpha_bounds": [
+        0,
+        137,
+        892,
+        1020
+      ],
+      "note": "Existing tracked repository artwork, catalogued without changing resource bytes. Original Figma node/export provenance not recorded."
+    },
+    {
+      "resource": "deed_pair_star_plate",
+      "category": "Existing deed pairs",
+      "path": "app/src/main/res/drawable-nodpi/deed_pair_star_plate.webp",
+      "format": "webp",
+      "width": 920,
+      "height": 1120,
+      "bytes": 616746,
+      "sha256": "59ae6075dcab02b970cb6258a6c3ad934d925f28e8d1ccaf40220e97f92cb143",
+      "rgba_sha256": "b23c6b471235b89badfeb4e38dad2deae69a48fb268d8e419cc2e7351f276b94",
+      "alpha_bounds": [
+        57,
+        268,
+        883,
+        905
+      ],
+      "note": "Existing tracked repository artwork, catalogued without changing resource bytes. Original Figma node/export provenance not recorded."
+    },
+    {
+      "resource": "deed_pair_tag",
+      "category": "Existing deed pairs",
+      "path": "app/src/main/res/drawable-nodpi/deed_pair_tag.webp",
+      "format": "webp",
+      "width": 920,
+      "height": 1120,
+      "bytes": 981946,
+      "sha256": "24cdade47e527bf1a6a0171e419f2670e3679c876d29ceb5a344b2ceb325044e",
+      "rgba_sha256": "52de0c049755cda2a17cc919a706e444aa07df107f82a862258a980256457ccb",
+      "alpha_bounds": [
+        57,
+        23,
+        920,
+        1120
+      ],
+      "note": "Existing tracked repository artwork, catalogued without changing resource bytes. Original Figma node/export provenance not recorded."
+    },
+    {
+      "resource": "deed_pair_telescope",
+      "category": "Existing deed pairs",
+      "path": "app/src/main/res/drawable-nodpi/deed_pair_telescope.webp",
+      "format": "webp",
+      "width": 920,
+      "height": 1120,
+      "bytes": 422050,
+      "sha256": "945bb6ff4af1877baa6d4b8edfaf111e52e3cff3418025956c86349fa2984e97",
+      "rgba_sha256": "fa6c0a324165d0a10a11b5b425f546aa93c38e8ddc9b4f97a1b4df0f8987f9ec",
+      "alpha_bounds": [
+        132,
+        10,
+        822,
+        1095
+      ],
+      "note": "Existing tracked repository artwork, catalogued without changing resource bytes. Original Figma node/export provenance not recorded."
     },
     {
       "resource": "onboarding_castle",

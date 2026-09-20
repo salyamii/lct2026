@@ -44,7 +44,8 @@ class GameEnginePersistenceTest {
         val session = GameSession(games, RoomStoryContentRepository(db), catalog, createInitialGameState())
         session.prepare()
         val before = games.read()!!
-        val result = session.dispatch(request(checkNotNull(session.advanceCommand(before)))) as EngineResult.Applied
+        assertTrue(session.dispatch(request(session.selectGoalCommand(before, catalog.goals.first().goalId))) is EngineResult.Applied)
+        val result = session.dispatch(request(checkNotNull(session.advanceCommand(games.read()!!)))) as EngineResult.Applied
         val intro = result.state.engine!!.currentEvent!!
         assertEquals(catalog.introductionId, intro.eventId)
         assertEquals(100L, result.state.economy.balance)
@@ -54,7 +55,7 @@ class GameEnginePersistenceTest {
         val restored = GameSession(games, RoomStoryContentRepository(db), catalog, createInitialGameState())
         restored.prepare()
         assertEquals(chosen.state, games.read())
-        assertEquals(14, RoomStoryContentRepository(db).read().events.count { it.id.startsWith("figma-") })
+        assertEquals(catalog.content.events.size, RoomStoryContentRepository(db).read().events.count { it.id.startsWith("figma-") })
         assertTrue(restored.dispatch(request(EngineCommand.AcknowledgeResult(intro.id))) is EngineResult.Applied)
         assertEquals(100L, games.read()!!.economy.balance)
     }

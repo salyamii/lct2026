@@ -34,4 +34,7 @@ internal data class GameStateEntity(
     @ColumnInfo(name = "current_day_id") val currentDayId: String?,
     @ColumnInfo(name = "next_script_position") val nextScriptPosition: Int?,
     @ColumnInfo(name = "active_event_id") val activeEventId: String?,
+    @ColumnInfo(name = "pet_name", defaultValue = "'Рыжик'") val petName: String,
+    @ColumnInfo(name = "pet_age", defaultValue = "'CUB'") val petAge: String,
+    @ColumnInfo(name = "pet_color", defaultValue = "'COPPER'") val petColor: String,
 )

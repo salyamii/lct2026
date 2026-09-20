@@ -50,9 +50,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 
 @Composable
-internal fun MenuActions(onAction: (MainMenuAction) -> Unit, viewport: DpSize, state: MainMenuUiState) {
+internal fun MenuActions(onAction: (MainMenuAction) -> Unit, viewport: DpSize, state: MainMenuUiState, modifier: Modifier = Modifier) {
     var panelPosition by remember { mutableStateOf(Offset.Zero) }
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         state.dayStatus?.let { status ->
             Text(
                 text = status,

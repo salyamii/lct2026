@@ -21,6 +21,7 @@ internal data class EngineStateEntity(
     @ColumnInfo(name = "ate_today") val ateToday: Boolean,
     @ColumnInfo(name = "next_morning_energy") val nextMorningEnergy: Int?,
     @ColumnInfo(name = "opening_balance") val openingBalance: Long,
+    @ColumnInfo(name = "opening_energy") val openingEnergy: Int? = null,
 )
 
 @Entity(

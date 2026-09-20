@@ -1,4 +1,12 @@
 pluginManagement {
+    resolutionStrategy {
+        eachPlugin {
+            // Both Android plugins ship in AGP; reuse it without a separate library marker.
+            if (requested.id.id == "com.android.library") {
+                requested.version?.let { useModule("com.android.tools.build:gradle:$it") }
+            }
+        }
+    }
     repositories {
         google {
             content {

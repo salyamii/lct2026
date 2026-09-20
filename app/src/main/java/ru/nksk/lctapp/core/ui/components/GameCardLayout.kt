@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,18 +28,21 @@ internal val GameInk = Color(0xFF171440)
 @Composable
 internal fun GameCardLayout(
     category: String,
-    @DrawableRes scene: Int,
+    @DrawableRes scene: Int?,
     @DrawableRes character: Int?,
     onBack: () -> Unit,
+    sceneDim: Float = 0f,
+    characterDescription: String? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     BoxWithConstraints(Modifier.fillMaxSize().background(AdventureNight)) {
         val landscape = maxWidth > maxHeight
         @Composable fun Stage(modifier: Modifier) {
             Box(modifier) {
-                Image(painterResource(scene), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                scene?.let { Image(painterResource(it), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
+                if (sceneDim > 0f) Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = sceneDim)))
                 character?.let {
-                    Image(painterResource(it), null, Modifier.fillMaxHeight(0.78f).fillMaxWidth(0.7f)
+                    Image(painterResource(it), characterDescription, Modifier.fillMaxHeight(0.78f).fillMaxWidth(0.7f)
                         .align(Alignment.BottomCenter).padding(bottom = 12.dp), contentScale = ContentScale.Fit)
                 }
                 Row(Modifier.statusBarsPadding().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -53,8 +57,10 @@ internal fun GameCardLayout(
         }
         @Composable fun Panel(modifier: Modifier) {
             Surface(modifier, color = GamePaper, shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)) {
-                Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding().padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp), content = content)
+                key(category) {
+                    Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding().padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp), content = content)
+                }
             }
         }
         if (landscape) Row(Modifier.fillMaxSize().safeDrawingPadding()) {
@@ -84,11 +90,14 @@ internal fun GameButton(text: String, enabled: Boolean = true, onClick: () -> Un
     }
 }
 
-@DrawableRes internal fun gameScene(key: String?): Int = when (key) {
+@DrawableRes internal fun gameScene(key: String?): Int? = when (key) {
     "observatory" -> R.drawable.location_observatory
     "pier" -> R.drawable.location_pier_day
     "fair" -> R.drawable.location_fair_day
-    else -> R.drawable.menu_village
+    "trail" -> R.drawable.location_trail_day
+    "workshop" -> R.drawable.location_workshop_day
+    "village", null -> R.drawable.menu_village
+    else -> null
 }
 
 @DrawableRes internal fun gameCharacter(key: String?): Int? = when (key) {

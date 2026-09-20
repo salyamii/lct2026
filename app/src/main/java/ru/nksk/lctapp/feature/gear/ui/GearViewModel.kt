@@ -33,7 +33,7 @@ internal class GearViewModel @Inject constructor(
                     val game = checkNotNull(saved) { "Inventory requires an existing save" }
                     // Read after ownership: newly acquired definitions must already be installed.
                     val catalog = content.read()
-                    mutableState.value = GearLoadState.Ready(gearUiState(game.ownedItems, catalog.items))
+                    mutableState.value = GearLoadState.Ready(gearUiState(game.ownedItems, catalog.items, game.pet.name))
                 }
             } catch (cancelled: CancellationException) {
                 throw cancelled

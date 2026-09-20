@@ -21,9 +21,10 @@ internal fun energyDescription(remaining: Int, maximum: Int): String = when {
     else -> "Сильно устал"
 }
 
-internal fun BlockReason.playerMessage(): String = when (this) {
-    BlockReason.MustEat -> "Рыжик проголодался. Сначала нужно поесть, затем можно продолжить."
-    BlockReason.MustSleep -> "Сил не хватает. Пора отдохнуть — оставшиеся события дождутся завтра."
+internal fun BlockReason.playerMessage(petName: String): String = when (this) {
+    BlockReason.InvalidPetName -> "Введи непустое имя в одну строку."
+    BlockReason.MustEat -> "$petName проголодался. Сначала нужно поесть, затем можно продолжить."
+    BlockReason.MustSleep -> "$petName устал. Сил на это действие не хватает. Сначала нужно отдохнуть — оставшиеся события дождутся завтра."
     BlockReason.StaleRevision -> "Игра уже изменилась. Данные обновлены, повтори действие."
     BlockReason.EventInProgress -> "Сначала закончи текущее событие или выбери «Вернуться позже»."
     BlockReason.OnlyShortDeedsAfterSchedule -> "Сегодня остались только короткие дела. Это дело можно выполнить завтра, если его срок ещё не закончится."
@@ -33,7 +34,12 @@ internal fun BlockReason.playerMessage(): String = when (this) {
     BlockReason.DayFinished -> "День завершён. Новые дела можно выполнить после отдыха."
     BlockReason.NoNextEvent -> "Все события на сегодня закончились."
     BlockReason.PreviousLoreIncomplete -> "Сначала нужно завершить предыдущий шаг истории."
+    BlockReason.StoryConditionsNotMet -> "Для этой сцены ещё нужны открытия или действия. Продолжай историю."
     BlockReason.ChapterGoalIncomplete -> "Для продолжения нужен весь комплект большой цели."
+    BlockReason.GoalUnavailable -> "Эта цель пока недоступна. Выбери одну из открытых целей."
+    BlockReason.GoalAlreadySelected -> "Большая цель уже выбрана."
+    BlockReason.ItemAlreadyOwned -> "Эта часть комплекта уже куплена."
+    is BlockReason.FoodBudgetWarning -> "Останется $remainingBalance монет, а на еду до конца недели нужно $neededForFood."
     is BlockReason.MissingItems -> "Для этого события ещё нужны предметы."
     is BlockReason.InsufficientMoney -> "Не хватает $missing монет. Можно вернуться к делам и заработать."
     BlockReason.InvalidEventAction -> "Это действие уже недоступно. Открой событие заново."

@@ -1,5 +1,7 @@
 package ru.nksk.lctapp.feature.day.ui
 
+import ru.nksk.lctapp.domain.pet.renderPetText
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,6 +14,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ru.nksk.lctapp.core.ui.game.playerMessage
 import ru.nksk.lctapp.core.ui.game.energyDescription
+import ru.nksk.lctapp.core.ui.game.restingPetArtwork
 import ru.nksk.lctapp.domain.content.EventType
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
@@ -27,7 +30,11 @@ internal data class DayUiState(
     val primary: String? = null, val primaryNeedsFood: Boolean = false,
     val showMeals: Boolean = false,
     val meals: List<MealOption> = emptyList(), val message: String? = null,
+    val actionNotice: String? = null,
     val weeklyReminder: String? = null,
+    val petName: String = "",
+    val summary: DaySummaryUiState? = null,
+    val restingPetRes: Int? = null,
 )
 
 internal sealed interface DayAction {
@@ -115,7 +122,13 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
                 when (val result = session.dispatch(EngineRequest(UUID.randomUUID().toString(), saved.engine?.revision, command))) {
                     is EngineResult.Applied -> {
                         game = result.state
-                        if (fed) { mealsShown = false; message = "Рыжик поел. Можно продолжить." }
+                        if (fed) {
+                            mealsShown = false
+                            message = "${result.state.pet.name} поел. " +
+                                if (primaryCommand(result.state) is EngineCommand.FinishDayFromEvent)
+                                    "Теперь можно закончить день — оставшиеся события перенесём на завтра."
+                                else "Можно продолжить."
+                        }
                         if (openGame) {
                             exitRequested = true
                             games.send(checkNotNull(result.state.engine?.currentEvent).id)
@@ -126,7 +139,7 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
                         }
                     }
                     is EngineResult.Blocked -> {
-                        message = result.reason.playerMessage()
+                        message = result.reason.playerMessage(saved.pet.name)
                         if (result.reason == BlockReason.MustEat) mealsShown = true
                     }
                 }
@@ -160,8 +173,13 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
 
     private fun primaryCommand(saved: GameState): EngineCommand? {
         val occurrence = saved.engine?.currentEvent
-        return if (occurrence?.status == EventStatus.RESULT && !isProposal(saved)) EngineCommand.AcknowledgeResult(occurrence.id)
-        else session.advanceCommand(saved)
+        if (occurrence?.status == EventStatus.RESULT && !isProposal(saved)) return EngineCommand.AcknowledgeResult(occurrence.id)
+        if (occurrence != null) {
+            val rest = EngineCommand.FinishDayFromEvent(occurrence.id)
+            val blocked = session.engine.blockReason(saved, rest)
+            if (blocked == null || blocked == BlockReason.MustEat) return rest
+        }
+        return session.advanceCommand(saved)
     }
 
     private fun render() {
@@ -174,61 +192,72 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
         val catalog = session.catalog
         val event = occurrence?.let { catalog.content.events.single { e -> e.id == it.eventId } }
         val card = event?.let { catalog.cards[it.id] }
+        val variant = card?.variants?.firstOrNull { catalog.storyProgress(saved).meets(it.condition) }
         val result = occurrence?.status == EventStatus.RESULT && !isProposal(saved)
         val choices = if (event != null && !result) catalog.content.choices.filter { it.eventId == event.id }.sortedBy { it.position } else emptyList()
         val blocked = choices.associate { it.id to session.engine.blockReason(saved, choiceCommand(saved, it.id)) }
         val primary = primaryCommand(saved)
         val primaryBlock = primary?.let { session.engine.blockReason(saved, it) }
+        val restFromCard = primary is EngineCommand.FinishDayFromEvent
         val summary = session.engine.daySummary(saved)
         val completedChoice = occurrence?.let { active -> saved.story.decisions.find { it.id == "${active.id}:decision" } }
             ?.let { decision -> catalog.content.choices.find { it.id == decision.choiceId } }
         val body = when {
-            summary != null -> buildString {
-                append("Баланс: ${summary.openingBalance} → ${summary.closingBalance} монет\n")
-                append("За день: ${summary.closingBalance - summary.openingBalance} монет · Шагов: ${summary.steps}\n")
-                append(if (summary.completedLoreEventIds.isEmpty()) "Новых шагов истории сегодня нет." else
-                    "История: " + summary.completedLoreEventIds.joinToString { id -> catalog.content.events.single { it.id == id }.title })
-                val carried = day!!.events.count { it.status == EventStatus.CARRIED || it.status == EventStatus.CARRIED_ACTIVE }
-                if (carried > 0) append("\nНа завтра перенесено событий: $carried.")
-            }
-            result -> if (event?.type == EventType.EARNING) "Дело выполнено. Получено ${completedChoice?.moneyDelta ?: 0} монет. Сейчас Рыжик ${energyDescription(checkNotNull(day).energy, catalog.rules.fullEnergy).lowercase()}."
+            summary != null -> "${saved.pet.name} отдыхает."
+            result -> if (event?.type == EventType.EARNING) "Дело выполнено. Получено ${completedChoice?.moneyDelta ?: 0} монет. Сейчас ${saved.pet.name} ${energyDescription(checkNotNull(day).energy, catalog.rules.fullEnergy).lowercase()}."
                 else "Этот шаг истории завершён."
-            event != null -> event.description
-            day == null -> "В начале недели у Рыжика 100 монет. Еда стоит 5 монет в день: на неделю нужно запланировать минимум 35. Деньги остаются общими — план не блокирует покупки."
+            event != null -> renderPetText(variant?.body ?: event.description, saved.pet.name)
+            day == null -> "${saved.pet.name} начинает неделю со 100 монетами. Еда стоит 5 монет в день: на неделю нужно запланировать минимум 35. Деньги остаются общими — план не блокирует покупки."
             day.phase == DayPhase.READY_TO_END -> "Все события на сегодня закончились. До сна ещё можно выполнить короткое дело из списка «Дела»."
-            day.energy == 0 -> "Рыжик устал. Оставшийся план перенесётся на завтра." +
+            day.energy == 0 -> "${saved.pet.name} устал. Оставшийся план перенесётся на завтра." +
                 if (day.ateToday) " Можно отдохнуть." else " Перед сном нужно поесть."
-            else -> "Рыжик готов продолжить день."
+            else -> "${saved.pet.name} готов продолжить день."
         }
         val mealPrice = catalog.meals.first { it.price > 0 }.price
         val foodWarning = if (day?.ateToday == false && choices.any {
             it.moneyDelta < 0 && blocked[it.id] == null && saved.economy.balance + it.moneyDelta < mealPrice
-        }) "После этой траты на обычный обед не хватит. Рыжику ещё нужно поесть сегодня." else null
-        val effectiveMessage = message ?: blocked.values.firstOrNull { it != null && it != BlockReason.MustEat }?.playerMessage()
-            ?: foodWarning
-            ?: primaryBlock?.playerMessage()
+        }) "После этой траты на обычный обед не хватит. ${saved.pet.name} ещё не поел сегодня." else null
+        // Derive the explanation from the same guards that replace the button. Keep it separate
+        // from transient feedback so a save error or feeding message cannot hide the current need.
+        val actionNotice = when {
+            restFromCard || (primary == EngineCommand.FinishDay && (day?.energy == 0 ||
+                session.engine.blockReason(saved, EngineCommand.OpenNextEvent) == BlockReason.MustSleep)) ->
+                if (primaryBlock == BlockReason.MustEat) "${saved.pet.name} устал. Перед отдыхом нужно поесть, затем можно закончить день. Оставшиеся события перенесём на завтра."
+                else BlockReason.MustSleep.playerMessage(saved.pet.name)
+            primaryBlock == BlockReason.MustEat || blocked.values.any { it == BlockReason.MustEat } ->
+                BlockReason.MustEat.playerMessage(saved.pet.name)
+            else -> null
+        }
+        val choiceBlock = blocked.values.takeIf { reasons -> reasons.none { it == null } }
+            ?.firstOrNull { it != null && it != BlockReason.MustEat }
+        val effectiveMessage = message?.takeUnless { it == actionNotice }
+            ?: if (actionNotice == null) choiceBlock?.playerMessage(saved.pet.name)
+                ?: foodWarning ?: primaryBlock?.playerMessage(saved.pet.name) else null
         mutableState.value = DayUiState(
-            loading = false, busy = busy,
-            title = when { summary != null -> "День ${summary.day} завершён"; result -> "Готово!"; event != null -> event.title; day != null -> "День ${day.day}"; else -> "Новый день" },
-            body = body, category = if (summary != null) "Итоги дня" else card?.category ?: "Рыжик",
-            status = "${day?.let { "День ${it.day} · ${energyDescription(it.energy, catalog.rules.fullEnergy)} · " }.orEmpty()}${saved.economy.balance} монет",
-            impact = if (result) "" else if (isDeed(saved)) "Награда: до ${choices.single().moneyDelta} монет" else card?.impact.orEmpty(),
-            effort = if (result) "" else card?.effort.orEmpty(),
-            footer = card?.footer.orEmpty(), scene = card?.scene, character = card?.character,
-            options = choices.map { DayOption(it.id, if (isDeed(saved)) "Выполнить дело" else it.text,
+            loading = false, busy = busy, petName = saved.pet.name,
+            summary = summary?.toUiState(catalog, saved.pet.name),
+            restingPetRes = summary?.let { restingPetArtwork(saved.pet) },
+            title = when { summary != null -> "День ${summary.day} завершён"; result -> "Готово!"; event != null -> renderPetText(event.title, saved.pet.name); day != null -> "День ${day.day}"; else -> "Новый день" },
+            body = body, category = if (summary != null) "Итоги дня" else card?.category?.let { renderPetText(it, saved.pet.name) } ?: saved.pet.name,
+            status = if (summary != null) "" else "${day?.let { "День ${it.day} · ${energyDescription(it.energy, catalog.rules.fullEnergy)} · " }.orEmpty()}${saved.economy.balance} монет",
+            impact = if (result) "" else if (isDeed(saved)) "Награда: до ${choices.single().moneyDelta} монет" else renderPetText(card?.impact.orEmpty(), saved.pet.name),
+            effort = if (result) "" else renderPetText(card?.effort.orEmpty(), saved.pet.name),
+            footer = renderPetText(card?.footer.orEmpty(), saved.pet.name), scene = variant?.scene ?: card?.scene, character = variant?.character ?: card?.character,
+            options = (if (restFromCard) emptyList() else choices).map { DayOption(it.id, if (isDeed(saved)) "Выполнить дело" else renderPetText(it.text, saved.pet.name),
                 blocked[it.id] == BlockReason.MustEat, blocked[it.id] == null || blocked[it.id] == BlockReason.MustEat) },
-            later = if (event != null && !result) { if (card != null) card.later else "Вернуться позже" } else null,
+            later = if (event != null && !result) { if (card != null) card.later?.let { renderPetText(it, saved.pet.name) } else "Вернуться позже" } else null,
             primary = primary?.let { when {
                 primaryBlock == BlockReason.MustEat -> "Покормить"
                 result -> "Вернуться"
-                summary != null || day == null -> "Начать день"
-                it == EngineCommand.FinishDay -> "Закончить день"
+                summary != null -> "Начать день ${summary.day.toLong() + 1}"
+                day == null -> "Начать день 1"
+                it == EngineCommand.FinishDay || restFromCard -> "Закончить день"
                 else -> "Продолжить день"
             } }, primaryNeedsFood = primaryBlock == BlockReason.MustEat,
             showMeals = mealsShown,
             meals = catalog.meals.filter { it.price > 0 || saved.economy.balance < catalog.meals.first().price }.map {
                 MealOption(it.id, if (it.price == 0L) "Бесплатная столовая · завтра меньше сил" else "Обычный обед · ${it.price} монет", saved.economy.balance >= it.price)
-            }, message = effectiveMessage,
+            }, message = effectiveMessage, actionNotice = actionNotice,
             weeklyReminder = day?.takeIf { (it.day - 1) % 7 == 0 && it.steps <= 1 && summary == null }?.let {
                 val mealPrice = catalog.meals.first { meal -> meal.price > 0 }.price
                 "На неделю — ${catalog.rules.weeklyIncome} монет. На ежедневную еду запланируй минимум ${mealPrice * 7}. Деньги остаются общими, поэтому учитывай и будущие поездки."

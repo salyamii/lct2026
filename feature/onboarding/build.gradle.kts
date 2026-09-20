@@ -17,6 +17,23 @@ android {
 }
 
 dependencies {
+    constraints {
+        implementation(libs.androidx.core.ktx) {
+            because("Use the app's Core version when compiling this feature independently.")
+        }
+        implementation(libs.androidx.activity.runtime) {
+            because("Align Hilt's transitive Activity dependency with the app.")
+        }
+        implementation(libs.androidx.navigationevent) {
+            because("Use the same NavigationEvent version as the app's Navigation 3 host.")
+        }
+        implementation(libs.androidx.compose.runtime) {
+            because("Navigation 3 selects a newer Compose runtime than the BOM alone.")
+        }
+        implementation(libs.kotlinx.serialization.core) {
+            because("Align SavedState's transitive serialization with the app.")
+        }
+    }
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material3)

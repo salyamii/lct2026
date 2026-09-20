@@ -11,7 +11,7 @@ import androidx.compose.ui.test.FontScale
 import androidx.compose.ui.test.ForcedSize
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
-import androidx.compose.ui.test.assertHeightIsEqualTo
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasClickAction
@@ -84,7 +84,7 @@ class MainMenuScreenTest {
     }
 
     @Test
-    fun villageAcceptsTouchesOnlyInsideItsVisiblePill() {
+    fun villageAcceptsTouchesOnlyInsideItsFloatingButton() {
         val selections = mutableListOf<MainMenuAction>()
         compose.setContent {
             DeviceConfigurationOverride(DeviceConfigurationOverride.FontScale(1f)) {
@@ -92,16 +92,17 @@ class MainMenuScreenTest {
             }
         }
         val village = compose.onNode(
-            hasText(compose.activity.getString(R.string.menu_village)) and hasClickAction(),
+            hasContentDescription(compose.activity.getString(R.string.menu_village)) and hasClickAction(),
         )
-        village.assertIsDisplayed().assertHeightIsEqualTo(34.dp)
+        village.assertIsDisplayed()
         val bounds = village.fetchSemanticsNode().boundsInRoot
         val root = compose.onRoot()
         val origin = root.fetchSemanticsNode().boundsInRoot.topLeft
+        assertEquals(root.fetchSemanticsNode().boundsInRoot.right, bounds.right, 1f)
         val edgeInset = with(compose.density) { 1.dp.toPx() }
         val outsideGap = with(compose.density) { 4.dp.toPx() }
 
-        // These points are inside the old 48dp wrapper, but outside the visible 34dp pill.
+        // The surrounding scene must not open the village.
         root.performTouchInput {
             click(Offset(bounds.center.x, bounds.top - outsideGap) - origin)
             click(Offset(bounds.center.x, bounds.bottom + outsideGap) - origin)
@@ -135,11 +136,15 @@ class MainMenuScreenTest {
         }
 
         fun label(id: Int) = hasText(compose.activity.getString(id))
+        val name = compose.onNodeWithText(MainMenuPreviewState.pet.name)
+        name.assertIsDisplayed().assertHasNoClickAction()
+        name.performTouchInput { click() }
+        compose.runOnIdle { assertEquals(emptyList<MainMenuAction>(), selections) }
         val actions = listOf(
-            label(R.string.menu_current_goal) to MainMenuAction.Goal,
+            hasText(MainMenuPreviewState.goalTitle) to MainMenuAction.Goal,
             hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility, 100)) to
                 MainMenuAction.Coins,
-            label(R.string.menu_village) to MainMenuAction.Village,
+            hasContentDescription(compose.activity.getString(R.string.menu_village)) to MainMenuAction.Village,
             label(R.string.menu_gear) to MainMenuAction.Gear,
             label(R.string.menu_tasks) to MainMenuAction.Tasks,
             label(R.string.menu_goal) to MainMenuAction.Goal,
@@ -147,7 +152,7 @@ class MainMenuScreenTest {
         )
         actions.forEach { (label, destination) ->
             val action = compose.onNode(label and hasClickAction())
-            if (scrollToActions) action.performScrollTo()
+            if (scrollToActions && destination != MainMenuAction.Village) action.performScrollTo()
             action.assertIsDisplayed()
                 .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
                 .performClick()

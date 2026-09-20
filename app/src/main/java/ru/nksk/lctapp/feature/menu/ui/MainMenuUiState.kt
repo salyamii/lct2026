@@ -1,6 +1,7 @@
 package ru.nksk.lctapp.feature.menu.ui
 
-import ru.nksk.lctapp.R
+import ru.nksk.lctapp.domain.pet.PetState
+import ru.nksk.lctapp.domain.pet.PetVisualState
 
 /** Values rendered by the menu; this is presentation state, not a saved game. */
 data class MainMenuUiState(
@@ -15,6 +16,7 @@ data class MainMenuUiState(
     val notice: String? = null,
     val mealPrice: Long? = null,
     val showFreeMeal: Boolean = false,
+    val goalTitle: String = "Выбрать большую цель",
 )
 
 /** Preview-only presentation fixture. Runtime state comes from MainMenuViewModel. */
@@ -22,7 +24,7 @@ internal val MainMenuPreviewState = MainMenuUiState(
     coins = 100L,
     completedGoals = 0,
     totalGoals = 4,
-    pet = MainMenuPetUiState(R.drawable.menu_ryzhik, R.string.menu_fox_description),
+    pet = PetState("PLAIN", PetVisualState.NORMAL).toMainMenuPetUiState(),
 )
 
 /** UI intents are handled by the app host; the menu stays independent of navigation. */
