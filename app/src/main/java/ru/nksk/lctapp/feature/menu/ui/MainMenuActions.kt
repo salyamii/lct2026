@@ -77,7 +77,7 @@ internal fun MenuActions(onAction: (MainMenuAction) -> Unit, viewport: DpSize, s
                 .onGloballyPositioned { panelPosition = it.positionInRoot() }
                 .border(1.dp, Color.White.copy(alpha = 0.16f), RoundedCornerShape(34.dp)),
         ) {
-            FrostedVillagePanel(viewport, panelPosition, Modifier.matchParentSize())
+            FrostedVillagePanel(viewport, panelPosition, Modifier.matchParentSize(), state.backgroundRes)
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 2.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,

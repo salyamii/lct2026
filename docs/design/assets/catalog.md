@@ -450,3 +450,24 @@ SVG-оригиналы лежат рядом с каталогом. Контур
 | `introduction_reserve` | Vector XML, 30 × 30 | [Figma 2186:679](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2186-679) |
 
 SVG-оригиналы сохранены рядом; точные контуры перенесены в Android XML. Хеши в manifest.
+
+## Generated map background
+
+| Android resource | Canvas | File | Source |
+| --- | --- | --- | --- |
+| `R.drawable.map_adventure_day` | 853 × 1844 | [map_adventure_day.webp](../../../app/src/main/res/drawable-nodpi/map_adventure_day.webp) | [Generated source and prompt](sources/map_adventure_day.md), 2026-09-20; no Figma source node |
+
+Full canvas, lossless exact WebP, no resizing. Illustration contains all nine
+preview landmarks; labels and markers are rendered separately in Compose.
+
+## Generated evening locations
+
+Built-in imagegen lighting edits, 2026-09-20. [PNG sources and exact prompts](sources/location-evenings.md). Full generated canvas, lossless exact WebP, no resizing. The original daytime resources are preserved.
+
+| Android resource | Canvas | File | Daytime reference |
+| --- | --- | --- | --- |
+| `R.drawable.location_city_evening` | 941 × 1672 | [location_city_evening.webp](../../../app/src/main/res/drawable-nodpi/location_city_evening.webp) | `location_city` |
+| `R.drawable.location_gates_evening` | 941 × 1671 | [location_gates_evening.webp](../../../app/src/main/res/drawable-nodpi/location_gates_evening.webp) | `location_gates` |
+| `R.drawable.location_windmill_evening` | 941 × 1672 | [location_windmill_evening.webp](../../../app/src/main/res/drawable-nodpi/location_windmill_evening.webp) | `location_windmill` |
+
+Observatory already has a night image (`location_observatory`); its daytime counterpart remains unavailable. The five existing Figma day/evening pairs are unchanged.

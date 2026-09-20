@@ -24,7 +24,7 @@ import ru.nksk.lctapp.feature.tasks.navigation.PriceCheck
 import ru.nksk.lctapp.feature.tasks.navigation.Telescope
 import ru.nksk.lctapp.feature.tasks.navigation.Tasks
 import ru.nksk.lctapp.feature.tasks.navigation.DeedGame
-import ru.nksk.lctapp.feature.village.navigation.Village
+import ru.nksk.lctapp.feature.map.navigation.GameMap
 
 /** Compatibility with the Navigation 3 Android serializer used before the package cleanup. */
 @RunWith(AndroidJUnit4::class)
@@ -38,7 +38,7 @@ class NavigationKeyCompatibilityTest {
         "ru.nksk.lctapp.ui.gear.navigation.Gear" to Gear,
         "ru.nksk.lctapp.ui.goal.navigation.Goal" to Goal,
         "ru.nksk.lctapp.ui.tasks.navigation.Tasks" to Tasks,
-        "ru.nksk.lctapp.ui.village.navigation.Village" to Village,
+        "ru.nksk.lctapp.ui.village.navigation.Village" to GameMap,
     )
 
     @Test
@@ -71,7 +71,7 @@ class NavigationKeyCompatibilityTest {
             "tasks_price_check" to PriceCheck,
             "tasks_telescope" to Telescope,
             "deed_game" to DeedGame("day-1:proposal:offer:execution"),
-            "village" to Village,
+            "village" to GameMap,
         )
         for ((id, route) in stableRoutes) {
             val encoded = encodeToSavedState(serializer, route, configuration)

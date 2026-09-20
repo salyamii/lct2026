@@ -36,6 +36,15 @@ labels are not runtime artwork and are excluded.
 
 ## Resource locations
 
+The 2026-09-20 generated additions include the adventure map background and
+evening variants of city, gates and windmill. They are imagegen derivatives,
+not Figma exports. Their PNG sources and prompts are retained under `sources/`;
+the catalog and manifest record reference resources, dimensions and hashes.
+The generated gates canvas is 941 × 1671 (one row shorter than the 941 × 1672
+reference); it is preserved without resizing or padding. These are background
+alternatives, not aligned character layers. Observatory already has night art;
+its daytime counterpart is still unavailable.
+
 Paths below are relative to the repository root. Android assigns `R` IDs to
 resources in `res`; files in `assets` are accessed differently. Follow the
 [Android resource directory rules](https://developer.android.com/guide/topics/resources/providing-resources#ResourceTypes).

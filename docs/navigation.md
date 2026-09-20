@@ -248,3 +248,12 @@ and selected accessory; only Start on Introduction commits a game and opens LctN
 Introduction follows accessory confirmation (CUST-D-018); Back returns to
 Accessories. The persisted INTRODUCTION step uses the Room v13 text
 column. No additional migration or Navigation 3 key is needed.
+
+## Карта — 2026-09-20
+
+`feature/map/navigation/GameMap` заменяет заглушку Village. Стабильный serial ID
+`village` и чтение старого имени `ru.nksk.lctapp.ui.village.navigation.Village`
+сохранены. Ключ не содержит игровое состояние. Кнопка карты меню открывает
+mapEntry; после успешного сохранения AppNavigator возвращает к корню меню.
+MapViewModel получает GameLocationController через Hilt; entry собирает состояние
+с lifecycle и обрабатывает завершение только в RESUMED. UI получает callbacks.

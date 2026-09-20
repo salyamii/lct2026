@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.domain.game
 
+import ru.nksk.lctapp.domain.location.LocationScene
 import ru.nksk.lctapp.domain.economy.EconomyState
 import ru.nksk.lctapp.domain.pet.PetState
 import ru.nksk.lctapp.domain.story.StoryState
@@ -20,6 +21,7 @@ data class GameState(
     val completedMiniGames: Set<String> = emptySet(),
     val selectedGoalId: String? = null,
     val completedGoalProjects: List<CompletedGoalProject> = emptyList(),
+    val locationScene: LocationScene = LocationScene(),
 ) {
     init {
         require(completedGoalProjects.map { it.decisionId }.distinct().size == completedGoalProjects.size)

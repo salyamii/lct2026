@@ -14,7 +14,7 @@ import ru.nksk.lctapp.feature.tasks.navigation.PriceCheck
 import ru.nksk.lctapp.feature.tasks.navigation.Telescope
 import ru.nksk.lctapp.feature.tasks.navigation.Tasks
 import ru.nksk.lctapp.feature.tasks.navigation.DeedGame
-import ru.nksk.lctapp.feature.village.navigation.Village
+import ru.nksk.lctapp.feature.map.navigation.GameMap
 
 /** Saves stable route IDs and can read the former Android serializer's JVM class names. */
 internal val AppNavigationSavedStateConfiguration = SavedStateConfiguration {
@@ -30,7 +30,7 @@ internal val AppNavigationSavedStateConfiguration = SavedStateConfiguration {
             subclass(StarPlates::class, StarPlates.serializer())
             subclass(PriceCheck::class, PriceCheck.serializer())
             subclass(Telescope::class, Telescope.serializer())
-            subclass(Village::class, Village.serializer())
+            subclass(GameMap::class, GameMap.serializer())
 
             // Read-only migration; new saves always use each key's @SerialName.
             defaultDeserializer { className ->
@@ -41,7 +41,7 @@ internal val AppNavigationSavedStateConfiguration = SavedStateConfiguration {
                     "ru.nksk.lctapp.ui.gear.navigation.Gear" -> Gear.serializer()
                     "ru.nksk.lctapp.ui.goal.navigation.Goal" -> Goal.serializer()
                     "ru.nksk.lctapp.ui.tasks.navigation.Tasks" -> Tasks.serializer()
-                    "ru.nksk.lctapp.ui.village.navigation.Village" -> Village.serializer()
+                    "ru.nksk.lctapp.ui.village.navigation.Village" -> GameMap.serializer()
                     else -> null
                 }
             }

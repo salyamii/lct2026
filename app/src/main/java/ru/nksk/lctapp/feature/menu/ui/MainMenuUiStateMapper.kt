@@ -13,6 +13,7 @@ internal fun GameState.toMainMenuUiState(fullEnergy: Int = 5, catalog: GameCatal
     val progress = goal?.progress(this, catalog.content)
     return MainMenuUiState(
     coins = economy.balance,
+    backgroundRes = ru.nksk.lctapp.core.ui.location.locationArtwork(locationScene),
     completedGoals = progress?.boughtCount ?: 0,
     totalGoals = progress?.items?.size ?: 0,
     goalTitle = goal?.let { selected -> renderPetText(catalog.content.goals.first { it.id == selected.goalId }.title, pet.name) }
