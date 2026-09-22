@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Test
 import ru.nksk.lctapp.domain.content.*
+import ru.nksk.lctapp.domain.economy.*
 import ru.nksk.lctapp.domain.economy.BudgetPlan
 import ru.nksk.lctapp.domain.economy.EconomyState
 import ru.nksk.lctapp.domain.game.GameRepository
@@ -316,9 +317,11 @@ class GameEngineTest {
         val engine = GameEngine(f.repo, f.factory, f.rules.copy(weeklyIncome = 100))
         assertNotNull(engine.daySummary(f.state))
         assertEquals(balance, f.state.economy.balance)
-        val request = f.request(EngineCommand.BeginDay("day", List(4) { "quiet" }))
+        val request = f.request(EngineCommand.BeginDay("day", List(4) { "quiet" }, openFirst = true))
         assertTrue(engine.dispatch(request) is EngineResult.Applied)
         assertEquals(balance + 100, f.state.economy.balance)
+        assertNull(f.day.currentEvent)
+        assertEquals(BudgetPlanningStage.RECEIPT, f.state.economy.planning!!.stage)
         assertEquals(100L, f.day.journal.single { it.kind == DayJournalKind.WEEKLY_INCOME }.moneyDelta)
         assertEquals(EngineResult.Blocked(BlockReason.StaleRevision), engine.dispatch(request))
     }
@@ -607,6 +610,237 @@ class GameEngineTest {
         assertEquals(after, f.state)
     }
 
+    @Test fun weeklyPlanningBlocksFirstEventAndEveryGameplayCommand() = runTest {
+        val f = Fixture()
+        f.begin()
+        f.repo.update { it.copy(economy = EconomyOperations.weekly(it.economy, "week:8", 100)) }
+        val before = f.state
+        listOf(EngineCommand.OpenNextEvent, EngineCommand.Feed("free"), EngineCommand.FinishDay,
+            EngineCommand.StartDeed("fake"), EngineCommand.BuyGoalItem("goal", "rope")).forEach {
+            assertEquals(BlockReason.BudgetPlanningRequired, f.blocked(it))
+            assertEquals(before, f.state)
+        }
+    }
+
+    @Test fun earningContentRejectsStartCostAndAnyPaidAnswer() {
+        val f = Fixture()
+        val paidStart = f.content.copy(events = f.content.events.map {
+            if (it.id == "small") it.copy(moneyDeltaOnStart = -1) else it
+        })
+        assertThrows(IllegalArgumentException::class.java) { EventFactory(paidStart, f.policies, emptyList()) }
+        val paidAnswer = f.content.copy(choices = f.content.choices.map {
+            if (it.eventId == "small") it.copy(moneyDelta = -1) else it
+        })
+        assertThrows(IllegalArgumentException::class.java) { EventFactory(paidAnswer, f.policies, emptyList()) }
+    }
+
+    @Test fun firstDayPreviewExplainsEntryCostWithoutOpeningOrSpending() = runTest {
+        val f = Fixture()
+        val content = f.content.copy(events = f.content.events.map {
+            if (it.id == "reward") it.copy(type = EventType.WANT, moneyDeltaOnStart = -7) else it
+        })
+        val engine = GameEngine(f.repo, EventFactory(content,
+            f.policies + ("reward" to EventPolicy(0, startEffectsTiming = EffectTiming.OPEN)), emptyList()), f.rules)
+        val before = f.state
+        val quote = engine.advanceSpending(before, EngineCommand.BeginDay("day", listOf("reward", "quiet", "quiet", "quiet"), true))!!
+        assertEquals(SpendingKind.WANT, quote.kind)
+        assertEquals(7L, quote.quote.parts.sumOf { it.amount })
+        assertEquals(before, f.state)
+        assertNull(f.state.engine)
+    }
+
+    @Test fun migrationCorrectionIsSeparateFromDayActivityAndResetsNextMorning() = runTest {
+        val f = Fixture(balance = 20)
+        f.begin()
+        val originalOpening = f.day.openingBalance
+        f.repo.update { it.copy(economy = it.economy.copy(plan = it.economy.plan.copy(reserve = 15)),
+            engine = it.engine!!.copy(balanceAdjustment = 15)) }
+        f.completePlan()
+        f.endFedDay()
+        val summary = f.engine.daySummary(f.state)!!
+        assertEquals(originalOpening, summary.openingBalance)
+        assertEquals(15L, summary.balanceAdjustment)
+        assertEquals(-4L, summary.journal.sumOf { it.moneyDelta })
+        assertEquals(summary.journal.sumOf { it.moneyDelta },
+            summary.closingBalance - summary.openingBalance - summary.balanceAdjustment)
+        f.begin()
+        assertEquals(0L, f.day.balanceAdjustment)
+        assertEquals(31L, f.day.openingBalance)
+    }
+
+    @Test fun pendingBudgetPreservesActiveAndResultUntilTheirOriginalCommandsCanResume() = runTest {
+        for (resultSaved in listOf(false, true)) {
+            val f = Fixture()
+            f.begin(listOf("reward", "quiet", "quiet", "quiet"))
+            f.apply(EngineCommand.OpenNextEvent)
+            if (resultSaved) f.choose()
+            val original = f.state
+            val occurrence = f.day.currentEvent!!
+            val command = if (resultSaved) EngineCommand.AcknowledgeResult(occurrence.id)
+                else EngineCommand.PauseEvent(occurrence.id)
+            val stale = f.request(command)
+            f.repo.update { current ->
+                current.copy(economy = EconomyState(BudgetPlan(0, 0, 0, 0), current.economy.balance,
+                    BudgetPlanning("migration", BudgetPlanningReason.MIGRATION, BudgetPlanningStage.ALLOCATION, 0)),
+                    engine = current.engine!!.copy(revision = current.engine.revision + 1))
+            }
+            val pending = f.state
+            assertEquals(BlockReason.BudgetPlanningRequired, f.blocked(command))
+            assertEquals(pending, f.state)
+            assertEquals(original.engine!!.events, f.day.events)
+            assertEquals(original.story, f.state.story)
+            f.repo.update { current ->
+                var economy = EconomyOperations.setAllocation(current.economy, "migration", 0, BudgetSection.NEEDS, 35)
+                economy = EconomyOperations.setAllocation(economy, "migration", 1, BudgetSection.RESERVE, economy.unallocated)
+                current.copy(economy = EconomyOperations.confirm(economy, "migration", 2),
+                    engine = current.engine!!.copy(revision = current.engine.revision + 1))
+            }
+            assertEquals(original.copy(economy = f.state.economy,
+                engine = original.engine.copy(revision = f.day.revision)), f.state)
+            assertEquals(EngineResult.Blocked(BlockReason.StaleRevision), f.newEngine().dispatch(stale))
+            assertTrue(f.newEngine().dispatch(f.request(command)) is EngineResult.Applied)
+            assertEquals(original.economy.balance, f.state.economy.balance)
+            assertEquals(original.engine.journal, f.day.journal)
+            assertEquals(original.engine.steps, f.day.steps)
+            assertEquals(original.engine.energy, f.day.energy)
+            assertEquals(original.story.decisions, f.state.story.decisions)
+            if (!resultSaved) {
+                f.apply(EngineCommand.OpenNextEvent)
+                assertEquals(occurrence, f.day.currentEvent)
+            } else assertNull(f.day.currentEvent)
+        }
+    }
+
+    @Test fun energyAndEarlySleepUseTheSameAffordabilityAsTheFormerSingleBalance() = runTest {
+        val types = listOf(EventType.STATE, EventType.RANDOM, EventType.WANT, EventType.STORY)
+        for (type in types) for (timing in EffectTiming.entries) {
+            val f = Fixture(energy = 1)
+            val content = f.content.copy(
+                events = f.content.events.map { if (it.id == "reward") it.copy(type = type, moneyDeltaOnStart = -2) else it },
+                choices = f.content.choices.map { if (it.id == "reward-choice") it.copy(moneyDelta = -4) else it } +
+                    EventChoiceDefinition("work", "reward", 1, "Work", 0, null, null, GoalImpact.NEUTRAL),
+            )
+            val engine = GameEngine(f.repo, EventFactory(content, f.policies + ("reward" to
+                EventPolicy(0, startEffectsTiming = timing, choiceEnergyCosts = mapOf("work" to 2))), emptyList()), f.rules)
+            f.begin(listOf("reward", "quiet", "quiet", "quiet"))
+            for (balance in listOf(2L, 3L, 4L, 5L, 6L, 7L)) for (section in BudgetSection.entries) {
+                for (status in listOf(EventStatus.PENDING, EventStatus.PAUSED, EventStatus.ACTIVE)) {
+                    val day = f.day.copy(ateToday = true, events = f.day.events.mapIndexed { i, e ->
+                        if (i == 0) e.copy(status = status) else e
+                    })
+                    val state = f.state.copy(
+                        economy = EconomyState(BudgetPlan(0, 0, 0, 0).withAmount(section, balance)),
+                        engine = day, story = f.state.story.copy(activeEventId = if (status == EventStatus.ACTIVE) "reward" else null),
+                    )
+                    // Former rule: an unapplied entry charge must be affordable before the paid answer.
+                    val entry = if (timing == EffectTiming.COMPLETE || status == EventStatus.PENDING) 2 else 0
+                    val canPayWithoutEnergy = balance >= entry + 4
+                    val command = if (status == EventStatus.ACTIVE)
+                        EngineCommand.FinishDayFromEvent(day.events.first().id) else EngineCommand.OpenNextEvent
+                    val expected = if (status == EventStatus.ACTIVE) {
+                        if (canPayWithoutEnergy) BlockReason.UnfinishedEvents else null
+                    } else if (canPayWithoutEnergy) null else BlockReason.MustSleep
+                    assertEquals("$type / $timing / $balance / $section / $status", expected, engine.blockReason(state, command))
+                    assertEquals(1, state.engine!!.energy)
+                }
+            }
+        }
+    }
+
+    @Test fun spendingPreviewUsesOriginalPriorityAndNeverChangesScheduledOrInsertedEvents() = runTest {
+        for (selected in listOf(false, true)) for (paused in listOf(false, true)) {
+            val f = Fixture()
+            val content = f.content.copy(
+                events = f.content.events.map { e -> e.copy(moneyDeltaOnStart = when (e.id) {
+                    "quiet" -> -3; "reward" -> -7; "lore" -> -11; else -> 0
+                }) },
+                items = f.content.items.map { it.copy(priceCoins = 10) },
+            )
+            val policies = f.policies.mapValues { (id, policy) ->
+                if (id in listOf("quiet", "reward", "lore")) policy.copy(startEffectsTiming = EffectTiming.OPEN) else policy
+            }
+            val goals = if (selected) listOf(GoalCampaign("goal", "lore", listOf("rope"))) else emptyList()
+            val engine = GameEngine(f.repo, EventFactory(content, policies, emptyList(), goals), f.rules)
+            f.begin(listOf("quiet", "reward", "quiet", "quiet"))
+            f.repo.update { it.copy(selectedGoalId = if (selected) "goal" else null,
+                engine = it.engine!!.copy(events = it.engine.events.map { e ->
+                    if (paused && e.eventId == "reward") e.copy(status = EventStatus.PAUSED) else e
+                })) }
+            val before = f.state
+            val expectedId = when { selected -> "lore"; paused -> "reward"; else -> "quiet" }
+            val expectedCost = when { selected -> 11L; paused -> 0L; else -> 3L }
+            val request = f.request(EngineCommand.OpenNextEvent)
+            val withoutPreview = engine.transition(before, request)
+            repeat(3) {
+                val preview = engine.nextEventSpendingPreview(before)
+                if (paused && !selected) assertNull(preview)
+                else assertEquals(expectedCost, preview!!.quote.parts.sumOf { it.amount })
+                assertEquals(before, f.state)
+            }
+            val applied = (engine.dispatch(request) as EngineResult.Applied).state
+            assertEquals(withoutPreview, applied)
+            assertEquals(expectedId, applied.engine!!.currentEvent!!.eventId)
+            assertEquals(expectedCost, before.economy.balance - applied.economy.balance)
+            if (!selected) assertEquals(before.engine!!.events.map { it.id }, applied.engine.events.map { it.id })
+        }
+    }
+
+    @Test fun paidEventsPreserveAllNonFinancialOutcomesAcrossDifferentAllocations() = runTest {
+        for (type in listOf(EventType.STATE, EventType.RANDOM, EventType.WANT, EventType.STORY)) {
+            for (timing in EffectTiming.entries) for (delta in listOf(-4L, 7L)) {
+                val f = Fixture()
+                val content = f.content.copy(
+                    events = f.content.events.map { if (it.id == "reward")
+                        it.copy(type = type, moneyDeltaOnStart = -6) else it },
+                    choices = f.content.choices.map { if (it.id == "reward-choice")
+                        it.copy(moneyDelta = delta, petStateAfter = PetVisualState.HAPPY) else it },
+                    items = f.content.items + ItemDefinition("ticket", "Ticket", ""),
+                    choiceItemEffects = listOf(ChoiceItemEffect("ticket-effect", "reward-choice", 0, "ticket", ItemOperation.ADD)),
+                )
+                val factory = EventFactory(content, f.policies + ("reward" to EventPolicy(1, startEffectsTiming = timing)),
+                    listOf(MealDefinition("basic", 4, null)))
+                val engine = GameEngine(f.repo, factory, f.rules)
+                f.begin(listOf("reward", "quiet", "quiet", "quiet"))
+                val original = f.state
+                fun play(plan: BudgetPlan): List<GameState> {
+                    var state = original.copy(economy = EconomyState(plan))
+                    val outcomes = mutableListOf<GameState>()
+                    var id = 0
+                    fun step(command: EngineCommand) {
+                        state = engine.transition(state, EngineRequest("regression:${++id}", state.engine!!.revision, command))
+                        outcomes += state.copy(economy = EconomyState(BudgetPlan(0, 0, 0, state.economy.balance)))
+                    }
+                    step(EngineCommand.OpenNextEvent)
+                    step(EngineCommand.PauseEvent(state.engine!!.currentEvent!!.id))
+                    step(EngineCommand.OpenNextEvent)
+                    step(EngineCommand.CompleteEvent(state.engine!!.currentEvent!!.id, "reward-choice"))
+                    assertEquals(100 - 6 + delta, state.economy.balance)
+                    assertEquals(4, state.engine!!.energy)
+                    assertEquals(1, state.engine!!.steps)
+                    assertEquals(PetVisualState.HAPPY, state.pet.visualState)
+                    assertEquals(listOf("ticket"), state.ownedItems.map { it.itemId })
+                    step(EngineCommand.Feed("basic"))
+                    repeat(3) {
+                        step(EngineCommand.OpenNextEvent)
+                        step(EngineCommand.CompleteEvent(state.engine!!.currentEvent!!.id, "quiet-choice"))
+                    }
+                    step(EngineCommand.FinishDay)
+                    step(EngineCommand.BeginDay("day", List(4) { "quiet" }))
+                    assertEquals(2, state.engine!!.day)
+                    assertEquals(5, state.engine!!.energy)
+                    assertEquals(0, state.engine!!.steps)
+                    return outcomes
+                }
+                val reference = play(BudgetPlan(0, 0, 0, 100))
+                for (plan in listOf(BudgetPlan(100, 0, 0, 0), BudgetPlan(0, 100, 0, 0),
+                    BudgetPlan(0, 0, 100, 0), BudgetPlan(90, 2, 3, 5))) {
+                    assertEquals("$type / $timing / $delta / $plan", reference, play(plan))
+                }
+                assertEquals(original, f.state)
+            }
+        }
+    }
+
     private class Fixture(energy: Int = 5, hunger: Int = 50, balance: Long = 100, deedKind: DeedGameKind? = null) {
         val content = content()
         val policies = content.events.associate { event -> event.id to EventPolicy(
@@ -623,7 +857,7 @@ class GameEngineTest {
         ))
         val rules = EngineRules("test-rules", energy, hunger, 1)
         val repo = MemoryRepository(GameState(
-            PetState("BACKPACK", PetVisualState.NORMAL), EconomyState(balance, BudgetPlan(10, 20, 30, 40)),
+            PetState("BACKPACK", PetVisualState.NORMAL), EconomyState(BudgetPlan(0, 0, balance, 0)),
             StoryState(null, null, null, emptyList()), 17, 29, emptyList(),
         ))
         val engine = newEngine()

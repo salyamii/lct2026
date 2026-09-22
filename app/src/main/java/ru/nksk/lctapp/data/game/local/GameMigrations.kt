@@ -208,3 +208,37 @@ internal val MIGRATION_14_15 = object : Migration(14, 15) {
         connection.execSQL("UPDATE ONBOARDING_DRAFT SET step = 'GOAL_SELECTION' WHERE step = 'INTRODUCTION'")
     }
 }
+
+/** Convert the actual balance once; the former plan never represented additional money. */
+internal val MIGRATION_15_16 = object : Migration(15, 16) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        // Keep the one-time technical top-up outside this day's earned/spent totals.
+        connection.execSQL("ALTER TABLE ENGINE_STATE ADD COLUMN balance_adjustment INTEGER NOT NULL DEFAULT 0")
+        connection.execSQL("""
+            UPDATE ENGINE_STATE SET balance_adjustment = (
+                SELECT MAX(35 - balance, 0) FROM GAME_STATE WHERE id = ENGINE_STATE.game_state_id
+            )
+        """.trimIndent())
+        // Rename in place: parent identity and every referencing FK stay intact.
+        connection.execSQL("ALTER TABLE GAME_STATE RENAME COLUMN balance TO unallocated")
+        for (section in listOf("needs", "wants", "savings", "reserve")) {
+            connection.execSQL("ALTER TABLE GAME_STATE RENAME COLUMN planned_$section TO $section")
+        }
+        connection.execSQL("UPDATE GAME_STATE SET unallocated = MAX(unallocated, 35), needs = 0, wants = 0, savings = 0, reserve = 0")
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS BUDGET_PLANNING (
+                game_state_id TEXT NOT NULL PRIMARY KEY,
+                session_id TEXT NOT NULL,
+                reason TEXT NOT NULL,
+                stage TEXT NOT NULL,
+                income INTEGER NOT NULL,
+                revision INTEGER NOT NULL,
+                FOREIGN KEY(game_state_id) REFERENCES GAME_STATE(id) ON UPDATE NO ACTION ON DELETE NO ACTION
+            )
+        """.trimIndent())
+        connection.execSQL("""
+            INSERT INTO BUDGET_PLANNING (game_state_id, session_id, reason, stage, income, revision)
+            SELECT id, 'migration-16-' || id, 'MIGRATION', 'ALLOCATION', 0, 0 FROM GAME_STATE
+        """.trimIndent())
+    }
+}

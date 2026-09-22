@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.data.game.content
 
+import ru.nksk.lctapp.domain.economy.*
 import java.io.IOException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -172,7 +173,7 @@ class FirstGoalTest {
     private class Fixture(balance: Long = 100) {
         val catalog = bundledGameCatalog()
         val goal = catalog.goals.first { it.goalId == "figma-stargazing-180-v1" }
-        private val initial = createInitialGameState().let { it.copy(economy = it.economy.copy(balance = balance)) }
+        private val initial = createInitialGameState().let { it.copy(economy = EconomyState(BudgetPlan(0, 0, balance, 0))) }
         val repo = MemoryRepository(initial)
         val session = GameSession(repo, object : StoryContentRepository {
             override suspend fun read() = catalog.content

@@ -58,7 +58,7 @@ class PetColorPersistenceTest {
             assertEquals(PetVisualState.HAPPY, saved.pet.visualState)
             assertEquals("backend:scarf", saved.pet.selectedLookId)
             assertEquals(247L, saved.economy.balance)
-            assertEquals(listOf(10L, 20L, 30L, 40L), saved.economy.plan.let { listOf(it.needs, it.wants, it.savings, it.reserve) })
+            assertEquals(listOf(0L, 0L, 0L, 0L), saved.economy.plan.let { listOf(it.needs, it.wants, it.savings, it.reserve) })
             assertEquals(17, saved.satiety)
             assertEquals(30, saved.fatigue)
             assertEquals("goal", saved.selectedGoalId)

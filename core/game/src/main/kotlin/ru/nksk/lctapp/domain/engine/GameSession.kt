@@ -120,7 +120,10 @@ class GameSession(
         } }
     } == true
 
+    fun previewAdvanceSpending(state: GameState): EventSpendingPreview? = engine.advanceSpending(state, advanceCommand(state))
+
     fun advanceCommand(state: GameState): EngineCommand? = when {
+        state.economy.planning != null || state.economy.unallocated != 0L -> null
         state.engine == null || state.engine.phase == DayPhase.FINISHED ->
             // The first Continue starts a new save; waking after a summary only prepares the day.
             EngineCommand.BeginDay(catalog.dayId(state), catalog.plan(state), openFirst = state.engine == null)

@@ -48,6 +48,7 @@ internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
                     summary.moneyLines.forEach { GameBody(it) }
                     GameTitle(summary.remaining)
                     summary.detailsNote?.let { GameBody(it) }
+                    summary.adjustmentNote?.let { GameBody(it) }
                 }
             }
         }
@@ -82,7 +83,7 @@ internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
         title = { Text("${state.petName} проголодался") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Нужно поесть. Если деньги на нужды закончились, придётся взять из накоплений. В следующий раз спланируем бюджет внимательнее. Еда не восстанавливает силы.")
+                Text("Еда не восстанавливает силы. Сначала используем «Нужно», затем при необходимости — другие статьи.")
                 state.message?.let { Text(it) }
                 state.meals.forEach { meal -> GameButton(meal.label, meal.enabled && !state.busy) { onAction(DayAction.Feed(meal.id)) } }
             }

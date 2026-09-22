@@ -15,6 +15,7 @@ internal data class DaySummaryUiState(
     val moneyLines: List<String>,
     val remaining: String,
     val detailsNote: String? = null,
+    val adjustmentNote: String? = null,
 )
 
 internal fun DaySummary.toUiState(catalog: GameCatalog, petName: String): DaySummaryUiState {
@@ -88,7 +89,7 @@ internal fun DaySummary.toUiState(catalog: GameCatalog, petName: String): DaySum
 
     val spending = journal.filter { it.moneyDelta < 0 }.fold(BigInteger.ZERO) { total, it -> total - it.moneyDelta.toBigInteger() }
     val income = journal.filter { it.moneyDelta > 0 }.fold(BigInteger.ZERO) { total, it -> total + it.moneyDelta.toBigInteger() }
-    val difference = closingBalance.toBigInteger() - openingBalance.toBigInteger()
+    val difference = closingBalance.toBigInteger() - openingBalance.toBigInteger() - balanceAdjustment.toBigInteger()
     val balanced = income - spending == difference
     val moneyLines = buildList {
         if (balanced) {
@@ -105,6 +106,8 @@ internal fun DaySummary.toUiState(catalog: GameCatalog, petName: String): DaySum
         moneyLines = moneyLines,
         remaining = "Сейчас ${coins(closingBalance.toBigInteger())}",
         detailsNote = if (!balanced) "Не все доходы и траты за этот день сохранились в подробностях." else null,
+        adjustmentNote = if (balanceAdjustment > 0)
+            "При переходе на бюджет добавлено ${coins(balanceAdjustment.toBigInteger(), accusative = true)}. Это не заработок за день." else null,
     )
 }
 

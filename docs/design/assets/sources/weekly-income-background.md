@@ -1,0 +1,7 @@
+# Weekly income background
+
+Generated 2026-09-21 with built-in imagegen from the user-selected weekly receipt concept. Event-specific artwork; not a Figma export. Reference: weekly-income-reference.png. Full original canvas preserved in PNG and lossless exact WebP.
+
+## Prompt
+
+Edit the supplied UI mockup into ONLY its illustrated background artwork, for the upper hero region of an Android game weekly allowance event. Output portrait 4:5 aspect ratio background, full bleed. Faithfully preserve the original warm sunrise fantasy village with blue sky and distant mountains, forest, paw banner upper left, glowing brass lantern at left, rustic wooden table foreground, gold paw-emblem coin pile at lower center, leather travel book left, parchment map and compass lower right. Reconstruct scenery behind ALL removed UI. Remove ALL text, numbers, +100 panel, title pill, back button, status bar icons, white bottom sheet, lime button, and every interface element. The entire output must be the continuous illustration, no white panels or blank margins. Match original stylized detailed 3D game art, lighting, colors and camera angle. Place table and gold coins in bottom 30 percent, village soft focus in middle, sky top. Keep middle 30–60 percent visually calm for a live Compose reward panel that will overlay it later; do NOT paint any panel. No fox or characters. Coins occupy lower center around 78 percent height, fully visible. This is an event-specific background asset, not a new UI mockup.

@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.feature.menu.ui
 
+import ru.nksk.lctapp.domain.economy.*
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -88,7 +89,7 @@ class MainMenuUiStateMapperTest {
     fun suppliedGameSnapshotDrivesTheBalanceAndPetAppearance() {
         val initial = createInitialGameState()
         val game = initial.copy(
-            economy = initial.economy.copy(balance = 3_000_000_000L),
+            economy = EconomyState(BudgetPlan(0, 0, 0, 3_000_000_000L)),
             pet = PetState("BANDANA", PetVisualState.HUNGRY),
         )
 

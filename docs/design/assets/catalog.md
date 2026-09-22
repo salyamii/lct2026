@@ -471,3 +471,23 @@ Built-in imagegen lighting edits, 2026-09-20. [PNG sources and exact prompts](so
 | `R.drawable.location_windmill_evening` | 941 × 1672 | [location_windmill_evening.webp](../../../app/src/main/res/drawable-nodpi/location_windmill_evening.webp) | `location_windmill` |
 
 Observatory already has a night image (`location_observatory`); its daytime counterpart remains unavailable. The five existing Figma day/evening pairs are unchanged.
+
+## Budget illustrations — 2026-09-21
+
+Generated from the approved budget mockup with image_gen; not Figma exports.
+[Prompts and provenance](sources/budget-icons.md). Full transparent canvases preserved as lossless exact WebP.
+
+| Resource | Canvas | File |
+| --- | --- | --- |
+| `R.drawable.budget_needs` | 1254 × 1254 | [budget_needs.webp](../../../app/src/main/res/drawable-nodpi/budget_needs.webp) |
+| `R.drawable.budget_wants` | 1254 × 1254 | [budget_wants.webp](../../../app/src/main/res/drawable-nodpi/budget_wants.webp) |
+| `R.drawable.budget_savings` | 1254 × 1254 | [budget_savings.webp](../../../app/src/main/res/drawable-nodpi/budget_savings.webp) |
+| `R.drawable.budget_reserve` | 1254 × 1254 | [budget_reserve.webp](../../../app/src/main/res/drawable-nodpi/budget_reserve.webp) |
+
+## Weekly income event background — 2026-09-21
+
+| Resource | Canvas | File | Provenance |
+| --- | --- | --- | --- |
+| `R.drawable.event_weekly_income_background` | 1122 × 1402 | [WebP](../../../app/src/main/res/drawable-nodpi/event_weekly_income_background.webp) | [Imagegen prompt and reference](sources/weekly-income-background.md) |
+
+Full canvas preserved; lossless exact WebP. Dedicated to the weekly receipt Preview.

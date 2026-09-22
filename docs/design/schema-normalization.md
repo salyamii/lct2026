@@ -663,3 +663,25 @@ CustomizationPersistenceTest покрывает 12→13, повторные пр
 Игра и цель фиксируются вместе с удалением черновика транзакцией initializeIfAbsent.
 День и события не создаются этой операцией.
 [Экспорт v15](../../app/schemas/ru.nksk.lctapp.data.game.local.GameDatabase/15.json).
+
+## Room v16: фактические статьи и сессия бюджета — 2026-09-21
+
+GAME_STATE хранит needs,wants,savings,reserve,unallocated вместо balance/planned_*.
+Их определитель — PK id; отдельного общего balance нет, он вычисляется.
+BUDGET_PLANNING(game_state_id PK/FK → GAME_STATE, session_id, reason, stage,
+income, revision) существует только во время планирования. Единственный
+определитель — ключ игры; income является историческим размером поступления,
+а не копией текущего unallocated. Между reason и stage нет функциональной
+зависимости: INITIAL и WEEKLY проходят оба этапа. Таблицы соответствуют НФБК.
+
+ENGINE_STATE.balance_adjustment INTEGER NOT NULL DEFAULT0 — историческая
+техническая поправка текущего дня для доплаты при миграции, не копия баланса.
+Она вычитается при сверке дневного изменения с журналом; новый день сбрасывает
+её в0. Существующие opening_balance и DAY_JOURNAL не переписываются.
+
+Миграция15→16 переименовывает столбцы на месте, сохраняя родительские ключи/FK,
+переносит max(balance,35) в unallocated, обнуляет старый план и создаёт
+MIGRATION/ALLOCATION с revision0. Никакие предметы, решения и события не удаляются.
+Актуальный экспорт — [16.json](../../app/schemas/ru.nksk.lctapp.data.game.local.GameDatabase/16.json).
+
+D-142: reason сессии дополнен кодом MANUAL, этап всегда ALLOCATION, income0. Схема таблицы не меняется, enum кодируется явной строкой.

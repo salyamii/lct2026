@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.domain.engine
 
+import ru.nksk.lctapp.domain.economy.*
 import ru.nksk.lctapp.domain.content.EventType
 import ru.nksk.lctapp.domain.content.ItemOperation
 import ru.nksk.lctapp.domain.game.GameRepository
@@ -9,6 +10,8 @@ import ru.nksk.lctapp.domain.story.StoryDecision
 import ru.nksk.lctapp.domain.pet.PetVisualState
 import ru.nksk.lctapp.domain.minigame.DeedGameScore
 import ru.nksk.lctapp.domain.pet.isValidPetName
+
+data class EventSpendingPreview(val quote: SpendingQuote, val kind: SpendingKind)
 
 /** A single domain entry point. Room supplies the latest aggregate inside its write transaction. */
 class GameEngine(
@@ -43,6 +46,9 @@ class GameEngine(
     internal fun transition(current: GameState, request: EngineRequest): GameState {
         ensure(current.engine?.revision == request.expectedRevision, BlockReason.StaleRevision)
         return try {
+            ensure(current.economy.planning == null && current.economy.unallocated == 0L ||
+                request.command is EngineCommand.RenamePet || request.command is EngineCommand.SetPetColor,
+                BlockReason.BudgetPlanningRequired)
             require(current.engine == null || current.engine.rulesId == rules.id) { "Saved engine uses a different rules version" }
             val next = when (val command = request.command) {
                 is EngineCommand.RenamePet -> {
@@ -56,7 +62,7 @@ class GameEngine(
                     current.copy(pet = current.pet.copy(color = command.color))
                 }
                 is EngineCommand.BeginDay -> beginDay(current, command, request.id).let {
-                    if (command.openFirst) openNext(it, request.id) else it
+                    if (command.openFirst && it.economy.planning == null) openNext(it, request.id) else it
                 }
                 EngineCommand.OpenNextEvent -> openNext(current, request.id)
                 is EngineCommand.SelectGoal -> selectGoal(current, command, request.id)
@@ -80,6 +86,13 @@ class GameEngine(
             recorded.copy(engine = recorded.engine?.copy(
                 revision = Math.addExact(current.engine?.revision ?: -1L, 1L),
             ))
+        } catch (invalid: EconomyViolation) {
+            reject(when (invalid.reason) {
+                EconomyFailure.PLANNING_REQUIRED -> BlockReason.BudgetPlanningRequired
+                EconomyFailure.INSUFFICIENT_MONEY -> BlockReason.InsufficientMoney(invalid.missing)
+                EconomyFailure.STALE_SESSION -> BlockReason.StaleRevision
+                else -> BlockReason.InvalidContent(invalid.message ?: "Invalid economy operation")
+            })
         } catch (invalid: IllegalArgumentException) {
             reject(BlockReason.InvalidContent(invalid.message ?: "Invalid authored content"))
         } catch (_: ArithmeticException) {
@@ -103,7 +116,7 @@ class GameEngine(
         DaySummary(day.day, day.openingBalance, state.economy.balance, day.events.filter {
             it.status == EventStatus.COMPLETED && factory.event(it.eventId).type == EventType.STORY
         }.map { it.eventId }, day.steps, day.openingEnergy, day.energy, day.journal,
-            state.story.decisions.filter { it.id in completedDecisionIds })
+            state.story.decisions.filter { it.id in completedDecisionIds }, day.balanceAdjustment)
     }
 
     private fun beginDay(state: GameState, command: EngineCommand.BeginDay, requestId: String): GameState {
@@ -132,7 +145,7 @@ class GameEngine(
         ensure(carried.isEmpty() || occurrences.size == 5, BlockReason.MissingCarriedLore)
         val dayNumber = Math.addExact(previous?.day ?: 0, 1)
         // The first week's money already belongs to the new-save initializer; never re-grant it.
-        val funded = if (previous != null && (dayNumber - 1) % 7 == 0) money(state, rules.weeklyIncome) else state
+        val funded = if (previous != null && (dayNumber - 1) % 7 == 0) state.copy(economy = EconomyOperations.weekly(state.economy, "week:$dayNumber", rules.weeklyIncome)) else state
         return funded.copy(
             pet = if (previous != null && state.pet.visualState == PetVisualState.TIRED) state.pet.transitionTo(PetVisualState.NORMAL) else state.pet,
             story = state.story.copy(currentDayId = command.storyDayId, nextScriptPosition = null),
@@ -158,15 +171,7 @@ class GameEngine(
         val state = prepareIntroduction(current, requestId)
         val day = running(state)
         ensure(day.currentEvent == null, BlockReason.EventInProgress)
-        val introduction = factory.goals.selectedGoal(state)?.introductionEventId
-        val progress = factory.storyProgress(state)
-        val paused = day.events.firstOrNull { it.status == EventStatus.PAUSED &&
-            it.origin == EventOrigin.SCHEDULE && progress.eligible(it.eventId) }
-        val occurrence = day.events.firstOrNull { it.eventId == introduction && progress.eligible(it.eventId) &&
-            (it.status == EventStatus.PENDING || it.status == EventStatus.PAUSED) }
-            ?: paused?.takeIf { progress.eligible(it.eventId) }
-            ?: day.events.firstOrNull { it.status == EventStatus.PENDING && progress.eligible(it.eventId) }
-            ?: reject(BlockReason.NoNextEvent)
+        val occurrence = nextOccurrence(state)
         val event = factory.event(occurrence.eventId)
         entryGuard(state, occurrence.eventId)
         if (event.type == EventType.EARNING) {
@@ -183,6 +188,49 @@ class GameEngine(
             eventEffects(next, occurrence)
         } else next
     }
+
+    private fun nextOccurrence(state: GameState): EventOccurrence {
+        val day = running(state)
+        val introduction = factory.goals.selectedGoal(state)?.introductionEventId
+        val progress = factory.storyProgress(state)
+        val paused = day.events.firstOrNull { it.status == EventStatus.PAUSED &&
+            it.origin == EventOrigin.SCHEDULE && progress.eligible(it.eventId) }
+        return day.events.firstOrNull { it.eventId == introduction && progress.eligible(it.eventId) &&
+            (it.status == EventStatus.PENDING || it.status == EventStatus.PAUSED) }
+            ?: paused?.takeIf { progress.eligible(it.eventId) }
+            ?: day.events.firstOrNull { it.status == EventStatus.PENDING && progress.eligible(it.eventId) }
+            ?: reject(BlockReason.NoNextEvent)
+    }
+
+    /** Cost of opening the next scheduled card, before Continue applies its entry effects. */
+    fun nextEventSpending(state: GameState): SpendingQuote? = nextEventSpendingPreview(state)?.quote
+
+    fun nextEventSpendingPreview(state: GameState): EventSpendingPreview? = try {
+        if (state.economy.planning != null || state.engine == null || state.engine.phase == DayPhase.FINISHED ||
+            state.engine.currentEvent != null) null
+        else {
+            val prepared = prepareIntroduction(state, "quote:${state.engine.revision}")
+            val occurrence = nextOccurrence(prepared)
+            val event = factory.event(occurrence.eventId)
+            if (occurrence.status == EventStatus.PAUSED || factory.policy(event.id).startEffectsTiming != EffectTiming.OPEN ||
+                event.moneyDeltaOnStart >= 0) null
+            else {
+                val kind = SpendingKind.forEvent(event.type)
+                EventSpendingPreview(EconomyOperations.quote(state.economy, Math.negateExact(event.moneyDeltaOnStart), kind), kind)
+            }
+        }
+    } catch (_: Rejected) { null }
+
+    /** Simulate only day preparation, never its first event or any repository write. */
+    fun advanceSpending(state: GameState, command: EngineCommand?): EventSpendingPreview? = try {
+        if (state.economy.planning != null || state.economy.unallocated != 0L) null
+        else when (command) {
+            EngineCommand.OpenNextEvent -> nextEventSpendingPreview(state)
+            is EngineCommand.BeginDay -> if (command.openFirst)
+                nextEventSpendingPreview(beginDay(state, command.copy(openFirst = false), "quote:day")) else null
+            else -> null
+        }
+    } catch (_: Rejected) { null }
 
     private fun selectGoal(state: GameState, command: EngineCommand.SelectGoal, requestId: String): GameState {
         ensure(factory.goals.any { it.goalId == command.goalId && it.isAvailable(state) }, BlockReason.GoalUnavailable)
@@ -203,7 +251,7 @@ class GameEngine(
         ensure(state.ownedItems.none { it.itemId == command.itemId }, BlockReason.ItemAlreadyOwned)
         foodGuard(day)
         val definition = factory.content.items.first { it.id == command.itemId }
-        val paid = money(state, -checkNotNull(definition.priceCoins))
+        val paid = money(state, -checkNotNull(definition.priceCoins), SpendingKind.GOAL)
         val food = foodCostUntilWeekEnd(state, factory.basicMealPrice())
         ensure(command.acceptFoodRisk || paid.economy.balance >= food,
             BlockReason.FoodBudgetWarning(paid.economy.balance, food))
@@ -300,7 +348,7 @@ class GameEngine(
         val energyCost = policy.energyFor(choice.id)
         actionGuard(day, energyCost)
         var next = if (policy.startEffectsTiming == EffectTiming.COMPLETE) eventEffects(state, occurrence) else state
-        next = money(next, score?.reward(choice.moneyDelta) ?: choice.moneyDelta)
+        next = money(next, score?.reward(choice.moneyDelta) ?: choice.moneyDelta, SpendingKind.forEvent(event.type))
         choice.petStateAfter?.let { next = next.copy(pet = next.pet.transitionTo(it)) }
         factory.content.choiceItemEffects.filter { it.choiceId == choice.id }.sortedBy { it.position }.forEach {
             next = item(next, it.itemId, it.operation, "${occurrence.id}:choice-item:${it.id}")
@@ -399,7 +447,7 @@ class GameEngine(
         val day = running(state)
         val meal = factory.meal(mealId)
         require(meal.nextMorningEnergy == null || meal.nextMorningEnergy <= rules.fullEnergy)
-        val paid = money(state, -meal.price)
+        val paid = money(state, -meal.price, SpendingKind.FEEDING)
         return paid.copy(
             pet = meal.visualStateAfter?.let { paid.pet.transitionTo(it) } ?: paid.pet,
             engine = day.copy(ateToday = true, nextMorningEnergy = meal.nextMorningEnergy ?: day.nextMorningEnergy),
@@ -462,10 +510,10 @@ class GameEngine(
                     (policy.startEffectsTiming == EffectTiming.OPEN && occurrence.status == EventStatus.PENDING)) {
                     event.moneyDeltaOnStart
                 } else 0L
-                money(money(state, priceOnStart), choice.moneyDelta)
+                money(money(state, priceOnStart, SpendingKind.forEvent(event.type)), choice.moneyDelta, SpendingKind.forEvent(event.type))
                 true
-            } catch (blocked: Rejected) {
-                if (blocked.reason !is BlockReason.InsufficientMoney) throw blocked
+            } catch (blocked: EconomyViolation) {
+                if (blocked.reason != EconomyFailure.INSUFFICIENT_MONEY) throw blocked
                 false
             }
         }
@@ -474,6 +522,9 @@ class GameEngine(
 
     private fun entryGuard(state: GameState, eventId: String) {
         val event = factory.event(eventId)
+        require(event.type != EventType.EARNING || (event.moneyDeltaOnStart >= 0 && factory.choices(eventId).all { it.moneyDelta >= 0 })) {
+            "EARNING cannot require money"
+        }
         val policy = factory.policy(eventId)
         ensure(factory.storyProgress(state).eligible(eventId),
             if (policy.finishesStoryAct && factory.goals.selectedGoal(state)?.progress(state, factory.content)?.isCollected != true)
@@ -501,7 +552,7 @@ class GameEngine(
 
     private fun eventEffects(state: GameState, occurrence: EventOccurrence): GameState {
         val event = factory.event(occurrence.eventId)
-        var next = money(state, event.moneyDeltaOnStart)
+        var next = money(state, event.moneyDeltaOnStart, SpendingKind.forEvent(event.type))
         event.petStateOnStart?.let { next = next.copy(pet = next.pet.transitionTo(it)) }
         factory.content.eventItemEffects.filter { it.eventId == event.id }.sortedBy { it.position }.forEach {
             next = item(next, it.itemId, it.operation, "${occurrence.id}:event-item:${it.id}")
@@ -516,11 +567,10 @@ class GameEngine(
         return state.copy(ownedItems = state.ownedItems + OwnedItem(occurrenceId, itemId))
     }
 
-    private fun money(state: GameState, delta: Long): GameState {
-        val balance = Math.addExact(state.economy.balance, delta)
-        if (delta < 0 && balance < 0) reject(BlockReason.InsufficientMoney(Math.negateExact(balance)))
-        return state.copy(economy = state.economy.copy(balance = balance))
-    }
+    private fun money(state: GameState, delta: Long, kind: SpendingKind): GameState = state.copy(
+        economy = if (delta < 0) EconomyOperations.spend(state.economy, Math.negateExact(delta), kind)
+            else EconomyOperations.earn(state.economy, delta),
+    )
 
     private fun replaceEvent(state: GameState, event: EventOccurrence): GameState = state.copy(
         story = state.story.copy(activeEventId = if (event.status == EventStatus.ACTIVE || event.status == EventStatus.RESULT) event.eventId else null),

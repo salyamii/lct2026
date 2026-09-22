@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.data.game.content
 
+import ru.nksk.lctapp.domain.economy.*
 import java.io.IOException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -145,7 +146,7 @@ class EverydayEventsTest {
     }
 
     private class Fixture(balance: Long = 100) {
-        private val initial = createInitialGameState().let { it.copy(economy = it.economy.copy(balance = balance)) }
+        private val initial = createInitialGameState().let { it.copy(economy = EconomyState(BudgetPlan(0, 0, 0, balance))) }
         val repo = MemoryGameRepository(initial)
         val session = newSession()
         val state get() = repo.value

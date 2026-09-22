@@ -10,7 +10,7 @@ internal class DebugGameResetRepository @Inject constructor(private val database
         database.withWriteTransaction {
             // Children first: the schema intentionally has no cascading deletes.
             for (table in listOf(
-                "DAY_JOURNAL", "ENGINE_EVENT", "ENGINE_DEED", "ENGINE_STATE", "MINI_GAME_COMPLETION",
+                "BUDGET_PLANNING", "DAY_JOURNAL", "ENGINE_EVENT", "ENGINE_DEED", "ENGINE_STATE", "MINI_GAME_COMPLETION",
                 "GOAL_SELECTION", "COMPLETED_GOAL_PROJECT",
                 "PLAYER_DECISION", "OWNED_ITEM", "LEGACY_EXPENSE_STATE", "GAME_STATE", "ONBOARDING_DRAFT",
             )) {

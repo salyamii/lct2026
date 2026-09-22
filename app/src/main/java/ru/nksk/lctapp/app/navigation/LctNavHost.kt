@@ -11,6 +11,14 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,8 +37,8 @@ import androidx.navigation3.ui.NavDisplay
 import kotlinx.coroutines.delay
 import ru.nksk.lctapp.core.ui.components.GameCompletionSnackbar
 import ru.nksk.lctapp.core.ui.theme.AdventureNight
-import ru.nksk.lctapp.feature.coins.navigation.Coins
-import ru.nksk.lctapp.feature.coins.navigation.coinsEntry
+import ru.nksk.lctapp.feature.economy.navigation.Economy
+import ru.nksk.lctapp.feature.economy.navigation.economyEntry
 import ru.nksk.lctapp.feature.day.navigation.Day
 import ru.nksk.lctapp.feature.day.navigation.dayEntry
 import ru.nksk.lctapp.feature.gear.navigation.Gear
@@ -65,7 +73,34 @@ fun LctNavHost(
     val navigator = remember(backStack) { AppNavigator(backStack) }
     val snackbarHost = remember { SnackbarHostState() }
     var completion by remember { mutableStateOf<CompletionNotice?>(null) }
+    val gateModel: EconomyGateViewModel = hiltViewModel()
+    val gate by gateModel.uiState.collectAsStateWithLifecycle()
+    var presentedPlanningId by rememberSaveable { mutableStateOf<String?>(null) }
     val destination = backStack.lastOrNull()
+    val pending = gate.planning
+    LaunchedEffect(pending?.id, destination) {
+        if (pending != null && destination != Economy &&
+            (presentedPlanningId != pending.id || destination == Day || destination == Tasks ||
+                destination is DeedGame || destination == StarPlates || destination == PriceCheck || destination == Telescope)) {
+            presentedPlanningId = pending.id
+            // Persisted budget has priority over restored gameplay routes; Back returns to the menu.
+            backStack.clear()
+            backStack.add(MainMenu)
+            backStack.add(Economy)
+        } else if (pending != null && destination == Economy) {
+            presentedPlanningId = pending.id
+        }
+    }
+    if (gate.loading || gate.failed) {
+        Box(Modifier.fillMaxSize().background(AdventureNight), contentAlignment = Alignment.Center) {
+            if (gate.loading) CircularProgressIndicator()
+            else Column {
+                Text("Не удалось прочитать бюджет")
+                Button(onClick = gateModel::retry) { Text("Повторить") }
+            }
+        }
+        return
+    }
     val finish: (NavKey, String?) -> Unit = { source, message ->
         if (backStack.lastOrNull() == source && backStack.size > 1) {
             navigator.returnToRoot(source)
@@ -113,9 +148,9 @@ fun LctNavHost(
                             MainMenuAction.Gear -> Gear
                             MainMenuAction.Tasks -> Tasks
                             MainMenuAction.Goal -> Goal
-                            MainMenuAction.Coins -> Coins
+                            MainMenuAction.Coins -> Economy
                             MainMenuAction.Village -> GameMap
-                            MainMenuAction.ContinueDay, MainMenuAction.Feed -> Day
+                            MainMenuAction.ContinueDay, MainMenuAction.Feed -> if (pending != null) Economy else Day
                         },
                     )
                 }
@@ -133,7 +168,7 @@ fun LctNavHost(
                     onBack = navigator::goBack,
                 )
                 goalEntry(onBack = navigator::goBack)
-                coinsEntry(onBack = navigator::goBack)
+                economyEntry(onBack = navigator::returnToRoot, onConfirmed = navigator::returnToRoot)
                 mapEntry(onBack = navigator::goBack, onSelected = navigator::returnToRoot)
                 dayEntry(onBack = navigator::goBack, onFinished = finish,
                     onGame = { source, id -> navigator.replace(source, DeedGame(id)) })

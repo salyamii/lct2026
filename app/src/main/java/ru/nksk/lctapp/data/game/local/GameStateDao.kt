@@ -8,6 +8,14 @@ import androidx.room3.Update
 /** No REPLACE or parent deletion: references and unrelated rows must survive writes. */
 @Dao
 internal interface GameStateDao {
+    @Query("SELECT * FROM BUDGET_PLANNING WHERE game_state_id = :gameId")
+    suspend fun readBudgetPlanning(gameId: String): BudgetPlanningEntity?
+
+    @Insert suspend fun insertBudgetPlanning(row: BudgetPlanningEntity)
+
+    @Query("DELETE FROM BUDGET_PLANNING WHERE game_state_id = :gameId")
+    suspend fun deleteBudgetPlanning(gameId: String)
+
     @Query("SELECT * FROM DAY_JOURNAL WHERE game_state_id = :gameId ORDER BY position")
     suspend fun readDayJournal(gameId: String): List<DayJournalEntity>
 

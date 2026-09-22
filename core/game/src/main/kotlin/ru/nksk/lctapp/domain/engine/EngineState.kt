@@ -18,6 +18,8 @@ data class EngineState(
     /** Unknown for a day already in progress when migrating an older save. */
     val openingEnergy: Int? = null,
     val journal: List<DayJournalEntry> = emptyList(),
+    /** Technical balance corrections, excluded from gameplay income and spending. */
+    val balanceAdjustment: Long = 0,
 ) {
     init {
         require(rulesId.isNotBlank())
@@ -73,4 +75,5 @@ data class DaySummary(
     val journal: List<DayJournalEntry> = emptyList(),
     /** Actual choices of occurrences completed today, in decision order; proposals are excluded. */
     val completedDecisions: List<StoryDecision> = emptyList(),
+    val balanceAdjustment: Long = 0,
 )

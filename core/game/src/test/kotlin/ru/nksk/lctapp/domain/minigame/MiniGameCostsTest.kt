@@ -13,7 +13,7 @@ import ru.nksk.lctapp.domain.story.StoryState
 
 class MiniGameCostsTest {
     private val initial = GameState(
-        PetState("BACKPACK", PetVisualState.NORMAL), EconomyState(100, BudgetPlan(0, 0, 0, 0)),
+        PetState("BACKPACK", PetVisualState.NORMAL), EconomyState(BudgetPlan(0, 0, 0, 100)),
         StoryState(null, null, null, emptyList()), 17, 0, emptyList(),
     )
 

@@ -375,3 +375,13 @@ all in `app/src/debug`; the release build includes none of them.
 локации и интерфейс доступности находятся в `:core:game`, DI — в app/di,
 resolver иллюстраций — в core/ui/location. Room v14 сохраняет локацию и явное
 освещение; усталость на них не влияет. См. [карту](design/map-preview.md).
+
+## Экономика — 2026-09-21
+
+`feature/economy` в :app заменяет feature/coins и подключает согласованные экраны.
+EconomyViewModel получает GameRepository через Hilt, наблюдает Room, сериализует
+действия и сохраняет результат чистых EconomyOperations из :core:game.
+EconomyState.balance вычисляется из пяти остатков. BudgetPlan теперь обозначает
+фактические четыре суммы, а не независимый план. Сессия бюджета хранится в Room v16.
+Экран получает UiState/callbacks; app-owned EconomyGateViewModel определяет маршрут.
+Общие тексты расчёта списаний в core/ui/game; фичи не импортируют друг друга.

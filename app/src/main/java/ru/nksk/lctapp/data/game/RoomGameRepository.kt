@@ -26,7 +26,7 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
     private val dao = database.gameStateDao()
 
     override fun observe(): Flow<GameState?> = database.invalidationTracker
-        .createFlow("GAME_STATE", "OWNED_ITEM", "PLAYER_DECISION", "ENGINE_STATE", "ENGINE_EVENT", "ENGINE_DEED", "MINI_GAME_COMPLETION", "GOAL_SELECTION", "COMPLETED_GOAL_PROJECT", "DAY_JOURNAL")
+        .createFlow("GAME_STATE", "BUDGET_PLANNING", "OWNED_ITEM", "PLAYER_DECISION", "ENGINE_STATE", "ENGINE_EVENT", "ENGINE_DEED", "MINI_GAME_COMPLETION", "GOAL_SELECTION", "COMPLETED_GOAL_PROJECT", "DAY_JOURNAL")
         .map { read() }
         .distinctUntilChanged()
 
@@ -45,6 +45,7 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
         val current = checkNotNull(readInTransaction()) { "Game has not been initialized" }
         val next = transform(current)
         check(dao.updateState(next.toEntity()) == 1) { "Saved game disappeared during update" }
+        dao.deleteBudgetPlanning(CURRENT_GAME_ID)
         dao.deleteMiniGameCompletions(CURRENT_GAME_ID)
         dao.deleteGoalSelection(CURRENT_GAME_ID)
         dao.deleteCompletedGoalProjects(CURRENT_GAME_ID)
@@ -63,7 +64,7 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
         check(rows.size <= 1) { "Multiple saved games are not supported" }
         val row = rows.singleOrNull() ?: return null
         check(row.id == CURRENT_GAME_ID) { "Unknown saved game identity: ${row.id}" }
-        return row.toDomain(dao.readDecisions(row.id), dao.readOwnedItems(row.id)).copy(
+        return row.toDomain(dao.readDecisions(row.id), dao.readOwnedItems(row.id), dao.readBudgetPlanning(row.id)).copy(
             completedMiniGames = dao.readMiniGameCompletions(row.id).map { it.attemptId }.toSet(),
             selectedGoalId = dao.readGoalSelection(row.id)?.goalId,
             completedGoalProjects = dao.readCompletedGoalProjects(row.id).map { CompletedGoalProject(it.goalId, it.decisionId) },
@@ -72,6 +73,7 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
     }
 
     private suspend fun writeChildren(state: GameState) {
+        state.economy.planning?.let { dao.insertBudgetPlanning(it.toEntity()) }
         state.selectedGoalId?.let { dao.insertGoalSelection(GoalSelectionEntity(CURRENT_GAME_ID, it)) }
         dao.insertMiniGameCompletions(state.completedMiniGames.map { MiniGameCompletionEntity(it, CURRENT_GAME_ID) })
         state.engine?.let { engine ->

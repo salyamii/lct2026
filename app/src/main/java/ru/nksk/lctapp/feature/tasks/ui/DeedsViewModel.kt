@@ -88,12 +88,13 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
                 val event = catalog.content.events.single { it.id == offer.eventId }
                 val card = catalog.cards.getValue(event.id)
                 val reward = catalog.content.choices.single { it.eventId == event.id }.moneyDelta
-                OfferedDeedUiState(offer.id, renderPetText(event.title, saved.pet.name), renderPetText(event.description, saved.pet.name), "До $reward монет",
+                OfferedDeedUiState(offer.id, renderPetText(event.title, saved.pet.name), renderPetText(event.description, saved.pet.name), "До $reward монет в «Запас»",
                     renderPetText(card.effort, saved.pet.name),
                     deedDeadline(saved.engine!!.day, offer.expiresDay), card.scene)
             },
             meals = if (!needsFood) emptyList() else catalog.meals.filter { it.price > 0 || saved.economy.balance < catalog.meals.first().price }.map {
-                DeedsMealUiState(it.id, if (it.price == 0L) "Бесплатная столовая · завтра меньше сил" else "Поесть · ${it.price} монет", saved.economy.balance >= it.price)
+                DeedsMealUiState(it.id, if (it.price == 0L) "Бесплатная столовая · завтра меньше сил" else "Поесть · ${it.price} монет",
+                    session.engine.blockReason(saved, EngineCommand.Feed(it.id)) == null)
             },
         )
     }

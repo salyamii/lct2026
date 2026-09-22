@@ -69,7 +69,7 @@ class PetIdentityPersistenceTest {
             assertEquals(247L, migrated.economy.balance)
             assertEquals(17, migrated.satiety)
             assertEquals(30, migrated.fatigue)
-            assertEquals(listOf(10L, 20L, 30L, 40L), migrated.economy.plan.let { listOf(it.needs, it.wants, it.savings, it.reserve) })
+            assertEquals(listOf(0L, 0L, 0L, 0L), migrated.economy.plan.let { listOf(it.needs, it.wants, it.savings, it.reserve) })
             assertEquals(listOf("second", "first"), migrated.ownedItems.map { it.id })
             assertEquals(setOf("old-attempt"), migrated.completedMiniGames)
             assertEquals(42L, migrated.engine!!.revision)

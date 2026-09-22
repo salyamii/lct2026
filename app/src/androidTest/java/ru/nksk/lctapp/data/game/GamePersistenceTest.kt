@@ -21,7 +21,7 @@ import org.junit.runner.RunWith
 import ru.nksk.lctapp.app.createInitialGameState
 import ru.nksk.lctapp.data.game.local.GameDatabase
 import ru.nksk.lctapp.domain.content.*
-import ru.nksk.lctapp.domain.economy.BudgetPlan
+import ru.nksk.lctapp.domain.economy.*
 import ru.nksk.lctapp.domain.game.OwnedItem
 import ru.nksk.lctapp.domain.pet.PetVisualState
 import ru.nksk.lctapp.domain.story.StoryDecision
@@ -63,10 +63,31 @@ class GamePersistenceTest {
         } finally { db.close(); context.deleteDatabase(name) }
     }
 
+    @Test fun planningStageAndAllocationPersistAndClearWithTheAggregate() = runBlocking {
+        val initial = createInitialGameState().let { it.copy(economy = EconomyState(
+            plan = BudgetPlan(0, 0, 0, 0), unallocated = 100,
+            planning = BudgetPlanning("initial-test", BudgetPlanningReason.INITIAL,
+                BudgetPlanningStage.RECEIPT, 100),
+        )) }
+        games.initializeIfAbsent(initial)
+        assertEquals(initial, games.read())
+        val draft = games.update { state -> state.copy(economy = state.economy.copy(
+            plan = BudgetPlan(35, 0, 0, 0), unallocated = 65,
+            planning = state.economy.planning!!.copy(stage = BudgetPlanningStage.ALLOCATION, revision = 1),
+        )) }
+        assertEquals(draft, games.observe().filterNotNull().first())
+        val confirmed = games.update { state -> state.copy(economy = state.economy.copy(
+            plan = BudgetPlan(35, 20, 20, 25), unallocated = 0, planning = null,
+        )) }
+        assertNull(db.gameStateDao().readBudgetPlanning("current"))
+        assertEquals(confirmed, games.read())
+        assertEquals(100L, confirmed.economy.balance)
+    }
+
     @Test fun concurrentInitializationDoesNotReplaceExistingState() = runBlocking {
         val initial = createInitialGameState()
         (0..15).map { n -> async {
-            games.initializeIfAbsent(initial.copy(economy = initial.economy.copy(balance = n.toLong())))
+            games.initializeIfAbsent(initial.copy(economy = initial.economy.withTotalBalance(n.toLong())))
         } }.awaitAll().let { results -> assertEquals(1, results.distinct().size) }
         val before = games.read()
         games.initializeIfAbsent(initial)
@@ -76,7 +97,7 @@ class GamePersistenceTest {
     @Test fun concurrentUpdatesReadLatestStateInsideTransaction() = runBlocking {
         games.initializeIfAbsent(createInitialGameState())
         (1..30).map { async {
-            games.update { current -> current.copy(economy = current.economy.copy(balance = current.economy.balance + 1)) }
+            games.update { current -> current.copy(economy = current.economy.withTotalBalance(current.economy.balance + 1)) }
         } }.awaitAll()
         assertEquals(130L, games.read()!!.economy.balance)
     }
@@ -87,7 +108,7 @@ class GamePersistenceTest {
         val before = games.read()
         expectFailure { games.update { state -> state.copy(
             pet = state.pet.transitionTo(PetVisualState.NORMAL),
-            economy = state.economy.copy(balance = 1L),
+            economy = state.economy.withTotalBalance(1L),
             ownedItems = listOf(OwnedItem("missing-owner", "missing-item")),
             story = state.story.copy(decisions = emptyList()),
         ) } }
@@ -106,7 +127,7 @@ class GamePersistenceTest {
         }
         withTimeout(5_000) { subscribed.await() }
         games.update { it.copy(
-            economy = it.economy.copy(balance = 25L),
+            economy = it.economy.withTotalBalance(25L),
             pet = it.pet.transitionTo(PetVisualState.HAPPY),
             ownedItems = emptyList(),
         ) }
@@ -153,6 +174,19 @@ class GamePersistenceTest {
             chapters = listOf(ChapterDefinition("bad", "Bad", "absent-goal")),
         )) }
         assertTrue(content.read().items.isEmpty())
+    }
+
+    @Test fun earningEntryAndPaidChoicesRejectTheEntireContentBatch() = runBlocking {
+        for (atEntry in listOf(true, false)) {
+            val definition = testContent().events.single { it.type == EventType.EARNING }
+            val invalid = StoryContent(
+                events = listOf(definition.copy(moneyDeltaOnStart = if (atEntry) -1 else 50)),
+                choices = listOf(EventChoiceDefinition("paid", definition.id, 0, "Work",
+                    if (atEntry) 50 else -1, null, null, GoalImpact.NEUTRAL)),
+            )
+            expectFailure { content.install(invalid) }
+            assertTrue(content.read().events.isEmpty())
+        }
     }
 
     @Test fun storyEventsCannotGiveGoalItemsDirectlyOrThroughChoices() = runBlocking {
@@ -214,7 +248,7 @@ internal fun savedGame() = createInitialGameState().let { initial -> initial.cop
     pet = initial.pet.copy(selectedLookId = "HAT", visualState = PetVisualState.UPSET),
     satiety = 17,
     fatigue = 29,
-    economy = initial.economy.copy(balance = 3_000_000_000L, plan = BudgetPlan(5, 6, 7, 8)),
+    economy = initial.economy.copy(unallocated = 3_000_000_000L - 26, plan = BudgetPlan(5, 6, 7, 8)),
     story = StoryState("day", 4, "random", listOf(
         StoryDecision("d3", "yes"), StoryDecision("d1", "no"), StoryDecision("d2", "yes"),
     )),

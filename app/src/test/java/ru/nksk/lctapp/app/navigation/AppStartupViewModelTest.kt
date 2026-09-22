@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.app.navigation
 
+import ru.nksk.lctapp.domain.economy.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -73,11 +74,16 @@ class AppStartupViewModelTest {
         assertNull(repository.read()!!.engine)
         assertEquals(STARS_GOAL, repository.read()!!.selectedGoalId)
         assertEquals(1, repository.initializations)
+        assertEquals(100L, repository.read()!!.economy.balance)
+        assertEquals(100L, repository.read()!!.economy.unallocated)
+        assertEquals(BudgetPlan(0, 0, 0, 0), repository.read()!!.economy.plan)
+        assertEquals(BudgetPlanningReason.INITIAL, repository.read()!!.economy.planning!!.reason)
+        assertEquals(BudgetPlanningStage.RECEIPT, repository.read()!!.economy.planning!!.stage)
     }
 
     @Test fun existingSaveSkipsOnboardingWithoutChangingProgress() = runTest(dispatcher) {
         val initial = createInitialGameState()
-        val saved = initial.copy(economy = initial.economy.copy(balance = 37))
+        val saved = initial.copy(economy = EconomyState(BudgetPlan(0, 0, 0, 37)))
         val repository = StartupRepository(saved)
         val model = model(repository)
         advanceUntilIdle()
@@ -122,7 +128,7 @@ class AppStartupViewModelTest {
         assertTrue((model.uiState.value as AppStartupState.Introduction).failed)
         assertNull(repository.read())
         repository.writeFailure = null
-        val saved = createInitialGameState().let { it.copy(economy = it.economy.copy(balance = 59)) }
+        val saved = createInitialGameState().let { it.copy(economy = EconomyState(BudgetPlan(0, 0, 0, 59))) }
         repository.state.value = saved
         model.finishOnboarding()
         advanceUntilIdle()

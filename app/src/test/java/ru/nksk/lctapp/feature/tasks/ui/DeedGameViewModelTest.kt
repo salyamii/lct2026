@@ -18,6 +18,8 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import ru.nksk.lctapp.app.createInitialGameState
+import ru.nksk.lctapp.domain.economy.BudgetPlan
+import ru.nksk.lctapp.domain.economy.EconomyState
 import ru.nksk.lctapp.data.game.content.bundledGameCatalog
 import ru.nksk.lctapp.domain.content.StoryContent
 import ru.nksk.lctapp.domain.content.StoryContentRepository
@@ -127,7 +129,7 @@ class DeedGameViewModelTest {
     }
 
     private suspend fun fixture(): Fixture {
-        val initial = createInitialGameState()
+        val initial = createInitialGameState().let { it.copy(economy = EconomyState(plan = BudgetPlan(35, 20, 20, 25), unallocated = 0, planning = null)) }
         val repo = DeedRepository(initial)
         val catalog = bundledGameCatalog()
         val content = object : StoryContentRepository {

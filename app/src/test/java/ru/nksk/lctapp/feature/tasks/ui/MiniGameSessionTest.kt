@@ -8,6 +8,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Test
 import ru.nksk.lctapp.app.createInitialGameState
+import ru.nksk.lctapp.domain.economy.BudgetPlan
+import ru.nksk.lctapp.domain.economy.EconomyState
 import ru.nksk.lctapp.domain.minigame.MiniGameKind
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -70,7 +72,7 @@ class MiniGameSessionTest {
     }
 
     @Test fun restoredUnavailableEntryCannotStart() = runTest {
-        val repository = MiniGameTestRepository(createInitialGameState().copy(satiety = 81))
+        val repository = MiniGameTestRepository(createInitialGameState().let { it.copy(economy = EconomyState(plan = BudgetPlan(35, 20, 20, 25), unallocated = 0, planning = null)) }.copy(satiety = 81))
         val session = MiniGameSession(MiniGameKind.MEMORY, repository, SavedStateHandle(), backgroundScope) { }
         session.observe()
         runCurrent()

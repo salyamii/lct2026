@@ -4,7 +4,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.savedstate.serialization.SavedStateConfiguration
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
-import ru.nksk.lctapp.feature.coins.navigation.Coins
+import ru.nksk.lctapp.feature.economy.navigation.Economy
 import ru.nksk.lctapp.feature.day.navigation.Day
 import ru.nksk.lctapp.feature.gear.navigation.Gear
 import ru.nksk.lctapp.feature.goal.navigation.Goal
@@ -21,7 +21,7 @@ internal val AppNavigationSavedStateConfiguration = SavedStateConfiguration {
     serializersModule = SerializersModule {
         polymorphic(NavKey::class) {
             subclass(MainMenu::class, MainMenu.serializer())
-            subclass(Coins::class, Coins.serializer())
+            subclass(Economy::class, Economy.serializer())
             subclass(Day::class, Day.serializer())
             subclass(Gear::class, Gear.serializer())
             subclass(Goal::class, Goal.serializer())
@@ -36,7 +36,7 @@ internal val AppNavigationSavedStateConfiguration = SavedStateConfiguration {
             defaultDeserializer { className ->
                 when (className) {
                     "ru.nksk.lctapp.ui.menu.MainMenu" -> MainMenu.serializer()
-                    "ru.nksk.lctapp.ui.coins.navigation.Coins" -> Coins.serializer()
+                    "ru.nksk.lctapp.ui.coins.navigation.Coins" -> Economy.serializer()
                     "ru.nksk.lctapp.ui.day.navigation.Day" -> Day.serializer()
                     "ru.nksk.lctapp.ui.gear.navigation.Gear" -> Gear.serializer()
                     "ru.nksk.lctapp.ui.goal.navigation.Goal" -> Goal.serializer()

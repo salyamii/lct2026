@@ -21,7 +21,7 @@ internal fun GameCatalog.withEverydayEvents(): GameCatalog {
     val choices = listOf(
         EventChoiceDefinition("$cap:buy", cap, 0, "Купить · 25", -25, null, null, GoalImpact.NEUTRAL),
         EventChoiceDefinition("$cap:pass", cap, 1, "Пройти мимо", 0, null, null, GoalImpact.NEUTRAL),
-        // D-040: reserve/budget labels do not create separate purses; spend the shared balance.
+        // D-117/D-138: runtime spending follows event-type priorities over actual category balances.
         EventChoiceDefinition("$resin:pay", resin, 0, "Оплатить очистку · 4", -4, null, null, GoalImpact.NEUTRAL),
         EventChoiceDefinition("$resin:clean", resin, 1, "Почистить самому", 0, null, null, GoalImpact.NEUTRAL),
     )

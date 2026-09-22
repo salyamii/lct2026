@@ -49,7 +49,7 @@ class GameSchemaTest {
             assertEquals(247L, state.economy.balance)
             assertEquals(17, state.satiety)
             assertEquals(29, state.fatigue)
-            assertEquals(30L, state.economy.plan.savings)
+            assertEquals(0L, state.economy.plan.savings)
             assertEquals(PetVisualState.HUNGRY, state.pet.visualState)
             assertEquals("BANDANA", state.pet.selectedLookId)
         }
@@ -164,6 +164,7 @@ class GameSchemaTest {
             assertTrue(dump(connection, "MINI_GAME_COMPLETION").isEmpty())
         }
         withDatabase { db ->
+            RoomGameRepository(db).update { it.copy(economy = it.economy.withTotalBalance(it.economy.balance)) }
             RoomGameRepository(db).update {
                 ru.nksk.lctapp.domain.minigame.MiniGameKind.MEMORY.complete(it, "persisted-attempt")
             }
@@ -205,7 +206,7 @@ class GameSchemaTest {
             }
         }
         BundledSQLiteDriver().open(context.getDatabasePath(name).absolutePath).use { connection ->
-            connection.prepare("SELECT visual_state, balance FROM GAME_STATE").use { row ->
+            connection.prepare("SELECT visual_state, unallocated FROM GAME_STATE").use { row ->
                 assertTrue(row.step())
                 assertEquals("FUTURE_STATE", row.getText(0))
                 assertEquals(247L, row.getLong(1))

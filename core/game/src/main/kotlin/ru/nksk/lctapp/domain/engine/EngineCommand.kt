@@ -39,6 +39,7 @@ sealed interface EngineResult {
 }
 
 sealed interface BlockReason {
+    data object BudgetPlanningRequired : BlockReason
     data object InvalidPetName : BlockReason
     data object StaleRevision : BlockReason
     data object DayNotStarted : BlockReason

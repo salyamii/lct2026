@@ -68,6 +68,9 @@ class GoalPersistenceTest {
             var games = RoomGameRepository(database)
             var session = GameSession(games, RoomStoryContentRepository(database), catalog, createInitialGameState())
             session.prepare()
+            // This persistence case starts after budget confirmation, with funds for the goal.
+            games.update { it.copy(economy = ru.nksk.lctapp.domain.economy.EconomyState(
+                ru.nksk.lctapp.domain.economy.BudgetPlan(35, 0, 65, 0))) }
             val select = session.selectGoalCommand(games.read()!!, goal.goalId)
             assertTrue(session.dispatch(EngineRequest("select", null, select)) is EngineResult.Applied)
             val request = EngineRequest("buy", games.read()!!.engine!!.revision,
@@ -83,7 +86,7 @@ class GoalPersistenceTest {
             assertEquals(bought, games.read())
             assertEquals(EngineResult.Blocked(BlockReason.StaleRevision), session.dispatch(request))
             try {
-                games.update { it.copy(selectedGoalId = "missing-goal", economy = it.economy.copy(balance = 0), ownedItems = emptyList()) }
+                games.update { it.copy(selectedGoalId = "missing-goal", economy = it.economy.withTotalBalance(0), ownedItems = emptyList()) }
                 fail("Unknown goal FK must roll back the whole outcome")
             } catch (_: androidx.sqlite.SQLiteException) { }
             assertEquals(bought, games.read())

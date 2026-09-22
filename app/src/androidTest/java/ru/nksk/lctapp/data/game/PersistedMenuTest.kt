@@ -54,7 +54,7 @@ class PersistedMenuTest {
         val initial = createInitialGameState()
         runBlocking {
             games.initializeIfAbsent(initial.copy(
-                economy = initial.economy.copy(balance = 247),
+                economy = initial.economy.withTotalBalance(247),
                 pet = initial.pet.copy(selectedLookId = "HAT", visualState = PetVisualState.UPSET, name = "Тоша"),
             ))
         }
@@ -64,7 +64,7 @@ class PersistedMenuTest {
         compose.onNodeWithText("Тоша").assertIsDisplayed()
         compose.onNodeWithText("Ребёнок").assertDoesNotExist()
         runBlocking {
-            games.update { it.copy(economy = it.economy.copy(balance = 37),
+            games.update { it.copy(economy = it.economy.withTotalBalance(37),
                 pet = it.pet.transitionTo(PetVisualState.NORMAL).copy(name = "Мика", age = PetAge.TEEN)) }
         }
         awaitDescription(R.string.menu_coins_accessibility, 37L)

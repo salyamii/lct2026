@@ -28,6 +28,7 @@ internal fun StoryContent.newDefinitionsComparedTo(old: StoryContent): StoryCont
         added.requiredItems.none { it.goalId in oldGoals } &&
         added.schedule.none { it.dayId in oldDays }
     ) { "Changing the children of an existing definition requires a new parent ID" }
+    validateEarningCosts(old, added)
     return added
 }
 
@@ -51,4 +52,13 @@ internal fun validateStoryItemRewards(old: StoryContent, added: StoryContent) {
     } && (old.choiceItemEffects + added.choiceItemEffects).none {
         it.choiceId in storyChoices && it.itemId in goalItems && it.operation == ItemOperation.ADD
     }) { "STORY events cannot grant goal-required items (D-038)" }
+}
+
+/** An earning reward cannot hide a charge at entry or in any response. */
+private fun validateEarningCosts(old: StoryContent, added: StoryContent) {
+    val earnings = (old.events + added.events).filter { it.type == EventType.EARNING }
+    val ids = earnings.map { it.id }.toSet()
+    require(earnings.none { it.moneyDeltaOnStart < 0 } &&
+        (old.choices + added.choices).none { it.eventId in ids && it.moneyDelta < 0 }
+    ) { "EARNING events cannot require money at entry or in a choice" }
 }

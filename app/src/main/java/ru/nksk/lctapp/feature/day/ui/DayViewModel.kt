@@ -133,7 +133,7 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
                             exitRequested = true
                             games.send(checkNotNull(result.state.engine?.currentEvent).id)
                         }
-                        if (leave) {
+                        if (leave && result.state.economy.planning == null) {
                             exitRequested = true
                             exits.send(if (command is EngineCommand.CompleteEvent) "Событие выполнено!" else null)
                         }
@@ -207,7 +207,7 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
             result -> if (event?.type == EventType.EARNING) "Дело выполнено. Получено ${completedChoice?.moneyDelta ?: 0} монет. Сейчас ${saved.pet.name} ${energyDescription(checkNotNull(day).energy, catalog.rules.fullEnergy).lowercase()}."
                 else "Этот шаг истории завершён."
             event != null -> renderPetText(variant?.body ?: event.description, saved.pet.name)
-            day == null -> "${saved.pet.name} начинает неделю со 100 монетами. Еда стоит 5 монет в день: на неделю нужно запланировать минимум 35. Деньги остаются общими — план не блокирует покупки."
+            day == null -> "${saved.pet.name} начинает неделю со 100 монетами. Еда стоит 5 монет в день: на неделю нужно запланировать минимум 35. Перед началом игры распредели монеты по статьям."
             day.phase == DayPhase.READY_TO_END -> "Все события на сегодня закончились. До сна ещё можно выполнить короткое дело из списка «Дела»."
             day.energy == 0 -> "${saved.pet.name} устал. Оставшийся план перенесётся на завтра." +
                 if (day.ateToday) " Можно отдохнуть." else " Перед сном нужно поесть."
@@ -240,7 +240,7 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
             title = when { summary != null -> "День ${summary.day} завершён"; result -> "Готово!"; event != null -> renderPetText(event.title, saved.pet.name); day != null -> "День ${day.day}"; else -> "Новый день" },
             body = body, category = if (summary != null) "Итоги дня" else card?.category?.let { renderPetText(it, saved.pet.name) } ?: saved.pet.name,
             status = if (summary != null) "" else "${day?.let { "День ${it.day} · ${energyDescription(it.energy, catalog.rules.fullEnergy)} · " }.orEmpty()}${saved.economy.balance} монет",
-            impact = if (result) "" else if (isDeed(saved)) "Награда: до ${choices.single().moneyDelta} монет" else renderPetText(card?.impact.orEmpty(), saved.pet.name),
+            impact = if (result) "" else if (isDeed(saved)) "Награда: до ${choices.single().moneyDelta} монет в «Запас»" else renderPetText(card?.impact.orEmpty(), saved.pet.name),
             effort = if (result) "" else renderPetText(card?.effort.orEmpty(), saved.pet.name),
             footer = renderPetText(card?.footer.orEmpty(), saved.pet.name), scene = variant?.scene ?: card?.scene, character = variant?.character ?: card?.character,
             options = (if (restFromCard) emptyList() else choices).map { DayOption(it.id, if (isDeed(saved)) "Выполнить дело" else renderPetText(it.text, saved.pet.name),
@@ -256,11 +256,12 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
             } }, primaryNeedsFood = primaryBlock == BlockReason.MustEat,
             showMeals = mealsShown,
             meals = catalog.meals.filter { it.price > 0 || saved.economy.balance < catalog.meals.first().price }.map {
-                MealOption(it.id, if (it.price == 0L) "Бесплатная столовая · завтра меньше сил" else "Обычный обед · ${it.price} монет", saved.economy.balance >= it.price)
+                MealOption(it.id, if (it.price == 0L) "Бесплатная столовая · завтра меньше сил" else "Обычный обед · ${it.price} монет",
+                    session.engine.blockReason(saved, EngineCommand.Feed(it.id)) == null)
             }, message = effectiveMessage, actionNotice = actionNotice,
             weeklyReminder = day?.takeIf { (it.day - 1) % 7 == 0 && it.steps <= 1 && summary == null }?.let {
                 val mealPrice = catalog.meals.first { meal -> meal.price > 0 }.price
-                "На неделю — ${catalog.rules.weeklyIncome} монет. На ежедневную еду запланируй минимум ${mealPrice * 7}. Деньги остаются общими, поэтому учитывай и будущие поездки."
+                "На неделю — ${catalog.rules.weeklyIncome} монет. На ежедневную еду запланируй минимум ${mealPrice * 7}. Заработок поступает в «Запас». Учитывай и будущие поездки."
             },
         )
     }

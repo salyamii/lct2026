@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.data.game.content
 
+import ru.nksk.lctapp.domain.economy.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
@@ -139,7 +140,7 @@ class StoryCampaignTest {
     /** Drives public commands, including real deed result validation, feeding, sleep and purchases. */
     private class Fixture {
         val catalog = bundledGameCatalog()
-        val initial = createInitialGameState().let { it.copy(economy = it.economy.copy(balance = 10_000),
+        val initial = createInitialGameState().let { it.copy(economy = EconomyState(BudgetPlan(0, 0, 10_000, 0)),
             pet = it.pet.copy(name = "Тоша", color = PetColor.SAND, selectedLookId = "backend:scarf")) }
         val repo = MemoryRepository(initial)
         val content = object : StoryContentRepository {
@@ -161,6 +162,19 @@ class StoryCampaignTest {
         suspend fun finishCampaign(order: List<String>, skipOptional: Boolean) {
             repeat(4_000) {
                 if (catalog.storyProgress(state).campaignComplete) return
+                if (state.economy.planning != null) {
+                    repo.update { game ->
+                        var economy = game.economy
+                        fun session() = checkNotNull(economy.planning)
+                        if (session().stage == BudgetPlanningStage.RECEIPT)
+                            economy = EconomyOperations.startAllocation(economy, session().id, session().revision)
+                        economy = EconomyOperations.setAllocation(economy, session().id, session().revision,
+                            BudgetSection.NEEDS, maxOf(35, economy.plan.needs))
+                        economy = EconomyOperations.setAllocation(economy, session().id, session().revision,
+                            BudgetSection.SAVINGS, economy.plan.savings + economy.unallocated)
+                        game.copy(economy = EconomyOperations.confirm(economy, session().id, session().revision))
+                    }
+                }
                 val day = state.engine
                 when {
                     day != null && day.phase != DayPhase.FINISHED && !day.ateToday -> send(EngineCommand.Feed("basic-v1"))

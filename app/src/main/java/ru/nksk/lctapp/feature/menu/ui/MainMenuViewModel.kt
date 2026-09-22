@@ -69,6 +69,10 @@ internal class MainMenuViewModel @Inject constructor(
 
     fun continueDay() {
         val game = saved ?: return
+        if (game.economy.planning != null) {
+            viewModelScope.launch { dayNavigation.send(Unit) }
+            return
+        }
         // Reopening the completed day's summary is a read, not the next day's income.
         val command = if (game.engine?.phase == DayPhase.FINISHED) null else session.advanceCommand(game)
         act(game, command, open = true)
@@ -76,12 +80,20 @@ internal class MainMenuViewModel @Inject constructor(
 
     fun feed() {
         val game = saved ?: return
+        if (game.economy.planning != null) {
+            viewModelScope.launch { dayNavigation.send(Unit) }
+            return
+        }
         act(game, EngineCommand.Feed(session.catalog.meals.first { it.price > 0 }.id), open = false)
     }
 
     fun feedFree() {
         val game = saved ?: return
         if (!offersFreeMeal(game)) return
+        if (game.economy.planning != null) {
+            viewModelScope.launch { dayNavigation.send(Unit) }
+            return
+        }
         act(game, EngineCommand.Feed(session.catalog.meals.first { it.price == 0L }.id), open = false)
     }
 

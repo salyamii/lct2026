@@ -1,5 +1,7 @@
 package ru.nksk.lctapp
 
+import ru.nksk.lctapp.domain.economy.*
+
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
@@ -44,7 +46,7 @@ class MainMenuInitialStateTest {
     @JvmField
     val game: GameState = createInitialGameState().let { initial ->
         initial.copy(
-            economy = initial.economy.copy(balance = 3_000_000_000L),
+            economy = EconomyState(BudgetPlan(0, 0, 0, 3_000_000_000L)),
             pet = PetState("BANDANA", PetVisualState.HUNGRY),
         )
     }
