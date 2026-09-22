@@ -7,7 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,6 +32,13 @@ private val GoalAccent = Color(0xFF3E31B8)
 /** Native scroll/insets instead of the mockup's fixed viewport and simulated system bar. */
 @Composable
 internal fun GoalScreen(state: GoalUiState, onBack: () -> Unit, onAction: (GoalAction) -> Unit) {
+    var missingCoins by remember { mutableStateOf<Long?>(null) }
+    missingCoins?.let { missing ->
+        AlertDialog(onDismissRequest = { missingCoins = null },
+            title = { Text("Не хватает монет", fontFamily = Rubik) },
+            text = { GameBody("В «Коплю» не хватает $missing монет для покупки.") },
+            confirmButton = { TextButton(onClick = { missingCoins = null }) { Text("Понятно") } })
+    }
     Column(Modifier.fillMaxSize().background(GoalBackground)) {
         Row(Modifier.fillMaxWidth().background(Brush.verticalGradient(listOf(GameInk, GoalAccent)))
             .statusBarsPadding().padding(horizontal = 12.dp),
@@ -40,7 +47,7 @@ internal fun GoalScreen(state: GoalUiState, onBack: () -> Unit, onAction: (GoalA
                 Text("Назад", color = Color.White, fontFamily = Nunito)
             }
             Spacer(Modifier.weight(1f))
-            if (!state.loading && !state.failed) Text("${state.balance} монет", color = Color.White,
+            if (!state.loading && !state.failed) Text("Коплю: ${state.balance}", color = Color.White,
                 fontFamily = Nunito, fontWeight = FontWeight.ExtraBold)
         }
         Box(Modifier.weight(1f).fillMaxWidth()) {
@@ -101,7 +108,10 @@ internal fun GoalScreen(state: GoalUiState, onBack: () -> Unit, onAction: (GoalA
                                 Text("Что входит в цель", color = GoalAccent, fontFamily = Nunito,
                                     fontWeight = FontWeight.ExtraBold)
                                 state.parts.forEach { part ->
-                                    GoalPart(part, state.selected, state.busy) { onAction(GoalAction.Buy(checkNotNull(state.goalId), part.id)) }
+                                    GoalPart(part, state.selected, state.busy) {
+                                        if (part.missingCoins != null) missingCoins = part.missingCoins
+                                        else onAction(GoalAction.Buy(checkNotNull(state.goalId), part.id))
+                                    }
                                 }
                                 GameBody(state.storyHint)
                                 if (state.selected) GameBody("Покупка занимает шаг дня. Не забудь оставить монеты на еду.")
@@ -150,9 +160,10 @@ private fun GoalPart(part: GoalPartUiState, selected: Boolean, busy: Boolean, on
             }
             GameBody(part.description)
             if (selected && !part.owned) {
-                Button(onClick = onBuy, enabled = part.canBuy && !busy,
+                Button(onClick = onBuy, enabled = (part.canBuy || part.missingCoins != null) && !busy,
                     modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AdventureLime, contentColor = GameInk,
+                    colors = ButtonDefaults.buttonColors(containerColor = if (part.canBuy) AdventureLime else Color(0xFFE7E5F0),
+                        contentColor = if (part.canBuy) GameInk else Color(0xFF55506B),
                         disabledContainerColor = Color(0xFFE7E5F0), disabledContentColor = Color(0xFF55506B))) {
                     Text("Купить за ${part.price} монет", fontFamily = Rubik, fontWeight = FontWeight.SemiBold)
                 }

@@ -35,6 +35,7 @@ internal data class GoalProjectUiState(
 internal data class GoalPartUiState(
     val id: String, val title: String, val description: String, val price: Long,
     val owned: Boolean, val canBuy: Boolean, val blockedMessage: String?,
+    val missingCoins: Long? = null,
 )
 
 internal data class PurchaseConfirmation(

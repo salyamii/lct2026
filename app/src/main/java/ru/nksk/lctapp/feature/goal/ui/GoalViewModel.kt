@@ -143,7 +143,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
         val goal = catalog.goals.firstOrNull { it.goalId == handle.get<String>("viewed_goal") } ?: activeGoal
         val showList = handle.get<Boolean>("show_list") ?: (activeGoal == null)
         val common = GoalUiState(loading = false, busy = busy, petName = game.pet.name,
-            balance = game.economy.balance, projects = projects, showList = showList || goal == null,
+            balance = game.economy.plan.savings, projects = projects, showList = showList || goal == null,
             completedProjectCount = game.completedGoalProjects.size,
             campaignComplete = catalog.storyProgress(game).campaignComplete,
             message = message, confirmation = confirmation, celebration = celebration)
@@ -155,7 +155,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
         mutableState.value = common.copy(
             goalId = goal.goalId, canSelect = activeGoal == null && goal.isAvailable(game), completedProject = completed,
             title = renderPetText(definition.title, game.pet.name), description = renderPetText(definition.description, game.pet.name),
-            selected = selected, balance = game.economy.balance, totalPrice = progress.totalPrice,
+            selected = selected, balance = game.economy.plan.savings, totalPrice = progress.totalPrice,
             remainingPrice = progress.remainingPrice, collected = progress.boughtCount,
             parts = progress.items.map { item ->
                 val owned = item.id in progress.ownedItemIds
@@ -163,7 +163,8 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
                     EngineCommand.BuyGoalItem(goal.goalId, item.id)) else null
                 GoalPartUiState(item.id, renderPetText(item.name, game.pet.name), renderPetText(item.description, game.pet.name), checkNotNull(item.priceCoins), owned,
                     selected && !owned && (block == null || block is BlockReason.FoodBudgetWarning),
-                    block?.takeUnless { it is BlockReason.FoodBudgetWarning }?.playerMessage(game.pet.name))
+                    block?.takeUnless { it is BlockReason.FoodBudgetWarning || it is BlockReason.InsufficientMoney }?.playerMessage(game.pet.name),
+                    (block as? BlockReason.InsufficientMoney)?.missing)
             },
             storyHint = when {
                 completed -> "Этот проект уже помог пройти главу. Вещи остаются у тебя."
