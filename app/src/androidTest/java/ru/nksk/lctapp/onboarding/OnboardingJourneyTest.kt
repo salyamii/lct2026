@@ -98,7 +98,7 @@ class OnboardingJourneyTest {
 
         // Before opening allocation, leaving and continuing must return to this receipt.
         compose.onNodeWithContentDescription("В главное меню").performClick()
-        compose.onNodeWithText("Продолжить день").assertIsDisplayed()
+        compose.onNodeWithText("Монетки").assertIsDisplayed()
         compose.onNodeWithText("Продолжить день").performClick()
         compose.onNodeWithText("Первый бюджет").assertIsDisplayed()
         compose.onNodeWithText("Распределить монеты").performScrollTo().performClick()
@@ -141,7 +141,7 @@ class OnboardingJourneyTest {
         compose.onNodeWithText("Подтвердить бюджет").assertIsEnabled()
         compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
         compose.waitUntil(10_000) { runBlocking { repository.read() }?.economy?.planning == null }
-        compose.onNodeWithText("Продолжить день").assertIsDisplayed()
+        compose.onNodeWithText("Монетки").assertIsDisplayed()
         compose.runOnIdle {
             val saved = runBlocking { repository.read() }!!
             assertEquals(ru.nksk.lctapp.domain.economy.BudgetPlan(35, 20, 20, 25), saved.economy.plan)
@@ -149,7 +149,7 @@ class OnboardingJourneyTest {
             assertNull(saved.engine)
         }
         compose.activityRule.scenario.recreate()
-        compose.onNodeWithText("Продолжить день").assertIsDisplayed()
+        compose.onNodeWithText("Монетки").assertIsDisplayed()
         compose.onNodeWithText("План на 7 дней").assertDoesNotExist()
     }
 

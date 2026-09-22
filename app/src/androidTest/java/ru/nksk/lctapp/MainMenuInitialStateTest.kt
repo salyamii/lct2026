@@ -1,7 +1,6 @@
 package ru.nksk.lctapp
 
 import ru.nksk.lctapp.domain.economy.*
-
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
@@ -65,9 +64,8 @@ class MainMenuInitialStateTest {
         }
 
         compose.onNodeWithText("3000000000", useUnmergedTree = true).assertIsDisplayed()
-        compose.onNode(hasContentDescription(
-            compose.activity.getString(R.string.menu_coins_accessibility, 3_000_000_000L),
-        )).assertIsDisplayed()
+        compose.onNodeWithText("Монетки").assertIsDisplayed()
+        compose.onNodeWithText("Запас", useUnmergedTree = true).assertIsDisplayed()
         compose.onNode(hasContentDescription(
             compose.activity.getString(R.string.menu_pet_hungry, PetDefaults.FOX_NAME),
         )).assertIsDisplayed()

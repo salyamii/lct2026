@@ -49,6 +49,7 @@ internal fun MenuHud(
     onAction: (MainMenuAction) -> Unit,
     goalTitle: String = "Выбрать большую цель",
     modifier: Modifier = Modifier,
+    budget: MenuBudgetUiState? = null,
 ) {
     Column(modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Row(
@@ -79,9 +80,10 @@ internal fun MenuHud(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            CoinsBadge(coins) { onAction(MainMenuAction.Coins) }
+            if (budget == null) CoinsBadge(coins) { onAction(MainMenuAction.Coins) }
+            else BudgetBadge(budget) { onAction(MainMenuAction.Coins) }
             Spacer(Modifier.width(12.dp))
-            Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+            Box(Modifier.weight(1f).align(if (budget == null) Alignment.CenterVertically else Alignment.Top), contentAlignment = Alignment.CenterEnd) {
                 Text(
                     text = petName,
                     modifier = Modifier.clip(RoundedCornerShape(20.dp))
@@ -97,6 +99,41 @@ internal fun MenuHud(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun BudgetBadge(budget: MenuBudgetUiState, onClick: () -> Unit) {
+    Column(
+        Modifier.width(154.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(AdventurePanel.copy(alpha = 0.9f))
+            .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(20.dp))
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        MenuText("Монетки", 13, color = AdventureLabel,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+        BudgetBalanceRow("Нужно", budget.needs, Color(0xFFFF7770))
+        BudgetBalanceRow("Хочу", budget.wants, Color(0xFF4BA6F8))
+        BudgetBalanceRow("Коплю", budget.savings, Color(0xFF79CD43))
+        BudgetBalanceRow("Запас", budget.reserve, Color(0xFFFFBD29))
+    }
+}
+
+@Composable
+private fun BudgetBalanceRow(title: String, amount: Long, color: Color) {
+    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
+        .background(color.copy(alpha = 0.12f))
+        .border(1.dp, color.copy(alpha = 0.55f), RoundedCornerShape(10.dp))
+        .padding(horizontal = 8.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(title, Modifier.weight(1f), color = AdventureLabel, fontFamily = Rubik,
+            fontWeight = FontWeight.Medium, fontSize = 12.sp)
+        Text(amount.toString(), color = color, fontFamily = Rubik,
+            fontWeight = FontWeight.Bold, fontSize = 14.sp)
     }
 }
 

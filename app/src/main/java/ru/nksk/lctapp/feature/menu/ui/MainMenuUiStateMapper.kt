@@ -13,6 +13,7 @@ internal fun GameState.toMainMenuUiState(fullEnergy: Int = 5, catalog: GameCatal
     val progress = goal?.progress(this, catalog.content)
     return MainMenuUiState(
     coins = economy.balance,
+    budget = MenuBudgetUiState(economy.plan.needs, economy.plan.wants, economy.plan.savings, economy.plan.reserve),
     backgroundRes = ru.nksk.lctapp.core.ui.location.locationArtwork(locationScene),
     completedGoals = progress?.boughtCount ?: 0,
     totalGoals = progress?.items?.size ?: 0,

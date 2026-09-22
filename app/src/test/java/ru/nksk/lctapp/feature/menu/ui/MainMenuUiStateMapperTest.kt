@@ -96,6 +96,7 @@ class MainMenuUiStateMapperTest {
         val state = game.toMainMenuUiState()
 
         assertEquals(3_000_000_000L, state.coins)
+        assertEquals(MenuBudgetUiState(0, 0, 0, 3_000_000_000L), state.budget)
         assertEquals(R.drawable.ryzhik_cub_state_hungry_copper, state.pet.artworkRes)
         assertEquals(R.string.menu_pet_hungry, state.pet.descriptionRes)
     }

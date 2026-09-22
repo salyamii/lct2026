@@ -70,7 +70,7 @@ fun MainMenuScreen(
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                     ) {
-                        MenuHud(state.pet.name, state.coins, state.completedGoals, state.totalGoals, dispatch, state.goalTitle)
+                        MenuHud(state.pet.name, state.coins, state.completedGoals, state.totalGoals, dispatch, state.goalTitle, budget = state.budget)
                         MenuActions(dispatch, viewport, state)
                     }
                 }
@@ -79,7 +79,7 @@ fun MainMenuScreen(
                     Modifier.widthIn(max = 480.dp).fillMaxSize().align(Alignment.TopCenter),
                 ) {
                     MenuHud(state.pet.name, state.coins, state.completedGoals, state.totalGoals, dispatch, state.goalTitle,
-                        Modifier.onGloballyPositioned { hudBottom = it.positionInRoot().y + it.size.height })
+                        Modifier.onGloballyPositioned { hudBottom = it.positionInRoot().y + it.size.height }, budget = state.budget)
                     CharacterScene(state.pet, Modifier.weight(1f).fillMaxWidth(), characterPosition)
                     MenuActions(dispatch, viewport, state)
                 }
@@ -100,7 +100,7 @@ fun MainMenuScreen(
     }
 }
 
-@Preview(name = "Figma · 390 × 844", widthDp = 390, heightDp = 844)
+@Preview(name = "Бюджет · 390 × 844", widthDp = 390, heightDp = 844)
 @Preview(name = "Compact phone", widthDp = 360, heightDp = 640)
 @Preview(name = "Landscape", widthDp = 844, heightDp = 390)
 @Preview(name = "Large text", widthDp = 390, heightDp = 844, fontScale = 1.5f)
