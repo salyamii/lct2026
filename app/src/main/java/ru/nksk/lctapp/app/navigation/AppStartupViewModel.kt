@@ -25,6 +25,7 @@ internal sealed interface AppStartupState {
     data class Choose(val saving: Boolean = false, val failed: Boolean = false) : AppStartupState
     data class Customize(val draft: PetCustomization, val saving: Boolean = false, val failed: Boolean = false) : AppStartupState
     data class Accessories(val draft: OnboardingDraft, val saving: Boolean = false, val failed: Boolean = false) : AppStartupState
+    data class GoalSelection(val draft: OnboardingDraft, val saving: Boolean = false, val failed: Boolean = false) : AppStartupState
     data class Introduction(val draft: OnboardingDraft, val saving: Boolean = false, val failed: Boolean = false) : AppStartupState
     data object Ready : AppStartupState
     data object Error : AppStartupState
@@ -41,6 +42,8 @@ internal class AppStartupViewModel @Inject constructor(
     private var work: Job? = null
     private val writes = Mutex()
     private var selectedAccessory = "BACKPACK"
+    private var selectedGoalId: String? = null
+    val goalIds: List<String> = session.onboardingGoals.map { it.goalId }
 
     init { retry() }
 
@@ -52,10 +55,13 @@ internal class AppStartupViewModel @Inject constructor(
                 state.value = if (session.read() != null) AppStartupState.Ready
                 else drafts.read()?.let {
                     selectedAccessory = it.accessoryId
+                    selectedGoalId = it.goalId
                     when (it.step) {
                         OnboardingStep.Profile -> AppStartupState.Customize(it.profile)
                         OnboardingStep.Accessories -> AppStartupState.Accessories(it)
-                        OnboardingStep.Introduction -> AppStartupState.Introduction(it)
+                        OnboardingStep.GoalSelection -> AppStartupState.GoalSelection(it)
+                        OnboardingStep.Introduction -> if (it.goalId in goalIds) AppStartupState.Introduction(it)
+                            else AppStartupState.GoalSelection(it.copy(step = OnboardingStep.GoalSelection))
                     }
                 } ?: AppStartupState.Choose()
             } catch (cancelled: CancellationException) {
@@ -73,8 +79,9 @@ internal class AppStartupViewModel @Inject constructor(
         work = viewModelScope.launch {
             try {
                 selectedAccessory = "BACKPACK"
+                selectedGoalId = null
                 val draft = PetCustomization(name = "")
-                writes.withLock { drafts.save(OnboardingDraft(draft, accessoryId = selectedAccessory)) }
+                writes.withLock { drafts.save(OnboardingDraft(draft, accessoryId = selectedAccessory, goalId = selectedGoalId)) }
                 state.value = AppStartupState.Customize(draft)
             } catch (cancelled: CancellationException) {
                 throw cancelled
@@ -99,7 +106,7 @@ internal class AppStartupViewModel @Inject constructor(
         state.value = current.copy(draft = draft, failed = false)
         viewModelScope.launch {
             try {
-                writes.withLock { drafts.save(OnboardingDraft(draft, accessoryId = selectedAccessory)) }
+                writes.withLock { drafts.save(OnboardingDraft(draft, accessoryId = selectedAccessory, goalId = selectedGoalId)) }
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
@@ -131,7 +138,7 @@ internal class AppStartupViewModel @Inject constructor(
         state.value = current.copy(saving = true, failed = false)
         work = viewModelScope.launch {
             try {
-                val draft = OnboardingDraft(current.draft, OnboardingStep.Accessories, selectedAccessory)
+                val draft = OnboardingDraft(current.draft, OnboardingStep.Accessories, selectedAccessory, selectedGoalId)
                 writes.withLock { drafts.save(draft) }
                 state.value = AppStartupState.Accessories(draft)
             } catch (cancelled: CancellationException) { throw cancelled }
@@ -174,16 +181,16 @@ internal class AppStartupViewModel @Inject constructor(
         state.value = current.copy(saving = true, failed = false)
         work = viewModelScope.launch {
             try {
-                val draft = current.draft.copy(step = OnboardingStep.Introduction)
+                val draft = current.draft.copy(step = OnboardingStep.GoalSelection)
                 writes.withLock { drafts.save(draft) }
-                state.value = AppStartupState.Introduction(draft)
+                state.value = AppStartupState.GoalSelection(draft)
             } catch (cancelled: CancellationException) { throw cancelled }
             catch (_: Exception) { state.value = current.copy(failed = true) }
         }
     }
 
     fun backToAccessories() {
-        val current = state.value as? AppStartupState.Introduction ?: return
+        val current = state.value as? AppStartupState.GoalSelection ?: return
         if (current.saving || work?.isActive == true) return
         state.value = current.copy(saving = true, failed = false)
         work = viewModelScope.launch {
@@ -196,15 +203,58 @@ internal class AppStartupViewModel @Inject constructor(
         }
     }
 
+    fun selectGoal(id: String) {
+        val current = state.value as? AppStartupState.GoalSelection ?: return
+        if (current.saving || work?.isActive == true || id !in goalIds) return
+        state.value = current.copy(saving = true, failed = false)
+        work = viewModelScope.launch {
+            try {
+                val draft = current.draft.copy(goalId = id)
+                writes.withLock { drafts.save(draft) }
+                selectedGoalId = id
+                state.value = AppStartupState.GoalSelection(draft)
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (_: Exception) { state.value = current.copy(failed = true) }
+        }
+    }
+
+    fun confirmGoal() {
+        val current = state.value as? AppStartupState.GoalSelection ?: return
+        if (current.saving || work?.isActive == true || current.draft.goalId !in goalIds) return
+        state.value = current.copy(saving = true, failed = false)
+        work = viewModelScope.launch {
+            try {
+                val draft = current.draft.copy(step = OnboardingStep.Introduction)
+                writes.withLock { drafts.save(draft) }
+                state.value = AppStartupState.Introduction(draft)
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (_: Exception) { state.value = current.copy(failed = true) }
+        }
+    }
+
+    fun backToGoals() {
+        val current = state.value as? AppStartupState.Introduction ?: return
+        if (current.saving || work?.isActive == true) return
+        state.value = current.copy(saving = true, failed = false)
+        work = viewModelScope.launch {
+            try {
+                val draft = current.draft.copy(step = OnboardingStep.GoalSelection)
+                writes.withLock { drafts.save(draft) }
+                state.value = AppStartupState.GoalSelection(draft)
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (_: Exception) { state.value = current.copy(failed = true) }
+        }
+    }
+
     fun finishOnboarding() {
         val current = state.value as? AppStartupState.Introduction ?: return
-        if (current.saving || work?.isActive == true || !current.draft.canFinish) return
+        if (current.saving || work?.isActive == true || !current.draft.canFinish || current.draft.goalId !in goalIds) return
         state.value = current.copy(saving = true, failed = false)
         work = viewModelScope.launch {
             try {
                 writes.withLock {
                     // Profile and accessory commit with the game; startup never replaces an existing save.
-                    session.prepare(current.draft.profile.toPetState(current.draft.accessoryId))
+                    session.prepare(current.draft.profile.toPetState(current.draft.accessoryId), current.draft.goalId)
                 }
                 state.value = AppStartupState.Ready
             } catch (cancelled: CancellationException) { throw cancelled }

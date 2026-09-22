@@ -10,6 +10,7 @@ internal data class OnboardingDraftEntity(
     val fur: String,
     @ColumnInfo(defaultValue = "'PROFILE'") val step: String = "PROFILE",
     @ColumnInfo(name = "accessory_id", defaultValue = "'BACKPACK'") val accessoryId: String = "BACKPACK",
+    @ColumnInfo(name = "goal_id") val goalId: String? = null,
 )
 
 @Dao

@@ -200,3 +200,11 @@ internal val MIGRATION_13_14 = object : Migration(13, 14) {
         connection.execSQL("ALTER TABLE GAME_STATE ADD COLUMN location_lighting TEXT NOT NULL DEFAULT 'DAY'")
     }
 }
+
+/** Keep every game/profile value; old introductions now resume at the required goal chooser. */
+internal val MIGRATION_14_15 = object : Migration(14, 15) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE ONBOARDING_DRAFT ADD COLUMN goal_id TEXT")
+        connection.execSQL("UPDATE ONBOARDING_DRAFT SET step = 'GOAL_SELECTION' WHERE step = 'INTRODUCTION'")
+    }
+}

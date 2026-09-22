@@ -64,24 +64,35 @@ class OnboardingJourneyTest {
         compose.onNodeWithContentDescription("Искорка: Бандана").assertIsDisplayed()
         compose.runOnIdle { assertNull(runBlocking { repository.read() }) }
         compose.onNodeWithText("Применить").performClick()
-        compose.onNodeWithText("Впереди — приключения!").assertIsDisplayed()
+        compose.onNodeWithText("Выбери большую цель").assertIsDisplayed()
+        compose.onNodeWithText("Выбрать цель").assertIsNotEnabled()
+        compose.onNodeWithText("Ночь наблюдений").performScrollTo().performClick()
         compose.activityRule.scenario.recreate()
-        compose.onNodeWithText("Впереди — приключения!").assertIsDisplayed()
+        compose.onNodeWithText("Ночь наблюдений").performScrollTo().assertIsSelected()
+        compose.onNodeWithText("Выбрать цель").performClick()
+        compose.onNodeWithText("НОВОЕ ПРИКЛЮЧЕНИЕ НАЧАЛОСЬ").assertIsDisplayed()
+        compose.activityRule.scenario.recreate()
+        compose.onNodeWithText("НОВОЕ ПРИКЛЮЧЕНИЕ НАЧАЛОСЬ").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Назад к выбору цели").performClick()
         compose.onNodeWithContentDescription("Назад к аксессуарам").performClick()
         compose.onNodeWithContentDescription("Искорка: Бандана").assertIsDisplayed()
         compose.onNodeWithText("Применить").performClick()
+        compose.onNodeWithText("Выбрать цель").performClick()
         compose.runOnIdle { assertNull(runBlocking { repository.read() }) }
-        compose.onNodeWithText("Начать приключение").performClick()
+        compose.onNodeWithText("В путь!").performClick()
         compose.waitUntil(10_000) { runBlocking { repository.read() } != null }
         compose.runOnIdle {
-            val pet = runBlocking { repository.read() }!!.pet
+            val saved = runBlocking { repository.read() }!!
+            assertEquals("figma-stargazing-180-v1", saved.selectedGoalId)
+            val pet = saved.pet
             assertEquals("Искорка", pet.name)
             assertEquals(ru.nksk.lctapp.domain.pet.PetColor.SAND, pet.color)
             assertEquals("BANDANA", pet.selectedLookId)
         }
         compose.activityRule.scenario.recreate()
         compose.onNodeWithText(compose.activity.getString(R.string.menu_continue)).assertIsDisplayed()
-        compose.onNodeWithText("Впереди — приключения!").assertDoesNotExist()
+        compose.onNodeWithText("НОВОЕ ПРИКЛЮЧЕНИЕ НАЧАЛОСЬ").assertDoesNotExist()
+
     }
 
     private fun waitForFox() {

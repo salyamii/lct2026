@@ -11,7 +11,7 @@ import ru.nksk.lctapp.data.game.local.StoredCodes
 internal class RoomOnboardingDraftRepository @Inject constructor(private val database: GameDatabase) : OnboardingDraftRepository {
     override suspend fun read() = database.onboardingDraftDao().read()?.let {
         OnboardingDraft(PetCustomization(it.name, StoredCodes.petTemperament.decode(it.temperament), StoredCodes.petFur.decode(it.fur)),
-            when (it.step) { "PROFILE" -> OnboardingStep.Profile; "ACCESSORIES" -> OnboardingStep.Accessories; "INTRODUCTION" -> OnboardingStep.Introduction; else -> error("Unknown onboarding step: ${it.step}") }, it.accessoryId)
+            when (it.step) { "PROFILE" -> OnboardingStep.Profile; "ACCESSORIES" -> OnboardingStep.Accessories; "GOAL_SELECTION" -> OnboardingStep.GoalSelection; "INTRODUCTION" -> OnboardingStep.Introduction; else -> error("Unknown onboarding step: ${it.step}") }, it.accessoryId, it.goalId)
     }
     override suspend fun save(draft: OnboardingDraft) {
         database.withWriteTransaction {
@@ -19,8 +19,8 @@ internal class RoomOnboardingDraftRepository @Inject constructor(private val dat
             if (database.gameStateDao().readStates().isEmpty()) {
                 database.onboardingDraftDao().save(OnboardingDraftEntity(
                     name = draft.profile.name, temperament = StoredCodes.petTemperament.encode(draft.profile.temperament), fur = StoredCodes.petFur.encode(draft.profile.fur),
-                    step = when (draft.step) { OnboardingStep.Profile -> "PROFILE"; OnboardingStep.Accessories -> "ACCESSORIES"; OnboardingStep.Introduction -> "INTRODUCTION" },
-                    accessoryId = draft.accessoryId))
+                    step = when (draft.step) { OnboardingStep.Profile -> "PROFILE"; OnboardingStep.Accessories -> "ACCESSORIES"; OnboardingStep.GoalSelection -> "GOAL_SELECTION"; OnboardingStep.Introduction -> "INTRODUCTION" },
+                    accessoryId = draft.accessoryId, goalId = draft.goalId))
             }
         }
     }

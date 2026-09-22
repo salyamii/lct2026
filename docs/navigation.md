@@ -232,7 +232,7 @@ not substitute a new game. See [onboarding](design/onboarding.md).
 
 ### Customization step — 2026-09-20
 
-The startup gate now has Choose, Customize, Accessories and Introduction steps (CUST-D-018). Start from the character
+The startup gate now has Choose, Customize, Accessories, GoalSelection and Introduction steps (CUST-D-019). Start from the character
 screen persists a Room draft and opens CustomizationScreen in the onboarding
 module. AppStartupViewModel owns the step and persisted draft; UI receives values
 and callbacks. Back from Customize clears the draft before returning to Choose.
@@ -245,9 +245,11 @@ uses the same feature module and state/callback boundary. Back from Accessories
 returns to Customize without resetting the profile. The draft persists both step
 and selected accessory; only Start on Introduction commits a game and opens LctNavHost.
 
-Introduction follows accessory confirmation (CUST-D-018); Back returns to
-Accessories. The persisted INTRODUCTION step uses the Room v13 text
-column. No additional migration or Navigation 3 key is needed.
+Under CUST-D-019 accessory confirmation opens GoalSelection; explicit goal
+confirmation opens Introduction. Back returns to GoalSelection, then Accessories.
+Room v15 adds draft goal_id and migrates the old INTRODUCTION to GOAL_SELECTION.
+Only “В путь!” commits the pet and goal together and clears the draft.
+Existing saves skip onboarding. No Navigation 3 key or day/event transition is added.
 
 ## Карта — 2026-09-20
 

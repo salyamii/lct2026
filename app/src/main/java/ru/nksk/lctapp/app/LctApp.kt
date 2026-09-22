@@ -21,7 +21,8 @@ import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 import ru.nksk.lctapp.feature.onboarding.navigation.OnboardingEntry
 import ru.nksk.lctapp.feature.onboarding.ui.OnboardingArtwork
-import ru.nksk.lctapp.feature.onboarding.ui.AdventureIntroductionScreen
+import ru.nksk.lctapp.feature.onboarding.ui.AdventureGoalSelectionScreen
+import ru.nksk.lctapp.feature.onboarding.ui.AdventureStartedScreen
 import ru.nksk.lctapp.feature.onboarding.ui.CustomizationScreen
 import ru.nksk.lctapp.feature.onboarding.ui.AccessoryCustomizationScreen
 import ru.nksk.lctapp.feature.onboarding.ui.AccessoryCustomizationUiState
@@ -96,17 +97,30 @@ private fun LctAppContent() {
                     saveFailed = current.failed,
                 )
             }
-            is AppStartupState.Introduction -> {
+            is AppStartupState.GoalSelection -> {
                 BackHandler { startup.backToAccessories() }
+                AdventureGoalSelectionScreen(
+                    artwork = customizationArtwork().copy(background = R.drawable.location_hill_day),
+                    goals = onboardingGoalOptions().filter { it.id in startup.goalIds },
+                    selectedGoalId = current.draft.goalId,
+                    onSelect = startup::selectGoal,
+                    onBack = startup::backToAccessories,
+                    onConfirm = startup::confirmGoal,
+                    saving = current.saving,
+                    saveFailed = current.failed,
+                )
+            }
+            is AppStartupState.Introduction -> {
+                BackHandler { startup.backToGoals() }
                 val art = customizationArtwork()
                 val accessory = OnboardingAccessory.entries.first { it.id == current.draft.accessoryId }
                 val fur = CharacterFur.valueOf(current.draft.profile.fur.name)
-                AdventureIntroductionScreen(
+                AdventureStartedScreen(
                     artwork = art,
+                    goal = onboardingGoalOptions().first { it.id == current.draft.goalId },
                     portrait = accessoryArtwork(art).portraits.getValue(accessory).getValue(fur),
-                    icons = introductionIcons(),
-                    onBack = startup::backToAccessories,
-                    onStart = startup::finishOnboarding,
+                    onBack = startup::backToGoals,
+                    onContinue = startup::finishOnboarding,
                     saving = current.saving,
                     saveFailed = current.failed,
                 )

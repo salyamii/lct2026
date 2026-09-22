@@ -87,10 +87,14 @@ class GameSession(
     private var prepared = false
     val engine = GameEngine(games, EventFactory(catalog.content, catalog.policies, catalog.meals, catalog.goals, catalog.storyCampaign), catalog.rules)
 
-    suspend fun prepare(pet: PetState? = null) = preparation.withLock {
+    /** Available projects for a new game, before there is a persisted aggregate. */
+    val onboardingGoals: List<GoalCampaign> get() = catalog.goals.filter { it.isAvailable(initial) }
+
+    suspend fun prepare(pet: PetState? = null, goalId: String? = null) = preparation.withLock {
         if (!prepared) {
             content.install(catalog.content)
-            games.initializeIfAbsent(if (pet == null) initial else initial.copy(pet = pet))
+            require(goalId == null || onboardingGoals.any { it.goalId == goalId }) { "Unavailable starting goal" }
+            games.initializeIfAbsent(initial.copy(pet = pet ?: initial.pet, selectedGoalId = goalId ?: initial.selectedGoalId))
             engine.synchronizeStoryAge()
             prepared = true
         }
