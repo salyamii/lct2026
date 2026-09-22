@@ -69,6 +69,7 @@ fun DeedsScreen(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit,
                 state.message?.let { Text(it, color = DeedColors.Text) }
                 if (state.hasCurrentEvent) OutlinedButton(onCurrentEvent, enabled = !state.busy) { Text("Вернуться к событию") }
                 state.meals.forEach { meal ->
+                    meal.spending?.let { Text(it) }
                     Button({ onFeed(meal.id) }, enabled = meal.enabled && !state.busy) { Text(meal.label) }
                 }
                 if (!state.loading && !state.failed && state.offers.isEmpty()) {

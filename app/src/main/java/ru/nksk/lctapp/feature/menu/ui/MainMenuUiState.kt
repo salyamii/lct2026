@@ -19,6 +19,7 @@ data class MainMenuUiState(
     val showFreeMeal: Boolean = false,
     val goalTitle: String = "Выбрать большую цель",
     val budget: MenuBudgetUiState? = null,
+    val spendingPreview: String? = null,
 )
 
 /** Actual article balances once economy is connected; null keeps the current runtime HUD. */

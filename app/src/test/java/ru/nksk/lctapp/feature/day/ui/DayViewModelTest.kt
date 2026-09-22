@@ -405,6 +405,18 @@ class DayViewModelTest {
         assertFalse(model.uiState.value.body.contains("Рыжик"))
     }
 
+    @Test fun paidChoiceShowsTheActualArticleBreakdownAndFallback() = runTest(dispatcher) {
+        val (repository, model) = fixture(eventFirst = "figma-2164-2-v1")
+        repository.update { it.copy(economy = EconomyState(BudgetPlan(35, 3, 20, 22))) }
+        runCurrent()
+        val paid = model.uiState.value.options.first()
+        assertTrue(paid.enabled)
+        assertTrue(checkNotNull(paid.spending).contains("Хочу: 3"))
+        assertTrue(checkNotNull(paid.spending).contains("Запас: 22"))
+        assertTrue(checkNotNull(paid.spending).contains("других статей"))
+        assertNull(model.uiState.value.options.last().spending)
+    }
+
     private suspend fun fixture(deedFirst: Boolean = false, finishedDay: Int? = null,
         eventFirst: String? = null): Triple<DayRepository, DayViewModel, GameSession> {
         val catalog = bundledGameCatalog()

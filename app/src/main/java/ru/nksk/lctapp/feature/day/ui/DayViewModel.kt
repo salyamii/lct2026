@@ -12,6 +12,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import ru.nksk.lctapp.core.ui.game.playerDescription
+import ru.nksk.lctapp.domain.economy.EconomyOperations
+import ru.nksk.lctapp.domain.economy.SpendingKind
 import ru.nksk.lctapp.core.ui.game.playerMessage
 import ru.nksk.lctapp.core.ui.game.energyDescription
 import ru.nksk.lctapp.core.ui.game.restingPetArtwork
@@ -19,8 +22,8 @@ import ru.nksk.lctapp.domain.content.EventType
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
 
-internal data class DayOption(val id: String, val label: String, val needsFood: Boolean, val enabled: Boolean)
-internal data class MealOption(val id: String, val label: String, val enabled: Boolean)
+internal data class DayOption(val id: String, val label: String, val needsFood: Boolean, val enabled: Boolean, val spending: String? = null)
+internal data class MealOption(val id: String, val label: String, val enabled: Boolean, val spending: String? = null)
 internal data class DayUiState(
     val loading: Boolean = true, val failed: Boolean = false, val busy: Boolean = false,
     val title: String = "", val body: String = "", val category: String = "Событие",
@@ -28,6 +31,7 @@ internal data class DayUiState(
     val scene: String? = null, val character: String? = null,
     val options: List<DayOption> = emptyList(), val later: String? = null,
     val primary: String? = null, val primaryNeedsFood: Boolean = false,
+    val primarySpending: String? = null,
     val showMeals: Boolean = false,
     val meals: List<MealOption> = emptyList(), val message: String? = null,
     val actionNotice: String? = null,
@@ -244,7 +248,9 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
             effort = if (result) "" else renderPetText(card?.effort.orEmpty(), saved.pet.name),
             footer = renderPetText(card?.footer.orEmpty(), saved.pet.name), scene = variant?.scene ?: card?.scene, character = variant?.character ?: card?.character,
             options = (if (restFromCard) emptyList() else choices).map { DayOption(it.id, if (isDeed(saved)) "Выполнить дело" else renderPetText(it.text, saved.pet.name),
-                blocked[it.id] == BlockReason.MustEat, blocked[it.id] == null || blocked[it.id] == BlockReason.MustEat) },
+                blocked[it.id] == BlockReason.MustEat, blocked[it.id] == null || blocked[it.id] == BlockReason.MustEat,
+                if (it.moneyDelta < 0) EconomyOperations.quote(saved.economy, Math.negateExact(it.moneyDelta),
+                    SpendingKind.forEvent(checkNotNull(event).type)).playerDescription(SpendingKind.forEvent(event.type)) else null) },
             later = if (event != null && !result) { if (card != null) card.later?.let { renderPetText(it, saved.pet.name) } else "Вернуться позже" } else null,
             primary = primary?.let { when {
                 primaryBlock == BlockReason.MustEat -> "Покормить"
@@ -254,10 +260,14 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
                 it == EngineCommand.FinishDay || restFromCard -> "Закончить день"
                 else -> "Продолжить день"
             } }, primaryNeedsFood = primaryBlock == BlockReason.MustEat,
+            primarySpending = if (occurrence == null && primary != null && primaryBlock != BlockReason.MustEat)
+                session.previewAdvanceSpending(saved)?.let { it.quote.playerDescription(it.kind) } else null,
             showMeals = mealsShown,
             meals = catalog.meals.filter { it.price > 0 || saved.economy.balance < catalog.meals.first().price }.map {
+                val quote = EconomyOperations.quote(saved.economy, it.price, SpendingKind.FEEDING)
                 MealOption(it.id, if (it.price == 0L) "Бесплатная столовая · завтра меньше сил" else "Обычный обед · ${it.price} монет",
-                    session.engine.blockReason(saved, EngineCommand.Feed(it.id)) == null)
+                    session.engine.blockReason(saved, EngineCommand.Feed(it.id)) == null,
+                    quote.playerDescription(SpendingKind.FEEDING))
             }, message = effectiveMessage, actionNotice = actionNotice,
             weeklyReminder = day?.takeIf { (it.day - 1) % 7 == 0 && it.steps <= 1 && summary == null }?.let {
                 val mealPrice = catalog.meals.first { meal -> meal.price > 0 }.price

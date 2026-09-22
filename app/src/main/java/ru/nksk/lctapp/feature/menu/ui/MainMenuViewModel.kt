@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.core.ui.game.playerMessage
+import ru.nksk.lctapp.core.ui.game.playerDescription
 import java.util.UUID
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -140,7 +141,9 @@ internal class MainMenuViewModel @Inject constructor(
         saved?.let {
             val menu = it.toMainMenuUiState(session.catalog.rules.fullEnergy, session.catalog)
             mutableState.value = MainMenuLoadState.Ready(menu.copy(
-                busy = busy, notice = notice, mealPrice = session.catalog.meals.first { meal -> meal.price > 0 }.price,
+                busy = busy, notice = notice, spendingPreview = session.previewAdvanceSpending(it)?.let { preview ->
+                    preview.quote.playerDescription(preview.kind)
+                }, mealPrice = session.catalog.meals.first { meal -> meal.price > 0 }.price,
                 showFreeMeal = offersFreeMeal(it),
                 continueLabel = if (it.engine?.phase == DayPhase.FINISHED) menu.continueLabel else when (session.advanceCommand(it)) {
                     EngineCommand.FinishDay -> "Закончить день"
