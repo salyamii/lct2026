@@ -1,6 +1,6 @@
 package ru.nksk.lctapp.feature.tasks.ui
 
-import androidx.compose.foundation.Image
+import ru.nksk.lctapp.core.ui.components.GameArtwork
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,7 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -63,8 +62,7 @@ fun MemoryGameScreen(
             .background(DeedColors.Scene),
     ) {
         Box {
-            Image(
-                painterResource(R.drawable.location_hill),
+            GameArtwork(R.drawable.location_hill,
                 contentDescription = null,
                 modifier = Modifier.fillMaxWidth().height(150.dp),
                 contentScale = ContentScale.Crop,
@@ -162,14 +160,12 @@ private fun StarPlateView(
         contentAlignment = Alignment.Center,
     ) {
         if (revealed) {
-            Image(
-                painterResource(face),
+            GameArtwork(face,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize().padding(6.dp),
             )
         } else {
-            Image(
-                painterResource(R.drawable.deed_star_plate_back),
+            GameArtwork(R.drawable.deed_star_plate_back,
                 contentDescription = "Рубашка пласта",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),

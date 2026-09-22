@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import ru.nksk.lctapp.core.ui.theme.AdventureNight
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
+import ru.nksk.lctapp.core.ui.components.rememberScenePainter
 
 private val MapButtonWidth = 176.dp
 private val MapButtonOverflow = 56.dp
@@ -53,7 +54,10 @@ fun MainMenuScreen(
     BoxWithConstraints(modifier = modifier.fillMaxSize().clipToBounds().background(AdventureNight)
         .onGloballyPositioned { screenTop = it.positionInRoot().y }) {
         val viewport = DpSize(maxWidth, maxHeight)
-        VillageBackdrop(state.backgroundRes)
+        val sceneScale = maxOf(maxWidth / 390.dp, maxHeight / 844.dp)
+        val scenePainter = rememberScenePainter(state.backgroundRes,
+            DpSize((483f * sceneScale).dp, (858f * sceneScale).dp))
+        VillageBackdrop(scenePainter)
         // Only the foreground observes insets: the village extends behind native system bars.
         BoxWithConstraints(Modifier.fillMaxSize().safeDrawingPadding().padding(vertical = 12.dp)) {
             val useSideBySide = maxWidth > maxHeight || maxWidth >= 840.dp
@@ -71,7 +75,7 @@ fun MainMenuScreen(
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                     ) {
                         MenuHud(state.pet.name, state.coins, state.completedGoals, state.totalGoals, dispatch, state.goalTitle)
-                        MenuActions(dispatch, viewport, state)
+                        MenuActions(dispatch, viewport, state, scenePainter)
                     }
                 }
             } else {
@@ -81,7 +85,7 @@ fun MainMenuScreen(
                     MenuHud(state.pet.name, state.coins, state.completedGoals, state.totalGoals, dispatch, state.goalTitle,
                         Modifier.onGloballyPositioned { hudBottom = it.positionInRoot().y + it.size.height })
                     CharacterScene(state.pet, Modifier.weight(1f).fillMaxWidth(), characterPosition)
-                    MenuActions(dispatch, viewport, state)
+                    MenuActions(dispatch, viewport, state, scenePainter)
                 }
             }
         }

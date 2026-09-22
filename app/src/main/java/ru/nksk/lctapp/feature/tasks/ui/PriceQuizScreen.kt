@@ -1,6 +1,6 @@
 package ru.nksk.lctapp.feature.tasks.ui
 
-import androidx.compose.foundation.Image
+import ru.nksk.lctapp.core.ui.components.GameArtwork
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,7 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -62,8 +61,7 @@ fun PriceQuizScreen(
             .background(DeedColors.Scene),
     ) {
         Box {
-            Image(
-                painterResource(R.drawable.location_workshop),
+            GameArtwork(R.drawable.location_workshop,
                 contentDescription = null,
                 modifier = Modifier.fillMaxWidth().height(150.dp),
                 contentScale = ContentScale.Crop,
@@ -159,8 +157,7 @@ private fun InvoiceCard(
             .padding(vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Image(
-            painterResource(art),
+        GameArtwork(art,
             contentDescription = null,
             modifier = Modifier.size(96.dp),
         )

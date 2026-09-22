@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
@@ -50,7 +51,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 
 @Composable
-internal fun MenuActions(onAction: (MainMenuAction) -> Unit, viewport: DpSize, state: MainMenuUiState, modifier: Modifier = Modifier) {
+internal fun MenuActions(onAction: (MainMenuAction) -> Unit, viewport: DpSize, state: MainMenuUiState, backgroundPainter: Painter, modifier: Modifier = Modifier) {
     var panelPosition by remember { mutableStateOf(Offset.Zero) }
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         state.dayStatus?.let { status ->
@@ -77,7 +78,7 @@ internal fun MenuActions(onAction: (MainMenuAction) -> Unit, viewport: DpSize, s
                 .onGloballyPositioned { panelPosition = it.positionInRoot() }
                 .border(1.dp, Color.White.copy(alpha = 0.16f), RoundedCornerShape(34.dp)),
         ) {
-            FrostedVillagePanel(viewport, panelPosition, Modifier.matchParentSize(), state.backgroundRes)
+            FrostedVillagePanel(viewport, panelPosition, Modifier.matchParentSize(), backgroundPainter)
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 2.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,

@@ -46,6 +46,7 @@ room3 {
 }
 
 dependencies {
+    implementation(libs.coil.compose)
     implementation(project(":feature:onboarding"))
     debugImplementation(project(":feature:debug"))
     implementation(project(":core:game"))

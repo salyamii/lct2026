@@ -7,7 +7,8 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -80,14 +81,16 @@ class NavigationRestorationTest {
         val games = listOf(R.string.deeds_star_title, R.string.deeds_price_title, R.string.deeds_target_title)
         games.forEach { title ->
             compose.onNodeWithText(compose.activity.getString(R.string.menu_tasks)).performClick()
-            compose.onNodeWithText(compose.activity.getString(title)).performScrollTo().performClick()
+            compose.onNodeWithTag("deeds_list").performScrollToNode(hasText(compose.activity.getString(title)))
+            compose.onNodeWithText(compose.activity.getString(title)).performClick()
             compose.mainClock.advanceTimeBy(1_000)
             restoration.emulateSavedInstanceStateRestore()
             compose.mainClock.advanceTimeBy(1_000)
             compose.onNodeWithText(compose.activity.getString(title)).assertIsDisplayed()
             compose.onNodeWithContentDescription(compose.activity.getString(R.string.navigation_back)).performClick()
             compose.mainClock.advanceTimeBy(1_000)
-            compose.onNodeWithText(compose.activity.getString(R.string.menu_tasks)).performScrollTo().assertIsDisplayed()
+            compose.onNodeWithTag("deeds_list").performScrollToNode(hasText(compose.activity.getString(R.string.menu_tasks)))
+            compose.onNodeWithText(compose.activity.getString(R.string.menu_tasks)).assertIsDisplayed()
             compose.onNodeWithContentDescription(compose.activity.getString(R.string.navigation_back)).performClick()
         }
     }

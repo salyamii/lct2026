@@ -15,6 +15,7 @@ data class MainMenuPetUiState(
     @param:StringRes val descriptionRes: Int,
     val name: String = PetDefaults.FOX_NAME,
     val artworkScale: Float = 1f,
+    val motionIntensity: Float = 1f,
 )
 
 internal fun PetState.toMainMenuPetUiState(): MainMenuPetUiState {
@@ -61,5 +62,10 @@ internal fun PetState.toMainMenuPetUiState(): MainMenuPetUiState {
         }
     }
 
-    return result.copy(name = name, artworkScale = if (age == PetAge.CUB) 0.8f else 1f)
+    return result.copy(
+        name = name,
+        artworkScale = if (age == PetAge.CUB) 0.8f else 1f,
+        // This only softens the gesture on an existing special-state sprite; no mood is changed.
+        motionIntensity = if (visualState == PetVisualState.NORMAL || visualState == PetVisualState.HAPPY) 1f else .35f,
+    )
 }

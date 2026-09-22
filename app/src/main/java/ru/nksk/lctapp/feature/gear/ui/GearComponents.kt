@@ -1,7 +1,7 @@
 package ru.nksk.lctapp.feature.gear.ui
 
+import ru.nksk.lctapp.core.ui.components.GameArtwork
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -98,7 +97,7 @@ internal fun GearItemCard(item: GearItemUiState) {
                     Modifier.background(GearColors.Gold, RoundedCornerShape(10.dp)).padding(horizontal = 8.dp, vertical = 6.dp),
                     horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Image(painterResource(R.drawable.menu_coin), null, Modifier.size(20.dp), contentScale = ContentScale.Fit)
+                    GameArtwork(R.drawable.menu_coin, null, Modifier.size(20.dp), contentScale = ContentScale.Fit)
                     Text(
                         stringResource(R.string.gear_price, item.priceCoins), color = GearColors.Ink,
                         fontFamily = Nunito, fontSize = 13.sp, fontWeight = FontWeight.Bold,

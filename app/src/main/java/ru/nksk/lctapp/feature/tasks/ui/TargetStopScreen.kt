@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.feature.tasks.ui
 
+import ru.nksk.lctapp.core.ui.components.GameArtwork
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -10,7 +11,6 @@ import androidx.lifecycle.compose.currentStateAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.border
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,7 +37,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -89,8 +88,7 @@ fun TargetStopScreen(
         val sceneHeight = if (maxHeight < 480.dp) 72.dp else 150.dp
         Column(Modifier.fillMaxSize()) {
             Box {
-                Image(
-                    painterResource(R.drawable.location_observatory),
+                GameArtwork(R.drawable.location_observatory,
                     contentDescription = null,
                     modifier = Modifier.fillMaxWidth().height(sceneHeight),
                     contentScale = ContentScale.Crop,
@@ -213,8 +211,7 @@ private fun Track(zoneStart: Int, markerPosition: Float, modifier: Modifier = Mo
             )
         }
         // Шестерёнка-бегунок
-        Image(
-            painter = painterResource(R.drawable.deed_gear_marker),
+        GameArtwork(R.drawable.deed_gear_marker,
             contentDescription = null,
             modifier = Modifier
                 .size(MARKER_SIZE_DP.dp)
