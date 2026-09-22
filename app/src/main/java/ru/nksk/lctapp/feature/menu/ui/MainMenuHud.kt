@@ -1,5 +1,7 @@
 package ru.nksk.lctapp.feature.menu.ui
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,15 +14,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -30,6 +38,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
@@ -39,6 +48,7 @@ import ru.nksk.lctapp.core.ui.theme.AdventureLime
 import ru.nksk.lctapp.core.ui.theme.AdventureMuted
 import ru.nksk.lctapp.core.ui.theme.AdventurePanel
 import ru.nksk.lctapp.core.ui.theme.Rubik
+import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
 
 @Composable
 internal fun MenuHud(
@@ -50,6 +60,8 @@ internal fun MenuHud(
     goalTitle: String = "Выбрать большую цель",
     modifier: Modifier = Modifier,
     budget: MenuBudgetUiState? = null,
+    budgetExpanded: Boolean = false,
+    onBudgetExpandedChange: (Boolean) -> Unit = {},
 ) {
     Column(modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Row(
@@ -81,7 +93,7 @@ internal fun MenuHud(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (budget == null) CoinsBadge(coins) { onAction(MainMenuAction.Coins) }
-            else BudgetBadge(budget) { onAction(MainMenuAction.Coins) }
+            else BudgetBadge(budget, budgetExpanded, onBudgetExpandedChange) { onAction(MainMenuAction.Coins) }
             Spacer(Modifier.width(12.dp))
             Box(Modifier.weight(1f).align(if (budget == null) Alignment.CenterVertically else Alignment.Top), contentAlignment = Alignment.CenterEnd) {
                 Text(
@@ -103,23 +115,76 @@ internal fun MenuHud(
 }
 
 @Composable
-private fun BudgetBadge(budget: MenuBudgetUiState, onClick: () -> Unit) {
-    Column(
-        Modifier.width(154.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(AdventurePanel.copy(alpha = 0.9f))
-            .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(20.dp))
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        MenuText("Монетки", 13, color = AdventureLabel,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
-        BudgetBalanceRow("Нужно", budget.needs, Color(0xFFFF7770))
-        BudgetBalanceRow("Хочу", budget.wants, Color(0xFF4BA6F8))
-        BudgetBalanceRow("Коплю", budget.savings, Color(0xFF79CD43))
-        BudgetBalanceRow("Запас", budget.reserve, Color(0xFFFFBD29))
+private fun BudgetBadge(
+    budget: MenuBudgetUiState,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    onClick: () -> Unit,
+) {
+    val arrowRotation by animateFloatAsState(
+        targetValue = if (expanded) 270f else 90f,
+        animationSpec = tween(200),
+        label = "Budget dropdown rotation",
+    )
+    val openBudgetLabel = stringResource(R.string.menu_budget_open)
+    // Only the header participates in HUD measurement. The menu is a separate popup,
+    // so expanding it cannot resize the pet scene or reposition the map/actions.
+    Box {
+        Row(
+            Modifier.width(154.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(AdventurePanel.copy(alpha = 0.9f))
+                .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(20.dp))
+                .clickable(role = Role.Button, onClickLabel = openBudgetLabel, onClick = onClick)
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            MenuText(stringResource(R.string.menu_budget_title), 13, color = AdventureLabel,
+                modifier = Modifier.weight(1f).padding(start = 8.dp))
+            IconButton(onClick = { onExpandedChange(!expanded) }, modifier = Modifier.size(48.dp)) {
+                Icon(
+                    painter = painterResource(R.drawable.menu_chevron),
+                    contentDescription = stringResource(if (expanded) R.string.menu_budget_collapse else R.string.menu_budget_expand),
+                    tint = AdventureLime,
+                    modifier = Modifier.size(24.dp).rotate(arrowRotation),
+                )
+            }
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { onExpandedChange(false) },
+            modifier = Modifier.width(154.dp),
+            shape = RoundedCornerShape(20.dp),
+            containerColor = AdventurePanel,
+            tonalElevation = 0.dp,
+            shadowElevation = 8.dp,
+        ) {
+            Column(
+                Modifier.fillMaxWidth()
+                    .clickable(role = Role.Button, onClickLabel = openBudgetLabel, onClick = onClick)
+                    .padding(horizontal = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                BudgetBalanceRow("Нужно", budget.needs, Color(0xFFFF7770))
+                BudgetBalanceRow("Хочу", budget.wants, Color(0xFF4BA6F8))
+                BudgetBalanceRow("Коплю", budget.savings, Color(0xFF79CD43))
+                BudgetBalanceRow("Запас", budget.reserve, Color(0xFFFFBD29))
+            }
+        }
     }
+}
+
+@Preview(name = "Монетки · свернуто", showBackground = true, backgroundColor = 0xFF120F30)
+@Composable
+private fun CollapsedBudgetBadgePreview() {
+    LCTAppTheme { BudgetBadge(MenuBudgetUiState(35, 20, 20, 25), false, {}, {}) }
+}
+
+@Preview(name = "Монетки · раскрыто", showBackground = true, backgroundColor = 0xFF120F30)
+@Preview(name = "Монетки · крупный текст", fontScale = 1.5f, showBackground = true, backgroundColor = 0xFF120F30)
+@Composable
+private fun ExpandedBudgetBadgePreview() {
+    LCTAppTheme { BudgetBadge(MenuBudgetUiState(35, 20, 20, 25), true, {}, {}) }
 }
 
 @Composable

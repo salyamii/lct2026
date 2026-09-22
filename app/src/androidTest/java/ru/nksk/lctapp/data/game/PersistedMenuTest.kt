@@ -1,5 +1,7 @@
 package ru.nksk.lctapp.data.game
 
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -60,6 +62,11 @@ class PersistedMenuTest {
             ))
         }
         compose.setContent { LCTAppTheme { LctNavHost() } }
+        val expandBudget = compose.activity.getString(R.string.menu_budget_expand)
+        compose.waitUntil(5_000) {
+            compose.onAllNodesWithContentDescription(expandBudget).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithContentDescription(expandBudget).performClick()
         awaitAmount(247L)
         compose.onNode(hasContentDescription(compose.activity.getString(R.string.menu_pet_upset, "Тоша"))).assertIsDisplayed()
         compose.onNodeWithText("Тоша").assertIsDisplayed()

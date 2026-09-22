@@ -18,6 +18,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -116,6 +117,43 @@ class MainMenuScreenTest {
         compose.runOnIdle {
             assertEquals(listOf(MainMenuAction.Village, MainMenuAction.Village), selections)
         }
+    }
+
+    @Test
+    fun expandingBudgetDoesNotMovePortraitMenu() {
+        verifyBudgetDoesNotMoveMenu(DpSize(390.dp, 844.dp))
+    }
+
+    @Test
+    fun expandingBudgetDoesNotMoveLandscapeMenu() {
+        verifyBudgetDoesNotMoveMenu(DpSize(844.dp, 390.dp))
+    }
+
+    private fun verifyBudgetDoesNotMoveMenu(size: DpSize) {
+        val selections = mutableListOf<MainMenuAction>()
+        compose.setContent {
+            DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(size)) {
+                LCTAppTheme { MainMenuScreen(MainMenuPreviewState, selections::add) }
+            }
+        }
+        val fixedElements = listOf(
+            hasText(MainMenuPreviewState.goalTitle),
+            hasText(MainMenuPreviewState.pet.name),
+            hasContentDescription(compose.activity.getString(R.string.menu_pet_plain, MainMenuPreviewState.pet.name)),
+            hasContentDescription(compose.activity.getString(R.string.menu_village)),
+            hasText(compose.activity.getString(R.string.menu_tasks)),
+            hasText(compose.activity.getString(R.string.menu_continue)),
+        )
+        fun positions() = fixedElements.map { compose.onNode(it).fetchSemanticsNode().boundsInRoot }
+        val before = positions()
+        compose.onNodeWithContentDescription(compose.activity.getString(R.string.menu_budget_expand)).performClick()
+        compose.onNodeWithText("Нужно", useUnmergedTree = true).assertIsDisplayed()
+        compose.onNodeWithText("Запас", useUnmergedTree = true).assertIsDisplayed()
+        assertEquals(before, positions())
+        compose.onNodeWithContentDescription(compose.activity.getString(R.string.menu_budget_collapse)).performClick()
+        compose.waitForIdle()
+        assertEquals(before, positions())
+        compose.runOnIdle { assertEquals(emptyList<MainMenuAction>(), selections) }
     }
 
     private fun verifyActions(
