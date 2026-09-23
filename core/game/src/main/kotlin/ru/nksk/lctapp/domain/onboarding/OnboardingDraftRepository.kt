@@ -3,7 +3,7 @@ package ru.nksk.lctapp.domain.onboarding
 import ru.nksk.lctapp.domain.pet.PetCustomization
 
 /** A draft is not a saved game. Its presence resumes customization before completion. */
-enum class OnboardingStep { Profile, Accessories, GoalSelection, Introduction }
+enum class OnboardingStep { Profile, Accessories, GoalBriefing, GoalSelection, Introduction }
 
 data class OnboardingDraft(
     val profile: PetCustomization,

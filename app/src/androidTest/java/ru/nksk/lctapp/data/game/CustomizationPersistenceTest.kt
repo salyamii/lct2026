@@ -106,6 +106,22 @@ class CustomizationPersistenceTest {
         } finally { db.close() }
     }
 
+    @Test fun goalBriefingDraftSurvivesReopenWithProfileAccessoryAndGoal() = runBlocking {
+        val draft = OnboardingDraft(
+            PetCustomization("Искорка", PetTemperament.Joyful, PetFur.Sand),
+            OnboardingStep.GoalBriefing, "BANDANA", STARS_GOAL,
+        )
+        var db = GameDatabase.open(context, name)
+        try {
+            RoomOnboardingDraftRepository(db).save(draft)
+        } finally { db.close() }
+        db = GameDatabase.open(context, name)
+        try {
+            assertEquals(draft, RoomOnboardingDraftRepository(db).read())
+            assertNull(RoomGameRepository(db).read())
+        } finally { db.close() }
+    }
+
     @Test fun oldIntroductionMigratesToGoalSelectionWithoutChangingProfile() = runBlocking {
         schemas.createDatabase(14).use { connection ->
             connection.execSQL("INSERT INTO ONBOARDING_DRAFT VALUES ('current', 'Искорка', 'Joyful', 'Sand', 'INTRODUCTION', 'BANDANA')")

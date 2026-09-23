@@ -21,8 +21,9 @@ import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 import ru.nksk.lctapp.feature.onboarding.navigation.OnboardingEntry
 import ru.nksk.lctapp.feature.onboarding.ui.OnboardingArtwork
+import ru.nksk.lctapp.feature.onboarding.ui.AdventureGoalBriefingScreen
 import ru.nksk.lctapp.feature.onboarding.ui.AdventureGoalSelectionScreen
-import ru.nksk.lctapp.feature.onboarding.ui.AdventureStartedScreen
+import ru.nksk.lctapp.feature.onboarding.ui.BudgetIntroductionScreen
 import ru.nksk.lctapp.feature.onboarding.ui.CustomizationScreen
 import ru.nksk.lctapp.feature.onboarding.ui.AccessoryCustomizationScreen
 import ru.nksk.lctapp.feature.onboarding.ui.AccessoryCustomizationUiState
@@ -97,14 +98,24 @@ private fun LctAppContent() {
                     saveFailed = current.failed,
                 )
             }
-            is AppStartupState.GoalSelection -> {
+            is AppStartupState.GoalBriefing -> {
                 BackHandler { startup.backToAccessories() }
+                AdventureGoalBriefingScreen(
+                    artwork = customizationArtwork().copy(background = R.drawable.location_hill_day),
+                    onBack = startup::backToAccessories,
+                    onContinue = startup::continueToGoals,
+                    saving = current.saving,
+                    saveFailed = current.failed,
+                )
+            }
+            is AppStartupState.GoalSelection -> {
+                BackHandler { startup.backToGoalBriefing() }
                 AdventureGoalSelectionScreen(
                     artwork = customizationArtwork().copy(background = R.drawable.location_hill_day),
                     goals = onboardingGoalOptions().filter { it.id in startup.goalIds },
                     selectedGoalId = current.draft.goalId,
                     onSelect = startup::selectGoal,
-                    onBack = startup::backToAccessories,
+                    onBack = startup::backToGoalBriefing,
                     onConfirm = startup::confirmGoal,
                     saving = current.saving,
                     saveFailed = current.failed,
@@ -112,13 +123,9 @@ private fun LctAppContent() {
             }
             is AppStartupState.Introduction -> {
                 BackHandler { startup.backToGoals() }
-                val art = customizationArtwork()
-                val accessory = OnboardingAccessory.entries.first { it.id == current.draft.accessoryId }
-                val fur = CharacterFur.valueOf(current.draft.profile.fur.name)
-                AdventureStartedScreen(
-                    artwork = art,
-                    goal = onboardingGoalOptions().first { it.id == current.draft.goalId },
-                    portrait = accessoryArtwork(art).portraits.getValue(accessory).getValue(fur),
+                BudgetIntroductionScreen(
+                    artwork = customizationArtwork().copy(background = R.drawable.location_hill_day),
+                    categoryArtwork = { category, modifier -> OnboardingBudgetArtwork(category, modifier) },
                     onBack = startup::backToGoals,
                     onContinue = startup::finishOnboarding,
                     saving = current.saving,

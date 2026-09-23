@@ -23,9 +23,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-private val GoalCream = Color(0xfffbfaef)
-private val GoalInk = Color(0xff231942)
-private val GoalPurple = Color(0xff6540bd)
+internal val GoalCream = Color(0xfffbfaef)
+internal val GoalInk = Color(0xff231942)
+internal val GoalPurple = Color(0xff6540bd)
 private val GoalLime = Color(0xffa8e830)
 
 /** Presentation data only; the caller owns selection and game commands. */
@@ -39,6 +39,47 @@ data class AdventureGoalOption(
 )
 
 @Composable
+fun AdventureGoalBriefingScreen(
+    artwork: CustomizationArtwork,
+    onBack: () -> Unit,
+    onContinue: () -> Unit,
+    saving: Boolean = false,
+    saveFailed: Boolean = false,
+) {
+    AdventureGoalLayout(artwork, artwork.background, "Большое приключение",
+        "Назад к аксессуарам", onBack, saving = saving, stage = {}) {
+        Column(
+            Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())
+                .padding(horizontal = 22.dp, vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+        ) {
+            GoalHeading("Тебя ждёт большое приключение!", artwork, large = true)
+            Column(
+                Modifier.fillMaxWidth()
+                    .background(Color.White.copy(alpha = .75f), RoundedCornerShape(20.dp))
+                    .border(1.dp, Color(0xffe1deeb), RoundedCornerShape(20.dp))
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Text("Каждое путешествие с чего-то начинается.",
+                    color = GoalInk, fontFamily = artwork.bodyFont,
+                    fontWeight = FontWeight.Bold, fontSize = 17.sp, lineHeight = 25.sp)
+                Text("Перед тобой три большие цели — выбери ту, которая тебе больше нравится, " +
+                    "и шаг за шагом двигайся к ней.",
+                    color = GoalInk.copy(alpha = .8f), fontFamily = artwork.bodyFont,
+                    fontSize = 17.sp, lineHeight = 26.sp)
+                HorizontalDivider(color = GoalPurple.copy(alpha = .15f))
+                Text("Вперёд, исследовать неизведанный мир!",
+                    color = GoalPurple, fontFamily = artwork.titleFont,
+                    fontWeight = FontWeight.Bold, fontSize = 20.sp, lineHeight = 27.sp)
+            }
+        }
+        if (saveFailed) GoalSaveError(artwork)
+        GoalFooter("Дальше", artwork, !saving, onContinue)
+    }
+}
+
+@Composable
 fun AdventureGoalSelectionScreen(
     artwork: CustomizationArtwork,
     goals: List<AdventureGoalOption>,
@@ -50,7 +91,7 @@ fun AdventureGoalSelectionScreen(
     saveFailed: Boolean = false,
 ) {
     AdventureGoalLayout(artwork, artwork.background, "Выбери большую цель",
-        "Назад к аксессуарам", onBack, saving = saving, stage = {}) {
+        "Назад к началу приключения", onBack, saving = saving, stage = {}) {
         Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())
             .padding(horizontal = 22.dp, vertical = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             GoalHeading("С чего начнётся твоё приключение?", artwork)
@@ -119,7 +160,7 @@ fun AdventureStartedScreen(
 
 /** Shared header is identical to customization/accessories. Wide windows place art beside content. */
 @Composable
-private fun AdventureGoalLayout(
+internal fun AdventureGoalLayout(
     artwork: CustomizationArtwork,
     background: Int,
     title: String,
@@ -169,7 +210,7 @@ private fun AdventureGoalLayout(
 }
 
 @Composable
-private fun GoalHeading(text: String, artwork: CustomizationArtwork, large: Boolean = false) {
+internal fun GoalHeading(text: String, artwork: CustomizationArtwork, large: Boolean = false) {
     Text(text, color = GoalInk, fontFamily = artwork.titleFont, fontWeight = FontWeight.ExtraBold,
         fontSize = if (large) 32.sp else 23.sp, lineHeight = if (large) 37.sp else 29.sp)
 }
@@ -181,7 +222,7 @@ private fun GoalBody(text: String, artwork: CustomizationArtwork) {
 }
 
 @Composable
-private fun GoalFooter(text: String, artwork: CustomizationArtwork, enabled: Boolean, onClick: () -> Unit) {
+internal fun GoalFooter(text: String, artwork: CustomizationArtwork, enabled: Boolean, onClick: () -> Unit) {
     Button(onClick, enabled = enabled,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp, vertical = 16.dp).heightIn(min = 56.dp),
         shape = RoundedCornerShape(18.dp),

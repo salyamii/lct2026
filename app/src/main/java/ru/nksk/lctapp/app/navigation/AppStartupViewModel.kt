@@ -25,6 +25,7 @@ internal sealed interface AppStartupState {
     data class Choose(val saving: Boolean = false, val failed: Boolean = false) : AppStartupState
     data class Customize(val draft: PetCustomization, val saving: Boolean = false, val failed: Boolean = false) : AppStartupState
     data class Accessories(val draft: OnboardingDraft, val saving: Boolean = false, val failed: Boolean = false) : AppStartupState
+    data class GoalBriefing(val draft: OnboardingDraft, val saving: Boolean = false, val failed: Boolean = false) : AppStartupState
     data class GoalSelection(val draft: OnboardingDraft, val saving: Boolean = false, val failed: Boolean = false) : AppStartupState
     data class Introduction(val draft: OnboardingDraft, val saving: Boolean = false, val failed: Boolean = false) : AppStartupState
     data object Ready : AppStartupState
@@ -59,6 +60,7 @@ internal class AppStartupViewModel @Inject constructor(
                     when (it.step) {
                         OnboardingStep.Profile -> AppStartupState.Customize(it.profile)
                         OnboardingStep.Accessories -> AppStartupState.Accessories(it)
+                        OnboardingStep.GoalBriefing -> AppStartupState.GoalBriefing(it)
                         OnboardingStep.GoalSelection -> AppStartupState.GoalSelection(it)
                         OnboardingStep.Introduction -> if (it.goalId in goalIds) AppStartupState.Introduction(it)
                             else AppStartupState.GoalSelection(it.copy(step = OnboardingStep.GoalSelection))
@@ -181,6 +183,34 @@ internal class AppStartupViewModel @Inject constructor(
         state.value = current.copy(saving = true, failed = false)
         work = viewModelScope.launch {
             try {
+                val draft = current.draft.copy(step = OnboardingStep.GoalBriefing)
+                writes.withLock { drafts.save(draft) }
+                state.value = AppStartupState.GoalBriefing(draft)
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (_: Exception) { state.value = current.copy(failed = true) }
+        }
+    }
+
+    fun backToAccessories() {
+        val current = state.value as? AppStartupState.GoalBriefing ?: return
+        if (current.saving || work?.isActive == true) return
+        state.value = current.copy(saving = true, failed = false)
+        work = viewModelScope.launch {
+            try {
+                val draft = current.draft.copy(step = OnboardingStep.Accessories)
+                writes.withLock { drafts.save(draft) }
+                state.value = AppStartupState.Accessories(draft)
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (_: Exception) { state.value = current.copy(failed = true) }
+        }
+    }
+
+    fun continueToGoals() {
+        val current = state.value as? AppStartupState.GoalBriefing ?: return
+        if (current.saving || work?.isActive == true) return
+        state.value = current.copy(saving = true, failed = false)
+        work = viewModelScope.launch {
+            try {
                 val draft = current.draft.copy(step = OnboardingStep.GoalSelection)
                 writes.withLock { drafts.save(draft) }
                 state.value = AppStartupState.GoalSelection(draft)
@@ -189,15 +219,15 @@ internal class AppStartupViewModel @Inject constructor(
         }
     }
 
-    fun backToAccessories() {
+    fun backToGoalBriefing() {
         val current = state.value as? AppStartupState.GoalSelection ?: return
         if (current.saving || work?.isActive == true) return
         state.value = current.copy(saving = true, failed = false)
         work = viewModelScope.launch {
             try {
-                val draft = current.draft.copy(step = OnboardingStep.Accessories)
+                val draft = current.draft.copy(step = OnboardingStep.GoalBriefing)
                 writes.withLock { drafts.save(draft) }
-                state.value = AppStartupState.Accessories(draft)
+                state.value = AppStartupState.GoalBriefing(draft)
             } catch (cancelled: CancellationException) { throw cancelled }
             catch (_: Exception) { state.value = current.copy(failed = true) }
         }
