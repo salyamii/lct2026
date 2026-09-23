@@ -2,7 +2,9 @@ package ru.nksk.lctapp.feature.menu.ui
 
 import ru.nksk.lctapp.domain.economy.*
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.app.createInitialGameState
@@ -14,8 +16,29 @@ import ru.nksk.lctapp.domain.pet.PetAge
 import ru.nksk.lctapp.domain.pet.PetColor
 import ru.nksk.lctapp.core.ui.game.restingPetArtwork
 import ru.nksk.lctapp.domain.pet.PetVisualState
+import ru.nksk.lctapp.domain.engine.DayPhase
+import ru.nksk.lctapp.domain.engine.EngineState
 
 class MainMenuUiStateMapperTest {
+    @Test fun feedingIsAvailableImmediatelyAfterWakingUntilThePetEats() {
+        val morning = createInitialGameState().copy(
+            economy = EconomyState(BudgetPlan(35, 20, 20, 25)),
+            engine = EngineState(
+                rulesId = "test", revision = 10, day = 2, phase = DayPhase.RUNNING,
+                steps = 0, energy = 5, ateToday = false, nextMorningEnergy = null,
+                openingBalance = 100, events = emptyList(), deeds = emptyList(),
+            ),
+        )
+
+        assertTrue(morning.toMainMenuUiState().canFeed)
+        assertFalse(morning.copy(engine = morning.engine!!.copy(ateToday = true)).toMainMenuUiState().canFeed)
+        assertFalse(morning.copy(engine = morning.engine!!.copy(phase = DayPhase.FINISHED)).toMainMenuUiState().canFeed)
+        assertFalse(morning.copy(engine = null).toMainMenuUiState().canFeed)
+
+        val planning = BudgetPlanning("week", BudgetPlanningReason.WEEKLY, BudgetPlanningStage.RECEIPT, 100)
+        assertFalse(morning.copy(economy = morning.economy.copy(planning = planning)).toMainMenuUiState().canFeed)
+    }
+
     @Test fun customizedNewGameDisplaysCubInItsSavedColor() {
         val expected = mapOf(
             PetFur.Copper to R.drawable.ryzhik_cub_body_base_no_accessory,

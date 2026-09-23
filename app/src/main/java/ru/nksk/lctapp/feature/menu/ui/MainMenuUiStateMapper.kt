@@ -28,6 +28,6 @@ internal fun GameState.toMainMenuUiState(fullEnergy: Int = 5, catalog: GameCatal
         it.phase == DayPhase.READY_TO_END || it.energy == 0 -> "Закончить день"
         else -> "Продолжить день"
     } },
-    canFeed = economy.planning == null && engine?.let { it.phase != DayPhase.FINISHED && !it.ateToday && it.steps > 0 } == true,
+    canFeed = economy.planning == null && engine?.let { it.phase != DayPhase.FINISHED && !it.ateToday } == true,
 )
 }
