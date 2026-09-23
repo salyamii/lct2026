@@ -1,6 +1,7 @@
 package ru.nksk.lctapp.feature.tasks.ui
 
-import androidx.compose.foundation.Image
+import ru.nksk.lctapp.core.ui.components.GameArtwork
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,9 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -120,8 +119,7 @@ fun CoinChip(text: String, modifier: Modifier = Modifier, lime: Boolean = false)
             .padding(start = 8.dp, end = 12.dp, top = 5.dp, bottom = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Image(
-            painterResource(R.drawable.menu_coin),
+        GameArtwork(R.drawable.menu_coin,
             contentDescription = null,
             modifier = Modifier.size(16.dp),
         )
@@ -205,7 +203,7 @@ fun DeedCard(
     title: String,
     description: String,
     rewardLabel: String,
-    scene: Painter,
+    @DrawableRes scene: Int?,
     onOpen: () -> Unit,
     modifier: Modifier = Modifier,
     deadline: String? = null,
@@ -218,12 +216,12 @@ fun DeedCard(
             .clickable(onClick = onOpen),
     ) {
         Box(modifier = Modifier.fillMaxWidth().height(140.dp)) {
-            Image(
-                scene,
+            scene?.let { GameArtwork(
+                it,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
-            )
+            ) }
             Box(
                 modifier = Modifier
                     .fillMaxSize()

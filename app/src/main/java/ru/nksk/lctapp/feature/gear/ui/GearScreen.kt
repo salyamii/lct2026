@@ -1,6 +1,6 @@
 package ru.nksk.lctapp.feature.gear.ui
 
-import androidx.compose.foundation.Image
+import ru.nksk.lctapp.core.ui.components.GameArtwork
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -66,8 +65,7 @@ internal fun GearScreen(state: GearLoadState, onBack: () -> Unit, onRetry: () ->
                         color = AdventureMuted, fontFamily = Nunito, fontSize = 14.sp,
                     )
                 }
-                Image(
-                    painterResource(R.drawable.menu_gear), contentDescription = null,
+                GameArtwork(R.drawable.menu_gear, contentDescription = null,
                     modifier = Modifier.size(58.dp), contentScale = ContentScale.Fit,
                 )
             }

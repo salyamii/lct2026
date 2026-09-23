@@ -8,7 +8,8 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dagger.hilt.android.testing.BindValue
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -66,16 +67,19 @@ class AppSmokeTest {
     fun miniGames_hubListsThreeGames() {
         openMiniGames()
         compose.onNodeWithText("Дела").assertIsDisplayed()
-        compose.onNodeWithText("Перепутанные находки").assertIsDisplayed()
-        compose.onNodeWithText("Сверка счетов").performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText("Настрой телескоп").performScrollTo().assertIsDisplayed()
+        listOf("Перепутанные находки", "Сверка счетов", "Настрой телескоп").forEach { title ->
+            compose.onNodeWithTag("deeds_list").performScrollToNode(hasText(title))
+            compose.onNodeWithText(title).assertIsDisplayed()
+        }
     }
 
     @Test
     fun miniGames_openMemoryAndReturnBack() {
         openMiniGames()
+        compose.onNodeWithTag("deeds_list").performScrollToNode(hasText("Перепутанные находки"))
         compose.onNodeWithText("Перепутанные находки").performClick()
         compose.onNodeWithContentDescription("Назад").performClick()
+        compose.onNodeWithTag("deeds_list").performScrollToNode(hasText("Дела"))
         compose.onNodeWithText("Дела").assertIsDisplayed()
         compose.onNodeWithContentDescription("Назад").performClick()
         compose.onNodeWithText(compose.activity.getString(R.string.menu_continue)).assertIsDisplayed()
@@ -84,6 +88,7 @@ class AppSmokeTest {
     @Test
     fun openMemoryCardSurvivesActivityRecreation() {
         openMiniGames()
+        compose.onNodeWithTag("deeds_list").performScrollToNode(hasText("Перепутанные находки"))
         compose.onNodeWithText("Перепутанные находки").performClick()
         compose.onAllNodesWithContentDescription("Рубашка пласта")[0].performClick()
         compose.onAllNodesWithContentDescription("Рубашка пласта").assertCountEquals(15)

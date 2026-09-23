@@ -17,9 +17,11 @@ import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -139,7 +141,7 @@ class MainMenuScreenTest {
         val fixedElements = listOf(
             hasText(MainMenuPreviewState.goalTitle),
             hasText(MainMenuPreviewState.pet.name),
-            hasContentDescription(compose.activity.getString(R.string.menu_pet_plain, MainMenuPreviewState.pet.name)),
+            hasTestTag("menu_pet"),
             hasContentDescription(compose.activity.getString(R.string.menu_village)),
             hasText(compose.activity.getString(R.string.menu_tasks)),
             hasText(compose.activity.getString(R.string.menu_continue)),
@@ -153,6 +155,23 @@ class MainMenuScreenTest {
         compose.onNodeWithContentDescription(compose.activity.getString(R.string.menu_budget_collapse)).performClick()
         compose.waitForIdle()
         assertEquals(before, positions())
+        compose.runOnIdle { assertEquals(emptyList<MainMenuAction>(), selections) }
+    }
+
+    @Test
+    fun idlePetHasNoClickActionAndDoesNotMoveTheMap() {
+        val selections = mutableListOf<MainMenuAction>()
+        compose.setContent {
+            LCTAppTheme { MainMenuScreen(MainMenuPreviewState, selections::add) }
+        }
+        compose.mainClock.autoAdvance = false
+        val pet = compose.onNodeWithTag("menu_pet")
+        val map = compose.onNode(hasContentDescription(compose.activity.getString(R.string.menu_village)))
+        val mapBefore = map.fetchSemanticsNode().boundsInRoot
+        pet.assertHasNoClickAction()
+        pet.performTouchInput { click() }
+        compose.mainClock.advanceTimeBy(4_200)
+        assertEquals(mapBefore, map.fetchSemanticsNode().boundsInRoot)
         compose.runOnIdle { assertEquals(emptyList<MainMenuAction>(), selections) }
     }
 

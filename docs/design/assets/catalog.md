@@ -2,9 +2,17 @@
 
 See [the guide](README.md) for storage and usage rules and [the manifest](manifest.json) for checksums and export details.
 
-320 logical assets; 3 exact drawable aliases; 0 unavailable exports.
+324 logical assets; 3 exact drawable aliases; 0 unavailable exports.
 
 Locations retain their original 941 × 1672 pixels. Earlier character and equipment layers retain a 512 × 512 canvas; new sleep originals retain 1024 × 1024 (2× Figma frame). Names are artwork labels, not gameplay rules.
+
+## Deferred eye animation — 2026-09-22
+
+D-119 excludes blink code and its six image resources from the current MR.
+Sources, prompts and placement metadata are preserved in the external prototype
+archive described in [pet-motion notes](../pet-motion.md). The four generated
+frames also remain in [Figma](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2825-2).
+They are outside the bundled asset count below.
 
 ## Existing menu
 
