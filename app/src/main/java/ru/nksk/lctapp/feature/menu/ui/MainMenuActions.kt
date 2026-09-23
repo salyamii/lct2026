@@ -101,6 +101,7 @@ internal fun MenuActions(onAction: (MainMenuAction) -> Unit, viewport: DpSize, s
                 )
             }
         }
+        state.spendingPreview?.let { Text(it, Modifier.padding(horizontal = 20.dp), color = AdventureLabel, fontFamily = Rubik) }
         Button(
             onClick = { onAction(MainMenuAction.ContinueDay) },
             enabled = !state.busy,

@@ -232,7 +232,7 @@ not substitute a new game. See [onboarding](design/onboarding.md).
 
 ### Customization step — 2026-09-20
 
-The startup gate now has Choose, Customize, Accessories and Introduction steps (CUST-D-018). Start from the character
+The startup gate now has Choose, Customize, Accessories, GoalSelection and Introduction steps (CUST-D-019). Start from the character
 screen persists a Room draft and opens CustomizationScreen in the onboarding
 module. AppStartupViewModel owns the step and persisted draft; UI receives values
 and callbacks. Back from Customize clears the draft before returning to Choose.
@@ -245,9 +245,11 @@ uses the same feature module and state/callback boundary. Back from Accessories
 returns to Customize without resetting the profile. The draft persists both step
 and selected accessory; only Start on Introduction commits a game and opens LctNavHost.
 
-Introduction follows accessory confirmation (CUST-D-018); Back returns to
-Accessories. The persisted INTRODUCTION step uses the Room v13 text
-column. No additional migration or Navigation 3 key is needed.
+Under CUST-D-019 accessory confirmation opens GoalSelection; explicit goal
+confirmation opens Introduction. Back returns to GoalSelection, then Accessories.
+Room v15 adds draft goal_id and migrates the old INTRODUCTION to GOAL_SELECTION.
+Only “В путь!” commits the pet and goal together and clears the draft.
+Existing saves skip onboarding. No Navigation 3 key or day/event transition is added.
 
 ## Карта — 2026-09-20
 
@@ -257,3 +259,21 @@ column. No additional migration or Navigation 3 key is needed.
 mapEntry; после успешного сохранения AppNavigator возвращает к корню меню.
 MapViewModel получает GameLocationController через Hilt; entry собирает состояние
 с lifecycle и обрабатывает завершение только в RESUMED. UI получает callbacks.
+
+## Экономика — 2026-09-21
+
+feature/economy заменяет coins; Economy сохраняет serial ID `coins` и чтение
+старого имени `ru.nksk.lctapp.ui.coins.navigation.Coins`. Ключ не содержит данные.
+EconomyGateViewModel в app наблюдает сохранённую сессию. Новое поступление и
+восстановленные игровые маршруты при незавершённом бюджете ведут к Economy.
+На RECEIPT Back разрешает меню. На ALLOCATION Back блокируется, пока бюджет
+не готов; готовый бюджет подтверждается перед выходом (D-143).
+Текущая сессия не открывается циклически сама собой.
+Continue вновь открывает её. Этап RECEIPT/ALLOCATION читается из Room.
+
+После знакомства с выбранным приключением host открывает INITIAL/RECEIPT.
+Вне сессии тот же маршрут открывает редактор; первое изменение создаёт MANUAL/ALLOCATION без начисления. Подтверждение
+и Back возвращают к меню. Gameplay-защита независимо находится в домене;
+навигационный переход сам по себе не начисляет деньги.
+
+По D-142 «Монетки» всегда открывает редактор. MANUAL/ALLOCATION создаётся при первом изменении и сохраняет черновик; требует распределить все деньги, но не вводит недельный минимум35. Простое открытие ничего не начисляет и не блокирует игру. INITIAL/WEEKLY/MIGRATION сохраняют минимум35.

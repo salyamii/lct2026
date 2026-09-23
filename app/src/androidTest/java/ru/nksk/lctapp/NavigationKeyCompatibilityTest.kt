@@ -14,7 +14,7 @@ import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
 import ru.nksk.lctapp.app.navigation.AppNavigationSavedStateConfiguration
-import ru.nksk.lctapp.feature.coins.navigation.Coins
+import ru.nksk.lctapp.feature.economy.navigation.Economy as Coins
 import ru.nksk.lctapp.feature.day.navigation.Day
 import ru.nksk.lctapp.feature.gear.navigation.Gear
 import ru.nksk.lctapp.feature.goal.navigation.Goal

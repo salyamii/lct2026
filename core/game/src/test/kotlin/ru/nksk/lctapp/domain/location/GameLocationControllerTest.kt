@@ -15,7 +15,7 @@ class GameLocationControllerTest {
         val repository = FakeRepository(initial())
         val controller = DefaultGameLocationController(repository, AllLocationsAvailable)
         controller.observe().first() // an older UI snapshot must not own the next write
-        repository.state.value = initial().copy(fatigue = 95, economy = EconomyState(753, BudgetPlan(1, 2, 3, 4)))
+        repository.state.value = initial().copy(fatigue = 95, economy = EconomyState(BudgetPlan(1, 2, 3, 747)))
         val latest = repository.state.value!!
         controller.selectLocation(GameLocation.PIER)
         assertEquals(latest.copy(locationScene = latest.locationScene.copy(location = GameLocation.PIER)), repository.read())
@@ -55,7 +55,7 @@ class GameLocationControllerTest {
     }
 
     private fun initial() = GameState(PetState("PLAIN", PetVisualState.NORMAL),
-        EconomyState(100, BudgetPlan(0, 0, 0, 0)), StoryState(null, null, null, emptyList()),
+        EconomyState(BudgetPlan(0, 0, 0, 100)), StoryState(null, null, null, emptyList()),
         0, 0, emptyList())
 
     private class FakeRepository(initial: GameState) : GameRepository {

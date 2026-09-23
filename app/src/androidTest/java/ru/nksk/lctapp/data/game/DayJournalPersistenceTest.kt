@@ -64,7 +64,7 @@ class DayJournalPersistenceTest {
         try {
             RoomStoryContentRepository(database).install(catalog.content)
             var games = RoomGameRepository(database)
-            games.initializeIfAbsent(createInitialGameState())
+            games.initializeIfAbsent(createInitialGameState().let { it.copy(economy = it.economy.withTotalBalance(100)) })
             val engine = GameEngine(games, EventFactory(catalog.content, catalog.policies, catalog.meals, catalog.goals, catalog.storyCampaign), catalog.rules)
             assertTrue(engine.dispatch(EngineRequest("begin", null,
                 EngineCommand.BeginDay(catalog.storyDayId, catalog.deedPool.take(4)))) is EngineResult.Applied)
@@ -78,9 +78,9 @@ class DayJournalPersistenceTest {
             database = GameDatabase.open(context, name)
             games = RoomGameRepository(database)
             assertEquals(saved, games.observe().first())
-            assertEquals(saved, games.initializeIfAbsent(createInitialGameState()))
+            assertEquals(saved, games.initializeIfAbsent(createInitialGameState().let { it.copy(economy = it.economy.withTotalBalance(100)) }))
             try {
-                games.update { it.copy(economy = it.economy.copy(balance = 0),
+                games.update { it.copy(economy = it.economy.withTotalBalance(0),
                     engine = it.engine!!.copy(journal = emptyList()), ownedItems = it.ownedItems + OwnedItem("bad", "unknown-item")) }
                 fail("Invalid inventory must roll back the balance and journal")
             } catch (_: androidx.sqlite.SQLiteException) { }

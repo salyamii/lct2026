@@ -33,7 +33,7 @@ class GameEnginePersistenceTest {
         db = GameDatabase.open(context, name)
         games = RoomGameRepository(db)
         RoomStoryContentRepository(db).install(catalog())
-        games.initializeIfAbsent(createInitialGameState())
+        games.initializeIfAbsent(createInitialGameState().let { it.copy(economy = it.economy.withTotalBalance(100)) })
         engine = newEngine()
     }
 
@@ -125,7 +125,7 @@ class GameEnginePersistenceTest {
         val before = send(EngineCommand.BeginDay("day", List(4) { "event" }))
         try {
             games.update { it.copy(
-                economy = it.economy.copy(balance = 1),
+                economy = it.economy.withTotalBalance(1),
                 ownedItems = listOf(OwnedItem("new-owned", "item")),
                 engine = it.engine!!.copy(events = it.engine!!.events.mapIndexed { index, event ->
                     if (index == 0) event.copy(eventId = "missing-definition") else event

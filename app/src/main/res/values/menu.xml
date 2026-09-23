@@ -1,4 +1,8 @@
 <resources>
+    <string name="menu_budget_title">Монетки</string>
+    <string name="menu_budget_open">Открыть распределение монет</string>
+    <string name="menu_budget_expand">Развернуть статьи бюджета</string>
+    <string name="menu_budget_collapse">Свернуть статьи бюджета</string>
     <string name="menu_goal_label">ЦЕЛЬ</string>
     <string name="menu_current_goal">Наблюдение за звёздами</string>
     <string name="menu_goal_progress">%1$d из %2$d</string>

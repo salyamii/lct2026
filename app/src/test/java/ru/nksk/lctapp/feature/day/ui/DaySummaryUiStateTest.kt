@@ -35,6 +35,26 @@ class DaySummaryUiStateTest {
         assertFalse((summary.activities.map { it.toString() } + summary.moneyLines + summary.remaining).any { "→" in it })
     }
 
+    @Test fun migrationTopupReconcilesWithoutBeingCountedAsDailyIncome() {
+        val summary = DaySummary(4, 20, 36, emptyList(), 2, journal = listOf(
+            DayJournalEntry("meal", DayJournalKind.MEAL, "basic-v1", -5),
+            DayJournalEntry("work", DayJournalKind.DEED, "figma-2163-43-v1:complete", 6),
+        ), balanceAdjustment = 15).toUiState(catalog, "Тоша")
+        assertEquals(listOf("Потрачено за день: 5 монет", "Получено за день: 6 монет"), summary.moneyLines)
+        assertEquals("Сейчас 36 монет", summary.remaining)
+        assertNull(summary.detailsNote)
+        assertEquals("При переходе на бюджет добавлено 15 монет. Это не заработок за день.", summary.adjustmentNote)
+        assertFalse(summary.activities.any { it.value.contains("15") })
+    }
+
+    @Test fun migrationTopupDoesNotHideMissingHistoryOrCountAsNetEarnings() {
+        val summary = DaySummary(4, 20, 32, emptyList(), 2,
+            balanceAdjustment = 15).toUiState(catalog, "Тоша")
+        assertEquals(listOf("За день монет стало меньше на 3"), summary.moneyLines)
+        assertNotNull(summary.detailsNote)
+        assertNotNull(summary.adjustmentNote)
+    }
+
     @Test fun oldSaveStillShowsCompletedWorkButDoesNotTreatItsNetDecreaseAsGrossSpending() {
         val old = DaySummary(4, 97, 68, emptyList(), 3, completedDecisions = listOf(
             StoryDecision("work-done", "figma-2270-54-v1:complete"),

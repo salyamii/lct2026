@@ -22,6 +22,7 @@ internal data class EngineStateEntity(
     @ColumnInfo(name = "next_morning_energy") val nextMorningEnergy: Int?,
     @ColumnInfo(name = "opening_balance") val openingBalance: Long,
     @ColumnInfo(name = "opening_energy") val openingEnergy: Int? = null,
+    @ColumnInfo(name = "balance_adjustment", defaultValue = "0") val balanceAdjustment: Long = 0,
 )
 
 @Entity(

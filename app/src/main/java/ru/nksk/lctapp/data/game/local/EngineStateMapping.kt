@@ -8,7 +8,7 @@ import ru.nksk.lctapp.domain.engine.EventOrigin
 import ru.nksk.lctapp.domain.engine.EventStatus
 
 internal fun EngineState.toEntity() = EngineStateEntity(
-    CURRENT_GAME_ID, rulesId, revision, day, phase.name, steps, energy, ateToday, nextMorningEnergy, openingBalance, openingEnergy,
+    CURRENT_GAME_ID, rulesId, revision, day, phase.name, steps, energy, ateToday, nextMorningEnergy, openingBalance, openingEnergy, balanceAdjustment,
 )
 
 /** These enum names are v2 wire codes. A future rename requires an explicit compatible mapping. */
@@ -22,4 +22,5 @@ internal fun EngineStateEntity.toDomain(events: List<EngineEventEntity>, deeds: 
     deeds.map { DeedOffer(it.id, it.eventId, it.expiresDay, it.completed) },
     openingEnergy,
     journal.map { it.toDomain() },
+    balanceAdjustment = balanceAdjustment,
 )

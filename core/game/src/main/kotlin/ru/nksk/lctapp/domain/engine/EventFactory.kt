@@ -26,6 +26,9 @@ class EventFactory(
             require(goal.itemIds.all { id -> content.items.any { it.id == id && it.priceCoins != null && it.priceCoins > 0 } })
             require(content.events.any { it.id == goal.introductionEventId && it.type == EventType.STORY })
         }
+        require(content.events.filter { it.type == EventType.EARNING }.all { event ->
+            event.moneyDeltaOnStart >= 0 && content.choices.filter { it.eventId == event.id }.all { it.moneyDelta >= 0 }
+        }) { "EARNING cannot require money at entry or in any answer" }
         require(events.size == content.events.size) { "Duplicate event identity" }
         require(this.meals.size == meals.size) { "Duplicate meal identity" }
         require(content.choices.map { it.id }.distinct().size == content.choices.size)

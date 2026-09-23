@@ -9,6 +9,7 @@ enum class MiniGameKind(val fatigueCost: Int) {
     val hungerCost: Int get() = 20
 
     fun canPlay(state: GameState): Boolean =
+        state.economy.planning == null && state.economy.unallocated == 0L &&
         state.engine == null && state.satiety in 0..(100 - hungerCost) && state.fatigue in 0..(100 - fatigueCost)
 
     /** Apply only after success, inside the aggregate repository's write transaction. */

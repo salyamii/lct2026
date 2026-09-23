@@ -54,7 +54,7 @@ class StoryProjectPersistenceTest {
             assertEquals("Тоша", saved.pet.name)
             assertEquals("custom-look", saved.pet.selectedLookId)
             assertEquals(247L, saved.economy.balance)
-            assertEquals(listOf(10L, 20L, 30L, 40L), saved.economy.plan.let { listOf(it.needs, it.wants, it.savings, it.reserve) })
+            assertEquals(listOf(0L, 0L, 0L, 0L), saved.economy.plan.let { listOf(it.needs, it.wants, it.savings, it.reserve) })
             assertEquals(17, saved.satiety)
             assertEquals(30, saved.fatigue)
             assertEquals(listOf("second", "first"), saved.ownedItems.map { it.id })
@@ -90,7 +90,7 @@ class StoryProjectPersistenceTest {
             assertEquals(saved, games.read())
             assertEquals(saved, games.initializeIfAbsent(createInitialGameState()))
             try {
-                games.update { it.copy(economy = it.economy.copy(balance = 0),
+                games.update { it.copy(economy = it.economy.withTotalBalance(0),
                     completedGoalProjects = it.completedGoalProjects.map { project -> project.copy(goalId = "missing-goal") }) }
                 fail("Unknown project must roll back balance and all children")
             } catch (_: androidx.sqlite.SQLiteException) { }

@@ -22,6 +22,7 @@ internal fun energyDescription(remaining: Int, maximum: Int): String = when {
 }
 
 internal fun BlockReason.playerMessage(petName: String): String = when (this) {
+    BlockReason.BudgetPlanningRequired -> "Сначала распредели монеты по статьям и подтверди бюджет."
     BlockReason.InvalidPetName -> "Введи непустое имя в одну строку."
     BlockReason.MustEat -> "$petName проголодался. Сначала нужно поесть, затем можно продолжить."
     BlockReason.MustSleep -> "$petName устал. Сил на это действие не хватает. Сначала нужно отдохнуть — оставшиеся события дождутся завтра."

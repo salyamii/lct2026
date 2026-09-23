@@ -19,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,6 +47,7 @@ fun MainMenuScreen(
     modifier: Modifier = Modifier,
 ) {
     val dispatch: (MainMenuAction) -> Unit = { if (!state.busy) onAction(it) }
+    var budgetExpanded by rememberSaveable { mutableStateOf(false) }
     val density = LocalDensity.current
     var screenTop by remember { mutableStateOf(0f) }
     var hudBottom by remember { mutableStateOf(0f) }
@@ -74,7 +76,8 @@ fun MainMenuScreen(
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                     ) {
-                        MenuHud(state.pet.name, state.coins, state.completedGoals, state.totalGoals, dispatch, state.goalTitle)
+                        MenuHud(state.pet.name, state.coins, state.completedGoals, state.totalGoals, dispatch, state.goalTitle, budget = state.budget,
+                            budgetExpanded = budgetExpanded, onBudgetExpandedChange = { budgetExpanded = it })
                         MenuActions(dispatch, viewport, state, scenePainter)
                     }
                 }
@@ -83,7 +86,8 @@ fun MainMenuScreen(
                     Modifier.widthIn(max = 480.dp).fillMaxSize().align(Alignment.TopCenter),
                 ) {
                     MenuHud(state.pet.name, state.coins, state.completedGoals, state.totalGoals, dispatch, state.goalTitle,
-                        Modifier.onGloballyPositioned { hudBottom = it.positionInRoot().y + it.size.height })
+                        Modifier.onGloballyPositioned { hudBottom = it.positionInRoot().y + it.size.height }, budget = state.budget,
+                            budgetExpanded = budgetExpanded, onBudgetExpandedChange = { budgetExpanded = it })
                     CharacterScene(state.pet, Modifier.weight(1f).fillMaxWidth(), characterPosition)
                     MenuActions(dispatch, viewport, state, scenePainter)
                 }
@@ -104,7 +108,7 @@ fun MainMenuScreen(
     }
 }
 
-@Preview(name = "Figma · 390 × 844", widthDp = 390, heightDp = 844)
+@Preview(name = "Бюджет · 390 × 844", widthDp = 390, heightDp = 844)
 @Preview(name = "Compact phone", widthDp = 360, heightDp = 640)
 @Preview(name = "Landscape", widthDp = 844, heightDp = 390)
 @Preview(name = "Large text", widthDp = 390, heightDp = 844, fontScale = 1.5f)

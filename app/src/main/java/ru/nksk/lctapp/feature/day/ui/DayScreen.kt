@@ -48,6 +48,7 @@ internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
                     summary.moneyLines.forEach { GameBody(it) }
                     GameTitle(summary.remaining)
                     summary.detailsNote?.let { GameBody(it) }
+                    summary.adjustmentNote?.let { GameBody(it) }
                 }
             }
         }
@@ -60,11 +61,13 @@ internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
             GameButton("Покормить", !state.busy) { onAction(DayAction.ShowMeals) }
         }
         state.options.filterNot { it.needsFood }.forEach { option ->
+            option.spending?.let { GameBody(it) }
             GameButton(if (option.needsFood) "Покормить" else option.label, !state.busy && option.enabled) {
                 onAction(if (option.needsFood) DayAction.ShowMeals else DayAction.Choose(option.id))
             }
         }
         state.primary?.let { text ->
+            state.primarySpending?.let { GameBody(it) }
             GameButton(text, !state.busy) { onAction(if (state.primaryNeedsFood) DayAction.ShowMeals else DayAction.Primary) }
         }
         state.later?.let { text ->
@@ -82,9 +85,12 @@ internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
         title = { Text("${state.petName} проголодался") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Нужно поесть. Если деньги на нужды закончились, придётся взять из накоплений. В следующий раз спланируем бюджет внимательнее. Еда не восстанавливает силы.")
+                Text("Еда не восстанавливает силы. Сначала используем «Нужно», затем при необходимости — другие статьи.")
                 state.message?.let { Text(it) }
-                state.meals.forEach { meal -> GameButton(meal.label, meal.enabled && !state.busy) { onAction(DayAction.Feed(meal.id)) } }
+                state.meals.forEach { meal ->
+                    meal.spending?.let { Text(it) }
+                    GameButton(meal.label, meal.enabled && !state.busy) { onAction(DayAction.Feed(meal.id)) }
+                }
             }
         },
         confirmButton = { TextButton({ onAction(DayAction.CloseMeals) }, enabled = !state.busy) { Text("Вернуться") } },

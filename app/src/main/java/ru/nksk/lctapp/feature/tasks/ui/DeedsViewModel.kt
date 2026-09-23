@@ -12,13 +12,16 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import ru.nksk.lctapp.core.ui.game.playerDescription
+import ru.nksk.lctapp.domain.economy.EconomyOperations
+import ru.nksk.lctapp.domain.economy.SpendingKind
 import ru.nksk.lctapp.core.ui.game.playerMessage
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
 
 data class OfferedDeedUiState(val id: String, val title: String, val description: String, val reward: String,
     val effort: String, val deadline: String, val scene: String)
-data class DeedsMealUiState(val id: String, val label: String, val enabled: Boolean)
+data class DeedsMealUiState(val id: String, val label: String, val enabled: Boolean, val spending: String? = null)
 data class DeedsUiState(
     val loading: Boolean = true, val failed: Boolean = false, val busy: Boolean = false,
     val offers: List<OfferedDeedUiState> = emptyList(), val message: String? = null,
@@ -88,12 +91,14 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
                 val event = catalog.content.events.single { it.id == offer.eventId }
                 val card = catalog.cards.getValue(event.id)
                 val reward = catalog.content.choices.single { it.eventId == event.id }.moneyDelta
-                OfferedDeedUiState(offer.id, renderPetText(event.title, saved.pet.name), renderPetText(event.description, saved.pet.name), "До $reward монет",
+                OfferedDeedUiState(offer.id, renderPetText(event.title, saved.pet.name), renderPetText(event.description, saved.pet.name), "До $reward монет в «Запас»",
                     renderPetText(card.effort, saved.pet.name),
                     deedDeadline(saved.engine!!.day, offer.expiresDay), card.scene)
             },
             meals = if (!needsFood) emptyList() else catalog.meals.filter { it.price > 0 || saved.economy.balance < catalog.meals.first().price }.map {
-                DeedsMealUiState(it.id, if (it.price == 0L) "Бесплатная столовая · завтра меньше сил" else "Поесть · ${it.price} монет", saved.economy.balance >= it.price)
+                DeedsMealUiState(it.id, if (it.price == 0L) "Бесплатная столовая · завтра меньше сил" else "Поесть · ${it.price} монет",
+                    session.engine.blockReason(saved, EngineCommand.Feed(it.id)) == null,
+                    EconomyOperations.quote(saved.economy, it.price, SpendingKind.FEEDING).playerDescription(SpendingKind.FEEDING))
             },
         )
     }

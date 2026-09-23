@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.app.navigation
 
+import ru.nksk.lctapp.domain.economy.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,6 +11,9 @@ import org.junit.Before
 import org.junit.Test
 import ru.nksk.lctapp.app.createInitialGameState
 import ru.nksk.lctapp.data.game.content.bundledGameCatalog
+import ru.nksk.lctapp.data.game.content.STARS_GOAL
+import ru.nksk.lctapp.data.game.content.TOWER_GOAL
+import ru.nksk.lctapp.data.game.content.MAP_GOAL
 import ru.nksk.lctapp.domain.content.StoryContent
 import ru.nksk.lctapp.domain.content.StoryContentRepository
 import ru.nksk.lctapp.domain.engine.GameSession
@@ -50,6 +54,14 @@ class AppStartupViewModelTest {
         model.selectAccessory("BANDANA")
         model.confirmAccessory()
         advanceUntilIdle()
+        assertTrue(model.uiState.value is AppStartupState.GoalSelection)
+        model.confirmGoal()
+        advanceUntilIdle()
+        assertTrue(model.uiState.value is AppStartupState.GoalSelection)
+        model.selectGoal(STARS_GOAL)
+        advanceUntilIdle()
+        model.confirmGoal()
+        advanceUntilIdle()
         assertTrue(model.uiState.value is AppStartupState.Introduction)
         assertNull(repository.read())
         model.finishOnboarding()
@@ -60,12 +72,18 @@ class AppStartupViewModelTest {
         assertEquals(PetAge.CUB, repository.read()!!.pet.age)
         assertEquals("BANDANA", repository.read()!!.pet.selectedLookId)
         assertNull(repository.read()!!.engine)
+        assertEquals(STARS_GOAL, repository.read()!!.selectedGoalId)
         assertEquals(1, repository.initializations)
+        assertEquals(100L, repository.read()!!.economy.balance)
+        assertEquals(100L, repository.read()!!.economy.unallocated)
+        assertEquals(BudgetPlan(0, 0, 0, 0), repository.read()!!.economy.plan)
+        assertEquals(BudgetPlanningReason.INITIAL, repository.read()!!.economy.planning!!.reason)
+        assertEquals(BudgetPlanningStage.RECEIPT, repository.read()!!.economy.planning!!.stage)
     }
 
     @Test fun existingSaveSkipsOnboardingWithoutChangingProgress() = runTest(dispatcher) {
         val initial = createInitialGameState()
-        val saved = initial.copy(economy = initial.economy.copy(balance = 37))
+        val saved = initial.copy(economy = EconomyState(BudgetPlan(0, 0, 0, 37)))
         val repository = StartupRepository(saved)
         val model = model(repository)
         advanceUntilIdle()
@@ -100,13 +118,17 @@ class AppStartupViewModelTest {
         advanceUntilIdle()
         model.confirmAccessory()
         advanceUntilIdle()
+        model.selectGoal(STARS_GOAL)
+        advanceUntilIdle()
+        model.confirmGoal()
+        advanceUntilIdle()
         repository.writeFailure = IllegalStateException("Disk full")
         model.finishOnboarding()
         advanceUntilIdle()
         assertTrue((model.uiState.value as AppStartupState.Introduction).failed)
         assertNull(repository.read())
         repository.writeFailure = null
-        val saved = createInitialGameState().let { it.copy(economy = it.economy.copy(balance = 59)) }
+        val saved = createInitialGameState().let { it.copy(economy = EconomyState(BudgetPlan(0, 0, 0, 59))) }
         repository.state.value = saved
         model.finishOnboarding()
         advanceUntilIdle()
@@ -179,11 +201,15 @@ class AppStartupViewModelTest {
         assertNull(repository.read())
         val intro = model(repository, drafts)
         advanceUntilIdle()
-        assertEquals(OnboardingStep.Introduction, (intro.uiState.value as AppStartupState.Introduction).draft.step)
+        assertEquals(OnboardingStep.GoalSelection, (intro.uiState.value as AppStartupState.GoalSelection).draft.step)
         intro.backToAccessories()
         advanceUntilIdle()
         assertEquals("PLAIN", (intro.uiState.value as AppStartupState.Accessories).draft.accessoryId)
         intro.confirmAccessory()
+        advanceUntilIdle()
+        intro.selectGoal(TOWER_GOAL)
+        advanceUntilIdle()
+        intro.confirmGoal()
         advanceUntilIdle()
         intro.finishOnboarding()
         advanceUntilIdle()
@@ -191,13 +217,94 @@ class AppStartupViewModelTest {
         assertEquals("Искорка", repository.read()!!.pet.name)
     }
 
-    private fun model(repository: GameRepository, drafts: OnboardingDraftRepository = MemoryDrafts()) = AppStartupViewModel(GameSession(
+    @Test fun goalSelectionAndConfirmationResumeWithoutStartingGame() = runTest(dispatcher) {
+        val repository = StartupRepository()
+        val drafts = MemoryDrafts()
+        drafts.save(OnboardingDraft(PetCustomization(), OnboardingStep.GoalSelection))
+        val first = model(repository, drafts)
+        advanceUntilIdle()
+        first.selectGoal(MAP_GOAL)
+        first.selectGoal("unknown")
+        advanceUntilIdle()
+        assertNull(drafts.read()!!.goalId)
+        first.selectGoal(TOWER_GOAL)
+        advanceUntilIdle()
+        val restored = model(repository, drafts)
+        advanceUntilIdle()
+        assertEquals(TOWER_GOAL, (restored.uiState.value as AppStartupState.GoalSelection).draft.goalId)
+        restored.confirmGoal()
+        restored.confirmGoal()
+        advanceUntilIdle()
+        val confirmation = model(repository, drafts)
+        advanceUntilIdle()
+        assertEquals(TOWER_GOAL, (confirmation.uiState.value as AppStartupState.Introduction).draft.goalId)
+        assertNull(repository.read())
+        confirmation.backToGoals()
+        advanceUntilIdle()
+        confirmation.backToAccessories()
+        advanceUntilIdle()
+        confirmation.backToCustomization()
+        advanceUntilIdle()
+        confirmation.finishCustomization()
+        advanceUntilIdle()
+        confirmation.confirmAccessory()
+        advanceUntilIdle()
+        assertEquals(TOWER_GOAL, (confirmation.uiState.value as AppStartupState.GoalSelection).draft.goalId)
+        confirmation.selectGoal(STARS_GOAL)
+        advanceUntilIdle()
+        confirmation.confirmGoal()
+        advanceUntilIdle()
+        confirmation.finishOnboarding()
+        advanceUntilIdle()
+        assertEquals(STARS_GOAL, repository.read()!!.selectedGoalId)
+        assertNull(repository.read()!!.engine)
+    }
+
+    @Test fun failedGoalSaveStaysVisibleAndSameSelectionCanBeRetried() = runTest(dispatcher) {
+        val repository = StartupRepository()
+        val drafts = MemoryDrafts()
+        drafts.save(OnboardingDraft(PetCustomization(), OnboardingStep.GoalSelection))
+        val model = model(repository, drafts)
+        advanceUntilIdle()
+        drafts.failWrites = true
+        model.selectGoal(STARS_GOAL)
+        advanceUntilIdle()
+        assertTrue((model.uiState.value as AppStartupState.GoalSelection).failed)
+        assertNull(drafts.read()!!.goalId)
+        assertNull(repository.read())
+        drafts.failWrites = false
+        model.selectGoal(STARS_GOAL)
+        advanceUntilIdle()
+        assertEquals(STARS_GOAL, drafts.read()!!.goalId)
+        model.confirmGoal()
+        advanceUntilIdle()
+        assertTrue(model.uiState.value is AppStartupState.Introduction)
+    }
+
+    @Test fun sessionRejectsUnavailableStartingGoalWithoutCreatingSave() = runTest(dispatcher) {
+        val repository = StartupRepository()
+        val session = session(repository)
+        try {
+            session.prepare(PetCustomization().toPetState("PLAIN"), MAP_GOAL)
+            fail("A locked project must not initialize a game")
+        } catch (_: IllegalArgumentException) {
+            assertNull(repository.read())
+        }
+        session.prepare(PetCustomization().toPetState("PLAIN"), TOWER_GOAL)
+        assertEquals(TOWER_GOAL, repository.read()!!.selectedGoalId)
+        assertNull(repository.read()!!.engine)
+    }
+
+    private fun model(repository: GameRepository, drafts: OnboardingDraftRepository = MemoryDrafts()) =
+        AppStartupViewModel(session(repository), drafts)
+
+    private fun session(repository: GameRepository) = GameSession(
         repository, object : StoryContentRepository {
             private var content = StoryContent()
             override suspend fun read() = content
             override suspend fun install(content: StoryContent) { this.content = content }
         }, bundledGameCatalog(), createInitialGameState(),
-    ), drafts)
+    )
 }
 
 private class StartupRepository(initial: GameState? = null) : GameRepository {
@@ -221,7 +328,11 @@ private class StartupRepository(initial: GameState? = null) : GameRepository {
 
 private class MemoryDrafts : OnboardingDraftRepository {
     private var draft: OnboardingDraft? = null
+    var failWrites = false
     override suspend fun read() = draft
-    override suspend fun save(draft: OnboardingDraft) { this.draft = draft }
+    override suspend fun save(draft: OnboardingDraft) {
+        check(!failWrites) { "Disk full" }
+        this.draft = draft
+    }
     override suspend fun clear() { draft = null }
 }

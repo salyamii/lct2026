@@ -18,6 +18,8 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import ru.nksk.lctapp.app.createInitialGameState
+import ru.nksk.lctapp.domain.economy.BudgetPlan
+import ru.nksk.lctapp.domain.economy.EconomyState
 import ru.nksk.lctapp.data.game.content.bundledGameCatalog
 import ru.nksk.lctapp.domain.content.StoryContent
 import ru.nksk.lctapp.domain.content.StoryContentRepository
@@ -42,7 +44,7 @@ class DayViewModelTest {
 
     @Test fun exhaustedCardOffersOneFeedThenRestAndWakesInMenuWithoutOpeningAnEvent() = runTest(dispatcher) {
         val (repository, model) = fixture()
-        repository.update { it.copy(economy = it.economy.copy(balance = 0),
+        repository.update { it.copy(economy = it.economy.copy(plan = BudgetPlan(0, 0, 0, 0), unallocated = 0),
             engine = it.engine!!.copy(energy = 0, steps = 0, ateToday = false)) }
         runCurrent()
         val eventId = repository.read().engine!!.currentEvent!!.id
@@ -309,9 +311,13 @@ class DayViewModelTest {
         val morning = repository.read()
         assertEquals(8, morning.engine!!.day)
         assertEquals(previous.economy.balance + 100, morning.economy.balance)
+        assertEquals(previous.economy.plan, morning.economy.plan)
+        assertEquals(100L, morning.economy.unallocated)
+        assertNotNull(morning.economy.planning)
+        assertNull(session.advanceCommand(morning))
         assertNull(morning.engine!!.currentEvent)
         assertEquals(0, morning.engine!!.steps)
-        assertEquals(listOf<String?>(null), exits)
+        assertTrue(exits.isEmpty())
         val restored = DayViewModel(session)
         store.put("restored-day", restored)
         runCurrent()
@@ -352,7 +358,7 @@ class DayViewModelTest {
 
     @Test fun purchaseOffersPassingByWithoutPausingAndWarnsAboutFoodMoney() = runTest(dispatcher) {
         val (repository, model) = fixture(eventFirst = "figma-2164-2-v1")
-        repository.update { it.copy(economy = it.economy.copy(balance = 27)) }
+        repository.update { it.copy(economy = it.economy.copy(plan = BudgetPlan(0, 27, 0, 0), unallocated = 0)) }
         runCurrent()
         assertEquals(listOf("Купить · 25", "Пройти мимо"), model.uiState.value.options.map { it.label })
         assertNull(model.uiState.value.later)
@@ -399,10 +405,22 @@ class DayViewModelTest {
         assertFalse(model.uiState.value.body.contains("Рыжик"))
     }
 
+    @Test fun paidChoiceShowsTheActualArticleBreakdownAndFallback() = runTest(dispatcher) {
+        val (repository, model) = fixture(eventFirst = "figma-2164-2-v1")
+        repository.update { it.copy(economy = EconomyState(BudgetPlan(35, 3, 20, 22))) }
+        runCurrent()
+        val paid = model.uiState.value.options.first()
+        assertTrue(paid.enabled)
+        assertTrue(checkNotNull(paid.spending).contains("Хочу: 3"))
+        assertTrue(checkNotNull(paid.spending).contains("Запас: 22"))
+        assertTrue(checkNotNull(paid.spending).contains("других статей"))
+        assertNull(model.uiState.value.options.last().spending)
+    }
+
     private suspend fun fixture(deedFirst: Boolean = false, finishedDay: Int? = null,
         eventFirst: String? = null): Triple<DayRepository, DayViewModel, GameSession> {
         val catalog = bundledGameCatalog()
-        val initial = createInitialGameState().let { state ->
+        val initial = createInitialGameState().let { it.copy(economy = EconomyState(plan = BudgetPlan(35, 20, 20, 25), unallocated = 0, planning = null)) }.let { state ->
             if (!deedFirst && eventFirst == null) state.copy(selectedGoalId = catalog.goals.first().goalId) else state
         }
         val repository = DayRepository(initial)

@@ -10636,6 +10636,166 @@
         "method": 6,
         "resized": false
       }
+    },
+    {
+      "resource": "budget_needs",
+      "category": "Generated budget illustrations",
+      "path": "app/src/main/res/drawable-nodpi/budget_needs.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 869900,
+      "sha256": "b310320df19ff8cf1da0bdafa8c4701da35669ad8514e463c7c9cb6325c89552",
+      "rgba_sha256": "50704d1968a32bfce7b22d2db91efd6dee5bd87a2ad2a8e76c1a253aeb6bdb9e",
+      "alpha_bounds": [
+        0,
+        19,
+        1226,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/budget_needs.png",
+      "source_sha256": "e19671886db84a965f6288d0f3e8f90cd2583c526040ece1182b6385ef411014",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-09-21",
+        "reference_path": "docs/design/assets/sources/budget-plan-reference.png",
+        "prompt_path": "docs/design/assets/sources/budget-icons.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false
+      }
+    },
+    {
+      "resource": "budget_wants",
+      "category": "Generated budget illustrations",
+      "path": "app/src/main/res/drawable-nodpi/budget_wants.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 769488,
+      "sha256": "d2ebd797364e20532be6846d542a50cbc78b0eb121bcb1a8a823e4cf5006cd8b",
+      "rgba_sha256": "b86aa811c3bda70104204a0fb6e8ff902d8f12698fa65812ace6ef819dcbc131",
+      "alpha_bounds": [
+        41,
+        9,
+        1194,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/budget_wants.png",
+      "source_sha256": "b160036984e519bf72ab8f709da6d86511ab231b058fb1a1cd1421dc27ed43a7",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-09-21",
+        "reference_path": "docs/design/assets/sources/budget-plan-reference.png",
+        "prompt_path": "docs/design/assets/sources/budget-icons.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false
+      }
+    },
+    {
+      "resource": "budget_savings",
+      "category": "Generated budget illustrations",
+      "path": "app/src/main/res/drawable-nodpi/budget_savings.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 875082,
+      "sha256": "8f6acddd6fca051f5aa0a41ccc0641dd0c3b14c8c8469e861fb15e23b5745fd8",
+      "rgba_sha256": "181843ca10e27238d0f6a802edba5e2a3e568870aee05fc0394d0aae89a5fc46",
+      "alpha_bounds": [
+        0,
+        25,
+        1232,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/budget_savings.png",
+      "source_sha256": "30c0e18d98eb6ea1223f72a843d7d3746da74feeaf50336e883d16a7519cbcf2",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-09-21",
+        "reference_path": "docs/design/assets/sources/budget-plan-reference.png",
+        "prompt_path": "docs/design/assets/sources/budget-icons.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false
+      }
+    },
+    {
+      "resource": "budget_reserve",
+      "category": "Generated budget illustrations",
+      "path": "app/src/main/res/drawable-nodpi/budget_reserve.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 802302,
+      "sha256": "41116de9270f574a0fdf9fc044c809511eafac16ca286f35a5c8f473e8d7fcdc",
+      "rgba_sha256": "9051efcc4956c883b1efdada07f6eb4001b7bd4156e906747f9ed79d7e859e87",
+      "alpha_bounds": [
+        0,
+        21,
+        1142,
+        1206
+      ],
+      "source_path": "docs/design/assets/sources/budget_reserve.png",
+      "source_sha256": "84012453bb804ec88945abc867051a67532d32bf7ed2cdd33db3e1f8f741da3b",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-09-21",
+        "reference_path": "docs/design/assets/sources/budget-plan-reference.png",
+        "prompt_path": "docs/design/assets/sources/budget-icons.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false
+      }
+    },
+    {
+      "resource": "event_weekly_income_background",
+      "category": "Generated event backgrounds",
+      "path": "app/src/main/res/drawable-nodpi/event_weekly_income_background.webp",
+      "format": "webp",
+      "width": 1122,
+      "height": 1402,
+      "bytes": 1661718,
+      "sha256": "84fae293ba1fa47886b27000a75e0173881b0ac364c6d47bd281752f134d2b22",
+      "rgba_sha256": "0eaf0524c4d33aa5faddb8fa5fc5fb56ff8d95cb3a2595a7bbcc1e422394a1fb",
+      "alpha_bounds": [
+        0,
+        0,
+        1122,
+        1402
+      ],
+      "source_path": "docs/design/assets/sources/event_weekly_income_background.png",
+      "source_sha256": "ccc9a3184c6718530880b0f15ac4350bd7ac67eb2732df7b4a2a62b04a9fbb51",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-09-21",
+        "reference_path": "docs/design/assets/sources/weekly-income-reference.png",
+        "prompt_path": "docs/design/assets/sources/weekly-income-background.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false
+      }
     }
   ],
   "missing": []
