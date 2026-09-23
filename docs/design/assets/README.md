@@ -83,6 +83,10 @@ recenter individual layers, stretch the art or export Figma labels and preview
 card backgrounds as part of the sprite. A different-size export must record its
 scale and coordinate relationship in the manifest.
 
+D-119 defers the eye-animation prototype. Its images and masks are outside the
+current MR and Android resources; full sources and provenance are archived.
+See [pet-motion notes](../pet-motion.md) before restoring this work.
+
 The `body_accessory_*` sprites include the entire character wearing the item;
 they are alternatives to the base body, not accessory-only overlays. The
 `gear_*` assets are standalone item illustrations. Face patches and masks retain
@@ -127,12 +131,18 @@ Record the alias target and both source nodes in the manifest. Similar-looking
 artwork, different canvas placement and different resolutions are not exact
 duplicates. Keep resource names unique across raster and XML definitions.
 
-Load bundled artwork with `painterResource(R.drawable.<resource_name>)` inside
-`Image`; use explicit bounds and the intended scaling mode. Display multicolor
-art without an icon tint. Provide a localized content description when it
-conveys information, or `null` when decorative. Do not load Figma export URLs at
-runtime. Compose supports bitmap and vector drawables through the same API;
-see [resources in Compose](https://developer.android.com/develop/ui/compose/resources#vector-assets).
+On game screens, load bundled raster artwork through `core/ui/components/GameArtwork`.
+It uses the shared Coil loader to decode off the UI thread at the measured display
+size and reuse a bounded memory cache. Keep explicit bounds and the intended
+`ContentScale`; the resource's complete canvas and transparency are preserved.
+The menu shares one explicitly sized painter between the backdrop and frosted
+panel. Preview rendering and small vector icons still use `painterResource`.
+Do not use synchronous raster decoding inside composition on these screens.
+Display multicolor art without an icon tint. Provide a localized content
+description when it conveys information, or `null` when decorative. Do not load
+Figma export URLs at runtime. These runtime changes do not replace source exports
+or alter the manifest's hashes. See
+[image loading](https://coil-kt.github.io/coil/compose/).
 
 Artwork names describe design variants. They do not establish gameplay states,
 age transitions, unlock rules, prices or rewards. Follow the

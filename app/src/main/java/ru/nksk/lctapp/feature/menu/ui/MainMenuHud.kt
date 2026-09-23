@@ -1,6 +1,6 @@
 package ru.nksk.lctapp.feature.menu.ui
 
-import androidx.compose.foundation.Image
+import ru.nksk.lctapp.core.ui.components.GameArtwork
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,7 +23,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -123,8 +122,7 @@ private fun CoinsBadge(coins: Long, onClick: () -> Unit) {
 
 @Composable
 internal fun VillageMapButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Image(
-        painter = painterResource(R.drawable.menu_map),
+    GameArtwork(R.drawable.menu_map,
         contentDescription = stringResource(R.string.menu_village),
         contentScale = ContentScale.Fit,
         modifier = modifier.alpha(0.92f).clickable(role = Role.Button, onClick = onClick),

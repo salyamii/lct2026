@@ -1,7 +1,6 @@
 package ru.nksk.lctapp.core.ui.components
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -14,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,10 +37,10 @@ internal fun GameCardLayout(
         val landscape = maxWidth > maxHeight
         @Composable fun Stage(modifier: Modifier) {
             Box(modifier) {
-                scene?.let { Image(painterResource(it), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
+                scene?.let { GameArtwork(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
                 if (sceneDim > 0f) Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = sceneDim)))
                 character?.let {
-                    Image(painterResource(it), characterDescription, Modifier.fillMaxHeight(0.78f).fillMaxWidth(0.7f)
+                    GameArtwork(it, characterDescription, Modifier.fillMaxHeight(0.78f).fillMaxWidth(0.7f)
                         .align(Alignment.BottomCenter).padding(bottom = 12.dp), contentScale = ContentScale.Fit)
                 }
                 Row(Modifier.statusBarsPadding().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {

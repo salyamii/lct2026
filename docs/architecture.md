@@ -375,3 +375,41 @@ all in `app/src/debug`; the release build includes none of them.
 локации и интерфейс доступности находятся в `:core:game`, DI — в app/di,
 resolver иллюстраций — в core/ui/location. Room v14 сохраняет локацию и явное
 освещение; усталость на них не влияет. См. [карту](design/map-preview.md).
+
+## Game artwork loading — 2026-09-22
+
+`app/di/ArtworkModule` provides one Coil ImageLoader through Hilt;
+`LctApplication` exposes it to Coil's Compose integration. The memory cache is
+limited to the smaller of 32 MiB and one eighth of the process heap limit.
+At most two bitmap decodes run concurrently. Bundled artwork needs no disk cache
+or network observer. No image crossfade is added; navigation remains at 160 ms.
+
+`core/ui/components/GameArtwork` loads raster resources asynchronously with
+size-aware decoding. Game screens keep their original layout bounds, full art
+canvases and accessibility descriptions. Previews use synchronous resource
+painters; small vector icons remain on `painterResource`. The menu background
+and frosted panel share one painter sized for the full backdrop, instead of
+decoding the same background independently. The existing blur styling remains.
+
+The deeds list uses keyed lazy items, so offscreen offers and training cards are
+created as needed. UI coverage checks reaching and selecting a distant offer;
+navigation checks scroll through the lazy list. This is a presentation change:
+game rules, repository transactions, navigation order and animation durations
+are unchanged. Device frame timings still require a separate profiling run.
+
+## Procedural pet motion — 2026-09-22
+
+Under D-119, the menu keeps only quiet breathing and a small horizontal weight
+shift. `PetMotionPose` uses fractions of the original full sprite canvas:
+four 4.2-second breaths per 16.8-second loop, at most 1.2% vertical scale change,
+0.3% horizontal movement and 0.65 degrees of sway. Special states except HAPPY
+use gentler movement. The pet has no tap action; its accessibility description
+comes from the existing artwork state.
+
+Animation values are read only inside the graphics-layer lambda. The outer
+layout, map anchor and ground shadow remain static. The frame clock exists
+only while the entry is RESUMED; previews render the original pose.
+Coil loading, shared background painters, lazy lists and navigation durations
+remain as documented above. No gameplay state or persistence changes.
+The earlier greeting/blink prototype is deferred outside the MR; see
+[pet motion scope and restoration notes](design/pet-motion.md).

@@ -19,6 +19,7 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -116,6 +117,23 @@ class MainMenuScreenTest {
         compose.runOnIdle {
             assertEquals(listOf(MainMenuAction.Village, MainMenuAction.Village), selections)
         }
+    }
+
+    @Test
+    fun idlePetHasNoClickActionAndDoesNotMoveTheMap() {
+        val selections = mutableListOf<MainMenuAction>()
+        compose.setContent {
+            LCTAppTheme { MainMenuScreen(MainMenuPreviewState, selections::add) }
+        }
+        compose.mainClock.autoAdvance = false
+        val pet = compose.onNodeWithTag("menu_pet")
+        val map = compose.onNode(hasContentDescription(compose.activity.getString(R.string.menu_village)))
+        val mapBefore = map.fetchSemanticsNode().boundsInRoot
+        pet.assertHasNoClickAction()
+        pet.performTouchInput { click() }
+        compose.mainClock.advanceTimeBy(4_200)
+        assertEquals(mapBefore, map.fetchSemanticsNode().boundsInRoot)
+        compose.runOnIdle { assertEquals(emptyList<MainMenuAction>(), selections) }
     }
 
     private fun verifyActions(
