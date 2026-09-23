@@ -232,7 +232,7 @@ not substitute a new game. See [onboarding](design/onboarding.md).
 
 ### Customization step — 2026-09-20
 
-The startup gate now has Choose, Customize, Accessories, GoalSelection and Introduction steps (CUST-D-019). Start from the character
+The startup gate now has Choose, Customize, Accessories, GoalBriefing, GoalSelection and Introduction steps (CUST-D-019/CUST-D-020). Start from the character
 screen persists a Room draft and opens CustomizationScreen in the onboarding
 module. AppStartupViewModel owns the step and persisted draft; UI receives values
 and callbacks. Back from Customize clears the draft before returning to Choose.
@@ -245,10 +245,18 @@ uses the same feature module and state/callback boundary. Back from Accessories
 returns to Customize without resetting the profile. The draft persists both step
 and selected accessory; only Start on Introduction commits a game and opens LctNavHost.
 
-Under CUST-D-019 accessory confirmation opens GoalSelection; explicit goal
-confirmation opens Introduction. Back returns to GoalSelection, then Accessories.
+Under CUST-D-020 accessory confirmation opens GoalBriefing; “Дальше” opens
+GoalSelection. Explicit goal confirmation opens Introduction (CUST-D-019).
+Back returns to GoalSelection, then GoalBriefing and Accessories.
+GoalBriefing persists as GOAL_BRIEFING in the existing draft step column;
+existing GOAL_SELECTION/INTRODUCTION drafts keep their steps. The schema is unchanged.
 Room v15 adds draft goal_id and migrates the old INTRODUCTION to GOAL_SELECTION.
-Only “В путь!” commits the pet and goal together and clears the draft.
+Under CUST-D-021, Introduction explains the budget once during onboarding.
+“Дальше” commits the pet and goal together, clears the draft and opens MainMenu.
+Existing saves skip this explanation, including after a weekly income.
+INITIAL/RECEIPT does not automatically redirect MainMenu to Economy; ContinueDay
+and Coins open it explicitly. Allocation, weekly receipts and restored gameplay
+routes retain the mandatory budget gate.
 Existing saves skip onboarding. No Navigation 3 key or day/event transition is added.
 
 ## Карта — 2026-09-20

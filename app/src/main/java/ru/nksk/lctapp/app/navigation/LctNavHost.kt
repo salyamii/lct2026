@@ -78,11 +78,9 @@ fun LctNavHost(
     var presentedPlanningId by rememberSaveable { mutableStateOf<String?>(null) }
     val destination = backStack.lastOrNull()
     val pending = gate.planning
-    LaunchedEffect(pending?.id, destination) {
-        if (pending != null && destination != Economy &&
-            (presentedPlanningId != pending.id || destination == Day || destination == Tasks ||
-                destination is DeedGame || destination == StarPlates || destination == PriceCheck || destination == Telescope)) {
-            presentedPlanningId = pending.id
+    LaunchedEffect(pending, destination) {
+        if (shouldPresentBudget(pending, destination, presentedPlanningId)) {
+            presentedPlanningId = checkNotNull(pending).id
             // Persisted budget has priority over restored gameplay routes; Back returns to the menu.
             backStack.clear()
             backStack.add(MainMenu)

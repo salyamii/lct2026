@@ -64,22 +64,29 @@ class OnboardingJourneyTest {
         compose.onNodeWithContentDescription("Искорка: Бандана").assertIsDisplayed()
         compose.runOnIdle { assertNull(runBlocking { repository.read() }) }
         compose.onNodeWithText("Применить").performClick()
+        compose.onNodeWithText("Тебя ждёт большое приключение!").assertIsDisplayed()
+        compose.activityRule.scenario.recreate()
+        compose.onNodeWithText("Тебя ждёт большое приключение!").assertIsDisplayed()
+        compose.runOnIdle { assertNull(runBlocking { repository.read() }) }
+        compose.onNodeWithText("Дальше").performClick()
         compose.onNodeWithText("Выбери большую цель").assertIsDisplayed()
         compose.onNodeWithText("Выбрать цель").assertIsNotEnabled()
         compose.onNodeWithText("Ночь наблюдений").performScrollTo().performClick()
         compose.activityRule.scenario.recreate()
         compose.onNodeWithText("Ночь наблюдений").performScrollTo().assertIsSelected()
         compose.onNodeWithText("Выбрать цель").performClick()
-        compose.onNodeWithText("НОВОЕ ПРИКЛЮЧЕНИЕ НАЧАЛОСЬ").assertIsDisplayed()
+        compose.onNodeWithText("Большие планы начинаются с маленьких решений").assertIsDisplayed()
         compose.activityRule.scenario.recreate()
-        compose.onNodeWithText("НОВОЕ ПРИКЛЮЧЕНИЕ НАЧАЛОСЬ").assertIsDisplayed()
+        compose.onNodeWithText("Большие планы начинаются с маленьких решений").assertIsDisplayed()
         compose.onNodeWithContentDescription("Назад к выбору цели").performClick()
+        compose.onNodeWithContentDescription("Назад к началу приключения").performClick()
         compose.onNodeWithContentDescription("Назад к аксессуарам").performClick()
         compose.onNodeWithContentDescription("Искорка: Бандана").assertIsDisplayed()
         compose.onNodeWithText("Применить").performClick()
+        compose.onNodeWithText("Дальше").performClick()
         compose.onNodeWithText("Выбрать цель").performClick()
         compose.runOnIdle { assertNull(runBlocking { repository.read() }) }
-        compose.onNodeWithText("В путь!").performClick()
+        compose.onNodeWithText("Дальше").performClick()
         compose.waitUntil(10_000) { runBlocking { repository.read() } != null }
         compose.runOnIdle {
             val saved = runBlocking { repository.read() }!!
@@ -92,9 +99,13 @@ class OnboardingJourneyTest {
             assertEquals(ru.nksk.lctapp.domain.pet.PetColor.SAND, pet.color)
             assertEquals("BANDANA", pet.selectedLookId)
         }
+        compose.onNodeWithText("Монетки").assertIsDisplayed()
+        compose.onNodeWithText("Распределить монеты").assertDoesNotExist()
         compose.activityRule.scenario.recreate()
+        compose.onNodeWithText("Монетки").assertIsDisplayed()
+        compose.onNodeWithText("Продолжить день").performClick()
         compose.onNodeWithText("Распределить монеты").assertIsDisplayed()
-        compose.onNodeWithText("НОВОЕ ПРИКЛЮЧЕНИЕ НАЧАЛОСЬ").assertDoesNotExist()
+        compose.onNodeWithText("Большие планы начинаются с маленьких решений").assertDoesNotExist()
 
         // Before opening allocation, leaving and continuing must return to this receipt.
         compose.onNodeWithContentDescription("В главное меню").performClick()

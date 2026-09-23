@@ -101,6 +101,27 @@ class OnboardingAdaptiveTest(private val width: Int, private val height: Int, pr
         compose.runOnIdle { assertEquals(1, starts) }
     }
 
+    @Test fun budgetExplanationScrollsAndContinueRemainsAccessible() {
+        var continues = 0
+        render {
+            BudgetIntroductionScreen(
+                artwork = customizationArtwork(),
+                categoryArtwork = { category, modifier -> OnboardingBudgetArtwork(category, modifier) },
+                onBack = {}, onContinue = { continues++ },
+            )
+        }
+        assertActionSafe("Дальше")
+        listOf("Нужно", "Хочу", "Коплю", "Запас").forEach {
+            compose.onNodeWithText(it).performScrollTo().assertIsDisplayed().assertHasNoClickAction()
+        }
+        compose.onNodeWithText("Распредели все монетки между четырьмя категориями. " +
+            "Если планы изменятся, распределение тоже можно изменить.")
+            .performScrollTo().assertIsDisplayed()
+        assertActionSafe("Дальше")
+        compose.onNodeWithText("Дальше").performClick()
+        compose.runOnIdle { assertEquals(1, continues) }
+    }
+
     private fun render(content: @Composable () -> Unit) {
         compose.setContent {
             DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(DpSize(width.dp, height.dp)) then
