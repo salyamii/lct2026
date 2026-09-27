@@ -1,6 +1,13 @@
 package ru.nksk.lctapp.feature.learning.ui
 
 import org.junit.Assert.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runTest
+import ru.nksk.lctapp.domain.content.StoryContent
+import ru.nksk.lctapp.domain.content.StoryContentRepository
+import ru.nksk.lctapp.domain.engine.GameSession
+import ru.nksk.lctapp.domain.game.GameRepository
+import ru.nksk.lctapp.domain.game.GameState
 import org.junit.Test
 import ru.nksk.lctapp.app.createInitialGameState
 import ru.nksk.lctapp.data.game.content.bundledGameCatalog
@@ -95,6 +102,37 @@ class FinancialPracticePresentationTest {
         val otherTopic = fixture.legacy.copy(kind = FinancialQuestionKind.SAVING_PRACTICE)
         assertSame(example, financialPracticePresentation(example, fixture.history, fixture.catalog))
         assertSame(otherTopic, financialPracticePresentation(otherTopic, fixture.history, fixture.catalog))
+    }
+
+    @Test fun cachedLegacyWordingPreservesAnswerProgressAndReadsOnlyForAnImmutableQuestionChange() = runTest {
+        val fixture = Fixture()
+        val current = checkNotNull(fixture.history.last().after)
+        var reads = 0
+        val repository = object : GameRepository {
+            override fun observe() = MutableStateFlow(current)
+            override suspend fun read() = current
+            override suspend fun initializeIfAbsent(initial: GameState) = current
+            override suspend fun update(transform: (GameState) -> GameState) = error("Presentation cannot write")
+            override suspend fun readHistory(): List<AuditEntry> { reads += 1; return fixture.history }
+        }
+        val session = GameSession(repository, object : StoryContentRepository {
+            override suspend fun read(): StoryContent = fixture.catalog.content
+            override suspend fun install(content: StoryContent) = Unit
+        }, fixture.catalog, current)
+        val cache = TrainingQuestionPresentation(session)
+        val first = checkNotNull(cache.display(fixture.legacy))
+        val answered = fixture.legacy.copy(answeredOptionId = "more", attempts = 2, usedHint = true)
+        val displayed = checkNotNull(cache.display(answered))
+        assertEquals(1, reads)
+        assertEquals(first.prompt, displayed.prompt)
+        assertEquals(first.explanation, displayed.explanation)
+        assertEquals(answered.answeredOptionId, displayed.answeredOptionId)
+        assertEquals(2, displayed.attempts)
+        assertTrue(displayed.usedHint)
+        cache.display(answered.copy(version = answered.version + 1))
+        assertEquals(2, reads)
+        cache.display(answered.copy(kind = FinancialQuestionKind.CONSEQUENCE))
+        assertEquals(2, reads)
     }
 
     private class Fixture {

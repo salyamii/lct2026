@@ -11,7 +11,7 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.RoundedCornerShape
-import ru.nksk.lctapp.R
+import ru.nksk.lctapp.domain.engine.EventLayout
 import ru.nksk.lctapp.core.ui.components.*
 
 @Composable
@@ -30,6 +30,14 @@ internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
         }) {
             LinearProgressIndicator(Modifier.align(Alignment.TopCenter).safeDrawingPadding().fillMaxWidth())
         }
+        if (state.retryRequired && !state.busy) AlertDialog(
+            onDismissRequest = onBack,
+            containerColor = GamePaper,
+            title = { AdventureHeading("Сохранение не подтверждено") },
+            text = { AdventureBody("Повторим то же действие. Второй раз монеты не спишутся и награда не начислится.") },
+            confirmButton = { AdventurePrimaryButton("Повторить", { onAction(DayAction.Retry) }) },
+            dismissButton = { AdventureQuietButton("Вернуться", onBack) },
+        )
     }
 }
 
@@ -50,9 +58,9 @@ private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
     }
     if (state.summary != null) {
         DaySummaryScreen(state, onAction, onBack)
-    } else if (state.storyIntroduction) {
+    } else if (state.layout == EventLayout.INTRODUCTION) {
         StoryIntroduction(state, onAction, onBack)
-    } else if (state.purchaseArtworkRes != null) {
+    } else if (state.layout == EventLayout.PURCHASE) {
         PurchaseCard(state, onAction, onBack)
     } else AdventureScreen(
         title = state.category, onBack = onBack, backgroundRes = state.eventBackgroundRes,
@@ -129,8 +137,8 @@ private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
 @Composable
 private fun PurchaseCard(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit) {
     AdventureScreen(
-        title = if (state.bakeryBunCard) "Пекарня" else "Ярмарка", onBack = onBack,
-        backgroundRes = gameScene(state.scene) ?: R.drawable.location_fair_day,
+        title = state.locationTitle, onBack = onBack,
+        backgroundRes = state.eventBackgroundRes,
         sceneAspectRatio = 1.12f, pinFooter = false,
         scene = {
             Box(
@@ -138,8 +146,10 @@ private fun PurchaseCard(state: DayUiState, onAction: (DayAction) -> Unit, onBac
                     .widthIn(max = 292.dp).fillMaxWidth().height(218.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                GameArtwork(checkNotNull(state.purchaseArtworkRes), state.title,
-                    Modifier.fillMaxSize().padding(8.dp), contentScale = ContentScale.Fit)
+                state.purchaseArtworkRes?.let { artwork ->
+                    GameArtwork(artwork, state.title,
+                        Modifier.fillMaxSize().padding(8.dp), contentScale = ContentScale.Fit)
+                }
             }
         },
     ) {
@@ -174,8 +184,8 @@ private fun PurchaseCard(state: DayUiState, onAction: (DayAction) -> Unit, onBac
 @Composable
 private fun StoryIntroduction(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit) {
     AdventureScreen(
-        title = "История", onBack = onBack,
-        backgroundRes = R.drawable.goal_preview_stargazing,
+        title = state.locationTitle, onBack = onBack,
+        backgroundRes = state.eventBackgroundRes,
         sceneAspectRatio = 1.5f, scene = {}, pinFooter = false,
         footer = {
             if (state.practiceRequired) AdventurePrimaryButton("К практике", { onAction(DayAction.OpenLearning) }, enabled = !state.busy)

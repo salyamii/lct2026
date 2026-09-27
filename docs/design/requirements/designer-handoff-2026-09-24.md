@@ -318,7 +318,12 @@ FIN-11/12, сохраняя различие между вопросом о пр
   [ввод суммы](../../../app/src/main/java/ru/nksk/lctapp/feature/economy/ui/BudgetAmountDialog.kt).
 - [Overlay «Монетки»](../../../app/src/main/java/ru/nksk/lctapp/feature/menu/ui/MainMenuHud.kt).
 - [Бюджетное вступление onboarding](../../../feature/onboarding/src/main/java/ru/nksk/lctapp/feature/onboarding/ui/BudgetIntroductionScreen.kt).
-- [История, практика и хроноскоп в текущем UI](../../../app/src/main/java/ru/nksk/lctapp/feature/learning/ui/LearningScreen.kt).
+- История, практика и хроноскоп из этого задания теперь разделены на
+  [HistoryScreen](../../../app/src/main/java/ru/nksk/lctapp/feature/learning/ui/HistoryScreen.kt),
+  [TrainingScreen](../../../app/src/main/java/ru/nksk/lctapp/feature/learning/ui/TrainingScreen.kt) и
+  [ReflectionScreen / ChronoscopeScreen](../../../app/src/main/java/ru/nksk/lctapp/feature/learning/ui/ChronoscopeScreen.kt).
+  Это актуальные точки реализации вместо прежнего `LearningScreen`;
+  [текущие сценарии](../skills-and-reflection.md) уточняют исходное задание.
 - [Выбор целей и общий лор](../campaign-choice.md).
 - [Текущее поведение инвентаря](../inventory.md).
 - [Текущая карта](../map-preview.md).

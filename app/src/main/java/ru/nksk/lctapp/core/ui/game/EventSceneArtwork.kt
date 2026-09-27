@@ -13,7 +13,10 @@ internal data class EventSceneArtwork(
 private fun npc(@DrawableRes resource: Int, name: String) = EventSceneArtwork(resource, name, true)
 private fun item(@DrawableRes resource: Int, name: String) = EventSceneArtwork(resource, name)
 
-/** Match stable authored identities, including the rebalanced versions of the same deeds. */
+/**
+ * Compatibility adapter for illustrations of the existing immutable catalog.
+ * New event art is authored through EventCardCopy.presentation.media and resolved first by sceneArtwork.
+ */
 internal fun eventSceneArtwork(eventId: String?, characterKey: String? = null): EventSceneArtwork? {
     val id = eventId?.removeSuffix(":balance-v2")
     return eventIllustrations[id] ?: when (characterKey) {

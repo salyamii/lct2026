@@ -61,7 +61,7 @@ class PlateCleaningEventTest {
         assertEquals(-3L, catalog.content.choices.single { it.id == PAY }.moneyDelta)
         assertEquals(0L, catalog.content.choices.single { it.id == WORK }.moneyDelta)
         assertTrue(policy.scheduling.blocksStoryUntilResolved)
-        assertEquals(R.drawable.event_star_plate_tarnished, storyGameTheme(CURRENT)?.objectRes)
+        assertEquals(R.drawable.event_star_plate_tarnished, storyGameTheme(catalog.cards.getValue(CURRENT).presentation.media)?.objectRes)
     }
 
     @Test fun payingSpendsThreeCoinsWithoutSpendingEnergyAndUnblocksTheStory() = runTest {

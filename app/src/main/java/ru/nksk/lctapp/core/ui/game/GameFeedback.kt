@@ -3,6 +3,8 @@ package ru.nksk.lctapp.core.ui.game
 import ru.nksk.lctapp.domain.engine.BlockReason
 import ru.nksk.lctapp.domain.engine.EngineCommand
 import ru.nksk.lctapp.domain.engine.GameCatalog
+import ru.nksk.lctapp.domain.engine.displayOutcome
+import ru.nksk.lctapp.domain.engine.displayTitle
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.pet.renderPetText
 
@@ -11,8 +13,8 @@ internal fun eventCompletionMessage(before: GameState, after: GameState,
     command: EngineCommand.CompleteEvent, catalog: GameCatalog): String {
     val occurrence = before.engine?.currentEvent ?: return "Решение сохранено."
     val event = catalog.content.events.first { it.id == occurrence.eventId }
-    val summary = catalog.cards[event.id]?.summaryByChoiceId?.get(command.choiceId)
-        ?: "Завершили: ${event.title}"
+    val choice = catalog.content.choices.first { it.id == command.choiceId }
+    val summary = catalog.displayOutcome(choice) ?: "Завершили: ${catalog.displayTitle(event)}"
     val parts = mutableListOf(renderPetText(summary, after.pet.name).trimEnd('.') + ".")
     val spent = before.economy.balance - after.economy.balance
     if (spent > 0) parts += "Потратили $spent монет."

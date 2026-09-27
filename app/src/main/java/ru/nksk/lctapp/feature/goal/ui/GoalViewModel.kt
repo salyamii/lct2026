@@ -148,8 +148,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
         execute(prepared)
     }
 
-    private fun knownNeeds(game: GameState): Long = foodCostUntilWeekEnd(game,
-        session.catalog.meals.filter { it.price > 0 }.minOf { it.price })
+    private fun knownNeeds(game: GameState): Long = session.catalog.mealPolicy.foodRequirement(game)
 
     private fun execute(request: EngineRequest) {
         val purchasing = request.command is EngineCommand.BuyGoalItem

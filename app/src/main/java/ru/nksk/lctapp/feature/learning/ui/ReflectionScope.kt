@@ -4,7 +4,6 @@ import ru.nksk.lctapp.domain.timemachine.TimeMachineAvailability
 import ru.nksk.lctapp.domain.timemachine.TimeMachineStatus
 
 internal enum class ReflectionScope { DAY, WEEK }
-internal enum class LearningPageMode { HISTORY, TRAINING, REFLECTION }
 
 /** The selected week chooses memories; each comparison still ends within its original day. */
 internal fun TimeMachineAvailability.forReflection(day: Int?, scope: ReflectionScope): TimeMachineAvailability {

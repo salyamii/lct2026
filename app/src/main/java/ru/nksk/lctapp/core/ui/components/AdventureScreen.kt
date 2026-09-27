@@ -32,7 +32,6 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
@@ -263,21 +262,13 @@ internal fun AdventureBody(text: String, modifier: Modifier = Modifier) {
 
 @Composable
 internal fun AdventurePrimaryButton(text: String, onClick: () -> Unit,
-    modifier: Modifier = Modifier, enabled: Boolean = true) {
-    Button(onClick, modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = enabled,
-        colors = ButtonDefaults.buttonColors(containerColor = AdventureLime, contentColor = GameInk,
-            disabledContainerColor = GameDisabledButtonContainer, disabledContentColor = GameDisabledButtonContent),
-        shape = RoundedCornerShape(28.dp)) {
-        Text(text, fontFamily = Rubik, fontSize = 16.sp, lineHeight = 22.sp, textAlign = TextAlign.Center)
-    }
+    modifier: Modifier = Modifier, enabled: Boolean = true, loading: Boolean = false) {
+    GameActionButton(text, onClick, modifier, enabled, loading)
 }
 
 @Composable
 internal fun AdventureQuietButton(text: String, onClick: () -> Unit,
-    modifier: Modifier = Modifier, enabled: Boolean = true) {
-    TextButton(onClick, modifier.fillMaxWidth().heightIn(min = 48.dp), enabled = enabled,
-        colors = ButtonDefaults.textButtonColors(contentColor = GameInk,
-            disabledContentColor = GameDisabledButtonContent)) {
-        Text(text, fontFamily = Nunito, fontSize = 15.sp, lineHeight = 21.sp, textAlign = TextAlign.Center)
-    }
+    modifier: Modifier = Modifier, enabled: Boolean = true, loading: Boolean = false) {
+    GameActionButton(text, onClick, modifier, enabled, loading, style = GameActionStyle.QUIET,
+        minHeight = 48.dp, textStyle = GameActionButtonDefaults.QuietText)
 }

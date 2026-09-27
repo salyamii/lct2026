@@ -56,13 +56,8 @@ class GameEngine(
     /** Adopt chapter bindings and age for older saves, using the latest aggregate in the transaction. */
     internal suspend fun synchronizeStoryAge() {
         val saved = games.read() ?: return
-        if (synchronizeCampaign(saved) == saved) return
-        games.update { current ->
-            val next = synchronizeCampaign(current)
-            if (next == current) current else next.copy(engine = next.engine?.copy(
-                revision = Math.addExact(next.engine.revision, 1L),
-            ))
-        }
+        if (campaignReconciliation(saved).applyTo(saved) == saved) return
+        games.reconcileCampaign(::campaignReconciliation)
     }
 
     private fun withStoryAge(state: GameState): GameState {
@@ -71,21 +66,18 @@ class GameEngine(
     }
 
     /** Preserve old purchases, decisions and the running financial cycle when adopting chapter order. */
-    private fun synchronizeCampaign(state: GameState): GameState {
+    private fun campaignReconciliation(state: GameState): CampaignReconciliation {
         val aged = withStoryAge(state)
-        if (factory.campaign?.acts?.none { it.goalId != null } != false) return aged
+        val unchanged = CampaignReconciliation(aged.pet.age, aged.selectedGoalId, aged.selectedSavingItemId)
+        if (factory.campaign?.acts?.none { it.goalId != null } != false) return unchanged
         val required = factory.storyProgress(aged).requiredGoal
         val selected = factory.goals.selectedGoal(aged)
-        if (aged.selectedGoalId != null && selected == null) return aged
+        if (aged.selectedGoalId != null && selected == null) return unchanged
         val goalId = if (selected != null) required?.goalId else null
         val target = aged.selectedSavingItemId?.takeIf { item ->
             required != null && required.goalId == goalId && item in required.itemIds && aged.ownedItems.none { it.itemId == item }
         }
-        val period = aged.financial.currentPeriod
-        return aged.copy(selectedGoalId = goalId, selectedSavingItemId = target,
-            financial = if (period != null && goalId != null && period.goalId != goalId) aged.financial.copy(
-                periods = aged.financial.periods.map { if (it.id == period.id) it.copy(goalId = goalId, imported = true) else it },
-            ) else aged.financial)
+        return CampaignReconciliation(aged.pet.age, goalId, target, rebindCurrentPeriod = true)
     }
 
     /** Deterministic transition; does not read clocks, generate IDs, observe flows or perform I/O. */
@@ -120,19 +112,19 @@ class GameEngine(
                         EconomyOperations.beginManual(current.economy, command.sessionId) else current.economy
                     val revision = if (command.increase != null && economy.planning?.id == command.sessionId)
                         economy.planning.revision else command.revision
-                    val knownNeeds = foodCostUntilWeekEnd(current, factory.basicMealPrice())
+                    val knownNeeds = factory.mealPolicy.foodRequirement(current)
                     current.copy(economy = if (command.amount != null)
                         EconomyOperations.setAllocation(economy, command.sessionId, revision, command.section, command.amount, knownNeeds)
                     else EconomyOperations.adjustAllocation(economy, command.sessionId, revision, command.section, checkNotNull(command.increase), knownNeeds))
                 }
                 is EngineCommand.ConfirmBudget -> {
-                    val knownNeeds = foodCostUntilWeekEnd(current, factory.basicMealPrice())
+                    val knownNeeds = factory.mealPolicy.foodRequirement(current)
                     val confirmed = current.copy(economy = EconomyOperations.confirm(current.economy, command.sessionId, command.revision, knownNeeds))
                     FinancialPeriods.confirmed(current, confirmed, request, command, knownNeeds)
                 }
                 is EngineCommand.DepositSavings -> {
                     val deposited = EconomyOperations.deposit(current.economy, command.amount)
-                    val needed = foodCostUntilWeekEnd(current, factory.basicMealPrice())
+                    val needed = factory.mealPolicy.foodRequirement(current)
                     ensure(command.acceptFoodRisk || deposited.availableBalance >= needed,
                         BlockReason.FoodBudgetWarning(deposited.availableBalance, needed))
                     current.copy(economy = deposited)
@@ -151,7 +143,7 @@ class GameEngine(
                         current.copy(financial = current.financial.copy(practice = FinancialTraining.standalone(command.kind, request.id)))
                     } else {
                         val first = FinancialPeriods.question(current, "${request.id}:question", command.kind,
-                            knownNeeds = foodCostUntilWeekEnd(current, factory.basicMealPrice()),
+                            knownNeeds = factory.mealPolicy.foodRequirement(current),
                             purchasePrice = purchase?.let { Math.negateExact(it.moneyDelta) }
                                 ?: 7L.takeIf { command.series },
                             purchaseTitle = purchase?.let { factory.event(it.eventId).title },
@@ -418,7 +410,7 @@ class GameEngine(
         foodGuard(day)
         val definition = factory.content.items.first { it.id == command.itemId }
         val paid = state.copy(economy = EconomyOperations.purchaseGoal(state.economy, checkNotNull(definition.priceCoins)))
-        val food = foodCostUntilWeekEnd(state, factory.basicMealPrice())
+        val food = factory.mealPolicy.foodRequirement(state)
         ensure(command.acceptFoodRisk || paid.economy.availableBalance >= food,
             BlockReason.FoodBudgetWarning(paid.economy.availableBalance, food))
         return paid.copy(
@@ -648,16 +640,8 @@ class GameEngine(
     }
 
     private fun feed(state: GameState, mealId: String): GameState {
-        val day = running(state)
-        val meal = factory.meal(mealId)
-        require(meal.nextMorningEnergy == null || meal.nextMorningEnergy <= rules.fullEnergy)
-        val paid = money(state, -meal.price, SpendingKind.FEEDING)
-        return paid.copy(
-            pet = meal.visualStateAfter?.let { paid.pet.transitionTo(it) } ?: paid.pet,
-            engine = day.copy(ateToday = true,
-                energy = if (meal.price == 0L) 0 else day.energy,
-                nextMorningEnergy = meal.nextMorningEnergy ?: day.nextMorningEnergy),
-        )
+        running(state)
+        return factory.mealPolicy.apply(state, mealId, rules.fullEnergy)
     }
 
     private fun finishDayFromEvent(state: GameState, occurrenceId: String): GameState {

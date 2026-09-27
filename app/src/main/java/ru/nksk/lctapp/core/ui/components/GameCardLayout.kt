@@ -83,12 +83,7 @@ internal fun GameBody(text: String) = Text(text, fontFamily = Nunito, fontSize =
 
 @Composable
 internal fun GameButton(text: String, enabled: Boolean = true, onClick: () -> Unit) {
-    Button(onClick, Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = enabled,
-        colors = ButtonDefaults.buttonColors(containerColor = AdventureLime, contentColor = AdventureNight,
-            disabledContainerColor = GameDisabledButtonContainer, disabledContentColor = GameDisabledButtonContent),
-        shape = RoundedCornerShape(28.dp)) {
-        Text(text, fontFamily = Rubik, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-    }
+    GameActionButton(text, onClick, enabled = enabled, contentColor = AdventureNight)
 }
 
 @DrawableRes internal fun gameScene(key: String?): Int? = when (key) {

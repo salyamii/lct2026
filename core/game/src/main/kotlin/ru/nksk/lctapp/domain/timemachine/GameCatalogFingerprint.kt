@@ -4,7 +4,7 @@ import java.lang.reflect.Modifier
 import ru.nksk.lctapp.domain.engine.GameCatalog
 import ru.nksk.lctapp.domain.history.HistoryCodec
 
-/** Includes all catalog fields; field additions cannot silently escape the historical version check. */
+/** Includes gameplay and legacy copy. Presentation-only media can evolve without invalidating replay. */
 object GameCatalogFingerprint {
     /** Increment when transition semantics change, even if authored content stays identical. */
     const val TRANSITION_VERSION = 9
@@ -35,7 +35,10 @@ object GameCatalogFingerprint {
             .sortedBy { it.first }.joinToString("") { token(it.first) + token(it.second) })}"
         else -> {
             require(value.javaClass.name.startsWith("ru.nksk.lctapp.domain.")) { "Unsupported catalog value" }
-            val fields = value.javaClass.declaredFields.filterNot { Modifier.isStatic(it.modifiers) || it.isSynthetic }
+            val fields = value.javaClass.declaredFields.filterNot {
+                Modifier.isStatic(it.modifiers) || it.isSynthetic ||
+                    (value is ru.nksk.lctapp.domain.engine.EventCardCopy && it.name == "presentation")
+            }
                 .sortedBy { it.name }
             "record${token(value.javaClass.name)}${token(fields.joinToString("") { field ->
                 field.isAccessible = true

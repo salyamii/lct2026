@@ -25,14 +25,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -151,7 +150,7 @@ private fun BudgetBadge(
     onFinance: (() -> Unit)? = null,
     onSavings: (() -> Unit)? = null,
 ) {
-    val arrowRotation by animateFloatAsState(
+    val arrowRotation = animateFloatAsState(
         targetValue = if (expanded) 270f else 90f,
         animationSpec = tween(200),
         label = "Budget dropdown rotation",
@@ -176,7 +175,7 @@ private fun BudgetBadge(
                     painter = painterResource(R.drawable.menu_chevron),
                     contentDescription = stringResource(if (expanded) R.string.menu_budget_collapse else R.string.menu_budget_expand),
                     tint = AdventureLabel.copy(alpha = .8f),
-                    modifier = Modifier.size(18.dp).rotate(arrowRotation),
+                    modifier = Modifier.size(18.dp).graphicsLayer { rotationZ = arrowRotation.value },
                 )
             }
         }

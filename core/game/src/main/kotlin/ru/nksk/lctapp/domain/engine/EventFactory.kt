@@ -13,7 +13,7 @@ class EventFactory(
 ) {
     private val events = content.events.associateBy { it.id }
     private val policies = policies.toMap()
-    private val meals = meals.associateBy { it.id }
+    internal val mealPolicy = MealPolicy(meals)
 
     init {
         require(goals.map { it.goalId }.distinct().size == goals.size)
@@ -30,7 +30,6 @@ class EventFactory(
             event.moneyDeltaOnStart >= 0 && content.choices.filter { it.eventId == event.id }.all { it.moneyDelta >= 0 }
         }) { "EARNING cannot require money at entry or in any answer" }
         require(events.size == content.events.size) { "Duplicate event identity" }
-        require(this.meals.size == meals.size) { "Duplicate meal identity" }
         require(content.choices.map { it.id }.distinct().size == content.choices.size)
         require(content.choices.all { it.eventId in events })
         val goalItems = content.requiredItems.map { it.itemId }.toSet()
@@ -141,8 +140,7 @@ class EventFactory(
     internal fun event(id: String) = requireNotNull(events[id]) { "Unknown event: $id" }
     internal fun storyProgress(state: GameState) = StoryProgress(content, policies, goals, campaign, state)
     internal fun policy(id: String) = requireNotNull(policies[id]) { "Missing authored event policy: $id" }
-    internal fun meal(id: String) = requireNotNull(meals[id]) { "Unknown meal: $id" }
-    internal fun basicMealPrice() = meals.values.filter { it.price > 0 }.minOf { it.price }
+    internal fun meal(id: String) = mealPolicy.meal(id)
     internal fun choices(id: String) = content.choices.filter {
         it.eventId == id && it.id !in policy(id).disabledChoiceIds
     }.sortedBy { it.position }

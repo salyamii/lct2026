@@ -7,6 +7,9 @@ import ru.nksk.lctapp.domain.engine.DayJournalEntry
 import ru.nksk.lctapp.domain.engine.DayJournalKind
 import ru.nksk.lctapp.domain.engine.DaySummary
 import ru.nksk.lctapp.domain.engine.GameCatalog
+import ru.nksk.lctapp.domain.engine.displayTitle
+import ru.nksk.lctapp.domain.engine.displayAction
+import ru.nksk.lctapp.domain.engine.displayOutcome
 import ru.nksk.lctapp.domain.pet.renderPetText
 import ru.nksk.lctapp.domain.economy.EconomyState
 
@@ -29,7 +32,7 @@ internal data class DaySummaryUiState(
 internal fun DaySummary.toUiState(catalog: GameCatalog, petName: String, economy: EconomyState? = null): DaySummaryUiState {
     fun text(value: String) = renderPetText(value, petName)
     fun itemName(id: String) = text(catalog.content.items.find { it.id == id }?.name ?: "Предмет")
-    fun eventName(id: String) = text(catalog.content.events.find { it.id == id }?.title ?: "Событие")
+    fun eventName(id: String) = text(catalog.content.events.find { it.id == id }?.let(catalog::displayTitle) ?: "Событие")
     val usedReceipts = mutableSetOf<String>()
     fun takeReceipt(source: String, kinds: Set<DayJournalKind>): DayJournalEntry? = journal.firstOrNull {
         it.id !in usedReceipts && it.sourceId == source && it.kind in kinds
@@ -53,9 +56,9 @@ internal fun DaySummary.toUiState(catalog: GameCatalog, petName: String, economy
         items.forEach { takeReceipt(it, setOf(DayJournalKind.ITEM_RECEIVED)) }
         val purchase = event.type == EventType.WANT && choice.moneyDelta < 0 && items.isNotEmpty()
         val label = if (purchase) "Купили: ${items.joinToString { itemName(it) }}" else
-            catalog.cards[event.id]?.summaryByChoiceId?.get(choice.id)?.let(::text)
-                ?: if (event.type == EventType.EARNING) "Выполнили дело «${text(event.title)}»"
-                else "${text(event.title)}: ${text(choice.text)}"
+            catalog.displayOutcome(choice)?.let(::text)
+                ?: if (event.type == EventType.EARNING) "Выполнили дело «${text(catalog.displayTitle(event))}»"
+                else "${text(catalog.displayTitle(event))}: ${text(catalog.displayAction(choice))}"
         val details = buildList {
             receipt?.let { actionMoney(it.moneyDelta).takeIf(String::isNotEmpty)?.let(::add) }
             if (!purchase && items.isNotEmpty()) add("Получили: ${items.joinToString { itemName(it) }}")

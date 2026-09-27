@@ -30,6 +30,7 @@ import ru.nksk.lctapp.domain.engine.EngineResult
 import ru.nksk.lctapp.domain.engine.BlockReason
 import ru.nksk.lctapp.domain.engine.DayPhase
 import ru.nksk.lctapp.domain.engine.EventStatus
+import ru.nksk.lctapp.domain.engine.EventLayout
 import ru.nksk.lctapp.domain.engine.EventOrigin
 import ru.nksk.lctapp.domain.engine.GameSession
 import ru.nksk.lctapp.domain.engine.GameCatalog
@@ -40,6 +41,11 @@ import ru.nksk.lctapp.domain.analytics.AnalyticsFact
 import ru.nksk.lctapp.domain.analytics.DecisionContext
 import ru.nksk.lctapp.domain.pet.PetVisualState
 import ru.nksk.lctapp.domain.story.StoryDecision
+import ru.nksk.lctapp.domain.history.AuditEntry
+import ru.nksk.lctapp.domain.history.AuditType
+import ru.nksk.lctapp.domain.minigame.DeedGameScore
+import ru.nksk.lctapp.domain.minigame.PriceQuizState
+import ru.nksk.lctapp.domain.minigame.TargetStopState
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DayViewModelTest {
@@ -182,7 +188,7 @@ class DayViewModelTest {
         val (repository, model) = fixture()
         runCurrent()
         val card = model.uiState.value
-        assertTrue(card.storyIntroduction)
+        assertEquals(EventLayout.INTRODUCTION, card.layout)
         assertEquals("В обсерваторию", card.options.single().label)
         assertTrue(card.effort.isBlank())
         assertNull(card.financialContext)
@@ -220,7 +226,7 @@ class DayViewModelTest {
         model.onAction(DayAction.Later)
         runCurrent()
         assertEquals(1, exits)
-        assertEquals(retryCard.copy(busy = true), model.uiState.value)
+        assertEquals(retryCard.copy(busy = true, retryRequired = false), model.uiState.value)
     }
 
     @Test fun hungerReplacesThePrimaryActionWithoutASecondFeedButton() = runTest(dispatcher) {
@@ -391,6 +397,92 @@ class DayViewModelTest {
         assertEquals(0, exits)
     }
 
+    @Test fun lostDeedStartReplyDoesNotOpenACompletedOrDifferentActiveOccurrenceOnRetry() = runTest(dispatcher) {
+        for (startAnotherDeed in listOf(false, true)) {
+            val (repository, model, session) = fixture(deedFirst = true)
+            runCurrent()
+            val games = mutableListOf<String>()
+            val exits = mutableListOf<String?>()
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.openGame.collect { games += it } }
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.exit.collect { exits += it } }
+            repository.afterWrite = { throw IOException("Reply lost after deed start") }
+            model.onAction(DayAction.Choose(model.uiState.value.options.single().id))
+            runCurrent()
+            val original = repository.attempted.last()
+            val started = checkNotNull(repository.read().engine!!.currentEvent)
+            assertEquals(EventStatus.ACTIVE, started.status)
+            assertTrue(model.uiState.value.retryRequired)
+            assertTrue(games.isEmpty())
+
+            repository.afterWrite = {}
+            val score = checkNotNull(DeedGameScore.fromComparison(PriceQuizState.create().copy(current = 5, correctAnswers = 3)))
+            assertTrue(session.dispatch(EngineRequest("completed-elsewhere", repository.read().engine!!.revision,
+                EngineCommand.CompleteDeed(started.id, score))) is EngineResult.Applied)
+            assertNull(repository.read().engine!!.currentEvent)
+            if (startAnotherDeed) {
+                assertTrue(session.dispatch(EngineRequest("opened-elsewhere", repository.read().engine!!.revision,
+                    EngineCommand.OpenNextEvent)) is EngineResult.Applied)
+                val proposal = checkNotNull(repository.read().engine!!.currentEvent)
+                assertTrue(session.dispatch(EngineRequest("started-elsewhere", repository.read().engine!!.revision,
+                    EngineCommand.AcceptDeedProposal(proposal.id))) is EngineResult.Applied)
+                assertEquals(EventStatus.ACTIVE, repository.read().engine!!.currentEvent!!.status)
+                assertNotEquals(started.id, repository.read().engine!!.currentEvent!!.id)
+            }
+            runCurrent()
+            val latest = repository.read()
+            val writes = repository.writes
+
+            model.onAction(DayAction.Retry)
+            runCurrent()
+            assertEquals(original, repository.attempted.last())
+            assertEquals(latest, repository.read())
+            assertEquals(writes, repository.writes)
+            assertEquals(1, repository.requests.count { it.id == original.id })
+            assertTrue(games.isEmpty())
+            assertTrue(exits.isEmpty())
+            assertFalse(model.uiState.value.busy)
+            assertFalse(model.uiState.value.retryRequired)
+            assertTrue(model.uiState.value.message.orEmpty().contains("Состояние дела уже изменилось"))
+        }
+    }
+
+    @Test fun lostStoryStartReplyDoesNotOpenTheBoardAfterItsOccurrenceWasCompleted() = runTest(dispatcher) {
+        val (repository, model, session) = fixture(storyMiniGame = true)
+        runCurrent()
+        val games = mutableListOf<StoryGameRequest>()
+        val exits = mutableListOf<String?>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.openStoryGame.collect { games += it } }
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.exit.collect { exits += it } }
+        repository.afterWrite = { throw IOException("Reply lost after story start") }
+        model.onAction(DayAction.Choose(model.uiState.value.options.single().id))
+        runCurrent()
+        val original = repository.attempted.last()
+        val command = original.command as EngineCommand.StartStoryGame
+        assertTrue(model.uiState.value.retryRequired)
+        assertTrue(games.isEmpty())
+
+        repository.afterWrite = {}
+        val score = checkNotNull(DeedGameScore.fromPrecision(TargetStopState.create().copy(round = 5, hits = 2, lastHit = true)))
+        assertTrue(session.dispatch(EngineRequest("story-completed-elsewhere", repository.read().engine!!.revision,
+            EngineCommand.CompleteStoryGame(command.occurrenceId, command.choiceId, score))) is EngineResult.Applied)
+        runCurrent()
+        val latest = repository.read()
+        assertNull(latest.engine!!.currentEvent)
+        val writes = repository.writes
+
+        model.onAction(DayAction.Retry)
+        runCurrent()
+        assertEquals(original, repository.attempted.last())
+        assertEquals(latest, repository.read())
+        assertEquals(writes, repository.writes)
+        assertEquals(1, repository.requests.count { it.id == original.id })
+        assertTrue(games.isEmpty())
+        assertTrue(exits.isEmpty())
+        assertFalse(model.uiState.value.busy)
+        assertFalse(model.uiState.value.retryRequired)
+        assertFalse(model.uiState.value.message.isNullOrBlank())
+    }
+
     @Test fun purchaseOffersPassingByWithoutPausingAndWarnsAboutFoodMoney() = runTest(dispatcher) {
         val (repository, model) = fixture(eventFirst = "figma-2164-2-v1")
         repository.update { it.copy(economy = it.economy.copy(plan = BudgetPlan(27, 0, 0, 0),
@@ -464,7 +556,8 @@ class DayViewModelTest {
             ) }
             runCurrent()
             val shown = model.uiState.value
-            assertTrue(shown.bakeryBunCard)
+            assertEquals("Пекарня", shown.locationTitle)
+            assertEquals(EventLayout.PURCHASE, shown.layout)
             assertEquals(R.drawable.prop_bakery_bun, shown.purchaseArtworkRes)
             assertEquals("Ароматная булочка", shown.title)
             assertEquals("Заменяет обычный приём пищи. Тоша будет доволен: она гораздо вкуснее обычного обеда.", shown.body)
@@ -511,7 +604,8 @@ class DayViewModelTest {
             runCurrent()
             val shown = model.uiState.value
             assertEquals(event, artwork, shown.purchaseArtworkRes)
-            assertFalse(shown.bakeryBunCard)
+            assertEquals("Ярмарка", shown.locationTitle)
+            assertEquals(EventLayout.PURCHASE, shown.layout)
             assertNull(shown.financialContext)
             assertTrue(shown.impact.isEmpty())
             assertFalse(shown.title.any(Char::isDigit))
@@ -524,10 +618,27 @@ class DayViewModelTest {
         }
     }
 
+    @Test fun missingIllustrationDoesNotChangeThePurchaseLayoutOrItsActions() = runTest(dispatcher) {
+        val id = "figma-2654-98-purchase-v2"
+        val (repository, model) = fixture(eventFirst = id, catalogTransform = { catalog ->
+            val card = catalog.cards.getValue(id)
+            catalog.copy(cards = catalog.cards + (id to card.copy(presentation = card.presentation.copy(
+                media = card.presentation.media.copy(artworkKey = "unavailable.illustration")))))
+        })
+        runCurrent()
+        val shown = model.uiState.value
+        assertEquals(EventLayout.PURCHASE, shown.layout)
+        assertNull(shown.purchaseArtworkRes)
+        assertEquals("Кольцеброс", shown.title)
+        assertEquals("Ярмарка", shown.locationTitle)
+        assertEquals(listOf("Сыграть", "Пройти мимо"), shown.options.map { it.label })
+        assertEquals(0, repository.writes)
+    }
+
     @Test fun ordinaryRefusalWithoutPresentedNumbersDoesNotClaimFinancialEvidenceOrPriority() = runTest(dispatcher) {
         val (repository, model) = fixture(eventFirst = "figma-2164-2-v1")
         runCurrent()
-        assertFalse(model.uiState.value.storyIntroduction)
+        assertNotEquals(EventLayout.INTRODUCTION, model.uiState.value.layout)
         assertNull(model.uiState.value.financialContext)
         model.onAction(DayAction.Choose("figma-2164-2-v1:pass"))
         runCurrent()
@@ -642,6 +753,124 @@ class DayViewModelTest {
         assertEquals("urgent-offer", (repository.requests.last().command as EngineCommand.CompleteEvent).resourcePriorityOfferId)
     }
 
+    @Test fun failedChoiceRetriesTheSameRequestAndDoesNotAcceptAnotherIntent() = runTest(dispatcher) {
+        val (repository, model) = fixture(eventFirst = "figma-2164-2-v1")
+        runCurrent()
+        val before = repository.read()
+        val buy = DayAction.Choose("figma-2164-2-v1:buy")
+        repository.failure = IOException("Write unavailable")
+        model.onAction(buy)
+        runCurrent()
+        val original = repository.attempted.last()
+        assertTrue(model.uiState.value.retryRequired)
+        assertEquals(before, repository.read())
+        val attempts = repository.attempted.size
+        model.onAction(DayAction.Choose("figma-2164-2-v1:pass"))
+        model.onAction(DayAction.Later)
+        runCurrent()
+        assertEquals(attempts, repository.attempted.size)
+        repository.failure = null
+        model.onAction(DayAction.Retry)
+        runCurrent()
+        assertEquals(original, repository.attempted.last())
+        assertEquals(listOf(original, original), repository.attempted.takeLast(2))
+        assertEquals(1, repository.requests.count { it.id == original.id })
+        assertEquals(before.story.decisions.size + 1, repository.read().story.decisions.size)
+    }
+
+    @Test fun choiceCommittedBeforeReplyFailureKeepsItsCardAndConfirmsExactlyOnceOnRetry() = runTest(dispatcher) {
+        val (repository, model) = fixture(eventFirst = "figma-2164-2-v1")
+        runCurrent()
+        val before = repository.read()
+        val card = model.uiState.value
+        val exits = mutableListOf<String?>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.exit.collect { exits += it } }
+        repository.afterWrite = { throw IOException("Reply lost after commit") }
+        model.onAction(DayAction.Choose("figma-2164-2-v1:buy"))
+        runCurrent()
+        val committed = repository.read()
+        val original = repository.attempted.last()
+        assertEquals(before.story.decisions.size + 1, committed.story.decisions.size)
+        assertTrue(committed.economy.balance < before.economy.balance)
+        assertTrue(exits.isEmpty())
+        assertTrue(model.uiState.value.retryRequired)
+        assertEquals(card.title, model.uiState.value.title)
+        assertEquals(card.options, model.uiState.value.options)
+        repository.afterWrite = {}
+        model.onAction(DayAction.Retry)
+        runCurrent()
+        assertEquals(original, repository.attempted.last())
+        assertEquals(committed, repository.read())
+        assertEquals(1, repository.writes)
+        assertEquals(1, exits.size)
+        assertNotNull(exits.single())
+        model.onAction(DayAction.Retry)
+        runCurrent()
+        assertEquals(1, exits.size)
+        assertEquals(1, repository.writes)
+    }
+
+    @Test fun recoveredChoiceFeedbackUsesItsReceiptInsteadOfLaterUnrelatedMoney() = runTest(dispatcher) {
+        val (repository, model) = fixture(eventFirst = "figma-2164-2-v1")
+        runCurrent()
+        val before = repository.read()
+        val exits = mutableListOf<String?>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.exit.collect { exits += it } }
+        repository.afterWrite = { throw IOException("Reply lost after commit") }
+        model.onAction(DayAction.Choose("figma-2164-2-v1:buy"))
+        runCurrent()
+        val purchased = repository.read()
+        val spent = before.economy.balance - purchased.economy.balance
+        assertTrue(spent > 0)
+        val original = repository.attempted.last()
+        repository.afterWrite = {}
+        repository.update { game -> game.copy(
+            economy = game.economy.copy(availableBalance = game.economy.availableBalance + 30,
+                plan = game.economy.plan.copy(reserve = game.economy.plan.reserve + 30)),
+            engine = game.engine!!.copy(revision = game.engine!!.revision + 1)) }
+        runCurrent()
+        val changed = repository.read()
+        val writesBeforeRetry = repository.writes
+        model.onAction(DayAction.Retry)
+        runCurrent()
+        assertEquals(original, repository.attempted.last())
+        assertEquals(changed, repository.read())
+        assertEquals(writesBeforeRetry, repository.writes)
+        assertEquals(1, exits.size)
+        assertTrue(exits.single().orEmpty().contains("Потратили $spent монет"))
+        assertFalse(exits.single().orEmpty().contains("Получили"))
+        assertEquals(1, repository.requests.count { it.id == original.id })
+    }
+
+    @Test fun failedDayActionKeepsItsRevisionUntilExplicitStaleRejection() = runTest(dispatcher) {
+        val (repository, model) = fixture()
+        runCurrent()
+        val before = repository.read()
+        val choice = model.uiState.value.options.single().id
+        repository.failure = IOException("Write unavailable")
+        model.onAction(DayAction.Choose(choice))
+        runCurrent()
+        val original = repository.attempted.last()
+        repository.failure = null
+        repository.update { game -> game.copy(engine = game.engine!!.copy(revision = game.engine!!.revision + 1)) }
+        runCurrent()
+        val changed = repository.read()
+        model.onAction(DayAction.Retry)
+        runCurrent()
+        assertEquals(original, repository.attempted.last())
+        assertEquals(changed, repository.read())
+        assertEquals(before.story.decisions, changed.story.decisions)
+        assertFalse(model.uiState.value.retryRequired)
+        assertTrue(model.uiState.value.message!!.contains("Игра уже изменилась"))
+        // Only a new explicit click can bind a new request to the refreshed revision.
+        model.onAction(DayAction.Choose(choice))
+        runCurrent()
+        val fresh = repository.attempted.last()
+        assertNotEquals(original.id, fresh.id)
+        assertEquals(changed.engine!!.revision, fresh.expectedRevision)
+        assertEquals(before.story.decisions.size + 1, repository.read().story.decisions.size)
+    }
+
     private suspend fun fixture(deedFirst: Boolean = false, finishedDay: Int? = null,
         eventFirst: String? = null, storyMiniGame: Boolean = false, priorChoices: List<String> = emptyList(),
         catalogTransform: (GameCatalog) -> GameCatalog = { it }): Triple<DayRepository, DayViewModel, GameSession> {
@@ -691,12 +920,35 @@ private class DayRepository(initial: GameState) : GameRepository {
     var failure: Exception? = null
     var writes = 0
     val requests = mutableListOf<EngineRequest>()
+    val attempted = mutableListOf<EngineRequest>()
+    private data class Receipt(val request: EngineRequest, val context: DecisionContext?, val fingerprint: String?)
+    private val receipts = mutableMapOf<String, Receipt>()
+    private val history = mutableListOf(AuditEntry("initial", 1, "run", AuditType.INITIALIZED, after = initial))
     override fun observe() = state
     override suspend fun read() = state.value
+    override suspend fun readHistory() = history.toList()
     override suspend fun initializeIfAbsent(initial: GameState) = state.value
     override suspend fun commit(request: EngineRequest, context: DecisionContext?, contentFingerprint: String?,
-        facts: (GameState, GameState, String, Long) -> List<AnalyticsFact>, transform: (GameState) -> GameState): GameState =
-        update(transform).also { requests += request }
+        facts: (GameState, GameState, String, Long) -> List<AnalyticsFact>, transform: (GameState) -> GameState): GameState {
+        attempted += request
+        val identity = Receipt(request, context, contentFingerprint)
+        receipts[request.id]?.let { prior ->
+            check(prior == identity) { "Conflicting command identity" }
+            return state.value
+        }
+        failure?.let { throw it }
+        val before = state.value
+        val next = transform(before)
+        // A receipt and aggregate become durable together, before a response can be lost.
+        receipts[request.id] = identity
+        requests += request
+        history += AuditEntry("command:run:${request.id}", history.last().sequence + 1, "run", AuditType.COMMAND,
+            request = request, context = context, before = before, after = next, contentFingerprint = contentFingerprint)
+        state.value = next
+        writes += 1
+        afterWrite()
+        return next
+    }
     override suspend fun update(transform: (GameState) -> GameState): GameState {
         failure?.let { throw it }
         val next = transform(state.value)

@@ -117,11 +117,11 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
                     renderPetText(card.effort, saved.pet.name).asGameUiText(),
                     deedDeadline(saved.engine!!.day, offer.expiresDay), card.scene)
             },
-            meals = if (!needsFood) emptyList() else catalog.meals.filter { it.price > 0 || saved.economy.availableBalance < catalog.meals.first().price }.map {
+            meals = if (!needsFood) emptyList() else catalog.mealPolicy.choices(saved).map {
                 DeedsMealUiState(it.id, if (it.price == 0L) "Поесть бесплатно" else "Поесть за ${it.price} монет",
                     session.engine.blockReason(saved, EngineCommand.Feed(it.id)) == null,
                     EconomyOperations.quote(saved.economy, it.price, SpendingKind.FEEDING).playerDescription(SpendingKind.FEEDING),
-                    "После еды сегодня понадобится отдых. Утром будем немного уставшими.".takeIf { _ -> it.price == 0L })
+                    "После еды сегодня понадобится отдых. Утром будем немного уставшими.".takeIf { _ -> catalog.mealPolicy.effects(it.id).exhaustsCurrentEnergy })
             },
         )
     }

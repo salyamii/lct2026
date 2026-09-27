@@ -8,16 +8,22 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.currentStateAsState
 import androidx.lifecycle.compose.dropUnlessResumed
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.coroutines.awaitCancellation
 import ru.nksk.lctapp.feature.learning.ui.ChronoscopeStep
-import ru.nksk.lctapp.feature.learning.ui.LearningAction
-import ru.nksk.lctapp.feature.learning.ui.LearningPageMode
-import ru.nksk.lctapp.feature.learning.ui.LearningScreen
-import ru.nksk.lctapp.feature.learning.ui.LearningViewModel
+import ru.nksk.lctapp.feature.learning.ui.HistoryScreen
+import ru.nksk.lctapp.feature.learning.ui.LearningHistoryViewModel
+import ru.nksk.lctapp.feature.learning.ui.ReflectionAction
+import ru.nksk.lctapp.feature.learning.ui.ReflectionScreen
+import ru.nksk.lctapp.feature.learning.ui.ReflectionViewModel
+import ru.nksk.lctapp.feature.learning.ui.TrainingScreen
+import ru.nksk.lctapp.feature.learning.ui.TrainingViewModel
 
 /** Keep the saved history route readable across the split into history and training. */
 @Serializable
@@ -34,28 +40,53 @@ data object SkillTraining : NavKey
 data class OtherPaths(val day: Int) : NavKey { init { require(day > 0) } }
 
 fun EntryProviderScope<NavKey>.learningEntry(onBack: (NavKey) -> Unit, onOpenBudget: (NavKey) -> Unit = {}) {
-    entry<Learning> { source -> LearningEntryContent(source, LearningPageMode.HISTORY, onBack, onOpenBudget) }
-    entry<SkillTraining> { source -> LearningEntryContent(source, LearningPageMode.TRAINING, onBack, onOpenBudget) }
-    entry<OtherPaths> { source -> LearningEntryContent(source, LearningPageMode.REFLECTION, onBack, onOpenBudget, source.day) }
+    entry<Learning> { source ->
+        val model = hiltViewModel<LearningHistoryViewModel>()
+        val state by model.uiState.collectAsStateWithLifecycle()
+        val lifecycle = LocalLifecycleOwner.current.lifecycle
+        LaunchedEffect(model, lifecycle) {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                model.setActive(true)
+                try { awaitCancellation() } finally { model.setActive(false) }
+            }
+        }
+        HistoryScreen(state, onRetry = dropUnlessResumed { model.retry() },
+            onBack = dropUnlessResumed { onBack(source) })
+    }
+    entry<SkillTraining> { source ->
+        val model = hiltViewModel<TrainingViewModel>()
+        val state by model.uiState.collectAsStateWithLifecycle()
+        val lifecycle = LocalLifecycleOwner.current.lifecycle
+        TrainingScreen(state, onAction = {
+            if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) model.onAction(it)
+        }, onBack = dropUnlessResumed { onBack(source) },
+            onOpenBudget = dropUnlessResumed { onOpenBudget(source) })
+    }
+    entry<OtherPaths> { source -> ReflectionEntryContent(source, onBack) }
 }
 
 @Composable
-private fun LearningEntryContent(source: NavKey, mode: LearningPageMode, onBack: (NavKey) -> Unit,
-    onOpenBudget: (NavKey) -> Unit, reflectionDay: Int? = null) {
-    val model = hiltViewModel<LearningViewModel>()
+private fun ReflectionEntryContent(source: OtherPaths, onBack: (NavKey) -> Unit) {
+    val model = hiltViewModel<ReflectionViewModel>()
     val state by model.uiState.collectAsStateWithLifecycle()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
-    LaunchedEffect(model, state.loading, state.realGame != null, reflectionDay) {
-        if (reflectionDay != null && !state.loading) model.openReflection(reflectionDay)
+    val lifecycleState by lifecycle.currentStateAsState()
+    LaunchedEffect(model, lifecycle) {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            model.setActive(true)
+            try { awaitCancellation() } finally { model.setActive(false) }
+        }
+    }
+    LaunchedEffect(model, state.loading, state.realGame != null, source.day, lifecycleState) {
+        if (!state.loading && lifecycleState.isAtLeast(Lifecycle.State.RESUMED)) model.openReflection(source.day)
     }
     val back = dropUnlessResumed {
-        if (mode == LearningPageMode.REFLECTION && state.chronoscopeStep !in setOf(null, ChronoscopeStep.INTRO, ChronoscopeStep.MOMENTS))
-            model.onAction(LearningAction.ChronoscopeBack)
+        if (state.chronoscopeStep !in setOf(null, ChronoscopeStep.INTRO, ChronoscopeStep.MOMENTS))
+            model.onAction(ReflectionAction.ChronoscopeBack)
         else onBack(source)
     }
-    BackHandler(enabled = mode == LearningPageMode.REFLECTION) { back() }
-    LearningScreen(state, onAction = {
+    BackHandler { back() }
+    ReflectionScreen(state, onAction = {
         if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) model.onAction(it)
-    }, onBack = dropUnlessResumed { onBack(source) },
-        onOpenBudget = dropUnlessResumed { onOpenBudget(source) }, mode = mode)
+    }, onBack = dropUnlessResumed { onBack(source) })
 }

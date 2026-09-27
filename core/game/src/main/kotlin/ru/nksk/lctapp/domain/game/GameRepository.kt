@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.flowOf
 import ru.nksk.lctapp.domain.analytics.AnalyticsFact
 import ru.nksk.lctapp.domain.analytics.DecisionContext
 import ru.nksk.lctapp.domain.engine.EngineRequest
+import ru.nksk.lctapp.domain.engine.CampaignReconciliation
 import ru.nksk.lctapp.domain.history.AuditEntry
 import ru.nksk.lctapp.domain.history.GameSnapshot
 import ru.nksk.lctapp.domain.history.RestoreGuard
@@ -31,6 +32,10 @@ interface GameRepository {
      * Gameplay operations own their guards and retry/occurrence semantics; this is not an event engine.
      */
     suspend fun update(transform: (GameState) -> GameState): GameState
+
+    /** Resolve legacy chapter bindings from the latest save; only this narrow patch may rebind its open period. */
+    suspend fun reconcileCampaign(reconciliation: (GameState) -> CampaignReconciliation): GameState =
+        update { current -> reconciliation(current).applyTo(current) }
 
     /** State, audit checkpoints, decision facts and delivery receipt commit together. */
     suspend fun commit(request: EngineRequest, context: DecisionContext? = null,

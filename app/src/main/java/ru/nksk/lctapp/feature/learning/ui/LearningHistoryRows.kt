@@ -9,6 +9,9 @@ import ru.nksk.lctapp.domain.content.ItemOperation
 import ru.nksk.lctapp.domain.engine.DayJournalEntry
 import ru.nksk.lctapp.domain.engine.DayJournalKind
 import ru.nksk.lctapp.domain.engine.GameCatalog
+import ru.nksk.lctapp.domain.engine.displayTitle
+import ru.nksk.lctapp.domain.engine.displayAction
+import ru.nksk.lctapp.domain.engine.displayOutcome
 import ru.nksk.lctapp.domain.history.AuditEntry
 import ru.nksk.lctapp.domain.pet.renderPetText
 
@@ -23,7 +26,7 @@ private fun AuditEntry.activityRows(catalog: GameCatalog, petName: String, inclu
     val after = after ?: return emptyList()
     fun text(value: String) = renderPetText(value, petName).asGameUiText()
     fun itemName(id: String) = text(catalog.content.items.find { it.id == id }?.name ?: "Предмет")
-    fun eventName(id: String) = text(catalog.content.events.find { it.id == id }?.title ?: "Событие")
+    fun eventName(id: String) = text(catalog.content.events.find { it.id == id }?.let(catalog::displayTitle) ?: "Событие")
     val oldJournalIds = before.engine?.journal.orEmpty().map { it.id }.toSet()
     val journal = after.engine?.journal.orEmpty().filter { it.id !in oldJournalIds }
     val receipts = operations.associateBy { it.operationId }
@@ -64,9 +67,9 @@ private fun AuditEntry.activityRows(catalog: GameCatalog, petName: String, inclu
         val label = when {
             purchase -> "Купили: ${received.joinToString()}"
             choice == null || event == null -> "Завершили событие"
-            else -> catalog.cards[event.id]?.summaryByChoiceId?.get(choice.id)?.let(::text)
-                ?: if (event.type == EventType.EARNING) "Выполнили дело «${text(event.title)}»"
-                else "${text(event.title)}: ${text(choice.text.asGameActionLabel())}"
+            else -> catalog.displayOutcome(choice)?.let(::text)
+                ?: if (event.type == EventType.EARNING) "Выполнили дело «${text(catalog.displayTitle(event))}»"
+                else "${text(catalog.displayTitle(event))}: ${text(catalog.displayAction(choice).asGameActionLabel())}"
         }
         add(label, receipt(entry), received.takeIf { !purchase && it.isNotEmpty() }?.let { "Получили: ${it.joinToString()}" })
     }

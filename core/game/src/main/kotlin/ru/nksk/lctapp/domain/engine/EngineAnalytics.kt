@@ -20,9 +20,9 @@ internal class EngineAnalytics(private val factory: EventFactory, private val ru
         val shown = request.context ?: DecisionContext()
         val context = shown.copy(
             before = FinancialPosition(before.economy.availableBalance, before.economy.savingsBalance,
-                shown.before?.knownNeeds ?: foodCostUntilWeekEnd(before, factory.basicMealPrice())),
+                shown.before?.knownNeeds ?: factory.mealPolicy.foodRequirement(before)),
             after = FinancialPosition(after.economy.availableBalance, after.economy.savingsBalance,
-                foodCostUntilWeekEnd(after, factory.basicMealPrice())),
+                factory.mealPolicy.foodRequirement(after)),
             financialPeriodId = period?.id, day = day,
         )
         val out = mutableListOf<AnalyticsFact>()

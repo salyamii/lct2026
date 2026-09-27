@@ -321,8 +321,7 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
         }
     }
 
-    private fun knownNeeds(game: GameState): Long = foodCostUntilWeekEnd(game,
-        session.catalog.meals.filter { it.price > 0 }.minOf { it.price })
+    private fun knownNeeds(game: GameState): Long = session.catalog.mealPolicy.foodRequirement(game)
 
     /** A history response belongs only to the exact saved state that was displayed when requested. */
     private fun loadBudgetHistory() {

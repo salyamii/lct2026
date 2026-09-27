@@ -14,6 +14,7 @@ import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.data.game.local.*
 import ru.nksk.lctapp.domain.analytics.*
 import ru.nksk.lctapp.domain.engine.EngineRequest
+import ru.nksk.lctapp.domain.engine.CampaignReconciliation
 import ru.nksk.lctapp.domain.finance.FinancialProgress
 import ru.nksk.lctapp.domain.history.*
 import ru.nksk.lctapp.domain.pet.withStarterAccessoryOwnership
@@ -76,6 +77,21 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
         saved
     }
 
+    override suspend fun reconcileCampaign(reconciliation: (GameState) -> CampaignReconciliation): GameState = withLiveBudgetWrite {
+        val current = checkNotNull(readInTransaction()) { "Game has not been initialized" }
+        val next = reconciliation(current).applyTo(current)
+        if (next == current) return@withLiveBudgetWrite current
+        val run = ensureBaseline(current)
+        val reboundPeriodId = current.financial.currentPeriod?.takeIf {
+            it.goalId != next.financial.currentPeriod?.goalId
+        }?.id
+        persistGame(next, reboundPeriodId)
+        val saved = checkNotNull(readInTransaction())
+        appendAudit(AuditEntry("campaign-reconciliation:${UUID.randomUUID()}", nextSequence(), run.runId,
+            AuditType.TECHNICAL_UPDATE, before = current, after = saved))
+        saved
+    }
+
     override suspend fun commit(request: EngineRequest, context: DecisionContext?, contentFingerprint: String?,
         facts: (GameState, GameState, String, Long) -> List<AnalyticsFact>,
         transform: (GameState) -> GameState): GameState = withLiveBudgetWrite {
@@ -103,7 +119,7 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
         saved
     }
 
-    private suspend fun persistGame(next: GameState) {
+    private suspend fun persistGame(next: GameState, reboundPeriodId: String? = null) {
         check(dao.updateState(next.toEntity()) == 1) { "Saved game disappeared during update" }
         dao.deleteBudgetPlanning(CURRENT_GAME_ID)
         dao.deleteEventExposure(CURRENT_GAME_ID)
@@ -117,7 +133,7 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
         dao.deleteEngineDeeds(CURRENT_GAME_ID)
         dao.deleteDayJournal(CURRENT_GAME_ID)
         dao.deleteEngine(CURRENT_GAME_ID)
-        writeChildren(next)
+        writeChildren(next, reboundPeriodId)
     }
 
     private suspend fun readInTransaction(): GameState? {
@@ -144,8 +160,8 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
         )
     }
 
-    private suspend fun writeChildren(state: GameState) {
-        writeFinancial(state.financial)
+    private suspend fun writeChildren(state: GameState, reboundPeriodId: String? = null) {
+        writeFinancial(state.financial, reboundPeriodId)
         dao.insertEventExposure(state.eventHistory.mapIndexed { position, exposure -> exposure.toEntity(position) })
         state.economy.planning?.let { dao.insertBudgetPlanning(it.toEntity()) }
         state.selectedGoalId?.let { dao.insertGoalSelection(GoalSelectionEntity(CURRENT_GAME_ID, it)) }
@@ -172,16 +188,23 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
         })
     }
 
-    private suspend fun writeFinancial(progress: FinancialProgress) {
+    private suspend fun writeFinancial(progress: FinancialProgress, reboundPeriodId: String? = null) {
         val oldPeriods = finance.periods(CURRENT_GAME_ID)
         require(progress.periods.size >= oldPeriods.size && progress.periods.take(oldPeriods.size).map { it.id } == oldPeriods.map { it.id }) {
             "A regular write cannot delete or reorder financial periods"
         }
         oldPeriods.forEachIndexed { index, old ->
             val next = progress.periods[index].toEntity(index)
-            require(next.goalId == old.goalId && next.ordinal == old.ordinal && next.startedDay == old.startedDay &&
-                next.openingAvailable == old.openingAvailable && next.openingSavings == old.openingSavings && next.imported == old.imported) {
-                "Financial period origins are immutable"
+            if (old.id == reboundPeriodId) {
+                require(old.closedDay == null && old.id == progress.currentPeriodId && next.goalId != old.goalId &&
+                    next == old.copy(goalId = next.goalId, imported = true)) {
+                    "Campaign compatibility may only rebind the current open period"
+                }
+            } else {
+                require(next.goalId == old.goalId && next.ordinal == old.ordinal && next.startedDay == old.startedDay &&
+                    next.openingAvailable == old.openingAvailable && next.openingSavings == old.openingSavings && next.imported == old.imported) {
+                    "Financial period origins are immutable"
+                }
             }
             require(old.closedDay == null || old == next) { "Closed financial periods are immutable" }
         }

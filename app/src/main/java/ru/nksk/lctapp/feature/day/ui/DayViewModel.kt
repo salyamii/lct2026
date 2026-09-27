@@ -5,13 +5,13 @@ import ru.nksk.lctapp.domain.pet.renderPetText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import ru.nksk.lctapp.core.ui.game.GameActionAttempt
 import ru.nksk.lctapp.core.ui.game.playerDescription
 import ru.nksk.lctapp.domain.economy.EconomyOperations
 import ru.nksk.lctapp.domain.economy.SpendingKind
@@ -20,7 +20,8 @@ import ru.nksk.lctapp.core.ui.game.eventCompletionMessage
 import ru.nksk.lctapp.core.ui.game.restingPetArtwork
 import ru.nksk.lctapp.core.ui.game.asGameActionLabel
 import ru.nksk.lctapp.core.ui.game.asGameUiText
-import ru.nksk.lctapp.core.ui.game.cosmeticArtwork
+import ru.nksk.lctapp.core.ui.game.eventMediaArtwork
+import ru.nksk.lctapp.core.ui.game.sceneArtwork
 import ru.nksk.lctapp.core.ui.game.AdventurePetPresentation
 import ru.nksk.lctapp.core.ui.game.EventSceneArtwork
 import ru.nksk.lctapp.core.ui.game.eventSceneArtwork
@@ -28,12 +29,10 @@ import ru.nksk.lctapp.core.ui.game.eventSceneBackground
 import ru.nksk.lctapp.core.ui.game.toAdventurePetPresentation
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.domain.content.EventType
-import ru.nksk.lctapp.domain.content.ItemOperation
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.analytics.DecisionContext
 import ru.nksk.lctapp.domain.analytics.FinancialPosition
-import ru.nksk.lctapp.domain.pet.PetCosmetics
 
 internal data class DayOption(val id: String, val label: String, val needsFood: Boolean, val enabled: Boolean, val spending: String? = null)
 internal data class StoryGameRequest(val occurrenceId: String, val choiceId: String)
@@ -42,6 +41,7 @@ internal data class ResourcePriorityUi(val offerId: String, val title: String, v
     val reward: Long, val comparisons: List<String>, val selected: Boolean)
 internal data class DayUiState(
     val loading: Boolean = true, val failed: Boolean = false, val busy: Boolean = false,
+    val retryRequired: Boolean = false,
     val title: String = "", val body: String = "", val category: String = "Событие",
     val impact: String = "", val effort: String = "",
     val scene: String? = null, val character: String? = null,
@@ -58,8 +58,8 @@ internal data class DayUiState(
     val practiceRequired: Boolean = false,
     val reflectionAvailable: Boolean = false,
     val resourcePriority: ResourcePriorityUi? = null,
-    val storyIntroduction: Boolean = false,
-    val bakeryBunCard: Boolean = false,
+    val layout: EventLayout = EventLayout.SCENE,
+    val locationTitle: String = "",
     val purchaseArtworkRes: Int? = null,
     val pet: AdventurePetPresentation? = null,
     val eventArtwork: EventSceneArtwork? = null,
@@ -103,6 +103,9 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
     private var busy = false
     private var mealsShown = false
     private var message: String? = null
+    private data class PendingAction(val attempt: GameActionAttempt, val action: DayAction,
+        val leave: Boolean, val fed: Boolean, val openGame: Boolean)
+    private var pendingAction: PendingAction? = null
 
     init { load() }
 
@@ -114,7 +117,7 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
                 session.prepare()
                 session.observe().collect { saved ->
                     if (game != saved) {
-                        message = null
+                        if (pendingAction == null) message = null
                         if (saved?.engine?.ateToday == true) mealsShown = false
                     }
                     if (game?.engine?.revision != saved?.engine?.revision ||
@@ -142,6 +145,10 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
             return
         }
         if (busy) return
+        pendingAction?.let { pending ->
+            if (action == DayAction.Retry || action == pending.action) submit(pending)
+            return
+        }
         if (action == DayAction.Retry) { load(); return }
         val saved = game ?: return
         when (action) {
@@ -152,14 +159,14 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
             }
             DayAction.CloseMeals -> { mealsShown = false; render() }
             DayAction.Primary -> primaryCommand(saved)?.let {
-                execute(saved, it, leave = it is EngineCommand.AcknowledgeResult ||
+                execute(saved, it, action, leave = it is EngineCommand.AcknowledgeResult ||
                     (it is EngineCommand.BeginDay && !it.openFirst))
             }
             is DayAction.Choose -> {
                 val miniGame = isDeed(saved)
                 val command = choiceCommand(saved, action.id,
                     selectedResourcePriority.takeIf { it == mutableState.value.resourcePriority?.offerId })
-                execute(saved, command, leave = !miniGame && command !is EngineCommand.StartStoryGame,
+                execute(saved, command, action, leave = !miniGame && command !is EngineCommand.StartStoryGame,
                     openGame = miniGame)
             }
             DayAction.OpenLearning -> viewModelScope.launch { learning.send(Unit) }
@@ -171,18 +178,18 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
                 selectedResourcePriority = action.offerId.takeIf { action.selected }
                 render()
             }
-            is DayAction.Feed -> execute(saved, EngineCommand.Feed(action.id), fed = true)
+            is DayAction.Feed -> execute(saved, EngineCommand.Feed(action.id), action, fed = true)
             DayAction.Later -> saved.engine?.currentEvent?.let {
                 execute(saved, if (isProposal(saved)) EngineCommand.DismissDeedProposal(it.id)
                     else if (it.status == EventStatus.RESULT) EngineCommand.AcknowledgeResult(it.id)
-                    else EngineCommand.PauseEvent(it.id), leave = true)
+                    else EngineCommand.PauseEvent(it.id), action, leave = true)
             }
             DayAction.Retry -> Unit
             is DayAction.FinancialContextPresented -> Unit
         }
     }
 
-    private fun execute(saved: GameState, command: EngineCommand, leave: Boolean = false,
+    private fun execute(saved: GameState, command: EngineCommand, action: DayAction, leave: Boolean = false,
         fed: Boolean = false, openGame: Boolean = false) {
         val context = mutableState.value.financialContext?.let { displayed ->
             val presented = displayed.presentationId == shownFinancialContext
@@ -190,14 +197,26 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
                 complete = presented && displayed.before == financialPosition(saved) &&
                     displayed.presentationId == presentationId(saved))
         }
+        val pending = PendingAction(GameActionAttempt.prepare(saved, command, context), action, leave, fed, openGame)
+        pendingAction = pending
+        submit(pending)
+    }
+
+    private fun submit(pending: PendingAction) {
+        val saved = pending.attempt.before
+        val command = pending.attempt.request.command
+        val leave = pending.leave
+        val fed = pending.fed
+        val openGame = pending.openGame
         busy = true
         message = null
-        mutableState.value = mutableState.value.copy(busy = true)
+        mutableState.value = mutableState.value.copy(busy = true, retryRequired = false)
         viewModelScope.launch {
             var exitRequested = false
             try {
-                when (val result = session.dispatch(EngineRequest(UUID.randomUUID().toString(), saved.engine?.revision, command, context))) {
+                when (val result = pending.attempt.submit(session)) {
                     is EngineResult.Applied -> {
+                        pendingAction = null
                         selectedResourcePriority = null
                         game = result.state
                         if (fed) {
@@ -208,23 +227,33 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
                                 else "Можно продолжить."
                         }
                         if (openGame) {
-                            exitRequested = true
-                            games.send(checkNotNull(result.state.engine?.currentEvent).id)
+                            val started = pending.attempt.committedState(session, result.state)?.engine?.currentEvent
+                            val current = result.state.engine?.currentEvent
+                            if (started != null && current?.id == started.id && current.status == EventStatus.ACTIVE) {
+                                exitRequested = true
+                                games.send(started.id)
+                            } else message = "Действие сохранено. Состояние дела уже изменилось."
                         }
                         if (command is EngineCommand.StartStoryGame) {
-                            exitRequested = true
-                            storyGames.send(StoryGameRequest(command.occurrenceId, command.choiceId))
+                            val current = result.state.engine?.currentEvent
+                            if (current?.id == command.occurrenceId && current.status == EventStatus.ACTIVE) {
+                                exitRequested = true
+                                storyGames.send(StoryGameRequest(command.occurrenceId, command.choiceId))
+                            } else message = "Действие сохранено. Состояние дела уже изменилось."
                         }
                         if (leave && result.state.economy.planning == null) {
                             exitRequested = true
                             exits.send(if (command is EngineCommand.CompleteEvent)
-                                eventCompletionMessage(saved, result.state, command, session.catalog)
+                                pending.attempt.committedState(session, result.state)?.let {
+                                    eventCompletionMessage(saved, it, command, session.catalog)
+                                } ?: "Готово!"
                                 else if (command is EngineCommand.PauseEvent && result.state.engine?.events?.any {
                                     it.id == command.occurrenceId && it.status == EventStatus.CARRIED_ACTIVE
                                 } == true) "Вернёмся к этой ситуации завтра. Пока можно заняться делами." else null)
                         }
                     }
                     is EngineResult.Blocked -> {
+                        pendingAction = null
                         message = result.reason.playerMessage(saved.pet.name)
                         if (result.reason == BlockReason.MustEat) mealsShown = true
                         if (result.reason is BlockReason.FinancialPracticeRequired) {
@@ -282,12 +311,12 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
             }
         } ?: return null
         val event = catalog.content.events.first { it.id == offer.eventId }
-        return ResourcePriorityUi(offer.id, renderPetText(event.title, saved.pet.name).asGameUiText(),
+        return ResourcePriorityUi(offer.id, renderPetText(catalog.displayTitle(event), saved.pet.name).asGameUiText(),
             effortCost(catalog.policies.getValue(offer.eventId).energyCost),
             catalog.content.choices.filter { it.eventId == offer.eventId }.maxOf { it.moneyDelta },
             choices.map { choice ->
                 val money = if (choice.moneyDelta == 0L) "без траты монет" else "${Math.negateExact(choice.moneyDelta)} монет"
-                val action = renderPetText(choice.text, saved.pet.name).substringBefore('\u00b7').trimEnd()
+                val action = renderPetText(catalog.displayAction(choice), saved.pet.name).substringBefore('\u00b7').trimEnd()
                 "$action: $money, ${effortCost(policy.energyFor(choice.id)).lowercase()}"
             }, selectedResourcePriority == offer.id)
     }
@@ -300,7 +329,7 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
     }
 
     private fun financialPosition(saved: GameState) = FinancialPosition(saved.economy.availableBalance,
-        saved.economy.savingsBalance, foodCostUntilWeekEnd(saved, session.catalog.meals.filter { it.price > 0 }.minOf { it.price }))
+        saved.economy.savingsBalance, session.catalog.mealPolicy.foodRequirement(saved))
 
     private fun presentationId(saved: GameState): String =
         "day:${saved.engine?.currentEvent?.id}:${saved.engine?.revision}"
@@ -320,6 +349,10 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
         // Observation can receive the saved pause/result acknowledgement before navigation exits.
         // Keep the outgoing card visible until removal; failed commands unlock and render again.
         if (busy) return
+        if (pendingAction != null) {
+            mutableState.value = mutableState.value.copy(busy = false, retryRequired = true, message = message)
+            return
+        }
         val saved = game ?: return
         val day = saved.engine
         val occurrence = day?.currentEvent
@@ -336,51 +369,32 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
         val primaryBlock = primary?.let { session.engine.blockReason(saved, it) }
         val restFromCard = primary is EngineCommand.FinishDayFromEvent
         val summary = session.engine.daySummary(saved)
-        val purchaseCard = event?.type == EventType.WANT && !result && !restFromCard && summary == null
-        val abilityCopy = event?.takeIf { !result }?.let { storyAbilityCopy(it.id, saved.pet.name) }
-        val purchaseCopy = if (purchaseCard) purchaseCardCopy(checkNotNull(event).id, saved.pet.name) else null
-        // Presentation override for the existing immutable bakery offer. The same
-        // saved event and choices still own its price, feeding and mood effects.
-        val bakeryBunCard = event?.id == "figma-2654-2-purchase-v2" && !result && !restFromCard && summary == null
-        val purchaseArtworkRes = if (event?.type == EventType.WANT && !result && !restFromCard) {
-            when (event.id) {
-                "figma-2654-2-purchase-v2" -> R.drawable.prop_bakery_bun
-                "figma-2654-50-purchase-v2" -> R.drawable.prop_fair_explorer_hat
-                "figma-2654-98-purchase-v2" -> R.drawable.prop_fair_ring_toss
-                "figma-2654-146-purchase-v2" -> R.drawable.prop_fair_compass_keychain
-                "figma-2654-194-purchase-v2" -> R.drawable.prop_fair_toy_boat
-                else -> {
-                    val paidChoices = choices.filter { it.moneyDelta < 0 }.map { it.id }.toSet()
-                    catalog.content.choiceItemEffects.asSequence()
-                        .filter { it.choiceId in paidChoices && it.operation == ItemOperation.ADD }
-                        .mapNotNull { PetCosmetics.forItem(it.itemId)?.lookId?.let(::cosmeticArtwork) }
-                        .firstOrNull()
-                }
-            }
-        } else null
-        // Lore does not become a money decision just because it has several
-        // replies or needs effort. Only a monetary consequence needs this summary.
-            val simpleStoryAction = event?.type == EventType.STORY && !result && choices.size == 1 &&
+        val presentation = card?.presentation ?: EventPresentation()
+        // Presentation does not bypass gameplay guards or turn a paid/work choice into an introduction.
+        val simpleStoryAction = event?.type == EventType.STORY && !result && choices.size == 1 &&
             event.moneyDeltaOnStart == 0L && choices.single().moneyDelta == 0L &&
             catalog.policies.getValue(event.id).energyFor(choices.single().id) == 0
-        val storyIntroduction = simpleStoryAction && event?.id == catalog.introductionId && summary == null
+        val layout = if (!result && !restFromCard && summary == null &&
+            (presentation.layout != EventLayout.INTRODUCTION || simpleStoryAction)) presentation.layout else EventLayout.SCENE
+        val purchaseCard = layout == EventLayout.PURCHASE
+        val purchaseArtworkRes = eventMediaArtwork(presentation.media.artworkKey).takeIf { purchaseCard }
+        val storyIntroduction = layout == EventLayout.INTRODUCTION
         val completedChoice = occurrence?.let { active -> saved.story.decisions.find { it.id == "${active.id}:decision" } }
             ?.let { decision -> catalog.content.choices.find { it.id == decision.choiceId } }
         val body = when {
             summary != null -> "${saved.pet.name} отдыхает."
             result -> if (event?.type == EventType.EARNING) "Дело выполнено. Получено ${completedChoice?.moneyDelta ?: 0} монет."
                 else "Этот шаг истории завершён."
-            storyIntroduction -> "Смотритель зовёт нас на Ночь наблюдений.\n\nПоможем подготовить телескоп и разгадаем старые загадки."
-            purchaseCopy != null -> purchaseCopy.body
-            abilityCopy != null -> abilityCopy.body
-            event != null -> renderPetText(variant?.body ?: event.description, saved.pet.name).asGameUiText()
+            event != null -> renderPetText(presentation.body ?: variant?.body ?: event.description, saved.pet.name).asGameUiText()
             day == null -> ""
             day.phase == DayPhase.READY_TO_END -> "Все события на сегодня закончились. До сна ещё можно выполнить короткое дело из списка «Дела»."
             else -> ""
         }
-        val mealPrice = catalog.meals.first { it.price > 0 }.price
-        val foodWarning = if (!bakeryBunCard && day?.ateToday == false && choices.any {
-            it.moneyDelta < 0 && blocked[it.id] == null && saved.economy.availableBalance + it.moneyDelta < mealPrice
+        val mealPrice = catalog.mealPolicy.basicMeal.price
+        val feedingChoices = event?.let { catalog.policies.getValue(it.id).feedsPetChoiceIds }.orEmpty()
+        val foodWarning = if (day?.ateToday == false && choices.any {
+            it.id !in feedingChoices && it.moneyDelta < 0 && blocked[it.id] == null &&
+                saved.economy.availableBalance + it.moneyDelta < mealPrice
         }) "После этой траты на обычный обед не хватит. ${saved.pet.name} ещё не поел сегодня." else null
         // Derive the explanation from the same guards that replace the button. Keep it separate
         // from transient feedback so a save error or feeding message cannot hide the current need.
@@ -410,8 +424,8 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
             reflectionAvailable = summary != null && summary.day == reflectionDay,
             restingPetRes = summary?.let { restingPetArtwork(saved.pet) },
             resourcePriority = resourcePriority,
-            storyIntroduction = storyIntroduction,
-            bakeryBunCard = bakeryBunCard,
+            layout = layout,
+            locationTitle = renderPetText(presentation.locationTitle ?: card?.category.orEmpty(), saved.pet.name),
             purchaseArtworkRes = purchaseArtworkRes,
             deedDeadline = offeredDeed?.let { offer -> when (offer.expiresDay - checkNotNull(day).day) {
                 0 -> "Успеть до конца сегодня"
@@ -419,15 +433,15 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
                 else -> "Можно выполнить до конца дня ${offer.expiresDay}"
             } },
             pet = PetEventCondition.forPresentation(saved, session.catalog.policies).toAdventurePetPresentation(),
-            eventArtwork = eventSceneArtwork(event?.id, variant?.character ?: card?.character),
-            eventBackgroundRes = eventSceneBackground(event?.id, variant?.scene ?: card?.scene),
+            eventArtwork = presentation.media.sceneArtwork(event?.let(catalog::displayTitle).orEmpty())
+                ?: eventSceneArtwork(event?.id, variant?.character ?: card?.character),
+            eventBackgroundRes = eventMediaArtwork(presentation.media.sceneKey)
+                ?: eventSceneBackground(event?.id, presentation.media.sceneKey ?: variant?.scene ?: card?.scene),
             practiceRequired = blocked.values.any { it is BlockReason.FinancialPracticeRequired } || primaryBlock is BlockReason.FinancialPracticeRequired,
             title = when {
                 summary != null -> "День ${summary.day} завершён"
                 result -> "Готово!"
-                purchaseCopy != null -> purchaseCopy.title
-                abilityCopy != null -> abilityCopy.title
-                event != null -> renderPetText(event.title, saved.pet.name).asGameUiText()
+                event != null -> renderPetText(catalog.displayTitle(event), saved.pet.name).asGameUiText()
                 primaryBlock == BlockReason.MustEat -> "Пора подкрепиться"
                 primary == EngineCommand.FinishDay -> "Пора отдохнуть"
                 day == null -> "Начнём приключение"
@@ -436,17 +450,14 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
             body = if (event == null && summary == null && actionNotice != null) "" else body,
             category = if (summary != null) "Итоги дня" else card?.category?.let { renderPetText(it, saved.pet.name).asGameUiText() } ?: saved.pet.name,
             impact = if (result || storyIntroduction || purchaseCard) "" else if (isDeed(saved)) "Награда: до ${choices.single().moneyDelta} монет" else renderPetText(card?.impact.orEmpty(), saved.pet.name).asGameUiText(),
-            effort = if (result || simpleStoryAction || bakeryBunCard) "" else
+            effort = if (result || simpleStoryAction || !presentation.showEffort) "" else
                 renderPetText(card?.effort.orEmpty(), saved.pet.name).asGameUiText().takeUnless {
                     it in setOf("Без траты сил", "Без трат сил", "Без расхода сил", "Не тратит силы", "Можно отказаться")
                 }.orEmpty(),
             scene = variant?.scene ?: card?.scene, character = variant?.character ?: card?.character,
             options = (if (restFromCard) emptyList() else choices).map { DayOption(it.id, if (isDeed(saved)) {
                 if (goalSelected) "Заработать на цель" else "Выполнить дело"
-            } else if (storyIntroduction) "В обсерваторию" else if (purchaseCard) {
-                if (it.moneyDelta < 0) purchaseCopy?.action ?: "Купить" else "Пройти мимо"
-            } else abilityCopy?.action?.takeIf { _ -> choices.size == 1 }
-                ?: renderPetText(it.text, saved.pet.name).asGameActionLabel(),
+            } else renderPetText(catalog.displayAction(it), saved.pet.name).asGameActionLabel(),
                 blocked[it.id] == BlockReason.MustEat, blocked[it.id] == null || blocked[it.id] == BlockReason.MustEat,
                 if (it.moneyDelta < 0 && blocked[it.id] !is BlockReason.InsufficientMoney)
                     EconomyOperations.quote(saved.economy, Math.negateExact(it.moneyDelta),
@@ -469,12 +480,12 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
             primarySpending = if (occurrence == null && primary != null && primaryBlock != BlockReason.MustEat)
                 session.previewAdvanceSpending(saved)?.let { it.quote.playerDescription(it.kind) } else null,
             showMeals = mealsShown,
-            meals = catalog.meals.filter { it.price > 0 || saved.economy.availableBalance < catalog.meals.first().price }.map {
+            meals = catalog.mealPolicy.choices(saved).map {
                 val quote = EconomyOperations.quote(saved.economy, it.price, SpendingKind.FEEDING)
                 MealOption(it.id, if (it.price == 0L) "Поесть бесплатно" else "Обычный обед за ${it.price} монет",
                     session.engine.blockReason(saved, EngineCommand.Feed(it.id)) == null,
                     quote.playerDescription(SpendingKind.FEEDING),
-                    "После еды сегодня понадобится отдых. Утром будем немного уставшими.".takeIf { _ -> it.price == 0L })
+                    "После еды сегодня понадобится отдых. Утром будем немного уставшими.".takeIf { _ -> catalog.mealPolicy.effects(it.id).exhaustsCurrentEnergy })
             }, message = effectiveMessage, actionNotice = actionNotice,
         )
     }

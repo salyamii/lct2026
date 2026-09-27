@@ -81,13 +81,15 @@ internal fun MovingPetArtwork(
                         contentScale = ContentScale.FillBounds)
                 }
                 GameArtwork(frameArtwork, if (currentFrame) metadata.description else null, Modifier.fillMaxSize().graphicsLayer {
-                    val pose = if (active) petIdlePose(phase.value, metadata.intensity) else PetMotionPose()
                     transformOrigin = TransformOrigin(grounding?.centerX ?: .5f, grounding?.contactY ?: .91f)
-                    translationX = size.width * pose.x
                     translationY = grounding?.let { size.height * (floor - it.contactY) } ?: 0f
-                    scaleX = pose.scaleX
-                    scaleY = pose.scaleY
-                    rotationZ = pose.rotation
+                    // Read animation state in the layer, with no per-frame pose object.
+                    withPetIdlePose(if (active) phase.value else 0f, metadata.intensity) { x, sx, sy, rotation ->
+                        translationX = size.width * x
+                        scaleX = sx
+                        scaleY = sy
+                        rotationZ = rotation
+                    }
                 })
             }
         }
@@ -106,13 +108,18 @@ internal data class PetMotionPose(
 
 /** Four slow breaths and a small weight shift; the loop closes without displacement. */
 internal fun petIdlePose(phase: Float, intensity: Float = 1f): PetMotionPose {
+    return withPetIdlePose(phase, intensity, ::PetMotionPose)
+}
+
+private inline fun <T> withPetIdlePose(phase: Float, intensity: Float,
+    block: (x: Float, scaleX: Float, scaleY: Float, rotation: Float) -> T): T {
     val angle = phase * 2f * PI.toFloat()
     val breath = (1f - cos(angle * 4f)) * .5f
     val sway = sin(angle)
-    return PetMotionPose(
-        x = sway * .003f * intensity,
-        scaleX = 1f - breath * .004f * intensity,
-        scaleY = 1f + breath * .012f * intensity,
-        rotation = sway * .65f * intensity,
+    return block(
+        sway * .003f * intensity,
+        1f - breath * .004f * intensity,
+        1f + breath * .012f * intensity,
+        sway * .65f * intensity,
     )
 }

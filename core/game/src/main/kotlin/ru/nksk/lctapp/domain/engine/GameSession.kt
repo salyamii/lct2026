@@ -27,6 +27,7 @@ data class EventCardCopy(
     val variants: List<EventCardVariant> = emptyList(),
     /** Short past-tense outcomes keyed by the choice actually made, for the day recap. */
     val summaryByChoiceId: Map<String, String> = emptyMap(),
+    val presentation: EventPresentation = EventPresentation(),
 )
 
 data class GameCatalog(
@@ -45,6 +46,9 @@ data class GameCatalog(
     /** Direct old -> current IDs for compatible, unresolved scheduled occurrences only. */
     val eventReplacements: Map<String, String> = emptyMap(),
 ) {
+    // A derived helper has no backing field, so it does not become authored fingerprint data.
+    val mealPolicy: MealPolicy get() = MealPolicy(meals)
+
     fun storyProgress(state: GameState) = StoryProgress(content, policies, goals, storyCampaign, state)
 
     // Existing saves keep their current day reference; only a finale changes its chapter.

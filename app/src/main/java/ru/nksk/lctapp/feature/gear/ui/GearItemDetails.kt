@@ -29,6 +29,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -202,6 +203,9 @@ private fun GearDetailArtwork(resource: Int, title: String, zoomable: Boolean) {
     var scale by remember { mutableFloatStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
     var viewport by remember { mutableStateOf(IntSize.Zero) }
+    // The image layer follows every gesture frame; controls only change at the limits.
+    val canZoomOut by remember { derivedStateOf { scale > 1f } }
+    val canZoomIn by remember { derivedStateOf { scale < 5f } }
 
     fun bounded(position: Offset, zoom: Float): Offset {
         val maxX = viewport.width * (zoom - 1f) / 2f
@@ -277,7 +281,7 @@ private fun GearDetailArtwork(resource: Int, title: String, zoomable: Boolean) {
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 TextButton(
-                    onClick = { changeScale(scale / 1.5f) }, enabled = scale > 1f,
+                    onClick = { changeScale(scale / 1.5f) }, enabled = canZoomOut,
                     modifier = Modifier.heightIn(min = 48.dp).semantics { contentDescription = "Уменьшить изображение" },
                     colors = ButtonDefaults.textButtonColors(contentColor = GearColors.Ink),
                 ) { Text("−", fontSize = 24.sp) }
@@ -287,7 +291,7 @@ private fun GearDetailArtwork(resource: Int, title: String, zoomable: Boolean) {
                     colors = ButtonDefaults.textButtonColors(contentColor = GearColors.Ink),
                 ) { Text("Целиком", fontFamily = Nunito) }
                 TextButton(
-                    onClick = { changeScale(scale * 1.5f) }, enabled = scale < 5f,
+                    onClick = { changeScale(scale * 1.5f) }, enabled = canZoomIn,
                     modifier = Modifier.heightIn(min = 48.dp).semantics { contentDescription = "Увеличить изображение" },
                     colors = ButtonDefaults.textButtonColors(contentColor = GearColors.Ink),
                 ) { Text("+", fontSize = 24.sp) }

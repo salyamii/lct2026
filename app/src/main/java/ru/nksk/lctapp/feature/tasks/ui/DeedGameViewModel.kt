@@ -5,7 +5,6 @@ import ru.nksk.lctapp.domain.pet.renderPetText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -16,6 +15,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import ru.nksk.lctapp.core.ui.game.GameActionAttempt
 import ru.nksk.lctapp.core.ui.game.playerMessage
 import ru.nksk.lctapp.core.ui.game.deedCompletionMessage
 import ru.nksk.lctapp.core.ui.game.eventCompletionMessage
@@ -51,7 +51,11 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
     private var observer: Job? = null
     private var busy = false
     private var message: String? = null
-    private var pending: EngineCommand? = null
+    private class PendingAction(val before: GameState, val command: EngineCommand) {
+        var attempt: GameActionAttempt? = null
+    }
+    private var pending: PendingAction? = null
+    private var rejectedAction: EngineCommand? = null
     private val comparisonEvidence = linkedMapOf<String, PriceQuizEvidence>()
     private val comparisonWrites = Mutex()
     private var comparisonWriter: Job? = null
@@ -83,7 +87,7 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
     fun finishPrecision(state: TargetStopState) { DeedGameScore.fromPrecision(state)?.let(::finish) }
 
     private fun finish(score: DeedGameScore) {
-        if (busy || pending != null) return
+        if (busy || pending != null || rejectedAction != null) return
         val id = occurrenceId ?: return
         execute(choiceId?.let { EngineCommand.CompleteStoryGame(id, it, score) }
             ?: EngineCommand.CompleteDeed(id, score))
@@ -91,6 +95,7 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
 
     fun leave() {
         if (busy) return
+        if (pending != null) { exit(); return }
         if (latest == null) {
             leaveWhenLoaded = true
             occurrenceId?.let { load(it, choiceId) }
@@ -104,7 +109,10 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
 
     fun retry() {
         if (busy) return
-        pending?.let(::execute) ?: if (comparisonSaveFailed) persistComparisonAnswers() else occurrenceId?.let { load(it, choiceId) }
+        pending?.let { submit(it); return }
+        // A definite stale rejection can be retried only as an explicit new intent.
+        rejectedAction?.let { execute(it); return }
+        if (comparisonSaveFailed) persistComparisonAnswers() else occurrenceId?.let { load(it, choiceId) }
     }
 
     fun recordComparisonAnswers(evidence: PriceQuizEvidence) {
@@ -158,7 +166,16 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
     private fun execute(command: EngineCommand) {
         val game = latest ?: return
         if (busy) return
-        pending = command
+        rejectedAction = null
+        val action = PendingAction(game, command)
+        pending = action
+        submit(action)
+    }
+
+    private fun submit(action: PendingAction) {
+        if (busy) return
+        val game = action.before
+        val command = action.command
         busy = true
         message = null
         mutableState.value = mutableState.value.copy(busy = true, message = null,
@@ -168,23 +185,37 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
             try {
                 flushComparisonAnswers()
                 comparisonSaveFailed = false
-                val evidence = if (command is EngineCommand.CompleteStoryGame)
-                    eventGameStartEvidence(session.history(), game, command) else null
-                val submitted = if (command is EngineCommand.CompleteStoryGame)
-                    command.copy(resourcePriorityOfferId = evidence?.priorityOfferId) else command
-                when (val result = session.dispatch(EngineRequest(UUID.randomUUID().toString(), game.engine?.revision, submitted, evidence?.context))) {
+                val attempt = action.attempt ?: run {
+                    val evidence = if (command is EngineCommand.CompleteStoryGame)
+                        eventGameStartEvidence(session.history(), game, command) else null
+                    val submitted = if (command is EngineCommand.CompleteStoryGame)
+                        command.copy(resourcePriorityOfferId = evidence?.priorityOfferId) else command
+                    GameActionAttempt.prepare(game, submitted, evidence?.context).also { action.attempt = it }
+                }
+                when (val result = attempt.submit(session)) {
                     is EngineResult.Applied -> {
+                        pending = null
                         latest = result.state
                         leaving = true
-                        // Applied validates this snapshot's revision; the delta is the committed payout.
+                        val committed = attempt.committedState(session, result.state)
                         exits.send(when (command) {
-                            is EngineCommand.CompleteDeed -> deedCompletionMessage(result.state.economy.balance - game.economy.balance)
-                            is EngineCommand.CompleteStoryGame -> eventCompletionMessage(game, result.state,
-                                EngineCommand.CompleteEvent(command.occurrenceId, command.choiceId), session.catalog)
+                            is EngineCommand.CompleteDeed -> committed?.let {
+                                deedCompletionMessage(it.economy.balance - game.economy.balance)
+                            } ?: "Дело выполнено!"
+                            is EngineCommand.CompleteStoryGame -> committed?.let {
+                                eventCompletionMessage(game, it,
+                                    EngineCommand.CompleteEvent(command.occurrenceId, command.choiceId), session.catalog)
+                            } ?: "Готово!"
                             else -> null
                         })
                     }
-                    is EngineResult.Blocked -> message = result.reason.playerMessage(game.pet.name)
+                    is EngineResult.Blocked -> {
+                        pending = null
+                        if (result.reason == BlockReason.StaleRevision) {
+                            rejectedAction = command
+                            message = "Игра изменилась. Нажми «Повторить», чтобы заново проверить и сохранить действие."
+                        } else message = result.reason.playerMessage(game.pet.name)
+                    }
                 }
             } catch (cancelled: CancellationException) { throw cancelled
             } catch (_: Exception) { message = "Не удалось сохранить результат. Нажми «Повторить»."
@@ -203,6 +234,11 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
 
     private fun render() {
         if (busy) return
+        if (pending != null) {
+            mutableState.value = mutableState.value.copy(busy = false, message = message, canRetry = true,
+                presentation = mutableState.value.presentation?.copy(canPlay = false))
+            return
+        }
         val game = latest ?: return
         if (leaveWhenLoaded) {
             leaveWhenLoaded = false
@@ -222,8 +258,8 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
         val event = session.catalog.content.events.single { it.id == occurrence.eventId }
         val reward = if (choiceId == null) session.catalog.content.choices.single { it.eventId == event.id }.moneyDelta else 0L
         val storyGame = choiceId != null
-        val theme = if (storyGame) storyGameTheme(event.id) else null
         val card = session.catalog.cards[event.id]
+        val theme = if (storyGame) card?.presentation?.media?.let(::storyGameTheme) else null
         mutableState.value = DeedGameUiState(
             loading = false,
             type = when (kind) {
@@ -242,7 +278,7 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
                 activityArtworkRes = theme?.objectRes ?: eventSceneArtwork(event.id, card?.character)?.resource,
                 pairArtwork = theme?.pairs.orEmpty()),
             message = message,
-            canRetry = pending != null || comparisonSaveFailed,
+            canRetry = pending != null || rejectedAction != null || comparisonSaveFailed,
         )
     }
 

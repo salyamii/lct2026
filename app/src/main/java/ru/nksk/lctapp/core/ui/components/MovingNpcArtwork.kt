@@ -8,6 +8,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
@@ -29,7 +30,7 @@ internal fun MovingNpcArtwork(
     description: String?,
     modifier: Modifier = Modifier,
 ) {
-    val contact = npcArtworkContact(artwork)
+    val contact = remember(artwork) { npcArtworkContact(artwork) }
     val lifecycle by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
     val active = contact != null && lifecycle.isAtLeast(Lifecycle.State.RESUMED) && !LocalInspectionMode.current
     // Compose's transition clock also respects the system animator duration scale.
@@ -39,11 +40,12 @@ internal fun MovingNpcArtwork(
     } else rememberUpdatedState(0f)
 
     GameArtwork(artwork, description, modifier.graphicsLayer {
-        val pose = if (active) npcIdlePose(phase.value) else NpcMotionPose()
         transformOrigin = contact?.fittedPivot(size.width, size.height) ?: TransformOrigin.Center
-        scaleX = pose.scaleX
-        scaleY = pose.scaleY
-        rotationZ = pose.rotation
+        withNpcIdlePose(if (active) phase.value else 0f) { sx, sy, rotation ->
+            scaleX = sx
+            scaleY = sy
+            rotationZ = rotation
+        }
     }, contentScale = ContentScale.Fit)
 }
 
@@ -54,12 +56,17 @@ internal data class NpcMotionPose(
 )
 
 internal fun npcIdlePose(phase: Float): NpcMotionPose {
+    return withNpcIdlePose(phase, ::NpcMotionPose)
+}
+
+private inline fun <T> withNpcIdlePose(phase: Float,
+    block: (scaleX: Float, scaleY: Float, rotation: Float) -> T): T {
     val angle = phase * 2f * PI.toFloat()
     val breath = (1f - cos(angle * 4f)) * .5f
-    return NpcMotionPose(
-        scaleX = 1f - breath * .002f,
-        scaleY = 1f + breath * .008f,
-        rotation = sin(angle) * .3f,
+    return block(
+        1f - breath * .002f,
+        1f + breath * .008f,
+        sin(angle) * .3f,
     )
 }
 

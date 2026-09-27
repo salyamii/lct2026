@@ -4,11 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.selection.selectableGroup
 import ru.nksk.lctapp.core.ui.components.GameQuizOption
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,43 +26,26 @@ import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.core.ui.components.AdventureBody
 import ru.nksk.lctapp.core.ui.components.AdventureHeading
 import ru.nksk.lctapp.core.ui.components.GameInk
-import ru.nksk.lctapp.core.ui.components.GamePaper
-import ru.nksk.lctapp.core.ui.game.BudgetHistoryDetails
-import ru.nksk.lctapp.core.ui.game.BudgetHistoryUi
 import ru.nksk.lctapp.core.ui.game.asGameUiText
-import ru.nksk.lctapp.core.ui.theme.AdventureLime
-import ru.nksk.lctapp.core.ui.theme.AdventureNight
 import ru.nksk.lctapp.domain.finance.FinancialQuestion
 import ru.nksk.lctapp.domain.finance.FinancialQuestionKind
 
-private val PracticeBorder = Color(0xFFDBD7E9)
-private val PracticeDisabled = Color(0xFFEAE6F0)
-
 @Composable
-internal fun LearningScreen(state: LearningUiState, onAction: (LearningAction) -> Unit, onBack: () -> Unit,
-    onOpenBudget: () -> Unit = {}, mode: LearningPageMode = LearningPageMode.TRAINING) {
-    if (mode == LearningPageMode.REFLECTION || state.chronoscopeStep != null) {
-        if (state.chronoscopeStep != null) ChronoscopeScreen(state, onAction, onBack)
-        else LearningPage("А что, если…", onBack) { learningStatus(state, onAction) }
-        return
-    }
-    if (mode == LearningPageMode.HISTORY) {
-        LearningHistoryScreen(state, onAction, onBack)
-        return
-    }
+internal fun TrainingScreen(state: TrainingUiState, onAction: (TrainingAction) -> Unit, onBack: () -> Unit,
+    onOpenBudget: () -> Unit = {}) {
     val question = state.question.takeIf { state.practiceOpen }
     val closeQuestion = {
         if (!state.busy) {
             if (state.needsBudgetPlanning || state.practiceRetryRequired) onBack()
-            else onAction(LearningAction.CloseQuestion)
+            else onAction(TrainingAction.CloseQuestion)
         }
     }
     BackHandler(enabled = question != null) { closeQuestion() }
     if (question != null) {
         key(question.id) { PracticeQuestionScreen(state, question, onAction, closeQuestion, onOpenBudget) }
     } else LearningPage("Тренировка навыков", onBack) {
-        learningStatus(state, onAction)
-        if (!state.loading && state.realGame != null) {
+        learningStatus(state.loading, state.busy, state.error, state.practiceRetryRequired) { onAction(TrainingAction.Retry) }
+        if (!state.loading && state.hasGame) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                     GameArtwork(R.drawable.menu_tasks, null, Modifier.size(76.dp))
@@ -116,8 +95,8 @@ private fun TrainingTopic(kind: FinancialQuestionKind, resumeAt: Int?, enabled: 
 }
 
 @Composable
-private fun PracticeQuestionScreen(state: LearningUiState, question: FinancialQuestion,
-    onAction: (LearningAction) -> Unit, onBack: () -> Unit, onOpenBudget: () -> Unit) {
+private fun PracticeQuestionScreen(state: TrainingUiState, question: FinancialQuestion,
+    onAction: (TrainingAction) -> Unit, onBack: () -> Unit, onOpenBudget: () -> Unit) {
     var retrying by rememberSaveable(question.id, question.attempts) { mutableStateOf(false) }
     val series = question.series
     val advancing = question.correct && series != null
@@ -135,7 +114,7 @@ private fun PracticeQuestionScreen(state: LearningUiState, question: FinancialQu
         questionCoordinates[part] = coordinates
         if (showingQuestion && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) &&
             questionExposure.record(part, coordinates.fullyVisibleForPractice())) {
-            onAction(LearningAction.QuestionPresented(question.id))
+            onAction(TrainingAction.QuestionPresented(question.id))
         }
     }
     LaunchedEffect(showingQuestion, lifecycleState, questionExposure) {
@@ -143,14 +122,10 @@ private fun PracticeQuestionScreen(state: LearningUiState, question: FinancialQu
             questionCoordinates.toList().forEach { (part, coordinates) -> recordQuestionPart(part, coordinates) }
         }
     }
-    LaunchedEffect(question.id, advancing, enabled) {
-        if (advancing && enabled && state.error == null) {
-            if (series?.isLast == true) onAction(question.kind.startAction())
-            else onAction(LearningAction.NextQuestion(question.id))
-        }
-    }
+    val automaticAdvance = state.automaticAdvance(lifecycleState.isAtLeast(Lifecycle.State.RESUMED))
+    LaunchedEffect(automaticAdvance) { automaticAdvance?.let(onAction) }
     LearningPage(question.kind.trainingTitle(), onBack, backEnabled = !state.busy) {
-        learningStatus(state, onAction)
+        learningStatus(state.loading, state.busy, state.error, state.practiceRetryRequired) { onAction(TrainingAction.Retry) }
         if (state.needsBudgetPlanning) item { BudgetReminder(true, !state.busy && !state.practiceRetryRequired, onOpenBudget) }
         if (advancing) {
             item { AdventureHeading("Верно!") }
@@ -185,7 +160,7 @@ private fun PracticeQuestionScreen(state: LearningUiState, question: FinancialQu
                 }
                 item {
                     PracticeButton("Ответить", enabled && selectedAnswer != null) {
-                        selectedAnswer?.let { onAction(LearningAction.Answer(it)) }
+                        selectedAnswer?.let { onAction(TrainingAction.Answer(it)) }
                     }
                 }
             }
@@ -214,131 +189,11 @@ private fun FinancialQuestionKind.trainingArtwork(): Int = when (this) {
     FinancialQuestionKind.SAVING_PRACTICE -> R.drawable.budget_savings
 }
 
-private fun FinancialQuestionKind.startAction(): LearningAction = when (this) {
-    FinancialQuestionKind.PLAN_REVIEW -> LearningAction.Review
-    FinancialQuestionKind.CONSEQUENCE -> LearningAction.ReviewConsequences
-    FinancialQuestionKind.TRANSACTION_ACCOUNTING -> LearningAction.ReviewTransactions
-    FinancialQuestionKind.SAVING_PRACTICE -> LearningAction.PracticeSaving
-}
-
-@Composable
-private fun LearningHistoryScreen(state: LearningUiState, onAction: (LearningAction) -> Unit, onBack: () -> Unit) {
-    LearningPage("История приключения", onBack) {
-        learningStatus(state, onAction)
-        if (!state.loading && state.realGame?.financial?.plans?.isNotEmpty() == true) item {
-            CoinMovementHistory(state.coinMovements)
-        }
-        if (state.periods.isEmpty() && state.operations.isEmpty() && !state.loading) item {
-            LearningCard("Первые страницы впереди") {
-                AdventureBody("Здесь сохранятся события приключения, покупки и монеты, которые мы отложим.")
-            }
-        }
-        items(state.periods) { period ->
-            var expanded by rememberSaveable(period.title) { mutableStateOf(false) }
-            LearningCard(period.title) {
-                AdventureBody(period.body.asGameUiText())
-                PracticeButton(if (expanded) "Свернуть подробности" else "План, траты и причины изменений", true, primary = false) {
-                    expanded = !expanded
-                }
-                if (expanded) {
-                    if (period.plan.isNotEmpty()) AdventureBody(period.plan.asGameUiText())
-                    period.actual.forEach { AdventureBody(it.asGameUiText()) }
-                    period.note?.let { AdventureBody(it.asGameUiText()) }
-                    period.comparisons.forEach { comparison ->
-                        HorizontalDivider(color = PracticeBorder)
-                        Text(comparison.title.asGameUiText(), color = GameInk, style = MaterialTheme.typography.titleMedium)
-                        AdventureBody(comparison.note.asGameUiText())
-                        comparison.rows.forEach { AdventureBody(it.asGameUiText()) }
-                    }
-                }
-            }
-        }
-        if (state.operations.isNotEmpty()) item { AdventureHeading("Последние события") }
-        items(state.operations) { operation -> LearningCard { AdventureBody(operation.asGameUiText()) } }
-    }
-}
-
-@Composable
-private fun CoinMovementHistory(history: BudgetHistoryUi?) {
-    var expanded by rememberSaveable(history?.planId) { mutableStateOf(false) }
-    LearningCard("Движение монет") {
-        PracticeButton(if (expanded) "Свернуть" else "Откуда пришли и куда ушли монеты", true, primary = false) {
-            expanded = !expanded
-        }
-        if (expanded) {
-            if (history != null) {
-                AdventureBody("С последнего сохранения плана.")
-                BudgetHistoryDetails(history)
-            } else {
-                AdventureBody("Не хватает записей, чтобы точно показать движение монет. Сохранённые события можно посмотреть ниже.")
-            }
-        }
-    }
-}
-
-@Composable
-private fun LearningPage(title: String, onBack: () -> Unit, backEnabled: Boolean = true, content: LazyListScope.() -> Unit) {
-    Box(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding().background(GamePaper),
-        contentAlignment = Alignment.TopCenter) {
-        LazyColumn(Modifier.widthIn(max = 680.dp).fillMaxSize(), contentPadding = PaddingValues(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            item {
-                TextButton(onClick = onBack, enabled = backEnabled,
-                    colors = ButtonDefaults.textButtonColors(contentColor = GameInk, disabledContentColor = GameInk),
-                    contentPadding = PaddingValues(horizontal = 0.dp, vertical = 12.dp)) { Text("Назад") }
-                AdventureHeading(title)
-            }
-            content()
-        }
-    }
-}
-
-private fun LazyListScope.learningStatus(state: LearningUiState, onAction: (LearningAction) -> Unit) {
-    if (state.loading || state.busy) item {
-        LearningCard {
-            LinearProgressIndicator(Modifier.fillMaxWidth(), color = GameInk, trackColor = PracticeDisabled)
-            AdventureBody(if (state.loading) "Открываем страницы приключения…" else "Сохраняем…")
-        }
-    }
-    val message = state.error ?: "Сначала сохраним предыдущий шаг. Повтори попытку, чтобы продолжить."
-        .takeIf { state.practiceRetryRequired }
-    message?.let { error -> item {
-        LearningCard("Не получилось завершить действие") {
-            AdventureBody(error.asGameUiText())
-            PracticeButton("Повторить", !state.busy) { onAction(LearningAction.Retry) }
-        }
-    } }
-}
-
-@Composable
-private fun BudgetReminder(needsPlan: Boolean, enabled: Boolean, onOpenBudget: () -> Unit) {
-    LearningCard(if (needsPlan) "Сначала завершим план" else "Теперь уточним план") {
-        AdventureBody(if (needsPlan) "Мы ещё не закончили распределять монеты. Подтверди план, чтобы продолжить разбор."
-            else "Разницу уже разобрали. Распредели оставшиеся монеты с учётом ближайших нужд и подтверди новый план.")
-        PracticeButton(if (needsPlan) "Завершить план" else "Изменить план", enabled, onClick = onOpenBudget)
-    }
-}
-
-@Composable
-private fun LearningCard(title: String? = null, content: @Composable ColumnScope.() -> Unit) {
-    Surface(Modifier.fillMaxWidth(), color = Color.White, contentColor = GameInk,
-        shape = RoundedCornerShape(22.dp), border = BorderStroke(1.dp, PracticeBorder)) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            title?.let { Text(it.asGameUiText(), color = GameInk, style = MaterialTheme.typography.titleLarge) }
-            content()
-        }
-    }
-}
-
-@Composable
-private fun PracticeButton(text: String, enabled: Boolean, primary: Boolean = true, onClick: () -> Unit) {
-    Button(onClick, Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = enabled,
-        shape = RoundedCornerShape(20.dp), border = if (primary) null else BorderStroke(1.dp, PracticeBorder),
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = if (primary) AdventureLime else Color.White,
-            contentColor = GameInk, disabledContainerColor = PracticeDisabled, disabledContentColor = GameInk)) {
-        Text(text, color = GameInk, style = MaterialTheme.typography.bodyLarge)
-    }
+private fun FinancialQuestionKind.startAction(): TrainingAction = when (this) {
+    FinancialQuestionKind.PLAN_REVIEW -> TrainingAction.Review
+    FinancialQuestionKind.CONSEQUENCE -> TrainingAction.ReviewConsequences
+    FinancialQuestionKind.TRANSACTION_ACCOUNTING -> TrainingAction.ReviewTransactions
+    FinancialQuestionKind.SAVING_PRACTICE -> TrainingAction.PracticeSaving
 }
 
 private fun LayoutCoordinates.fullyVisibleForPractice(): Boolean {

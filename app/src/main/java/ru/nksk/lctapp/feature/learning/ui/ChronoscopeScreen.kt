@@ -45,7 +45,15 @@ import ru.nksk.lctapp.domain.timemachine.TimeMachineStatus
 private val PathRule = Color(0xFFE5DCC6)
 
 @Composable
-internal fun ChronoscopeScreen(state: LearningUiState, onAction: (LearningAction) -> Unit, onExit: () -> Unit) {
+internal fun ReflectionScreen(state: ReflectionUiState, onAction: (ReflectionAction) -> Unit, onBack: () -> Unit) {
+    if (state.chronoscopeStep != null) ChronoscopeScreen(state, onAction, onBack)
+    else LearningPage("А что, если…", onBack) {
+        learningStatus(state.loading, state.busy, state.error, onRetry = { onAction(ReflectionAction.Retry) })
+    }
+}
+
+@Composable
+internal fun ChronoscopeScreen(state: ReflectionUiState, onAction: (ReflectionAction) -> Unit, onExit: () -> Unit) {
     val step = state.chronoscopeStep ?: return
     val memory = state.memory
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -58,7 +66,7 @@ internal fun ChronoscopeScreen(state: LearningUiState, onAction: (LearningAction
         questionCoordinates[part] = coordinates
         if (step == ChronoscopeStep.QUIZ && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) &&
             questionExposure?.record(part, coordinates.isFullyVisibleInWindow()) == true) {
-            state.quiz?.id?.let { onAction(LearningAction.ChronoscopeQuestionPresented(it)) }
+            state.quiz?.id?.let { onAction(ReflectionAction.ChronoscopeQuestionPresented(it)) }
         }
     }
     LaunchedEffect(step, lifecycleState, questionExposure) {
@@ -96,7 +104,7 @@ internal fun ChronoscopeScreen(state: LearningUiState, onAction: (LearningAction
         title = title,
         onBack = {
             if (step in setOf(ChronoscopeStep.INTRO, ChronoscopeStep.MOMENTS, ChronoscopeStep.PRESENT)) onExit()
-            else onAction(LearningAction.ChronoscopeBack)
+            else onAction(ReflectionAction.ChronoscopeBack)
         },
         backgroundRes = background,
         available = shown?.economy?.availableBalance?.takeIf { showHistoricalBalance },
@@ -121,7 +129,7 @@ internal fun ChronoscopeScreen(state: LearningUiState, onAction: (LearningAction
         if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth(), color = AdventureLime)
         state.error?.let {
             GameBody(it)
-            SecondaryAction("Повторить", { onAction(LearningAction.Retry) }, enabled = !state.busy)
+            SecondaryAction("Повторить", { onAction(ReflectionAction.Retry) }, enabled = !state.busy)
         }
         when (step) {
             ChronoscopeStep.INTRO, ChronoscopeStep.MOMENTS -> {
@@ -132,7 +140,7 @@ internal fun ChronoscopeScreen(state: LearningUiState, onAction: (LearningAction
                         listOf(ReflectionScope.DAY to "Этот день", ReflectionScope.WEEK to "Эта неделя").forEach { (scope, label) ->
                             FilterChip(
                                 selected = state.reflectionScope == scope,
-                                onClick = { onAction(LearningAction.SetReflectionScope(scope)) },
+                                onClick = { onAction(ReflectionAction.SetReflectionScope(scope)) },
                                 enabled = !state.busy,
                                 label = { Text(label, Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
                                 modifier = Modifier.weight(1f).heightIn(min = 48.dp),
@@ -148,7 +156,7 @@ internal fun ChronoscopeScreen(state: LearningUiState, onAction: (LearningAction
                         style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                     decisions.forEach { decision ->
                         ChoiceAction(renderPetText(decision.title, name).asGameUiText(), !state.busy) {
-                            onAction(LearningAction.SelectMoment(decision.entryId))
+                            onAction(ReflectionAction.SelectMoment(decision.entryId))
                         }
                     }
                 }
@@ -169,7 +177,7 @@ internal fun ChronoscopeScreen(state: LearningUiState, onAction: (LearningAction
                     fontWeight = FontWeight.Bold)
                 it.decision.alternatives.forEach { alternative ->
                     ChoiceAction(renderPetText(alternative.title, name).asGameActionLabel(), !state.busy) {
-                        onAction(LearningAction.Simulate(it.decision.entryId, alternative.id))
+                        onAction(ReflectionAction.Simulate(it.decision.entryId, alternative.id))
                     }
                 }
             }
@@ -200,7 +208,7 @@ internal fun ChronoscopeScreen(state: LearningUiState, onAction: (LearningAction
             ChronoscopeStep.RETRY -> {
                 GameTitle("Посмотрим внимательнее")
                 QuizExplanation(state, onAction, "Сравни, какие действия изменились в двух путях.")
-                SecondaryAction("Ещё раз сравнить пути", { onAction(LearningAction.ComparePaths) }, enabled = !state.busy)
+                SecondaryAction("Ещё раз сравнить пути", { onAction(ReflectionAction.ComparePaths) }, enabled = !state.busy)
             }
             ChronoscopeStep.EXPLANATION -> {
                 GameTitle(if (state.quizAnswer?.correct == true) "Верно!" else "У каждого выбора свои последствия")
@@ -221,17 +229,14 @@ internal fun ChronoscopeScreen(state: LearningUiState, onAction: (LearningAction
 
 @Composable
 private fun SecondaryAction(text: String, onClick: () -> Unit, enabled: Boolean = true) {
-    OutlinedButton(onClick, Modifier.fillMaxWidth().heightIn(min = 52.dp), enabled = enabled,
-        shape = RoundedCornerShape(26.dp), border = BorderStroke(1.dp, GameInk.copy(alpha = .35f)),
+    GameActionButton(text, onClick, enabled = enabled, style = GameActionStyle.SECONDARY,
+        minHeight = 52.dp, shape = RoundedCornerShape(26.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = GameInk, containerColor = Color.White,
-            disabledContainerColor = GameDisabledButtonContainer, disabledContentColor = GameDisabledButtonContent)) {
-        Text(text, style = MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center)
-    }
+        textStyle = MaterialTheme.typography.labelLarge)
 }
 
 @Composable
-private fun QuizScene(state: LearningUiState) {
+private fun QuizScene(state: ReflectionUiState) {
     Box(Modifier.fillMaxSize().background(Brush.verticalGradient(
         listOf(Color(0xFFDAD9E9), Color(0xFFF5F1E7)),
     )), contentAlignment = Alignment.BottomCenter) {
@@ -244,15 +249,22 @@ private fun QuizScene(state: LearningUiState) {
 }
 
 @Composable
-private fun QuizExplanation(state: LearningUiState, onAction: (LearningAction) -> Unit, fallback: String) {
+private fun QuizExplanation(state: ReflectionUiState, onAction: (ReflectionAction) -> Unit, fallback: String) {
     val answer = state.quizAnswer
-    AdventureBody((answer?.explanation ?: fallback).asGameUiText(), Modifier.reportFullyVisible {
-        answer?.submissionId?.let { onAction(LearningAction.ChronoscopeExplanationPresented(answer.quizId, it)) }
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val lifecycleState by lifecycle.currentStateAsState()
+    var coordinates by remember(answer?.quizId, answer?.submissionId) { mutableStateOf<LayoutCoordinates?>(null) }
+    fun recordExplanation() {
+        if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) &&
+            coordinates?.isFullyVisibleInWindow() == true) {
+            answer?.submissionId?.let { onAction(ReflectionAction.ChronoscopeExplanationPresented(answer.quizId, it)) }
+        }
+    }
+    LaunchedEffect(lifecycleState, answer?.quizId, answer?.submissionId) { recordExplanation() }
+    AdventureBody((answer?.explanation ?: fallback).asGameUiText(), Modifier.onGloballyPositioned {
+        coordinates = it
+        recordExplanation()
     })
-}
-
-private fun Modifier.reportFullyVisible(onVisible: () -> Unit): Modifier = onGloballyPositioned { coordinates ->
-    if (coordinates.isFullyVisibleInWindow()) onVisible()
 }
 
 private fun LayoutCoordinates.isFullyVisibleInWindow(): Boolean {
@@ -262,26 +274,26 @@ private fun LayoutCoordinates.isFullyVisibleInWindow(): Boolean {
 }
 
 @Composable
-private fun ChronoscopeActions(state: LearningUiState, selectedOptionId: String?, onAction: (LearningAction) -> Unit, onExit: () -> Unit) {
+private fun ChronoscopeActions(state: ReflectionUiState, selectedOptionId: String?, onAction: (ReflectionAction) -> Unit, onExit: () -> Unit) {
     val step = state.chronoscopeStep ?: return
     if (step == ChronoscopeStep.QUIZ) {
         val quiz = state.quiz
         val selected = selectedOptionId?.takeIf { id -> quiz?.options?.any { it.id == id } == true }
         AdventurePrimaryButton("Ответить", {
-            if (quiz != null && selected != null) onAction(LearningAction.AnswerQuiz(quiz.id, selected))
+            if (quiz != null && selected != null) onAction(ReflectionAction.AnswerQuiz(quiz.id, selected))
         }, enabled = !state.busy && selected != null)
-        SecondaryAction("Посмотреть сравнение", { onAction(LearningAction.ComparePaths) }, enabled = !state.busy)
+        SecondaryAction("Посмотреть сравнение", { onAction(ReflectionAction.ComparePaths) }, enabled = !state.busy)
         SecondaryAction("К приключению", onExit, enabled = !state.busy)
         return
     }
     val primary = when (step) {
         ChronoscopeStep.COMPARISON, ChronoscopeStep.CONSEQUENCES -> when {
-            state.quizAnswer?.correct == true -> "Почему так получилось" to LearningAction.StartQuiz
-            state.quiz != null -> "Почему так получилось?" to LearningAction.StartQuiz
+            state.quizAnswer?.correct == true -> "Почему так получилось" to ReflectionAction.StartQuiz
+            state.quiz != null -> "Почему так получилось?" to ReflectionAction.StartQuiz
             else -> null
         }
-        ChronoscopeStep.RETRY -> "Попробовать ещё раз" to LearningAction.RetryQuiz
-        ChronoscopeStep.UNAVAILABLE -> "Выбрать другой момент" to LearningAction.ShowMoments
+        ChronoscopeStep.RETRY -> "Попробовать ещё раз" to ReflectionAction.RetryQuiz
+        ChronoscopeStep.UNAVAILABLE -> "Выбрать другой момент" to ReflectionAction.ShowMoments
         else -> null
     }
     primary?.let { (text, action) ->
@@ -296,13 +308,13 @@ private fun ChronoscopeActions(state: LearningUiState, selectedOptionId: String?
     }
     when (step) {
         ChronoscopeStep.EXPLANATION -> SecondaryAction("Вспомнить другой момент",
-            { onAction(LearningAction.ShowMoments) }, enabled = !state.busy)
+            { onAction(ReflectionAction.ShowMoments) }, enabled = !state.busy)
         else -> Unit
     }
 }
 
 @Composable
-private fun Horizon(state: LearningUiState) {
+private fun Horizon(state: ReflectionUiState) {
     state.simulation?.let { GameBody(chronoscopeHorizon(it, state.memory?.decision?.day)) }
     state.comparisonBoundary?.let {
         Text(it, color = GameInk.copy(alpha = .7f), style = MaterialTheme.typography.bodyMedium)
@@ -310,7 +322,7 @@ private fun Horizon(state: LearningUiState) {
 }
 
 @Composable
-private fun PathsComparison(state: LearningUiState) {
+private fun PathsComparison(state: ReflectionUiState) {
     val original = state.originalPath ?: return
     val alternative = state.alternativePath ?: return
     val differences = chronoscopeDifferences(original, alternative,
@@ -376,7 +388,7 @@ private fun PathConsequences(title: String, consequences: List<String>) {
 }
 
 @Composable
-private fun ComparisonScene(state: LearningUiState) {
+private fun ComparisonScene(state: ReflectionUiState) {
     // Keep the adventure scene visible; only each pet has a quiet paper backdrop.
     Row(Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)) {

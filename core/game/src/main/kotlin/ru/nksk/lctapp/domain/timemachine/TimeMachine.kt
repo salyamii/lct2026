@@ -285,11 +285,14 @@ class TimeMachine(
                 if (all.none { it.moneyDelta != 0L } && event.moneyDeltaOnStart == 0L && all.map { policy?.energyFor(it.id) }.distinct().size <= 1) return null
                 choices = all.filter { it.id != selected }.map { option ->
                     val work = option.id in policy?.choiceGameKinds.orEmpty()
-                    TimeMachineAlternative("choice:${option.id}", if (work) "${option.text} — если закончить работу" else option.text,
+                    val action = catalog.displayAction(option)
+                    val label = if (action != option.text && option.moneyDelta < 0)
+                        "$action · ${Math.negateExact(option.moneyDelta)} монет" else action
+                    TimeMachineAlternative("choice:${option.id}", if (work) "$label — если закончить работу" else label,
                         if (command is EngineCommand.Choose && !work) EngineCommand.Choose(occurrence.id, option.id) else EngineCommand.CompleteEvent(occurrence.id, option.id),
                         assumesCompletedWork = work)
                 }
-                title = event.title
+                title = catalog.displayTitle(event)
             }
             is EngineCommand.Feed -> {
                 choices = catalog.meals.filter { it.id != command.mealId }.map { TimeMachineAlternative("meal:${it.id}", "Другой обед: ${it.price} монет", EngineCommand.Feed(it.id)) }
@@ -451,7 +454,7 @@ class TimeMachine(
         val orderedOptions = options.sortedBy { HistoryCodec.sha256("${result.resultHash}:${it.id}") }
         val id = "time-quiz:${HistoryCodec.sha256("${result.resultHash}:cause:2") }"
         val public = TimeMachineQuiz(id, requireNotNull(result.simulationId), requireNotNull(result.resultHash), TimeMachineQuizKind.CAUSE,
-            "Вспомним «${event.title}». Почему после выбора «${simulation.alternative.title}» осталось бы на $amount больше?",
+            "Вспомним «${catalog.displayTitle(event)}». Почему после выбора «${simulation.alternative.title}» осталось бы на $amount больше?",
             orderedOptions, answerAlreadyShown = true)
         val explanation = if (work) {
             "В этой ситуации мы заплатили $amount за помощь. При выборе «${simulation.alternative.title}» выполнили бы работу сами и потратили $energy. Монеты остались бы у нас."

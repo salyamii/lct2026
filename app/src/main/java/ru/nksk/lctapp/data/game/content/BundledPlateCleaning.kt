@@ -1,6 +1,9 @@
 package ru.nksk.lctapp.data.game.content
 
 import ru.nksk.lctapp.domain.engine.GameCatalog
+import ru.nksk.lctapp.domain.content.EventSpec
+import ru.nksk.lctapp.domain.content.EventChoiceSpec
+import ru.nksk.lctapp.domain.minigame.DeedGameKind
 
 internal const val LEGACY_PLATE_CLEANING = "figma-2326-160-v2"
 internal const val PLATE_CLEANING = "figma-2326-160-v3"
@@ -11,25 +14,20 @@ internal fun GameCatalog.withPlateCleaningChoice(): GameCatalog {
     val paid = content.choices.single { it.eventId == original.id }
     val policy = policies.getValue(original.id)
     val card = cards.getValue(original.id)
-    return copy(
-        content = content.copy(
-            events = content.events + original.copy(id = PLATE_CLEANING,
-                description = "На звёздной пластине появился налёт. Можно очистить её специальным составом или аккуратно оттереть самому. Ручная очистка отнимет силы."),
-            choices = content.choices + listOf(
-                paid.copy(id = "$PLATE_CLEANING:pay", eventId = PLATE_CLEANING,
-                    text = "Очистить составом · 3 монеты"),
-                paid.copy(id = "$PLATE_CLEANING:work", eventId = PLATE_CLEANING,
-                    position = 1, text = "Почистить самому · 2 силы", moneyDelta = 0),
-            ),
+    val spec = EventSpec(
+        definition = original.copy(id = PLATE_CLEANING,
+            description = "На звёздной пластине появился налёт. Можно очистить её специальным составом или аккуратно оттереть самому. Ручная очистка отнимет силы."),
+        choices = listOf(
+            EventChoiceSpec("pay", "Очистить составом · 3 монеты", paid.moneyDelta,
+                recap = "Очистили звёздную пластину составом"),
+            EventChoiceSpec("work", "Почистить самому · 2 силы", energyCost = 2, gameKind = DeedGameKind.PRECISION,
+                recap = "Почистили звёздную пластину сами"),
         ),
-        policies = policies + (PLATE_CLEANING to policy.copy(
-            choiceEnergyCosts = mapOf("$PLATE_CLEANING:work" to 2),
-            scheduling = policy.scheduling.copy(previousEventIds = policy.scheduling.previousEventIds + original.id),
-        )),
-        cards = cards + (PLATE_CLEANING to card.copy(impact = "", effort = "", summaryByChoiceId = mapOf(
-            "$PLATE_CLEANING:pay" to "Очистили звёздную пластину составом",
-            "$PLATE_CLEANING:work" to "Почистили звёздную пластину сами",
-        ))),
+        policy = policy.copy(scheduling = policy.scheduling.copy(previousEventIds = policy.scheduling.previousEventIds + original.id)),
+        card = card.copy(impact = "", effort = "", summaryByChoiceId = emptyMap(),
+            presentation = card.presentation.copy(media = card.presentation.media.copy(game = StoryGamePresentation.CLEAN_TARNISHED_PLATE.media))),
+    )
+    return withEventSpecs(listOf(spec)).copy(
         dailyEventPool = dailyEventPool.map { if (it == original.id) PLATE_CLEANING else it },
         eventReplacements = eventReplacements + (original.id to PLATE_CLEANING),
     )
