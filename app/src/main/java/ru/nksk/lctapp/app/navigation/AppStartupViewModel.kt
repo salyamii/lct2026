@@ -43,8 +43,8 @@ internal class AppStartupViewModel @Inject constructor(
     private var work: Job? = null
     private val writes = Mutex()
     private var selectedAccessory = "BACKPACK"
-    private var selectedGoalId: String? = null
-    val goalIds: List<String> = session.onboardingGoals.map { it.goalId }
+    private var selectedSavingItemId: String? = null
+    val savingItemIds: List<String> = session.onboardingSavingItemIds
 
     init { retry() }
 
@@ -53,16 +53,20 @@ internal class AppStartupViewModel @Inject constructor(
         state.value = AppStartupState.Loading
         work = viewModelScope.launch {
             try {
-                state.value = if (session.read() != null) AppStartupState.Ready
-                else drafts.read()?.let {
+                state.value = if (session.read() != null) {
+                    // Reconcile owned starter equipment before restoring any destination,
+                    // including an inventory route that bypasses the menu entry.
+                    session.prepare()
+                    AppStartupState.Ready
+                } else drafts.read()?.let {
                     selectedAccessory = it.accessoryId
-                    selectedGoalId = it.goalId
+                    selectedSavingItemId = it.savingItemId
                     when (it.step) {
                         OnboardingStep.Profile -> AppStartupState.Customize(it.profile)
                         OnboardingStep.Accessories -> AppStartupState.Accessories(it)
                         OnboardingStep.GoalBriefing -> AppStartupState.GoalBriefing(it)
                         OnboardingStep.GoalSelection -> AppStartupState.GoalSelection(it)
-                        OnboardingStep.Introduction -> if (it.goalId in goalIds) AppStartupState.Introduction(it)
+                        OnboardingStep.Introduction -> if (it.savingItemId in savingItemIds) AppStartupState.Introduction(it)
                             else AppStartupState.GoalSelection(it.copy(step = OnboardingStep.GoalSelection))
                     }
                 } ?: AppStartupState.Choose()
@@ -81,9 +85,9 @@ internal class AppStartupViewModel @Inject constructor(
         work = viewModelScope.launch {
             try {
                 selectedAccessory = "BACKPACK"
-                selectedGoalId = null
+                selectedSavingItemId = null
                 val draft = PetCustomization(name = "")
-                writes.withLock { drafts.save(OnboardingDraft(draft, accessoryId = selectedAccessory, goalId = selectedGoalId)) }
+                writes.withLock { drafts.save(OnboardingDraft(draft, accessoryId = selectedAccessory, savingItemId = selectedSavingItemId)) }
                 state.value = AppStartupState.Customize(draft)
             } catch (cancelled: CancellationException) {
                 throw cancelled
@@ -108,7 +112,7 @@ internal class AppStartupViewModel @Inject constructor(
         state.value = current.copy(draft = draft, failed = false)
         viewModelScope.launch {
             try {
-                writes.withLock { drafts.save(OnboardingDraft(draft, accessoryId = selectedAccessory, goalId = selectedGoalId)) }
+                writes.withLock { drafts.save(OnboardingDraft(draft, accessoryId = selectedAccessory, savingItemId = selectedSavingItemId)) }
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
@@ -140,7 +144,7 @@ internal class AppStartupViewModel @Inject constructor(
         state.value = current.copy(saving = true, failed = false)
         work = viewModelScope.launch {
             try {
-                val draft = OnboardingDraft(current.draft, OnboardingStep.Accessories, selectedAccessory, selectedGoalId)
+                val draft = OnboardingDraft(current.draft, OnboardingStep.Accessories, selectedAccessory, selectedSavingItemId)
                 writes.withLock { drafts.save(draft) }
                 state.value = AppStartupState.Accessories(draft)
             } catch (cancelled: CancellationException) { throw cancelled }
@@ -235,13 +239,13 @@ internal class AppStartupViewModel @Inject constructor(
 
     fun selectGoal(id: String) {
         val current = state.value as? AppStartupState.GoalSelection ?: return
-        if (current.saving || work?.isActive == true || id !in goalIds) return
+        if (current.saving || work?.isActive == true || id !in savingItemIds) return
         state.value = current.copy(saving = true, failed = false)
         work = viewModelScope.launch {
             try {
-                val draft = current.draft.copy(goalId = id)
+                val draft = current.draft.copy(savingItemId = id)
                 writes.withLock { drafts.save(draft) }
-                selectedGoalId = id
+                selectedSavingItemId = id
                 state.value = AppStartupState.GoalSelection(draft)
             } catch (cancelled: CancellationException) { throw cancelled }
             catch (_: Exception) { state.value = current.copy(failed = true) }
@@ -250,7 +254,7 @@ internal class AppStartupViewModel @Inject constructor(
 
     fun confirmGoal() {
         val current = state.value as? AppStartupState.GoalSelection ?: return
-        if (current.saving || work?.isActive == true || current.draft.goalId !in goalIds) return
+        if (current.saving || work?.isActive == true || current.draft.savingItemId !in savingItemIds) return
         state.value = current.copy(saving = true, failed = false)
         work = viewModelScope.launch {
             try {
@@ -278,13 +282,14 @@ internal class AppStartupViewModel @Inject constructor(
 
     fun finishOnboarding() {
         val current = state.value as? AppStartupState.Introduction ?: return
-        if (current.saving || work?.isActive == true || !current.draft.canFinish || current.draft.goalId !in goalIds) return
+        if (current.saving || work?.isActive == true || !current.draft.canFinish || current.draft.savingItemId !in savingItemIds) return
         state.value = current.copy(saving = true, failed = false)
         work = viewModelScope.launch {
             try {
                 writes.withLock {
                     // Profile and accessory commit with the game; startup never replaces an existing save.
-                    session.prepare(current.draft.profile.toPetState(current.draft.accessoryId), current.draft.goalId)
+                    session.prepare(current.draft.profile.toPetState(current.draft.accessoryId),
+                        savingItemId = current.draft.savingItemId, beginInitialAllocation = true)
                 }
                 state.value = AppStartupState.Ready
             } catch (cancelled: CancellationException) { throw cancelled }

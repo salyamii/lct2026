@@ -18,6 +18,7 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import ru.nksk.lctapp.app.createInitialGameState
+import ru.nksk.lctapp.R
 import ru.nksk.lctapp.domain.economy.BudgetPlan
 import ru.nksk.lctapp.domain.economy.EconomyState
 import ru.nksk.lctapp.data.game.content.bundledGameCatalog
@@ -31,8 +32,14 @@ import ru.nksk.lctapp.domain.engine.DayPhase
 import ru.nksk.lctapp.domain.engine.EventStatus
 import ru.nksk.lctapp.domain.engine.EventOrigin
 import ru.nksk.lctapp.domain.engine.GameSession
+import ru.nksk.lctapp.domain.engine.GameCatalog
+import ru.nksk.lctapp.domain.engine.DeedOffer
 import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.domain.game.GameState
+import ru.nksk.lctapp.domain.analytics.AnalyticsFact
+import ru.nksk.lctapp.domain.analytics.DecisionContext
+import ru.nksk.lctapp.domain.pet.PetVisualState
+import ru.nksk.lctapp.domain.story.StoryDecision
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DayViewModelTest {
@@ -44,7 +51,8 @@ class DayViewModelTest {
 
     @Test fun exhaustedCardOffersOneFeedThenRestAndWakesInMenuWithoutOpeningAnEvent() = runTest(dispatcher) {
         val (repository, model) = fixture()
-        repository.update { it.copy(economy = it.economy.copy(plan = BudgetPlan(0, 0, 0, 0), unallocated = 0),
+        repository.update { it.copy(economy = it.economy.copy(plan = BudgetPlan(0, 0, 0, 0),
+            availableBalance = 0, savingsBalance = 0, unallocated = 0),
             engine = it.engine!!.copy(energy = 0, steps = 0, ateToday = false)) }
         runCurrent()
         val eventId = repository.read().engine!!.currentEvent!!.id
@@ -174,6 +182,10 @@ class DayViewModelTest {
         val (repository, model) = fixture()
         runCurrent()
         val card = model.uiState.value
+        assertTrue(card.storyIntroduction)
+        assertEquals("В обсерваторию", card.options.single().label)
+        assertTrue(card.effort.isBlank())
+        assertNull(card.financialContext)
         val exits = mutableListOf<String?>()
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.exit.collect { exits += it } }
 
@@ -182,6 +194,7 @@ class DayViewModelTest {
         assertNull(repository.read().engine!!.currentEvent)
         assertEquals(EventStatus.COMPLETED, repository.read().engine!!.events.first().status)
         assertEquals(1, repository.read().story.decisions.size)
+        assertNull(repository.requests.last().context)
         assertEquals(listOf("Событие выполнено!"), exits)
         assertEquals(card.copy(busy = true, message = null), model.uiState.value)
     }
@@ -203,10 +216,11 @@ class DayViewModelTest {
         assertEquals(EventStatus.ACTIVE, repository.read().engine!!.currentEvent!!.status)
 
         repository.failure = null
+        val retryCard = model.uiState.value
         model.onAction(DayAction.Later)
         runCurrent()
         assertEquals(1, exits)
-        assertEquals(card.copy(busy = true, message = null), model.uiState.value)
+        assertEquals(retryCard.copy(busy = true), model.uiState.value)
     }
 
     @Test fun hungerReplacesThePrimaryActionWithoutASecondFeedButton() = runTest(dispatcher) {
@@ -220,6 +234,8 @@ class DayViewModelTest {
         assertTrue(model.uiState.value.primaryNeedsFood)
         assertEquals("Покормить", model.uiState.value.primary)
         assertTrue(model.uiState.value.actionNotice!!.startsWith("Рыжик проголодался."))
+        assertEquals("Пора подкрепиться", model.uiState.value.title)
+        assertTrue(model.uiState.value.body.isBlank())
     }
 
     @Test fun unblockedEventDoesNotOpenFeedingButHungerReplacesItsAction() = runTest(dispatcher) {
@@ -336,6 +352,25 @@ class DayViewModelTest {
         assertFalse(repository.read().engine!!.deeds.single().completed)
     }
 
+    @Test fun telescopeWorkCanBeDeferredInBothCatalogVersionsWithoutLosingItsDeadline() = runTest(dispatcher) {
+        for (id in listOf("figma-2163-43-v1", "figma-2163-43-v1:balance-v2")) {
+            val (repository, model, session) = fixture(eventFirst = id)
+            runCurrent()
+            val before = repository.read()
+            val offer = before.engine!!.deeds.single()
+            assertEquals("Сделать позже", model.uiState.value.later)
+            assertEquals("Успеть до конца сегодня", model.uiState.value.deedDeadline)
+            model.onAction(DayAction.Later)
+            runCurrent()
+            val after = repository.read()
+            assertEquals(listOf(offer), session.engine.availableDeeds(after))
+            assertEquals(before.economy, after.economy)
+            assertEquals(before.engine!!.energy, after.engine!!.energy)
+            assertEquals(before.engine!!.steps, after.engine!!.steps)
+            assertNull(after.engine!!.currentEvent)
+        }
+    }
+
     @Test fun acceptingTheDeedOpensItsGameWithoutAwardingMoneyOrClosingTheDeed() = runTest(dispatcher) {
         val (repository, model) = fixture(deedFirst = true)
         runCurrent()
@@ -358,9 +393,10 @@ class DayViewModelTest {
 
     @Test fun purchaseOffersPassingByWithoutPausingAndWarnsAboutFoodMoney() = runTest(dispatcher) {
         val (repository, model) = fixture(eventFirst = "figma-2164-2-v1")
-        repository.update { it.copy(economy = it.economy.copy(plan = BudgetPlan(0, 27, 0, 0), unallocated = 0)) }
+        repository.update { it.copy(economy = it.economy.copy(plan = BudgetPlan(27, 0, 0, 0),
+            availableBalance = 27, savingsBalance = 0, unallocated = 0)) }
         runCurrent()
-        assertEquals(listOf("Купить · 25", "Пройти мимо"), model.uiState.value.options.map { it.label })
+        assertEquals(listOf("Купить", "Пройти мимо"), model.uiState.value.options.map { it.label })
         assertNull(model.uiState.value.later)
         assertTrue(model.uiState.value.message!!.contains("обед"))
         val exits = mutableListOf<String?>()
@@ -405,23 +441,217 @@ class DayViewModelTest {
         assertFalse(model.uiState.value.body.contains("Рыжик"))
     }
 
-    @Test fun paidChoiceShowsTheActualArticleBreakdownAndFallback() = runTest(dispatcher) {
+    @Test fun paidChoiceShowsTheRealPaymentSourceAndKeepsSavingsSeparate() = runTest(dispatcher) {
         val (repository, model) = fixture(eventFirst = "figma-2164-2-v1")
-        repository.update { it.copy(economy = EconomyState(BudgetPlan(35, 3, 20, 22))) }
+        repository.update { it.copy(economy = EconomyState(BudgetPlan(35, 3, 0, 22), savingsBalance = 20)) }
         runCurrent()
         val paid = model.uiState.value.options.first()
         assertTrue(paid.enabled)
-        assertTrue(checkNotNull(paid.spending).contains("Хочу: 3"))
-        assertTrue(checkNotNull(paid.spending).contains("Запас: 22"))
-        assertTrue(checkNotNull(paid.spending).contains("других статей"))
+        val explanation = checkNotNull(paid.spending)
+        assertTrue(explanation.contains("3 монеты из денег на желания"))
+        assertTrue(explanation.contains("22 монеты из запаса"))
+        assertEquals(20L, repository.read().economy.savingsBalance)
         assertNull(model.uiState.value.options.last().spending)
     }
 
+    @Test fun bakeryCardHasTwoClearChoicesWithoutHiddenEvidenceAndPreservesBothOutcomes() = runTest(dispatcher) {
+        val eventId = "figma-2654-2-purchase-v2"
+        for (buy in listOf(true, false)) {
+            val (repository, model, session) = fixture(eventFirst = eventId)
+            repository.update { saved -> saved.copy(
+                pet = saved.pet.copy(name = "Тоша"), selectedGoalId = session.catalog.goals.first().goalId,
+                economy = EconomyState(BudgetPlan(6, 0, 0, 0), availableBalance = 6, savingsBalance = 30),
+            ) }
+            runCurrent()
+            val shown = model.uiState.value
+            assertTrue(shown.bakeryBunCard)
+            assertEquals(R.drawable.prop_bakery_bun, shown.purchaseArtworkRes)
+            assertEquals("Ароматная булочка", shown.title)
+            assertEquals("Заменяет обычный приём пищи. Тоша будет доволен: она гораздо вкуснее обычного обеда.", shown.body)
+            assertEquals(listOf("Купить", "Пройти мимо"), shown.options.map { it.label })
+            assertTrue(shown.options.all { it.enabled && !it.needsFood })
+            assertEquals("", shown.impact)
+            assertEquals("", shown.effort)
+            assertNull(shown.financialContext)
+            assertNull(shown.message)
+            assertNotNull(shown.options.first().spending)
+            assertNull(shown.options.last().spending)
+
+            val writes = repository.writes
+            model.onAction(DayAction.FinancialContextPresented("day:${repository.read().engine!!.currentEvent!!.id}:${repository.read().engine!!.revision}"))
+            assertEquals(writes, repository.writes)
+            model.onAction(DayAction.Choose("$eventId:${if (buy) "buy" else "pass"}"))
+            runCurrent()
+
+            val after = repository.read()
+            assertEquals(if (buy) 0L else 6L, after.economy.availableBalance)
+            assertEquals(30L, after.economy.savingsBalance)
+            assertEquals(buy, after.engine!!.ateToday)
+            assertEquals(if (buy) PetVisualState.HAPPY else PetVisualState.NORMAL, after.pet.visualState)
+            val request = repository.requests.last()
+            assertNull((request.command as EngineCommand.CompleteEvent).priorityId)
+            assertNull(request.context)
+        }
+    }
+
+    @Test fun purchaseCardsKeepTheirArtworkAndOnlyOnePaymentExplanation() = runTest(dispatcher) {
+        val expected = listOf(
+            "figma-2164-2-v1" to R.drawable.gear_explorer_hat,
+            "figma-2654-50-purchase-v2" to R.drawable.prop_fair_explorer_hat,
+            "figma-2654-98-purchase-v2" to R.drawable.prop_fair_ring_toss,
+            "figma-56-55-purchase-v2" to R.drawable.gear_pilot_goggles,
+            "figma-56-49-purchase-v2" to R.drawable.gear_route_patch,
+            "figma-2654-146-purchase-v2" to R.drawable.prop_fair_compass_keychain,
+            "figma-56-64-purchase-v2" to R.drawable.gear_binoculars,
+            "figma-2654-194-purchase-v2" to R.drawable.prop_fair_toy_boat,
+        )
+        expected.forEach { (event, artwork) ->
+            val (repository, model, session) = fixture(eventFirst = event)
+            repository.update { it.copy(selectedGoalId = session.catalog.goals.first().goalId) }
+            runCurrent()
+            val shown = model.uiState.value
+            assertEquals(event, artwork, shown.purchaseArtworkRes)
+            assertFalse(shown.bakeryBunCard)
+            assertNull(shown.financialContext)
+            assertTrue(shown.impact.isEmpty())
+            assertFalse(shown.title.any(Char::isDigit))
+            assertFalse(shown.body.any(Char::isDigit))
+            assertEquals(if (event == "figma-2654-98-purchase-v2") "Сыграть" else "Купить", shown.options.first().label)
+            assertEquals("Пройти мимо", shown.options.last().label)
+            assertEquals(1, shown.options.count { it.spending != null })
+            assertEquals(2, shown.options.size)
+            assertNull(shown.message)
+        }
+    }
+
+    @Test fun ordinaryRefusalWithoutPresentedNumbersDoesNotClaimFinancialEvidenceOrPriority() = runTest(dispatcher) {
+        val (repository, model) = fixture(eventFirst = "figma-2164-2-v1")
+        runCurrent()
+        assertFalse(model.uiState.value.storyIntroduction)
+        assertNull(model.uiState.value.financialContext)
+        model.onAction(DayAction.Choose("figma-2164-2-v1:pass"))
+        runCurrent()
+        val request = repository.requests.last()
+        assertNull((request.command as EngineCommand.CompleteEvent).priorityId)
+        assertNull(request.context)
+    }
+
+    @Test fun passingByWithASelectedGoalDoesNotInventFinancialEvidenceOrAnExplicitSavingIntent() = runTest(dispatcher) {
+        val (repository, model, session) = fixture(eventFirst = "figma-2164-2-v1")
+        val goal = session.catalog.goals.first().goalId
+        repository.update { it.copy(selectedGoalId = goal) }
+        runCurrent()
+        assertNull(model.uiState.value.financialContext)
+        model.onAction(DayAction.FinancialContextPresented("day:${repository.read().engine!!.currentEvent!!.id}:${repository.read().engine!!.revision}"))
+        model.onAction(DayAction.Choose("figma-2164-2-v1:pass"))
+        runCurrent()
+        val request = repository.requests.last()
+        assertNull((request.command as EngineCommand.CompleteEvent).priorityId)
+        assertNull(request.context)
+    }
+
+    @Test fun earningIntentIsExplicitInTheLabelAndCommand() = runTest(dispatcher) {
+        val (repository, model, session) = fixture(deedFirst = true)
+        val goal = session.catalog.goals.first().goalId
+        repository.update { it.copy(selectedGoalId = goal) }
+        runCurrent()
+        assertEquals("Заработать на цель", model.uiState.value.options.single().label)
+        model.onAction(DayAction.Choose(model.uiState.value.options.single().id))
+        runCurrent()
+        assertEquals(goal, (repository.requests.last().command as EngineCommand.AcceptDeedProposal).priorityId)
+    }
+
+    @Test fun cargoRecordHasNoSkipOrBudgetSummaryAndCompletesWithoutClaimingShownMoney() = runTest(dispatcher) {
+        val id = "campaign-choice-v1:G1.04"
+        val (repository, model) = fixture(eventFirst = id, priorChoices = listOf(
+            "campaign-choice-v1:G1.01:continue", "figma-2270-2-v1:complete",
+            "campaign-choice-v1:G1.02:continue", "campaign-choice-v1:G1.03:continue"))
+        runCurrent()
+        assertEquals(listOf("Изучить запись"), model.uiState.value.options.map { it.label })
+        assertEquals("Вернуться позже", model.uiState.value.later)
+        assertNull(model.uiState.value.financialContext)
+        val before = repository.read()
+        model.onAction(DayAction.Choose("$id:skip"))
+        runCurrent()
+        assertEquals(before, repository.read())
+        model.onAction(DayAction.Choose("$id:continue"))
+        runCurrent()
+        assertNull(repository.requests.last().context)
+        assertEquals("$id:continue", repository.read().story.decisions.last().choiceId)
+    }
+
+    @Test fun eventChoicesDoNotInventFinancialContextWhenTheSummaryIsNotShown() = runTest(dispatcher) {
+        for (price in listOf(0L, 4L)) {
+            val (repository, model) = fixture(catalogTransform = { catalog ->
+                val original = catalog.content.choices.single { it.eventId == catalog.introductionId }
+                catalog.copy(content = catalog.content.copy(choices = catalog.content.choices + original.copy(
+                    id = "${original.id}-alternative", position = 1, text = "Другой путь", moneyDelta = -price)))
+            })
+            runCurrent()
+            assertEquals(2, model.uiState.value.options.size)
+            assertNull(model.uiState.value.financialContext)
+            model.onAction(DayAction.Choose(model.uiState.value.options.last().id))
+            runCurrent()
+            assertNull(repository.requests.last().context)
+        }
+    }
+
+    @Test fun practicalStoryChoiceOpensItsBoardWithoutCompletingTheActionOrLeavingAsSuccess() = runTest(dispatcher) {
+        val (repository, model) = fixture(storyMiniGame = true)
+        runCurrent()
+        val before = repository.read()
+        val games = mutableListOf<StoryGameRequest>()
+        val exits = mutableListOf<String?>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.openStoryGame.collect { games += it } }
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.exit.collect { exits += it } }
+        val option = model.uiState.value.options.single()
+        assertTrue(option.enabled)
+        model.onAction(DayAction.Choose(option.id))
+        runCurrent()
+        assertEquals(listOf(StoryGameRequest(before.engine!!.currentEvent!!.id, option.id)), games)
+        assertTrue(repository.requests.last().command is EngineCommand.StartStoryGame)
+        assertEquals(before.story.decisions, repository.read().story.decisions)
+        assertEquals(before.economy, repository.read().economy)
+        assertEquals(before.engine!!.steps, repository.read().engine!!.steps)
+        assertTrue(exits.isEmpty())
+    }
+
+    @Test fun resourcePriorityRequiresALiveOfferAndAnExplicitChoiceAndResetsOnRevision() = runTest(dispatcher) {
+        val (repository, model, session) = fixture(eventFirst = "figma-2313-2-v1")
+        runCurrent()
+        assertNull(model.uiState.value.resourcePriority)
+        val deed = session.catalog.deedPool.first { session.catalog.policies.getValue(it).energyCost == 1 }
+        repository.update { saved -> saved.copy(engine = saved.engine!!.copy(
+            energy = 2, ateToday = true,
+            deeds = listOf(DeedOffer("urgent-offer", deed, saved.engine!!.day)))) }
+        runCurrent()
+        assertEquals("urgent-offer", model.uiState.value.resourcePriority?.offerId)
+        assertFalse(checkNotNull(model.uiState.value.resourcePriority).selected)
+        model.onAction(DayAction.SetResourcePriority("urgent-offer", true))
+        assertTrue(checkNotNull(model.uiState.value.resourcePriority).selected)
+        repository.update { saved -> saved.copy(engine = saved.engine!!.copy(revision = saved.engine!!.revision + 1)) }
+        runCurrent()
+        assertFalse(checkNotNull(model.uiState.value.resourcePriority).selected)
+        model.onAction(DayAction.SetResourcePriority("urgent-offer", true))
+        model.onAction(DayAction.Choose("figma-2313-2-v1:pay"))
+        runCurrent()
+        assertEquals("urgent-offer", (repository.requests.last().command as EngineCommand.CompleteEvent).resourcePriorityOfferId)
+    }
+
     private suspend fun fixture(deedFirst: Boolean = false, finishedDay: Int? = null,
-        eventFirst: String? = null): Triple<DayRepository, DayViewModel, GameSession> {
-        val catalog = bundledGameCatalog()
-        val initial = createInitialGameState().let { it.copy(economy = EconomyState(plan = BudgetPlan(35, 20, 20, 25), unallocated = 0, planning = null)) }.let { state ->
-            if (!deedFirst && eventFirst == null) state.copy(selectedGoalId = catalog.goals.first().goalId) else state
+        eventFirst: String? = null, storyMiniGame: Boolean = false, priorChoices: List<String> = emptyList(),
+        catalogTransform: (GameCatalog) -> GameCatalog = { it }): Triple<DayRepository, DayViewModel, GameSession> {
+        val original = catalogTransform(bundledGameCatalog())
+        val catalog = if (storyMiniGame) original.copy(policies = original.policies +
+            (original.introductionId to original.policies.getValue(original.introductionId).copy(
+                choiceGameKinds = mapOf(original.content.choices.single { it.eventId == original.introductionId }.id to
+                    ru.nksk.lctapp.domain.minigame.DeedGameKind.PRECISION)))) else original
+        val initial = createInitialGameState().let { it.copy(economy = EconomyState(plan = BudgetPlan(35, 20, 20, 25),
+            unallocated = 0, planning = null, availableBalance = 100, savingsBalance = 0)) }.let { state ->
+            state.copy(
+                selectedGoalId = catalog.goals.first().goalId.takeIf { !deedFirst && (eventFirst == null || priorChoices.isNotEmpty()) },
+                story = state.story.copy(decisions = priorChoices.mapIndexed { index, id -> StoryDecision("prior-$index", id) }),
+            )
         }
         val repository = DayRepository(initial)
         val content = object : StoryContentRepository {
@@ -456,9 +686,13 @@ private class DayRepository(initial: GameState) : GameRepository {
     var afterWrite: suspend () -> Unit = {}
     var failure: Exception? = null
     var writes = 0
+    val requests = mutableListOf<EngineRequest>()
     override fun observe() = state
     override suspend fun read() = state.value
     override suspend fun initializeIfAbsent(initial: GameState) = state.value
+    override suspend fun commit(request: EngineRequest, context: DecisionContext?, contentFingerprint: String?,
+        facts: (GameState, GameState, String, Long) -> List<AnalyticsFact>, transform: (GameState) -> GameState): GameState =
+        update(transform).also { requests += request }
     override suspend fun update(transform: (GameState) -> GameState): GameState {
         failure?.let { throw it }
         val next = transform(state.value)

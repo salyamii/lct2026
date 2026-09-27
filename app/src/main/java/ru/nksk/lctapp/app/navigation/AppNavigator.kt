@@ -14,6 +14,17 @@ internal class AppNavigator(private val backStack: MutableList<NavKey>) {
         }
     }
 
+    /** Cross-links between singleton feature screens reuse their existing entry. */
+    fun navigateToExisting(source: NavKey, destination: NavKey) {
+        if (backStack.lastOrNull() != source) return
+        val existing = backStack.indexOfLast { it == destination }
+        if (existing >= 0) {
+            backStack.subList(existing + 1, backStack.size).clear()
+        } else {
+            backStack.add(destination)
+        }
+    }
+
     fun goBack(source: NavKey) {
         if (backStack.lastOrNull() == source) {
             goBack()

@@ -1,0 +1,416 @@
+[
+  {
+    "resource": "collection_tower_route",
+    "category": "Inventory collection illustrations",
+    "path": "app/src/main/res/drawable-nodpi/collection_tower_route.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1755136,
+    "sha256": "88d28aed206069f851c5e80da2b1ba031bb182f01c13e51c5a0294ad6365e24c",
+    "rgba_sha256": "1e68bc9a81598f63405d6822c42de961083f2d2050686868ffcf743d1e26c203",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/tower-map/collection_tower_route.png",
+    "source_sha256": "e8ccc3af6c405ad1e7bb344bbb8763ee99ca29fee6b5874584cb86c450d52aa0",
+    "source_bytes": 2448774,
+    "source_format": "png",
+    "lossless_rgba_verified": true,
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in generation",
+      "prompt_path": "docs/design/assets/sources/inventory-collection-2026-09-26/tower-map/generation-specs.json",
+      "figma_source": null,
+      "details": "New inventory collection artwork requested by the user. Generated from text; not a Figma export or a replacement for existing source artwork."
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "resized": false,
+      "cropped": false,
+      "pillow_version": "12.3.0",
+      "details": "Complete generated canvas retained. Source PNG and runtime WebP decode to identical RGBA pixels and dimensions."
+    }
+  },
+  {
+    "resource": "collection_tower_lantern",
+    "category": "Inventory collection illustrations",
+    "path": "app/src/main/res/drawable-nodpi/collection_tower_lantern.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1309586,
+    "sha256": "2749d77d5b0449f2ee2327f71b3303c1122d8e40cbee24c355d2770e9f09b9d8",
+    "rgba_sha256": "654242767dea47550f8390f74f936646ae6435be284d24e6f5e568cd290d7934",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/tower-map/collection_tower_lantern.png",
+    "source_sha256": "2e9fa8e325822cb06fd398073d6f1e3093eded81729b7445ab12f7a55bbc622f",
+    "source_bytes": 1864513,
+    "source_format": "png",
+    "lossless_rgba_verified": true,
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in generation",
+      "prompt_path": "docs/design/assets/sources/inventory-collection-2026-09-26/tower-map/generation-specs.json",
+      "figma_source": null,
+      "details": "New inventory collection artwork requested by the user. Generated from text; not a Figma export or a replacement for existing source artwork."
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "resized": false,
+      "cropped": false,
+      "pillow_version": "12.3.0",
+      "details": "Complete generated canvas retained. Source PNG and runtime WebP decode to identical RGBA pixels and dimensions."
+    }
+  },
+  {
+    "resource": "collection_tower_fastenings",
+    "category": "Inventory collection illustrations",
+    "path": "app/src/main/res/drawable-nodpi/collection_tower_fastenings.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1694574,
+    "sha256": "a49d06b2f53093deca43fd3577418770a46f56b2e19b6409d0273b6053461fb0",
+    "rgba_sha256": "3a3624f2e4db4991edfdcd80ef9d5d39113ca8dae5b2fc091af52c6523021691",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/tower-map/collection_tower_fastenings.png",
+    "source_sha256": "4c66de3bcdbed82910c8cb20a2854d3a24373eb33199f00d855517e7169a7ece",
+    "source_bytes": 2442481,
+    "source_format": "png",
+    "lossless_rgba_verified": true,
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in generation",
+      "prompt_path": "docs/design/assets/sources/inventory-collection-2026-09-26/tower-map/generation-specs.json",
+      "figma_source": null,
+      "details": "New inventory collection artwork requested by the user. Generated from text; not a Figma export or a replacement for existing source artwork."
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "resized": false,
+      "cropped": false,
+      "pillow_version": "12.3.0",
+      "details": "Complete generated canvas retained. Source PNG and runtime WebP decode to identical RGBA pixels and dimensions."
+    }
+  },
+  {
+    "resource": "collection_tower_bridge_kit",
+    "category": "Inventory collection illustrations",
+    "path": "app/src/main/res/drawable-nodpi/collection_tower_bridge_kit.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1481630,
+    "sha256": "1a814e2d5f43b457d10924f6add06d0167d5cb5afc68d342535f8cedf72bd723",
+    "rgba_sha256": "0d913055a2a7d4b124eddfb82197060d952f9aaffef097331224b2978ff6bb67",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/tower-map/collection_tower_bridge_kit.png",
+    "source_sha256": "ac7552ec3d3e06dfaa6bd403738bbd3d6342f530c9d0a73b55cb096b1c48ee8d",
+    "source_bytes": 2052479,
+    "source_format": "png",
+    "lossless_rgba_verified": true,
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in generation",
+      "prompt_path": "docs/design/assets/sources/inventory-collection-2026-09-26/tower-map/generation-specs.json",
+      "figma_source": null,
+      "details": "New inventory collection artwork requested by the user. Generated from text; not a Figma export or a replacement for existing source artwork."
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "resized": false,
+      "cropped": false,
+      "pillow_version": "12.3.0",
+      "details": "Complete generated canvas retained. Source PNG and runtime WebP decode to identical RGBA pixels and dimensions."
+    }
+  },
+  {
+    "resource": "collection_tower_transport",
+    "category": "Inventory collection illustrations",
+    "path": "app/src/main/res/drawable-nodpi/collection_tower_transport.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1660104,
+    "sha256": "66bbf1929b00ce485a24551f0d192aef73d55bb7fa39c3da2445c7f5a6462adf",
+    "rgba_sha256": "ee9d3e979b25adc22a055f231f3f6a200c10419528ca71ac96a7e3262e41241e",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/tower-map/collection_tower_transport.png",
+    "source_sha256": "b426bd7fb7070dcf9d0476939107f180d843cb61eac85352d69f1d223a1f8636",
+    "source_bytes": 2305652,
+    "source_format": "png",
+    "lossless_rgba_verified": true,
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in generation",
+      "prompt_path": "docs/design/assets/sources/inventory-collection-2026-09-26/tower-map/generation-specs.json",
+      "figma_source": null,
+      "details": "New inventory collection artwork requested by the user. Generated from text; not a Figma export or a replacement for existing source artwork."
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "resized": false,
+      "cropped": false,
+      "pillow_version": "12.3.0",
+      "details": "Complete generated canvas retained. Source PNG and runtime WebP decode to identical RGBA pixels and dimensions."
+    }
+  },
+  {
+    "resource": "collection_map_table",
+    "category": "Inventory collection illustrations",
+    "path": "app/src/main/res/drawable-nodpi/collection_map_table.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1508494,
+    "sha256": "989c115a881158e0cde37591382d647e1399dd87d8af551291a14be458d5e7de",
+    "rgba_sha256": "99eb385fc1d5f5fc2c77ea0fc08648f86dd14244175e32f143b765117fbb4f49",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/tower-map/collection_map_table.png",
+    "source_sha256": "17a471e70b43b049fe7187da83f56690c7ac91a33dd00c638d03c570feffcff1",
+    "source_bytes": 2097923,
+    "source_format": "png",
+    "lossless_rgba_verified": true,
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in generation",
+      "prompt_path": "docs/design/assets/sources/inventory-collection-2026-09-26/tower-map/generation-specs.json",
+      "figma_source": null,
+      "details": "New inventory collection artwork requested by the user. Generated from text; not a Figma export or a replacement for existing source artwork."
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "resized": false,
+      "cropped": false,
+      "pillow_version": "12.3.0",
+      "details": "Complete generated canvas retained. Source PNG and runtime WebP decode to identical RGBA pixels and dimensions."
+    }
+  },
+  {
+    "resource": "collection_map_copies",
+    "category": "Inventory collection illustrations",
+    "path": "app/src/main/res/drawable-nodpi/collection_map_copies.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1610988,
+    "sha256": "b0207f2c34ad69c3f201dde118861e51ad82920c862700026e415757ccd66a50",
+    "rgba_sha256": "ee2b73043aa2aa8138647d23fc1c98208c0c07afa95d73b6ec48d7fd8cdb69c2",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/tower-map/collection_map_copies.png",
+    "source_sha256": "bdd526964b173cfecdc99e946353bc8adc8cd6e6cdb5877b0dd0aafea75fc524",
+    "source_bytes": 2318787,
+    "source_format": "png",
+    "lossless_rgba_verified": true,
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in generation",
+      "prompt_path": "docs/design/assets/sources/inventory-collection-2026-09-26/tower-map/generation-specs.json",
+      "figma_source": null,
+      "details": "New inventory collection artwork requested by the user. Generated from text; not a Figma export or a replacement for existing source artwork."
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "resized": false,
+      "cropped": false,
+      "pillow_version": "12.3.0",
+      "details": "Complete generated canvas retained. Source PNG and runtime WebP decode to identical RGBA pixels and dimensions."
+    }
+  },
+  {
+    "resource": "collection_map_atlas",
+    "category": "Inventory collection illustrations",
+    "path": "app/src/main/res/drawable-nodpi/collection_map_atlas.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1709122,
+    "sha256": "cdfaf32a2c1a354c9d59c05af0b0786c194045df6d9f82610d360fb299f9ab0a",
+    "rgba_sha256": "0f958ef8940b6de4d4f12ff9a655cd2483a8249414c892b9e3717a5a75a852d8",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/tower-map/collection_map_atlas.png",
+    "source_sha256": "6981197ae631578ad0fb2873d86974a95ed6349318d6a3538e33ac8d52915eeb",
+    "source_bytes": 2368682,
+    "source_format": "png",
+    "lossless_rgba_verified": true,
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in generation",
+      "prompt_path": "docs/design/assets/sources/inventory-collection-2026-09-26/tower-map/generation-specs.json",
+      "figma_source": null,
+      "details": "New inventory collection artwork requested by the user. Generated from text; not a Figma export or a replacement for existing source artwork."
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "resized": false,
+      "cropped": false,
+      "pillow_version": "12.3.0",
+      "details": "Complete generated canvas retained. Source PNG and runtime WebP decode to identical RGBA pixels and dimensions."
+    }
+  },
+  {
+    "resource": "collection_map_field_kit",
+    "category": "Inventory collection illustrations",
+    "path": "app/src/main/res/drawable-nodpi/collection_map_field_kit.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1582814,
+    "sha256": "3bf814ca91ee6419665d6b731a2cb7d856175ccc10c15d327356350878a93da1",
+    "rgba_sha256": "4ee76fda180ed442db727b9659fd9d86c9e37a374843d2a054de714f9aab1de5",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/tower-map/collection_map_field_kit.png",
+    "source_sha256": "d3bc1e7f9d65c464c6e3cf3f7e5cec2a08fbcdcb4f3059e9e6bf2e534fc78592",
+    "source_bytes": 2290515,
+    "source_format": "png",
+    "lossless_rgba_verified": true,
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in generation",
+      "prompt_path": "docs/design/assets/sources/inventory-collection-2026-09-26/tower-map/generation-specs.json",
+      "figma_source": null,
+      "details": "New inventory collection artwork requested by the user. Generated from text; not a Figma export or a replacement for existing source artwork."
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "resized": false,
+      "cropped": false,
+      "pillow_version": "12.3.0",
+      "details": "Complete generated canvas retained. Source PNG and runtime WebP decode to identical RGBA pixels and dimensions."
+    }
+  }
+]

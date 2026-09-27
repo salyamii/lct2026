@@ -4,11 +4,20 @@ package ru.nksk.lctapp.domain.minigame
 enum class DeedGameKind { MEMORY, COMPARISON, PRECISION }
 
 /** A completed round set; incomplete boards cannot be submitted for payment. */
+@kotlinx.serialization.Serializable
 class DeedGameScore private constructor(
     val kind: DeedGameKind,
     val correct: Int,
     val attempts: Int,
 ) {
+    init {
+        require(attempts > 0 && correct in 0..attempts)
+        require(when (kind) {
+            DeedGameKind.MEMORY -> correct == MemoryState.PAIRS && attempts >= MemoryState.PAIRS
+            DeedGameKind.COMPARISON -> attempts == PriceQuizState.QUESTION_COUNT
+            DeedGameKind.PRECISION -> attempts == TargetStopState.ROUNDS
+        }) { "Invalid completed mini-game result" }
+    }
     /** Whole coins rounded down, without overflowing when the configured maximum is large. */
     fun reward(maximum: Long): Long {
         require(maximum >= 0)

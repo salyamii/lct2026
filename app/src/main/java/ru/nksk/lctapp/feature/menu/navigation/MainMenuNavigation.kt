@@ -1,6 +1,7 @@
 package ru.nksk.lctapp.feature.menu.navigation
 
 import android.util.Log
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.repeatOnLifecycle
@@ -23,6 +24,7 @@ import ru.nksk.lctapp.feature.menu.ui.MainMenuViewModel
 data object MainMenu : NavKey
 
 fun EntryProviderScope<NavKey>.mainMenuEntry(
+    settingsButton: (@Composable () -> Unit)? = null,
     onAction: (MainMenu, MainMenuAction) -> Unit,
 ) {
     entry<MainMenu> { source ->
@@ -41,8 +43,14 @@ fun EntryProviderScope<NavKey>.mainMenuEntry(
                 viewModel.openDay.collect { onAction(source, MainMenuAction.ContinueDay) }
             }
         }
+        LaunchedEffect(viewModel, lifecycle, "finance") {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.openFinance.collect { onAction(source, MainMenuAction.Finance) }
+            }
+        }
         MainMenuContent(
             state = state,
+            settingsButton = settingsButton,
             onRetry = viewModel::retry,
             onFreeMeal = dropUnlessResumed { viewModel.feedFree() },
             onDismissMeal = dropUnlessResumed { viewModel.dismissFreeMeal() },

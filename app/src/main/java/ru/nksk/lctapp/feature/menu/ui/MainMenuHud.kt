@@ -13,13 +13,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,11 +34,14 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,6 +54,9 @@ import ru.nksk.lctapp.core.ui.theme.AdventureLime
 import ru.nksk.lctapp.core.ui.theme.AdventureMuted
 import ru.nksk.lctapp.core.ui.theme.AdventurePanel
 import ru.nksk.lctapp.core.ui.theme.Rubik
+import ru.nksk.lctapp.core.ui.theme.Nunito
+import ru.nksk.lctapp.core.ui.components.GameInk
+import ru.nksk.lctapp.core.ui.components.GamePaper
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
 
 @Composable
@@ -62,29 +71,46 @@ internal fun MenuHud(
     budget: MenuBudgetUiState? = null,
     budgetExpanded: Boolean = false,
     onBudgetExpandedChange: (Boolean) -> Unit = {},
+    settingsButton: (@Composable () -> Unit)? = null,
 ) {
     Column(modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Row(
-            modifier = Modifier.fillMaxWidth()
-                .shadow(8.dp, RoundedCornerShape(24.dp))
-                .clip(RoundedCornerShape(24.dp))
-                .background(AdventurePanel.copy(alpha = 0.63f))
-                .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(24.dp))
-                .clickable(role = Role.Button) { onAction(MainMenuAction.Goal) }
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            MenuText(stringResource(R.string.menu_goal_label), 11, color = AdventureLavender, letterSpacing = 0.44f)
-            MenuText(goalTitle, 13, modifier = Modifier.weight(1f))
-            if (totalGoals > 0) MenuText(
-                stringResource(R.string.menu_goal_progress, completedGoals, totalGoals),
-                size = 11,
-                color = AdventureLime,
-                modifier = Modifier.clip(RoundedCornerShape(50))
-                    .background(Color.White.copy(alpha = 0.15f))
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-            )
+            // Progress is informational; the bottom menu owns the goal action.
+            Row(
+                Modifier.weight(1f).heightIn(min = 40.dp)
+                    .shadow(8.dp, RoundedCornerShape(20.dp))
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(AdventurePanel.copy(alpha = 0.63f))
+                    .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(20.dp))
+                    .semantics(mergeDescendants = true) { }
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                MenuText(stringResource(R.string.menu_goal_label), 11, color = AdventureLavender, letterSpacing = 0.44f)
+                MenuText(goalTitle, 13, modifier = Modifier.weight(1f))
+                if (totalGoals > 0) MenuText(
+                    stringResource(R.string.menu_goal_progress, completedGoals, totalGoals),
+                    size = 11,
+                    color = AdventureLime,
+                    modifier = Modifier.clip(RoundedCornerShape(50))
+                        .background(Color.White.copy(alpha = 0.15f))
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                )
+            }
+            settingsButton?.let { button ->
+                Box(
+                    Modifier.size(48.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(AdventurePanel.copy(alpha = 0.63f))
+                        .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(50)),
+                    contentAlignment = Alignment.Center,
+                ) { button() }
+            }
         }
         Spacer(Modifier.height(8.dp))
         Row(
@@ -93,8 +119,10 @@ internal fun MenuHud(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (budget == null) CoinsBadge(coins) { onAction(MainMenuAction.Coins) }
-            else BudgetBadge(budget, budgetExpanded, onBudgetExpandedChange) { onAction(MainMenuAction.Coins) }
-            Spacer(Modifier.width(12.dp))
+            else BudgetBadge(budget, budgetExpanded, onBudgetExpandedChange,
+                onClick = { onAction(MainMenuAction.Coins) }, onFinance = { onAction(MainMenuAction.Finance) },
+                onSavings = { onAction(MainMenuAction.Savings) })
+            Spacer(Modifier.width(8.dp))
             Box(Modifier.weight(1f).align(if (budget == null) Alignment.CenterVertically else Alignment.Top), contentAlignment = Alignment.CenterEnd) {
                 Text(
                     text = petName,
@@ -120,6 +148,8 @@ private fun BudgetBadge(
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     onClick: () -> Unit,
+    onFinance: (() -> Unit)? = null,
+    onSavings: (() -> Unit)? = null,
 ) {
     val arrowRotation by animateFloatAsState(
         targetValue = if (expanded) 270f else 90f,
@@ -145,31 +175,25 @@ private fun BudgetBadge(
                 Icon(
                     painter = painterResource(R.drawable.menu_chevron),
                     contentDescription = stringResource(if (expanded) R.string.menu_budget_collapse else R.string.menu_budget_expand),
-                    tint = AdventureLime,
-                    modifier = Modifier.size(24.dp).rotate(arrowRotation),
+                    tint = AdventureLabel.copy(alpha = .8f),
+                    modifier = Modifier.size(18.dp).rotate(arrowRotation),
                 )
             }
         }
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { onExpandedChange(false) },
-            modifier = Modifier.width(154.dp),
-            shape = RoundedCornerShape(20.dp),
-            containerColor = AdventurePanel,
+            modifier = Modifier.width((LocalConfiguration.current.screenWidthDp.dp - 32.dp).coerceIn(0.dp, 280.dp)),
+            shape = RoundedCornerShape(24.dp),
+            containerColor = GamePaper,
             tonalElevation = 0.dp,
-            shadowElevation = 8.dp,
+            shadowElevation = 10.dp,
         ) {
-            Column(
-                Modifier.fillMaxWidth()
-                    .clickable(role = Role.Button, onClickLabel = openBudgetLabel, onClick = onClick)
-                    .padding(horizontal = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                BudgetBalanceRow("Нужно", budget.needs, Color(0xFFFF7770))
-                BudgetBalanceRow("Хочу", budget.wants, Color(0xFF4BA6F8))
-                BudgetBalanceRow("Коплю", budget.savings, Color(0xFF79CD43))
-                BudgetBalanceRow("Запас", budget.reserve, Color(0xFFFFBD29))
-            }
+            BudgetPopupSummary(budget)
+            HorizontalDivider(Modifier.padding(horizontal = 16.dp, vertical = 6.dp), color = GameInk.copy(alpha = .10f))
+            BudgetPopupAction("Открыть бюджет") { onExpandedChange(false); onClick() }
+            if (onSavings != null) BudgetPopupAction("Открыть копилку") { onExpandedChange(false); onSavings() }
+            if (onFinance != null) BudgetPopupAction("История приключения") { onExpandedChange(false); onFinance() }
         }
     }
 }
@@ -184,22 +208,74 @@ private fun CollapsedBudgetBadgePreview() {
 @Preview(name = "Монетки · крупный текст", fontScale = 1.5f, showBackground = true, backgroundColor = 0xFF120F30)
 @Composable
 private fun ExpandedBudgetBadgePreview() {
-    LCTAppTheme { BudgetBadge(MenuBudgetUiState(35, 20, 20, 25), true, {}, {}) }
+    LCTAppTheme { BudgetBadge(MenuBudgetUiState(35, 20, 20, 25, actualSavings = 41), true, {}, {}, {}, {}) }
 }
 
 @Composable
-private fun BudgetBalanceRow(title: String, amount: Long, color: Color) {
-    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
-        .background(color.copy(alpha = 0.12f))
-        .border(1.dp, color.copy(alpha = 0.55f), RoundedCornerShape(10.dp))
-        .padding(horizontal = 8.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(title, Modifier.weight(1f), color = AdventureLabel, fontFamily = Rubik,
-            fontWeight = FontWeight.Medium, fontSize = 12.sp)
-        Text(amount.toString(), color = color, fontFamily = Rubik,
-            fontWeight = FontWeight.Bold, fontSize = 14.sp)
+private fun BudgetPopupSummary(budget: MenuBudgetUiState) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 8.dp)) {
+        if (LocalDensity.current.fontScale > 1.3f) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                BudgetBalance("Доступно", budget.available, R.drawable.menu_coin)
+                BudgetBalance("В копилке", budget.actualSavings, R.drawable.budget_savings)
+            }
+        } else {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                BudgetBalance("Доступно", budget.available, R.drawable.menu_coin, Modifier.weight(1f))
+                BudgetBalance("В копилке", budget.actualSavings, R.drawable.budget_savings, Modifier.weight(1f))
+            }
+        }
+        HorizontalDivider(Modifier.padding(vertical = 14.dp), color = GameInk.copy(alpha = .10f))
+        Text("В бюджете", color = GameInk.copy(alpha = .65f), fontFamily = Nunito,
+            fontWeight = FontWeight.Bold, fontSize = 13.sp)
+        Spacer(Modifier.height(6.dp))
+        // Match the allocation indicators on the budget screen.
+        BudgetArticleRow("Нужно", budget.needs, Color(0xFF70B7EA))
+        BudgetArticleRow("Хочу", budget.wants, Color(0xFFF2A15F))
+        BudgetArticleRow("В копилку", budget.savings, AdventureLime)
+        BudgetArticleRow("Запас", budget.reserve, Color(0xFFAB95E6))
+        if (budget.unallocated > 0) {
+            Spacer(Modifier.height(6.dp))
+            Text("Ещё не распределили ${budget.unallocated} монет", color = GameInk.copy(alpha = .72f),
+                fontFamily = Nunito, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, lineHeight = 18.sp)
+        }
     }
+}
+
+@Composable
+private fun BudgetBalance(title: String, amount: Long, artwork: Int, modifier: Modifier = Modifier) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(5.dp)) {
+        Text(title, color = GameInk.copy(alpha = .7f), fontFamily = Nunito,
+            fontWeight = FontWeight.Bold, fontSize = 13.sp)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            GameArtwork(artwork, null, Modifier.size(26.dp), contentScale = ContentScale.Fit)
+            Text(amount.toString(), color = GameInk, fontFamily = Rubik,
+                fontWeight = FontWeight.Bold, fontSize = 22.sp)
+        }
+    }
+}
+
+@Composable
+private fun BudgetArticleRow(title: String, amount: Long, color: Color) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 5.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Box(Modifier.width(4.dp).height(18.dp).clip(RoundedCornerShape(2.dp)).background(color))
+        Text(title, Modifier.weight(1f), color = GameInk, fontFamily = Nunito,
+            fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+        Text(amount.toString(), color = GameInk, fontFamily = Nunito,
+            fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
+    }
+}
+
+@Composable
+private fun BudgetPopupAction(title: String, onClick: () -> Unit) {
+    DropdownMenuItem(
+        text = { Text(title, color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp) },
+        trailingIcon = { Icon(painterResource(R.drawable.menu_chevron), null, Modifier.size(16.dp), tint = GameInk.copy(alpha = .55f)) },
+        onClick = onClick,
+        modifier = Modifier.heightIn(min = 48.dp),
+    )
 }
 
 @Composable

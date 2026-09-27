@@ -4,6 +4,29 @@ import androidx.room3.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 
+/** Upgrade the complete aggregate through the repository before exposing it; never guess past envelope expenses in SQL. */
+internal val MIGRATION_19_20 = object : Migration(19, 20) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE GAME_STATE ADD COLUMN budget_model_version INTEGER NOT NULL DEFAULT 0")
+    }
+}
+
+/** Existing project choices are kept as history; a purchase target requires a new explicit choice. */
+internal val MIGRATION_18_19 = object : Migration(18, 19) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS SAVING_GOAL_SELECTION (
+                game_state_id TEXT NOT NULL, item_id TEXT NOT NULL,
+                PRIMARY KEY(game_state_id),
+                FOREIGN KEY(game_state_id) REFERENCES GAME_STATE(id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+                FOREIGN KEY(item_id) REFERENCES ITEM(id) ON UPDATE NO ACTION ON DELETE NO ACTION)
+        """.trimIndent())
+        connection.execSQL("CREATE INDEX IF NOT EXISTS index_SAVING_GOAL_SELECTION_item_id ON SAVING_GOAL_SELECTION(item_id)")
+        connection.execSQL("ALTER TABLE ONBOARDING_DRAFT ADD COLUMN saving_item_id TEXT")
+        connection.execSQL("UPDATE ONBOARDING_DRAFT SET step = 'GOAL_SELECTION' WHERE step = 'INTRODUCTION'")
+    }
+}
+
 /** Preserve ownership and legacy item values; do not fabricate prices or award inventory. */
 internal val MIGRATION_4_5 = object : Migration(4, 5) {
     override suspend fun migrate(connection: SQLiteConnection) {
@@ -240,5 +263,116 @@ internal val MIGRATION_15_16 = object : Migration(15, 16) {
             INSERT INTO BUDGET_PLANNING (game_state_id, session_id, reason, stage, income, revision)
             SELECT id, 'migration-16-' || id, 'MIGRATION', 'ALLOCATION', 0, 0 FROM GAME_STATE
         """.trimIndent())
+    }
+}
+
+/** v16 savings are real money. Preserve them; combine only spendable categories. */
+internal val MIGRATION_16_17 = object : Migration(16, 17) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE GAME_STATE ADD COLUMN available_balance INTEGER NOT NULL DEFAULT 0")
+        connection.execSQL("ALTER TABLE GAME_STATE ADD COLUMN savings_balance INTEGER NOT NULL DEFAULT 0")
+        connection.execSQL("UPDATE GAME_STATE SET available_balance = needs + wants + reserve + unallocated, savings_balance = savings")
+        for (column in listOf("draft_needs", "draft_wants", "draft_savings", "draft_reserve", "base_amount")) {
+            connection.execSQL("ALTER TABLE BUDGET_PLANNING ADD COLUMN $column INTEGER")
+        }
+        // Already saved coins are not allocated again. The original distribution remains in GAME_STATE.
+        connection.execSQL("""
+            UPDATE BUDGET_PLANNING SET
+                draft_needs = (SELECT needs FROM GAME_STATE WHERE id = game_state_id),
+                draft_wants = (SELECT wants FROM GAME_STATE WHERE id = game_state_id),
+                draft_savings = 0,
+                draft_reserve = (SELECT reserve FROM GAME_STATE WHERE id = game_state_id),
+                base_amount = (SELECT available_balance FROM GAME_STATE WHERE id = game_state_id)
+        """.trimIndent())
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS GAME_RUN (
+                game_state_id TEXT NOT NULL PRIMARY KEY, run_id TEXT NOT NULL,
+                FOREIGN KEY(game_state_id) REFERENCES GAME_STATE(id) ON UPDATE NO ACTION ON DELETE NO ACTION)
+        """.trimIndent())
+        connection.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_GAME_RUN_run_id ON GAME_RUN(run_id)")
+        connection.execSQL("INSERT INTO GAME_RUN SELECT id, 'import-17-' || lower(hex(randomblob(16))) FROM GAME_STATE")
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS GAME_AUDIT (
+                id TEXT NOT NULL PRIMARY KEY, run_id TEXT NOT NULL, sequence INTEGER NOT NULL,
+                type TEXT NOT NULL, format_version INTEGER NOT NULL, payload TEXT NOT NULL,
+                FOREIGN KEY(run_id) REFERENCES GAME_RUN(run_id) ON UPDATE NO ACTION ON DELETE NO ACTION)
+        """.trimIndent())
+        connection.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_GAME_AUDIT_run_id_sequence ON GAME_AUDIT(run_id, sequence)")
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS AUDIT_FACT_ID (
+                fact_id TEXT NOT NULL PRIMARY KEY, audit_id TEXT NOT NULL,
+                FOREIGN KEY(audit_id) REFERENCES GAME_AUDIT(id) ON UPDATE NO ACTION ON DELETE NO ACTION)
+        """.trimIndent())
+        connection.execSQL("CREATE INDEX IF NOT EXISTS index_AUDIT_FACT_ID_audit_id ON AUDIT_FACT_ID(audit_id)")
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS AUDIT_OUTBOX (
+                audit_id TEXT NOT NULL PRIMARY KEY, acknowledged INTEGER NOT NULL DEFAULT 0,
+                FOREIGN KEY(audit_id) REFERENCES GAME_AUDIT(id) ON UPDATE NO ACTION ON DELETE NO ACTION)
+        """.trimIndent())
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS FINANCIAL_PERIOD (
+                id TEXT NOT NULL PRIMARY KEY, game_state_id TEXT NOT NULL, position INTEGER NOT NULL,
+                goal_id TEXT NOT NULL, ordinal INTEGER NOT NULL, started_day INTEGER NOT NULL,
+                opening_available INTEGER NOT NULL, opening_savings INTEGER NOT NULL, closed_day INTEGER,
+                needs_provided INTEGER NOT NULL, independently_saved INTEGER NOT NULL,
+                reviewed_plan INTEGER NOT NULL, imported INTEGER NOT NULL,
+                income INTEGER NOT NULL, spent_available INTEGER NOT NULL, spent_savings INTEGER NOT NULL,
+                deposited INTEGER NOT NULL, withdrawn INTEGER NOT NULL,
+                FOREIGN KEY(game_state_id) REFERENCES GAME_STATE(id) ON UPDATE NO ACTION ON DELETE NO ACTION)
+        """.trimIndent())
+        connection.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_FINANCIAL_PERIOD_game_state_id_position ON FINANCIAL_PERIOD(game_state_id, position)")
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS FINANCIAL_CURSOR (
+                game_state_id TEXT NOT NULL PRIMARY KEY, period_id TEXT,
+                FOREIGN KEY(game_state_id) REFERENCES GAME_STATE(id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+                FOREIGN KEY(period_id) REFERENCES FINANCIAL_PERIOD(id) ON UPDATE NO ACTION ON DELETE NO ACTION)
+        """.trimIndent())
+        connection.execSQL("CREATE INDEX IF NOT EXISTS index_FINANCIAL_CURSOR_period_id ON FINANCIAL_CURSOR(period_id)")
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS BUDGET_PLAN_REVISION (
+                id TEXT NOT NULL PRIMARY KEY, game_state_id TEXT NOT NULL, position INTEGER NOT NULL,
+                period_id TEXT, ordinal INTEGER NOT NULL, day INTEGER NOT NULL, available_basis INTEGER NOT NULL,
+                needs INTEGER NOT NULL, wants INTEGER NOT NULL, savings INTEGER NOT NULL, reserve INTEGER NOT NULL,
+                reason TEXT NOT NULL, previous_id TEXT, known_needs INTEGER, cause_action_id TEXT,
+                FOREIGN KEY(game_state_id) REFERENCES GAME_STATE(id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+                FOREIGN KEY(period_id) REFERENCES FINANCIAL_PERIOD(id) ON UPDATE NO ACTION ON DELETE NO ACTION)
+        """.trimIndent())
+        connection.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_BUDGET_PLAN_REVISION_game_state_id_position ON BUDGET_PLAN_REVISION(game_state_id, position)")
+        connection.execSQL("CREATE INDEX IF NOT EXISTS index_BUDGET_PLAN_REVISION_period_id ON BUDGET_PLAN_REVISION(period_id)")
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS FINANCIAL_PRACTICE (
+                game_state_id TEXT NOT NULL PRIMARY KEY, task_payload TEXT NOT NULL,
+                answered_option_id TEXT, used_hint INTEGER NOT NULL, attempts INTEGER NOT NULL,
+                FOREIGN KEY(game_state_id) REFERENCES GAME_STATE(id) ON UPDATE NO ACTION ON DELETE NO ACTION)
+        """.trimIndent())
+        // Only a selected unfinished project has a known current period. No prior milestones are invented.
+        connection.execSQL("""
+            INSERT INTO FINANCIAL_PERIOD
+            SELECT 'import-17-period-' || gs.id, gs.id, 0, selected.goal_id,
+                (SELECT COUNT(*) FROM COMPLETED_GOAL_PROJECT) + 1,
+                COALESCE(engine.day, 1), gs.available_balance, gs.savings_balance, NULL, 0, 0, 0, 1, 0, 0, 0, 0, 0
+            FROM GAME_STATE gs INNER JOIN GOAL_SELECTION selected ON selected.game_state_id = gs.id
+                LEFT JOIN ENGINE_STATE engine ON engine.game_state_id = gs.id
+        """.trimIndent())
+        connection.execSQL("INSERT INTO FINANCIAL_CURSOR SELECT game_state_id, id FROM FINANCIAL_PERIOD")
+    }
+}
+
+/** Retain unknown past exposure/practice as unknown; never guess a previous success or date. */
+internal val MIGRATION_17_18 = object : Migration(17, 18) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE FINANCIAL_PERIOD ADD COLUMN savings_practice_payload TEXT")
+        connection.execSQL("ALTER TABLE FINANCIAL_PERIOD ADD COLUMN review_evidence_payload TEXT")
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS EVENT_EXPOSURE (
+                game_state_id TEXT NOT NULL, event_id TEXT NOT NULL, position INTEGER NOT NULL,
+                last_offered_day INTEGER, last_completed_day INTEGER,
+                offer_count INTEGER NOT NULL, completion_count INTEGER NOT NULL,
+                PRIMARY KEY(game_state_id, event_id),
+                FOREIGN KEY(game_state_id) REFERENCES GAME_STATE(id) ON UPDATE NO ACTION ON DELETE NO ACTION,
+                FOREIGN KEY(event_id) REFERENCES EVENT(id) ON UPDATE NO ACTION ON DELETE NO ACTION)
+        """.trimIndent())
+        connection.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_EVENT_EXPOSURE_game_state_id_position ON EVENT_EXPOSURE(game_state_id, position)")
+        connection.execSQL("CREATE INDEX IF NOT EXISTS index_EVENT_EXPOSURE_event_id ON EVENT_EXPOSURE(event_id)")
     }
 }

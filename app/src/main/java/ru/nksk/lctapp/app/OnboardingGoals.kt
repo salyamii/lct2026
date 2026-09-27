@@ -1,20 +1,21 @@
 package ru.nksk.lctapp.app
 
 import ru.nksk.lctapp.R
-import ru.nksk.lctapp.data.game.content.STARS_GOAL
-import ru.nksk.lctapp.data.game.content.TOWER_GOAL
-import ru.nksk.lctapp.data.game.content.HOME_GOAL
+import ru.nksk.lctapp.core.ui.game.goalItemArtwork
 import ru.nksk.lctapp.feature.onboarding.ui.AdventureGoalOption
 
-/** App-owned artwork/copy mapping; availability comes from GameSession. */
+/** First chapter purchase targets. IDs and availability are validated against the catalog. */
 internal fun onboardingGoalOptions(): List<AdventureGoalOption> = listOf(
-    AdventureGoalOption(STARS_GOAL, "Ночь наблюдений", "Открой для себя звёздное небо",
-        "Впереди — звёздное небо и удивительные открытия. Подготовься к своей первой ночи наблюдений!",
-        R.drawable.location_observatory),
-    AdventureGoalOption(TOWER_GOAL, "Подготовка к башне", "Подготовься к исследованию башни",
-        "Впереди — загадки старой башни. Собери снаряжение и подготовься к новым открытиям!",
-        R.drawable.location_trail_day),
-    AdventureGoalOption(HOME_GOAL, "Дом исследователя", "Создай своё место для открытий",
-        "У каждого исследователя есть место, куда хочется возвращаться. Обустрой свой дом для будущих открытий!",
-        R.drawable.location_workshop_day),
+    AdventureGoalOption("stargazing-star-map-v1", "Карта звёзд", "24 монеты\nНайди знакомые созвездия",
+        "Начнём с карты звёзд. Откладывай монеты в копилку, следи за прогрессом и собери всё нужное для Ночи наблюдений.",
+        R.drawable.location_observatory_stage, itemImage = goalItemArtwork("stargazing-star-map-v1")),
+    AdventureGoalOption("stargazing-tripod-v1", "Штатив", "36 монет\nУстойчивая опора для телескопа",
+        "Первой целью станет штатив. Откладывай монеты в копилку, а после покупки выбери следующую цель.",
+        R.drawable.location_observatory_stage, itemImage = goalItemArtwork("stargazing-tripod-v1")),
+    AdventureGoalOption("stargazing-telescope-v1", "Телескоп", "90 монет\nРассмотри далёкие звёзды",
+        "Начнём копить на телескоп! Впереди Ночь наблюдений: для неё понадобятся и остальные части комплекта.",
+        R.drawable.location_observatory_stage, itemImage = goalItemArtwork("stargazing-telescope-v1")),
+    AdventureGoalOption("stargazing-trip-v1", "Поездка", "30 монет\nОтправляйся на Ночь наблюдений",
+        "Первой целью станет поездка. Накопи на неё, затем продолжай собирать снаряжение для наблюдений.",
+        R.drawable.location_observatory_stage, itemImage = goalItemArtwork("stargazing-trip-v1")),
 )

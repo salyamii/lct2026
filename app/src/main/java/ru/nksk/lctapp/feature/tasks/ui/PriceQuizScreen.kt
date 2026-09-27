@@ -61,16 +61,18 @@ fun PriceQuizScreen(
             .background(DeedColors.Scene),
     ) {
         Box {
-            GameArtwork(R.drawable.location_workshop,
+            GameArtwork(deed?.sceneRes ?: R.drawable.location_workshop,
                 contentDescription = null,
                 modifier = Modifier.fillMaxWidth().height(150.dp),
                 contentScale = ContentScale.Crop,
             )
+            deed?.activityArtworkRes?.let { art -> GameArtwork(art, null,
+                Modifier.align(Alignment.BottomEnd).size(92.dp)) }
             DeedHeader(deed?.title ?: stringResource(R.string.deeds_price_title), onBack = onBack)
         }
         DeedSheet(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             Text(
-                if (deed != null) "Сравни значения и выбери большее. Ошибки уменьшают награду." else stringResource(R.string.deeds_price_prompt),
+                deed?.instructions ?: if (deed != null) "Сравни значения и выбери большее. Ошибки уменьшают награду." else stringResource(R.string.deeds_price_prompt),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = Rubik,
@@ -82,29 +84,33 @@ fun PriceQuizScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 DeedChip(stringResource(R.string.deeds_question, minOf(state.current + 1, PriceQuizState.QUESTION_COUNT), PriceQuizState.QUESTION_COUNT))
-                CoinChip(deed?.let { "Награда до ${it.maximumReward} монет" }
+                if (deed?.storyAction != true) CoinChip(deed?.let { "Награда до ${it.maximumReward} монет" }
                     ?: stringResource(R.string.deeds_demo_reward, state.reward))
             }
             Spacer(Modifier.height(14.dp))
-            if (!state.finished) {
+            // Connected work returns to the menu after saving. Keep the last pair
+            // visible during that write instead of collapsing the whole game board.
+            if (!state.finished || deed != null) {
+                val displayedIndex = minOf(state.current, state.questions.lastIndex)
+                val displayedQuestion = state.questions[displayedIndex]
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     InvoiceCard(
-                        art = GOODS_ART[state.current % GOODS_ART.size],
-                        amount = state.question.leftAmount,
-                        enabled = state.lastCorrect == null && deed?.canPlay != false,
-                        showAsAnswer = uiState.leftIsAnswer,
-                        onClick = { onAction(PriceQuizAction.Answer(pickedLeft = true)) },
+                        art = GOODS_ART[displayedIndex % GOODS_ART.size],
+                        amount = displayedQuestion.leftAmount,
+                        enabled = !state.finished && state.lastCorrect == null && deed?.canPlay != false,
+                        showAsAnswer = if (state.finished) displayedQuestion.leftIsBigger else uiState.leftIsAnswer,
+                        onClick = { onAction(PriceQuizAction.Answer(pickedLeft = true, questionIndex = state.current)) },
                         modifier = Modifier.weight(1f),
                     )
                     InvoiceCard(
-                        art = GOODS_ART[(state.current + 3) % GOODS_ART.size],
-                        amount = state.question.rightAmount,
-                        enabled = state.lastCorrect == null && deed?.canPlay != false,
-                        showAsAnswer = uiState.rightIsAnswer,
-                        onClick = { onAction(PriceQuizAction.Answer(pickedLeft = false)) },
+                        art = GOODS_ART[(displayedIndex + 3) % GOODS_ART.size],
+                        amount = displayedQuestion.rightAmount,
+                        enabled = !state.finished && state.lastCorrect == null && deed?.canPlay != false,
+                        showAsAnswer = if (state.finished) !displayedQuestion.leftIsBigger else uiState.rightIsAnswer,
+                        onClick = { onAction(PriceQuizAction.Answer(pickedLeft = false, questionIndex = state.current)) },
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -113,7 +119,7 @@ fun PriceQuizScreen(
                     when (state.lastCorrect) {
                         true -> stringResource(R.string.deeds_correct)
                         false -> stringResource(R.string.deeds_incorrect)
-                        null -> stringResource(R.string.deeds_price_hint)
+                        null -> stringResource(if (state.finished) R.string.deeds_ready else R.string.deeds_price_hint)
                     },
                     fontSize = 14.sp,
                     fontFamily = Nunito,

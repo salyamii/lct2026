@@ -10,6 +10,8 @@ import ru.nksk.lctapp.domain.pet.PetState
 import ru.nksk.lctapp.domain.pet.PetVisualState
 import ru.nksk.lctapp.domain.pet.PetAge
 import ru.nksk.lctapp.domain.story.StoryDecision
+import ru.nksk.lctapp.domain.economy.BudgetPlan
+import ru.nksk.lctapp.domain.economy.EconomyState
 
 class DaySummaryUiStateTest {
     private val catalog = bundledGameCatalog()
@@ -28,10 +30,10 @@ class DaySummaryUiStateTest {
         assertEquals("Сейчас 72 монеты", summary.remaining)
         assertEquals(listOf("Потрачено за день: 34 монеты", "Получено за день: 6 монет"), summary.moneyLines)
         assertNull(summary.detailsNote)
-        assertTrue(summary.activities.contains(DaySummaryRow("Настроили малый телескоп", "Получили 6 монет")))
+        assertTrue(summary.activities.contains(DaySummaryRow("Настроили малый телескоп", "Получили 6 монет", DaySummaryRowKind.WORK)))
         assertTrue(summary.activities.any { it.label.contains("важную деталь Хроноскопа") })
-        assertTrue(summary.activities.contains(DaySummaryRow("Купили: Карта звёзд", "Потратили 24 монеты")))
-        assertEquals(2, summary.activities.count { it == DaySummaryRow("Пообедали", "Потратили 5 монет") })
+        assertTrue(summary.activities.contains(DaySummaryRow("Купили: Карта звёзд", "Потратили 24 монеты", DaySummaryRowKind.PURCHASE)))
+        assertEquals(2, summary.activities.count { it == DaySummaryRow("Пообедали", "Потратили 5 монет", DaySummaryRowKind.MEAL) })
         assertFalse((summary.activities.map { it.toString() } + summary.moneyLines + summary.remaining).any { "→" in it })
     }
 
@@ -59,7 +61,7 @@ class DaySummaryUiStateTest {
         val old = DaySummary(4, 97, 68, emptyList(), 3, completedDecisions = listOf(
             StoryDecision("work-done", "figma-2270-54-v1:complete"),
         )).toUiState(catalog, "Тоша")
-        assertEquals(listOf(DaySummaryRow("Помогли бобру распутать канаты")), old.activities)
+        assertEquals(listOf(DaySummaryRow("Помогли бобру распутать канаты", kind = DaySummaryRowKind.WORK)), old.activities)
         assertEquals(listOf("За день монет стало меньше на 29"), old.moneyLines)
         assertNotNull(old.detailsNote)
         val quiet = DaySummary(1, 100, 100, emptyList(), 0, 5, 5).toUiState(catalog, "Тоша")
@@ -73,7 +75,7 @@ class DaySummaryUiStateTest {
             DayJournalEntry("purchase", DayJournalKind.ITEM_PURCHASE, "stargazing-star-map-v1", -24),
         )).toUiState(catalog, "Тоша")
         assertEquals(listOf("За день монет стало меньше на 29"), summary.moneyLines)
-        assertEquals(listOf(DaySummaryRow("Купили: Карта звёзд", "Потратили 24 монеты")), summary.activities)
+        assertEquals(listOf(DaySummaryRow("Купили: Карта звёзд", "Потратили 24 монеты", DaySummaryRowKind.PURCHASE)), summary.activities)
         assertNotNull(summary.detailsNote)
     }
 
@@ -106,7 +108,7 @@ class DaySummaryUiStateTest {
             DayJournalEntry("income", DayJournalKind.WEEKLY_INCOME, "rules", 25),
         ), completedDecisions = listOf(StoryDecision("bought", cap))).toUiState(catalog, "Тоша")
         assertEquals(1, summary.activities.count { "Кепка" in it.label })
-        assertTrue(summary.activities.contains(DaySummaryRow("Купили: Кепка исследователя", "Потратили 25 монет")))
+        assertTrue(summary.activities.contains(DaySummaryRow("Купили: Кепка исследователя", "Потратили 25 монет", DaySummaryRowKind.PURCHASE)))
         assertEquals(listOf("Потрачено за день: 25 монет", "Получено за день: 25 монет"), summary.moneyLines)
     }
 
@@ -118,6 +120,55 @@ class DaySummaryUiStateTest {
         val summary = DaySummary(1, 0, 0, emptyList(), 3, 5, 0,
             listOf(DayJournalEntry("free", DayJournalKind.MEAL, "community-v1", 0))).toUiState(catalog, "Тоша")
         assertTrue(summary.moneyLines.isEmpty())
-        assertEquals(listOf(DaySummaryRow("Поели в бесплатной столовой", "Завтра будет меньше сил")), summary.activities)
+        assertEquals(listOf(DaySummaryRow("Поели в бесплатной столовой", "Завтра будет меньше сил", DaySummaryRowKind.MEAL)), summary.activities)
+    }
+
+    @Test fun diarySeparatesDailyFlowsFromCurrentWalletAndBankWithoutGuessingMissingAmounts() {
+        val economy = EconomyState(BudgetPlan(35, 6, 10, 10), availableBalance = 61, savingsBalance = 30)
+        val recap = DaySummary(3, 100, 91, emptyList(), 2, journal = listOf(
+            DayJournalEntry("meal", DayJournalKind.MEAL, "basic-v1", -15),
+            DayJournalEntry("work", DayJournalKind.DEED, "figma-2163-43-v1:complete", 6),
+        )).toUiState(catalog, "Тоша", economy)
+        assertEquals(3, recap.day)
+        assertEquals(6.toBigInteger(), recap.income)
+        assertEquals(15.toBigInteger(), recap.spending)
+        assertEquals(61L, recap.availableBalance)
+        assertEquals(30L, recap.savingsBalance)
+        assertNull(recap.netChange)
+        assertNull(recap.detailsNote)
+
+        val partial = DaySummary(3, 100, 91, emptyList(), 2, journal = listOf(
+            DayJournalEntry("meal", DayJournalKind.MEAL, "basic-v1", -15),
+        )).toUiState(catalog, "Тоша", economy)
+        assertNull(partial.income)
+        assertNull(partial.spending)
+        assertEquals((-9).toBigInteger(), partial.netChange)
+        assertEquals(61L, partial.availableBalance)
+        assertEquals(30L, partial.savingsBalance)
+        assertNotNull(partial.detailsNote)
+        assertEquals(DaySummaryRowKind.MEAL, partial.activities.single().kind)
+    }
+
+    @Test fun refusalIsADiaryDecisionAndNeverARewardOrAnIncome() {
+        val choice = "figma-2654-2-purchase-v2:pass"
+        val recap = DaySummary(1, 100, 100, emptyList(), 1,
+            journal = listOf(DayJournalEntry("pass", DayJournalKind.EVENT_CHOICE, choice, 0)),
+            completedDecisions = listOf(StoryDecision("pass-decision", choice))).toUiState(catalog, "Тоша")
+        assertEquals(DaySummaryRowKind.DECISION, recap.activities.single().kind)
+        assertEquals("", recap.activities.single().value)
+        assertEquals(0.toBigInteger(), recap.income)
+        assertEquals(0.toBigInteger(), recap.spending)
+    }
+
+    @Test fun oldPaidChoicesWithoutReceiptsDoNotBecomeZeroIncomeWhenTheNetBalanceMatches() {
+        val recap = DaySummary(1, 100, 100, emptyList(), 1,
+            completedDecisions = listOf(StoryDecision("old-work", "figma-2163-43-v1:complete")))
+            .toUiState(catalog, "Тоша")
+        assertNull(recap.income)
+        assertNull(recap.spending)
+        assertEquals(0.toBigInteger(), recap.netChange)
+        assertNotNull(recap.detailsNote)
+        assertEquals(DaySummaryRowKind.WORK, recap.activities.single().kind)
+        assertEquals("", recap.activities.single().value)
     }
 }

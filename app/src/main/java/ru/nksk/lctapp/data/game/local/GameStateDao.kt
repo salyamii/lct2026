@@ -8,6 +8,12 @@ import androidx.room3.Update
 /** No REPLACE or parent deletion: references and unrelated rows must survive writes. */
 @Dao
 internal interface GameStateDao {
+    @Query("SELECT * FROM EVENT_EXPOSURE WHERE game_state_id = :gameId ORDER BY position")
+    suspend fun readEventExposure(gameId: String): List<EventExposureEntity>
+    @Insert suspend fun insertEventExposure(rows: List<EventExposureEntity>)
+    @Query("DELETE FROM EVENT_EXPOSURE WHERE game_state_id = :gameId")
+    suspend fun deleteEventExposure(gameId: String)
+
     @Query("SELECT * FROM BUDGET_PLANNING WHERE game_state_id = :gameId")
     suspend fun readBudgetPlanning(gameId: String): BudgetPlanningEntity?
 
@@ -39,6 +45,12 @@ internal interface GameStateDao {
 
     @Query("DELETE FROM GOAL_SELECTION WHERE game_state_id = :gameId")
     suspend fun deleteGoalSelection(gameId: String)
+
+    @Query("SELECT * FROM SAVING_GOAL_SELECTION WHERE game_state_id = :gameId")
+    suspend fun readSavingGoalSelection(gameId: String): SavingGoalSelectionEntity?
+    @Insert suspend fun insertSavingGoalSelection(row: SavingGoalSelectionEntity)
+    @Query("DELETE FROM SAVING_GOAL_SELECTION WHERE game_state_id = :gameId")
+    suspend fun deleteSavingGoalSelection(gameId: String)
 
     @Query("SELECT * FROM MINI_GAME_COMPLETION WHERE game_state_id = :gameId")
     suspend fun readMiniGameCompletions(gameId: String): List<MiniGameCompletionEntity>

@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
@@ -43,7 +45,9 @@ import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 
 @Composable
-internal fun GearScreen(state: GearLoadState, onBack: () -> Unit, onRetry: () -> Unit) {
+internal fun GearScreen(state: GearLoadState, onBack: () -> Unit, onRetry: () -> Unit,
+    onEquip: (String) -> Unit = {}, onOpenItem: (String) -> Unit = {},
+    gridState: LazyGridState = rememberLazyGridState()) {
     Box(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding()) {
         Column(Modifier.align(Alignment.TopCenter).widthIn(max = 840.dp).fillMaxSize()) {
             TextButton(onClick = onBack, modifier = Modifier.padding(start = 8.dp)) {
@@ -77,6 +81,7 @@ internal fun GearScreen(state: GearLoadState, onBack: () -> Unit, onRetry: () ->
                 // Loading/error content scrolls too, including in landscape and at large font sizes.
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(152.dp),
+                    state = gridState,
                     contentPadding = PaddingValues(20.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -101,17 +106,26 @@ internal fun GearScreen(state: GearLoadState, onBack: () -> Unit, onRetry: () ->
                             }
                         }
                         is GearLoadState.Ready -> {
+                            state.actionMessage?.let { message ->
+                                item(span = { GridItemSpan(maxLineSpan) }) {
+                                    Text(stringResource(message), color = GearColors.Ink, fontFamily = Nunito)
+                                }
+                            }
                             gearSection(
                                 key = "story", title = R.string.gear_story_title,
                                 emptyTitle = R.string.gear_story_empty_title,
                                 emptyDescription = R.string.gear_story_empty_description,
                                 items = state.inventory.storyItems,
+                                onOpenItem = onOpenItem,
                             )
                             gearSection(
                                 key = "accessories", title = R.string.gear_accessories_title,
                                 emptyTitle = R.string.gear_accessories_empty_title,
                                 emptyDescription = R.string.gear_accessories_empty_description,
                                 items = state.inventory.accessories,
+                                enabled = !state.busy,
+                                onEquip = onEquip,
+                                onOpenItem = onOpenItem,
                             )
                         }
                     }
@@ -127,6 +141,9 @@ private fun LazyGridScope.gearSection(
     emptyTitle: Int,
     emptyDescription: Int,
     items: List<GearItemUiState>,
+    enabled: Boolean = true,
+    onEquip: (String) -> Unit = {},
+    onOpenItem: (String) -> Unit = {},
 ) {
     item(key = "$key-header", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
         GearSectionHeading(stringResource(title), items.size)
@@ -136,7 +153,7 @@ private fun LazyGridScope.gearSection(
             GearEmptySection(stringResource(emptyTitle), stringResource(emptyDescription))
         }
     } else {
-        items(items, key = { "owned-${it.occurrenceId}" }, contentType = { "item" }) { GearItemCard(it) }
+        items(items, key = { "owned-${it.occurrenceId}" }, contentType = { "item" }) { GearItemCard(it, enabled, onEquip, onOpenItem) }
     }
 }
 

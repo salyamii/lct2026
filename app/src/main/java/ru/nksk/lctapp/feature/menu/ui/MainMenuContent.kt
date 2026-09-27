@@ -20,9 +20,10 @@ import ru.nksk.lctapp.R
 
 @Composable
 internal fun MainMenuContent(state: MainMenuLoadState, onRetry: () -> Unit, onAction: (MainMenuAction) -> Unit,
-    onFreeMeal: () -> Unit, onDismissMeal: () -> Unit) {
+    onFreeMeal: () -> Unit, onDismissMeal: () -> Unit,
+    settingsButton: (@Composable () -> Unit)? = null) {
     when (state) {
-        is MainMenuLoadState.Ready -> MainMenuScreen(state = state.menu, onAction = onAction)
+        is MainMenuLoadState.Ready -> MainMenuScreen(state = state.menu, onAction = onAction, settingsButton = settingsButton)
         else -> Surface(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp),
@@ -45,7 +46,13 @@ internal fun MainMenuContent(state: MainMenuLoadState, onRetry: () -> Unit, onAc
             title = { Text("Бесплатная столовая") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("На обычный обед не хватает монет. Можно поесть бесплатно, но завтра ${state.menu.pet.name} будет быстрее уставать.")
+                    Text("На обычный обед не хватает монет. После бесплатного обеда сегодня понадобится отдых. Утром ${state.menu.pet.name} будет немного уставшим.")
+                    if ((state.menu.budget?.actualSavings ?: 0) > 0) {
+                        Text("В копилке есть ${state.menu.budget?.actualSavings} монет. Открой её через план монет, чтобы отдельно подтвердить снятие на еду.")
+                        TextButton(onClick = { onDismissMeal(); onAction(MainMenuAction.Coins) }, enabled = !state.menu.busy) {
+                            Text("Открыть бюджет")
+                        }
+                    }
                     state.menu.notice?.let { Text(it) }
                 }
             },

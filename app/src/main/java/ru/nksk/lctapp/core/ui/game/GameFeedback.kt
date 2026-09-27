@@ -1,6 +1,34 @@
 package ru.nksk.lctapp.core.ui.game
 
 import ru.nksk.lctapp.domain.engine.BlockReason
+import ru.nksk.lctapp.domain.engine.EngineCommand
+import ru.nksk.lctapp.domain.engine.GameCatalog
+import ru.nksk.lctapp.domain.game.GameState
+import ru.nksk.lctapp.domain.pet.renderPetText
+
+/** Explain the outcome actually committed, including the selected alternative and real costs. */
+internal fun eventCompletionMessage(before: GameState, after: GameState,
+    command: EngineCommand.CompleteEvent, catalog: GameCatalog): String {
+    val occurrence = before.engine?.currentEvent ?: return "Решение сохранено."
+    val event = catalog.content.events.first { it.id == occurrence.eventId }
+    val summary = catalog.cards[event.id]?.summaryByChoiceId?.get(command.choiceId)
+        ?: "Завершили: ${event.title}"
+    val parts = mutableListOf(renderPetText(summary, after.pet.name).trimEnd('.') + ".")
+    val spent = before.economy.balance - after.economy.balance
+    if (spent > 0) parts += "Потратили $spent монет."
+    else if (spent < 0) parts += "Получили ${-spent} монет."
+    val effort = (before.engine?.energy ?: 0) - (after.engine?.energy ?: 0)
+    val equipped = after.ownedItems.any { item -> before.ownedItems.none { it.id == item.id } &&
+        ru.nksk.lctapp.domain.pet.PetCosmetics.forItem(item.itemId) != null }
+    when {
+        equipped -> parts += "Обновку можно надеть в «Снаряжении»."
+        after.engine?.energy == 0 -> parts += "${after.pet.name} без сил — пора отдохнуть."
+        effort > 0 -> parts += "${after.pet.name} ${energyDescription(after.engine!!.energy, catalog.rules.fullEnergy).lowercase()}."
+        after.engine?.ateToday == true && before.engine?.ateToday == false -> parts += "${after.pet.name} поел."
+        catalog.policies[event.id]?.scheduling?.blocksStoryUntilResolved == true -> parts += "Можно продолжить историю."
+    }
+    return parts.joinToString(" ")
+}
 
 internal fun deedCompletionMessage(reward: Long): String {
     val coins = when {
@@ -16,13 +44,15 @@ internal fun deedCompletionMessage(reward: Long): String {
 internal fun energyDescription(remaining: Int, maximum: Int): String = when {
     remaining <= 0 -> "Без сил"
     remaining >= maximum -> "Полон сил"
-    remaining == maximum - 1 -> "Немного устал"
-    remaining == maximum - 2 -> "Устал"
+    remaining >= maximum - 2 && remaining > 1 -> "Немного устал"
+    remaining > 1 -> "Устал"
     else -> "Сильно устал"
 }
 
 internal fun BlockReason.playerMessage(petName: String): String = when (this) {
     BlockReason.BudgetPlanningRequired -> "Сначала распредели монеты по статьям и подтверди бюджет."
+    is BlockReason.FinancialPracticeRequired -> "Комплект собран. Перед финалом главы осталось попробовать финансовые решения — открой практику."
+    BlockReason.SavingsWithdrawalConfirmationRequired -> "Чтобы взять монеты из копилки, сначала подтверди решение."
     BlockReason.InvalidPetName -> "Введи непустое имя в одну строку."
     BlockReason.MustEat -> "$petName проголодался. Сначала нужно поесть, затем можно продолжить."
     BlockReason.MustSleep -> "$petName устал. Сил на это действие не хватает. Сначала нужно отдохнуть — оставшиеся события дождутся завтра."

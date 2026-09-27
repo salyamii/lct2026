@@ -16,6 +16,7 @@
 local.properties
 /docs/*
 !/docs/design/
+!/docs/backend/
 !/docs/navigation.md
 !/docs/architecture.md
 .pdf

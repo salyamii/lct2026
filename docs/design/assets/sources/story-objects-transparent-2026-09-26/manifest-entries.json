@@ -1,0 +1,1514 @@
+[
+  {
+    "resource": "story_cargo_journal",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:429",
+      "node_name": "Грузовой журнал · открытый разворот",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-429"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G1.04 · Запись в журнале грузов",
+    "figma_image_sha1": "02761a13a573e93aea6bdd82c1400495d935ac4a",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_cargo_journal.png",
+    "source_sha256": "029d463653ff76133ebffc431e2f94785e890dbc15ee767be547a11255e70863",
+    "source_bytes": 2828203,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1536,
+    "height": 1024,
+    "design_canvas": [
+      1536,
+      1024
+    ],
+    "bytes": 1931672,
+    "sha256": "e03082bdf79580b261cbc10199852fbb6d9809ebc6ef4b0b38e6da50f91d71e9",
+    "rgba_sha256": "6ff1f26b07ee7dec4899d26e8c49382ee228b216c004a98e71d79d1edfbbb446",
+    "alpha_bounds": [
+      28,
+      29,
+      1536,
+      1014
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_cargo_journal.webp"
+  },
+  {
+    "resource": "story_observation_journal",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:434",
+      "node_name": "Журнал наблюдений",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-434"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G1.10 · Малый телескоп и старый журнал | G2.07 · Комната дежурного",
+    "figma_image_sha1": "878ef418c8ea47339983b6cf7e5c117588b9c4cd",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_observation_journal.png",
+    "source_sha256": "cbdd29bc08d8cf9c0d4ddf452bc13af0c86f5cb10ebae43e5d785306c0b0a29d",
+    "source_bytes": 2766604,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1536,
+    "height": 1024,
+    "design_canvas": [
+      1536,
+      1024
+    ],
+    "bytes": 1895348,
+    "sha256": "32e65fcc8afe974c062ea4f85e2107fb023b1fa515b646b1b56008b6968f4934",
+    "rgba_sha256": "92b025d9581a00698f33894f2a15a6fcda965264cc06d17088e71bc83a439f38",
+    "alpha_bounds": [
+      28,
+      26,
+      1536,
+      1024
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_observation_journal.webp"
+  },
+  {
+    "resource": "story_letter",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:439",
+      "node_name": "Письмо · отдельный объект",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-439"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G3.03 · Письмо без отправителя",
+    "figma_image_sha1": "1d8315605f15192e6b231d1e4414e4d1f5ad1110",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_letter.png",
+    "source_sha256": "2d364889cb1f3207537c27294360b9908b9dd5c8e15e6767e39a0252137f2137",
+    "source_bytes": 1762930,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1374,
+    "height": 1145,
+    "design_canvas": [
+      1374,
+      1145
+    ],
+    "bytes": 1216618,
+    "sha256": "f405af06148117ae9e3c291bd09735443da1ab365b17e45265f4fe534d091f6f",
+    "rgba_sha256": "9992681d66f53254432b87db457dccdbd19d3db7fb23b97323a64a7074a712a7",
+    "alpha_bounds": [
+      0,
+      44,
+      1362,
+      1141
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_letter.webp"
+  },
+  {
+    "resource": "story_old_photograph",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:444",
+      "node_name": "Старая фотография",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-444"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G3.06 · Старая фотография",
+    "figma_image_sha1": "320a7662af295b199dfc9e17c82f49681992e2da",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_old_photograph.png",
+    "source_sha256": "bd50b28d37559a2c88823094b923b89ac85ed77fb9710933b5b321971d3fb9de",
+    "source_bytes": 2852345,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1205,
+    "height": 1305,
+    "design_canvas": [
+      1205,
+      1305
+    ],
+    "bytes": 1939294,
+    "sha256": "ffc1061cf40f59e1bd6512f3af9da435d95f3ca8c020f3564a732a60192d268e",
+    "rgba_sha256": "130e551a5b2f4882e7139f0fb717b26da5dd6252b9f6adababa34cb1cd0c45c7",
+    "alpha_bounds": [
+      20,
+      24,
+      1174,
+      1289
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_old_photograph.webp"
+  },
+  {
+    "resource": "story_instruction_journal",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:449",
+      "node_name": "Журнал с инструкцией",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-449"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G3.07 · Меняй только одно",
+    "figma_image_sha1": "d6a368129b1007568b6776c4581e2df2a001b49e",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_instruction_journal.png",
+    "source_sha256": "6f8a5e87040b1c3b6fbb9d5b7dcd3131e21a4a46c1a14ba6b810b9cd3b0f5b73",
+    "source_bytes": 2527784,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1536,
+    "height": 1024,
+    "design_canvas": [
+      1536,
+      1024
+    ],
+    "bytes": 1711762,
+    "sha256": "3a5f14c00315da31a3d9df6c594ebd4275673dd4a62c03b2e7b96ef3811ca752",
+    "rgba_sha256": "c8dd40628d3245f564f850b57d4288cc86b79430cb981c1b495e5b9acf918778",
+    "alpha_bounds": [
+      46,
+      32,
+      1520,
+      1024
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_instruction_journal.webp"
+  },
+  {
+    "resource": "story_route_map",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:454",
+      "node_name": "Карта маршрутов",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-454"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G3.10 · Ящики маршрутов",
+    "figma_image_sha1": "0922759bb610feff0f747f3c20503409966b64dd",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_route_map.png",
+    "source_sha256": "093043aaacb38ce373c4f9fffe46b46a75e40601cbbdbd5cddf41177efbcc33a",
+    "source_bytes": 2810850,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1536,
+    "height": 1024,
+    "design_canvas": [
+      1536,
+      1024
+    ],
+    "bytes": 1945316,
+    "sha256": "20d0c7bd0227979eda9d7ece816e1128ea5c2b620c65a012dafa24af77ff57ff",
+    "rgba_sha256": "6afdabfc3cb752b297d616ef541381fea717f1435a498c74c1945199d08e6318",
+    "alpha_bounds": [
+      0,
+      23,
+      1536,
+      944
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_route_map.webp"
+  },
+  {
+    "resource": "story_map_table",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:459",
+      "node_name": "Карта на столе",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-459"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G3.12 · Дом становится базой | G4.01 · Луна приносит повреждённую карту",
+    "figma_image_sha1": "13cd251c0b622d13952bff69f73d0e5fbc4130ca",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_map_table.png",
+    "source_sha256": "34b0f10f1c91c04d5bfe262a5802e417aad735c9aab1951c3181e0de2ad8d995",
+    "source_bytes": 2447941,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1536,
+    "height": 1024,
+    "design_canvas": [
+      1536,
+      1024
+    ],
+    "bytes": 1742254,
+    "sha256": "f60ee6454263df451d85414bafc06d26da404ad5a33ae35fbede25ca143a00d3",
+    "rgba_sha256": "414d05a2f0ce35101ca42750fd4f96a2786042d95f918fe3570fddbbf682be5c",
+    "alpha_bounds": [
+      0,
+      31,
+      1536,
+      1024
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_map_table.webp"
+  },
+  {
+    "resource": "story_map_missing_region",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:464",
+      "node_name": "Карта с пустой областью · отдельный объект",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-464"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G4.02 · Картографический стол | G4.04 · Архивная копия без одной дороги | G4.08 · На карте появляется пустая область | G5.09 · Луна находит последнюю станцию",
+    "figma_image_sha1": "09cbf9286a0fb44bf889d7613d2d540c1195d360",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_map_missing_region.png",
+    "source_sha256": "bd581646d7df7a96ea1cb9bf11cf6f06f5832e42f7c8ea2eb9cd14bb75f0d419",
+    "source_bytes": 3092433,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1536,
+    "height": 1024,
+    "design_canvas": [
+      1536,
+      1024
+    ],
+    "bytes": 2209452,
+    "sha256": "17b287138f82d9bd688984802396023759f552b11cc72c48e1de52451076488e",
+    "rgba_sha256": "bbd58169aa32ddc17e95e205728686106cddfb459efc7ed95e82603389ec531d",
+    "alpha_bounds": [
+      0,
+      4,
+      1536,
+      952
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_map_missing_region.webp"
+  },
+  {
+    "resource": "story_assembled_map",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:469",
+      "node_name": "Собранная карта",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-469"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G4.12 · Карта королевства собрана | G5.01 · Большая экспедиция | G5.06 · Центральный узел маршрутов | G5.07 · Почему сеть закрыли | G5.09 · Луна находит последнюю станцию",
+    "figma_image_sha1": "d07f2e8f5f69dd4d0aabae6a1433b2b80e7cc3f8",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_assembled_map.png",
+    "source_sha256": "b6d030f3b58c9cb1df8296a0420d412cd54df2e4b183fcbfb19de0788de08826",
+    "source_bytes": 3397986,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1536,
+    "height": 1024,
+    "design_canvas": [
+      1536,
+      1024
+    ],
+    "bytes": 2486468,
+    "sha256": "a39af048241e508cba78edb9a3e97ebb34e3d8bbac6517e55f2eefa149822ca4",
+    "rgba_sha256": "9267da2fe964f47334c09d506ebd503e2b0761258576d0e61be05256e6957ff7",
+    "alpha_bounds": [
+      0,
+      0,
+      1525,
+      1013
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_assembled_map.webp"
+  },
+  {
+    "resource": "story_telescope_parts",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:477",
+      "node_name": "Телескоп и детали",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-477"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G1.01 · Ночь наблюдений",
+    "figma_image_sha1": "2998d392e908a7a0cd936612c0cf3b3bd2885271",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_telescope_parts.png",
+    "source_sha256": "a2f79dd79028b732fed9ce6287f822bdf2ac5283d5de6f17403e5ef1e250feb8",
+    "source_bytes": 2189297,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1024,
+    "height": 1536,
+    "design_canvas": [
+      1024,
+      1536
+    ],
+    "bytes": 1439694,
+    "sha256": "42c44b60c4511476a9bef6039c0bdef5cf3a18ae199eacdfc9ef2541f908a1b4",
+    "rgba_sha256": "44918c95844d80a70a0aa35b8404d4f96abf3d78d8581cb43d7fd9fcb92b24e1",
+    "alpha_bounds": [
+      0,
+      16,
+      994,
+      1486
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_telescope_parts.webp"
+  },
+  {
+    "resource": "story_north_tower_signal",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:482",
+      "node_name": "Северная башня · сигнал",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-482"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G1.11 · Башня отвечает",
+    "figma_image_sha1": "53df618d6571818bcfeef2b443c9c71c3ec70ada",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_north_tower_signal.png",
+    "source_sha256": "6e6b19bf0f256c17b6f7a0521662c144feae629235deb65e272f6061f8786ee2",
+    "source_bytes": 2047464,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1024,
+    "height": 1536,
+    "design_canvas": [
+      1024,
+      1536
+    ],
+    "bytes": 1320044,
+    "sha256": "e29a403c1109c61e1f59ecc85ae87e742641ac1afd2bfa9f6b1c3d50593c989c",
+    "rgba_sha256": "015e97f26064f7b63e1529705eb5b49dcc6b0db8e5b8f49156a6ffdf3bf2e368",
+    "alpha_bounds": [
+      0,
+      0,
+      1022,
+      1536
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_north_tower_signal.webp"
+  },
+  {
+    "resource": "story_signal_post",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:487",
+      "node_name": "Сигнальный пост · отдельный объект",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-487"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G2.04 · Сигнальный пост за мостом",
+    "figma_image_sha1": "0fbbf3589c5741acc422bf39d04ef2e7cf388181",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_signal_post.png",
+    "source_sha256": "4dd251cdbae1389e70272f388c0299c317e705d0a1e4579b8b81b20c6b64fe7d",
+    "source_bytes": 1561187,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1122,
+    "height": 1402,
+    "design_canvas": [
+      1122,
+      1402
+    ],
+    "bytes": 1130258,
+    "sha256": "f45ad17d36b0c274014dc0efd0de01f4bc393cade325e15b8a740f9adc7ba4bf",
+    "rgba_sha256": "a738cc482e2ff5ca8414730eaddd812a9af6eda928715dcfcd1d4086b031aa6b",
+    "alpha_bounds": [
+      25,
+      36,
+      1056,
+      1386
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_signal_post.webp"
+  },
+  {
+    "resource": "story_three_lights_mechanism",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:492",
+      "node_name": "Механизм трёх огней",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-492"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G2.06 · Механизм трёх огней",
+    "figma_image_sha1": "9b46d8d000bfbb28c5b58afb34bbdf6f72b21c21",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_three_lights_mechanism.png",
+    "source_sha256": "d09650a070a5347926c9ce9dade07260e8743a20f0a89b117c48794c78f423b2",
+    "source_bytes": 1683121,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1122,
+    "height": 1402,
+    "design_canvas": [
+      1122,
+      1402
+    ],
+    "bytes": 1177560,
+    "sha256": "f221f42c81d0aa53eb17e8c2c70d699d4d6126056b0e1b1ecfbd584e7e1c1ae0",
+    "rgba_sha256": "cd8c658e5c2870dedd737e6ab23de511b01455270c761f76c0443f3d90abb522",
+    "alpha_bounds": [
+      49,
+      49,
+      1058,
+      1402
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_three_lights_mechanism.webp"
+  },
+  {
+    "resource": "story_tower_receiver",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:497",
+      "node_name": "Приёмник башни",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-497"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G2.10 · Приёмник указывает на Обсерваторию",
+    "figma_image_sha1": "14ab6b6a2e78b31862cfbbf42560b0ef9e43f084",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_tower_receiver.png",
+    "source_sha256": "dd35a2a048f0667f8b2d8b7d891297be8dfc908a37b6dcf7603dea4ce928a5b9",
+    "source_bytes": 1510748,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1122,
+    "height": 1402,
+    "design_canvas": [
+      1122,
+      1402
+    ],
+    "bytes": 1113010,
+    "sha256": "485fc994b3c63905c16a245f9ff0e9b0c486d1ebaccb00ba708b120de78c3b85",
+    "rgba_sha256": "51a6fa43de6b7e1060e31ece771abd8f679a073048ef5977fb903dc85b7b7bb6",
+    "alpha_bounds": [
+      0,
+      22,
+      1106,
+      1386
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_tower_receiver.webp"
+  },
+  {
+    "resource": "story_return_signal",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:502",
+      "node_name": "Обратный сигнал",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-502"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G2.11 · Башня посылает обратный код",
+    "figma_image_sha1": "bdeaa383ec8170729ed861a58f07eea4a23eb754",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_return_signal.png",
+    "source_sha256": "8a0f75ffc06e53b5cc58029e835187fcd50bb7871e9a01bc26225a3799963d7a",
+    "source_bytes": 970224,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1122,
+    "height": 1402,
+    "design_canvas": [
+      1122,
+      1402
+    ],
+    "bytes": 727064,
+    "sha256": "b5de8eacf1db3117ed0c4234efbef78a1044aabdb7d957e6c2bbb30549417be1",
+    "rgba_sha256": "aee268f3214cd46d0c75c679f8bf394234ddc54bf3f5c4a8445ebe12408426c3",
+    "alpha_bounds": [
+      49,
+      32,
+      1056,
+      1346
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_return_signal.webp"
+  },
+  {
+    "resource": "story_chronoscope",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:507",
+      "node_name": "Хроноскоп",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-507"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G2.12 · Хроноскоп | G4.07 · Хроноскоп сравнивает маршруты | G5.04 · Хроноскоп не предсказывал будущее",
+    "figma_image_sha1": "0229b727ab04ba38c8c3364482d7e45f20017927",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_chronoscope.png",
+    "source_sha256": "7f2c6699288b491c72b76f2606d6b2e16c0b2d924931ed29cb9752703b75c448",
+    "source_bytes": 1949521,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1122,
+    "height": 1402,
+    "design_canvas": [
+      1122,
+      1402
+    ],
+    "bytes": 1473820,
+    "sha256": "ef5fc2e563bcdcc46c727cd0d3f54bf0c80ed6d1f3a8fb92127678d6ed9a49b5",
+    "rgba_sha256": "8c5acf7d3b99f3e52207d5a8e0bef0184d04af816f5384768d3fce3d76bc8d85",
+    "alpha_bounds": [
+      45,
+      15,
+      1098,
+      1376
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_chronoscope.webp"
+  },
+  {
+    "resource": "story_chronoscope_ring",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:512",
+      "node_name": "Кольцо хроноскопа",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-512"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G3.05 · Деталь Хроноскопа",
+    "figma_image_sha1": "651782be4c2f95aee33e20c884b84ad4451dfa51",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_chronoscope_ring.png",
+    "source_sha256": "be197a64a3afc569356d9d0897da8f9966a0e0c91162a61da2f85195e27a2cbf",
+    "source_bytes": 1591950,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1246,
+    "height": 1263,
+    "design_canvas": [
+      1246,
+      1263
+    ],
+    "bytes": 1106306,
+    "sha256": "75f781aed2ab68dfe390ad118a837c0bd238596a36e75cbac341d806386976c7",
+    "rgba_sha256": "041a0ba054f2f0c116969d2318c851ef33ffb8d1813cbbe80322e981b6eaee33",
+    "alpha_bounds": [
+      33,
+      21,
+      1189,
+      1263
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_chronoscope_ring.webp"
+  },
+  {
+    "resource": "story_signal_lens",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:517",
+      "node_name": "Сигнальная линза",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-517"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G3.08 · Станция калибровки",
+    "figma_image_sha1": "ecf4900253e06ddeb1300420c8e809c1381c3348",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_signal_lens.png",
+    "source_sha256": "82a996fe1b21b84778335c1d392339d9452e828d90bc22fd4df216843bdf7910",
+    "source_bytes": 1315361,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1176,
+    "height": 1338,
+    "design_canvas": [
+      1176,
+      1338
+    ],
+    "bytes": 900698,
+    "sha256": "d443de65d768a5566191640b92b0d54ba8413a58140bbaa7194611db8a7c7473",
+    "rgba_sha256": "10bf1bcf446069363145dfe36814dd3281e3d73eff3205771aa0ffc59e1c1005",
+    "alpha_bounds": [
+      0,
+      39,
+      1162,
+      1338
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_signal_lens.webp"
+  },
+  {
+    "resource": "story_route_tester",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:522",
+      "node_name": "Тестер двух маршрутов",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-522"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G3.11 · Тико запускает тестер",
+    "figma_image_sha1": "9212b1a2219caddf20dbb3e008fdca2c62d91813",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_route_tester.png",
+    "source_sha256": "81338a10504dbb67b7b88a55c1e85732c34c045618a3530c2c9148ebc39675af",
+    "source_bytes": 1304188,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1227,
+    "height": 1282,
+    "design_canvas": [
+      1227,
+      1282
+    ],
+    "bytes": 944068,
+    "sha256": "14933ceb51752e62f3908b233979f6a458f0beec8f578217564290251b12faff",
+    "rgba_sha256": "cfe8f49144ce6d68f2e0c0fde99836a7da3c09f5cea96bc21a11e11ed6fea00d",
+    "alpha_bounds": [
+      0,
+      21,
+      1205,
+      1282
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_route_tester.webp"
+  },
+  {
+    "resource": "story_relay",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:527",
+      "node_name": "Реле · отдельный объект",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-527"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G5.08 · Тико восстанавливает последнее реле",
+    "figma_image_sha1": "e2ef7889b94c97fd744ea6d4d03eac9409d5d800",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_relay.png",
+    "source_sha256": "ce78f203e0ba45589a371959908037d834c5ea5172fe36e9c9c6ccd4f9579dcc",
+    "source_bytes": 2314247,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1536,
+    "height": 1024,
+    "design_canvas": [
+      1536,
+      1024
+    ],
+    "bytes": 1637788,
+    "sha256": "fb90f124f0de6483e163ea9fe3fefb627b95774d99ca70ca66806757dd82c92e",
+    "rgba_sha256": "55fab83221186cce48c3a851f8725abe4591969458cc85ff37b12a60843de804",
+    "alpha_bounds": [
+      0,
+      4,
+      1522,
+      1006
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_relay.webp"
+  },
+  {
+    "resource": "story_astrolabe",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:532",
+      "node_name": "Астролябия · отдельный объект",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-532"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G5.10 · Послание последнего Смотрителя",
+    "figma_image_sha1": "c4645679f219f492740f8bf83c07d65dea816000",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_astrolabe.png",
+    "source_sha256": "537a1750beec2334aabbf48abd7c44110b11812aef8b5905ab52561b69e518eb",
+    "source_bytes": 2713830,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1536,
+    "height": 1024,
+    "design_canvas": [
+      1536,
+      1024
+    ],
+    "bytes": 1857222,
+    "sha256": "4fd39d9a33f503723a9575fd6526972405f621dd8b308c855cd503a29f5ab865",
+    "rgba_sha256": "200e09eeb9acd435d998080a4c62e733e08becfc9042544f272ca0287daf38df",
+    "alpha_bounds": [
+      0,
+      30,
+      1536,
+      1024
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_astrolabe.webp"
+  },
+  {
+    "resource": "story_marked_crate",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:540",
+      "node_name": "Ящик со знаком · отдельный объект",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-540"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G1.02 · Странный знак на ящике",
+    "figma_image_sha1": "6a48f7eed23ff2d42843c8034a59752e6ea0920d",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_marked_crate.png",
+    "source_sha256": "07da0cb8d611dddcc0334ee3f298ba817ba8873184c400f031542d4df5ed00ee",
+    "source_bytes": 2476072,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1372,
+    "height": 1146,
+    "design_canvas": [
+      1372,
+      1146
+    ],
+    "bytes": 1762382,
+    "sha256": "0e05a2ada44381f62392c4ca457508bf60610cfe58d4770f7584fc38843c6a55",
+    "rgba_sha256": "988cf568437e087c74fcdf7a492707307d09d4393a067981c071686bf38a37d2",
+    "alpha_bounds": [
+      0,
+      0,
+      1340,
+      1122
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_marked_crate.webp"
+  },
+  {
+    "resource": "story_cleaning_worktable",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:545",
+      "node_name": "Стол · лампа, щётка и ткань",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-545"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G1.03 · Пластина с тем же знаком | G1.05 · Три ответа — в одном свете",
+    "figma_image_sha1": "6b51ea8507b39db4f1c6caba388256619f048dc8",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_cleaning_worktable.png",
+    "source_sha256": "a9eb3148558d166f626032a1578d34dc9c8e5b747e26521107d8316606eb38e5",
+    "source_bytes": 1870062,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1536,
+    "height": 1024,
+    "design_canvas": [
+      1536,
+      1024
+    ],
+    "bytes": 1285006,
+    "sha256": "76203c9b5c902f534e811d46f75867cde627de8b9a3ce33068dba0a52f044472",
+    "rgba_sha256": "bc1ac311f82c7160f6ec2a1dd467bea6c89f7d2aaa81174cc0a751cefc1189fd",
+    "alpha_bounds": [
+      0,
+      21,
+      1536,
+      1024
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_cleaning_worktable.webp"
+  },
+  {
+    "resource": "story_story_plate",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:550",
+      "node_name": "Сюжетная пластина · под налётом",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-550"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G1.03 · Пластина с тем же знаком | G1.08 · Схема трёх линз",
+    "figma_image_sha1": "039bdd981cbcc1c0cac9862b52ec06abd5f26bcc",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_story_plate.png",
+    "source_sha256": "332987c270208aa2e25eeb6330d44e8a71debce0c6f11f7a5d968283b0abd57a",
+    "source_bytes": 2290112,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1448,
+    "height": 1086,
+    "design_canvas": [
+      1448,
+      1086
+    ],
+    "bytes": 1564040,
+    "sha256": "d2de086bc4c1210a5890ac123b5ac2d30aa4466c76406b2a5583aff2acaa6350",
+    "rgba_sha256": "74d578cb7fa571545c25a03671b36ca3c40938348a48621261abf5c4cab192f8",
+    "alpha_bounds": [
+      0,
+      41,
+      1386,
+      1086
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_story_plate.webp"
+  },
+  {
+    "resource": "story_service_emblem",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:555",
+      "node_name": "Эмблема службы · ремень и бирка",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-555"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G1.07 · Старая эмблема службы",
+    "figma_image_sha1": "333eecd49a5e35e9f00665070644c5be59def801",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_service_emblem.png",
+    "source_sha256": "424d00926f87a6fc12d4e2602ed994470fcb6ce9eb911522068c02ed89704b25",
+    "source_bytes": 2344881,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1312,
+    "height": 1199,
+    "design_canvas": [
+      1312,
+      1199
+    ],
+    "bytes": 1573336,
+    "sha256": "6f05ad791f4a49ffc1ba9eff7bfc1ea4fb7d8d3d699b0c4609d4ab8851ab42a5",
+    "rgba_sha256": "f3223636e6772ee4d2125e4900301f74ff7021016b1705e5a51c20cd56e66dea",
+    "alpha_bounds": [
+      0,
+      11,
+      1296,
+      1199
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_service_emblem.webp"
+  },
+  {
+    "resource": "story_stone_post",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:560",
+      "node_name": "Каменный пост · три линзы",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-560"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G1.09 · Каменный пост",
+    "figma_image_sha1": "cec8696098c109c044e3939d90a00d9c8d740bb3",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_stone_post.png",
+    "source_sha256": "a8c71ee538768a753038246cb97a826c6de30f8e3b212ae40694b447eeb8df04",
+    "source_bytes": 2198799,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1024,
+    "height": 1536,
+    "design_canvas": [
+      1024,
+      1536
+    ],
+    "bytes": 1458436,
+    "sha256": "13da7ef3b46476edf45c8ae49c0d126c12436ef9fd1a5a113699c844d2249308",
+    "rgba_sha256": "7e20748849ef7857b951c71805e10750e5ff79235ab067cc2e758990a2c2dae5",
+    "alpha_bounds": [
+      0,
+      39,
+      1012,
+      1482
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_stone_post.webp"
+  },
+  {
+    "resource": "story_two_paths_device",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:565",
+      "node_name": "Устройство двух путей",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-565"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G2.08 · Знак двойной развилки",
+    "figma_image_sha1": "f42afffee31f103264f6a5c4515f49628f74fe30",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_two_paths_device.png",
+    "source_sha256": "662528587c2be169d1a4b25f45ac3eb1c103b9e8d70fe78464ec910371a654d1",
+    "source_bytes": 2435953,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1164,
+    "height": 1351,
+    "design_canvas": [
+      1164,
+      1351
+    ],
+    "bytes": 1833074,
+    "sha256": "5a400e042ea185a3e6c19c940b1f879c83f6a4aa08d675952a493b7f479d1d37",
+    "rgba_sha256": "9484291c4902738bb17267ea2fd5e7defa6e5af0f8d835ed0924b338e8fc67c3",
+    "alpha_bounds": [
+      0,
+      22,
+      1128,
+      1315
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_two_paths_device.webp"
+  },
+  {
+    "resource": "story_caretakers_seal",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:570",
+      "node_name": "Печать Смотрителей · отдельный объект",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-570"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G3.02 · Печать Смотрителей на двери",
+    "figma_image_sha1": "9bad4874582acf752a4deed2d2bedf2dbf77af53",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_caretakers_seal.png",
+    "source_sha256": "766be82bab0e682e57e1651e459a2ce9ec20f1652d9e12844874522141c4b04f",
+    "source_bytes": 2626952,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 1937806,
+    "sha256": "24812edf1a96eb8ec70ff1bcd8dcba1ecd9acf7698dc86378afccb8902844132",
+    "rgba_sha256": "654e8d5173566e9056ebf020d77958dd36d144d4959417674f39de31b3bceb60",
+    "alpha_bounds": [
+      0,
+      21,
+      1192,
+      1254
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_caretakers_seal.webp"
+  },
+  {
+    "resource": "story_mailbox",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:575",
+      "node_name": "Почтовый ящик · отдельный объект",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-575"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G3.03 · Письмо без отправителя",
+    "figma_image_sha1": "bb9092a5dbc2e413f0177eb1388ae5b085557651",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_mailbox.png",
+    "source_sha256": "190046544ef9d96945e067af6e9b7221b8f8c4ba734b60d52505e392eeae744d",
+    "source_bytes": 2104591,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1024,
+    "height": 1536,
+    "design_canvas": [
+      1024,
+      1536
+    ],
+    "bytes": 1412340,
+    "sha256": "751f34b5b8a6c2198cf549c75a81f15937f1cf11d6df97ba1bef41c6615a87f1",
+    "rgba_sha256": "9369ba868c28b322ce34738224dd4f22f4e7c04358553796945f624ac40fe3ea",
+    "alpha_bounds": [
+      39,
+      7,
+      1020,
+      1536
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_mailbox.webp"
+  },
+  {
+    "resource": "story_token_crate",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:580",
+      "node_name": "Ящик с жетонами",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-580"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G3.09 · Ящик из подвала",
+    "figma_image_sha1": "fa0431180494a59ad8eab42caa9b5af2d44c37b7",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_token_crate.png",
+    "source_sha256": "3820b2b4fd9a98861e44bf6b0a59a9dfdcec5ff389871b9e25bf06e4a65087e1",
+    "source_bytes": 2450224,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1205,
+    "height": 1305,
+    "design_canvas": [
+      1205,
+      1305
+    ],
+    "bytes": 1722468,
+    "sha256": "83b347a63778d57ab48010288b4d0bed245987f8d461e1d8c37f06d9b7e7f1c3",
+    "rgba_sha256": "360c1bd77889d2840725431f670d0f7f98ce493ec9a0bfdf3b3d9d66eae27e1a",
+    "alpha_bounds": [
+      0,
+      0,
+      1191,
+      1305
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_token_crate.webp"
+  },
+  {
+    "resource": "story_mountain_sign",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:585",
+      "node_name": "Горный указатель",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-585"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G4.05 · Горный указатель двух путей",
+    "figma_image_sha1": "bce732d3450d50dac4ce5114db10c1c3e4676a47",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_mountain_sign.png",
+    "source_sha256": "7ebdc4398b0ecee4b199c3a4929dadcbba1fdff426e2203b83026ce5fac93892",
+    "source_bytes": 1735938,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1241,
+    "height": 1267,
+    "design_canvas": [
+      1241,
+      1267
+    ],
+    "bytes": 1224116,
+    "sha256": "8bb74256636d4e1489b2b4a36d7b82dca9a0259fbad5a47a879970bd393f0381",
+    "rgba_sha256": "8ea9c69a98afdc208dec75d5f25b51e616af79e9864d93e5df2667b9119fe4df",
+    "alpha_bounds": [
+      0,
+      9,
+      1227,
+      1243
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_mountain_sign.webp"
+  },
+  {
+    "resource": "story_waystone",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:590",
+      "node_name": "Лесной путевой камень",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-590"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G4.06 · Лесной путевой камень",
+    "figma_image_sha1": "11124d41929ccd1b0416dc7fb7ccf60b3848fcfa",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_waystone.png",
+    "source_sha256": "86f7ab13d0b6a32c10aa841fe38f74c1610850f52d257a71f3eb1afd64e9cf2e",
+    "source_bytes": 2977159,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1145,
+    "height": 1374,
+    "design_canvas": [
+      1145,
+      1374
+    ],
+    "bytes": 2190792,
+    "sha256": "e0b5fb9dfc064f68553ca64ba6c60d4a612051f8c38eb7402cdb516334115333",
+    "rgba_sha256": "20a7621d8b5b40751264f192106be6f8094bdad456f97c9cb10e0bc9fdba89c4",
+    "alpha_bounds": [
+      0,
+      14,
+      1144,
+      1374
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_waystone.webp"
+  },
+  {
+    "resource": "story_border_beacon",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:595",
+      "node_name": "Пограничный маяк",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-595"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G4.10 · Пограничный маяк",
+    "figma_image_sha1": "316469585e2b9973c6a9ae39534e13d26e724a34",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_border_beacon.png",
+    "source_sha256": "24a8a01f9a37a3776cb33805178d52867b2f0d8955a087295f3e82076e82c82f",
+    "source_bytes": 1498142,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1145,
+    "height": 1374,
+    "design_canvas": [
+      1145,
+      1374
+    ],
+    "bytes": 1082060,
+    "sha256": "f060cbf81074d871ecd67e9058ac7d708ff3de0bb7994c486deca7fdf323e555",
+    "rgba_sha256": "bced0c952b1220faa3dbe41fb18c64576fc3fd9ec71cb808a2c82921168beb80",
+    "alpha_bounds": [
+      33,
+      4,
+      1091,
+      1354
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_border_beacon.webp"
+  },
+  {
+    "resource": "story_route_token",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:600",
+      "node_name": "Маршрутный жетон",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-600"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G4.11 · Обратная сторона маршрутного жетона",
+    "figma_image_sha1": "001a28fbdee42fd70fb23f08cdf1daf695b23414",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_route_token.png",
+    "source_sha256": "98cabfb1d8d718865fcf4f9da8edf71d56fb744fc9dbf20dee6228a3680f1420",
+    "source_bytes": 3064631,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1225,
+    "height": 1284,
+    "design_canvas": [
+      1225,
+      1284
+    ],
+    "bytes": 2128400,
+    "sha256": "3c88bb670094cc52d23ce4557cd393245fdef42eec315204bac8d2afebba7fd0",
+    "rgba_sha256": "34e7dca7273c2dedae20df6db17c4519ddb5ec9bf8b1badb360c9fa155628d8b",
+    "alpha_bounds": [
+      0,
+      31,
+      1201,
+      1269
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_route_token.webp"
+  },
+  {
+    "resource": "story_supply_bag",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:605",
+      "node_name": "Мешок припасов · отдельный объект",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-605"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G5.05 · Запись в штормовом убежище",
+    "figma_image_sha1": "46177464969499a965987e76cbe67d2790d00789",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_supply_bag.png",
+    "source_sha256": "e5ce831d46a7ea53060672a584ed58079a90e0ccce6ebd546fd8765808c6b3cb",
+    "source_bytes": 2134199,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1233,
+    "height": 1276,
+    "design_canvas": [
+      1233,
+      1276
+    ],
+    "bytes": 1437734,
+    "sha256": "77e0a5c7a1741c52566f0add2861ed28d7fce9c0b6e650943e73bc26a4df9793",
+    "rgba_sha256": "d9c24022c0bc93165e22a179438b9abe966c475a87d2b934e975a5c549bc9e49",
+    "alpha_bounds": [
+      19,
+      21,
+      1215,
+      1232
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_supply_bag.webp"
+  },
+  {
+    "resource": "story_new_map_book",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:610",
+      "node_name": "Книга новой карты · отдельный объект",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-610"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G5.12 · Новая карта начинается за краем старой",
+    "figma_image_sha1": "481b7bbee8a6f1980a835248aff6383cb67bcb70",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_new_map_book.png",
+    "source_sha256": "97f1b7a92d08571827cb301b02d7e704d3bcf230ce7c8819795030332cf46a04",
+    "source_bytes": 2519084,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1536,
+    "height": 1024,
+    "design_canvas": [
+      1536,
+      1024
+    ],
+    "bytes": 1708058,
+    "sha256": "3ab19bc1eadb3c97c3f6d2e246d79b9803d91aa62584ca8b1be60f169ef83433",
+    "rgba_sha256": "757b5fd16d893b59cd2c1ee61891d9e7bc42608cdbf5a0e865b012d69b5c5abb",
+    "alpha_bounds": [
+      0,
+      0,
+      1519,
+      1024
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_new_map_book.webp"
+  },
+  {
+    "resource": "story_route_fragment_tower",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:623",
+      "node_name": "Латунный фрагмент 1 · дорога к башне",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-623"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G3.10 · Ящики маршрутов",
+    "figma_image_sha1": "151467944e26585bf2d09ee86dff2864637f8220",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_route_fragment_tower.png",
+    "source_sha256": "68dd494a51bfae7f874e7d803a0cb631e7be07c0a02daf8781f30e89c741eca4",
+    "source_bytes": 348463,
+    "source_format": "png",
+    "format": "webp",
+    "width": 552,
+    "height": 282,
+    "design_canvas": [
+      552,
+      282
+    ],
+    "bytes": 231606,
+    "sha256": "8ee2621bf4557eebaf60c16bb197d238943b34f65a42199eb7f1bb233c591c33",
+    "rgba_sha256": "0ce17b9e5069dc693f9451035d2c239f5ac4d76cc0b258f587c789aeaf7ced18",
+    "alpha_bounds": [
+      4,
+      12,
+      541,
+      275
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_route_fragment_tower.webp"
+  },
+  {
+    "resource": "story_route_fragment_mountain",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:628",
+      "node_name": "Латунный фрагмент 2 · горный участок",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-628"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G3.10 · Ящики маршрутов",
+    "figma_image_sha1": "a10cd09ce109b055d8d5337302bd928943ffef62",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_route_fragment_mountain.png",
+    "source_sha256": "30594e1c67ad4da868fdd7d852bcfcef8015003775b190ba7e3529cce0af70f3",
+    "source_bytes": 338518,
+    "source_format": "png",
+    "format": "webp",
+    "width": 564,
+    "height": 282,
+    "design_canvas": [
+      564,
+      282
+    ],
+    "bytes": 224140,
+    "sha256": "c8986e12fd6cc7237b5a0104799034d66662bf9894e4b0acfabf217f73419cb4",
+    "rgba_sha256": "ade20fdcaaf4a876acd56c2bb26875f6ed09619ac8ac552b84d52a203417482c",
+    "alpha_bounds": [
+      10,
+      10,
+      546,
+      282
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_route_fragment_mountain.webp"
+  },
+  {
+    "resource": "story_route_fragment_winding",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:633",
+      "node_name": "Латунный фрагмент 3 · извилистая дорога",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-633"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G3.10 · Ящики маршрутов",
+    "figma_image_sha1": "87bf64682c330688f085a2b352c3559569bd9103",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_route_fragment_winding.png",
+    "source_sha256": "ef7c46f686b8b4b291e820521a0bc81203f8e5bfe7fa1c29e8fe2ac2d35626c1",
+    "source_bytes": 364536,
+    "source_format": "png",
+    "format": "webp",
+    "width": 564,
+    "height": 280,
+    "design_canvas": [
+      564,
+      280
+    ],
+    "bytes": 242706,
+    "sha256": "90bb795a58744ae315f0bcabd11229a398fde46b66e8ca5f4057010d3ca19b5a",
+    "rgba_sha256": "e46efe60d1ba2d986c1cc4103e077e609a5e087326ec0fabfe003c1ab169a7b6",
+    "alpha_bounds": [
+      7,
+      1,
+      550,
+      280
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_route_fragment_winding.webp"
+  },
+  {
+    "resource": "story_route_fragment_forest",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:638",
+      "node_name": "Латунный фрагмент 4 · лесной обход",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-638"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G3.10 · Ящики маршрутов",
+    "figma_image_sha1": "ac02aaa5ee3e5a1946b86230713c4177d209cc7e",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_route_fragment_forest.png",
+    "source_sha256": "2d1ae9f2fb13e4d5de7c468d65e9408df895e8fa7c4226caf514b441a2798cef",
+    "source_bytes": 357936,
+    "source_format": "png",
+    "format": "webp",
+    "width": 564,
+    "height": 280,
+    "design_canvas": [
+      564,
+      280
+    ],
+    "bytes": 237942,
+    "sha256": "ab094a6bc46e4860399a248a95a8dbc5756be06217e65c2e3d3a01c82393889c",
+    "rgba_sha256": "b3fd0807e850eb5f36fbbfcc5543d3c060f23e90976e88f07263a40289071dfd",
+    "alpha_bounds": [
+      8,
+      0,
+      560,
+      274
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_route_fragment_forest.webp"
+  },
+  {
+    "resource": "story_bridge_token",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:643",
+      "node_name": "Жетон 1 · мост",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-643"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G3.10 · Ящики маршрутов",
+    "figma_image_sha1": "c985369ca2c05323fc3cecac528e445537410057",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_bridge_token.png",
+    "source_sha256": "c705e0f5149dbf3a205af16a76405465ee36fe779ff5b7b14cb336114bfebe43",
+    "source_bytes": 60024,
+    "source_format": "png",
+    "format": "webp",
+    "width": 188,
+    "height": 204,
+    "design_canvas": [
+      188,
+      204
+    ],
+    "bytes": 42712,
+    "sha256": "e43cd1ad3e8776ac49a66633b422c2fa220a0b069593a62cc8193466fda9982c",
+    "rgba_sha256": "75059b351d806c1f5b96812dbf4a93621d89174967860a821c14195cb7653530",
+    "alpha_bounds": [
+      5,
+      6,
+      173,
+      192
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_bridge_token.webp"
+  },
+  {
+    "resource": "story_tower_token",
+    "category": "Transparent story objects — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "3238:648",
+      "node_name": "Жетон 2 · башня",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-648"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G3.10 · Ящики маршрутов",
+    "figma_image_sha1": "8452bf826dc4241279a420185f6184356470474b",
+    "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_tower_token.png",
+    "source_sha256": "d02aa9da91b55fa1c952c4c8132485299579ac3336b41f59a42685502ceef74a",
+    "source_bytes": 58717,
+    "source_format": "png",
+    "format": "webp",
+    "width": 188,
+    "height": 204,
+    "design_canvas": [
+      188,
+      204
+    ],
+    "bytes": 42004,
+    "sha256": "631d903b6fe8b84df5564d875743a2f07c4999da53dc0cf673db95d99c7f8a7f",
+    "rgba_sha256": "ad7ad9af8aaa1cdac7362186515dfc722d12fc5fc31e16d3917ec4a0dacd52a8",
+    "alpha_bounds": [
+      8,
+      7,
+      173,
+      192
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/story_tower_token.webp"
+  }
+]

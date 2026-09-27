@@ -103,7 +103,7 @@ internal fun GameCatalog.withDayRecapCopy(): GameCatalog {
         put("figma-2313-2-v1:clean", "Сами очистили рюкзак от смолы")
     }
     return copy(cards = cards.mapValues { (eventId, card) ->
-        card.copy(summaryByChoiceId = content.choices.filter { it.eventId == eventId }.mapNotNull { choice ->
+        card.copy(summaryByChoiceId = card.summaryByChoiceId + content.choices.filter { it.eventId == eventId }.mapNotNull { choice ->
             val text = summaries[choice.id] ?: if (choice.id.endsWith(":skip"))
                 "Пропустили дополнительную историю «${content.events.single { it.id == eventId }.title}»" else null
             text?.let { choice.id to it }

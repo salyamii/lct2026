@@ -1,5 +1,25 @@
 # Project architecture
 
+> Backend preparation, 2026-09-27: `feature/settings` is a release feature;
+> it consumes the pure `domain/parentlink` repository contract. `data/backend`
+> owns Retrofit/OkHttp transport and installation identity in encrypted
+> Preferences DataStore under `noBackupFilesDir`; Hilt bindings remain in
+> `app/di`. The URL is empty by default. The QR contains the persisted profile UUID and is generated locally.
+> Registration is a separate request after the explicit parent-code action;
+> a missing server or network failure does not prevent displaying the QR.
+> No observer uploads game data.
+> Pure versioned DTO/export projections live in `domain/backend` in `:core:game`.
+> Snapshot/analytics HTTP methods are prepared, with no background sync or
+> WorkManager job yet. See [backend handoff](backend/README.md).
+> Parent coin/accessory rewards have versioned DTOs and child transport methods
+> for reading the grant ledger and acknowledgements. These
+> methods are not called yet. The proposed atomic local application and notification
+> protocol are documented in [parent rewards](backend/parent-rewards.md); no remote
+> reward changes the game through the current registration flow.
+> Delivery is designed around authenticated pulls on reconnect/resume and
+> scheduled retries; Firebase messaging is excluded by PARENT-REWARD-D-002.
+> Delayed grants apply to the current local aggregate, never an old server balance.
+
 > Implementation update, 2026-09-19: the game domain now lives in the JVM
 > module `:core:game`; Room is at v6 (including compatibility with both v2 branches, mini-game costs and inventory metadata). The original description below is retained.
 > See the dated addition at the end and the [engine implementation](design/game-engine.md)
@@ -353,9 +373,10 @@ constraints apply to existing transitive dependencies without adding unused libr
 `:feature:debug` is an Android Compose library included by `:app` only through
 `debugImplementation` (DBG-D-001). The debug source set supplies `AppDebugOverlay`;
 the release source set supplies an empty composable with no feature dependency.
-The app composition hosts it outside the game theme and navigation. A non-focusable
-popup exposes the Debug button; only the button handles taps, leaving the app
-interactive. It opens a standard Material 3 bottom sheet. Sheet visibility is local
+The app composition owns its sheet state. Under ADVENTURE-D-004, it passes an
+optional button slot through app navigation into the main-menu HUD, instead of
+a floating popup covering every game screen. The feature UI does not import
+debug or app wiring. The button opens the existing Material 3 bottom sheet. Sheet visibility is local
 saveable UI state, independent of navigation. The default Material styling is
 independent of app artwork.
 
@@ -423,3 +444,14 @@ Coil loading, shared background painters, lazy lists and navigation durations
 remain as documented above. No gameplay state or persistence changes.
 The earlier greeting/blink prototype is deferred outside the MR; see
 [pet motion scope and restoration notes](design/pet-motion.md).
+
+
+## Завершение вступления — 2026-09-27
+
+По CUST-D-022 AppStartup перед Ready подготавливает актуальный каталог и
+согласование стартового аксессуара; поэтому восстановленная навигация может
+сразу открыть инвентарь с корректным владением. Новое завершение onboarding
+передаёт GameSession `beginInitialAllocation=true`: INITIAL/ALLOCATION, профиль,
+цель/подцель и выбранный стартовый предмет создаются атомарно. Существующее
+сохранение не заменяется. Gate сразу открывает бюджет; дальнейший первый день
+начинается прежней командой только после подтверждения распределения.

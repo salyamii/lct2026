@@ -1,8 +1,101 @@
 # Asset catalog
 
+## Коллекция покупок и звёздный атлас — 2026-09-26
+
+26 новых иллюстраций встроенного imagegen: 23 части пяти целей и три звёздные страницы.
+Полные исходники 1254 × 1254 сохранены как lossless exact WebP без обрезки.
+[Исходники, точные prompts и научные источники](sources/inventory-collection-2026-09-26/README.md).
+Покупки сохраняются между главами; просмотр страниц ничего не тратит.
+
+| Ресурс | Изображение |
+| --- | --- |
+| `collection_stars_map` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_stars_map.webp) |
+| `collection_stars_tripod` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_stars_tripod.webp) |
+| `collection_stars_telescope` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_stars_telescope.webp) |
+| `collection_stars_ticket` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_stars_ticket.webp) |
+| `collection_sky_orion` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_sky_orion.webp) |
+| `collection_sky_ursa_major` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_sky_ursa_major.webp) |
+| `collection_sky_milky_way` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_sky_milky_way.webp) |
+| `collection_tower_route` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_tower_route.webp) |
+| `collection_tower_lantern` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_tower_lantern.webp) |
+| `collection_tower_fastenings` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_tower_fastenings.webp) |
+| `collection_tower_bridge_kit` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_tower_bridge_kit.webp) |
+| `collection_tower_transport` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_tower_transport.webp) |
+| `collection_map_table` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_map_table.webp) |
+| `collection_map_copies` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_map_copies.webp) |
+| `collection_map_atlas` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_map_atlas.webp) |
+| `collection_map_field_kit` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_map_field_kit.webp) |
+| `collection_home_entrance` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_home_entrance.webp) |
+| `collection_home_roof` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_home_roof.webp) |
+| `collection_home_workbench` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_home_workbench.webp) |
+| `collection_home_desk` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_home_desk.webp) |
+| `collection_home_shelves` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_home_shelves.webp) |
+| `collection_expedition_backpack` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_expedition_backpack.webp) |
+| `collection_expedition_compass` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_expedition_compass.webp) |
+| `collection_expedition_light` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_expedition_light.webp) |
+| `collection_expedition_supplies` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_expedition_supplies.webp) |
+| `collection_expedition_transport` | [WebP](../../../app/src/main/res/drawable-nodpi/collection_expedition_transport.webp) |
+
+
 See [the guide](README.md) for storage and usage rules and [the manifest](manifest.json) for checksums and export details.
 
-324 logical assets; 3 exact drawable aliases; 0 unavailable exports.
+442 logical assets; 3 exact drawable aliases; 0 unavailable exports.
+
+## Fair purchase props — 2026-09-26
+
+Five original PNG image fills from the existing Figma event cards. Every source
+SHA-1 matches its Figma image hash. Real alpha and the complete 1254 × 1254 canvas
+are preserved as exact lossless WebP, without resizing or cropping.
+[PNG originals, source links and provenance](sources/fair-items-2026-09-26/README.md).
+
+| Android resource | Canvas | File | Figma source |
+| --- | --- | --- | --- |
+| `R.drawable.prop_bakery_bun` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/prop_bakery_bun.webp) | [2654:29](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2654-29) |
+| `R.drawable.prop_fair_explorer_hat` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/prop_fair_explorer_hat.webp) | [2654:77](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2654-77) |
+| `R.drawable.prop_fair_ring_toss` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/prop_fair_ring_toss.webp) | [2654:125](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2654-125) |
+| `R.drawable.prop_fair_compass_keychain` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/prop_fair_compass_keychain.webp) | [2654:173](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2654-173) |
+| `R.drawable.prop_fair_toy_boat` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/prop_fair_toy_boat.webp) | [2654:221](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2654-221) |
+
+The earlier generated bun remains an [unused draft](sources/bakery-bun-2026-09-26/README.md)
+outside runtime resources; `prop_bakery_bun` now uses the Figma original.
+
+## Goal chapter previews — 2026-09-25
+
+Five original illustrations generated with the built-in imagegen tool for the chapter carousel.
+They show the undertaking of each chapter; they do not introduce item ownership, prices or unlock rules.
+No UI, text or character is baked into the artwork. All canvases are 1536 × 1024 (3:2),
+preserved as exact lossless WebP with no resizing or cropping.
+[Previews, PNG originals and provenance](sources/goal-previews-2026-09-25/README.md);
+[complete generation prompts](sources/goal-previews-2026-09-25/generation-specs.json).
+
+| Chapter | Android resource | File |
+| --- | --- | --- |
+| Ночь наблюдений | `R.drawable.goal_preview_stargazing` | [WebP](../../../app/src/main/res/drawable-nodpi/goal_preview_stargazing.webp) |
+| Подготовка к башне | `R.drawable.goal_preview_tower` | [WebP](../../../app/src/main/res/drawable-nodpi/goal_preview_tower.webp) |
+| Дом исследователя | `R.drawable.goal_preview_home` | [WebP](../../../app/src/main/res/drawable-nodpi/goal_preview_home.webp) |
+| Карта королевства | `R.drawable.goal_preview_kingdom_map` | [WebP](../../../app/src/main/res/drawable-nodpi/goal_preview_kingdom_map.webp) |
+| Большая экспедиция | `R.drawable.goal_preview_expedition` | [WebP](../../../app/src/main/res/drawable-nodpi/goal_preview_expedition.webp) |
+
+## Financial adventure screens — 2026-09-25
+
+Imported for the new savings, lore and Chronoscope screens. Generated scene originals remain
+in [the Figma design folder](../figma/financial-adventure-2026-09-25/README.md).
+Raster imports preserve the complete canvas and exact RGBA pixels as lossless WebP;
+the two 64 × 64 SVG illustrations retain their viewport in Android vectors.
+[Import script](../../../scripts/import_financial_adventure_art.py) and manifest record conversion and hashes.
+
+| Resource | Source node | Original source |
+| --- | --- | --- |
+| `location_observatory_stage` | [2990:226](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2990-226) | [PNG](../figma/financial-adventure-2026-09-25/observatory-stage.png) |
+| `prop_chronoscope_workbench` | [3023:313](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3023-313) | [PNG](../figma/financial-adventure-2026-09-25/chronoscope-workbench.png) |
+| `location_fair_hat_stall` | [3023:318](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3023-318) | [PNG](../figma/financial-adventure-2026-09-25/fair-hat-stall.png) |
+| `gear_star_map` | [3052:285](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3052-285) | [SVG](sources/financial-goals/goal_star_map.svg) |
+| `gear_tripod` | [3052:298](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3052-298) | [SVG](sources/financial-goals/goal_tripod.svg) |
+| `gear_goal_telescope` | [3052:308](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3052-308) | [PNG](sources/financial-goals/goal_telescope.png) |
+| `gear_stargazing_trip` | [3052:314](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3052-314) | [PNG](sources/financial-goals/goal_trip.png) |
+
+The hat stall depicts a specific item, not a generic historical event. Replays select their
+actual saved location and appearance; later chapters have no invented item illustrations.
 
 Locations retain their original 941 × 1672 pixels. Earlier character and equipment layers retain a 512 × 512 canvas; new sleep originals retain 1024 × 1024 (2× Figma frame). Names are artwork labels, not gameplay rules.
 
@@ -329,6 +422,54 @@ at its right edge as requested in D-095; the source file is not cropped.
 
 ## NPCs and event art
 
+[Покрытие игровых карточек и недостающие уникальные арты](event-card-coverage.md).
+
+### Мясная лавка — перенесено 2026-09-26
+
+Активные оригинальные IMAGE fills проверены по SHA-1, полотна и RGBA сохранены.
+[Исходники и воспроизводимый импорт](sources/butcher-events-2026-09-26/README.md).
+
+| Android resource | Canvas | File | Figma source |
+| --- | --- | --- | --- |
+| `R.drawable.npc_butcher_tray` | 1083 × 1452 | [WebP](../../../app/src/main/res/drawable-nodpi/npc_butcher_tray.webp) | [2289:23](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2289-23) |
+| `R.drawable.npc_butcher_tying` | 1086 × 1448 | [WebP](../../../app/src/main/res/drawable-nodpi/npc_butcher_tying.webp) | [2289:77](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2289-77) |
+| `R.drawable.npc_butcher_pointing` | 1086 × 1448 | [WebP](../../../app/src/main/res/drawable-nodpi/npc_butcher_pointing.webp) | [2289:131](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2289-131) |
+| `R.drawable.npc_butcher_orders` | 1086 × 1448 | [WebP](../../../app/src/main/res/drawable-nodpi/npc_butcher_orders.webp) | [2289:185](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2289-185) |
+| `R.drawable.npc_butcher_scales` | 1086 × 1448 | [WebP](../../../app/src/main/res/drawable-nodpi/npc_butcher_scales.webp) | [2289:239](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2289-239) |
+| `R.drawable.location_butcher_shop` | 1086 × 1448 | [WebP](../../../app/src/main/res/drawable-nodpi/location_butcher_shop.webp) | [2289:4](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2289-4) |
+
+### Предметы неожиданных событий — перенесено 2026-09-26
+
+22 оригинальных предмета с соответствующим повреждением или неисправностью.
+[Проверка источников, аудит сюжета и импорт](sources/unexpected-events-2026-09-26/README.md).
+
+| Android resource | Canvas | File | Figma source |
+| --- | --- | --- | --- |
+| `R.drawable.event_backpack_torn` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_backpack_torn.webp) | [2305:2](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2305-2) |
+| `R.drawable.event_map_wet` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_map_wet.webp) | [2308:32](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2308-32) |
+| `R.drawable.event_backpack_resin` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_backpack_resin.webp) | [2313:32](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2313-32) |
+| `R.drawable.event_rope_frayed` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_rope_frayed.webp) | [2320:29](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2320-29) |
+| `R.drawable.event_tripod_loose` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_tripod_loose.webp) | [2320:77](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2320-77) |
+| `R.drawable.event_lens_mount_bent` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_lens_mount_bent.webp) | [2320:125](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2320-125) |
+| `R.drawable.event_lantern_sooty` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_lantern_sooty.webp) | [2320:173](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2320-173) |
+| `R.drawable.event_workbench_broken` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_workbench_broken.webp) | [2320:221](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2320-221) |
+| `R.drawable.event_roof_lens_misaligned` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_roof_lens_misaligned.webp) | [2320:269](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2320-269) |
+| `R.drawable.event_map_plate_scratched` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_map_plate_scratched.webp) | [2320:317](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2320-317) |
+| `R.drawable.event_compass_jammed` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_compass_jammed.webp) | [2320:365](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2320-365) |
+| `R.drawable.event_gear_tooth_broken` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_gear_tooth_broken.webp) | [2320:413](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2320-413) |
+| `R.drawable.event_key_bent` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_key_bent.webp) | [2326:43](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2326-43) |
+| `R.drawable.event_scroll_fragile` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_scroll_fragile.webp) | [2326:91](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2326-91) |
+| `R.drawable.event_journal_unbound` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_journal_unbound.webp) | [2326:139](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2326-139) |
+| `R.drawable.event_star_plate_tarnished` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_star_plate_tarnished.webp) | [2326:187](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2326-187) |
+| `R.drawable.event_lens_cloudy` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_lens_cloudy.webp) | [2326:235](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2326-235) |
+| `R.drawable.event_signal_lever_jammed` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_signal_lever_jammed.webp) | [2326:283](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2326-283) |
+| `R.drawable.event_roof_leak` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_roof_leak.webp) | [2326:331](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2326-331) |
+| `R.drawable.event_map_box_stuck` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_map_box_stuck.webp) | [2326:379](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2326-379) |
+| `R.drawable.event_calibration_ring_stuck` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_calibration_ring_stuck.webp) | [2326:427](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2326-427) |
+| `R.drawable.event_station_window_broken` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/event_station_window_broken.webp) | [2326:475](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2326-475) |
+
+### Ранее перенесённые NPC и предметы
+
 | Android resource | Canvas | File / canonical asset | Figma source |
 | --- | --- | --- | --- |
 | `R.drawable.npc_tiko_body` | 1024 × 1024 | [npc_tiko_body.webp](../../../app/src/main/res/drawable-nodpi/npc_tiko_body.webp) | [2163:42](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2163-42) |
@@ -429,7 +570,7 @@ differs from `npc_tiko_body`; the fox has no backpack, unlike `menu_ryzhik`.
 
 | Resource | Canvas | Android resource | Source |
 | --- | --- | --- | --- |
-| `debug_settings` | 24 × 24 | [Vector XML](../../../feature/debug/src/main/res/drawable/debug_settings.xml) | [Original SVG](debug_settings.svg), locally authored geometric gear, no Figma node; identical path and evenOdd fill. Displayed at 20 dp on a gray 40 dp button. |
+| `debug_settings` | 24 × 24 | [Vector XML](../../../feature/debug/src/main/res/drawable/debug_settings.xml) | [Original SVG](debug_settings.svg), locally authored geometric gear, no Figma node; identical path and evenOdd fill. Displayed at 20 dp inside a 48 dp HUD button on the main menu; the floating gray 40 dp overlay is removed. |
 
 ## Customization preview
 
@@ -499,3 +640,61 @@ Generated from the approved budget mockup with image_gen; not Figma exports.
 | `R.drawable.event_weekly_income_background` | 1122 × 1402 | [WebP](../../../app/src/main/res/drawable-nodpi/event_weekly_income_background.webp) | [Imagegen prompt and reference](sources/weekly-income-background.md) |
 
 Full canvas preserved; lossless exact WebP. Dedicated to the weekly receipt Preview.
+
+## Прозрачные сюжетные предметы — 2026-09-26
+
+42 оригинальных IMAGE fills из отдельного [каталога предметов Figma](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-421).
+Полные холсты и RGBA сохранены. Светлые подложки карточек не входят в изображения.
+[Проверка прозрачности и импорт](sources/story-objects-transparent-2026-09-26/README.md).
+Иллюстрированные страницы `collection_*` остаются только в коллекции покупок.
+
+| Ресурс | Полотно | Файл | Figma |
+| --- | --- | --- | --- |
+| `story_cargo_journal` | 1536 × 1024 | [WebP](../../../app/src/main/res/drawable-nodpi/story_cargo_journal.webp) | [3238:429](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-429) |
+| `story_observation_journal` | 1536 × 1024 | [WebP](../../../app/src/main/res/drawable-nodpi/story_observation_journal.webp) | [3238:434](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-434) |
+| `story_letter` | 1374 × 1145 | [WebP](../../../app/src/main/res/drawable-nodpi/story_letter.webp) | [3238:439](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-439) |
+| `story_old_photograph` | 1205 × 1305 | [WebP](../../../app/src/main/res/drawable-nodpi/story_old_photograph.webp) | [3238:444](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-444) |
+| `story_instruction_journal` | 1536 × 1024 | [WebP](../../../app/src/main/res/drawable-nodpi/story_instruction_journal.webp) | [3238:449](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-449) |
+| `story_route_map` | 1536 × 1024 | [WebP](../../../app/src/main/res/drawable-nodpi/story_route_map.webp) | [3238:454](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-454) |
+| `story_map_table` | 1536 × 1024 | [WebP](../../../app/src/main/res/drawable-nodpi/story_map_table.webp) | [3238:459](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-459) |
+| `story_map_missing_region` | 1536 × 1024 | [WebP](../../../app/src/main/res/drawable-nodpi/story_map_missing_region.webp) | [3238:464](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-464) |
+| `story_assembled_map` | 1536 × 1024 | [WebP](../../../app/src/main/res/drawable-nodpi/story_assembled_map.webp) | [3238:469](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-469) |
+| `story_telescope_parts` | 1024 × 1536 | [WebP](../../../app/src/main/res/drawable-nodpi/story_telescope_parts.webp) | [3238:477](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-477) |
+| `story_north_tower_signal` | 1024 × 1536 | [WebP](../../../app/src/main/res/drawable-nodpi/story_north_tower_signal.webp) | [3238:482](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-482) |
+| `story_signal_post` | 1122 × 1402 | [WebP](../../../app/src/main/res/drawable-nodpi/story_signal_post.webp) | [3238:487](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-487) |
+| `story_three_lights_mechanism` | 1122 × 1402 | [WebP](../../../app/src/main/res/drawable-nodpi/story_three_lights_mechanism.webp) | [3238:492](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-492) |
+| `story_tower_receiver` | 1122 × 1402 | [WebP](../../../app/src/main/res/drawable-nodpi/story_tower_receiver.webp) | [3238:497](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-497) |
+| `story_return_signal` | 1122 × 1402 | [WebP](../../../app/src/main/res/drawable-nodpi/story_return_signal.webp) | [3238:502](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-502) |
+| `story_chronoscope` | 1122 × 1402 | [WebP](../../../app/src/main/res/drawable-nodpi/story_chronoscope.webp) | [3238:507](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-507) |
+| `story_chronoscope_ring` | 1246 × 1263 | [WebP](../../../app/src/main/res/drawable-nodpi/story_chronoscope_ring.webp) | [3238:512](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-512) |
+| `story_signal_lens` | 1176 × 1338 | [WebP](../../../app/src/main/res/drawable-nodpi/story_signal_lens.webp) | [3238:517](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-517) |
+| `story_route_tester` | 1227 × 1282 | [WebP](../../../app/src/main/res/drawable-nodpi/story_route_tester.webp) | [3238:522](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-522) |
+| `story_relay` | 1536 × 1024 | [WebP](../../../app/src/main/res/drawable-nodpi/story_relay.webp) | [3238:527](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-527) |
+| `story_astrolabe` | 1536 × 1024 | [WebP](../../../app/src/main/res/drawable-nodpi/story_astrolabe.webp) | [3238:532](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-532) |
+| `story_marked_crate` | 1372 × 1146 | [WebP](../../../app/src/main/res/drawable-nodpi/story_marked_crate.webp) | [3238:540](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-540) |
+| `story_cleaning_worktable` | 1536 × 1024 | [WebP](../../../app/src/main/res/drawable-nodpi/story_cleaning_worktable.webp) | [3238:545](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-545) |
+| `story_story_plate` | 1448 × 1086 | [WebP](../../../app/src/main/res/drawable-nodpi/story_story_plate.webp) | [3238:550](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-550) |
+| `story_service_emblem` | 1312 × 1199 | [WebP](../../../app/src/main/res/drawable-nodpi/story_service_emblem.webp) | [3238:555](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-555) |
+| `story_stone_post` | 1024 × 1536 | [WebP](../../../app/src/main/res/drawable-nodpi/story_stone_post.webp) | [3238:560](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-560) |
+| `story_two_paths_device` | 1164 × 1351 | [WebP](../../../app/src/main/res/drawable-nodpi/story_two_paths_device.webp) | [3238:565](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-565) |
+| `story_caretakers_seal` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/story_caretakers_seal.webp) | [3238:570](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-570) |
+| `story_mailbox` | 1024 × 1536 | [WebP](../../../app/src/main/res/drawable-nodpi/story_mailbox.webp) | [3238:575](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-575) |
+| `story_token_crate` | 1205 × 1305 | [WebP](../../../app/src/main/res/drawable-nodpi/story_token_crate.webp) | [3238:580](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-580) |
+| `story_mountain_sign` | 1241 × 1267 | [WebP](../../../app/src/main/res/drawable-nodpi/story_mountain_sign.webp) | [3238:585](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-585) |
+| `story_waystone` | 1145 × 1374 | [WebP](../../../app/src/main/res/drawable-nodpi/story_waystone.webp) | [3238:590](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-590) |
+| `story_border_beacon` | 1145 × 1374 | [WebP](../../../app/src/main/res/drawable-nodpi/story_border_beacon.webp) | [3238:595](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-595) |
+| `story_route_token` | 1225 × 1284 | [WebP](../../../app/src/main/res/drawable-nodpi/story_route_token.webp) | [3238:600](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-600) |
+| `story_supply_bag` | 1233 × 1276 | [WebP](../../../app/src/main/res/drawable-nodpi/story_supply_bag.webp) | [3238:605](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-605) |
+| `story_new_map_book` | 1536 × 1024 | [WebP](../../../app/src/main/res/drawable-nodpi/story_new_map_book.webp) | [3238:610](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-610) |
+| `story_route_fragment_tower` | 552 × 282 | [WebP](../../../app/src/main/res/drawable-nodpi/story_route_fragment_tower.webp) | [3238:623](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-623) |
+| `story_route_fragment_mountain` | 564 × 282 | [WebP](../../../app/src/main/res/drawable-nodpi/story_route_fragment_mountain.webp) | [3238:628](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-628) |
+| `story_route_fragment_winding` | 564 × 280 | [WebP](../../../app/src/main/res/drawable-nodpi/story_route_fragment_winding.webp) | [3238:633](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-633) |
+| `story_route_fragment_forest` | 564 × 280 | [WebP](../../../app/src/main/res/drawable-nodpi/story_route_fragment_forest.webp) | [3238:638](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-638) |
+| `story_bridge_token` | 188 × 204 | [WebP](../../../app/src/main/res/drawable-nodpi/story_bridge_token.webp) | [3238:643](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-643) |
+| `story_tower_token` | 188 × 204 | [WebP](../../../app/src/main/res/drawable-nodpi/story_tower_token.webp) | [3238:648](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-648) |
+
+### Общие настройки — 2026-09-27
+
+| Resource | Size | Android | Provenance |
+| --- | --- | --- | --- |
+| `settings_gear` | 24 × 24 | [Vector XML](../../../app/src/main/res/drawable/settings_gear.xml) | Точная копия геометрии [debug_settings.svg](debug_settings.svg) для общего source set приложения. Одинаковые path, viewport и evenOdd; release не зависит от debug-модуля, поэтому межмодульный alias недоступен. |

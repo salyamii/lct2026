@@ -1,0 +1,178 @@
+package ru.nksk.lctapp.domain.history
+
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.*
+import ru.nksk.lctapp.domain.analytics.AnalyticsFact
+import ru.nksk.lctapp.domain.analytics.DecisionContext
+import ru.nksk.lctapp.domain.analytics.LedgerEntry
+import ru.nksk.lctapp.domain.engine.EngineRequest
+import ru.nksk.lctapp.domain.game.GameState
+import ru.nksk.lctapp.domain.finance.FinancialQuestion
+import java.security.MessageDigest
+
+/** Historical aggregates are separate from the small observable live game state. */
+@Serializable
+data class AuditEntry(
+    val id: String,
+    val sequence: Long,
+    val runId: String,
+    val type: AuditType,
+    val request: EngineRequest? = null,
+    val context: DecisionContext? = null,
+    val before: GameState? = null,
+    val after: GameState? = null,
+    val facts: List<AnalyticsFact> = emptyList(),
+    val operations: List<LedgerEntry> = emptyList(),
+    val formatVersion: Int = HISTORY_FORMAT_VERSION,
+    val contentFingerprint: String? = null,
+) {
+    init {
+        require(id.isNotBlank() && runId.isNotBlank() && sequence > 0)
+        require(formatVersion == HISTORY_FORMAT_VERSION) { "Unsupported history format" }
+        require(facts.map { it.eventId }.distinct().size == facts.size)
+        require(operations.map { it.operationId }.distinct().size == operations.size)
+        require(contentFingerprint == null || contentFingerprint.isNotBlank())
+        require(facts.all { it.gameRunId == runId && it.sequence == sequence })
+        require(type != AuditType.COMMAND || (request != null && before != null && after != null))
+        require(type != AuditType.COMMAND || facts.all { it.actionId == request?.id })
+        require(type != AuditType.FACTS || (before == null && after == null && request == null))
+        require(type != AuditType.REJECTED || (request != null && before == null && after == null && operations.isEmpty()))
+    }
+}
+
+@Serializable
+enum class AuditType { INITIALIZED, IMPORTED_BASELINE, COMMAND, TECHNICAL_UPDATE, FACTS, RESTORED, REJECTED }
+
+const val HISTORY_FORMAT_VERSION = 1
+/** Format 4 keeps the wire fields but identifies live budget allocations instead of legacy intentions. */
+const val SNAPSHOT_FORMAT_VERSION = 4
+
+/** Global storage sequence closes the gap left by map writes without an engine revision. */
+data class RestoreGuard(
+    val engineRevision: Long?,
+    val historySequence: Long,
+    /** Required for an engine snapshot restored into an empty installation. */
+    val supportedRulesId: String? = null,
+)
+
+@Serializable
+data class GameSnapshot(
+    val formatVersion: Int = SNAPSHOT_FORMAT_VERSION,
+    val runId: String,
+    val state: GameState,
+    val history: List<AuditEntry>,
+    val historySequence: Long,
+    val rulesId: String? = state.engine?.rulesId,
+    val checksum: String,
+) {
+    init {
+        require(formatVersion in 1..SNAPSHOT_FORMAT_VERSION) { "Unsupported snapshot format" }
+        require(runId.isNotBlank() && historySequence >= 0 && checksum.isNotBlank())
+        require(rulesId == state.engine?.rulesId)
+        require(history.all { it.runId == runId && it.sequence <= historySequence })
+        require(history.zipWithNext().all { (a, b) -> a.sequence < b.sequence })
+        require(history.map { it.id }.distinct().size == history.size)
+    }
+}
+
+/** Strict versioned decoding: unknown fields/types never silently become an initial save. */
+object HistoryCodec {
+    private val json = Json { encodeDefaults = true; ignoreUnknownKeys = false; classDiscriminator = "_type" }
+    fun encode(entry: AuditEntry): String = json.encodeToString(normalize(entry))
+    fun decodeEntry(value: String): AuditEntry = json.decodeFromString(value)
+    fun encodeState(state: GameState): String = json.encodeToString(normalize(state))
+    fun decodeState(value: String): GameState = json.decodeFromString(value)
+    fun encodeRequest(request: EngineRequest): String = json.encodeToString(request.copy(context = request.context?.let(::normalize)))
+    fun encodeFact(fact: AnalyticsFact): String = json.encodeToString(fact.copy(context = normalize(fact.context)))
+    fun encodeQuestion(question: FinancialQuestion): String = json.encodeToString(question)
+    fun decodeQuestion(value: String): FinancialQuestion = json.decodeFromString(value)
+    fun encodeSnapshot(snapshot: GameSnapshot): String {
+        val encoded = json.encodeToString(snapshot.copy(state = normalize(snapshot.state), history = snapshot.history.map(::normalize)))
+        return versioned(encoded, snapshot.formatVersion)
+    }
+    fun decodeSnapshot(value: String): GameSnapshot = json.decodeFromString<GameSnapshot>(value).also(::validate)
+
+    fun snapshot(runId: String, state: GameState, history: List<AuditEntry>): GameSnapshot {
+        val sequence = history.lastOrNull()?.sequence ?: 0
+        return GameSnapshot(runId = runId, state = state, history = history, historySequence = sequence,
+            checksum = checksum(runId, state, history, sequence))
+    }
+
+    fun validate(snapshot: GameSnapshot) {
+        require(snapshot.checksum == checksum(snapshot.runId, snapshot.state, snapshot.history, snapshot.historySequence, snapshot.formatVersion)) {
+            "Snapshot checksum mismatch"
+        }
+        require(snapshot.historySequence == (snapshot.history.lastOrNull()?.sequence ?: 0))
+        require(snapshot.history.withIndex().all { (index, entry) -> entry.sequence == index.toLong() + 1L }) {
+            "Snapshot history has gaps"
+        }
+        val factIds = snapshot.history.flatMap { it.facts }.map { it.eventId }
+        require(factIds.distinct().size == factIds.size) { "Repeated analytics fact identity" }
+        val requestIds = snapshot.history.filter { it.type == AuditType.COMMAND }.mapNotNull { it.request?.id }
+        require(requestIds.distinct().size == requestIds.size) { "Repeated command identity" }
+        val operationIds = snapshot.history.flatMap { it.operations }.map { it.operationId }
+        require(operationIds.distinct().size == operationIds.size) { "Repeated financial receipt identity" }
+        var previous: GameState? = null
+        snapshot.history.forEach { entry ->
+            if (entry.before != null && previous != null) {
+                require(encodeState(entry.before) == encodeState(checkNotNull(previous))) { "Historical checkpoint chain is broken" }
+            }
+            if (entry.type == AuditType.COMMAND) {
+                CanonicalLedger.validate(checkNotNull(entry.before), checkNotNull(entry.after), entry.operations)
+            }
+            if (entry.after != null) previous = entry.after
+        }
+        val tip = snapshot.history.lastOrNull { it.after != null }?.after
+        require(tip == null || encodeState(tip) == encodeState(snapshot.state)) { "Snapshot state differs from history tip" }
+    }
+
+    private fun checksum(runId: String, state: GameState, history: List<AuditEntry>, sequence: Long,
+        version: Int = SNAPSHOT_FORMAT_VERSION): String {
+        return sha256("$version\n$runId\n$sequence\n${versioned(encodeState(state), version)}\n${versioned(json.encodeToString(history.map(::normalize)), version)}")
+    }
+
+    private fun versioned(encoded: String, version: Int): String {
+        if (version >= 3) return encoded
+        val v2 = legacyV2(json.parseToJsonElement(encoded))
+        return (if (version == 1) legacyV1(v2) else v2).toString()
+    }
+
+    private fun legacyV2(value: JsonElement): JsonElement = when (value) {
+        is JsonArray -> JsonArray(value.map(::legacyV2))
+        is JsonObject -> JsonObject(value.entries.mapNotNull { (key, child) ->
+            if (key == "selectedSavingItemId") { require(child == JsonNull); null }
+            else key to legacyV2(child)
+        }.toMap())
+        else -> value
+    }
+
+    /** The signed v1 shape had none of these fields. Only absent/default legacy data may be omitted. */
+    private fun legacyV1(value: JsonElement): JsonElement = when (value) {
+        is JsonArray -> JsonArray(value.map(::legacyV1))
+        is JsonObject -> JsonObject(value.entries.mapNotNull { (key, child) ->
+            when (key) {
+                "eventHistory" -> { require(child == JsonArray(emptyList())); null }
+                "savingPractice", "reviewEvidence" -> { require(child == JsonNull); null }
+                "applications" -> if (value["_type"] == JsonPrimitive("reserve_decision")) {
+                    require(child == JsonArray(emptyList())); null
+                } else key to legacyV1(child)
+                else -> key to legacyV1(child)
+            }
+        }.toMap())
+        else -> value
+    }
+
+    // Sets carry no order; Room can return them in a different order after restore.
+    // Lists (including repeated inventory and decisions) retain every original position.
+    private fun normalize(state: GameState) = state.copy(completedMiniGames = state.completedMiniGames.sorted().toSet())
+    private fun normalize(context: DecisionContext) = context.copy(assistance = context.assistance.sortedBy { it.name }.toSet())
+    private fun normalize(entry: AuditEntry) = entry.copy(
+        request = entry.request?.let { it.copy(context = it.context?.let(::normalize)) },
+        context = entry.context?.let(::normalize), before = entry.before?.let(::normalize), after = entry.after?.let(::normalize),
+        facts = entry.facts.map { it.copy(context = normalize(it.context)) },
+    )
+
+    fun sha256(value: String): String = MessageDigest.getInstance("SHA-256")
+        .digest(value.toByteArray(Charsets.UTF_8)).joinToString("") { "%02x".format(it) }
+}

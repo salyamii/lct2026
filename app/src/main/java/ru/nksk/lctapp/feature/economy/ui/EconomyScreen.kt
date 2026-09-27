@@ -2,16 +2,23 @@ package ru.nksk.lctapp.feature.economy.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.core.ui.components.GamePaper
+import ru.nksk.lctapp.core.ui.components.GameInk
+import ru.nksk.lctapp.core.ui.theme.Nunito
+import ru.nksk.lctapp.core.ui.theme.Rubik
 import ru.nksk.lctapp.domain.economy.BudgetPlanningReason
 import ru.nksk.lctapp.domain.economy.BudgetPlanningStage
+import ru.nksk.lctapp.domain.economy.BudgetRevisionReason
 
 @Composable
-internal fun EconomyScreen(state: EconomyUiState, onAction: (EconomyAction) -> Unit, onBack: () -> Unit) {
+internal fun EconomyScreen(state: EconomyUiState, onAction: (EconomyAction) -> Unit, onBack: () -> Unit,
+    onOpenHistory: () -> Unit = {}, onOpenSavings: () -> Unit = {}) {
     val economy = state.economy
     if (economy == null) {
         Surface(Modifier.fillMaxSize(), color = GamePaper) {
@@ -24,25 +31,119 @@ internal fun EconomyScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
         }
     } else {
         val planning = economy.planning
+        val display = state.budgetScreenState()
         when {
-            planning?.stage == BudgetPlanningStage.RECEIPT -> WeeklyIncomeScreen(
+            planning?.stage == BudgetPlanningStage.RECEIPT && state.budgetConfirmation == null -> WeeklyIncomeScreen(
                 state = WeeklyIncomeUiState(amount = planning.income,
+                    availableBalance = economy.availableBalance, savingsBalance = economy.savingsBalance,
                     header = if (planning.reason == BudgetPlanningReason.INITIAL) "Первый бюджет" else "Новая неделя",
                     title = if (planning.reason == BudgetPlanningReason.INITIAL) "Монеты для приключения" else "Новый запас на неделю"),
                 onPlan = { if (!state.saving) onAction(EconomyAction.StartAllocation) }, onBack = onBack)
             else -> BudgetPlanScreen(
-                state = BudgetUiState(economy.plan.needs, economy.plan.wants, economy.plan.savings,
-                    economy.plan.reserve, economy.unallocated, planning?.income ?: 0, actionsEnabled = !state.saving,
-                    minimumNeeds = ru.nksk.lctapp.domain.economy.EconomyOperations.minimumNeeds(economy)),
+                state = display.budget,
+                interactionsBlocked = state.budgetConfirmation != null,
                 onAmountChange = { article, amount -> onAction(EconomyAction.SetAmount(article, amount)) },
                 onConfirm = { onAction(EconomyAction.Confirm) }, onBack = onBack,
-                onAdjust = { article, increase -> onAction(EconomyAction.Adjust(article, increase)) })
+                onOpenChanges = if (display.historyAvailable) ({ onAction(EconomyAction.OpenBudgetHistory) }) else null,
+                onAdjust = { article, increase -> onAction(EconomyAction.Adjust(article, increase)) },
+                onOpenSavings = onOpenSavings,
+                pet = display.pet,
+                revisionReason = display.revisionReason,
+                onReasonChange = { onAction(EconomyAction.SetReason(it)) },
+                onOpenHistory = onOpenHistory.takeIf { display.historyAvailable },
+                contextId = display.contextId,
+                onContextPresented = { onAction(EconomyAction.ContextPresented(it)) },
+                revisionDetails = {
+                    if (display.revisionReason == BudgetRevisionReason.UNEXPECTED_EXPENSE) {
+                        UnexpectedExpenseSelection(state, onAction)
+                    }
+                })
         }
+    }
+    EconomyFeedback(state, onAction)
+    if (state.budgetHistoryVisible) BudgetHistoryDialog(state,
+        onClose = { onAction(EconomyAction.CloseBudgetHistory) },
+        onRetry = { onAction(EconomyAction.OpenBudgetHistory) })
+}
+
+@Composable
+internal fun EconomyFeedback(state: EconomyUiState, onAction: (EconomyAction) -> Unit,
+    showDepositWarning: Boolean = true) {
+    val dialogButtonColors = ButtonDefaults.textButtonColors(
+        contentColor = GameInk, disabledContentColor = GameInk.copy(alpha = .55f),
+    )
+    state.depositWarning?.takeIf { showDepositWarning }?.let { warning ->
+        AlertDialog(onDismissRequest = { if (!state.saving) onAction(EconomyAction.CancelDepositRisk) },
+            containerColor = GamePaper, titleContentColor = GameInk, textContentColor = GameInk, iconContentColor = GameInk,
+            title = { Text("На еду может не хватить", fontFamily = Rubik, fontWeight = FontWeight.Bold,
+                fontSize = 22.sp, lineHeight = 28.sp) },
+            text = { Text("После перевода доступно ${warning.remainingBalance}, а на еду до следующей недели нужно ${warning.neededForFood} монет. Всё равно отложить монеты?",
+                fontFamily = Nunito, fontSize = 16.sp, lineHeight = 24.sp) },
+            confirmButton = {
+                TextButton(onClick = { onAction(EconomyAction.ConfirmDepositRisk) }, enabled = !state.saving,
+                    colors = dialogButtonColors) {
+                    Text("Всё равно отложить", fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onAction(EconomyAction.CancelDepositRisk) }, enabled = !state.saving,
+                    colors = dialogButtonColors) {
+                    Text("Отмена", fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                }
+            })
     }
     state.error?.let { error ->
         AlertDialog(onDismissRequest = { onAction(EconomyAction.DismissError) },
-            title = { Text("Бюджет не сохранён") }, text = { Text(error) },
-            confirmButton = { TextButton(onClick = { onAction(EconomyAction.Retry) }) { Text("Повторить") } },
-            dismissButton = { TextButton(onClick = { onAction(EconomyAction.DismissError) }) { Text("Закрыть") } })
+            containerColor = GamePaper, titleContentColor = GameInk, textContentColor = GameInk, iconContentColor = GameInk,
+            title = { Text("Действие не сохранено", fontFamily = Rubik, fontWeight = FontWeight.Bold,
+                fontSize = 22.sp, lineHeight = 28.sp) },
+            text = { Text(error, fontFamily = Nunito, fontSize = 16.sp, lineHeight = 24.sp) },
+            confirmButton = {
+                TextButton(onClick = { onAction(EconomyAction.Retry) }, colors = dialogButtonColors) {
+                    Text("Повторить", fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onAction(EconomyAction.DismissError) }, colors = dialogButtonColors) {
+                    Text("Закрыть", fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                }
+            })
     }
 }
+
+@Composable
+private fun UnexpectedExpenseSelection(state: EconomyUiState, onAction: (EconomyAction) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    val selected = state.unexpectedExpenses.find { it.operationId == state.selectedExpenseOperationId }
+    Column {
+        Text("Из-за какой траты меняешь план?", color = GameInk)
+        when {
+            state.expenseHistoryLoading -> Text("Загружаем траты…", color = GameInk)
+            state.expenseHistoryUnavailable -> {
+                Text("Не удалось загрузить историю. Можно сохранить причину без выбора траты.", color = GameInk)
+                TextButton(onClick = { onAction(EconomyAction.RetryExpenseHistory) }) { Text("Загрузить траты") }
+            }
+            state.unexpectedExpenses.isEmpty() -> Text("В истории пока нет подходящей траты. Можно оставить только причину.", color = GameInk)
+            else -> Box {
+                TextButton(onClick = { expanded = true }, enabled = !state.saving) {
+                    Text(selected?.expenseLabel() ?: "Выбрать трату — необязательно", color = GameInk)
+                }
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    DropdownMenuItem(text = { Text("Без выбора траты") }, onClick = {
+                        expanded = false
+                        onAction(EconomyAction.SelectUnexpectedExpense(null))
+                    })
+                    state.unexpectedExpenses.forEach { expense ->
+                        DropdownMenuItem(text = { Text(expense.expenseLabel()) }, onClick = {
+                            expanded = false
+                            onAction(EconomyAction.SelectUnexpectedExpense(expense.operationId))
+                        })
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun UnexpectedExpenseUi.expenseLabel(): String =
+    (day?.let { "День $it\n" } ?: "") + "$title: $amount монет"

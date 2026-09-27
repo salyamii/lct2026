@@ -1,0 +1,1172 @@
+[
+  {
+    "resource": "deed_goods_lantern",
+    "canvas": [
+      256,
+      256
+    ],
+    "transparent_pixels": 41394,
+    "transparent_percent": 63.16,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "deed_goods_lens",
+    "canvas": [
+      256,
+      256
+    ],
+    "transparent_pixels": 31045,
+    "transparent_percent": 47.37,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "deed_goods_map",
+    "canvas": [
+      256,
+      256
+    ],
+    "transparent_pixels": 30473,
+    "transparent_percent": 46.5,
+    "alpha_extrema": [
+      0,
+      253
+    ]
+  },
+  {
+    "resource": "deed_goods_scroll",
+    "canvas": [
+      256,
+      256
+    ],
+    "transparent_pixels": 36771,
+    "transparent_percent": 56.11,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "deed_pair_armillary",
+    "canvas": [
+      920,
+      1120
+    ],
+    "transparent_pixels": 643722,
+    "transparent_percent": 62.47,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "deed_pair_astrolabe",
+    "canvas": [
+      920,
+      1120
+    ],
+    "transparent_pixels": 564678,
+    "transparent_percent": 54.8,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "deed_pair_key",
+    "canvas": [
+      920,
+      1120
+    ],
+    "transparent_pixels": 892809,
+    "transparent_percent": 86.65,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "deed_pair_loupe",
+    "canvas": [
+      920,
+      1120
+    ],
+    "transparent_pixels": 773034,
+    "transparent_percent": 75.02,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "deed_pair_tag",
+    "canvas": [
+      920,
+      1120
+    ],
+    "transparent_pixels": 443566,
+    "transparent_percent": 43.05,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "event_backpack_resin",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 754502,
+    "transparent_percent": 47.98,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_backpack_torn",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 976681,
+    "transparent_percent": 62.11,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_broken_wheel",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 792727,
+    "transparent_percent": 50.41,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_calibration_ring_stuck",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 859549,
+    "transparent_percent": 54.66,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_compass_jammed",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 924910,
+    "transparent_percent": 58.82,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_gear_tooth_broken",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 821083,
+    "transparent_percent": 52.21,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_journal_unbound",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 863131,
+    "transparent_percent": 54.89,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_key_bent",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 1323348,
+    "transparent_percent": 84.15,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_lantern_sooty",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 1053015,
+    "transparent_percent": 66.96,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_lens_cloudy",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 751206,
+    "transparent_percent": 47.77,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_lens_mount_bent",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 1098874,
+    "transparent_percent": 69.88,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_map_box_stuck",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 810175,
+    "transparent_percent": 51.52,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_map_plate_scratched",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 913424,
+    "transparent_percent": 58.09,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_map_wet",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 671112,
+    "transparent_percent": 42.68,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_roof_leak",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 893568,
+    "transparent_percent": 56.82,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_roof_lens_misaligned",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 1034224,
+    "transparent_percent": 65.77,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_rope_frayed",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 955983,
+    "transparent_percent": 60.79,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_scroll_fragile",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 890418,
+    "transparent_percent": 56.62,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_signal_lever_jammed",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 1017787,
+    "transparent_percent": 64.72,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_star_plate_1",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 648051,
+    "transparent_percent": 41.21,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_star_plate_tarnished",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 712927,
+    "transparent_percent": 45.34,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_station_window_broken",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 877659,
+    "transparent_percent": 55.81,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_tripod_loose",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 1278316,
+    "transparent_percent": 81.29,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "event_workbench_broken",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 994789,
+    "transparent_percent": 63.26,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "gear_goal_telescope",
+    "canvas": [
+      1024,
+      1536
+    ],
+    "transparent_pixels": 1132074,
+    "transparent_percent": 71.98,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "gear_lantern",
+    "canvas": [
+      512,
+      512
+    ],
+    "transparent_pixels": 215595,
+    "transparent_percent": 82.24,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "npc_butcher_orders",
+    "canvas": [
+      1086,
+      1448
+    ],
+    "transparent_pixels": 760478,
+    "transparent_percent": 48.36,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "npc_butcher_pointing",
+    "canvas": [
+      1086,
+      1448
+    ],
+    "transparent_pixels": 747762,
+    "transparent_percent": 47.55,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "npc_butcher_scales",
+    "canvas": [
+      1086,
+      1448
+    ],
+    "transparent_pixels": 666891,
+    "transparent_percent": 42.41,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "npc_butcher_tray",
+    "canvas": [
+      1083,
+      1452
+    ],
+    "transparent_pixels": 724744,
+    "transparent_percent": 46.09,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "npc_butcher_tying",
+    "canvas": [
+      1086,
+      1448
+    ],
+    "transparent_pixels": 756459,
+    "transparent_percent": 48.1,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "npc_caretaker_cleaning_lens",
+    "canvas": [
+      1086,
+      1448
+    ],
+    "transparent_pixels": 795259,
+    "transparent_percent": 50.57,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "npc_caretaker_explaining",
+    "canvas": [
+      1086,
+      1448
+    ],
+    "transparent_pixels": 784147,
+    "transparent_percent": 49.87,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "npc_carpenter_explaining",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 830857,
+    "transparent_percent": 52.84,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "npc_luna_body",
+    "canvas": [
+      1024,
+      1024
+    ],
+    "transparent_pixels": 764864,
+    "transparent_percent": 72.94,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "npc_tiko_body",
+    "canvas": [
+      1024,
+      1024
+    ],
+    "transparent_pixels": 812008,
+    "transparent_percent": 77.44,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "prop_bakery_bun",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 854016,
+    "transparent_percent": 54.31,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "prop_fair_compass_keychain",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 1158808,
+    "transparent_percent": 73.69,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "prop_fair_explorer_hat",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 1016637,
+    "transparent_percent": 64.65,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "prop_fair_ring_toss",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 1008458,
+    "transparent_percent": 64.13,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "prop_fair_toy_boat",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 1094754,
+    "transparent_percent": 69.62,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_assembled_map",
+    "canvas": [
+      1536,
+      1024
+    ],
+    "transparent_pixels": 474768,
+    "transparent_percent": 30.18,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "story_astrolabe",
+    "canvas": [
+      1536,
+      1024
+    ],
+    "transparent_pixels": 693305,
+    "transparent_percent": 44.08,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "story_border_beacon",
+    "canvas": [
+      1145,
+      1374
+    ],
+    "transparent_pixels": 999524,
+    "transparent_percent": 63.53,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_bridge_token",
+    "canvas": [
+      188,
+      204
+    ],
+    "transparent_pixels": 15304,
+    "transparent_percent": 39.9,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "story_caretakers_seal",
+    "canvas": [
+      1254,
+      1254
+    ],
+    "transparent_pixels": 565697,
+    "transparent_percent": 35.97,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_cargo_journal",
+    "canvas": [
+      1536,
+      1024
+    ],
+    "transparent_pixels": 374797,
+    "transparent_percent": 23.83,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "story_chronoscope",
+    "canvas": [
+      1122,
+      1402
+    ],
+    "transparent_pixels": 777191,
+    "transparent_percent": 49.41,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_chronoscope_ring",
+    "canvas": [
+      1246,
+      1263
+    ],
+    "transparent_pixels": 903824,
+    "transparent_percent": 57.43,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_cleaning_worktable",
+    "canvas": [
+      1536,
+      1024
+    ],
+    "transparent_pixels": 989853,
+    "transparent_percent": 62.93,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "story_instruction_journal",
+    "canvas": [
+      1536,
+      1024
+    ],
+    "transparent_pixels": 651051,
+    "transparent_percent": 41.39,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "story_letter",
+    "canvas": [
+      1374,
+      1145
+    ],
+    "transparent_pixels": 709643,
+    "transparent_percent": 45.11,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_map_missing_region",
+    "canvas": [
+      1536,
+      1024
+    ],
+    "transparent_pixels": 481769,
+    "transparent_percent": 30.63,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "story_map_table",
+    "canvas": [
+      1536,
+      1024
+    ],
+    "transparent_pixels": 686575,
+    "transparent_percent": 43.65,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "story_marked_crate",
+    "canvas": [
+      1372,
+      1146
+    ],
+    "transparent_pixels": 429872,
+    "transparent_percent": 27.34,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_mountain_sign",
+    "canvas": [
+      1241,
+      1267
+    ],
+    "transparent_pixels": 833393,
+    "transparent_percent": 53.0,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_new_map_book",
+    "canvas": [
+      1536,
+      1024
+    ],
+    "transparent_pixels": 700295,
+    "transparent_percent": 44.52,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "story_north_tower_signal",
+    "canvas": [
+      1024,
+      1536
+    ],
+    "transparent_pixels": 1046813,
+    "transparent_percent": 66.55,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "story_observation_journal",
+    "canvas": [
+      1536,
+      1024
+    ],
+    "transparent_pixels": 366112,
+    "transparent_percent": 23.28,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "story_old_photograph",
+    "canvas": [
+      1205,
+      1305
+    ],
+    "transparent_pixels": 301317,
+    "transparent_percent": 19.16,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_relay",
+    "canvas": [
+      1536,
+      1024
+    ],
+    "transparent_pixels": 761460,
+    "transparent_percent": 48.41,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "story_return_signal",
+    "canvas": [
+      1122,
+      1402
+    ],
+    "transparent_pixels": 1176764,
+    "transparent_percent": 74.81,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_route_fragment_forest",
+    "canvas": [
+      564,
+      280
+    ],
+    "transparent_pixels": 13107,
+    "transparent_percent": 8.3,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "story_route_fragment_mountain",
+    "canvas": [
+      564,
+      282
+    ],
+    "transparent_pixels": 22885,
+    "transparent_percent": 14.39,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "story_route_fragment_tower",
+    "canvas": [
+      552,
+      282
+    ],
+    "transparent_pixels": 19529,
+    "transparent_percent": 12.55,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "story_route_fragment_winding",
+    "canvas": [
+      564,
+      280
+    ],
+    "transparent_pixels": 14226,
+    "transparent_percent": 9.01,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "story_route_map",
+    "canvas": [
+      1536,
+      1024
+    ],
+    "transparent_pixels": 641940,
+    "transparent_percent": 40.81,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "story_route_tester",
+    "canvas": [
+      1227,
+      1282
+    ],
+    "transparent_pixels": 1026060,
+    "transparent_percent": 65.23,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_route_token",
+    "canvas": [
+      1225,
+      1284
+    ],
+    "transparent_pixels": 444062,
+    "transparent_percent": 28.23,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_service_emblem",
+    "canvas": [
+      1312,
+      1199
+    ],
+    "transparent_pixels": 566599,
+    "transparent_percent": 36.02,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_signal_lens",
+    "canvas": [
+      1176,
+      1338
+    ],
+    "transparent_pixels": 978944,
+    "transparent_percent": 62.21,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_signal_post",
+    "canvas": [
+      1122,
+      1402
+    ],
+    "transparent_pixels": 984803,
+    "transparent_percent": 62.6,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_stone_post",
+    "canvas": [
+      1024,
+      1536
+    ],
+    "transparent_pixels": 997726,
+    "transparent_percent": 63.43,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "story_story_plate",
+    "canvas": [
+      1448,
+      1086
+    ],
+    "transparent_pixels": 634365,
+    "transparent_percent": 40.34,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_supply_bag",
+    "canvas": [
+      1233,
+      1276
+    ],
+    "transparent_pixels": 631607,
+    "transparent_percent": 40.15,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_three_lights_mechanism",
+    "canvas": [
+      1122,
+      1402
+    ],
+    "transparent_pixels": 920718,
+    "transparent_percent": 58.53,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_token_crate",
+    "canvas": [
+      1205,
+      1305
+    ],
+    "transparent_pixels": 472769,
+    "transparent_percent": 30.06,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_tower_receiver",
+    "canvas": [
+      1122,
+      1402
+    ],
+    "transparent_pixels": 947014,
+    "transparent_percent": 60.2,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_tower_token",
+    "canvas": [
+      188,
+      204
+    ],
+    "transparent_pixels": 15326,
+    "transparent_percent": 39.96,
+    "alpha_extrema": [
+      0,
+      254
+    ]
+  },
+  {
+    "resource": "story_two_paths_device",
+    "canvas": [
+      1164,
+      1351
+    ],
+    "transparent_pixels": 533331,
+    "transparent_percent": 33.91,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  },
+  {
+    "resource": "story_waystone",
+    "canvas": [
+      1145,
+      1374
+    ],
+    "transparent_pixels": 483939,
+    "transparent_percent": 30.76,
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  }
+]

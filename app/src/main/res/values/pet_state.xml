@@ -1,0 +1,9 @@
+<resources>
+    <string name="pet_state_happy">Радуется</string>
+    <string name="pet_state_upset">Расстроен</string>
+    <string name="pet_state_thinking">Задумался</string>
+    <string name="pet_state_hungry">Голоден</string>
+    <string name="pet_state_tired">Устал</string>
+    <string name="pet_state_worried">Обеспокоен</string>
+    <string name="pet_state_needs_help">Нужна помощь</string>
+</resources>

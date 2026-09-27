@@ -63,14 +63,22 @@ class NavigationRestorationTest {
 
         actions.forEach { (action, title) ->
             compose.onNode(action and hasClickAction()).performClick()
-            compose.onNode(hasText(compose.activity.getString(R.string.navigation_back)) or hasContentDescription(compose.activity.getString(R.string.navigation_back))).assertIsDisplayed()
+            compose.onNode(hasText(compose.activity.getString(R.string.navigation_back)) or
+                hasContentDescription(compose.activity.getString(R.string.navigation_back)) or hasContentDescription("В главное меню")).assertIsDisplayed()
 
             restoration.emulateSavedInstanceStateRestore()
 
-            compose.onNodeWithText(when (title) { R.string.menu_village -> "Карта приключений"; R.string.menu_continue -> "Смотритель просит помочь"; R.string.menu_goal -> "Большие цели"; else -> compose.activity.getString(title) }).assertIsDisplayed()
-            compose.onNode(hasText(compose.activity.getString(R.string.navigation_back)) or hasContentDescription(compose.activity.getString(R.string.navigation_back)))
+            compose.onNodeWithText(when (title) {
+                R.string.menu_village -> "Карта приключений"
+                R.string.menu_continue -> "Первый бюджет"
+                R.string.menu_goal -> "Цели"
+                R.string.menu_coins -> "Первый бюджет"
+                else -> compose.activity.getString(title)
+            }).assertIsDisplayed()
+            compose.onNode(hasText(compose.activity.getString(R.string.navigation_back)) or
+                hasContentDescription(compose.activity.getString(R.string.navigation_back)) or hasContentDescription("В главное меню"))
                 .assertIsDisplayed().performClick()
-            compose.onNodeWithText("Выбрать большую цель")
+            compose.onNodeWithText("Выбрать цель накопления")
                 .assertIsDisplayed()
         }
     }

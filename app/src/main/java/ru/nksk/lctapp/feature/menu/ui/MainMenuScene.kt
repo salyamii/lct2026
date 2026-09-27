@@ -5,11 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,8 +21,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import ru.nksk.lctapp.R
-import ru.nksk.lctapp.core.ui.components.GameArtwork
 
 @Composable
 internal fun VillageBackdrop(painter: Painter) {
@@ -52,18 +47,13 @@ internal fun CharacterScene(
     artworkModifier: Modifier = Modifier,
 ) {
     BoxWithConstraints(modifier.offset(y = 64.dp), contentAlignment = Alignment.Center) {
-        // Scale the full shared canvas and its ground shadow together.
+        // The shared renderer keeps the full canvas and its paw contact together.
         val characterSize = minOf(maxWidth * 1.18f, maxHeight * 0.92f, 560.dp) * pet.artworkScale
         val artwork = pet.artworkRes
         if (artwork == null) {
             MenuText(stringResource(pet.descriptionRes, pet.name), size = 18, modifier = artworkModifier)
             return@BoxWithConstraints
         }
-        GameArtwork(
-            R.drawable.menu_ground_shadow, null,
-            Modifier.offset(x = characterSize * -0.03f, y = characterSize * 0.378f)
-                .size(characterSize * 0.328f, characterSize * 0.117f),
-        )
         MovingPet(
             artwork = artwork,
             description = stringResource(pet.descriptionRes, pet.name),

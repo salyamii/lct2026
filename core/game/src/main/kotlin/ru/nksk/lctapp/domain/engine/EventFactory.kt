@@ -45,6 +45,9 @@ class EventFactory(
                 is StoryCondition.EventCompleted -> require(condition.eventId in events)
                 is StoryCondition.EventCompletions -> require(condition.minimum > 0 && condition.eventIds.isNotEmpty() && condition.eventIds.all { it in events })
                 is StoryCondition.OwnsItem -> require(content.items.any { it.id == condition.itemId })
+                is StoryCondition.OwnsAnyItem -> require(condition.itemIds.isNotEmpty() && condition.itemIds.all { id -> content.items.any { it.id == id } })
+                is StoryCondition.CurrentLocation -> require(ru.nksk.lctapp.domain.location.GameLocation.entries.any { it.code == condition.locationId })
+                is StoryCondition.EquippedLook -> require(condition.lookId.isNotBlank())
                 is StoryCondition.GoalCollected -> require(goals.any { it.goalId == condition.goalId })
                 is StoryCondition.FactsAtLeast -> require(condition.minimum in 1..condition.factIds.size && condition.factIds.all { it in knownFacts })
                 is StoryCondition.DayStepsAtLeast -> require(condition.minimum >= 0)
@@ -60,6 +63,7 @@ class EventFactory(
                 require(content.days.any { it.id == act.dayId })
                 require(act.eventIds.all { it in events && policies[it]?.storyActId == act.id })
                 require(policies[act.finaleId]?.finishesStoryAct == true)
+                require(act.goalId == null || goals.any { it.goalId == act.goalId }) { "Unknown chapter kit" }
                 require(act.eventIds.count { policies[it]?.finishesStoryAct == true } == 1)
             }
             require(story.completionAliases.keys.all { it in events })
@@ -69,6 +73,14 @@ class EventFactory(
             val definition = requireNotNull(events[id]) { "Unknown event policy: $id" }
             require(policy.goalId == null || content.goals.any { it.id == policy.goalId })
             val eventChoices = content.choices.filter { it.eventId == id }
+            require(policy.disabledChoiceIds.all { choice -> eventChoices.any { it.id == choice } }) {
+                "A retired choice must belong to its event: $id"
+            }
+            require(eventChoices.isEmpty() || eventChoices.any { it.id !in policy.disabledChoiceIds }) {
+                "An event must retain an available action: $id"
+            }
+            require(policy.feedsPetChoiceIds.all { choice -> eventChoices.any { it.id == choice } })
+            require(policy.feedsPetChoiceIds.all { policy.energyFor(it) == 0 }) { "Food cannot consume energy" }
             validate(policy.condition)
             require(policy.factsByChoiceId.keys.all { choice -> eventChoices.any { it.id == choice } })
             require(policy.factsByChoiceId.values.flatten().all { it.isNotBlank() })
@@ -86,6 +98,12 @@ class EventFactory(
                 require(definition.type == EventType.EARNING)
                 val reward = content.choices.singleOrNull { it.eventId == id }
                 require(reward != null && reward.moneyDelta >= 0) { "A mini-game needs one maximum reward: $id" }
+            }
+            if (policy.choiceGameKinds.isNotEmpty()) {
+                require(definition.type in setOf(EventType.STORY, EventType.RANDOM) && policy.deedGameKind == null)
+                require(policy.choiceGameKinds.keys.all { choice -> eventChoices.any { it.id == choice } }) {
+                    "A story mini-game must name an existing choice: $id"
+                }
             }
             val startItems = content.eventItemEffects.filter { it.eventId == id }
             val hasStartEffects = definition.moneyDeltaOnStart != 0L || definition.petStateOnStart != null || startItems.isNotEmpty()
@@ -125,7 +143,9 @@ class EventFactory(
     internal fun policy(id: String) = requireNotNull(policies[id]) { "Missing authored event policy: $id" }
     internal fun meal(id: String) = requireNotNull(meals[id]) { "Unknown meal: $id" }
     internal fun basicMealPrice() = meals.values.filter { it.price > 0 }.minOf { it.price }
-    internal fun choices(id: String) = content.choices.filter { it.eventId == id }.sortedBy { it.position }
+    internal fun choices(id: String) = content.choices.filter {
+        it.eventId == id && it.id !in policy(id).disabledChoiceIds
+    }.sortedBy { it.position }
     internal fun goalItemsForDay(dayId: String?): Set<String> {
         val day = requireNotNull(content.days.find { it.id == dayId }) { "Unknown story day: $dayId" }
         val chapter = requireNotNull(content.chapters.find { it.id == day.chapterId }) { "Unknown chapter" }

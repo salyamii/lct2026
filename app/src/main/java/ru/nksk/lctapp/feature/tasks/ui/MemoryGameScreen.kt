@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -62,16 +63,18 @@ fun MemoryGameScreen(
             .background(DeedColors.Scene),
     ) {
         Box {
-            GameArtwork(R.drawable.location_hill,
+            GameArtwork(deed?.sceneRes ?: R.drawable.location_hill,
                 contentDescription = null,
                 modifier = Modifier.fillMaxWidth().height(150.dp),
                 contentScale = ContentScale.Crop,
             )
+            deed?.activityArtworkRes?.let { art -> GameArtwork(art, null,
+                Modifier.align(Alignment.BottomEnd).size(92.dp).padding(4.dp)) }
             DeedHeader(deed?.title ?: stringResource(R.string.deeds_star_title), onBack = onBack)
         }
         DeedSheet(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             Text(
-                if (deed != null) "Найди одинаковые пары. Чем меньше ошибок, тем больше награда." else stringResource(R.string.deeds_memory_prompt),
+                deed?.instructions ?: if (deed != null) "Найди одинаковые пары. Чем меньше ошибок, тем больше награда." else stringResource(R.string.deeds_memory_prompt),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = Rubik,
@@ -83,7 +86,7 @@ fun MemoryGameScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 DeedChip(stringResource(R.string.deeds_moves, state.moves))
-                CoinChip(deed?.let { "Награда до ${it.maximumReward} монет" }
+                if (deed?.storyAction != true) CoinChip(deed?.let { "Награда до ${it.maximumReward} монет" }
                     ?: stringResource(R.string.deeds_demo_reward, MemoryState.REWARD))
             }
             Spacer(Modifier.height(12.dp))
@@ -100,7 +103,7 @@ fun MemoryGameScreen(
                             val index = rowIndex * 4 + columnIndex
                             StarPlateView(
                                 index = index,
-                                face = PAIR_ART[face],
+                                face = deed?.pairArtwork?.takeIf { it.size == MemoryState.PAIRS }?.get(face) ?: PAIR_ART[face],
                                 revealed = index in state.faceUp || index in state.matched,
                                 matched = index in state.matched,
                                 enabled = state.pending == null && !state.won && deed?.canPlay != false,

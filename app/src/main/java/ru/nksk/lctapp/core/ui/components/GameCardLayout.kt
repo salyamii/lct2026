@@ -21,6 +21,8 @@ import ru.nksk.lctapp.core.ui.theme.*
 
 internal val GamePaper = Color(0xFFFBF9EE)
 internal val GameInk = Color(0xFF171440)
+internal val GameDisabledButtonContainer = Color(0xFFE5E1EB)
+internal val GameDisabledButtonContent = Color(0xFF625B72)
 
 /** Figma narrative panel, adapted to native insets, scrolling, landscape and large text. */
 @Composable
@@ -82,7 +84,8 @@ internal fun GameBody(text: String) = Text(text, fontFamily = Nunito, fontSize =
 @Composable
 internal fun GameButton(text: String, enabled: Boolean = true, onClick: () -> Unit) {
     Button(onClick, Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = enabled,
-        colors = ButtonDefaults.buttonColors(containerColor = AdventureLime, contentColor = AdventureNight),
+        colors = ButtonDefaults.buttonColors(containerColor = AdventureLime, contentColor = AdventureNight,
+            disabledContainerColor = GameDisabledButtonContainer, disabledContentColor = GameDisabledButtonContent),
         shape = RoundedCornerShape(28.dp)) {
         Text(text, fontFamily = Rubik, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
     }

@@ -1,0 +1,10 @@
+<resources>
+    <string name="gear_equip">Надеть</string>
+    <string name="gear_unequip">Снять</string>
+    <string name="gear_equipped">Сейчас надето</string>
+    <string name="gear_equip_error">Не получилось сменить аксессуар. Попробуй ещё раз.</string>
+    <string name="gear_equip_changed">Состояние изменилось. Выбери аксессуар ещё раз.</string>
+    <string name="menu_pet_route_patch">Лис с нашивкой путешественника</string>
+    <string name="menu_pet_compass">Лис с походным компасом</string>
+    <string name="menu_pet_binoculars">Лис с биноклем</string>
+</resources>

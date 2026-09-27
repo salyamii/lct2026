@@ -1,0 +1,253 @@
+{
+  "imported_on": "2026-09-26",
+  "figma_file_key": "bAod1cKtTX9Q8omQ067q3q",
+  "download_method": "figma_download_assets rawImages original PNGs",
+  "rgba_hash_format": "SHA-256(width uint32 big endian + height uint32 big endian + RGBA pixel bytes), matching scripts/verify_assets.py.",
+  "assets": [
+    {
+      "resource": "prop_bakery_bun",
+      "category": "Fair purchase props",
+      "path": "app/src/main/res/drawable-nodpi/prop_bakery_bun.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 887970,
+      "sha256": "154c320f1f7a7554cb7c44948ce9a463cc2e2c4cd2ab8047f6b52b58b18aa2e7",
+      "rgba_sha256": "fc0d55da21f7cd99bb94b32eb96159b53c5a4ceaa5b8a00e072a64cb4173a16c",
+      "alpha_bounds": [
+        49,
+        36,
+        1208,
+        1254
+      ],
+      "design_canvas": [
+        1254,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/fair-items-2026-09-26/prop_bakery_bun.png",
+      "source_sha256": "aafa7c83e8affd28d4febbe70af2f2374de8d841f313d3acc99cb166efb47672",
+      "source_sha1": "390605bc7bb5629139f42ef9bf34e5c237849f7e",
+      "source_bytes": 1310518,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2654:29",
+        "image_hash": "390605bc7bb5629139f42ef9bf34e5c237849f7e"
+      },
+      "provenance": {
+        "type": "figma-original-image",
+        "date": "2026-09-26",
+        "tool": "figma_download_assets",
+        "details": "Original uploaded image fill returned in rawImages. Downloaded PNG SHA-1 matches the Figma image hash; not a rendered screen, thumbnail or regenerated substitute."
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "quality": 100,
+        "method": 6,
+        "resized": false,
+        "cropped": false,
+        "pillow_version": "12.3.0",
+        "details": "Complete original 1254 x 1254 canvas and alpha retained; decoded PNG and WebP RGBA pixels match exactly."
+      }
+    },
+    {
+      "resource": "prop_fair_explorer_hat",
+      "category": "Fair purchase props",
+      "path": "app/src/main/res/drawable-nodpi/prop_fair_explorer_hat.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 735790,
+      "sha256": "75d9da05c142e073426af5806fdc813c59702d3faa2591ee177305e09ea75f30",
+      "rgba_sha256": "f9788a796e73bc64ba81ba1ba2e78bfea9515148b91d6a2d072cacfe5a38cef5",
+      "alpha_bounds": [
+        49,
+        28,
+        1218,
+        1254
+      ],
+      "design_canvas": [
+        1254,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/fair-items-2026-09-26/prop_fair_explorer_hat.png",
+      "source_sha256": "44e9f1b477530eef686d40c3e1cccb0fa1d1e8652a41638390de65127e826f61",
+      "source_sha1": "63b18a8a2ad5b297e9172fd12d8c65acc941a711",
+      "source_bytes": 1110277,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2654:77",
+        "image_hash": "63b18a8a2ad5b297e9172fd12d8c65acc941a711"
+      },
+      "provenance": {
+        "type": "figma-original-image",
+        "date": "2026-09-26",
+        "tool": "figma_download_assets",
+        "details": "Original uploaded image fill returned in rawImages. Downloaded PNG SHA-1 matches the Figma image hash; not a rendered screen, thumbnail or regenerated substitute."
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "quality": 100,
+        "method": 6,
+        "resized": false,
+        "cropped": false,
+        "pillow_version": "12.3.0",
+        "details": "Complete original 1254 x 1254 canvas and alpha retained; decoded PNG and WebP RGBA pixels match exactly."
+      }
+    },
+    {
+      "resource": "prop_fair_ring_toss",
+      "category": "Fair purchase props",
+      "path": "app/src/main/res/drawable-nodpi/prop_fair_ring_toss.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 792576,
+      "sha256": "929f0594b3395a22ce02170884fead4e6a5084c56892806cab71707d57cf12fc",
+      "rgba_sha256": "aa3684b648b2b5f6d8e417694027f8c78ba1995e761831d1c27bef28b1546a19",
+      "alpha_bounds": [
+        47,
+        39,
+        1224,
+        1230
+      ],
+      "design_canvas": [
+        1254,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/fair-items-2026-09-26/prop_fair_ring_toss.png",
+      "source_sha256": "19237e2d8e1c73174c9cb5d8c0361d046f58e3fdfbfd35a87abfd62c47330149",
+      "source_sha1": "08ca3cfd2ce23bb1d3dbea901013ff6191865567",
+      "source_bytes": 1172360,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2654:125",
+        "image_hash": "08ca3cfd2ce23bb1d3dbea901013ff6191865567"
+      },
+      "provenance": {
+        "type": "figma-original-image",
+        "date": "2026-09-26",
+        "tool": "figma_download_assets",
+        "details": "Original uploaded image fill returned in rawImages. Downloaded PNG SHA-1 matches the Figma image hash; not a rendered screen, thumbnail or regenerated substitute."
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "quality": 100,
+        "method": 6,
+        "resized": false,
+        "cropped": false,
+        "pillow_version": "12.3.0",
+        "details": "Complete original 1254 x 1254 canvas and alpha retained; decoded PNG and WebP RGBA pixels match exactly."
+      }
+    },
+    {
+      "resource": "prop_fair_compass_keychain",
+      "category": "Fair purchase props",
+      "path": "app/src/main/res/drawable-nodpi/prop_fair_compass_keychain.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 620560,
+      "sha256": "944e34f823c57dad06219960b3923cbe4c5ef2c96f55f4958930bd3add8e55de",
+      "rgba_sha256": "39128cb65677c1dbfe717b88d74b792b1a086f7b04d5672b2dcc734bda27b800",
+      "alpha_bounds": [
+        39,
+        51,
+        1218,
+        1230
+      ],
+      "design_canvas": [
+        1254,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/fair-items-2026-09-26/prop_fair_compass_keychain.png",
+      "source_sha256": "7344caa4536ec0a01e0e9a61ba355fe748b1ffc595dd8687f261b24ce53fb4d5",
+      "source_sha1": "8b4a96139495faf241e8dd288dc7ae5cb1847dec",
+      "source_bytes": 955948,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2654:173",
+        "image_hash": "8b4a96139495faf241e8dd288dc7ae5cb1847dec"
+      },
+      "provenance": {
+        "type": "figma-original-image",
+        "date": "2026-09-26",
+        "tool": "figma_download_assets",
+        "details": "Original uploaded image fill returned in rawImages. Downloaded PNG SHA-1 matches the Figma image hash; not a rendered screen, thumbnail or regenerated substitute."
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "quality": 100,
+        "method": 6,
+        "resized": false,
+        "cropped": false,
+        "pillow_version": "12.3.0",
+        "details": "Complete original 1254 x 1254 canvas and alpha retained; decoded PNG and WebP RGBA pixels match exactly."
+      }
+    },
+    {
+      "resource": "prop_fair_toy_boat",
+      "category": "Fair purchase props",
+      "path": "app/src/main/res/drawable-nodpi/prop_fair_toy_boat.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 675274,
+      "sha256": "6f62cedc413d70f6d065ad1957f8e1eda09e10b5ace83e2a2ba55a2c684726b6",
+      "rgba_sha256": "93368d9e6c32a3343928bbf2fc07996be19bc95685dd9bdd0f4fa41cdff75fdf",
+      "alpha_bounds": [
+        49,
+        17,
+        1202,
+        1230
+      ],
+      "design_canvas": [
+        1254,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/fair-items-2026-09-26/prop_fair_toy_boat.png",
+      "source_sha256": "f0f6195e1f2f2dc407a9f67a77b8fa1f0fa9302676e361b3eec72bc0e8d82d22",
+      "source_sha1": "668f835a6591ff0f1be013546501da63235570f1",
+      "source_bytes": 1003836,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "2654:221",
+        "image_hash": "668f835a6591ff0f1be013546501da63235570f1"
+      },
+      "provenance": {
+        "type": "figma-original-image",
+        "date": "2026-09-26",
+        "tool": "figma_download_assets",
+        "details": "Original uploaded image fill returned in rawImages. Downloaded PNG SHA-1 matches the Figma image hash; not a rendered screen, thumbnail or regenerated substitute."
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "quality": 100,
+        "method": 6,
+        "resized": false,
+        "cropped": false,
+        "pillow_version": "12.3.0",
+        "details": "Complete original 1254 x 1254 canvas and alpha retained; decoded PNG and WebP RGBA pixels match exactly."
+      }
+    }
+  ]
+}

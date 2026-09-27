@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -19,7 +20,7 @@ data class PriceQuizUiState(val game: PriceQuizState) {
 }
 
 sealed interface PriceQuizAction {
-    data class Answer(val pickedLeft: Boolean) : PriceQuizAction
+    data class Answer(val pickedLeft: Boolean, val questionIndex: Int? = null) : PriceQuizAction
     data object Restart : PriceQuizAction
 }
 
@@ -28,6 +29,14 @@ class PriceQuizViewModel @Inject constructor(private val savedState: SavedStateH
     private val mutableUiState = MutableStateFlow(PriceQuizUiState(restore()))
     val uiState = mutableUiState.asStateFlow()
     private var feedbackJob: Job? = null
+    private var seriesId: String = savedState.get<String>("comparison_series_id")
+        ?: UUID.randomUUID().toString().also { savedState["comparison_series_id"] = it }
+    private var selectedAnswers: IntArray = savedState.get<IntArray>("comparison_answers")
+        ?.takeIf { it.size == uiState.value.game.questions.size }
+        ?: IntArray(uiState.value.game.questions.size) { -1 }
+    private var presentedQuestions: BooleanArray = savedState.get<BooleanArray>("comparison_presented")
+        ?.takeIf { it.size == uiState.value.game.questions.size }
+        ?: BooleanArray(uiState.value.game.questions.size)
 
     init {
         publish(uiState.value.game)
@@ -38,17 +47,50 @@ class PriceQuizViewModel @Inject constructor(private val savedState: SavedStateH
         when (action) {
             is PriceQuizAction.Answer -> {
                 val before = uiState.value.game
+                if (action.questionIndex != null && action.questionIndex != before.current) return
                 val after = before.answer(action.pickedLeft)
                 if (before != after) {
+                    selectedAnswers[before.current] = if (action.pickedLeft) 1 else 0
+                    saveEvidence()
                     publish(after)
                     advanceAfterFeedback()
                 }
             }
             PriceQuizAction.Restart -> {
                 feedbackJob?.cancel()
-                publish(PriceQuizState.create())
+                val fresh = PriceQuizState.create()
+                seriesId = UUID.randomUUID().toString()
+                selectedAnswers = IntArray(fresh.questions.size) { -1 }
+                presentedQuestions = BooleanArray(fresh.questions.size)
+                saveEvidence()
+                publish(fresh)
             }
         }
+    }
+
+    /** Called by the resumed entry after this question is composed, never by a background observer. */
+    internal fun questionPresented(index: Int = uiState.value.game.current) {
+        val game = uiState.value.game
+        if (index != game.current || game.finished || game.lastCorrect != null || presentedQuestions[game.current]) return
+        presentedQuestions[game.current] = true
+        saveEvidence()
+    }
+
+    internal fun comparisonEvidence(): PriceQuizEvidence {
+        val game = uiState.value.game
+        val complete = selectedAnswers.all { it != -1 }
+        return PriceQuizEvidence(seriesId, game.questions.mapIndexedNotNull { index, question ->
+            selectedAnswers[index].takeIf { it != -1 }?.let { selected ->
+                PriceQuizAnswerEvidence(index, question.leftAmount, question.rightAmount, selected == 1,
+                    presentedQuestions[index], complete && index == game.questions.lastIndex)
+            }
+        })
+    }
+
+    private fun saveEvidence() {
+        savedState["comparison_series_id"] = seriesId
+        savedState["comparison_answers"] = selectedAnswers.copyOf()
+        savedState["comparison_presented"] = presentedQuestions.copyOf()
     }
 
     private fun advanceAfterFeedback() {

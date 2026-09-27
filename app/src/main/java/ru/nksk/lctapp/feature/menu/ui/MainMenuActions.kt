@@ -65,11 +65,13 @@ internal fun MenuActions(onAction: (MainMenuAction) -> Unit, viewport: DpSize, s
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 color = AdventureLabel,
                 fontFamily = Rubik,
+                fontSize = 14.sp,
+                lineHeight = 18.sp,
             )
         }
         state.notice?.let { Text(it, Modifier.padding(horizontal = 20.dp), color = AdventureLabel, fontFamily = Rubik) }
         if (state.canFeed) Button({ onAction(MainMenuAction.Feed) }, Modifier.padding(horizontal = 18.dp).fillMaxWidth(), enabled = !state.busy) {
-            Text(state.mealPrice?.let { "Покормить · $it монет" } ?: "Покормить")
+            Text(state.mealPrice?.let { "Покормить за $it монет" } ?: "Покормить")
         }
         Box(
             Modifier.padding(horizontal = 12.dp).fillMaxWidth()

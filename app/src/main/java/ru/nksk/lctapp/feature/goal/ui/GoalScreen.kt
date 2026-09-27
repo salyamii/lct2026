@@ -1,174 +1,389 @@
 package ru.nksk.lctapp.feature.goal.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ru.nksk.lctapp.core.ui.components.GameBody
-import ru.nksk.lctapp.core.ui.components.GameButton
-import ru.nksk.lctapp.core.ui.components.GameInk
-import ru.nksk.lctapp.core.ui.components.GamePaper
+import ru.nksk.lctapp.R
+import ru.nksk.lctapp.core.ui.components.*
+import ru.nksk.lctapp.core.ui.game.goalItemArtwork
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
+import ru.nksk.lctapp.core.ui.theme.AdventureNight
 import ru.nksk.lctapp.core.ui.theme.Nunito
-import ru.nksk.lctapp.core.ui.theme.Rubik
 
-private val GoalBackground = Color(0xFFF8FEEE)
-private val GoalAccent = Color(0xFF3E31B8)
+private val GoalMuted = Color(0xFF635D7B)
+private val GoalLine = Color(0xFFE0DCCA)
 
-/** Native scroll/insets instead of the mockup's fixed viewport and simulated system bar. */
+/** Chapter artwork explains the undertaking; item actions explicitly select a savings goal. */
 @Composable
-internal fun GoalScreen(state: GoalUiState, onBack: () -> Unit, onAction: (GoalAction) -> Unit) {
-    var missingCoins by remember { mutableStateOf<Long?>(null) }
-    missingCoins?.let { missing ->
-        AlertDialog(onDismissRequest = { missingCoins = null },
-            title = { Text("Не хватает монет", fontFamily = Rubik) },
-            text = { GameBody("В «Коплю» не хватает $missing монет для покупки.") },
-            confirmButton = { TextButton(onClick = { missingCoins = null }) { Text("Понятно") } })
+internal fun GoalScreen(
+    state: GoalUiState,
+    onBack: () -> Unit,
+    onAction: (GoalAction) -> Unit,
+    onOpenSavings: () -> Unit = {},
+    onReturnHome: () -> Unit = onBack,
+) {
+    val target = state.parts.firstOrNull { it.savingTarget && !it.owned }
+    val result = state.purchaseResult
+    val ready = state.parts.isNotEmpty() && state.parts.all { it.owned }
+    val detailsScroll = rememberScrollState()
+    val selectedGoalAnchor = remember { BringIntoViewRequester() }
+    val selectionKey = state.goalId to target?.id
+    var previousSelection by remember { mutableStateOf(selectionKey) }
+    LaunchedEffect(selectionKey) {
+        if (selectionKey != previousSelection && previousSelection.first != null) {
+            // The selected item changes only after the committed save is projected.
+            if (selectionKey.first == previousSelection.first && target != null && state.selected && !state.showList) {
+                withFrameNanos { }
+                selectedGoalAnchor.bringIntoView()
+            } else detailsScroll.scrollTo(0)
+        }
+        previousSelection = selectionKey
     }
-    Column(Modifier.fillMaxSize().background(GoalBackground)) {
-        Row(Modifier.fillMaxWidth().background(Brush.verticalGradient(listOf(GameInk, GoalAccent)))
-            .statusBarsPadding().padding(horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = { if (state.showList) onBack() else onAction(GoalAction.ShowList) }) {
-                Text("Назад", color = Color.White, fontFamily = Nunito)
-            }
-            Spacer(Modifier.weight(1f))
-            if (!state.loading && !state.failed) Text("Коплю: ${state.balance}", color = Color.White,
-                fontFamily = Nunito, fontWeight = FontWeight.ExtraBold)
+    val back = {
+        when {
+            result != null -> onAction(GoalAction.DismissPurchaseResult)
+            !state.showList && state.returnToList -> onAction(GoalAction.ShowList)
+            else -> onBack()
         }
-        Box(Modifier.weight(1f).fillMaxWidth()) {
-            Column(Modifier.align(Alignment.TopCenter).widthIn(max = 620.dp).fillMaxSize()
-                .verticalScroll(rememberScrollState()).navigationBarsPadding().padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    }
+    BackHandler(enabled = result != null) { back() }
+
+    if (state.showList && !state.loading && !state.failed && result == null) {
+        GoalProjectList(state, onBack) { onAction(GoalAction.View(it)) }
+        return
+    }
+
+    AdventureScreen(
+        title = "Цели",
+        onBack = back,
+        backgroundRes = goalPreviewArtwork(state.goalId),
+        sceneFraction = .32f,
+        sceneAspectRatio = 1.5f,
+        contentSpacing = 8.dp,
+        pinFooter = false,
+        contentScrollState = detailsScroll,
+        headerAction = {
+            if (!state.loading && !state.failed && result == null) {
+                TextButton(onClick = { onAction(GoalAction.ShowList) }, enabled = !state.busy,
+                    modifier = Modifier.heightIn(min = 48.dp), shape = RoundedCornerShape(24.dp),
+                    colors = ButtonDefaults.textButtonColors(containerColor = AdventureNight, contentColor = Color.White)) {
+                    Text("Другие цели", fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
+                    Icon(painterResource(R.drawable.menu_chevron), null, Modifier.padding(start = 4.dp).size(18.dp))
+                }
+            }
+        },
+        scene = {},
+        footer = {
+            when {
+                state.loading -> Unit
+                state.failed -> AdventurePrimaryButton("Повторить", { onAction(GoalAction.Retry) })
+                result != null -> AdventurePrimaryButton(if (ready) "Продолжить историю" else "К целям", {
+                    onAction(GoalAction.DismissPurchaseResult)
+                    if (ready) onReturnHome()
+                }, enabled = !state.busy)
+                state.showList -> Unit
+                state.canSelect -> AdventurePrimaryButton("Продолжить историю", {
+                    onAction(GoalAction.Select(checkNotNull(state.goalId)))
+                }, enabled = !state.busy)
+                ready || state.completedProject -> AdventurePrimaryButton("Продолжить историю", onReturnHome, enabled = !state.busy)
+                state.selected && target != null -> Unit
+                state.selected -> GoalSavingsLink(state.balance, onOpenSavings, !state.busy)
+            }
+        },
+    ) {
+        when {
+            state.loading -> CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally), color = GameInk)
+            state.failed -> {
+                AdventureHeading("Не удалось открыть цели")
+                AdventureBody("Попробуй загрузить их ещё раз.")
+            }
+            result != null -> {
+                GoalItemIllustration(result.itemId, Modifier.size(88.dp).align(Alignment.CenterHorizontally))
+                AdventureHeading("${result.itemTitle} теперь у нас!")
+                AdventureBody("В копилке осталось ${goalCoins(state.balance)}.")
+                AdventureBody(if (ready) "Всё подготовлено. Продолжим историю!" else "Выбери, на что будем копить дальше.")
+            }
+            else -> {
+                AdventureHeading(state.title)
+                AdventureBody(goalPreviewText(state.goalId, state.description))
                 when {
-                    state.loading -> CircularProgressIndicator(color = GameInk)
-                    state.failed -> {
-                        GameBody("Не удалось загрузить цель. Сохранение осталось на месте.")
-                        GameButton("Повторить") { onAction(GoalAction.Retry) }
-                    }
-                    state.showList -> {
-                        Text(if (state.campaignComplete) "Все цели выполнены" else "Большие цели",
-                            color = GameInk, fontFamily = Rubik, fontWeight = FontWeight.ExtraBold,
-                            fontSize = 27.sp, modifier = Modifier.semantics { heading() })
-                        GameBody("${state.petName} может выбрать личный проект. Общая история идёт своим чередом, а финал каждой главы ждёт собранный комплект.")
-                        GameBody("Завершено проектов: ${state.completedProjectCount} из ${state.projects.size}")
-                        state.projects.forEach { project ->
-                            Surface(color = GamePaper, shape = RoundedCornerShape(24.dp),
-                                border = BorderStroke(1.dp, if (project.status == GoalProjectStatus.ACTIVE) AdventureLime else Color(0xFFD9DCF5))) {
-                                Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                                    Text(project.title, color = GameInk, fontFamily = Nunito,
-                                        fontWeight = FontWeight.ExtraBold, fontSize = 21.sp)
-                                    GameBody(project.description)
-                                    GameBody("Частей: ${project.parts} · всего ${project.price} монет")
-                                    Text(project.hint, color = GoalAccent, fontFamily = Nunito, fontWeight = FontWeight.Bold)
-                                    GameButton(if (project.status == GoalProjectStatus.ACTIVE) "Открыть текущую цель" else "Посмотреть состав", !state.busy) {
-                                        onAction(GoalAction.View(project.id))
-                                    }
-                                }
-                            }
+                    state.completedProject -> GoalStatus("Цель выполнена")
+                    ready -> GoalStatus("Всё подготовлено для продолжения истории")
+                    !state.selected -> GoalCaption("Откроется после предыдущей главы")
+                }
+                if (state.selected && target != null) {
+                    GoalSavingProgress(target, state.balance, Modifier.bringIntoViewRequester(selectedGoalAnchor)) {
+                        if (target.remainingCoins == 0L) {
+                            GoalFinancialContext(state) { onAction(GoalAction.ContextPresented(it)) }
+                            AdventurePrimaryButton("Купить за ${goalCoins(target.price)}", {
+                                onAction(GoalAction.Buy(checkNotNull(state.goalId), target.id))
+                            }, enabled = target.canBuy && !state.busy)
+                            target.blockedMessage?.let { GoalCaption(it) }
+                            AdventureQuietButton("Открыть копилку", onOpenSavings, enabled = !state.busy)
+                        } else {
+                            AdventurePrimaryButton("Открыть копилку", onOpenSavings, enabled = !state.busy)
                         }
-                        state.message?.let { GameBody(it) }
-                    }
-                    else -> {
-                        TextButton(onClick = { onAction(GoalAction.ShowList) }, enabled = !state.busy) {
-                            Text("Все большие цели", color = GoalAccent, fontFamily = Nunito, fontWeight = FontWeight.Bold)
-                        }
-                        Text(if (state.completedProject) "Завершённый проект" else if (state.selected) "Твоя большая цель" else "Большая цель",
-                            color = GameInk, fontFamily = Rubik, fontWeight = FontWeight.ExtraBold,
-                            fontSize = 27.sp, modifier = Modifier.semantics { heading() })
-                        Surface(color = GamePaper, shape = RoundedCornerShape(24.dp),
-                            border = BorderStroke(1.dp, AdventureLime), shadowElevation = 4.dp) {
-                            Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                Text(state.title, color = GameInk, fontFamily = Nunito,
-                                    fontWeight = FontWeight.ExtraBold, fontSize = 21.sp)
-                                Text("Частей: ${state.parts.size} · всего ${state.totalPrice} монет", color = GameInk,
-                                    fontFamily = Nunito, fontWeight = FontWeight.ExtraBold)
-                                GameBody(state.description)
-                                if (state.selected || state.completedProject) {
-                                    Text("Куплено ${state.collected} из ${state.parts.size} · осталось ${state.remainingPrice} монет",
-                                        color = GoalAccent, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold)
-                                    LinearProgressIndicator(progress = { state.collected.toFloat() / state.parts.size.coerceAtLeast(1) },
-                                        modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(8.dp)),
-                                        color = GoalAccent, trackColor = Color(0xFFE1DFF4))
-                                }
-                                Text("Что входит в цель", color = GoalAccent, fontFamily = Nunito,
-                                    fontWeight = FontWeight.ExtraBold)
-                                state.parts.forEach { part ->
-                                    GoalPart(part, state.selected, state.busy) {
-                                        if (part.missingCoins != null) missingCoins = part.missingCoins
-                                        else onAction(GoalAction.Buy(checkNotNull(state.goalId), part.id))
-                                    }
-                                }
-                                GameBody(state.storyHint)
-                                if (state.selected) GameBody("Покупка занимает шаг дня. Не забудь оставить монеты на еду.")
-                            }
-                        }
-                        state.message?.let { GameBody(it) }
-                        if (state.canSelect) GameButton("Выбрать эту цель", !state.busy) {
-                            onAction(GoalAction.Select(checkNotNull(state.goalId)))
-                        }
-                        GameButton("На главный экран", !state.busy, onBack)
                     }
                 }
-            }
-            state.celebration?.let {
-                Surface(Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(20.dp),
-                    shape = RoundedCornerShape(20.dp), color = GameInk, shadowElevation = 6.dp) {
-                    Text(it, Modifier.padding(16.dp), color = Color.White, fontFamily = Nunito, fontWeight = FontWeight.Bold)
+                Text(if (state.selected && target != null) "Что ещё понадобится" else "Что нужно подготовить", fontFamily = Nunito, fontSize = 17.sp,
+                    fontWeight = FontWeight.ExtraBold, color = GameInk)
+                GoalRequirementChoices(state.parts.filterNot { state.selected && it.id == target?.id }, state.selected, !state.busy) { item ->
+                    onAction(GoalAction.SelectSavingGoal(checkNotNull(state.goalId), item.id))
                 }
+                if (state.selected && !state.transfersEnabled && !ready) GoalCaption("Сначала заверши план монет.")
             }
         }
+        state.message?.let { AdventureBody(it) }
+        state.celebration?.let { AdventureBody(it) }
     }
     state.confirmation?.let { confirmation ->
         AlertDialog(onDismissRequest = { if (!state.busy) onAction(GoalAction.CancelPurchase) },
-            containerColor = GamePaper, titleContentColor = GameInk, textContentColor = GameInk,
-            title = { Text("На еду может не хватить", fontFamily = Rubik, fontWeight = FontWeight.Bold) },
-            text = { GameBody("${confirmation.itemTitle} стоит ${confirmation.price} монет. После покупки останется ${confirmation.remainingBalance}, а на обычную еду до конца недели нужно ${confirmation.foodNeeded}. Купить сейчас?") },
-            confirmButton = { TextButton(onClick = { onAction(GoalAction.ConfirmPurchase) }, enabled = !state.busy) {
-                Text("Всё равно купить", color = GameInk, fontWeight = FontWeight.Bold)
+            containerColor = GamePaper, titleContentColor = GameInk, textContentColor = GameInk, iconContentColor = GameInk,
+            title = { AdventureHeading("На еду может не хватить") },
+            text = { AdventureBody("${confirmation.itemTitle} стоит ${goalCoins(confirmation.price)} из копилки. " +
+                "С собой останется ${goalCoins(confirmation.remainingBalance)}, а на еду нужно ${goalCoins(confirmation.foodNeeded)}. Купить сейчас?") },
+            confirmButton = { TextButton(onClick = { onAction(GoalAction.ConfirmPurchase) }, enabled = !state.busy,
+                colors = ButtonDefaults.textButtonColors(contentColor = GameInk, disabledContentColor = Color(0xFF625E80))) {
+                Text("Купить сейчас")
             } },
-            dismissButton = { TextButton(onClick = { onAction(GoalAction.CancelPurchase) }, enabled = !state.busy) {
-                Text("Отложить покупку", color = GameInk)
+            dismissButton = { TextButton(onClick = { onAction(GoalAction.CancelPurchase) }, enabled = !state.busy,
+                colors = ButtonDefaults.textButtonColors(contentColor = GameInk, disabledContentColor = Color(0xFF625E80))) {
+                Text("Вернуться")
             } })
     }
 }
 
 @Composable
-private fun GoalPart(part: GoalPartUiState, selected: Boolean, busy: Boolean, onBuy: () -> Unit) {
-    Surface(color = Color.White, shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, if (part.owned) AdventureLime else Color(0xFFD9DCF5))) {
-        Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(part.title, Modifier.weight(1f), color = GameInk, fontFamily = Nunito,
-                    fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
-                Text(if (part.owned) "Куплено" else "${part.price} монет", color = GoalAccent,
-                    fontFamily = Nunito, fontWeight = FontWeight.ExtraBold)
-            }
-            GameBody(part.description)
-            if (selected && !part.owned) {
-                Button(onClick = onBuy, enabled = (part.canBuy || part.missingCoins != null) && !busy,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = if (part.canBuy) AdventureLime else Color(0xFFE7E5F0),
-                        contentColor = if (part.canBuy) GameInk else Color(0xFF55506B),
-                        disabledContainerColor = Color(0xFFE7E5F0), disabledContentColor = Color(0xFF55506B))) {
-                    Text("Купить за ${part.price} монет", fontFamily = Rubik, fontWeight = FontWeight.SemiBold)
+private fun GoalRequirementChoices(items: List<GoalPartUiState>, currentChapter: Boolean, enabled: Boolean,
+    onChoose: (GoalPartUiState) -> Unit) {
+    val fontScale = LocalDensity.current.fontScale
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val columns = if (maxWidth >= 300.dp && fontScale <= 1.3f) 2 else 1
+        Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            items.chunked(columns).forEach { row ->
+                Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    row.forEach { item ->
+                        GoalRequirementChoice(item, currentChapter, enabled, Modifier.weight(1f).fillMaxHeight()) { onChoose(item) }
+                    }
+                    repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
                 }
-                part.blockedMessage?.let { GameBody(it) }
             }
         }
     }
+}
+
+@Composable
+private fun GoalRequirementChoice(item: GoalPartUiState, currentChapter: Boolean, enabled: Boolean,
+    modifier: Modifier, onChoose: () -> Unit) {
+    val target = item.savingTarget && !item.owned
+    val shape = RoundedCornerShape(20.dp)
+    val canChoose = currentChapter && item.canSelect && !item.owned
+    Surface(modifier.clip(shape).selectable(selected = target,
+        enabled = enabled && canChoose, role = Role.RadioButton,
+        onClick = { if (!target) onChoose() }).semantics {
+        contentDescription = "${item.title}, ${goalCoins(item.price)}. " + when {
+            item.owned -> "Уже есть"
+            target -> "Выбранная цель"
+            canChoose -> "Выбрать цель"
+            currentChapter -> "Сначала заверши план монет"
+            else -> "Пока недоступно"
+        }
+    }, color = if (target) Color(0xFFF0F7DE) else Color.White, shape = shape,
+        border = BorderStroke(if (target) 2.dp else 1.dp, if (target) Color(0xFF89AE44) else GoalLine)) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                GoalItemIllustration(item.id, Modifier.size(46.dp))
+                Text(goalCoins(item.price), color = GoalMuted, fontFamily = Nunito, fontSize = 14.sp, lineHeight = 18.sp)
+            }
+            Text(item.title, Modifier.weight(1f), color = GameInk, fontFamily = Nunito,
+                fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, lineHeight = 21.sp)
+            Surface(color = when {
+                target || item.owned -> Color(0xFFE1EDC5)
+                canChoose -> Color(0xFFEEEAF7)
+                else -> Color.Transparent
+            }, shape = RoundedCornerShape(12.dp)) {
+                Text(when {
+                    item.owned -> "✓ Уже есть"
+                    target -> "✓ Выбрано"
+                    canChoose -> "Выбрать цель"
+                    currentChapter -> "Сначала план монет"
+                    else -> "Позже по истории"
+                }, Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp), color = GameInk,
+                    fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
+            }
+        }
+    }
+}
+
+@Composable
+private fun GoalSavingProgress(part: GoalPartUiState, savings: Long, anchor: Modifier, actions: @Composable ColumnScope.() -> Unit) {
+    Surface(color = Color.White, shape = RoundedCornerShape(22.dp), border = BorderStroke(1.dp, GoalLine)) {
+    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(anchor.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            GoalItemIllustration(part.id, Modifier.size(64.dp))
+            Column(Modifier.weight(1f)) {
+                GoalCaption("Сейчас собираем")
+                Text(part.title, color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold,
+                    fontSize = 20.sp, lineHeight = 25.sp)
+                GoalCaption("Цена ${goalCoins(part.price)}")
+            }
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            GoalCaption("В копилке")
+            Text(goalCoins(savings), color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
+        }
+        LinearProgressIndicator(progress = { if (part.price == 0L) 1f else part.savedCoins.toFloat() / part.price },
+            modifier = Modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(8.dp)).semantics {
+                contentDescription = "Для покупки ${part.savedCoins} из ${part.price} монет"
+            },
+            color = AdventureLime, trackColor = Color(0xFFE3E3CE), drawStopIndicator = {})
+        Text(if (part.remainingCoins > 0) "Осталось отложить ${goalCoins(part.remainingCoins)}" else "На покупку уже хватает",
+            color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 14.sp, lineHeight = 19.sp)
+        GoalCaption("Копилка общая. При смене цели монеты останутся в ней.")
+        actions()
+    }
+    }
+}
+
+@Composable
+private fun GoalSavingsLink(balance: Long, onClick: () -> Unit, enabled: Boolean) {
+    OutlinedButton(onClick, enabled = enabled, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+        shape = RoundedCornerShape(18.dp), border = BorderStroke(1.dp, GoalLine),
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = GameInk)) {
+        GameArtwork(R.drawable.budget_savings, null, Modifier.size(32.dp))
+        Text("В копилке ${goalCoins(balance)}", Modifier.weight(1f).padding(horizontal = 10.dp),
+            fontFamily = Nunito, fontWeight = FontWeight.ExtraBold)
+        Icon(painterResource(R.drawable.menu_chevron), "Открыть копилку", Modifier.size(22.dp))
+    }
+}
+
+/** Record purchase evidence only after all three real amounts are visibly presented. */
+@Composable
+private fun GoalFinancialContext(state: GoalUiState, onPresented: (String) -> Unit) {
+    Column(Modifier.fillMaxWidth().onGloballyPositioned { coordinates ->
+        val visible = coordinates.boundsInWindow()
+        if (visible.width >= coordinates.size.width - 1 && visible.height >= coordinates.size.height - 1 &&
+            visible.width > 0 && visible.height > 0) state.contextId?.let(onPresented)
+    }, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        GoalCaption("В копилке ${goalCoins(state.balance)}. С собой ${goalCoins(state.availableBalance)}.")
+        GoalCaption("На еду нужно ${goalCoins(state.knownNeeds)}. Покупка займёт один шаг.")
+    }
+}
+
+@Composable
+private fun GoalItemIllustration(itemId: String, modifier: Modifier) {
+    goalItemArtwork(itemId)?.let { GameArtwork(it, null, modifier, contentScale = ContentScale.Fit) }
+}
+
+@Composable
+private fun GoalProjectCard(project: GoalProjectUiState, enabled: Boolean, onClick: () -> Unit) {
+    Surface(color = Color.White, shape = RoundedCornerShape(22.dp), border = BorderStroke(1.dp, GoalLine)) {
+        Column(Modifier.fillMaxWidth()) {
+            GameArtwork(goalPreviewArtwork(project.id), null, Modifier.fillMaxWidth().aspectRatio(1.5f)
+                .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)), contentScale = ContentScale.Crop)
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                AdventureHeading(project.title)
+                AdventureBody(goalPreviewText(project.id, project.description))
+                Text("Что нужно подготовить", color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold)
+                project.requirements.forEach { item ->
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(item.title, Modifier.weight(1f), color = GameInk, fontFamily = Nunito, fontSize = 14.sp)
+                        Text(if (item.owned) "Есть ✓" else goalCoins(item.price), color = GoalMuted, fontFamily = Nunito, fontSize = 14.sp)
+                    }
+                }
+                if (project.status == GoalProjectStatus.LOCKED) GoalCaption("Откроется после предыдущей главы")
+                if (project.status == GoalProjectStatus.COMPLETED) GoalStatus("Цель выполнена")
+                AdventurePrimaryButton("Открыть цель", onClick, enabled = enabled)
+            }
+        }
+    }
+}
+
+@Composable
+private fun GoalProjectList(state: GoalUiState, onBack: () -> Unit, onView: (String) -> Unit) {
+    Column(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding()) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            IconButton(onBack, Modifier.size(48.dp).background(Color.White.copy(alpha = .10f), CircleShape)) {
+                Icon(painterResource(R.drawable.menu_chevron), "Назад", Modifier.size(20.dp).rotate(180f), tint = Color.White)
+            }
+            Text(if (state.campaignComplete) "Наши приключения" else "Большие цели", color = Color.White,
+                fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
+        }
+        LazyColumn(Modifier.weight(1f).fillMaxWidth().clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+            .background(GamePaper), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            items(state.projects, key = { it.id }) { project ->
+                GoalProjectCard(project, !state.busy) { onView(project.id) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun GoalCaption(text: String) {
+    Text(text, color = GoalMuted, fontFamily = Nunito, fontSize = 13.sp, lineHeight = 18.sp)
+}
+
+@Composable
+private fun GoalStatus(text: String) {
+    Text(text, color = Color(0xFF486719), fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
+}
+
+private fun goalCoins(amount: Long): String = "$amount " + when {
+    amount % 100 in 11..14 -> "монет"
+    amount % 10 == 1L -> "монета"
+    amount % 10 in 2..4 -> "монеты"
+    else -> "монет"
+}
+
+private fun goalPreviewText(id: String?, fallback: String): String = when (id) {
+    "figma-stargazing-180-v1" -> "Поможем Смотрителям подготовиться к ночным наблюдениям за звёздами."
+    "campaign-tower-kit-v1" -> "Подготовимся к исследованию старой северной башни."
+    "campaign-researcher-home-v1" -> "Обустроим дом и мастерскую исследователя."
+    "campaign-kingdom-map-v1" -> "Подготовим инструменты, чтобы нанести новые пути на карту."
+    "campaign-great-expedition-v1" -> "Соберёмся в путешествие за край известной карты."
+    else -> fallback
+}
+
+private fun goalPreviewArtwork(id: String?): Int = when (id) {
+    "campaign-tower-kit-v1" -> R.drawable.goal_preview_tower
+    "campaign-researcher-home-v1" -> R.drawable.goal_preview_home
+    "campaign-kingdom-map-v1" -> R.drawable.goal_preview_kingdom_map
+    "campaign-great-expedition-v1" -> R.drawable.goal_preview_expedition
+    else -> R.drawable.goal_preview_stargazing
 }

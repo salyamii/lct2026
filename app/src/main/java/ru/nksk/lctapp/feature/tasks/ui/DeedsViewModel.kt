@@ -16,12 +16,13 @@ import ru.nksk.lctapp.core.ui.game.playerDescription
 import ru.nksk.lctapp.domain.economy.EconomyOperations
 import ru.nksk.lctapp.domain.economy.SpendingKind
 import ru.nksk.lctapp.core.ui.game.playerMessage
+import ru.nksk.lctapp.core.ui.game.asGameUiText
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
 
 data class OfferedDeedUiState(val id: String, val title: String, val description: String, val reward: String,
     val effort: String, val deadline: String, val scene: String)
-data class DeedsMealUiState(val id: String, val label: String, val enabled: Boolean, val spending: String? = null)
+data class DeedsMealUiState(val id: String, val label: String, val enabled: Boolean, val spending: String? = null, val consequence: String? = null)
 data class DeedsUiState(
     val loading: Boolean = true, val failed: Boolean = false, val busy: Boolean = false,
     val offers: List<OfferedDeedUiState> = emptyList(), val message: String? = null,
@@ -38,6 +39,8 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
     private var game: GameState? = null
     private var loading: Job? = null
     private var busy = false
+    private var navigating = false
+    private var navigationHasLeft = false
     private var message: String? = null
     private var needsFood = false
 
@@ -62,26 +65,44 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
     fun start(offerId: String) = execute(EngineCommand.StartDeed(offerId), navigate = true)
     fun feed(mealId: String) = execute(EngineCommand.Feed(mealId), navigate = false)
 
+    fun onScreenResumed() {
+        if (navigating && navigationHasLeft) {
+            navigating = false
+            navigationHasLeft = false
+            busy = false
+            render()
+        }
+    }
+
+    fun onScreenHidden() {
+        if (navigating) navigationHasLeft = true
+    }
+
     private fun execute(command: EngineCommand, navigate: Boolean) {
         val saved = game ?: return
         if (busy) return
-        busy = true; message = null; render()
+        busy = true; message = null
+        mutableState.value = mutableState.value.copy(busy = true)
         viewModelScope.launch {
             try {
                 when (val result = session.dispatch(EngineRequest(UUID.randomUUID().toString(), saved.engine?.revision, command))) {
                     is EngineResult.Applied -> {
                         game = result.state; needsFood = false
-                        if (navigate) eventNavigation.send(checkNotNull(result.state.engine?.currentEvent).id)
+                        if (navigate) {
+                            navigating = true
+                            eventNavigation.send(checkNotNull(result.state.engine?.currentEvent).id)
+                        }
                     }
                     is EngineResult.Blocked -> { message = result.reason.playerMessage(saved.pet.name); needsFood = result.reason == BlockReason.MustEat }
                 }
             } catch (cancelled: CancellationException) { throw cancelled
             } catch (_: Exception) { message = "Не удалось сохранить действие. Попробуй ещё раз." }
-            finally { busy = false; render() }
+            finally { if (!navigating) { busy = false; render() } }
         }
     }
 
     private fun render() {
+        if (busy) return
         val saved = game ?: return
         val catalog = session.catalog
         mutableState.value = DeedsUiState(
@@ -91,14 +112,16 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
                 val event = catalog.content.events.single { it.id == offer.eventId }
                 val card = catalog.cards.getValue(event.id)
                 val reward = catalog.content.choices.single { it.eventId == event.id }.moneyDelta
-                OfferedDeedUiState(offer.id, renderPetText(event.title, saved.pet.name), renderPetText(event.description, saved.pet.name), "До $reward монет в «Запас»",
-                    renderPetText(card.effort, saved.pet.name),
+                OfferedDeedUiState(offer.id, renderPetText(event.title, saved.pet.name).asGameUiText(),
+                    renderPetText(event.description, saved.pet.name).asGameUiText(), "До $reward монет",
+                    renderPetText(card.effort, saved.pet.name).asGameUiText(),
                     deedDeadline(saved.engine!!.day, offer.expiresDay), card.scene)
             },
-            meals = if (!needsFood) emptyList() else catalog.meals.filter { it.price > 0 || saved.economy.balance < catalog.meals.first().price }.map {
-                DeedsMealUiState(it.id, if (it.price == 0L) "Бесплатная столовая · завтра меньше сил" else "Поесть · ${it.price} монет",
+            meals = if (!needsFood) emptyList() else catalog.meals.filter { it.price > 0 || saved.economy.availableBalance < catalog.meals.first().price }.map {
+                DeedsMealUiState(it.id, if (it.price == 0L) "Поесть бесплатно" else "Поесть за ${it.price} монет",
                     session.engine.blockReason(saved, EngineCommand.Feed(it.id)) == null,
-                    EconomyOperations.quote(saved.economy, it.price, SpendingKind.FEEDING).playerDescription(SpendingKind.FEEDING))
+                    EconomyOperations.quote(saved.economy, it.price, SpendingKind.FEEDING).playerDescription(SpendingKind.FEEDING),
+                    "После еды сегодня понадобится отдых. Утром будем немного уставшими.".takeIf { _ -> it.price == 0L })
             },
         )
     }

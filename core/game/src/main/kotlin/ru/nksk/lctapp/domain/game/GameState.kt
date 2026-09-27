@@ -8,6 +8,7 @@ import ru.nksk.lctapp.domain.engine.EngineState
 import ru.nksk.lctapp.domain.engine.CompletedGoalProject
 
 /** Immutable aggregate. Producers must not mutate backing lists after publishing a snapshot. */
+@kotlinx.serialization.Serializable
 data class GameState(
     val pet: PetState,
     val economy: EconomyState,
@@ -22,8 +23,13 @@ data class GameState(
     val selectedGoalId: String? = null,
     val completedGoalProjects: List<CompletedGoalProject> = emptyList(),
     val locationScene: LocationScene = LocationScene(),
+    val financial: ru.nksk.lctapp.domain.finance.FinancialProgress = ru.nksk.lctapp.domain.finance.FinancialProgress(),
+    val eventHistory: List<ru.nksk.lctapp.domain.engine.EventExposure> = emptyList(),
+    /** One chosen purchase target; savings remain a single shared balance. */
+    val selectedSavingItemId: String? = null,
 ) {
     init {
+        require(eventHistory.map { it.eventId }.distinct().size == eventHistory.size)
         require(completedGoalProjects.map { it.decisionId }.distinct().size == completedGoalProjects.size)
         require(completedGoalProjects.all { project -> story.decisions.any { it.id == project.decisionId } })
         require(completedGoalProjects.map { it.decisionId } == story.decisions.map { it.id }
@@ -37,4 +43,5 @@ data class GameState(
 }
 
 /** One ownership occurrence; duplicate item IDs are allowed and list order is significant. */
+@kotlinx.serialization.Serializable
 data class OwnedItem(val id: String, val itemId: String)

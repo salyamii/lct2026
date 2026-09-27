@@ -44,7 +44,7 @@ class OnboardingJourneyTest {
         compose.runOnIdle { assertNull(runBlocking { repository.read() }) }
     }
 
-    @Test fun entireOnboardingSurvivesRecreationAndCommitsOnlyFromIntroduction() {
+    @Test fun entireOnboardingRestoresChoicesAndStartsFirstAllocation() {
         waitForFox()
         compose.onNodeWithContentDescription("Лисёнок").performScrollTo()
             .performSemanticsAction(SemanticsActions.OnClick) { it() }
@@ -64,66 +64,71 @@ class OnboardingJourneyTest {
         compose.onNodeWithContentDescription("Искорка: Бандана").assertIsDisplayed()
         compose.runOnIdle { assertNull(runBlocking { repository.read() }) }
         compose.onNodeWithText("Применить").performClick()
-        compose.onNodeWithText("Тебя ждёт большое приключение!").assertIsDisplayed()
+        compose.onNodeWithText("Впереди большое приключение").assertIsDisplayed()
         compose.activityRule.scenario.recreate()
-        compose.onNodeWithText("Тебя ждёт большое приключение!").assertIsDisplayed()
+        compose.onNodeWithText("Впереди большое приключение").assertIsDisplayed()
         compose.runOnIdle { assertNull(runBlocking { repository.read() }) }
         compose.onNodeWithText("Дальше").performClick()
-        compose.onNodeWithText("Выбери большую цель").assertIsDisplayed()
-        compose.onNodeWithText("Выбрать цель").assertIsNotEnabled()
-        compose.onNodeWithText("Ночь наблюдений").performScrollTo().performClick()
+        compose.onNodeWithText("Выбери цель накопления").assertIsDisplayed()
+        compose.onNodeWithText("Начать с этого").assertIsNotEnabled()
+        compose.onNodeWithText("Карта звёзд").performScrollTo().performClick()
         compose.activityRule.scenario.recreate()
-        compose.onNodeWithText("Ночь наблюдений").performScrollTo().assertIsSelected()
-        compose.onNodeWithText("Выбрать цель").performClick()
-        compose.onNodeWithText("Большие планы начинаются с маленьких решений").assertIsDisplayed()
+        compose.onNodeWithText("Карта звёзд").performScrollTo().assertIsSelected()
+        compose.onNodeWithText("Начать с этого").performClick()
+        compose.onNodeWithText("На что оставим монеты?").assertIsDisplayed()
         compose.activityRule.scenario.recreate()
-        compose.onNodeWithText("Большие планы начинаются с маленьких решений").assertIsDisplayed()
+        compose.onNodeWithText("На что оставим монеты?").assertIsDisplayed()
+        compose.runOnIdle { assertNull(runBlocking { repository.read() }) }
         compose.onNodeWithContentDescription("Назад к выбору цели").performClick()
         compose.onNodeWithContentDescription("Назад к началу приключения").performClick()
         compose.onNodeWithContentDescription("Назад к аксессуарам").performClick()
         compose.onNodeWithContentDescription("Искорка: Бандана").assertIsDisplayed()
         compose.onNodeWithText("Применить").performClick()
         compose.onNodeWithText("Дальше").performClick()
-        compose.onNodeWithText("Выбрать цель").performClick()
+        compose.onNodeWithText("Начать с этого").performClick()
         compose.runOnIdle { assertNull(runBlocking { repository.read() }) }
-        compose.onNodeWithText("Дальше").performClick()
+        compose.onNodeWithText("Распределить монеты").performClick()
         compose.waitUntil(10_000) { runBlocking { repository.read() } != null }
         compose.runOnIdle {
             val saved = runBlocking { repository.read() }!!
             assertEquals("figma-stargazing-180-v1", saved.selectedGoalId)
+            assertEquals("stargazing-star-map-v1", saved.selectedSavingItemId)
             assertEquals(100L, saved.economy.balance)
             assertEquals(100L, saved.economy.unallocated)
-            assertEquals(ru.nksk.lctapp.domain.economy.BudgetPlanningStage.RECEIPT, saved.economy.planning!!.stage)
+            assertEquals(ru.nksk.lctapp.domain.economy.BudgetPlanningReason.INITIAL, saved.economy.planning!!.reason)
+            assertEquals(ru.nksk.lctapp.domain.economy.BudgetPlanningStage.ALLOCATION, saved.economy.planning!!.stage)
             val pet = saved.pet
             assertEquals("Искорка", pet.name)
             assertEquals(ru.nksk.lctapp.domain.pet.PetColor.SAND, pet.color)
             assertEquals("BANDANA", pet.selectedLookId)
         }
-        compose.onNodeWithText("Монетки").assertIsDisplayed()
-        compose.onNodeWithText("Распределить монеты").assertDoesNotExist()
-        compose.activityRule.scenario.recreate()
-        compose.onNodeWithText("Монетки").assertIsDisplayed()
-        compose.onNodeWithText("Продолжить день").performClick()
-        compose.onNodeWithText("Распределить монеты").assertIsDisplayed()
-        compose.onNodeWithText("Большие планы начинаются с маленьких решений").assertDoesNotExist()
-
-        // Before opening allocation, leaving and continuing must return to this receipt.
-        compose.onNodeWithContentDescription("В главное меню").performClick()
-        compose.onNodeWithText("Монетки").assertIsDisplayed()
-        compose.onNodeWithText("Продолжить день").performClick()
-        compose.onNodeWithText("Первый бюджет").assertIsDisplayed()
-        compose.onNodeWithText("Распределить монеты").performScrollTo().performClick()
-        compose.onNodeWithText("Подтвердить бюджет").assertIsNotEnabled()
         compose.waitUntil(10_000) {
-            runBlocking { repository.read() }?.economy?.planning?.stage ==
-                ru.nksk.lctapp.domain.economy.BudgetPlanningStage.ALLOCATION
+            compose.onAllNodesWithText("Первый план").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText("Первый план").assertIsDisplayed()
+        compose.onNodeWithText("Первый бюджет").assertDoesNotExist()
+        compose.onNodeWithText("Распределить монеты").assertDoesNotExist()
+        compose.onNodeWithText("НОВОЕ ПРИКЛЮЧЕНИЕ НАЧАЛОСЬ").assertDoesNotExist()
+        compose.onNodeWithText("Запомнить план").assertIsNotEnabled()
+
+        // The first saved screen is already allocation; recreation must not show a receipt or credit coins again.
+        compose.activityRule.scenario.recreate()
+        compose.onNodeWithText("Первый план").assertIsDisplayed()
+        compose.onNodeWithText("Первый бюджет").assertDoesNotExist()
+        compose.onNodeWithText("Запомнить план").assertIsNotEnabled()
+        compose.runOnIdle {
+            val saved = runBlocking { repository.read() }!!
+            assertEquals(100L, saved.economy.availableBalance)
+            assertEquals(100L, saved.economy.unallocated)
+            assertEquals(0L, saved.economy.savingsBalance)
+            assertEquals(ru.nksk.lctapp.domain.economy.BudgetPlanningStage.ALLOCATION, saved.economy.planning!!.stage)
         }
 
         setAllocation("Нужно", 35)
-        compose.waitUntil(10_000) { runBlocking { repository.read() }?.economy?.plan?.needs == 35L }
+        compose.waitUntil(10_000) { runBlocking { repository.read() }?.economy?.displayPlan?.needs == 35L }
         compose.activityRule.scenario.recreate()
         compose.onNodeWithContentDescription("Нужно: 35 монет. Ввести сумму").assertExists()
-        compose.onNodeWithText("Подтвердить бюджет").assertIsNotEnabled()
+        compose.onNodeWithText("Запомнить план").assertIsNotEnabled()
 
         // System Back cannot leave a budget with unallocated coins.
         compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
@@ -134,7 +139,7 @@ class OnboardingJourneyTest {
         compose.onNodeWithText("Заверши распределение").assertIsDisplayed()
         compose.onNodeWithText("Распределить").performClick()
         compose.activityRule.scenario.recreate()
-        compose.onNodeWithText("План на 7 дней").assertIsDisplayed()
+        compose.onNodeWithText("Первый план").assertIsDisplayed()
         compose.onNodeWithText("Первый бюджет").assertDoesNotExist()
         compose.onNodeWithContentDescription("Нужно: 35 монет. Ввести сумму").assertExists()
         compose.runOnIdle {
@@ -144,12 +149,12 @@ class OnboardingJourneyTest {
             assertNull(saved.engine)
         }
         setAllocation("Хочу", 20)
-        compose.waitUntil(10_000) { runBlocking { repository.read() }?.economy?.plan?.wants == 20L }
-        setAllocation("Коплю", 20)
-        compose.waitUntil(10_000) { runBlocking { repository.read() }?.economy?.plan?.savings == 20L }
+        compose.waitUntil(10_000) { runBlocking { repository.read() }?.economy?.displayPlan?.wants == 20L }
+        setAllocation("В копилку", 20)
+        compose.waitUntil(10_000) { runBlocking { repository.read() }?.economy?.displayPlan?.savings == 20L }
         setAllocation("Запас", 25)
         compose.waitUntil(10_000) { runBlocking { repository.read() }?.economy?.unallocated == 0L }
-        compose.onNodeWithText("Подтвердить бюджет").assertIsEnabled()
+        compose.onNodeWithText("Запомнить план").assertIsEnabled()
         compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
         compose.waitUntil(10_000) { runBlocking { repository.read() }?.economy?.planning == null }
         compose.onNodeWithText("Монетки").assertIsDisplayed()
@@ -157,11 +162,13 @@ class OnboardingJourneyTest {
             val saved = runBlocking { repository.read() }!!
             assertEquals(ru.nksk.lctapp.domain.economy.BudgetPlan(35, 20, 20, 25), saved.economy.plan)
             assertEquals(100L, saved.economy.balance)
+            assertEquals(100L, saved.economy.availableBalance)
+            assertEquals(0L, saved.economy.savingsBalance)
             assertNull(saved.engine)
         }
         compose.activityRule.scenario.recreate()
         compose.onNodeWithText("Монетки").assertIsDisplayed()
-        compose.onNodeWithText("План на 7 дней").assertDoesNotExist()
+        compose.onNodeWithText("Первый план").assertDoesNotExist()
     }
 
     private fun setAllocation(article: String, amount: Long) {

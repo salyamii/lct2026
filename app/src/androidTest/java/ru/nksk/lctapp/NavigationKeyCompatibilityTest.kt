@@ -15,6 +15,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import ru.nksk.lctapp.app.navigation.AppNavigationSavedStateConfiguration
 import ru.nksk.lctapp.feature.economy.navigation.Economy as Coins
+import ru.nksk.lctapp.feature.economy.navigation.Savings
+import ru.nksk.lctapp.feature.learning.navigation.Learning
+import ru.nksk.lctapp.feature.learning.navigation.SkillTraining
+import ru.nksk.lctapp.feature.learning.navigation.OtherPaths
 import ru.nksk.lctapp.feature.day.navigation.Day
 import ru.nksk.lctapp.feature.gear.navigation.Gear
 import ru.nksk.lctapp.feature.goal.navigation.Goal
@@ -25,6 +29,7 @@ import ru.nksk.lctapp.feature.tasks.navigation.Telescope
 import ru.nksk.lctapp.feature.tasks.navigation.Tasks
 import ru.nksk.lctapp.feature.tasks.navigation.DeedGame
 import ru.nksk.lctapp.feature.map.navigation.GameMap
+import ru.nksk.lctapp.feature.settings.navigation.Settings
 
 /** Compatibility with the Navigation 3 Android serializer used before the package cleanup. */
 @RunWith(AndroidJUnit4::class)
@@ -62,7 +67,12 @@ class NavigationKeyCompatibilityTest {
     fun encodedFeatureKeysUseStableIdsInsteadOfRuntimeClassNames() {
         val stableRoutes = listOf(
             "main_menu" to MainMenu,
+            "settings" to Settings,
             "coins" to Coins,
+            "savings" to Savings,
+            "financial_learning" to Learning,
+            "skill_training" to SkillTraining,
+            "other_paths" to OtherPaths(9),
             "day" to Day,
             "gear" to Gear,
             "goal" to Goal,
@@ -106,6 +116,16 @@ class NavigationKeyCompatibilityTest {
                 decodeFromSavedState(stackSerializer, reencoded, configuration).toList(),
             )
         }
+    }
+
+    @Test
+    fun savedOtherPathsFixtureKeepsTheDayWhoseSummaryOpenedIt() {
+        val savedRoute = savedState {
+            putString("type", "other_paths")
+            putSavedState("value", savedState { putInt("day", 9) })
+        }
+
+        assertEquals(OtherPaths(9), decodeFromSavedState(serializer, savedRoute, configuration))
     }
 
     @Test

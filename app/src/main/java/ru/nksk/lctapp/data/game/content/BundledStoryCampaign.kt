@@ -31,6 +31,7 @@ internal fun GameCatalog.withStoryCampaign(): GameCatalog {
     val scenes = listOf(firstStoryAct(), secondStoryAct(), thirdStoryAct(), fourthStoryAct(), fifthStoryAct())
     val titles = listOf("Башня отвечает", "Свиток второго пути", "Станция калибровки", "Пустое место на карте", "Последний Смотритель")
     val ages = listOf(PetAge.CUB, PetAge.TEEN, PetAge.TEEN, PetAge.ADULT, PetAge.SENIOR)
+    val chapterGoals = listOf(STARS_GOAL, TOWER_GOAL, HOME_GOAL, MAP_GOAL, EXPEDITION_GOAL)
     val oldChapter = content.days.single { it.id == storyDayId }.chapterId
     val referenceGoal = content.chapters.single { it.id == oldChapter }.goalId
     val chapterIds = listOf(oldChapter) + (2..5).map { "campaign-choice-v1:act-$it" }
@@ -65,17 +66,25 @@ internal fun GameCatalog.withStoryCampaign(): GameCatalog {
                 choiceEnergyCosts = options.associate { "$id:${it.key}" to it.energy },
                 condition = StoryCondition.All(requirements),
                 factsByChoiceId = options.associate { "$id:${it.key}" to it.facts },
+                disabledChoiceIds = if (source?.optional == true && scene.options.isEmpty()) setOf("$id:skip") else emptySet(),
                 storyActId = actId, finishesStoryAct = finale,
                 chapterEntryDayId = dayIds.getOrNull(index + 1).takeIf { finale })
             newCards[id] = EventCardCopy(if (source?.optional == true) "Дополнительная история" else "История",
-                if (finale) "Нужен собранный комплект выбранной цели" else "",
+                if (finale) "Нужен собранный комплект этой главы" else "",
                 when (options.maxOf { it.energy }) { 0 -> "Без траты сил"; 1 -> "Немного устанет"; 2 -> "Устанет"; else -> "Сильно устанет" },
                 "Вернуться позже", "Глава ${index + 1} · ${titles[index]}", source?.sourceUrl.orEmpty(), scene.scene,
-                null, scene.variants)
+                null, when (scene.sourceId) {
+                    // Presentation changes keep installed immutable event/choice definitions readable.
+                    "G1.01" -> listOf(EventCardVariant(StoryCondition.Always,
+                        "Смотритель приглашает {petName} на Ночь наблюдений. Для неё нужно собрать карту звёзд, штатив, телескоп и оплатить поездку. Выбери, на что копить сначала, а по дороге помогай жителям и разгадывай старые загадки."))
+                    "G2.01" -> listOf(EventCardVariant(StoryCondition.Always,
+                        "Сигнал башни подтверждён. Теперь цель — подготовиться к её исследованию. Собери карту подходов, фонарь, крепления, дорожный набор и подготовь перевозку. Смотритель поможет проверить дорогу."))
+                    else -> scene.variants
+                })
             if (scene.requiredInOrder) previousCore = id
         }
         StoryAct(actId, titles[index], dayIds[index], chapterScenes.map { storyEventId(it.sourceId) },
-            storyEventId("G${index + 1}.12"), petAge = ages[index])
+            storyEventId("G${index + 1}.12"), petAge = ages[index], goalId = chapterGoals[index])
     }
     // These facts describe actual completed mini-games, never merely seeing a job offer.
     val deedFacts = policies.mapValues { (id, policy) ->

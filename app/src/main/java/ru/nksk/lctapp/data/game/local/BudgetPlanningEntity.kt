@@ -19,6 +19,11 @@ internal data class BudgetPlanningEntity(
     @ColumnInfo(name = "stage") val stage: String,
     @ColumnInfo(name = "income") val income: Long,
     @ColumnInfo(name = "revision") val revision: Long,
+    @ColumnInfo(name = "draft_needs") val draftNeeds: Long? = null,
+    @ColumnInfo(name = "draft_wants") val draftWants: Long? = null,
+    @ColumnInfo(name = "draft_savings") val draftSavings: Long? = null,
+    @ColumnInfo(name = "draft_reserve") val draftReserve: Long? = null,
+    @ColumnInfo(name = "base_amount") val baseAmount: Long? = null,
 )
 
 private val reasons = StoredCode(mapOf(
@@ -34,7 +39,11 @@ private val stages = StoredCode(mapOf(
 
 internal fun BudgetPlanning.toEntity() = BudgetPlanningEntity(
     CURRENT_GAME_ID, id, reasons.encode(reason), stages.encode(stage), income, revision,
+    draft?.needs, draft?.wants, draft?.savings, draft?.reserve, baseAmount,
 )
 internal fun BudgetPlanningEntity.toDomain() = BudgetPlanning(
     id = sessionId, reason = reasons.decode(reason), stage = stages.decode(stage), income = income, revision = revision,
+    draft = if (draftNeeds == null && draftWants == null && draftSavings == null && draftReserve == null) null
+        else ru.nksk.lctapp.domain.economy.BudgetPlan(checkNotNull(draftNeeds), checkNotNull(draftWants), checkNotNull(draftSavings), checkNotNull(draftReserve)),
+    baseAmount = baseAmount,
 )

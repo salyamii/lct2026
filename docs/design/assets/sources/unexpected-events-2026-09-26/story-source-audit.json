@@ -1,0 +1,132 @@
+[
+  {
+    "id": "2053:3943",
+    "name": "G1.09 · Каменный пост",
+    "images": [],
+    "types": {
+      "SECTION": 1,
+      "RECTANGLE": 1,
+      "TEXT": 12
+    }
+  },
+  {
+    "id": "2053:4045",
+    "name": "G2.04 · Сигнальный пост за мостом",
+    "images": [],
+    "types": {
+      "SECTION": 1,
+      "RECTANGLE": 1,
+      "TEXT": 12
+    }
+  },
+  {
+    "id": "2053:4059",
+    "name": "G2.05 · Следы недавнего ремонта",
+    "images": [],
+    "types": {
+      "SECTION": 1,
+      "RECTANGLE": 1,
+      "TEXT": 12
+    }
+  },
+  {
+    "id": "2053:4073",
+    "name": "G2.06 · Механизм трёх огней",
+    "images": [],
+    "types": {
+      "SECTION": 1,
+      "RECTANGLE": 1,
+      "TEXT": 12
+    }
+  },
+  {
+    "id": "2053:4101",
+    "name": "G2.08 · Знак двойной развилки",
+    "images": [],
+    "types": {
+      "SECTION": 1,
+      "RECTANGLE": 1,
+      "TEXT": 12
+    }
+  },
+  {
+    "id": "2053:4129",
+    "name": "G2.10 · Приёмник указывает на Обсерваторию",
+    "images": [],
+    "types": {
+      "SECTION": 1,
+      "RECTANGLE": 1,
+      "TEXT": 12
+    }
+  },
+  {
+    "id": "2053:4143",
+    "name": "G2.11 · Башня посылает обратный код",
+    "images": [],
+    "types": {
+      "SECTION": 1,
+      "RECTANGLE": 1,
+      "TEXT": 12
+    }
+  },
+  {
+    "id": "2054:3898",
+    "name": "G3.06 · Старая фотография мастерской",
+    "images": [],
+    "types": {
+      "SECTION": 1,
+      "RECTANGLE": 1,
+      "TEXT": 12
+    }
+  },
+  {
+    "id": "2054:4056",
+    "name": "G4.05 · Горный указатель двух путей",
+    "images": [],
+    "types": {
+      "SECTION": 1,
+      "RECTANGLE": 1,
+      "TEXT": 12
+    }
+  },
+  {
+    "id": "2054:4070",
+    "name": "G4.06 · Лесной путевой камень",
+    "images": [],
+    "types": {
+      "SECTION": 1,
+      "RECTANGLE": 1,
+      "TEXT": 12
+    }
+  },
+  {
+    "id": "2054:4126",
+    "name": "G4.10 · Пограничный маяк",
+    "images": [],
+    "types": {
+      "SECTION": 1,
+      "RECTANGLE": 1,
+      "TEXT": 12
+    }
+  },
+  {
+    "id": "2055:3884",
+    "name": "G5.05 · Запись в штормовом убежище",
+    "images": [],
+    "types": {
+      "SECTION": 1,
+      "RECTANGLE": 1,
+      "TEXT": 12
+    }
+  },
+  {
+    "id": "2055:3968",
+    "name": "G5.11 · Огни сети возвращаются",
+    "images": [],
+    "types": {
+      "SECTION": 1,
+      "RECTANGLE": 1,
+      "TEXT": 12
+    }
+  }
+]

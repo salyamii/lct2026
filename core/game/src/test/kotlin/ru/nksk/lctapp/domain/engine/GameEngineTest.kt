@@ -26,6 +26,43 @@ import ru.nksk.lctapp.domain.minigame.PriceQuizState
 import ru.nksk.lctapp.domain.minigame.TargetStopState
 
 class GameEngineTest {
+    @Test fun retiredLoreChoiceRemainsReadableButCannotCompleteOrPreviewANewAction() = runTest {
+        val f = Fixture()
+        val oldSkip = f.content.choices.single { it.id == "lore-choice" }.copy(id = "lore-skip", position = 1)
+        val content = f.content.copy(choices = f.content.choices + oldSkip)
+        val policies = f.policies + ("lore" to f.policies.getValue("lore").copy(disabledChoiceIds = setOf(oldSkip.id)))
+        val factory = EventFactory(content, policies, emptyList())
+        val engine = GameEngine(f.repo, factory, f.rules)
+        f.begin(listOf("lore", "quiet", "quiet", "quiet"))
+        assertTrue(engine.dispatch(f.request(EngineCommand.OpenNextEvent)) is EngineResult.Applied)
+        val before = f.state
+        val occurrence = f.day.currentEvent!!
+        for (command in listOf(EngineCommand.Choose(occurrence.id, oldSkip.id),
+            EngineCommand.CompleteEvent(occurrence.id, oldSkip.id))) {
+            assertEquals(EngineResult.Blocked(BlockReason.InvalidEventAction), engine.dispatch(f.request(command)))
+            assertEquals(before, f.state)
+        }
+        assertEquals(EngineResult.Blocked(BlockReason.InvalidEventAction),
+            engine.previewEventChoice(before, occurrence.id, oldSkip.id))
+        val historical = before.copy(story = before.story.copy(decisions = listOf(
+            ru.nksk.lctapp.domain.story.StoryDecision("old-skip", oldSkip.id))))
+        assertTrue(factory.storyProgress(historical).completed("lore"))
+        assertTrue(engine.dispatch(f.request(EngineCommand.PauseEvent(occurrence.id))) is EngineResult.Applied)
+        assertTrue(engine.dispatch(f.request(EngineCommand.OpenNextEvent)) is EngineResult.Applied)
+        assertEquals(occurrence.id, f.day.currentEvent!!.id)
+        assertTrue(engine.dispatch(f.request(EngineCommand.CompleteEvent(occurrence.id, "lore-choice"))) is EngineResult.Applied)
+        assertEquals("lore-choice", f.state.story.decisions.last().choiceId)
+    }
+
+    @Test fun retiredChoiceConfigurationCannotNameAnotherEventOrRemoveAllActions() {
+        val f = Fixture()
+        for (disabled in listOf(setOf("quiet-choice"), setOf("lore-choice"))) {
+            assertThrows(IllegalArgumentException::class.java) {
+                EventFactory(f.content, f.policies + ("lore" to f.policies.getValue("lore").copy(disabledChoiceIds = disabled)), emptyList())
+            }
+        }
+    }
+
     @Test fun recapRecoversActualCompletedChoicesFromOldSavesAndExcludesOffersAndCarriedWork() = runTest {
         val f = Fixture(energy = 1)
         f.begin(listOf("large", "quiet", "small", "lore"))
@@ -426,18 +463,94 @@ class GameEngineTest {
         f.completeOne()
     }
 
-    @Test fun freeMealOnlyLimitsNextMorningAndDoesNotRestoreCurrentEnergy() = runTest {
+    @Test fun freeMealEndsTodaysEnergyAndKeepsTheConfiguredLimitForOnlyTheNextMorning() = runTest {
         val f = Fixture()
         f.begin(listOf("drain", "quiet", "quiet", "quiet")); f.completePlan()
         assertEquals(4, f.day.energy)
+        val steps = f.day.steps
         f.apply(EngineCommand.Feed("free"))
-        assertEquals(4, f.day.energy)
+        assertEquals(0, f.day.energy)
+        assertEquals(steps, f.day.steps)
+        assertTrue(f.day.ateToday)
+        assertEquals(PetVisualState.TIRED, f.state.pet.visualState)
+        assertEquals(-4, f.day.journal.single { it.kind == DayJournalKind.MEAL }.energyDelta)
+        assertEquals(0L, f.day.journal.single { it.kind == DayJournalKind.MEAL }.moneyDelta)
         assertEquals(100L, f.state.economy.balance)
         f.apply(EngineCommand.FinishDay); f.begin()
         assertEquals(3, f.day.energy)
+        assertEquals(3, f.day.openingEnergy)
+        assertEquals(PetVisualState.TIRED, f.state.pet.visualState)
         assertNull(f.day.nextMorningEnergy)
         f.completePlan(); f.endFedDay(); f.begin()
         assertEquals(5, f.day.energy)
+        assertEquals(PetVisualState.NORMAL, f.state.pet.visualState)
+    }
+
+    @Test fun anotherPaidMealCannotRestoreEnergyOrCancelTheFreeMealLimitAndTrainingStillWorks() = runTest {
+        val f = Fixture()
+        f.begin()
+        f.apply(EngineCommand.Feed("free"))
+        for (meal in listOf("basic", "luxury")) {
+            f.apply(EngineCommand.Feed(meal))
+            assertEquals(0, f.day.energy)
+            assertEquals(3, f.day.nextMorningEnergy)
+            assertEquals(PetVisualState.TIRED, f.state.pet.visualState)
+        }
+        assertEquals(88L, f.state.economy.balance)
+        assertEquals(listOf(-5, 0, 0), f.day.journal.map { it.energyDelta })
+        val economy = f.state.economy
+        val steps = f.day.steps
+        f.apply(EngineCommand.RequestFinancialPractice(series = true))
+        val question = checkNotNull(f.state.financial.practice)
+        f.apply(EngineCommand.AnswerFinancialQuestion(question.id, question.correctAnswerId))
+        f.apply(EngineCommand.AdvanceFinancialPractice(question.id))
+        assertEquals(2, f.state.financial.practice!!.series!!.questionNumber)
+        assertEquals(economy, f.state.economy)
+        assertEquals(0, f.day.energy)
+        assertEquals(steps, f.day.steps)
+    }
+
+    @Test fun freeMealBlocksAcceptingAnOfferedDeedAndStartingItFromTheListWithoutChangingItsDeadline() = runTest {
+        val f = Fixture(deedKind = DeedGameKind.COMPARISON)
+        f.begin(listOf("small", "quiet", "quiet", "quiet"))
+        f.apply(EngineCommand.OpenNextEvent)
+        val proposal = f.day.currentEvent!!
+        val offer = f.day.deeds.single()
+        f.apply(EngineCommand.Feed("free"))
+        val beforeAccept = f.state
+        assertEquals(BlockReason.MustSleep, f.blocked(EngineCommand.AcceptDeedProposal(proposal.id)))
+        assertEquals(beforeAccept, f.state)
+        f.apply(EngineCommand.DismissDeedProposal(proposal.id))
+        val beforeStart = f.state
+        assertEquals(BlockReason.MustSleep, f.blocked(EngineCommand.StartDeed(offer.id)))
+        assertEquals(beforeStart, f.state)
+        assertEquals(offer, f.day.deeds.single())
+        assertEquals(100L, f.state.economy.balance)
+        assertTrue(f.state.story.decisions.isEmpty())
+    }
+
+    @Test fun freeMealBlocksResumingOrCompletingAlreadyStartedWorkAndAllowsRest() = runTest {
+        val f = Fixture(deedKind = DeedGameKind.COMPARISON)
+        f.begin(listOf("small", "quiet", "quiet", "quiet"))
+        f.apply(EngineCommand.OpenNextEvent)
+        f.apply(EngineCommand.AcceptDeedProposal(f.day.currentEvent!!.id))
+        val work = f.day.currentEvent!!
+        val offer = f.day.deeds.single()
+        val score = checkNotNull(DeedGameScore.fromComparison(PriceQuizState.create().copy(current = 5, correctAnswers = 5)))
+        f.apply(EngineCommand.Feed("free"))
+        val exhausted = f.state
+        for (command in listOf(EngineCommand.StartDeed(offer.id), EngineCommand.CompleteDeed(work.id, score))) {
+            assertEquals(BlockReason.MustSleep, f.blocked(command))
+            assertEquals(exhausted, f.state)
+        }
+        f.apply(EngineCommand.PauseEvent(work.id))
+        val paused = f.state
+        assertEquals(BlockReason.MustSleep, f.blocked(EngineCommand.StartDeed(offer.id)))
+        assertEquals(paused, f.state)
+        assertFalse(f.day.deeds.single().completed)
+        assertEquals(100L, f.state.economy.balance)
+        f.apply(EngineCommand.FinishDay)
+        assertEquals(DayPhase.FINISHED, f.day.phase)
     }
 
     @Test fun normalAndLuxuryMealsDoNotGiveEnergy() = runTest {
@@ -447,7 +560,7 @@ class GameEngineTest {
         assertEquals(4, f.day.energy)
         assertEquals(PetVisualState.HAPPY, f.state.pet.visualState)
         f.completeOne()
-        assertEquals(PetVisualState.HAPPY, f.state.pet.visualState)
+        assertEquals(PetVisualState.NORMAL, f.state.pet.visualState)
     }
 
     @Test fun twoConcurrentCopiesOfAChoiceOnlyApplyOneOutcome() = runTest {
@@ -653,7 +766,8 @@ class GameEngineTest {
         val f = Fixture(balance = 20)
         f.begin()
         val originalOpening = f.day.openingBalance
-        f.repo.update { it.copy(economy = it.economy.copy(plan = it.economy.plan.copy(reserve = 15)),
+        f.repo.update { it.copy(economy = it.economy.copy(plan = it.economy.plan.copy(reserve = 15),
+            availableBalance = it.economy.availableBalance + 15),
             engine = it.engine!!.copy(balanceAdjustment = 15)) }
         f.completePlan()
         f.endFedDay()
@@ -729,7 +843,8 @@ class GameEngineTest {
                         if (i == 0) e.copy(status = status) else e
                     })
                     val state = f.state.copy(
-                        economy = EconomyState(BudgetPlan(0, 0, 0, 0).withAmount(section, balance)),
+                        economy = EconomyState(BudgetPlan(0, 0, 0, 0).withAmount(section, balance),
+                            availableBalance = balance, savingsBalance = 0),
                         engine = day, story = f.state.story.copy(activeEventId = if (status == EventStatus.ACTIVE) "reward" else null),
                     )
                     // Former rule: an unapplied entry charge must be affordable before the paid answer.
@@ -803,7 +918,7 @@ class GameEngineTest {
                 f.begin(listOf("reward", "quiet", "quiet", "quiet"))
                 val original = f.state
                 fun play(plan: BudgetPlan): List<GameState> {
-                    var state = original.copy(economy = EconomyState(plan))
+                    var state = original.copy(economy = EconomyState(plan, availableBalance = 100, savingsBalance = 0))
                     val outcomes = mutableListOf<GameState>()
                     var id = 0
                     fun step(command: EngineCommand) {
@@ -857,7 +972,8 @@ class GameEngineTest {
         ))
         val rules = EngineRules("test-rules", energy, hunger, 1)
         val repo = MemoryRepository(GameState(
-            PetState("BACKPACK", PetVisualState.NORMAL), EconomyState(BudgetPlan(0, 0, balance, 0)),
+            PetState("BACKPACK", PetVisualState.NORMAL), EconomyState(BudgetPlan(0, 0, balance, 0),
+                availableBalance = balance, savingsBalance = 0),
             StoryState(null, null, null, emptyList()), 17, 29, emptyList(),
         ))
         val engine = newEngine()

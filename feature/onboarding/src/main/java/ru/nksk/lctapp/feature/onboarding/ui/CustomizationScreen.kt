@@ -343,7 +343,7 @@ private fun CharacterStage(
         val canvasSize = minOf(maxWidth, maxHeight + 20.dp, maxCanvas)
         Image(painterResource(artwork.image(state.fur)), "Образ спутника: ${state.fur.label}",
             Modifier.requiredSize(canvasSize).align(Alignment.Center).offset(y = (-14).dp), contentScale = ContentScale.Fit)
-        Text("${state.name.ifBlank { "Твой спутник" }} · ${state.temperament.label}",
+        Text("${state.name.ifBlank { "Твой спутник" }}, ${state.temperament.label.lowercase()}",
             modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 16.dp, vertical = 10.dp)
                 .background(Ink.copy(alpha = .9f), RoundedCornerShape(50)).padding(horizontal = 14.dp, vertical = 7.dp),
             color = Color.White, fontFamily = artwork.bodyFont, fontSize = 13.sp, textAlign = TextAlign.Center)

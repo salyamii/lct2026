@@ -31,6 +31,10 @@ internal data class GameStateEntity(
     @ColumnInfo(name = "wants") val wants: Long,
     @ColumnInfo(name = "savings") val savings: Long,
     @ColumnInfo(name = "reserve") val reserve: Long,
+    @ColumnInfo(name = "available_balance", defaultValue = "0") val availableBalance: Long,
+    @ColumnInfo(name = "savings_balance", defaultValue = "0") val savingsBalance: Long,
+    /** Storage-only discriminator; historical GameState payloads retain their original wire shape. */
+    @ColumnInfo(name = "budget_model_version", defaultValue = "0") val budgetModelVersion: Int = 1,
     @ColumnInfo(name = "current_day_id") val currentDayId: String?,
     @ColumnInfo(name = "next_script_position") val nextScriptPosition: Int?,
     @ColumnInfo(name = "active_event_id") val activeEventId: String?,

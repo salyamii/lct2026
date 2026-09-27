@@ -22,6 +22,14 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        // Intentionally empty until a backend is available; never send data to a demo host.
+        val backendUrl = providers.gradleProperty("LCT_BACKEND_BASE_URL").orElse("").get().trim()
+        require(backendUrl.isEmpty() || (backendUrl.startsWith("https://") && backendUrl.endsWith("/") &&
+            backendUrl.none { it == '"' || it == '\\' || it.isWhitespace() })) {
+            "LCT_BACKEND_BASE_URL must be an HTTPS URL ending in /"
+        }
+        buildConfigField("String", "BACKEND_BASE_URL", "\"$backendUrl\"")
+
         testInstrumentationRunner = "ru.nksk.lctapp.HiltTestRunner"
     }
 
@@ -38,6 +46,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -46,6 +55,12 @@ room3 {
 }
 
 dependencies {
+    implementation(libs.qrcodegen)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.kotlinx.serialization)
+    implementation(libs.okhttp)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.coil.compose)
     implementation(project(":feature:onboarding"))
     debugImplementation(project(":feature:debug"))

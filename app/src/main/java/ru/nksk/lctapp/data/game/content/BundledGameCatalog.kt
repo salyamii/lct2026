@@ -132,8 +132,7 @@ internal fun bundledGameCatalog(): GameCatalog {
             events = entries.map { EventDefinition(it.id, it.type, it.title, it.body, null, null, null, 0, null, null) },
             choices = entries.map { EventChoiceDefinition("${it.id}:complete", it.id, 0, it.action, it.reward, null, null, GoalImpact.NEUTRAL) },
         ),
-        policies = entries.associate { it.id to EventPolicy(it.effort,
-            discardOfferOnDismiss = it.id == "figma-2163-43-v1", deedGameKind = deedGames[it.id]) },
+        policies = entries.associate { it.id to EventPolicy(it.effort, deedGameKind = deedGames[it.id]) },
         cards = entries.associate { it.id to it.card },
         rules = EngineRules("ryzhik-2026-09-19-v1", fullEnergy = 5, hungerBlocksAtStep = 3, shortDeedMaxEnergy = 1, weeklyIncome = 100),
         meals = listOf(
@@ -142,7 +141,7 @@ internal fun bundledGameCatalog(): GameCatalog {
         ),
         storyDayId = day, introductionId = entries.first().id,
         deedPool = entries.filter { it.type == EventType.EARNING }.map { it.id },
-    ).withEverydayEvents().withFirstGoal().withGoalProjects().withStoryCampaign().withDayRecapCopy()
+    ).withEverydayEvents().withFirstGoal().withGoalProjects().withStoryCampaign().withStoryActionGames().withDayRecapCopy().withRebalancedDeeds().withStarterAccessories()
 }
 
 private data class Entry(

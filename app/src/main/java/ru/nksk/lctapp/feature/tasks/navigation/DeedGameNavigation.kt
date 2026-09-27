@@ -17,7 +17,7 @@ import ru.nksk.lctapp.feature.tasks.ui.*
 
 @Serializable
 @SerialName("deed_game")
-data class DeedGame(val occurrenceId: String) : NavKey
+data class DeedGame(val occurrenceId: String, val choiceId: String? = null) : NavKey
 
 fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> Unit) {
     entry<DeedGame> { source ->
@@ -26,7 +26,7 @@ fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> 
         val lifecycle = LocalLifecycleOwner.current.lifecycle
         val lifecycleState by lifecycle.currentStateAsState()
         val resumed = lifecycleState.isAtLeast(Lifecycle.State.RESUMED)
-        LaunchedEffect(model, source.occurrenceId) { model.load(source.occurrenceId) }
+        LaunchedEffect(model, source.occurrenceId, source.choiceId) { model.load(source.occurrenceId, source.choiceId) }
         LaunchedEffect(model, lifecycle) {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 model.exit.collect { onFinished(source, it) }
@@ -46,8 +46,17 @@ fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> 
                 DeedGameType.COMPARISON -> {
                     val game = hiltViewModel<PriceQuizViewModel>()
                     val board by game.uiState.collectAsStateWithLifecycle()
-                    LaunchedEffect(board.game) { model.finishComparison(board.game) }
-                    PriceQuizScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
+                    LaunchedEffect(game, resumed, board.game.current) {
+                        if (resumed) game.questionPresented(board.game.current)
+                    }
+                    LaunchedEffect(board.game) { model.finishComparison(board.game, game.comparisonEvidence()) }
+                    PriceQuizScreen(board, { action ->
+                        if (resumed && state.presentation?.canPlay == true) {
+                            if (action is PriceQuizAction.Answer) action.questionIndex?.let(game::questionPresented)
+                            game.onAction(action)
+                            model.recordComparisonAnswers(game.comparisonEvidence())
+                        }
+                    },
                         leave, state.presentation)
                 }
                 DeedGameType.PRECISION -> {

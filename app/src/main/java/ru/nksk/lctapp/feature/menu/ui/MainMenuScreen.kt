@@ -45,6 +45,7 @@ fun MainMenuScreen(
     state: MainMenuUiState,
     onAction: (MainMenuAction) -> Unit,
     modifier: Modifier = Modifier,
+    settingsButton: (@Composable () -> Unit)? = null,
 ) {
     val dispatch: (MainMenuAction) -> Unit = { if (!state.busy) onAction(it) }
     var budgetExpanded by rememberSaveable { mutableStateOf(false) }
@@ -77,7 +78,7 @@ fun MainMenuScreen(
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                     ) {
                         MenuHud(state.pet.name, state.coins, state.completedGoals, state.totalGoals, dispatch, state.goalTitle, budget = state.budget,
-                            budgetExpanded = budgetExpanded, onBudgetExpandedChange = { budgetExpanded = it })
+                            budgetExpanded = budgetExpanded, onBudgetExpandedChange = { budgetExpanded = it }, settingsButton = settingsButton)
                         MenuActions(dispatch, viewport, state, scenePainter)
                     }
                 }
@@ -87,7 +88,7 @@ fun MainMenuScreen(
                 ) {
                     MenuHud(state.pet.name, state.coins, state.completedGoals, state.totalGoals, dispatch, state.goalTitle,
                         Modifier.onGloballyPositioned { hudBottom = it.positionInRoot().y + it.size.height }, budget = state.budget,
-                            budgetExpanded = budgetExpanded, onBudgetExpandedChange = { budgetExpanded = it })
+                            budgetExpanded = budgetExpanded, onBudgetExpandedChange = { budgetExpanded = it }, settingsButton = settingsButton)
                     CharacterScene(state.pet, Modifier.weight(1f).fillMaxWidth(), characterPosition)
                     MenuActions(dispatch, viewport, state, scenePainter)
                 }

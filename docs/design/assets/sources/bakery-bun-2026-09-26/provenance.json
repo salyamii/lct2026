@@ -1,0 +1,61 @@
+{
+  "resource": "prop_bakery_bun",
+  "category": "Generated event props",
+  "path": "app/src/main/res/drawable-nodpi/prop_bakery_bun.webp",
+  "format": "webp",
+  "width": 1254,
+  "height": 1254,
+  "bytes": 1683960,
+  "sha256": "fb4490b2636b96e16e02484c7295bbe33ce0f15414993c89813c11fd87f34669",
+  "rgba_sha256": "e87b361c863e4cc0a5b956785a78aad3b82c5521e9fe466d9ee1b9a116bf8393",
+  "alpha_bounds": [
+    0,
+    21,
+    1225,
+    1254
+  ],
+  "design_canvas": [
+    1254,
+    1254
+  ],
+  "source_path": "docs/design/assets/sources/bakery-bun-2026-09-26/prop_bakery_bun.png",
+  "source_sha256": "460a52b57a4260bda7e740a7d338c9a2b00e368214ae9d2f1115fb15f9d85856",
+  "source_bytes": 2418542,
+  "source_format": "png",
+  "lossless_rgba_verified": true,
+  "provenance": {
+    "type": "imagegen",
+    "date": "2026-09-26",
+    "tool": "image_gen.imagegen",
+    "mode": "built-in generation",
+    "reference": "Visual style inspected from budget_wants.webp and gear_goal_telescope.webp. No reference images supplied to generation tool.",
+    "prompt_path": "docs/design/assets/sources/bakery-bun-2026-09-26/prompt.txt",
+    "figma_source": null
+  },
+  "conversion": {
+    "format": "WebP",
+    "lossless": true,
+    "exact": true,
+    "quality": 100,
+    "method": 6,
+    "resized": false,
+    "cropped": false,
+    "pillow_version": "12.3.0",
+    "details": "Complete generated canvas and alpha retained; decoded PNG and WebP RGBA pixels match exactly."
+  },
+  "generated_source_file": "C:\\Users\\User\\.codex\\generated_images\\01a0de4f-e75b-7531-8d62-a0aa7eef6d9e\\exec-d0ac71ae-6b53-4c50-9998-c10333e86361.png",
+  "alpha_verification": {
+    "transparent_pixels": 650876,
+    "opaque_pixels": 271,
+    "partial_alpha_pixels": 921369,
+    "extrema": [
+      0,
+      255
+    ]
+  },
+  "rgba_hash_format": "SHA-256(width uint32 big endian + height uint32 big endian + RGBA pixel bytes), matching scripts/verify_assets.py.",
+  "status": "unused draft; not included in Android runtime",
+  "superseded_on": "2026-09-26",
+  "superseded_by_source": "docs/design/assets/sources/fair-items-2026-09-26/prop_bakery_bun.png",
+  "runtime_metadata_note": "path, bytes, sha256 and conversion describe the former temporary runtime conversion, not the installed resource; current runtime uses the Figma original."
+}

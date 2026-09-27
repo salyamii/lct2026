@@ -1,0 +1,30 @@
+{
+  "resource": "goal_preview_stargazing",
+  "category": "Goal chapter previews",
+  "generated_at": "2026-09-25",
+  "tool": "image_gen.imagegen",
+  "mode": "built-in generation",
+  "prompt": "Use case: stylized-concept.\nAsset type: final landscape chapter preview illustration for a polished cozy fantasy mobile adventure for children. Aspect ratio 3:2, 1536 x 1024 preferred.\nStyle: detailed dimensional 3D storybook game art, soft rounded craftsmanship, clean readable silhouettes, rich tactile stone/wood/brass textures, cinematic painterly lighting, premium production finish. The same coherent medieval fantasy world as a warm sandstone observatory with blue velvet banners, brass astronomy instruments, amber lanterns and distant castle mountains. Midnight blue and teal shadows, amber golden light.\nComposition: one strong centered subject immediately recognizable at small mobile-card size, natural perspective and coherent spatial depth, landscape full-bleed art only, keep essential subject within central 80% with comfortable margins. No fox, people, animals, characters, UI, borders, labels, logos, readable lettering, text, coins, graphs, finance motifs, collage or split panels. This is original game artwork, not a screenshot or app mockup.\nPrimary scene: A beautiful brass astronomical telescope on its sturdy three-legged wooden tripod, standing firmly on a stone observatory terrace. A small round wooden table holds an unlettered blue-and-parchment star map and compass, secondary and unobtrusive. Behind, a calm mountain lake, distant warm-lit fairytale castle, deep clear star-filled sky with a soft Milky Way and crescent moon. Lantern on stone balustrade. Telescope and tripod fully visible; inviting wonder and readiness for a night of observation. Not an indoor room and not a giant telescope cannon.",
+  "reference_context": "Visual style inspected from app/src/main/res/drawable-nodpi/location_observatory.webp; no reference image supplied to generation tool.",
+  "generated_source_file": "C:\\Users\\User\\.codex\\generated_images\\01a0d849-d082-7633-9364-a9b22475f6e8\\exec-3893cd5e-40eb-4a96-982b-72fb995fe350.png",
+  "source_file": "docs/design/assets/sources/goal-previews-2026-09-25/goal_preview_stargazing.png",
+  "source_sha256": "7a351a53cc41f051469520eaf22e775870a3da4fb559854559046ce6aee9a089",
+  "source_bytes": 2978476,
+  "path": "app/src/main/res/drawable-nodpi/goal_preview_stargazing.webp",
+  "sha256": "1c5cc56bd1c39180874d8c872b984e056ac9383a768d1586715d26bef522fbec",
+  "bytes": 2143340,
+  "width": 1536,
+  "height": 1024,
+  "rgba_sha256": "3756eb2aa5a49bbea66d9a29348e019e11cd936a94105339f4aa0f9f817c6be1",
+  "conversion": "Pillow WebP lossless=True, exact=True, quality=100, method=6; full original canvas, no resizing, cropping, retouching or compositing.",
+  "verification": "PNG and WebP decoded RGBA dimensions and pixel bytes match exactly.",
+  "rgba_hash_format": "SHA-256(width uint32 big endian + height uint32 big endian + RGBA pixel bytes), matching verify_assets.py.",
+  "source_path": "docs/design/assets/sources/goal-previews-2026-09-25/goal_preview_stargazing.png",
+  "alpha_bounds": [
+    0,
+    0,
+    1536,
+    1024
+  ],
+  "lossless_rgba_verified": true
+}

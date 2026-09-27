@@ -23,6 +23,7 @@ age or character without an explicit design decision.
 | Senior runtime layers | [89:185](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-185) | 58 |
 | Location originals | [2144:9](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2144-9) | 14 |
 | NPCs, companion portraits and event objects | Individual links in the catalog | 14 |
+| Transparent story objects | [3238:421](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-421) | 42 |
 
 The original Assets1, Assets2 and Assets3 links all target `56:2`; that pack is
 imported once. The 2026-09-20 sleep additions use the active transparent PNG
@@ -121,7 +122,7 @@ and have their own provenance. See
 Use stable lowercase ASCII names with underscores. Organize by meaning through
 prefixes, since Android resource folders do not support arbitrary nested groups:
 `ryzhik_cub_...`, `ryzhik_teen_...`, `ryzhik_adult_...`, `ryzhik_senior_...`,
-`gear_...`, `location_...` and `npc_...`. Add the documented pose, color or item
+`gear_...`, `location_...`, `npc_...` and `story_...`. Add the documented pose, color or item
 variant when needed. Preserve existing `menu_*` resource names used by the UI.
 
 Search the catalog before importing or drawing a replacement. If two entries

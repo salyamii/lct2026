@@ -167,7 +167,7 @@ class CustomizationPersistenceTest {
 
     @Test fun selectedGoalResumesAndCommitsWithProfileThenRemovesDraft() = runBlocking {
         val draft = OnboardingDraft(PetCustomization("Искорка", fur = PetFur.Sand),
-            OnboardingStep.Introduction, "BANDANA", STARS_GOAL)
+            OnboardingStep.Introduction, "BANDANA", "stargazing-star-map-v1")
         var db = GameDatabase.open(context, name)
         try { RoomOnboardingDraftRepository(db).save(draft) } finally { db.close() }
         db = GameDatabase.open(context, name)
@@ -175,7 +175,7 @@ class CustomizationPersistenceTest {
             assertEquals(draft, RoomOnboardingDraftRepository(db).read())
             val games = RoomGameRepository(db)
             val session = GameSession(games, RoomStoryContentRepository(db), bundledGameCatalog(), createInitialGameState())
-            session.prepare(draft.profile.toPetState(draft.accessoryId), draft.goalId)
+            session.prepare(draft.profile.toPetState(draft.accessoryId), savingItemId = draft.savingItemId)
             assertNull(RoomOnboardingDraftRepository(db).read())
             assertEquals(STARS_GOAL, games.read()!!.selectedGoalId)
             assertNull(games.read()!!.engine)

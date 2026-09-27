@@ -7,11 +7,12 @@ import ru.nksk.lctapp.feature.day.navigation.Day
 import ru.nksk.lctapp.feature.economy.navigation.Economy
 import ru.nksk.lctapp.feature.menu.navigation.MainMenu
 import ru.nksk.lctapp.feature.tasks.navigation.Tasks
+import ru.nksk.lctapp.feature.settings.navigation.Settings
 
 class BudgetNavigationPolicyTest {
     private val initial = BudgetPlanning("initial", BudgetPlanningReason.INITIAL, BudgetPlanningStage.RECEIPT, 100)
 
-    @Test fun initialReceiptAllowsMenuAfterOnboardingAndColdStart() {
+    @Test fun legacyInitialReceiptAllowsMenuOnColdStart() {
         assertFalse(shouldPresentBudget(initial, MainMenu, null))
         assertFalse(shouldPresentBudget(initial, MainMenu, initial.id))
     }
@@ -26,6 +27,13 @@ class BudgetNavigationPolicyTest {
     @Test fun initialReceiptCannotBeBypassedByRestoredGameplayOrTasks() {
         assertTrue(shouldPresentBudget(initial, Day, initial.id))
         assertTrue(shouldPresentBudget(initial, Tasks, initial.id))
+    }
+
+    @Test fun readOnlySettingsStayAvailableWithoutBypassingPendingGamePlanning() {
+        val pending = initial.copy(stage = BudgetPlanningStage.ALLOCATION)
+        assertFalse(shouldPresentBudget(pending, Settings, null))
+        assertTrue(shouldPresentBudget(pending, MainMenu, null))
+        assertTrue(shouldPresentBudget(pending, Day, pending.id))
     }
 
     @Test fun budgetRouteDoesNotDuplicateAndCompletedBudgetDoesNotRedirect() {

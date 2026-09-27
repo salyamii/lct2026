@@ -1,0 +1,242 @@
+[
+  {
+    "id": "2289:23",
+    "name": "Медведь · Заказы на подносе",
+    "width": 250,
+    "height": 335,
+    "fills": [
+      {
+        "type": "IMAGE",
+        "visible": true,
+        "opacity": 1,
+        "blendMode": "NORMAL",
+        "scaleMode": "FIT",
+        "scalingFactor": 0.5,
+        "rotation": 0,
+        "filters": {
+          "exposure": 0,
+          "contrast": 0,
+          "saturation": 0,
+          "temperature": 0,
+          "tint": 0,
+          "highlights": 0,
+          "shadows": 0
+        },
+        "imageTransform": [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ]
+        ],
+        "imageHash": "0f557a944fa80695e9813b3dbcf8961871def397"
+      }
+    ],
+    "resource": "npc_butcher_tray"
+  },
+  {
+    "id": "2289:77",
+    "name": "Медведь · Крепкий узел",
+    "width": 250,
+    "height": 335,
+    "fills": [
+      {
+        "type": "IMAGE",
+        "visible": true,
+        "opacity": 1,
+        "blendMode": "NORMAL",
+        "scaleMode": "FIT",
+        "scalingFactor": 0.5,
+        "rotation": 0,
+        "filters": {
+          "exposure": 0,
+          "contrast": 0,
+          "saturation": 0,
+          "temperature": 0,
+          "tint": 0,
+          "highlights": 0,
+          "shadows": 0
+        },
+        "imageTransform": [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ]
+        ],
+        "imageHash": "ad63defe5949ac4efbc78fe52d6340ba3140dc4a"
+      }
+    ],
+    "resource": "npc_butcher_tying"
+  },
+  {
+    "id": "2289:131",
+    "name": "Медведь · Порядок на витрине",
+    "width": 250,
+    "height": 335,
+    "fills": [
+      {
+        "type": "IMAGE",
+        "visible": true,
+        "opacity": 1,
+        "blendMode": "NORMAL",
+        "scaleMode": "FIT",
+        "scalingFactor": 0.5,
+        "rotation": 0,
+        "filters": {
+          "exposure": 0,
+          "contrast": 0,
+          "saturation": 0,
+          "temperature": 0,
+          "tint": 0,
+          "highlights": 0,
+          "shadows": 0
+        },
+        "imageTransform": [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ]
+        ],
+        "imageHash": "e5036132aea70de048070a5e7d808a52e9c98f72"
+      }
+    ],
+    "resource": "npc_butcher_pointing"
+  },
+  {
+    "id": "2289:185",
+    "name": "Медведь · Ни одного забытого заказа",
+    "width": 250,
+    "height": 335,
+    "fills": [
+      {
+        "type": "IMAGE",
+        "visible": true,
+        "opacity": 1,
+        "blendMode": "NORMAL",
+        "scaleMode": "FIT",
+        "scalingFactor": 0.5,
+        "rotation": 0,
+        "filters": {
+          "exposure": 0,
+          "contrast": 0,
+          "saturation": 0,
+          "temperature": 0,
+          "tint": 0,
+          "highlights": 0,
+          "shadows": 0
+        },
+        "imageTransform": [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ]
+        ],
+        "imageHash": "b8a3861f9b570caed1b3083ec92e0e46a5a700db"
+      }
+    ],
+    "resource": "npc_butcher_orders"
+  },
+  {
+    "id": "2289:239",
+    "name": "Медведь · Весы любят точность",
+    "width": 250,
+    "height": 335,
+    "fills": [
+      {
+        "type": "IMAGE",
+        "visible": true,
+        "opacity": 1,
+        "blendMode": "NORMAL",
+        "scaleMode": "FIT",
+        "scalingFactor": 0.5,
+        "rotation": 0,
+        "filters": {
+          "exposure": 0,
+          "contrast": 0,
+          "saturation": 0,
+          "temperature": 0,
+          "tint": 0,
+          "highlights": 0,
+          "shadows": 0
+        },
+        "imageTransform": [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ]
+        ],
+        "imageHash": "9660ab7560d0a2287c410f44ec5339e00236518b"
+      }
+    ],
+    "resource": "npc_butcher_scales"
+  },
+  {
+    "id": "2289:4",
+    "name": "BG · Мясная лавка",
+    "width": 390,
+    "height": 500,
+    "fills": [
+      {
+        "type": "IMAGE",
+        "visible": true,
+        "opacity": 1,
+        "blendMode": "NORMAL",
+        "scaleMode": "FILL",
+        "scalingFactor": 1,
+        "rotation": 0,
+        "filters": {
+          "exposure": 0,
+          "contrast": 0,
+          "saturation": 0,
+          "temperature": 0,
+          "tint": 0,
+          "highlights": 0,
+          "shadows": 0
+        },
+        "imageTransform": [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ]
+        ],
+        "imageHash": "6aa2192cc5a0c7feb98058cb456e5ee646390088"
+      }
+    ],
+    "resource": "location_butcher_shop"
+  }
+]

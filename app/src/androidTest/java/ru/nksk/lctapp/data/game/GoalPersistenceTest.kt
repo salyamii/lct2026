@@ -17,6 +17,7 @@ import ru.nksk.lctapp.data.game.content.bundledGameCatalog
 import ru.nksk.lctapp.data.game.local.GameDatabase
 import ru.nksk.lctapp.data.game.local.MIGRATION_6_7
 import ru.nksk.lctapp.domain.engine.*
+import ru.nksk.lctapp.domain.economy.BudgetSection
 
 @RunWith(AndroidJUnit4::class)
 class GoalPersistenceTest {
@@ -71,8 +72,15 @@ class GoalPersistenceTest {
             // This persistence case starts after budget confirmation, with funds for the goal.
             games.update { it.copy(economy = ru.nksk.lctapp.domain.economy.EconomyState(
                 ru.nksk.lctapp.domain.economy.BudgetPlan(35, 0, 65, 0))) }
-            val select = session.selectGoalCommand(games.read()!!, goal.goalId)
+            val select = session.selectSavingGoalCommand(games.read()!!, goal.goalId, goal.itemIds.first())
             assertTrue(session.dispatch(EngineRequest("select", null, select)) is EngineResult.Applied)
+            var planning = checkNotNull(games.read()!!.economy.planning)
+            assertTrue(session.dispatch(EngineRequest("allocate", games.read()!!.engine!!.revision,
+                EngineCommand.ChangeBudgetAllocation(planning.id, planning.revision, BudgetSection.NEEDS,
+                    amount = games.read()!!.economy.availableBalance))) is EngineResult.Applied)
+            planning = checkNotNull(games.read()!!.economy.planning)
+            assertTrue(session.dispatch(EngineRequest("confirm", games.read()!!.engine!!.revision,
+                EngineCommand.ConfirmBudget(planning.id, planning.revision))) is EngineResult.Applied)
             val request = EngineRequest("buy", games.read()!!.engine!!.revision,
                 EngineCommand.BuyGoalItem(goal.goalId, goal.itemIds.first()))
             assertTrue(session.dispatch(request) is EngineResult.Applied)
@@ -84,7 +92,8 @@ class GoalPersistenceTest {
             session = GameSession(games, RoomStoryContentRepository(database), catalog, createInitialGameState())
             session.prepare()
             assertEquals(bought, games.read())
-            assertEquals(EngineResult.Blocked(BlockReason.StaleRevision), session.dispatch(request))
+            // An exact acknowledged command is idempotent even after process restart.
+            assertEquals(EngineResult.Applied(bought), session.dispatch(request))
             try {
                 games.update { it.copy(selectedGoalId = "missing-goal", economy = it.economy.withTotalBalance(0), ownedItems = emptyList()) }
                 fail("Unknown goal FK must roll back the whole outcome")

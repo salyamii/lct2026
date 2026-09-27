@@ -1,0 +1,1677 @@
+# OpenAPI 3.1 external schema components. Source: domain/backend and domain/analytics Kotlin DTOs.
+components:
+  schemas:
+    AnalyticsMode:
+      type: "string"
+      enum:
+        - "REAL"
+        - "DEMO"
+        - "SIMULATION"
+    AnalyticsActor:
+      type: "string"
+      enum:
+        - "CHILD"
+        - "SYSTEM"
+        - "PARENT"
+    LearningContext:
+      type: "string"
+      enum:
+        - "GAME"
+        - "COUNTERFACTUAL"
+        - "TRAINING"
+    Assistance:
+      type: "string"
+      enum:
+        - "INFORMATION_ONLY"
+        - "HINT"
+        - "WORKED_EXAMPLE"
+        - "ANSWER_REVEALED"
+        - "ADULT_REPORTED"
+    FundingSource:
+      type: "string"
+      enum:
+        - "CONFIRMED_SAVINGS_WITHDRAWAL"
+        - "GUARANTEED_INCOME"
+    BudgetRevisionCause:
+      type: "string"
+      enum:
+        - "INITIAL"
+        - "KNOWN_NEED_OMITTED"
+        - "UNEXPECTED_EXPENSE"
+        - "NEW_INCOME"
+        - "UNSPECIFIED"
+    SavingMovementKind:
+      type: "string"
+      enum:
+        - "DEPOSIT"
+        - "WITHDRAWAL"
+        - "GOAL_PURCHASE"
+    QuestionPurpose:
+      type: "string"
+      enum:
+        - "COMPARE_AMOUNTS"
+        - "EXPLAIN_CAUSE"
+        - "READ_LEDGER"
+    PracticeKind:
+      type: "string"
+      enum:
+        - "PLAN_REVIEW"
+        - "SAVINGS_REHEARSAL"
+    ComparisonSide:
+      type: "string"
+      enum:
+        - "LEFT"
+        - "RIGHT"
+        - "EQUAL"
+    LedgerQuestion:
+      type: "string"
+      enum:
+        - "INCOME"
+        - "EXPENSE"
+        - "DEPOSIT"
+        - "WITHDRAWAL"
+        - "AVAILABLE_REMAINDER"
+        - "SAVINGS_REMAINDER"
+    TimeMachineLifecycleEvent:
+      type: "string"
+      enum:
+        - "time_machine_simulation_started"
+        - "time_machine_simulation_completed"
+        - "time_machine_simulation_diverged"
+        - "time_machine_simulation_unavailable"
+        - "time_machine_question_presented"
+        - "time_machine_explanation_shown"
+    LedgerKind:
+      type: "string"
+      enum:
+        - "INCOME"
+        - "AVAILABLE_EXPENSE"
+        - "SAVINGS_EXPENSE"
+        - "DEPOSIT"
+        - "WITHDRAWAL"
+    AnalyticsFact:
+      type: "object"
+      additionalProperties: false
+      properties:
+        eventId:
+          type: "string"
+          pattern: "\\S"
+        gameRunId:
+          type: "string"
+          pattern: "\\S"
+        episodeId:
+          type: "string"
+          pattern: "\\S"
+        actionId:
+          type: "string"
+          pattern: "\\S"
+        sequence:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        detail:
+          $ref: "#/components/schemas/FactDetail"
+        context:
+          $ref: "#/components/schemas/DecisionContext"
+          default: {}
+        mode:
+          $ref: "#/components/schemas/AnalyticsMode"
+          default: "REAL"
+        actor:
+          $ref: "#/components/schemas/AnalyticsActor"
+          default: "CHILD"
+        learningContext:
+          $ref: "#/components/schemas/LearningContext"
+          default: "GAME"
+        contextFamily:
+          type: "string"
+          default: "unspecified"
+          pattern: "\\S"
+        contentVersion:
+          type: "string"
+          default: "1"
+          pattern: "\\S"
+        gameRulesVersion:
+          type: "string"
+          default: "1"
+          pattern: "\\S"
+        schemaVersion:
+          type: "integer"
+          format: "int32"
+          default: 1
+          minimum: 1
+      required:
+        - "eventId"
+        - "gameRunId"
+        - "episodeId"
+        - "actionId"
+        - "sequence"
+        - "detail"
+      description: "Committed source or reconstructed interval fact. JSON discriminator is _type. Derived facts are versioned projections, not additional child actions."
+    FinancialPosition:
+      type: "object"
+      additionalProperties: false
+      properties:
+        available:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        savings:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        knownNeeds:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+      required:
+        - "available"
+        - "savings"
+        - "knownNeeds"
+    DecisionContext:
+      type: "object"
+      additionalProperties: false
+      properties:
+        presentationId:
+          anyOf:
+            -
+              type: "string"
+            -
+              type: "null"
+          default: null
+        informationPresented:
+          type: "boolean"
+          default: false
+        complete:
+          type: "boolean"
+          default: false
+        before:
+          anyOf:
+            -
+              $ref: "#/components/schemas/FinancialPosition"
+            -
+              type: "null"
+          default: null
+        after:
+          anyOf:
+            -
+              $ref: "#/components/schemas/FinancialPosition"
+            -
+              type: "null"
+          default: null
+        alternativeAvailable:
+          anyOf:
+            -
+              type: "boolean"
+            -
+              type: "null"
+          default: null
+        fundingPlan:
+          anyOf:
+            -
+              $ref: "#/components/schemas/FundingPlan"
+            -
+              type: "null"
+          default: null
+        assistance:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Assistance"
+          uniqueItems: true
+          default: []
+        adultHelpKnown:
+          type: "boolean"
+          default: false
+        financialPeriodId:
+          anyOf:
+            -
+              type: "string"
+            -
+              type: "null"
+          default: null
+        day:
+          anyOf:
+            -
+              type: "integer"
+              format: "int32"
+              minimum: 1
+            -
+              type: "null"
+          default: null
+    FundingPlan:
+      type: "object"
+      additionalProperties: false
+      properties:
+        id:
+          type: "string"
+          pattern: "\\S"
+        amount:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        selected:
+          type: "boolean"
+        feasibleBeforeNeed:
+          type: "boolean"
+        guaranteedAmount:
+          type: "boolean"
+        source:
+          $ref: "#/components/schemas/FundingSource"
+      required:
+        - "id"
+        - "amount"
+        - "selected"
+        - "feasibleBeforeNeed"
+        - "guaranteedAmount"
+        - "source"
+    Interaction:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "interaction"
+        name:
+          type: "string"
+      required:
+        - "_type"
+        - "name"
+    TimeMachineLifecycle:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "time_machine_lifecycle"
+        event:
+          $ref: "#/components/schemas/TimeMachineLifecycleEvent"
+        simulationId:
+          type: "string"
+          pattern: "\\S"
+        resultHash:
+          type: "string"
+          pattern: "\\S"
+        sourceEntryId:
+          type: "string"
+          pattern: "\\S"
+        requestedSequence:
+          type: "integer"
+          format: "int64"
+          minimum: 1
+        reachedSequence:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        status:
+          type: "string"
+          pattern: "\\S"
+        questionId:
+          anyOf:
+            -
+              type: "string"
+            -
+              type: "null"
+          default: null
+        submissionId:
+          anyOf:
+            -
+              type: "string"
+            -
+              type: "null"
+          default: null
+        attempt:
+          anyOf:
+            -
+              type: "integer"
+              format: "int32"
+              minimum: 1
+            -
+              type: "null"
+          default: null
+      required:
+        - "_type"
+        - "event"
+        - "simulationId"
+        - "resultHash"
+        - "sourceEntryId"
+        - "requestedSequence"
+        - "reachedSequence"
+        - "status"
+      description: "reachedSequence must not exceed requestedSequence. Lifecycle provenance alone is not skill success."
+    PracticeAnswer:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "practice_answer"
+        questionId:
+          type: "string"
+          pattern: "\\S"
+        kind:
+          $ref: "#/components/schemas/PracticeKind"
+        selectedAnswerId:
+          type: "string"
+          pattern: "\\S"
+        expectedAnswerId:
+          type: "string"
+          pattern: "\\S"
+        attempt:
+          type: "integer"
+          format: "int32"
+          minimum: 1
+        guidedRecovery:
+          type: "boolean"
+      required:
+        - "_type"
+        - "questionId"
+        - "kind"
+        - "selectedAnswerId"
+        - "expectedAnswerId"
+        - "attempt"
+        - "guidedRecovery"
+    BudgetConfirmed:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "budget_confirmed"
+        planId:
+          type: "string"
+          pattern: "\\S"
+        planVersion:
+          type: "integer"
+          format: "int32"
+          minimum: 1
+        allocationBase:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        needs:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        wants:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        savings:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        reserve:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        cause:
+          $ref: "#/components/schemas/BudgetRevisionCause"
+      required:
+        - "_type"
+        - "planId"
+        - "planVersion"
+        - "allocationBase"
+        - "needs"
+        - "wants"
+        - "savings"
+        - "reserve"
+        - "cause"
+    OptionalPurchase:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "optional_purchase"
+        itemId:
+          type: "string"
+          pattern: "\\S"
+        price:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        purchased:
+          type: "boolean"
+      required:
+        - "_type"
+        - "itemId"
+        - "price"
+        - "purchased"
+    IncomeWindow:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "income_window"
+        windowId:
+          type: "string"
+        closed:
+          type: "boolean"
+        historyComplete:
+          type: "boolean"
+        managedDecisionIds:
+          type: "array"
+          items:
+            type: "string"
+        knownNeedsMet:
+          type: "boolean"
+        avoidableUncoveredNeedIds:
+          type: "array"
+          items:
+            type: "string"
+          default: []
+        availableRemedyWasShown:
+          type: "boolean"
+          default: false
+      required:
+        - "_type"
+        - "windowId"
+        - "closed"
+        - "historyComplete"
+        - "managedDecisionIds"
+        - "knownNeedsMet"
+    SavingMovement:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "saving_movement"
+        operationId:
+          type: "string"
+          pattern: "\\S"
+        goalId:
+          type: "string"
+          pattern: "\\S"
+        incomeWindowId:
+          type: "string"
+          pattern: "\\S"
+        kind:
+          $ref: "#/components/schemas/SavingMovementKind"
+        amount:
+          type: "integer"
+          format: "int64"
+          minimum: 1
+      required:
+        - "_type"
+        - "operationId"
+        - "goalId"
+        - "incomeWindowId"
+        - "kind"
+        - "amount"
+    SavingCycleClosed:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "saving_cycle_closed"
+        goalId:
+          type: "string"
+        historyComplete:
+          type: "boolean"
+      required:
+        - "_type"
+        - "goalId"
+        - "historyComplete"
+    SavingIntentionResolved:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "saving_intention_resolved"
+        goalId:
+          type: "string"
+          pattern: "\\S"
+        opportunityId:
+          type: "string"
+          pattern: "\\S"
+        promisedAmount:
+          type: "integer"
+          format: "int64"
+          minimum: 1
+        depositedAmount:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        priorityUnchanged:
+          type: "boolean"
+        deliberatelySkipped:
+          type: "boolean"
+      required:
+        - "_type"
+        - "goalId"
+        - "opportunityId"
+        - "promisedAmount"
+        - "depositedAmount"
+        - "priorityUnchanged"
+        - "deliberatelySkipped"
+    DesireDeferred:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "desire_deferred"
+        itemId:
+          type: "string"
+          pattern: "\\S"
+        price:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        desireDeclared:
+          type: "boolean"
+        priorityId:
+          anyOf:
+            -
+              type: "string"
+            -
+              type: "null"
+      required:
+        - "_type"
+        - "itemId"
+        - "price"
+        - "desireDeclared"
+        - "priorityId"
+    PriorityApplied:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "priority_applied"
+        priorityId:
+          type: "string"
+          pattern: "\\S"
+        operationId:
+          type: "string"
+          pattern: "\\S"
+        amount:
+          type: "integer"
+          format: "int64"
+          minimum: 1
+      required:
+        - "_type"
+        - "priorityId"
+        - "operationId"
+        - "amount"
+    PriorityConflict:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "priority_conflict"
+        priorityId:
+          type: "string"
+        conditionsUnchanged:
+          type: "boolean"
+        alternativePreservedPriority:
+          type: "boolean"
+        explanation:
+          anyOf:
+            -
+              $ref: "#/components/schemas/ExplainCause"
+            -
+              type: "null"
+      required:
+        - "_type"
+        - "priorityId"
+        - "conditionsUnchanged"
+        - "alternativePreservedPriority"
+        - "explanation"
+    ReserveDecision:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "reserve_decision"
+        intentionId:
+          type: "string"
+        declaredAmount:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        remainingAmount:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        usedForUnexpectedExpense:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        intervalClosed:
+          type: "boolean"
+        applications:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/ReserveApplication"
+          default: []
+      required:
+        - "_type"
+        - "intentionId"
+        - "declaredAmount"
+        - "remainingAmount"
+        - "usedForUnexpectedExpense"
+        - "intervalClosed"
+    UnexpectedExpense:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "unexpected_expense"
+        operationId:
+          type: "string"
+          pattern: "\\S"
+        amount:
+          type: "integer"
+          format: "int64"
+          minimum: 1
+        previouslyDisclosed:
+          type: "boolean"
+      required:
+        - "_type"
+        - "operationId"
+        - "amount"
+        - "previouslyDisclosed"
+    RecoveryAction:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "recovery_action"
+        expenseOperationId:
+          type: "string"
+        selectedActionId:
+          type: "string"
+        completed:
+          type: "boolean"
+      required:
+        - "_type"
+        - "expenseOperationId"
+        - "selectedActionId"
+        - "completed"
+    ResourceChoice:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "resource_choice"
+        chosenOptionId:
+          type: "string"
+        chosenCost:
+          $ref: "#/components/schemas/ResourceCost"
+        alternativeCost:
+          $ref: "#/components/schemas/ResourceCost"
+        energyBefore:
+          type: "integer"
+          format: "int32"
+          minimum: 0
+        availableTimeBefore:
+          type: "integer"
+          format: "int32"
+          minimum: 0
+        priorityId:
+          anyOf:
+            -
+              type: "string"
+            -
+              type: "null"
+        priorityMoney:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        priorityEnergy:
+          type: "integer"
+          format: "int32"
+          minimum: 0
+        priorityTime:
+          type: "integer"
+          format: "int32"
+          minimum: 0
+        chosenPriorityFeasible:
+          anyOf:
+            -
+              type: "boolean"
+            -
+              type: "null"
+          default: null
+        alternativePriorityFeasible:
+          anyOf:
+            -
+              type: "boolean"
+            -
+              type: "null"
+          default: null
+      required:
+        - "_type"
+        - "chosenOptionId"
+        - "chosenCost"
+        - "alternativeCost"
+        - "energyBefore"
+        - "availableTimeBefore"
+        - "priorityId"
+        - "priorityMoney"
+        - "priorityEnergy"
+        - "priorityTime"
+    EarningPlan:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "earning_plan"
+        offerId:
+          type: "string"
+        priorityId:
+          anyOf:
+            -
+              type: "string"
+            -
+              type: "null"
+        startedDay:
+          type: "integer"
+          format: "int32"
+          minimum: 1
+        deadlineDay:
+          type: "integer"
+          format: "int32"
+          minimum: 1
+        effortRequired:
+          type: "integer"
+          format: "int32"
+          minimum: 0
+        availableEffortAtChoice:
+          type: "integer"
+          format: "int32"
+          minimum: 0
+        maximumReward:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+      required:
+        - "_type"
+        - "offerId"
+        - "priorityId"
+        - "startedDay"
+        - "deadlineDay"
+        - "effortRequired"
+        - "availableEffortAtChoice"
+        - "maximumReward"
+    EarningCompleted:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "earning_completed"
+        offerId:
+          type: "string"
+        day:
+          type: "integer"
+          format: "int32"
+          minimum: 1
+        actualReward:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        actualRewardAccountedFor:
+          type: "boolean"
+      required:
+        - "_type"
+        - "offerId"
+        - "day"
+        - "actualReward"
+        - "actualRewardAccountedFor"
+    QuestionAnswer:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "question_answer"
+        questionId:
+          type: "string"
+          pattern: "\\S"
+        attempt:
+          type: "integer"
+          format: "int32"
+          minimum: 1
+        task:
+          $ref: "#/components/schemas/AssessmentTask"
+        answerWasRevealed:
+          type: "boolean"
+          default: false
+        seriesClosed:
+          type: "boolean"
+          default: true
+        comparisonFamily:
+          anyOf:
+            -
+              type: "string"
+            -
+              type: "null"
+          default: null
+        simulationId:
+          anyOf:
+            -
+              type: "string"
+            -
+              type: "null"
+          default: null
+      required:
+        - "_type"
+        - "questionId"
+        - "attempt"
+        - "task"
+    ComparableApplication:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "comparable_application"
+        comparisonFamily:
+          type: "string"
+        sourceActionId:
+          type: "string"
+        priorityPreserved:
+          type: "boolean"
+      required:
+        - "_type"
+        - "comparisonFamily"
+        - "sourceActionId"
+        - "priorityPreserved"
+    ReserveApplication:
+      type: "object"
+      additionalProperties: false
+      properties:
+        expenseOperationId:
+          type: "string"
+          pattern: "\\S"
+        amount:
+          type: "integer"
+          format: "int64"
+          minimum: 1
+      required:
+        - "expenseOperationId"
+        - "amount"
+    ResourceCost:
+      type: "object"
+      additionalProperties: false
+      properties:
+        money:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        energy:
+          type: "integer"
+          format: "int32"
+          minimum: 0
+        time:
+          type: "integer"
+          format: "int32"
+          minimum: 0
+      required:
+        - "money"
+        - "energy"
+        - "time"
+    CompareAmounts:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "compare_amounts"
+        left:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        right:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        chosen:
+          $ref: "#/components/schemas/ComparisonSide"
+        purpose:
+          type: "string"
+          const: "COMPARE_AMOUNTS"
+          default: "COMPARE_AMOUNTS"
+      required:
+        - "_type"
+        - "left"
+        - "right"
+        - "chosen"
+    ExplainCause:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "explain_cause"
+        expectedOptionId:
+          type: "string"
+          pattern: "\\S"
+        chosenOptionId:
+          type: "string"
+          pattern: "\\S"
+        sourceFactIds:
+          type: "array"
+          items:
+            type: "string"
+          minItems: 1
+        purpose:
+          type: "string"
+          const: "EXPLAIN_CAUSE"
+          default: "EXPLAIN_CAUSE"
+      required:
+        - "_type"
+        - "expectedOptionId"
+        - "chosenOptionId"
+        - "sourceFactIds"
+    ReadLedger:
+      type: "object"
+      additionalProperties: false
+      properties:
+        _type:
+          type: "string"
+          const: "read_ledger"
+        openingAvailable:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        openingSavings:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        entries:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/LedgerEntry"
+        question:
+          $ref: "#/components/schemas/LedgerQuestion"
+        answer:
+          type: "integer"
+          format: "int64"
+        purpose:
+          type: "string"
+          const: "READ_LEDGER"
+          default: "READ_LEDGER"
+      required:
+        - "_type"
+        - "openingAvailable"
+        - "openingSavings"
+        - "entries"
+        - "question"
+        - "answer"
+    LedgerEntry:
+      type: "object"
+      additionalProperties: false
+      properties:
+        operationId:
+          type: "string"
+          pattern: "\\S"
+        kind:
+          $ref: "#/components/schemas/LedgerKind"
+        amount:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+      required:
+        - "operationId"
+        - "kind"
+        - "amount"
+    ObservationOutcome:
+      type: "string"
+      enum:
+        - "SUPPORTED"
+        - "DIFFICULTY"
+        - "NEUTRAL"
+        - "INSUFFICIENT_DATA"
+    ObservationEligibility:
+      type: "string"
+      enum:
+        - "ELIGIBLE"
+        - "NOT_ELIGIBLE"
+        - "UNDETERMINED"
+    EpisodeCompletion:
+      type: "string"
+      enum:
+        - "COMPLETE"
+        - "PENDING"
+    ObservationReason:
+      type: "string"
+      enum:
+        - "CONTEXT_MISSING"
+        - "PRESENTATION_MISSING"
+        - "INVALID_CONTEXT"
+        - "EPISODE_PENDING"
+        - "CORRECT_COMPARISON"
+        - "INCORRECT_COMPARISON"
+        - "VALID_PLAN"
+        - "KNOWN_NEED_OMITTED"
+        - "ORIGINAL_SHORTFALL"
+        - "INFEASIBLE_ALLOCATION"
+        - "UNKNOWN_REVISION_CAUSE"
+        - "NEEDS_COVERED"
+        - "AVOIDABLE_NEEDS_GAP"
+        - "FUNDING_PLAN_SELECTED"
+        - "NO_AVAILABLE_CHOICE"
+        - "INTERVAL_COVERED"
+        - "NO_MANAGED_DECISION"
+        - "SAVING_PROGRESS"
+        - "SAVING_INTENTION_NOT_APPLIED"
+        - "CIRCULAR_TRANSFER"
+        - "NO_SAVING_OPPORTUNITY"
+        - "PRIORITY_APPLIED"
+        - "PRIORITY_CONFLICT_MISUNDERSTOOD"
+        - "DESIRE_UNKNOWN"
+        - "PRIORITY_UNKNOWN"
+        - "RESERVE_PRESERVED"
+        - "RESERVE_USED"
+        - "RESERVE_OVERSTATED"
+        - "NO_RESERVE_INTENTION"
+        - "RECOVERY_COMPLETED"
+        - "GAP_WORSENED"
+        - "NO_EXTERNAL_EXPENSE"
+        - "CHANGE_NOT_UNEXPECTED"
+        - "PRIORITY_RESOURCE_PRESERVED"
+        - "PRIORITY_RESOURCE_LOST"
+        - "NO_RANKED_ALTERNATIVE"
+        - "EARNING_PLAN_COMPLETED"
+        - "EARNING_PLAN_INFEASIBLE"
+        - "CORRECT_EXPLANATION"
+        - "INCORRECT_EXPLANATION"
+        - "EXPLANATION_APPLIED"
+        - "CORRECT_LEDGER_ANSWER"
+        - "INCORRECT_LEDGER_ANSWER"
+    SkillObservation:
+      type: "object"
+      additionalProperties: false
+      properties:
+        gameRunId:
+          type: "string"
+        skill:
+          $ref: "#/components/schemas/SkillId"
+        episodeId:
+          type: "string"
+        outcome:
+          $ref: "#/components/schemas/ObservationOutcome"
+        eligibility:
+          $ref: "#/components/schemas/ObservationEligibility"
+        completion:
+          $ref: "#/components/schemas/EpisodeCompletion"
+        reason:
+          $ref: "#/components/schemas/ObservationReason"
+        sourceEventIds:
+          type: "array"
+          items:
+            type: "string"
+        assistance:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Assistance"
+          uniqueItems: true
+        adultHelpKnown:
+          type: "boolean"
+        learningContexts:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/LearningContext"
+          uniqueItems: true
+        contextFamilies:
+          type: "array"
+          items:
+            type: "string"
+          uniqueItems: true
+        measures:
+          type: "object"
+          additionalProperties:
+            type: "integer"
+            format: "int64"
+          default: {}
+        ruleVersion:
+          type: "integer"
+          format: "int32"
+          default: 1
+      required:
+        - "gameRunId"
+        - "skill"
+        - "episodeId"
+        - "outcome"
+        - "eligibility"
+        - "completion"
+        - "reason"
+        - "sourceEventIds"
+        - "assistance"
+        - "adultHelpKnown"
+        - "learningContexts"
+        - "contextFamilies"
+      description: "Existing per-episode evaluator evidence. SUPPORTED is not MASTERED. Counts/assistance are not additive scores."
+    SkillId:
+      type: "string"
+      enum:
+        - "FIN-01"
+        - "FIN-02"
+        - "FIN-03"
+        - "FIN-04"
+        - "FIN-05"
+        - "FIN-06"
+        - "FIN-07"
+        - "FIN-08"
+        - "FIN-09"
+        - "FIN-10"
+        - "FIN-11"
+        - "FIN-12"
+    SkillStatus:
+      type: "string"
+      enum:
+        - "MASTERED"
+        - "PRACTICING"
+        - "NO_DATA"
+        - "HAS_PROBLEM"
+      description: "Backend-provided status vocabulary. No automatic mapping from one episode outcome to a mastery status."
+    AnalyticsUploadRequest:
+      type: "object"
+      additionalProperties: false
+      properties:
+        batchId:
+          type: "string"
+          pattern: "\\S"
+        gameRunId:
+          type: "string"
+          pattern: "\\S"
+        throughHistorySequence:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        facts:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/AnalyticsFact"
+        skills:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/SkillEvidenceDto"
+          minItems: 12
+          maxItems: 12
+          allOf:
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-01"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-02"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-03"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-04"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-05"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-06"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-07"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-08"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-09"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-10"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-11"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-12"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+          description: "Exactly one entry for each FIN-01 through FIN-12; counts are evidence, not mastery thresholds."
+        schemaVersion:
+          type: "integer"
+          format: "int32"
+          default: 1
+          minimum: 1
+        projectionVersion:
+          type: "integer"
+          format: "int32"
+          default: 4
+          minimum: 1
+        evaluatorVersion:
+          type: "integer"
+          format: "int32"
+          default: 1
+          minimum: 1
+      required:
+        - "batchId"
+        - "gameRunId"
+        - "throughHistorySequence"
+        - "facts"
+        - "skills"
+      description: "Complete evidence projection from one validated snapshot. All facts and observations belong to gameRunId. Fact eventId values are unique; sequences do not exceed throughHistorySequence. Each observation sourceEventId references facts. These cross-field invariants require server validation."
+    SkillEvidenceDto:
+      type: "object"
+      additionalProperties: false
+      properties:
+        skillId:
+          $ref: "#/components/schemas/SkillId"
+        completedEpisodes:
+          type: "integer"
+          format: "int32"
+          minimum: 0
+        supportedEpisodes:
+          type: "integer"
+          format: "int32"
+          minimum: 0
+        difficultyEpisodes:
+          type: "integer"
+          format: "int32"
+          minimum: 0
+        neutralEpisodes:
+          type: "integer"
+          format: "int32"
+          minimum: 0
+        pendingEpisodes:
+          type: "integer"
+          format: "int32"
+          minimum: 0
+        incompleteEpisodes:
+          type: "integer"
+          format: "int32"
+          minimum: 0
+        supportedWithoutGameHints:
+          type: "integer"
+          format: "int32"
+          minimum: 0
+        assistedEpisodes:
+          type: "integer"
+          format: "int32"
+          minimum: 0
+        observations:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/SkillObservation"
+      required:
+        - "skillId"
+        - "completedEpisodes"
+        - "supportedEpisodes"
+        - "difficultyEpisodes"
+        - "neutralEpisodes"
+        - "pendingEpisodes"
+        - "incompleteEpisodes"
+        - "supportedWithoutGameHints"
+        - "assistedEpisodes"
+        - "observations"
+      description: "All observations must belong to skillId. The backend verifies counters against evidence and applies a separate versioned status policy."
+    SkillAssessmentDto:
+      type: "object"
+      additionalProperties: false
+      properties:
+        skillId:
+          $ref: "#/components/schemas/SkillId"
+        status:
+          $ref: "#/components/schemas/SkillStatus"
+        policyVersion:
+          type: "string"
+          pattern: "\\S"
+      required:
+        - "skillId"
+        - "status"
+        - "policyVersion"
+      description: "Server assessment under an agreed policyVersion; the client does not choose numerical mastery thresholds."
+    AnalyticsUploadResponse:
+      type: "object"
+      additionalProperties: false
+      properties:
+        batchId:
+          type: "string"
+          pattern: "\\S"
+        gameRunId:
+          type: "string"
+          pattern: "\\S"
+        acceptedThroughHistorySequence:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        acceptedEventIds:
+          type: "array"
+          items:
+            type: "string"
+            pattern: "\\S"
+          uniqueItems: true
+        schemaVersion:
+          type: "integer"
+          format: "int32"
+          default: 1
+          minimum: 1
+      required:
+        - "batchId"
+        - "gameRunId"
+        - "acceptedThroughHistorySequence"
+        - "acceptedEventIds"
+    SkillAssessmentsResponse:
+      type: "object"
+      additionalProperties: false
+      properties:
+        gameRunId:
+          type: "string"
+          pattern: "\\S"
+        basedOnHistorySequence:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+        skills:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/SkillAssessmentDto"
+          minItems: 12
+          maxItems: 12
+          allOf:
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-01"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-02"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-03"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-04"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-05"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-06"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-07"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-08"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-09"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-10"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-11"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+            -
+              contains:
+                type: "object"
+                properties:
+                  skillId:
+                    const: "FIN-12"
+                required:
+                  - "skillId"
+              minContains: 1
+              maxContains: 1
+          description: "Exactly one entry for each FIN-01 through FIN-12; counts are evidence, not mastery thresholds."
+        schemaVersion:
+          type: "integer"
+          format: "int32"
+          default: 1
+          minimum: 1
+      required:
+        - "gameRunId"
+        - "basedOnHistorySequence"
+        - "skills"
+    FactDetail:
+      oneOf:
+        -
+          $ref: "#/components/schemas/Interaction"
+        -
+          $ref: "#/components/schemas/TimeMachineLifecycle"
+        -
+          $ref: "#/components/schemas/PracticeAnswer"
+        -
+          $ref: "#/components/schemas/BudgetConfirmed"
+        -
+          $ref: "#/components/schemas/OptionalPurchase"
+        -
+          $ref: "#/components/schemas/IncomeWindow"
+        -
+          $ref: "#/components/schemas/SavingMovement"
+        -
+          $ref: "#/components/schemas/SavingCycleClosed"
+        -
+          $ref: "#/components/schemas/SavingIntentionResolved"
+        -
+          $ref: "#/components/schemas/DesireDeferred"
+        -
+          $ref: "#/components/schemas/PriorityApplied"
+        -
+          $ref: "#/components/schemas/PriorityConflict"
+        -
+          $ref: "#/components/schemas/ReserveDecision"
+        -
+          $ref: "#/components/schemas/UnexpectedExpense"
+        -
+          $ref: "#/components/schemas/RecoveryAction"
+        -
+          $ref: "#/components/schemas/ResourceChoice"
+        -
+          $ref: "#/components/schemas/EarningPlan"
+        -
+          $ref: "#/components/schemas/EarningCompleted"
+        -
+          $ref: "#/components/schemas/QuestionAnswer"
+        -
+          $ref: "#/components/schemas/ComparableApplication"
+      discriminator:
+        propertyName: "_type"
+        mapping:
+          interaction: "#/components/schemas/Interaction"
+          time_machine_lifecycle: "#/components/schemas/TimeMachineLifecycle"
+          practice_answer: "#/components/schemas/PracticeAnswer"
+          budget_confirmed: "#/components/schemas/BudgetConfirmed"
+          optional_purchase: "#/components/schemas/OptionalPurchase"
+          income_window: "#/components/schemas/IncomeWindow"
+          saving_movement: "#/components/schemas/SavingMovement"
+          saving_cycle_closed: "#/components/schemas/SavingCycleClosed"
+          saving_intention_resolved: "#/components/schemas/SavingIntentionResolved"
+          desire_deferred: "#/components/schemas/DesireDeferred"
+          priority_applied: "#/components/schemas/PriorityApplied"
+          priority_conflict: "#/components/schemas/PriorityConflict"
+          reserve_decision: "#/components/schemas/ReserveDecision"
+          unexpected_expense: "#/components/schemas/UnexpectedExpense"
+          recovery_action: "#/components/schemas/RecoveryAction"
+          resource_choice: "#/components/schemas/ResourceChoice"
+          earning_plan: "#/components/schemas/EarningPlan"
+          earning_completed: "#/components/schemas/EarningCompleted"
+          question_answer: "#/components/schemas/QuestionAnswer"
+          comparable_application: "#/components/schemas/ComparableApplication"
+      description: "Exhaustive concrete variants of the Kotlin sealed FactDetail interface; properties match constructor fields and encoded defaults."
+    AssessmentTask:
+      oneOf:
+        -
+          $ref: "#/components/schemas/CompareAmounts"
+        -
+          $ref: "#/components/schemas/ExplainCause"
+        -
+          $ref: "#/components/schemas/ReadLedger"
+      discriminator:
+        propertyName: "_type"
+        mapping:
+          compare_amounts: "#/components/schemas/CompareAmounts"
+          explain_cause: "#/components/schemas/ExplainCause"
+          read_ledger: "#/components/schemas/ReadLedger"
+      description: "Concrete task variants. purpose is an encoded property with a default; computed correctness is not serialized."

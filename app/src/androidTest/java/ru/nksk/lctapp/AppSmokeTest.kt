@@ -44,7 +44,7 @@ class AppSmokeTest {
 
     @Before fun waitForMenu() {
         compose.waitUntil(10_000) {
-            compose.onAllNodesWithText("Выбрать большую цель")
+            compose.onAllNodesWithText("Выбрать цель накопления")
                 .fetchSemanticsNodes().isNotEmpty()
         }
     }

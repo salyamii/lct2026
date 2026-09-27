@@ -1,0 +1,30 @@
+{
+  "resource": "goal_preview_kingdom_map",
+  "category": "Goal chapter previews",
+  "generated_at": "2026-09-25",
+  "tool": "image_gen.imagegen",
+  "mode": "built-in generation",
+  "prompt": "Use case: stylized-concept.\nAsset type: final landscape chapter preview illustration for a polished cozy fantasy mobile adventure for children. Aspect ratio 3:2, 1536 x 1024 preferred.\nStyle: detailed dimensional 3D storybook game art, soft rounded craftsmanship, clean readable silhouettes, rich tactile stone/wood/brass textures, cinematic painterly lighting, premium production finish. The same coherent medieval fantasy world as a warm sandstone observatory with blue velvet banners, brass astronomy instruments, amber lanterns and distant castle mountains. Midnight blue and teal shadows, amber golden light.\nComposition: one strong centered subject immediately recognizable at small mobile-card size, natural perspective and coherent spatial depth, landscape full-bleed art only, keep essential subject within central 80% with comfortable margins. No fox, people, animals, characters, UI, borders, labels, logos, readable lettering, text, coins, graphs, finance motifs, collage or split panels. This is original game artwork, not a screenshot or app mockup.\nPrimary scene: A large open parchment kingdom atlas centered on a beautiful cartographer's oak desk, with a brass compass, feather quill and small closed inkpot nearby. The atlas contains visually clear hand-drawn mountain ranges, winding rivers and roads, with no letters, numbers or readable words. Beyond the desk a softly magical physical miniature relief landscape of the same kingdom rises naturally from the far edge of the atlas: miniature mountains, valleys, a little castle and a winding road, all seamlessly part of one coherent 3D scene rather than a flat graphic or collage. Warm amber lamplight over parchment, deep midnight-blue observatory/workshop shadows. Keep atlas large and clear; this represents exploring and charting a kingdom, not a financial chart.",
+  "reference_context": "Visual style inspected from app/src/main/res/drawable-nodpi/location_observatory.webp; no reference image supplied to generation tool.",
+  "generated_source_file": "C:\\Users\\User\\.codex\\generated_images\\01a0d849-d082-7633-9364-a9b22475f6e8\\exec-fa85b347-30d3-41f2-9d8c-b67cbda38789.png",
+  "source_file": "docs/design/assets/sources/goal-previews-2026-09-25/goal_preview_kingdom_map.png",
+  "source_sha256": "b27cd1386cfb733bdf7d45080e52522fe83db934c076abc5a253d553665d062d",
+  "source_bytes": 2909559,
+  "path": "app/src/main/res/drawable-nodpi/goal_preview_kingdom_map.webp",
+  "sha256": "a3dd97531cb37862936e36d0b7eee401e0b42aff86a21717a0e155e77c91424d",
+  "bytes": 2004000,
+  "width": 1536,
+  "height": 1024,
+  "rgba_sha256": "42e33d13ee658ae80722c5d1beff5288739a668a6b5a3dc2c3e39f04f3279bb9",
+  "conversion": "Pillow WebP lossless=True, exact=True, quality=100, method=6; full original canvas, no resizing, cropping, retouching or compositing.",
+  "verification": "PNG and WebP decoded RGBA dimensions and pixel bytes match exactly.",
+  "rgba_hash_format": "SHA-256(width uint32 big endian + height uint32 big endian + RGBA pixel bytes), matching verify_assets.py.",
+  "source_path": "docs/design/assets/sources/goal-previews-2026-09-25/goal_preview_kingdom_map.png",
+  "alpha_bounds": [
+    0,
+    0,
+    1536,
+    1024
+  ],
+  "lossless_rgba_verified": true
+}

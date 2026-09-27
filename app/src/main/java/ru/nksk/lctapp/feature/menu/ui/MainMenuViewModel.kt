@@ -38,6 +38,8 @@ internal class MainMenuViewModel @Inject constructor(
     private var freeMealRequested = false
     private val dayNavigation = Channel<Unit>(Channel.BUFFERED)
     val openDay = dayNavigation.receiveAsFlow()
+    private val financeNavigation = Channel<Unit>(Channel.BUFFERED)
+    val openFinance = financeNavigation.receiveAsFlow()
 
     init { retry() }
 
@@ -53,7 +55,7 @@ internal class MainMenuViewModel @Inject constructor(
                     if (this@MainMenuViewModel.saved != game) {
                         notice = null
                         if (game.engine?.ateToday != false || game.engine?.phase == DayPhase.FINISHED ||
-                            game.economy.balance >= session.catalog.meals.first { it.price > 0 }.price) {
+                            game.economy.availableBalance >= session.catalog.meals.first { it.price > 0 }.price) {
                             freeMealRequested = false
                         }
                     }
@@ -107,7 +109,7 @@ internal class MainMenuViewModel @Inject constructor(
 
     private fun offersFreeMeal(game: GameState): Boolean = freeMealRequested &&
         game.engine?.let { !it.ateToday && it.phase != DayPhase.FINISHED } == true &&
-        game.economy.balance < session.catalog.meals.first { it.price > 0 }.price
+        game.economy.availableBalance < session.catalog.meals.first { it.price > 0 }.price
 
     private fun act(game: GameState, command: EngineCommand?, open: Boolean) {
         if (busy) return
@@ -128,7 +130,9 @@ internal class MainMenuViewModel @Inject constructor(
                     }
                     null -> Unit
                 }
-                if (open) dayNavigation.send(Unit)
+                if (result is EngineResult.Blocked && result.reason is BlockReason.FinancialPracticeRequired)
+                    financeNavigation.send(Unit)
+                else if (open) dayNavigation.send(Unit)
             } catch (cancelled: CancellationException) { throw cancelled
             } catch (_: Exception) {
                 notice = "Не удалось сохранить действие. Попробуй ещё раз."

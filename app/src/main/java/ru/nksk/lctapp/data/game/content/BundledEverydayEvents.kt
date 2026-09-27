@@ -6,7 +6,7 @@ import ru.nksk.lctapp.domain.engine.EventPolicy
 import ru.nksk.lctapp.domain.engine.GameCatalog
 
 /** Independent Figma cards; chapter-specific failures await their actual item/location guards. */
-internal fun GameCatalog.withEverydayEvents(): GameCatalog {
+internal fun GameCatalog.withLegacyEverydayEvents(): GameCatalog {
     val cap = "figma-2164-2-v1"
     val resin = "figma-2313-2-v1"
     val item = "figma-2164-2-explorer-cap-v1"

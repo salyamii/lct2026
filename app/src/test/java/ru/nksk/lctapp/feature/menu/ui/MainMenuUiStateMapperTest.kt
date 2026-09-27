@@ -157,6 +157,7 @@ class MainMenuUiStateMapperTest {
     fun specialStatesRenderWithoutSelectedAccessories() {
         val initial = createInitialGameState()
         val expectedArtwork = mapOf(
+            PetVisualState.NEEDS_HELP to R.drawable.ryzhik_cub_state_sick_copper,
             PetVisualState.HUNGRY to R.drawable.ryzhik_cub_state_hungry_copper,
             PetVisualState.TIRED to R.drawable.ryzhik_cub_state_tired_copper,
             PetVisualState.THINKING to R.drawable.ryzhik_cub_state_thoughtful_copper,
@@ -176,7 +177,6 @@ class MainMenuUiStateMapperTest {
     fun unmappedStatesKeepTheirDescriptionWithoutSubstitutingAnotherAppearance() {
         val initial = createInitialGameState()
         val descriptions = mapOf(
-            PetVisualState.NEEDS_HELP to R.string.menu_pet_needs_help,
             PetVisualState.WORRIED to R.string.menu_pet_worried,
         )
         for ((visualState, description) in descriptions) {

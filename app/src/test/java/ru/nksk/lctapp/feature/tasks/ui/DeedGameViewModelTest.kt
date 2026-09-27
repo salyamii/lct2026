@@ -27,6 +27,13 @@ import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.minigame.PriceQuizState
+import ru.nksk.lctapp.domain.minigame.QuizQuestion
+import ru.nksk.lctapp.domain.analytics.AnalyticsFact
+import ru.nksk.lctapp.domain.analytics.SkillId
+import ru.nksk.lctapp.domain.analytics.SkillEvaluator
+import ru.nksk.lctapp.domain.history.AuditEntry
+import ru.nksk.lctapp.domain.history.AuditType
+import ru.nksk.lctapp.domain.history.HistorySourceGuard
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DeedGameViewModelTest {
@@ -116,6 +123,39 @@ class DeedGameViewModelTest {
 
     private fun completedQuiz() = PriceQuizState.create().copy(current = 5, correctAnswers = 3)
 
+    @Test fun aStoryBoardCompletesItsChoiceWithoutPretendingToBePaidWork() = runTest(dispatcher) {
+        val f = fixture(storyGame = true)
+        runCurrent()
+        val before = f.repo.read()
+        val exits = mutableListOf<String?>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { f.model.exit.collect { exits += it } }
+        assertTrue(f.model.uiState.value.presentation!!.storyAction)
+        assertEquals(DeedGameType.PRECISION, f.model.uiState.value.type)
+        f.model.finishPrecision(ru.nksk.lctapp.domain.minigame.TargetStopState.create())
+        runCurrent()
+        assertEquals(0, f.repo.writes)
+        f.model.finishPrecision(ru.nksk.lctapp.domain.minigame.TargetStopState.create().copy(round = 5, hits = 2, lastHit = true))
+        runCurrent()
+        assertEquals(1, f.repo.writes)
+        assertEquals(before.economy, f.repo.read().economy)
+        assertEquals(before.story.decisions.size + 1, f.repo.read().story.decisions.size)
+        assertEquals(EventStatus.COMPLETED, f.repo.read().engine!!.events.single { it.id == f.id }.status)
+        assertEquals(1, exits.size)
+        assertFalse(exits.single().orEmpty().contains("Награда"))
+    }
+
+    @Test fun backDuringInitialLoadingWaitsForTheSnapshotAndPersistsPause() = runTest(dispatcher) {
+        val f = fixture()
+        val exits = mutableListOf<String?>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { f.model.exit.collect { exits += it } }
+        f.model.leave() // No observer turn has supplied latest yet.
+        assertTrue(exits.isEmpty())
+        runCurrent()
+        assertEquals(EventStatus.PAUSED, f.repo.read().engine!!.events.single { it.id == f.id }.status)
+        assertEquals(listOf<String?>(null), exits)
+        assertTrue(f.repo.read().story.decisions.isEmpty())
+    }
+
     @Test fun zeroRewardStillConfirmsCompletedWork() = runTest(dispatcher) {
         val f = fixture()
         runCurrent()
@@ -128,10 +168,42 @@ class DeedGameViewModelTest {
         assertEquals(100L, f.repo.read().economy.balance)
     }
 
-    private suspend fun fixture(): Fixture {
+    @Test fun actualComparisonAnswersAreDurableBeforePayoutAndAreNotDuplicated() = runTest(dispatcher) {
+        val f = fixture()
+        runCurrent()
+        val gate = CompletableDeferred<Unit>()
+        f.repo.beforeFacts = { gate.await() }
+        val evidence = PriceQuizEvidence("series", (0 until 5).map { index ->
+            PriceQuizAnswerEvidence(index, 80, 20, index < 3, true, index == 4)
+        })
+        val game = PriceQuizState(List(5) { QuizQuestion(80, 20) }, current = 5, correctAnswers = 3)
+        f.model.finishComparison(game, evidence)
+        runCurrent()
+        assertTrue(f.model.uiState.value.busy)
+        assertEquals(0, f.repo.writes)
+        assertTrue(f.repo.readHistory().flatMap { it.facts }.isEmpty())
+        gate.complete(Unit)
+        runCurrent()
+        assertEquals(1, f.repo.writes)
+        val facts = f.repo.readHistory().flatMap { it.facts }
+        assertEquals(5, facts.size)
+        val observation = SkillEvaluator().evaluate(facts).single()
+        assertEquals(SkillId.COMPARE_AMOUNTS, observation.skill)
+        assertEquals(3L, observation.measures["correctFirstAnswers"])
+        f.model.finishComparison(game, evidence)
+        runCurrent()
+        assertEquals(5, f.repo.readHistory().flatMap { it.facts }.size)
+        assertEquals(1, f.repo.writes)
+    }
+
+    private suspend fun fixture(storyGame: Boolean = false): Fixture {
         val initial = createInitialGameState().let { it.copy(economy = EconomyState(plan = BudgetPlan(35, 20, 20, 25), unallocated = 0, planning = null)) }
         val repo = DeedRepository(initial)
-        val catalog = bundledGameCatalog()
+        val original = bundledGameCatalog()
+        val storyChoice = original.content.choices.single { it.eventId == original.introductionId }.id
+        val catalog = if (storyGame) original.copy(policies = original.policies +
+            (original.introductionId to original.policies.getValue(original.introductionId).copy(
+                choiceGameKinds = mapOf(storyChoice to ru.nksk.lctapp.domain.minigame.DeedGameKind.PRECISION)))) else original
         val content = object : StoryContentRepository {
             private var stored = StoryContent()
             override suspend fun read() = stored
@@ -139,13 +211,14 @@ class DeedGameViewModelTest {
         }
         val session = GameSession(repo, content, catalog, initial)
         assertTrue(session.dispatch(EngineRequest("begin", null, EngineCommand.BeginDay(
-            catalog.storyDayId, catalog.deedPool.take(4), openFirst = true))) is EngineResult.Applied)
+            catalog.storyDayId, if (storyGame) listOf(catalog.introductionId) + catalog.deedPool.take(3) else catalog.deedPool.take(4), openFirst = true))) is EngineResult.Applied)
         assertTrue(session.dispatch(EngineRequest("accept", repo.read().engine!!.revision,
-            EngineCommand.AcceptDeedProposal(repo.read().engine!!.currentEvent!!.id))) is EngineResult.Applied)
+            if (storyGame) EngineCommand.StartStoryGame(repo.read().engine!!.currentEvent!!.id, storyChoice)
+            else EngineCommand.AcceptDeedProposal(repo.read().engine!!.currentEvent!!.id))) is EngineResult.Applied)
         val id = repo.read().engine!!.currentEvent!!.id
         val model = DeedGameViewModel(session)
         store.put("game", model)
-        model.load(id)
+        model.load(id, storyChoice.takeIf { storyGame })
         repo.writes = 0
         return Fixture(repo, session, model, id)
     }
@@ -158,9 +231,21 @@ private class DeedRepository(initial: GameState) : GameRepository {
     var failure: Exception? = null
     var afterWrite: suspend () -> Unit = {}
     var writes = 0
+    var beforeFacts: suspend () -> Unit = {}
+    private val history = mutableListOf(AuditEntry("initial", 1, "run", AuditType.INITIALIZED, after = initial))
     override fun observe() = state
     override suspend fun read() = state.value
     override suspend fun initializeIfAbsent(initial: GameState) = state.value
+    override suspend fun readHistory() = history.toList()
+    override suspend fun recordFacts(facts: List<AnalyticsFact>, sourceGuard: HistorySourceGuard?) {
+        failure?.let { throw it }
+        beforeFacts()
+        sourceGuard?.requireMatches(history)
+        val existing = history.flatMap { it.facts }.map { it.eventId }.toSet()
+        val missing = facts.filter { it.eventId !in existing }
+        if (missing.isNotEmpty()) history += AuditEntry("facts-${history.size}", history.last().sequence + 1,
+            "run", AuditType.FACTS, facts = missing)
+    }
     override suspend fun update(transform: (GameState) -> GameState): GameState {
         failure?.let { throw it }
         val next = transform(state.value)
