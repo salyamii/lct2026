@@ -13,6 +13,7 @@ import ru.nksk.lctapp.core.ui.theme.Rubik
 private val BudgetAccent = Color(0xFF3E31B8)
 private val BudgetMuted = Color(0xFF625E80)
 private val BudgetBorder = Color(0xFFD9DCF5)
+private val BudgetDanger = Color(0xFFA52532)
 
 @Composable
 internal fun BudgetAmountDialog(
@@ -22,6 +23,7 @@ internal fun BudgetAmountDialog(
     val value = input.toLongOrNull()
     val valid = value != null && value in minimum..maximum
     AlertDialog(onDismissRequest = onDismiss, containerColor = GamePaper, titleContentColor = GameInk,
+        textContentColor = GameInk, iconContentColor = GameInk,
         title = { Text(article.title, fontFamily = Rubik) },
         text = {
             OutlinedTextField(value = input, onValueChange = { if (it.all { char -> char in '0'..'9' } && it.length <= 19) input = it },
@@ -31,8 +33,14 @@ internal fun BudgetAmountDialog(
                     "Для минимума ${minimum} монет сначала освободи ${minimum - maximum} из другой статьи"
                     else "Можно распределить от ${minimum} до $maximum") },
                 colors = OutlinedTextFieldDefaults.colors(focusedTextColor = GameInk, unfocusedTextColor = GameInk,
+                    disabledTextColor = BudgetMuted, errorTextColor = BudgetDanger,
+                    errorLabelColor = BudgetDanger, errorSupportingTextColor = BudgetDanger,
+                    errorCursorColor = BudgetDanger, errorBorderColor = BudgetDanger,
                     focusedLabelColor = BudgetAccent, unfocusedLabelColor = BudgetMuted,
+                    disabledLabelColor = BudgetMuted, disabledSupportingTextColor = BudgetMuted,
                     focusedSupportingTextColor = BudgetMuted, unfocusedSupportingTextColor = BudgetMuted,
+                    focusedContainerColor = GamePaper, unfocusedContainerColor = GamePaper,
+                    disabledContainerColor = GamePaper, errorContainerColor = GamePaper,
                     cursorColor = BudgetAccent, focusedBorderColor = BudgetAccent, unfocusedBorderColor = BudgetBorder))
         },
         confirmButton = { TextButton(onClick = { if (valid) onSave(checkNotNull(value)) }, enabled = valid) {

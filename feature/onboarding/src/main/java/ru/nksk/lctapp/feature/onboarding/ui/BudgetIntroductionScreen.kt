@@ -1,17 +1,20 @@
 package ru.nksk.lctapp.feature.onboarding.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -30,57 +33,66 @@ fun BudgetIntroductionScreen(
     saving: Boolean = false,
     saveFailed: Boolean = false,
 ) {
-    AdventureGoalLayout(artwork, artwork.background, "План для приключения",
-        "Назад к выбору цели", onBack, saving = saving, stage = {}) {
-        Column(
-            Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())
-                .padding(horizontal = 22.dp, vertical = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp),
-        ) {
-            GoalHeading("Большие планы начинаются с маленьких решений", artwork)
-            BudgetIntroBody("Цель выбрана! Теперь давай подготовимся к путешествию.", artwork)
-            Column(
-                Modifier.fillMaxWidth().background(Color(0xffefebfb), RoundedCornerShape(20.dp)).padding(18.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                Text("100 монет", color = GoalPurple, fontFamily = artwork.titleFont,
-                    fontWeight = FontWeight.ExtraBold, fontSize = 30.sp)
-                BudgetIntroBody("В начале игры ты получишь 100 монет, а через каждые 7 игровых дней — ещё 100. " +
-                    "Монетки, которые ты не потратишь, останутся у тебя.", artwork)
+    Box(Modifier.fillMaxSize().background(GoalCream)) {
+        Image(painterResource(artwork.background), null, Modifier.matchParentSize(), contentScale = ContentScale.Crop)
+        Column(Modifier.fillMaxSize()) {
+            CustomizationHeader(onBack, artwork, saving = saving, title = "Монеты для приключения",
+                backDescription = "Назад к выбору цели")
+            Spacer(Modifier.height(12.dp))
+            Surface(Modifier.weight(1f).fillMaxWidth(), color = GoalCream,
+                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)) {
+                Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing.only(
+                    WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)), contentAlignment = Alignment.TopCenter) {
+                    Column(Modifier.widthIn(max = 560.dp).fillMaxHeight()) {
+                        BudgetIntroductionContent(artwork, categoryArtwork, saveFailed)
+                        GoalFooter("Распределить монеты", artwork, !saving, onContinue)
+                    }
+                }
             }
-            BudgetIntroBody("Перед началом пути реши, сколько монет на что отложить. " +
-                "Это и есть планирование бюджета. У твоих монет будет четыре назначения:", artwork)
+        }
+    }
+}
+
+@Composable
+private fun ColumnScope.BudgetIntroductionContent(
+    artwork: CustomizationArtwork,
+    categoryArtwork: @Composable (OnboardingBudgetCategory, Modifier) -> Unit,
+    saveFailed: Boolean,
+) {
+    Column(
+        Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())
+            .padding(horizontal = 22.dp, vertical = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        GoalHeading("На что оставим монеты?", artwork)
+        BudgetIntroBody("Гильдия Смотрителей каждую неделю даёт нам 100 монет " +
+            "на исследования и всё необходимое. То, что не потратим, останется у нас.", artwork)
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             BudgetCategoryCard(OnboardingBudgetCategory.Needs, "Нужно",
-                "На еду для твоего спутника. При планировании недели оставь здесь хотя бы 35 монет.",
+                "Нам нужно есть хотя бы раз в день.",
                 Color(0xffe4f2ed), artwork, categoryArtwork)
             BudgetCategoryCard(OnboardingBudgetCategory.Wants, "Хочу",
-                "На приятные покупки и маленькие радости.",
+                "На угощения, игрушки и другие радости.",
                 Color(0xffe8effb), artwork, categoryArtwork)
-            BudgetCategoryCard(OnboardingBudgetCategory.Savings, "Коплю",
-                "На вещи для большой цели. Их можно купить только на монеты из этой части бюджета.",
+            BudgetCategoryCard(OnboardingBudgetCategory.Savings, "В копилку",
+                "Монеты, которые хотим сберечь для большой цели.",
                 Color(0xfffff0d3), artwork, categoryArtwork)
             BudgetCategoryCard(OnboardingBudgetCategory.Reserve, "Запас",
-                "На неожиданности в пути, например ремонт сломанной вещи.",
+                "Пригодится, если в пути что-нибудь сломается.",
                 Color(0xffeee6f7), artwork, categoryArtwork)
-            BudgetIntroBody("Если потратить всё на желания, на важную покупку может не хватить. " +
-                "А если только копить — можно забыть о нужном и приятном. Постарайся найти свой баланс!", artwork)
-            Text("Распредели все монетки между четырьмя категориями. " +
-                "Если планы изменятся, распределение тоже можно изменить.",
-                color = GoalPurple, fontFamily = artwork.bodyFont, fontWeight = FontWeight.Bold,
-                fontSize = 17.sp, lineHeight = 25.sp)
         }
-        if (saveFailed) {
-            Text("Не удалось сохранить игру. Попробуй ещё раз.", Modifier.padding(horizontal = 22.dp),
-                color = MaterialTheme.colorScheme.error, fontFamily = artwork.bodyFont, fontSize = 14.sp)
-        }
-        GoalFooter("Дальше", artwork, !saving, onContinue)
+        BudgetIntroBody("Когда решишь отложить монеты, переложи их в копилку.", artwork)
+    }
+    if (saveFailed) {
+        Text("Не удалось сохранить игру. Попробуй ещё раз.", Modifier.padding(horizontal = 22.dp),
+            color = MaterialTheme.colorScheme.error, fontFamily = artwork.bodyFont, fontSize = 14.sp)
     }
 }
 
 @Composable
 private fun BudgetIntroBody(text: String, artwork: CustomizationArtwork) {
     Text(text, color = GoalInk.copy(alpha = .85f), fontFamily = artwork.bodyFont,
-        fontSize = 17.sp, lineHeight = 25.sp)
+        fontSize = 15.sp, lineHeight = 21.sp)
 }
 
 @Composable
@@ -92,19 +104,16 @@ private fun BudgetCategoryCard(
     artwork: CustomizationArtwork,
     illustration: @Composable (OnboardingBudgetCategory, Modifier) -> Unit,
 ) {
-    val shape = RoundedCornerShape(20.dp)
+    val shape = RoundedCornerShape(18.dp)
     Row(
-        Modifier.fillMaxWidth().background(Color.White.copy(alpha = .8f), shape)
-            .border(2.dp, tint, shape).padding(14.dp),
+        Modifier.fillMaxWidth().background(tint.copy(alpha = .5f), shape).padding(12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.Top,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.size(60.dp).background(tint, RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center) {
-            illustration(category, Modifier.size(60.dp))
-        }
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        illustration(category, Modifier.size(52.dp))
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Text(title, Modifier.semantics { heading() }, color = GoalInk,
-                fontFamily = artwork.titleFont, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                fontFamily = artwork.titleFont, fontWeight = FontWeight.Bold, fontSize = 17.sp)
             BudgetIntroBody(description, artwork)
         }
     }

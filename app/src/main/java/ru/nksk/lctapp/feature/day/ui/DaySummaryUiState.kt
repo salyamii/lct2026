@@ -7,21 +7,32 @@ import ru.nksk.lctapp.domain.engine.DayJournalEntry
 import ru.nksk.lctapp.domain.engine.DayJournalKind
 import ru.nksk.lctapp.domain.engine.DaySummary
 import ru.nksk.lctapp.domain.engine.GameCatalog
+import ru.nksk.lctapp.domain.engine.displayTitle
+import ru.nksk.lctapp.domain.engine.displayAction
+import ru.nksk.lctapp.domain.engine.displayOutcome
 import ru.nksk.lctapp.domain.pet.renderPetText
+import ru.nksk.lctapp.domain.economy.EconomyState
 
-internal data class DaySummaryRow(val label: String, val value: String = "")
+internal enum class DaySummaryRowKind { EVENT, STORY, WORK, MEAL, PURCHASE, FOUND, COINS, DECISION }
+internal data class DaySummaryRow(val label: String, val value: String = "", val kind: DaySummaryRowKind = DaySummaryRowKind.EVENT)
 internal data class DaySummaryUiState(
     val activities: List<DaySummaryRow>,
     val moneyLines: List<String>,
     val remaining: String,
     val detailsNote: String? = null,
     val adjustmentNote: String? = null,
+    val day: Int = 1,
+    val income: BigInteger? = null,
+    val spending: BigInteger? = null,
+    val netChange: BigInteger? = null,
+    val availableBalance: Long? = null,
+    val savingsBalance: Long? = null,
 )
 
-internal fun DaySummary.toUiState(catalog: GameCatalog, petName: String): DaySummaryUiState {
+internal fun DaySummary.toUiState(catalog: GameCatalog, petName: String, economy: EconomyState? = null): DaySummaryUiState {
     fun text(value: String) = renderPetText(value, petName)
     fun itemName(id: String) = text(catalog.content.items.find { it.id == id }?.name ?: "Предмет")
-    fun eventName(id: String) = text(catalog.content.events.find { it.id == id }?.title ?: "Событие")
+    fun eventName(id: String) = text(catalog.content.events.find { it.id == id }?.let(catalog::displayTitle) ?: "Событие")
     val usedReceipts = mutableSetOf<String>()
     fun takeReceipt(source: String, kinds: Set<DayJournalKind>): DayJournalEntry? = journal.firstOrNull {
         it.id !in usedReceipts && it.sourceId == source && it.kind in kinds
@@ -45,14 +56,23 @@ internal fun DaySummary.toUiState(catalog: GameCatalog, petName: String): DaySum
         items.forEach { takeReceipt(it, setOf(DayJournalKind.ITEM_RECEIVED)) }
         val purchase = event.type == EventType.WANT && choice.moneyDelta < 0 && items.isNotEmpty()
         val label = if (purchase) "Купили: ${items.joinToString { itemName(it) }}" else
-            catalog.cards[event.id]?.summaryByChoiceId?.get(choice.id)?.let(::text)
-                ?: if (event.type == EventType.EARNING) "Выполнили дело «${text(event.title)}»"
-                else "${text(event.title)}: ${text(choice.text)}"
+            catalog.displayOutcome(choice)?.let(::text)
+                ?: if (event.type == EventType.EARNING) "Выполнили дело «${text(catalog.displayTitle(event))}»"
+                else "${text(catalog.displayTitle(event))}: ${text(catalog.displayAction(choice))}"
         val details = buildList {
             receipt?.let { actionMoney(it.moneyDelta).takeIf(String::isNotEmpty)?.let(::add) }
             if (!purchase && items.isNotEmpty()) add("Получили: ${items.joinToString { itemName(it) }}")
         }
-        rows += DaySummaryRow(label, details.joinToString(". "))
+        val kind = when {
+            event.type == EventType.EARNING -> DaySummaryRowKind.WORK
+            choice.id in catalog.policies.getValue(event.id).feedsPetChoiceIds -> DaySummaryRowKind.MEAL
+            event.type == EventType.WANT && choice.moneyDelta == 0L -> DaySummaryRowKind.DECISION
+            purchase || event.type == EventType.WANT && choice.moneyDelta < 0 -> DaySummaryRowKind.PURCHASE
+            event.type == EventType.STORY -> DaySummaryRowKind.STORY
+            items.isNotEmpty() -> DaySummaryRowKind.FOUND
+            else -> DaySummaryRowKind.EVENT
+        }
+        rows += DaySummaryRow(label, details.joinToString(". "), kind)
     }
 
     // Occurrences and committed decisions also exist in saves from before the money journal.
@@ -74,23 +94,29 @@ internal fun DaySummary.toUiState(catalog: GameCatalog, petName: String): DaySum
         when (entry.kind) {
             DayJournalKind.EVENT_CHOICE, DayJournalKind.DEED -> completedAction(entry.sourceId, entry)
             DayJournalKind.MEAL -> rows += if (entry.moneyDelta == 0L)
-                DaySummaryRow("Поели в бесплатной столовой", "Завтра будет меньше сил")
-                else DaySummaryRow("Пообедали", actionMoney(entry.moneyDelta))
-            DayJournalKind.ITEM_PURCHASE -> rows += DaySummaryRow("Купили: ${itemName(entry.sourceId)}", actionMoney(entry.moneyDelta))
-            DayJournalKind.ITEM_RECEIVED -> rows += DaySummaryRow("Получили: ${itemName(entry.sourceId)}")
-            DayJournalKind.WEEKLY_INCOME -> rows += DaySummaryRow("Получили монеты на новую неделю", actionMoney(entry.moneyDelta))
+                DaySummaryRow("Поели в бесплатной столовой", "Завтра будет меньше сил", DaySummaryRowKind.MEAL)
+                else DaySummaryRow("Пообедали", actionMoney(entry.moneyDelta), DaySummaryRowKind.MEAL)
+            DayJournalKind.ITEM_PURCHASE -> rows += DaySummaryRow("Купили: ${itemName(entry.sourceId)}", actionMoney(entry.moneyDelta), DaySummaryRowKind.PURCHASE)
+            DayJournalKind.ITEM_RECEIVED -> rows += DaySummaryRow("Получили: ${itemName(entry.sourceId)}", kind = DaySummaryRowKind.FOUND)
+            DayJournalKind.WEEKLY_INCOME -> rows += DaySummaryRow("Получили монеты на новую неделю", actionMoney(entry.moneyDelta), DaySummaryRowKind.COINS)
             DayJournalKind.EVENT_START -> rows += DaySummaryRow(eventName(entry.sourceId), actionMoney(entry.moneyDelta))
         }
     }
     // Compatibility for callers that only have the earlier summary projection.
     completedLoreEventIds.filterNot { it in describedEvents }.forEach {
-        rows += DaySummaryRow("Продвинулись в истории «${eventName(it)}»")
+        rows += DaySummaryRow("Продвинулись в истории «${eventName(it)}»", kind = DaySummaryRowKind.STORY)
     }
 
     val spending = journal.filter { it.moneyDelta < 0 }.fold(BigInteger.ZERO) { total, it -> total - it.moneyDelta.toBigInteger() }
     val income = journal.filter { it.moneyDelta > 0 }.fold(BigInteger.ZERO) { total, it -> total + it.moneyDelta.toBigInteger() }
     val difference = closingBalance.toBigInteger() - openingBalance.toBigInteger() - balanceAdjustment.toBigInteger()
-    val balanced = income - spending == difference
+    val hasUnrecordedMoneyChoice = completedDecisions.any { decision ->
+        receiptsByDecision[decision.id] == null &&
+            catalog.content.choices.find { it.id == decision.choiceId }?.moneyDelta != 0L
+    }
+    // A matching net balance alone cannot prove that an older unrecorded paid
+    // choice earned or spent nothing: opposite operations may have cancelled out.
+    val balanced = income - spending == difference && !hasUnrecordedMoneyChoice
     val moneyLines = buildList {
         if (balanced) {
             if (spending.signum() > 0) add("Потрачено за день: ${coins(spending)}")
@@ -108,6 +134,12 @@ internal fun DaySummary.toUiState(catalog: GameCatalog, petName: String): DaySum
         detailsNote = if (!balanced) "Не все доходы и траты за этот день сохранились в подробностях." else null,
         adjustmentNote = if (balanceAdjustment > 0)
             "При переходе на бюджет добавлено ${coins(balanceAdjustment.toBigInteger(), accusative = true)}. Это не заработок за день." else null,
+        day = day,
+        income = income.takeIf { balanced },
+        spending = spending.takeIf { balanced },
+        netChange = difference.takeUnless { balanced },
+        availableBalance = economy?.availableBalance,
+        savingsBalance = economy?.savingsBalance,
     )
 }
 

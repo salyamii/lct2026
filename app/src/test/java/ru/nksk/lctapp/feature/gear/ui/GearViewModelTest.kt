@@ -32,7 +32,7 @@ class GearViewModelTest {
     @Test fun acquisitionAndLossUpdateInventoryWithoutWritingOrInitializingSave() = runTest(dispatcher) {
         val games = InventoryGames(createInitialGameState())
         val content = InventoryContent()
-        val model = GearViewModel(games, content).also { store.put("gear", it) }
+        val model = gearModel(games, content).also { store.put("gear", it) }
         assertEquals(GearLoadState.Loading, model.uiState.value)
         advanceUntilIdle()
         assertEquals(0, (model.uiState.value as GearLoadState.Ready).inventory.itemCount)
@@ -48,7 +48,7 @@ class GearViewModelTest {
     @Test fun catalogFailureShowsErrorAndRetryRestoresTheOwnedItem() = runTest(dispatcher) {
         val games = InventoryGames(createInitialGameState().copy(ownedItems = listOf(OwnedItem("map-1", "map"))))
         val content = InventoryContent().apply { fail = true }
-        val model = GearViewModel(games, content).also { store.put("gear", it) }
+        val model = gearModel(games, content).also { store.put("gear", it) }
         advanceUntilIdle()
         assertEquals(GearLoadState.Error, model.uiState.value)
         content.fail = false
@@ -59,14 +59,14 @@ class GearViewModelTest {
     }
 
     @Test fun missingSaveShowsErrorInsteadOfGrantingPreviewItems() = runTest(dispatcher) {
-        val model = GearViewModel(InventoryGames(null), InventoryContent()).also { store.put("gear", it) }
+        val model = gearModel(InventoryGames(null), InventoryContent()).also { store.put("gear", it) }
         advanceUntilIdle()
         assertEquals(GearLoadState.Error, model.uiState.value)
     }
 
     @Test fun observationFailureIsNotShownAsEmptyInventory() = runTest(dispatcher) {
         val games = InventoryGames(createInitialGameState()).apply { fail = true }
-        val model = GearViewModel(games, InventoryContent()).also { store.put("gear", it) }
+        val model = gearModel(games, InventoryContent()).also { store.put("gear", it) }
         advanceUntilIdle()
         assertEquals(GearLoadState.Error, model.uiState.value)
         games.fail = false
@@ -94,3 +94,7 @@ private class InventoryContent : StoryContentRepository {
     }
     override suspend fun install(content: StoryContent) = error("Inventory must not seed content")
 }
+
+private fun gearModel(games: GameRepository, content: StoryContentRepository) = GearViewModel(games, content,
+    ru.nksk.lctapp.domain.engine.GameSession(games, content,
+        ru.nksk.lctapp.data.game.content.bundledGameCatalog(), createInitialGameState()))

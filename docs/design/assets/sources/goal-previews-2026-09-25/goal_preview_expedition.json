@@ -1,0 +1,30 @@
+{
+  "resource": "goal_preview_expedition",
+  "category": "Goal chapter previews",
+  "generated_at": "2026-09-25",
+  "tool": "image_gen.imagegen",
+  "mode": "built-in generation",
+  "prompt": "Use case: stylized-concept.\nAsset type: final landscape chapter preview illustration for a polished cozy fantasy mobile adventure for children. Aspect ratio 3:2, 1536 x 1024 preferred.\nStyle: detailed dimensional 3D storybook game art, soft rounded craftsmanship, clean readable silhouettes, rich tactile stone/wood/brass textures, cinematic painterly lighting, premium production finish. The same coherent medieval fantasy world as a warm sandstone observatory with blue velvet banners, brass astronomy instruments, amber lanterns and distant castle mountains. Midnight blue and teal shadows, amber golden light.\nComposition: one strong centered subject immediately recognizable at small mobile-card size, natural perspective and coherent spatial depth, landscape full-bleed art only, keep essential subject within central 80% with comfortable margins. No fox, people, animals, characters, UI, borders, labels, logos, readable lettering, text, coins, graphs, finance motifs, collage or split panels. This is original game artwork, not a screenshot or app mockup.\nPrimary scene: A well-crafted canvas adventure backpack with rolled bedroll, small brass lantern and round compass, resting together naturally on a low stone at a mountain pathhead. They are expedition supplies, not scattered unrelated objects. Beyond them a broad inviting winding trail leads into a magnificent unknown mountain valley with layered blue-teal peaks, golden morning mist and a tiny distant stone bridge. Hopeful dawn: deep blue and teal shaded foreground with soft golden amber sunrise on clouds and mountain ridges. Backpack is the strong centered near subject, fully visible, with the valley and road visibly promising a long expedition. Cozy, safe, adventurous; no people, animals or danger.",
+  "reference_context": "Visual style inspected from app/src/main/res/drawable-nodpi/location_observatory.webp; no reference image supplied to generation tool.",
+  "generated_source_file": "C:\\Users\\User\\.codex\\generated_images\\01a0d849-d082-7633-9364-a9b22475f6e8\\exec-50903cf8-9efa-45c1-aeb0-c729a98c0dc8.png",
+  "source_file": "docs/design/assets/sources/goal-previews-2026-09-25/goal_preview_expedition.png",
+  "source_sha256": "e5b538e6fa8bcb2ae346e2323af35672b18114c34ac964964625b9affa7a5c39",
+  "source_bytes": 3063052,
+  "path": "app/src/main/res/drawable-nodpi/goal_preview_expedition.webp",
+  "sha256": "ba209166b60a40d55bb4bda9bd0c55a5c1ebfe413bec45288633234aac513a24",
+  "bytes": 2148092,
+  "width": 1536,
+  "height": 1024,
+  "rgba_sha256": "99e0da976784a3f0c8810b97f2fefb766c9acbe3cd5b5d8e63b7e9a175ff876a",
+  "conversion": "Pillow WebP lossless=True, exact=True, quality=100, method=6; full original canvas, no resizing, cropping, retouching or compositing.",
+  "verification": "PNG and WebP decoded RGBA dimensions and pixel bytes match exactly.",
+  "rgba_hash_format": "SHA-256(width uint32 big endian + height uint32 big endian + RGBA pixel bytes), matching verify_assets.py.",
+  "source_path": "docs/design/assets/sources/goal-previews-2026-09-25/goal_preview_expedition.png",
+  "alpha_bounds": [
+    0,
+    0,
+    1536,
+    1024
+  ],
+  "lossless_rgba_verified": true
+}

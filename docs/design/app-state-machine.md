@@ -1,11 +1,166 @@
+> **Подключение родителя, 2026-09-27, PARENT-LINK-D-001/002.** Настройки —
+> отдельный доступный без игровых переходов маршрут. Открытие может создать
+> локальную идентичность профиля, но не меняет GameState, деньги, дни и события.
+> «Показать код для родителей» строит QR ровно из сохранённого UUID, без ссылки,
+> токена и срока действия. Состояния: загрузка → готово / ошибка чтения или
+> построения. После показа при наличии URL отдельно отправляется регистрация;
+> сетевой сбой не убирает QR и допускает повтор отправки. Повторное открытие
+> не меняет ID. Облачное восстановление ещё не подключено к навигации;
+> существующий локальный restore не запускается автоматически.
+> [Предлагаемый контракт](../backend/README.md).
+
+> **Болезнь и её изображение, 2026-09-27, ADVENTURE-D-010.** Показанное
+> нерешённое событие с `requiresPetHelp` держит `NEEDS_HELP` в статусах
+> ACTIVE, PAUSED и CARRIED_ACTIVE. Запланированное, но ещё не открытое событие
+> болезнь не включает. Успешное лечение снимает условие; затем проверяются
+> обычные голод и усталость. Еда и переход к следующему дню не лечат болезнь.
+> Для сохранений с уже открытой карточкой UI применяет тот же признак без
+> записи в базу. Используются импортированные прозрачные `state_sick`.
+> Временный показ позы по ADVENTURE-D-011 не снимает условие болезни.
+
 # Ryzhik: app state-machine specification
 
-> Текущая адаптация, 2026-09-20, D-101–D-106: доступны три стартовые цели;
-> карта открывается после первого завершённого проекта, большая экспедиция —
-> после остальных четырёх. Пять общих актов раскрываются последовательно,
-> независимо от порядка личных проектов. Финал требует текущего комплекта и
-> сюжетных открытий. [Точные переходы и ограничения](campaign-choice.md).
-> Исходные материалы Figma сохранены; новые связки описаны отдельно.
+> **Единые правила питания и повтора записи, 2026-09-27, ARCH-D-004/005.**
+> [MealPolicy](../../core/game/src/main/kotlin/ru/nksk/lctapp/domain/engine/MealPolicy.kt)
+> задаёт обычный обед, бесплатную альтернативу, последствия питания и расчёт
+> оставшейся потребности в еде. Движок, аналитика, бюджет, цель и экраны питания
+> используют одну политику. Неопределённая запись повторяется исходным запросом;
+> подтверждённый отказ и ошибка записи различаются. Подробности — в разделе
+> [питание и повтор действий](#питание-и-повтор-действий--2026-09-27).
+
+> **Оплата предметов цели, 2026-09-27, ADVENTURE-D-018.** Можно сразу оплатить
+> предмет реальными накоплениями и текущими деньгами вместе. Расчёт показывает
+> расход копилки и каждой затронутой текущей статьи; недостаток на еду до
+> следующей недели требует явного подтверждения риска. До подтверждения
+> нет записи в игру. Старое подтверждение не применяется к новой ревизии.
+> BuyGoalItem атомарно записывает предмет и фактические расходы двух счетов.
+> Переводы в копилку и из неё из этой покупки не создаются; аналитика не
+> приписывает прямой оплате факт накопления. Старые квитанции остаются читаемыми.
+
+> **Лоровая пластина, 2026-09-27, ADVENTURE-D-015.** Сюжетный G1.03
+> «Пластина с тем же знаком» отличается от случайного налёта ниже.
+> Новый `campaign-choice-v2:G1.03` завершается напрямую: состав за 3 монеты
+> без сил или ручная очистка за прежнюю 1 силу без монет. Мини-игры нет.
+> Обе ветки открывают `plate_found` и `plate_symbol` и разрешают следующий
+> сюжетный шаг. «Вернуться позже» оставляет событие нерешённым и ничего
+> не списывает. Старый пройденный G1.03 засчитывается через completionAliases;
+> нерешённый экземпляр получает новую версию при prepare/restore.
+
+> **Очистка пластины, 2026-09-27, ADVENTURE-D-012.** Варианты нового
+> `figma-2326-160-v3`: состав за 3 монеты без расхода сил или «Почистить самому»
+> через мини-игру точности за 2 силы без монет. Открытие мини-игры не завершает
+> событие и не списывает ресурсы. Успешное завершение применяет последствия
+> один раз и снимает блокировку сюжета; нехватка сил блокирует ручную работу.
+> Перенос на завтра остаётся откладыванием, без фиктивной очистки.
+> При подготовке/восстановлении сохранения нерешённые экземпляры v2 получают
+> ссылку на v3; RESULT/COMPLETED и экземпляры с решением остаются прежними.
+> Это согласование версий, без хода дня, трат или переписывания истории.
+
+> **Тренировки и пересмотр, 2026-09-27, LEARNING-D-001/002.**
+> [Текущий сценарий](skills-and-reflection.md): непрерывная практика в «Делах»
+> с внутренними наборами по четыре вопроса; ошибка — объяснение и повтор,
+> верный ответ — следующий вопрос. Сохранённые вопросы не теряются при выходе.
+> «А что, если…» открывается из итогов и не меняет настоящую игру.
+> Общие финансовые сводки всех событийных карточек сняты ADVENTURE-D-010;
+> скрытые сведения не записываются как показанные.
+
+> **Герой в текущем игровом цикле, 2026-09-26, ADVENTURE-D-001/003.**
+> По ADVENTURE-D-009 отдельные подписи эмоций в меню убраны. Сохранённые
+> радость/огорчение сменяются при начале нового события; перед выбором герой
+> задумывается. Голод, усталость, питание и отдых обновляют состояние по
+> фактическим переходам дня, с существующими порогами еды и сил.
+> Повторный показ карточки, возвращение из копилки и обычная навигация
+> состояние не сбрасывают. Одновременно активно только одно состояние.
+> По ADVENTURE-D-011 от 2026-09-27 особая поза текущего питомца показывается
+> несколько секунд и плавно сменяется обычным выбранным образом. Это таймер
+> представления: сохранённые состояние, одежда, потребности и история остаются.
+> Сон в кровати и исторические/смоделированные учебные сцены отделены от него.
+
+> **Постоянные приобретения и страницы вещей, 2026-09-26, FINANCE-UI-D-021.**
+> Купленные предметы остаются в инвентаре после выполнения цели и перехода
+> главы, включая покупки существующего сохранения. Предмет открывается на
+> полноэкранной иллюстрированной странице; карта звёзд содержит темы Ориона,
+> Большой Медведицы и Млечного Пути, телескоп — характеристики, штатив —
+> инструкцию. Аксессуары идут ниже, их можно надевать. Просмотр и перелистывание
+> ничего не выдают, не списывают и не продвигают сюжет. Это уточняет подачу
+> MAIN-D-075 и исключает купленные вещи из возможной потери по D-029.
+> Точные рисунки, справочные тексты и навигация — выбор реализации, без новых
+> цен, бонусов и изменений схемы владения. [Контракт инвентаря](inventory.md).
+
+> **Булочка и подписи событий, 2026-09-26, FINANCE-UI-D-019.** Карточка булочки
+> показывает изображение, короткий текст с именем питомца и два действия:
+> купить или пройти мимо. Повторной сводки денег и потребностей и третьего
+> варианта отказа ради цели нет; источники оплаты остаются человеческой фразой
+> с фактическими суммами. Служебные нижние подписи убраны со всех карточек.
+> Цена 6, существующий приём пищи и HAPPY, правила списания и аналитики
+> сохраняются. Это отображение, без изменения метаданных старого каталога.
+
+> **Единая страница копилки, 2026-09-26, FINANCE-UI-D-017.** Пользователь
+> потребовал убрать лишние окна, скачки кнопок и пустоту, исправить фон,
+> пропорции и движение лисёнка, вернуть уголок реплики. Выбор реализации —
+> одна страница с режимами пополнения и снятия, вводом и последствиями;
+> подтверждение, предупреждение о еде и результат находятся внутри неё.
+> Back отменяет открытое подтверждение или предупреждение, иначе закрывает
+> раздел. Во время записи выход и повторная команда заблокированы.
+> Это локальные состояния UI: отдельного обзора и экрана RESULT нет,
+> команды, правила денег и обязательный контекст решения не меняются.
+
+> **Текущий бюджет, 2026-09-26, FINANCE-UI-D-015.** Четыре статьи показывают
+> оставшиеся доступные монеты. Их сумма вместе с нераспределённым остатком равна
+> `availableBalance`; реальная копилка `savingsBalance` находится отдельно.
+> Покупки, заработок и переводы меняют текущие статьи, первоначальное намерение
+> сохраняется в `FinancialProgress.plans`. Статья «В копилку» содержит ещё
+> доступные деньги; пополнение требует отдельного действия. Первая правка
+> открывает MANUAL с текущими остатками, без пустого плана. Прежний режим
+> исторических сумм FINANCE-UI-D-014 на основном экране заменён этой моделью.
+> Пояснение движений использует проверенную историю; разность остатков не
+> подменяет расход. FINANCE-UI-D-016 убирает автоматическую фразу «Монеты не
+> потратили» после бесплатного события, сохраняя фактические траты и доходы.
+
+> **Уточнение карточек и практики, 2026-09-25, FINANCE-UI-D-013.** Общая
+> сводка дня/сил/балансов убрана из карточек; условия конкретного решения и
+> причины блокировки остаются. Практика показывает вопрос отдельно от истории.
+> Её UI учитывает существующий запрет при незавершённом плане. При ошибке
+> отправки повторяется тот же запрос с прежними ID, ревизией и контекстом;
+> другой ответ до разрешения неопределённого результата не отправляется.
+> Отказ обновляет показанное состояние без автоматического повторного ответа.
+
+> **Подача первого вступления, 2026-09-25, FINANCE-UI-D-012.** Единственное
+> бесплатное сюжетное действие без затрат сил не показывает повторную денежную
+> сводку и не передаёт факт её показа как финансовый контекст. Денежные действия,
+> работа и альтернативы сохраняют контекст. Новые композиции вступления и
+> копилки не меняют команды, guards, подтверждение снятия или ход истории.
+> [Описание экранов](financial-adventure-ui-2026-09-25.md).
+
+> **Подключение игровых экранов · 2026-09-25 · FINANCE-UI-D-007.**
+> [Копилка, задания, бюджет и Хроноскоп в Android](financial-adventure-ui-2026-09-25.md)
+> используют текущий агрегат и команды. Подтверждение снятия содержит ожидаемые
+> остатки и подцель, которые проверяются внутри записи, включая состояние
+> до первого дня без ревизии. Отмена не вызывает команду. Хроноскоп имеет один
+> вопрос после сравнения; метаданные расчёта не изменяют реальные игровые
+> последствия. Учебные записи проверяют исходный сегмент истории атомарно.
+
+> **Актуальная финансовая модель · FINANCE-D-001–008 и FINANCE-UI-D-015.**
+> Последующие подтверждённые правила имеют приоритет над описанием экономики
+> v16 ниже и над историческими примерами общего баланса: два реальных остатка
+> «Доступно» и «Копилка»; четыре текущие статьи распределяют доступные деньги.
+> Статья «В копилку» ещё не является накоплениями. Подтверждение бюджета не переводит
+> деньги; по ADVENTURE-D-018 покупка цели может дополнить копилку текущими деньгами, снятие подтверждается
+> отдельно. Пять больших целей задают пять финансовых периодов. Текущая
+> реализация — Room v20; текущий бюджет введён переносом 19 → 20,
+> выбранная подцель — 18 → 19. Технические версии: формат снимка 4,
+> отпечаток переходов 9. Старые записи Хроноскопа не исполняются по новым правилам.
+> [Подробная модель и статус](requirements/engine-refactor-plan-2026-09-24.md),
+> [карточки для дизайнера](requirements/designer-handoff-2026-09-24.md).
+> Авторская расшифровка Figma в приложении этого документа не переписана.
+
+
+> Последовательные главы, 2026-09-24, CAMPAIGN-D-001: Ночь наблюдений →
+> Башня → Дом → Карта → Экспедиция. Внутри главы выбирается накопительная
+> подцель; для старта первой главы доступны четыре. Финал требует комплект
+> своей главы, сюжетные открытия и финансовые этапы. Смена подцели не меняет
+> деньги или период. [Точные переходы и совместимость](campaign-choice.md).
+> Исходные материалы Figma сохранены без изменений.
 
 > Дополнение D-086, 2026-09-19: к действующему циклу подключены независимые
 > покупка и неожиданная трата. Их точный состав и границы описаны в последнем
@@ -22,7 +177,8 @@
 > Implementation addition, 2026-09-19: the original specification below is
 > retained. The implemented day/event kernel is documented in
 > [game-engine.md](game-engine.md), including its explicit configuration and
-> unsupported/open operations. It lives in `:core:game` and persists via Room v2.
+> unsupported/open operations. It lives in `:core:game`; Room v2 was the kernel's
+> initial persistence version, and the current finance migration is v16 → v17.
 > `RUNNING → READY_TO_END → FINISHED` describes the day; event occurrences use
 > `PENDING → ACTIVE → RESULT → COMPLETED` with `CARRIED` for postponed lore.
 > Offering a deed goes directly to `RESULT` and consumes one step without
@@ -87,10 +243,11 @@ unresolved. Do not infer automatic visual transitions or unspecified thresholds.
 | Concept | Meaning | Values documented on the board |
 | --- | --- | --- |
 | `PetLook` / selected look | Saved cosmetic appearance; not a machine state | ОБЫЧНЫЙ (plain), БАНДАНА (bandana), РЮКЗАК (backpack), ОЧКИ (glasses), ШЛЯПА (hat) |
-| `PetVisualState` | Current visual state; special states temporarily replace the entire selected appearance | Eight states in section 3 |
+| `PetVisualState` | Saved current state, changed by gameplay; live presentation briefly shows its special artwork under ADVENTURE-D-011 | Eight states in section 3 |
 
-The selected look remains remembered while a special state is displayed. Ending
-a special state restores that look when the resolved state is ОБЫЧНОЕ.
+The selected look remains remembered while a special state is displayed. The
+live presentation returns to that look after its brief reaction, without
+changing the saved state. A gameplay transition to ОБЫЧНОЕ also shows that look.
 ОБЫЧНЫЙ is a cosmetic look; ОБЫЧНОЕ is a visual state. Do not conflate them.
 
 Do not create combined states such as ГОЛОДЕН_С_БАНДАНОЙ,
@@ -123,24 +280,13 @@ and the required set is no longer owned, the goal becomes incomplete again.
 Completion is reversible. Story rollback and an automatic visual change are
 not specified by this rule; D-030 defines when the active goal changes.
 
-**Принято пользователем · D-030 · 2026-09-19; уточнено D-102 · 2026-09-20:**
-goal progression accompanies chapter progression, but the next project is chosen
-under D-101/D-102 rather than fixed by the chapter number. Switching an unfinished
-project is not specified.
-
-**Принято пользователем · D-031 · 2026-09-19; уточнено D-102 · 2026-09-20:**
-advancing to the next chapter requires the currently selected goal to be complete:
-its required items must still be owned when advancing. Any available selected
-project can satisfy this requirement; it is not tied to one predetermined goal.
-This is a necessary condition, not an automatic transition upon collecting the
-last item. Required story discoveries must also be completed.
-
-**Принято пользователем · D-032 · 2026-09-19; уточнено D-102 · 2026-09-20:**
-an authored story timeline contains a final lore event that advances to the next
-chapter. Project choice follows D-101/D-102 rather than a fixed chapter-to-goal
-mapping. The completed-goal requirement from D-031 applies.
-The precise event stage and whether
-an incomplete goal blocks event entry or only the transition remain unspecified.
+**Принято пользователем · D-030–D-032 · 2026-09-19; уточнено CAMPAIGN-D-001 · 2026-09-24:**
+Each chapter binds its own large goal through StoryAct.goalId. Chapters and kits
+advance in the authored order. The player chooses a saving target within that
+kit; changing it preserves savings, the plan and the current financial period.
+A finale needs the complete kit of its own chapter, the required discoveries
+and the financial milestones. A different kit cannot satisfy this guard.
+The authored finale advances the chapter; buying the last item does not.
 This does not define how non-lore events are selected.
 
 **Принято пользователем · D-033–D-036 · 2026-09-19:** events are described by
@@ -155,22 +301,24 @@ The [current schema discussion](game-data-schema.md#23-типы-появлени
 separates these requirements from proposed event fields and activation rules.
 
 **Принято пользователем · D-037 · 2026-09-19:** the game offers an earning
-event when money is insufficient for a particular action. Actual money is shared
-according to D-040. Automatic acceptance, repeat offers, and returning to the
+event when money is insufficient for a particular action. The later
+FINANCE-D-002 rule separates available money from real savings. Automatic acceptance, repeat offers, and returning to the
 original action remain unspecified.
 
 **Принято пользователем · D-038 · 2026-09-19:** goal-required items are not
 awarded by story-progression events; they can be purchased in the goal tab.
 This refines D-036 and restricts the general event-item consequences from D-017
 for this combination of event and item. Story progress and buying goal items
-are separate actions; payment uses the common balance from D-040. Prices,
-purchase availability, and obtaining goal items from other event categories
-remain unspecified.
+are separate actions. FINANCE-D-002 now requires payment from real savings;
+current goal availability follows CAMPAIGN-D-001; temporary prices follow D-105/D-106. Do not infer
+additional ways to obtain goal items from the historical common-balance example.
 
 ## 2. Rendering contract
 
 ```text
-if visualState == ОБЫЧНОЕ:
+if displaying the sleeping day recap:
+    display the age/color sleeping artwork with its bed
+else if live presentation's reaction has finished, or visualState == ОБЫЧНОЕ:
     display the saved selectedLook
 else:
     display the dedicated image for visualState
@@ -179,8 +327,31 @@ else:
 
 Examples in ОБЫЧНОЕ: БАНДАНА displays Ryzhik wearing a bandana; РЮКЗАК
 displays Ryzhik wearing a backpack; ОБЫЧНЫЙ displays plain Ryzhik.
-A hungry Ryzhik has no selected accessory visible, but the selected look is
-retained and appears again on return to ОБЫЧНОЕ.
+A hungry Ryzhik briefly has no selected accessory visible, but the selected
+look is retained and reappears when the presentation reaction finishes.
+Hunger and its guards remain unchanged until a gameplay action resolves them.
+
+**Принято пользователем · ADVENTURE-D-011 · 2026-09-27:** the current pet's special
+pose lasts a few seconds and smoothly returns to the ordinary selected look.
+The implementation uses a single application-scoped 4-second reaction clock
+and a 600 ms crossfade in the shared artwork renderer; these durations are
+engineering choices. The display uses NORMAL after the deadline, while the
+saved `PetVisualState`, current needs, selected look, owned gear and history
+remain untouched. No game command or persistence write accompanies the timer.
+
+A new actual visual state replaces the current reaction and its deadline;
+NORMAL immediately selects the ordinary look. The first observed special state
+after process launch also gets a brief reaction because the clock is not persisted.
+Rotation and navigation retain the same clock. Redisplaying the same event and
+changing name, color, accessory, day or revision without a different visual
+state do not restart it. When the selected look changes during the reaction, its
+current value is used on return. This clock follows only the live game;
+historical and simulated learning snapshots neither advance nor replace it.
+The sleeping pet with its bed in the day recap has its own presentation and
+must not turn into a standing pet when the reaction expires. The shared
+crossfade includes each pose's shadows; it does not move the screen layout,
+invent missing artwork or change source canvases. Live menu, event, savings and
+budget scenes opt into the clock; historical learning artwork keeps its own mapper.
 
 ## 3. State catalog and lifecycle
 
@@ -192,23 +363,28 @@ its decision, need, and result states as in the source scenarios; each new state
 replaces the previous one rather than hiding it. See section 5 for the distinction
 between an explicit transition and the board's superseded fallback rule.
 
-**Принято пользователем · D-002 · 2026-09-17:** the current pet state,
-including HAPPY and UPSET, remains until an explicit gameplay event updates it.
-There is no automatic reset after a duration, animation, or generic Continue
-action. A later event can explicitly change UPSET to NORMAL, for example; the
-pet need not become NORMAL before that event is processed. This supersedes the
-board's description of HAPPY and UPSET as brief reactions. Event-specific
-mechanics are outside the initial state-model foundation.
+**Принято пользователем · D-002 · 2026-09-17; уточнено ADVENTURE-D-003 · 2026-09-26
+и ADVENTURE-D-011 · 2026-09-27:**
+the saved pet state remains until an explicit gameplay transition updates it.
+HAPPY and UPSET last until the next newly opened event. A pending decision enters
+THINKING; the existing food/energy thresholds enter HUNGRY/TIRED, and feeding or
+rest clears the corresponding need. A neutral new event can return a reaction
+to NORMAL. Authored state effects remain explicit transitions. There is no saved-state reset
+after a duration, animation, ordinary navigation, or merely redisplaying/resuming
+an already opened event. No previous reaction is retained underneath the current
+state. These rules describe the domain state. The temporary live artwork and
+smooth return in section 2 supersede the previous event-only display lifetime;
+they do not resolve a need or rewrite a result.
 
-| Source state / English alias | Entry condition | Duration and exit |
+| Source state / English alias | Entry condition | Saved-state duration and exit; live artwork follows section 2 |
 | --- | --- | --- |
 | ОБЫЧНОЕ / NORMAL | No active special state | Display the saved cosmetic look until a relevant event activates another state. |
 | ЗАДУМАЛСЯ / THINKING | Before an important financial decision; for example, buy an item now or save money toward a goal | After the decision, an explicit outcome can replace it with another state or NORMAL. No hidden decision state remains. |
-| ГОЛОДЕН / HUNGRY | A story event says food is needed, or a planned food need remains uncovered | Remains active until the need is met. The food scenario explicitly changes it to HAPPY; a later explicit update can return it to NORMAL. Controlled by game logic, never real elapsed time. |
+| ГОЛОДЕН / HUNGRY | A story event says food is needed, or the existing day's food threshold is reached without a meal | Remains active until feeding resolves the need. An authored meal may specify HAPPY; ordinary feeding clears HUNGRY, while exhausted energy can enter TIRED. Controlled by game logic, never real elapsed time. |
 | УСТАЛ / TIRED | A consequence of a story decision, such as additional work for virtual money | Rest or an explicitly defined fatigue-clearing event → NORMAL. Exact events are deferred; do not make every next event clear fatigue. No continuous energy meter or real-time energy consumption. |
 | ОБЕСПОКОЕН / WORRIED | Before the child's choice, when an unexpected mandatory expense, insufficient funds for a need, or a financial story problem occurs | After the decision, follow its explicit result transition, such as a reaction followed by NORMAL or the source example leading to HUNGRY. WORRIED does not remain hidden afterward. |
-| РАДУЕТСЯ / HAPPY | Positive outcome: goal reached, problem solved, desired item received, or adventure stage succeeded | Remains HAPPY until an explicit gameplay event changes the state. An explicit change to NORMAL restores the selected look. |
-| РАССТРОЕН / UPSET | Outcome: goal postponed, less advantageous option chosen, or part of the adventure temporarily unavailable | Remains UPSET until an explicit gameplay event changes the state, for example to NORMAL. Not punishment or a moral judgment. |
+| РАДУЕТСЯ / HAPPY | Authored positive outcome, such as a desired item received | Remains saved until a new event or actual need updates it under ADVENTURE-D-003. Ordinary navigation preserves it; ADVENTURE-D-011 independently restores the selected look on screen. |
+| РАССТРОЕН / UPSET | Authored outcome of an adventure | Remains until a new event or actual need updates the state under ADVENTURE-D-003. Not punishment for spending or a moral judgment. |
 | НУЖНА ПОМОЩЬ / NEEDS_HELP | Only an external story event, such as a twisted paw | Event → financial need → child decides where to obtain money. After resolution or event completion → NORMAL. Never caused by “bad spending.” |
 
 ## 4. Explicit event mappings and time rules
@@ -228,9 +404,9 @@ These are semantic event labels from the board, not API definitions.
 Game time and real-world clocks are unrelated. Do not use real-clock timers to
 drive these conditions, automatic hunger after real hours, or deterioration
 while the app is closed. Do not introduce a continuously depleting energy bar.
-All pet states, including HAPPY and UPSET, change only through explicit event
-updates. Animation completion, screen navigation, and elapsed time do not clear
-them by themselves.
+All saved pet states, including HAPPY and UPSET, change only through explicit
+event updates. Animation completion, screen navigation, and elapsed time do not
+clear them. The live artwork timer in section 2 changes only presentation.
 
 ## 5. Priority and routing
 
@@ -278,42 +454,91 @@ story rules; the state foundation only represents and applies that result.
 
 ## 6. Game-state ownership
 
-**Принято пользователем · D-039–D-040, D-147–D-149 · 2026-09-20:**
-the budget has four sections: «Нужно», «Хочу», «Коплю», and «Запас»
-(previously «На всякий случай»). STATE/RANDOM/STORY expenses prioritize
-Запас → Хочу → Коплю → Нужно; WANT prioritizes Хочу → Запас → Коплю → Нужно.
-Feeding prioritizes Нужно → Запас → Хочу → Коплю. Goal parts can only be paid
-from Коплю; insufficient funds grey out the button. Tapping it explains the
-shortfall without purchasing (D-125). EARNING must neither spend nor require
-money, on opening or in any choice; tests must enforce this rule (D-148).
+**Принято пользователем · FINANCE-D-001–008, уточнения FINANCE-UI-D-015 от 2026-09-26 и ADVENTURE-D-018 от 2026-09-27:**
 
-По D-120–D-122 неизменяемый план заменяется реальными остатками статей.
-Недельные 100 монет поступают нераспределёнными; специальное событие позволяет
-однократно изменить распределение старых и новых денег. По D-142 ручное перераспределение доступно в любой момент. Доходы мини-игр и событий сразу идут в «Запас» (D-138).
-Расход исчерпывает статьи по приоритету; нехватка всей допустимой суммы
-не приводит к частичному списанию. Использование последующих статей сопровождается
-пояснением о недостаточном планировании. Место и текст пояснения ещё проектируются.
-По D-124/D-127 меню показывает четыре остатка в прежнем блоке монет
-вертикально друг под другом;
-по D-126 существующие итоги дня сохраняют своё поведение.
-По D-128 до полного распределения денег нельзя подтвердить бюджет
-или продолжить игру; выход с экрана не обходит это условие.
-По D-143 выход из планирования запрещён, пока бюджет не готов; показывается пояснение.
-Готовый бюджет при выходе подтверждается и сохраняется перед возвратом в меню.
-«Продолжить день» снова открывает незавершённое планирование. Реконфигурация
-не сбрасывает состояние. По D-132 будущая карточка недельного дохода ведёт
-к планированию и также допускает выход в главное меню. Возврат в планирование
-не повторяет начисление. Этап и суммы сохраняются через MVVM и агрегатный репозиторий Room по D-141.
-По D-129 в недельном распределении «Нужно» должно содержать минимум 35 монет;
-кнопки изменения суммы имеют шаг 5. Остальные статьи дополнительных лимитов
-не имеют. Минимум не блокирует расходование уже распределённых денег ниже 35.
-Подтверждение проверяет полное распределение и применимый минимум в домене.
+- Реальные деньги принадлежат `EconomyState.availableBalance` и
+  `savingsBalance`. Общая сумма — их сумма. `unallocated` — часть доступных
+  денег, пока не включённая в текущий план; отдельным остатком сверху она не
+  является.
+- `economy.plan` содержит оставшиеся доступные монеты по статьям
+  `needs/wants/savings/reserve`. Вне редактирования `plan.total + unallocated =
+  availableBalance`; при открытом черновике эту сумму задаёт `displayPlan`.
+  Незавершённая редакция хранится в `BudgetPlanning.draft` со своей базой и
+  ревизией. Подтверждённые намерения сохраняются отдельно в
+  `FinancialProgress.plans` и не переписываются расходами.
+  Редактирование и подтверждение бюджета не переводят деньги в копилку.
+- `DepositSavings` явно переводит доступные монеты в накопления.
+  `WithdrawSavings` требует отдельного подтверждения и уменьшает накопления
+  на показанную сумму. Оба перевода сохраняют общую сумму и не являются новым
+  доходом или потребительским расходом. Пополнение уменьшает доступные статьи
+  по порядку В копилку → Запас → Хочу → Нужно; снятие увеличивает «Запас».
+- Еда, обычные покупки и платные варианты событий используют только доступные
+  монеты. Части большой цели по ADVENTURE-D-018 оплачиваются реальными
+  накоплениями и текущими деньгами вместе: сначала копилка, затем доступные
+  статьи В копилку → Запас → Хочу → Нужно. Предварительный перевод не нужен.
+  До подтверждения показываются источники оплаты и недостаток на еду после
+  покупки; риск требует явного подтверждения. Если общей суммы не хватает,
+  нет частичного списания. При нехватке на обычную еду и наличии денег
+  в копилке интерфейс предлагает открыть бюджет; автоматического снятия нет.
+- `EARNING` по D-148 не требует денег и не списывает их ни при предложении,
+  ни при выборе. Фактическая награда пополняет доступные монеты и «Запас».
+- Обычный расход использует Запас → Хочу → В копилку → Нужно; WANT —
+  Хочу → Запас → В копилку → Нужно; FEEDING — Нужно → Запас → Хочу → В копилку.
+  Название «В копилку» здесь обозначает доступную статью, а не реальную
+  копилку. Только покупка части цели уменьшает `savingsBalance` напрямую.
+- Недельные 100 поступают один раз в доступные деньги. INITIAL/WEEKLY проходят
+  `RECEIPT → ALLOCATION → подтверждено`; повторный просмотр ничего не
+  начисляет. Планируются доступные сейчас деньги, не будущие возможные награды.
+  WEEKLY сохраняет текущие статьи, новые 100 становятся нераспределёнными.
+  Минимум «Нужно» для INITIAL/WEEKLY — `min(35, база)`, для MANUAL/MIGRATION —
+  `min(оставшаяся потребность в еде, база)` по FINANCE-UI-D-015.
+  Полное распределение проверяется в домене.
+- «Наш бюджет» всегда показывает текущие статьи. Первая прямая правка
+  создаёт MANUAL на их основе; просмотр не пишет игру. Активный черновик
+  восстанавливается из сохранения. Первая отложенная правка проверяет
+  показанную доступную сумму перед отправкой, не подстраиваясь незаметно под
+  новый доход. После еды просмотр оставшихся «Нужно» не заставляет вернуть
+  потраченные монеты до 35. Вне редактирования «Готово» закрывает экран без
+  новой записи плана, в том числе при нулевом доступном остатке.
+- Изменение плана учитывает причину: забытая известная нужда — возможная
+  трудность планирования; неожиданная трата/новый доход — адаптация;
+  неизвестная причина — факт без оценки. Само изменение не означает неуспех.
+- Gameplay при незавершённом плане блокируется `BudgetPlanningRequired`.
+  Команды самого планирования и косметики разрешены. Просмотр меню, истории
+  и карты не выполняет событие и не начисляет деньги. Выход из редактора
+  сохраняет прежние проверки полного распределения; ошибка записи не теряет
+  сохранённый черновик.
 
-Правила подключены к агрегатному сохранению и игровому движку; этап и черновик
-хранятся в Room. См. [экономику бюджета](economy-budget.md).
+Преемственность UI: четыре иллюстрированные статьи, строка нераспределённого,
+ввод суммы и overlay «Монетки» сохранены. В overlay реальные доступные монеты и
+сумма в копилке отделены от текущего распределения доступных денег. Исторические
+намерения находятся в истории. Приоритеты текущих статей задаёт FINANCE-UI-D-015;
+автоматическое расходование реальной копилки запрещено FINANCE-D-002. Остальные правила
+игрового дня и запрет платного заработка сохраняются.
 
-The current persisted aggregate follows D-024, D-039, and D-040. Exact proposed
-columns and foreign keys are defined in the [normalized schema](schema-normalization.md).
+### Интерфейс копилки — реализация FINANCE-UI-D-017
+
+`Savings` остаётся одним маршрутом. Переключатели «Пополнить» / «Взять»,
+сумма и последствия находятся на одной странице. Их просмотр и изменение
+сами по себе не переводят монеты. Снятие по-прежнему требует отдельного
+явного подтверждения показанной суммы. При предупреждении о нехватке на еду
+пополнение также ждёт явного решения; предупреждение не скрывается ради
+упрощения композиции. Эти состояния показаны внутри страницы, а не в цепочке
+отдельных окон. До решения доступны реальные остатки, известные расходы
+на еду и последствия для выбранной подцели. Факт показа финансового контекста
+по-прежнему требует его полной видимости.
+
+Back отменяет открытое подтверждение снятия или предупреждение о еде,
+не вызывая денежную команду; иначе возвращает на предыдущий маршрут.
+Применённая операция показывает результат на этой же странице и актуальные
+остатки, без отдельного шага RESULT и без повторной команды при его показе.
+Ошибка записи не изображается успешным переводом: сохраняется явный повтор
+исходного запроса. Во время записи остаётся защита от повторного действия
+и выхода. Проверка ожидаемых остатков, подцели и ревизии внутри агрегатной
+записи сохранена. Упрощение UI не меняет FINANCE-D-002 и FINANCE-UI-D-015.
+
+The current persisted aggregate follows D-024 and the later FINANCE decisions.
+Columns and foreign keys are documented in the [normalized schema](schema-normalization.md).
 This layout does not prescribe merging the domain Kotlin classes.
 
 ```text
@@ -321,11 +546,14 @@ Persisted game / Сохраняемая игра
 ├── GAME_STATE
 │   ├── selected look and visual state / образ и визуальное состояние
 │   ├── satiety and fatigue / сытость и усталость
-│   ├── common balance / общий денежный остаток
-│   ├── four plan sections / четыре секции плана
+│   ├── available balance and savings / два реальных остатка
+│   ├── current allocations and separate draft / текущие статьи и черновик
 │   └── story position and active event / прогресс и активное событие
 ├── OWNED_ITEM / принадлежащие вещи
-└── PLAYER_DECISION / история решений
+├── PLAYER_DECISION / сюжетные решения
+├── FINANCIAL_PERIOD / периоды и учебные этапы
+├── BUDGET_PLAN_REVISION / история намерений
+└── GAME_AUDIT / команды, снимки, финансовые операции и факты
 ```
 
 One outcome may change money, story position, ownership, and the visual state
@@ -334,9 +562,11 @@ visual state is only one part of that aggregate.
 
 **Принято пользователем · D-004 · 2026-09-17:** closing and reopening the app must
 preserve the current game and pet state. Owned gear is also retained. Reopening
-does not reset the pet to NORMAL or advance the story merely because time passed.
+does not reset the saved pet to NORMAL or advance the story merely because time passed.
 This includes HAPPY and UPSET: reopening restores the saved state until an
-explicit event changes it. Room is the approved persistent-data technology in
+explicit event changes it. The presentation clock of ADVENTURE-D-011 is not part
+of the saved aggregate and must not alter restoration or historical snapshots.
+Room is the approved persistent-data technology in
 AGENTS.md; this requirement does not define cloud backup or restore.
 
 **Принято пользователем · D-007 · 2026-09-17 (initial menu scope):** the original
@@ -374,12 +604,13 @@ sections 1, 3, 5, and 6 when implementing them.
 3. HUNGRY: show hungry Ryzhik without the bandana.
 4. Child buys food and covers the need.
 5. An explicit food-result update changes the state to HAPPY.
-6. A later explicit update returns to NORMAL and shows Ryzhik wearing the saved
-   bandana, or the current selection if the player changed it in the meantime.
+6. The live presentation smoothly returns to the saved bandana after the brief
+   reaction, or the current selection if it changed in the meantime. A later
+   explicit update may change the saved state to NORMAL.
 
 The shorter cosmetic example omits the reaction step; the full hunger example
-explicitly includes it. Under the subsequent user decision, HAPPY remains until
-another explicit event update; there is no timed reset.
+explicitly includes it. HAPPY remains saved until another explicit event update;
+ADVENTURE-D-011 gives its live artwork a brief duration without a saved-state reset.
 
 ### 7.2 Financial problem
 
@@ -388,7 +619,8 @@ another explicit event update; there is no timed reset.
 3. WORRIED.
 4. Child chooses where to get the money.
 5. Show UPSET or HAPPY depending on the result.
-6. A later explicit event update returns to NORMAL.
+6. The live presentation returns to the selected look after its brief reaction;
+   a later explicit event update returns the saved state to NORMAL.
 
 The board does not define the calculation that classifies each financial result.
 
@@ -415,8 +647,10 @@ provisional.
 - Detailed restoration boundaries for uncommitted UI input. Preservation of the
   current game, every pet state including HAPPY/UPSET, and owned gear is decided;
   cloud/device restore policy is a separate future concern.
-- Item prices, reward amounts, budget-plan period and editing rules, and
-  event-specific definitions of the fixed choice-impact ratings.
+- Prices/rewards beyond the approved temporary catalog, precise pedagogical
+  thresholds of mastery, and event-specific interpretations not covered by the
+  current financial contract. Financial periods, editable plans and savings
+  payment rules are already resolved by FINANCE-D-001–FINANCE-D-008.
 - Exact story-event identities and fatigue-clearing events, explicitly deferred
   to future story design. Their absence must not be filled by a generic rule.
 - Asset files for each state; the board has labeled placeholders only.
@@ -432,11 +666,13 @@ These cases translate the explicit requirements into checks; they do not add
 new state rules.
 
 - NORMAL renders each of the five documented saved looks.
-- Each of the seven special states replaces the selected cosmetic appearance.
+- Each available special-state artwork briefly replaces the selected cosmetic
+  appearance in the live game, then crossfades back to the current selected look.
 - Entering/exiting a special state does not erase the saved look.
 - Changing the selected look retains owned gear; NORMAL displays the current
   selection after the special state finishes.
-- Hunger persists while the food need is unmet; buying food follows scenario 7.1.
+- Hunger persists in the game while the food need is unmet, even after its
+  artwork returns to the selected look; buying food follows scenario 7.1.
 - Extra work grants virtual money and produces fatigue as in scenario 7.3.
 - Exactly one pet state is active; no hidden conditions or reaction queues exist.
 - Explicit quest transitions replace the current state, including the source
@@ -448,9 +684,16 @@ new state rules.
   THINKING > UPSET > HAPPY > NORMAL; it does not enable concurrent states.
 - Reopening preserves the current saved game and pet state, including owned gear,
   without advancing the story or clearing the active state due to elapsed time.
-- HAPPY and UPSET persist until an explicit event changes the state, including
+- Saved HAPPY and UPSET persist until an explicit event changes the state, including
   across reopening; no timer, animation completion, or generic Continue action
   clears them. UPSET does not represent punishment or moral blame.
+- The live reaction returns smoothly after 4 seconds (600 ms crossfade); a new
+  actual state replaces its deadline. Navigation and cosmetic changes do not
+  restart it. The timer writes no pet, needs, money, story, ownership or history.
+- Initial observation after process launch may briefly show the saved reaction;
+  rotation/navigation retain its deadline rather than replaying it.
+- Historical/simulated learning snapshots do not drive the live reaction clock;
+  the sleeping day recap keeps the bed when a reaction deadline passes.
 - Injury comes from an external story event, never a spending penalty.
 - Real elapsed time and time while the app is closed do not cause deterioration.
 - No combined accessory-and-emotion state or continuous energy depletion exists.
@@ -1115,18 +1358,33 @@ including grammatical inconsistencies in the source.
 
 
 
-## Инвентарь — 2026-09-19
+## Инвентарь — актуализация 2026-09-26
 
-**Принято пользователем · MAIN-D-075:** «Снаряжение» открывает экран уже приобретённых
-вещей с разделами «Сюжетные предметы» и «Аксессуары», без блоков глав.
+**Принято пользователем · MAIN-D-075, BALANCE-D-002, FINANCE-UI-D-021:**
+«Снаряжение» открывает уже приобретённые вещи, ниже — аксессуары, без блоков глав.
 Открытие, просмотр и возврат не меняют баланс, владение, выбранный образ,
 состояние питомца или ход истории. Пустое владение отображается пустыми разделами;
 выбранный начальный образ сам по себе не подтверждает наличие вещи.
 Повторы и порядок экземпляров сохраняются внутри соответствующего раздела.
-В текущей реализации покупка и смена косметики не вызываются этим экраном.
-По D-116 неожиданное предложение должно продавать существующий аксессуар,
-ещё не открытый игроку; покупка открывает возможность его надеть. Выбор
-экипировки ещё предстоит подключить. См. [инвентарь](inventory.md).
+Купленные вещи не расходуются при выполнении цели и не удаляются при переходе
+главы. Старые приобретения отображаются по сохранённым `OwnedItem`, независимо
+от текущей главы. Иллюстрированные страницы выбираются по точному `itemId`,
+а не по названию или ID операции; новые страницы не требуют новой покупки.
+Сведения о созвездиях, характеристиках и использовании — справочная подача,
+без скрытого изменения игровых правил.
+
+Покупка остаётся на экране цели или в игровом предложении. Инвентарь позволяет
+явно надеть приобретённый аксессуар через `SetPetLook`: внутри актуальной
+транзакции проверяются владение и ожидаемый предыдущий образ. Меняется только
+выбранный образ; деньги, шаги, силы и список вещей сохраняются. Снятие возвращает
+базовый образ и не уничтожает вещь. Никакая экранная страница сама не исполняет
+команду надевания. По D-116 неожиданное предложение продаёт существующий ещё
+не открытый аксессуар. См. [инвентарь](inventory.md).
+
+Текущий движок уже добавляет владение при `BuyGoalItem` и сохраняет его в
+финале главы. REMOVE в существующем контенте отсутствует; неподдерживаемый
+предметный REMOVE отклоняется целиком. Новое требование постоянства покупок
+не требует миграции Room или восстановления владения по косвенным признакам.
 
 
 
@@ -1181,7 +1439,8 @@ including grammatical inconsistencies in the source.
 Порог голода и питание — D-072. Кнопка заблокированного действия предлагает
 покормить; после оплаты игрок продолжает действие явно. Еда не добавляет сил.
 При нехватке на обычную еду доступна бесплатная столовая, с ограничением сил
-только следующего утра. Автоматических списаний при отказе нет. Завершение дня
+сегодня и следующего утра по ADVENTURE-D-009: после бесплатной еды текущая
+энергия равна нулю, следующее утро использует прежнее ограничение сил. Автоматических списаний при отказе нет. Завершение дня
 по-прежнему требует питания. Happy/UpSet не сбрасываются простым входом на экран.
 
 По D-113 замена действия на «Покормить» или завершение дня из-за нехватки сил
@@ -1192,7 +1451,57 @@ including grammatical inconsistencies in the source.
 После кормления голодное пояснение исчезает; если всё ещё нужен отдых,
 показывается усталость. Обычное завершение полного плана само не означает усталость.
 
-## Сон и содержимое итогов — 2026-09-20
+## Питание и повтор действий — 2026-09-27
+
+По **ARCH-D-004** из [реестра решений](decisions.md) `MealPolicy` — общий
+источник правил еды для `GameEngine`, аналитики и экранов меню, событий, дел,
+бюджета и цели. Обычный обед — самый дешёвый платный вариант каталога;
+перестановка элементов не меняет его цену и порог предложения бесплатной еды.
+В текущем каталоге это 5 монет. Бесплатная альтернатива предлагается при
+нехватке доступных монет; предложение в меню также требует начатого,
+не законченного и ещё не накормленного дня. Платные варианты остаются видимыми
+при нехватке, чтобы интерфейс мог показать причину недоступности.
+
+Потребность до конца недели рассчитывается по той же цене и числу оставшихся
+приёмов пищи: сегодняшний входит в расчёт, пока питомец не поел; до первого
+дня учитываются семь обедов. Это предупреждение о будущих нуждах, а не отдельный
+кошелёк или автоматическая бронь денег. Его используют планирование,
+подтверждение пополнения копилки и смешанной покупки цели.
+
+Оплаченный обед уменьшает доступные деньги по существующему приоритету FEEDING,
+отмечает питание и не восстанавливает силы. Бесплатный обед не меняет деньги,
+обнуляет сегодняшние силы и сохраняет авторское ограничение следующего утра
+(сейчас 3 из 5 по ADVENTURE-D-009). Подтверждение команды по-прежнему проверяет
+текущий агрегат в движке; показ вариантов и расчёт потребности игру не меняют.
+Вынос политики не добавляет новых условий прохождения, таблиц или полей снимка.
+
+По **ARCH-D-005** один пользовательский выбор образует одну попытку записи.
+[GameActionAttempt](../../app/src/main/java/ru/nksk/lctapp/core/ui/game/GameActionAttempt.kt)
+сохраняет исходные команду, `request.id`, ожидаемую ревизию, контекст решения
+и состояние до действия. При исключении результат считается неопределённым:
+явный повтор отправляет тот же запрос, а другая команда не подменяет его.
+Полученный `EngineResult.Blocked` — определённый отказ; попытка завершается,
+экран показывает причину и актуальные возможности. Новая ревизия не становится
+основанием незаметно повторить прежний выбор как новую команду.
+
+Успешный повтор может вернуть уже более новое состояние мира. Сообщение
+о выполненном действии относится к его собственному сохранённому результату:
+если ближайшего результата нет в ответе, используется checkpoint команды
+из истории. Разность с поздним текущим балансом не выдаётся за награду или
+цену старого действия. Если запись прошла, а её пояснение прочитать не удалось,
+это не объявляется новой ошибкой записи и не запускает повторное списание.
+
+Сохраняются действующие правила подтверждения денежных действий и жизненный
+цикл незавершённой мини-игры. Это контракт повторной отправки и обратной связи,
+а не автоматическое выполнение нового действия при загрузке экрана.
+
+## Сон и содержимое итогов — актуализация 2026-09-26
+
+По FINANCE-UI-D-020 пользователь просит сделать сухие итоги дня более игровыми и выразительными.
+По уточнению FINANCE-UI-D-022 `DaySummaryScreen` возвращает прежнюю композицию:
+спящий герой в кроватке на отдельной ночной сцене сверху, светлая панель итогов
+снизу. Существующие записи с иконками сохраняют порядок журнала. Переходы дня,
+денежные операции и сохраняемые факты не меняются.
 
 По D-108 итог FINISHED показывает спящего лиса текущего сохранённого возраста
 на сильно затемнённой сцене. Это представление сна, не новая запись visualState:
@@ -1204,7 +1513,8 @@ including grammatical inconsistencies in the source.
 сюжетные находки, покупки с ценами и питание. Описания в прошедшем времени
 соответствуют конкретному выбранному действию. Предложение/откладывание дела
 не считается выполнением; обход и пропуск не получают текст ремонта/находки.
-Ниже — «Потрачено за день», «Получено за день» и текущий остаток без стрелок.
+Ниже — «Потратили» и «Получили», только при полной сверке журнала. Отдельный
+блок «Монеты сейчас» показывает доступные деньги и реальную копилку.
 Расходы и поступления считаются отдельно; чистая разница не заменяет расходы. Пустых
 разделов, сообщений «не было шагов сценария» и технического счётчика шагов нет.
 Повторные обеды имеют отдельные записи, награда дела берётся после снижения
@@ -1237,6 +1547,13 @@ including grammatical inconsistencies in the source.
 степень усилия и последствия описаны словами.
 
 ## Завершение без технического окна — 2026-09-19
+
+Дополнение реализации 2026-09-26: практические STORY-ветки и явные ручные
+ремонты RANDOM требуют завершённой мини-игры. Привязки 13 сюжетных работ и
+13 ручных ремонтов (плюс сохранённая прежняя версия очистки рюкзака), допуск, пауза, восстановление и
+отсутствие автоматического успеха описаны в
+[игровом выполнении сюжетных работ](story-work-minigames.md). Это не превращает
+диалоги, чтение или поездки в оплачиваемые EARNING-поручения.
 
 По D-077 решение без отдельного содержательного продолжения сохраняется через
 CompleteEvent: выбор, его последствия и закрытие события — одна транзакция.
@@ -1370,16 +1687,16 @@ SetPetColor(color, expectedColor) проверяет revision и прежний 
 | 4 | ADULT — взрослый |
 | 5 и завершённая история | SENIOR — старик |
 
-Возраст — поле StoryAct в каталоге. Успешный финал, ожидающий любую собранную
-выбранную цель, атомарно записывает решение, завершение проекта, переход главы
+Возраст — поле StoryAct в каталоге. Успешный финал, ожидающий собранный комплект
+своей главы, атомарно записывает решение, завершение проекта, переход главы
 и новый pet.age. Покупка, выбор цели, пропуск дополнительной карточки, сон,
 пауза и заблокированное действие не меняют возраст. Имя, цвет и аксессуар
 сохраняются при взрослении. Отдельного действия «повзрослеть» у UI нет.
 
 Для прежних игр GameSession.prepare после установки каталога и
 initializeIfAbsent сверяет возраст с сохранёнными финалами. При расхождении
-движок читает актуальный агрегат в транзакции и меняет только pet.age и
-revision существующего engine. Повторная подготовка согласованной игры
+движок читает актуальный агрегат в транзакции и согласует pet.age и
+привязку активного комплекта по CAMPAIGN-D-001, повышая revision существующего engine. Повторная подготовка согласованной игры
 ничего не пишет. Ошибка распространяется, игра не обнуляется.
 read/observe остаются чтением; UI не вычисляет отдельный возраст.
 Каталог без правила petAge оставляет сохранённый возраст неизменным.
@@ -1394,8 +1711,8 @@ D-119 уточняет объём D-117/D-118 для текущего MR: тол
 
 Цикл работает только пока экран RESUMED; при уходе или сворачивании вычисление
 кадров прекращается. Имя в HUD остаётся неинтерактивным (D-094). Привязка карты,
-тень и навигационные кнопки не двигаются вместе с фигурой. Длительность
-переходов и оптимизация UI сохраняются.
+тень и навигационные кнопки не двигаются вместе с фигурой. По ADVENTURE-D-011
+добавлена плавная смена иллюстрации за 600 мс; дыхание и оптимизация UI сохраняются.
 [Объём движения и отложенный прототип](pet-motion.md).
 
 ## Первый запуск и выбор спутника — 2026-09-19
@@ -1440,9 +1757,9 @@ CUST-D-014: новый черновик Customize создаётся с пуст
 под полем «Введи имя спутника» и оставляет пользователя в Customize.
 Восстановление существующего черновика не сбрасывает введённое имя.
 
-GoalBriefing, GoalSelection и Introduction восстанавливаются из черновика вместе с goalId.
+GoalBriefing, GoalSelection и Introduction восстанавливаются из черновика вместе с savingItemId.
 На GoalBriefing кнопка «Дальше» открывает GoalSelection; сама цель не назначается.
-Без выбора одной из трёх стартовых целей по D-101 подтвердить выбор нельзя.
+Без выбора одной из четырёх накопительных подцелей первой главы по CAMPAIGN-D-001 подтвердить выбор нельзя.
 Back из Introduction возвращает GoalSelection, затем GoalBriefing и Accessories с
 сохранённым выбором. Ошибка финального сохранения оставляет Introduction
 для повтора, кнопки блокируются на время записи.
@@ -1465,31 +1782,60 @@ LocationScene.location и после успешного commit возвраща�
 на планирование «Продолжить день» из меню возвращает на экран поступления.
 После нажатия «Распределить монеты» возвращает прямо к незавершённому бюджету;
 повторно показывать поступление не требуется. Продолжение игры недоступно до
-подтверждения полного распределения с минимумом «Нужно» 35 (D-128/D-129).
+подтверждения полного распределения с минимумом «Нужно» `min(35, база)`
+(D-128/D-129, уточнение FINANCE-UI-D-015).
 Показ и повторное открытие экрана не являются новым начислением.
 Правило подключено к движку и Room по D-141; Preview использует отдельный локальный сценарий.
 
 
-## Обязательное планирование — D-138–D-141, 2026-09-21
+## Обязательное планирование — актуализация 2026-09-26
 
-После Introduction онбординга атомарно создаётся игра со стартовыми 100 в
-нераспределённых и сессией INITIAL/RECEIPT. По CUST-D-021 Host открывает меню;
-«Продолжить день» или «Монетки» открывают поступление. Его кнопка переводит
-сессию в ALLOCATION, подтверждение удаляет её и возвращает в меню. Объяснение
-бюджета показывается только в незавершённом onboarding, не при недельных начислениях.
-На дни 8,15,… BeginDay атомарно сохраняет день, доход и WEEKLY/RECEIPT; первое
-событие не открывается до подтверждения бюджета. Старые статьи не очищаются.
-MIGRATION/ALLOCATION сохраняет текущие день и событие без повторных эффектов.
-Миграционная доплата до35 отдельно от заработка учитывается в итогах дня.
+Начальный путь D-138–D-143 и CUST-D-021 сохранён. После Introduction создаётся
+игра со 100 доступными монетами, маркером нераспределённого 100 и
+INITIAL/RECEIPT. Меню через «Продолжить день» или «Монетки» открывает поступление.
+«Распределить» переводит в ALLOCATION; подтверждение завершает сессию и
+возвращает в меню. На дни 8, 15, … BeginDay атомарно создаёт новый день,
+зачисляет недельный доход и открывает WEEKLY/RECEIPT; событие ждёт бюджета.
 
-Любая gameplay-команда при открытой сессии возвращает BudgetPlanningRequired;
-исключены только косметические RenamePet/SetPetColor. Демонстрационные мини-игры
-также проверяют этот запрет. Меню, карта и просмотр информации разрешены.
-Возврат с экрана бюджета ждёт завершения уже принятой записи; ошибка позволяет
-повторить запись, не теряя сохранённого черновика. Устаревшие команды запрещены.
+С FINANCE-UI-D-015 текущие статьи, черновик и история намерений разделены.
+WEEKLY сохраняет остатки статей в черновике; новые 100 добавляются в доступный
+баланс и нераспределённую часть. Реальная копилка не перераспределяется.
+Ручная сессия начинается при первой правке текущих статей, без их обнуления;
+простое открытие не блокирует игру. Обычный заработок увеличивает доступный
+баланс и «Запас», не открывая обязательное распределение. Ни один из этих
+переходов не переводит монеты в копилку.
 
-По D-142 «Монетки» всегда открывает редактор. MANUAL/ALLOCATION создаётся при первом изменении и сохраняет черновик; требует распределить все деньги, но не вводит недельный минимум35. Простое открытие ничего не начисляет и не блокирует игру. INITIAL/WEEKLY/MIGRATION сохраняют минимум35.
+По FINANCE-UI-D-015, уточняющему FINANCE-UI-D-008, INITIAL/WEEKLY проверяют
+`min(35, база)`, MANUAL/MIGRATION — `min(оставшаяся потребность в еде, база)`.
+Ограничение базой не создаёт монеты. Частичные увеличения недостаточной статьи
+«Нужно» допустимы; уменьшение ниже минимума, ручной ввод меньшей суммы и
+подтверждение недостаточного черновика запрещены. Покупка еды уменьшает
+текущую статью; простой выход из бюджета без редактирования не проверяет
+заново недельные 35. Первоначальные намерения в `FinancialProgress.plans`
+не переписываются. Цветные сегменты показывают текущее распределение
+доступных монет или открытый черновик, не фактический баланс копилки.
+Редактор и подтверждение используют ревизию сессии; очередь относительных
+изменений берёт актуальный черновик. Все записи проходят через
+`GameSession.dispatch`, без самостоятельного сохранения копии состояния из UI.
 
+Техническая версия переходов отпечатка каталога — 5. История с прежним
+отпечатком недоступна для пересчёта Хроноскопом: новые списания по статьям
+не применяются к старым событиям молча.
+
+Миграция 16 → 17 сохраняет реальные savings v16 в `savingsBalance`,
+а needs+wants+reserve+unallocated — в `availableBalance`. Открытый старый
+черновик переносится на доступную базу, его savings-намерение начинается с нуля
+без обнуления уже накопленных денег. Нового подарка, повторного дохода,
+сброса дня или события миграция не создаёт.
+
+Текущий перенос 19 → 20 выполняется один раз и сохраняет оба реальных
+баланса, прежнее намерение в истории и исходный снимок в аудите. Допустимый
+активный черновик сохраняется; иначе создаётся MIGRATION/ALLOCATION на реальные
+доступные монеты без начисления и без снятия копилки. При нулевом остатке
+текущие статьи обнуляются без обязательной сессии. Расходы по разнице
+не реконструируются.
+Технические версии: Room 20, формат снимка 4. Детали хранения описаны в
+[контракте сохранения](room-persistence.md).
 
 ## Сохранение игровой семантики при экономике — D-144, 2026-09-22
 
@@ -1501,3 +1847,175 @@ MIGRATION/ALLOCATION сохраняет текущие день и событи�
 Открытие бюджета не требует PauseEvent или AcknowledgeResult: стадия остается
 сохраненной до подтверждения бюджета, после чего исходный сценарий продолжается.
 [Аудит кода и пределы проверки](economy-regression-review.md).
+
+## Финансовые периоды, практика и аналитика — 2026-09-24
+
+По FINANCE-D-001–FINANCE-D-006 выбранная большая цель связывается с финансовым
+периодом; недели и дни находятся внутри него. Выбор следующей цели открывает
+следующий период, финал главы закрывает текущий. До выбора цели обычные
+события и история операций сохраняются, но вымышленный завершённый период
+не создаётся. Onboarding предлагает четыре накопительные подцели первой главы (CAMPAIGN-D-001).
+
+По FINANCE-D-009 новый период проверяет питание, повторяемые самостоятельные
+накопления и реальный разбор плана по категориям. Временный конфиг требует
+пополнения в двух разных игровых днях после разных поступлений; дробление и
+круговые переводы не создают регулярность. При нехватке практики доступен
+явно учебный разбор без выдачи вымышленного финансового успеха родителю.
+Соблюдение плана проверяется по известным фактам; при превышении требуется
+разобрать разницу и подтвердить реалистичный новый план. Адаптация после
+неожиданной траты или дохода не является автоматическим провалом.
+Если при собранной цели и сюжетных предпосылках этапы не пройдены, финал
+возвращает `FinancialPracticeRequired`; карточка показывает «К практике».
+Сохранённые уже начатые периоды отмечаются импортированными и не получают
+задним числом обязательный новый барьер. Возраст меняется при успешном финале
+по последовательности CUB → TEEN → TEEN → ADULT → SENIOR.
+
+Это технические условия игрового продвижения, **не численные пороги освоения
+12 навыков**. Родительские уровни и достаточность повторений не утверждены.
+Правила наблюдений описаны в
+[контракте FIN-01–FIN-12](requirements/financial-analytics-coverage-2026-09-24.md).
+
+Одно финансовое действие атомарно сохраняет агрегат, историческую команду,
+денежные операции и связанные факты. История переживает смену дня. Повтор
+того же идентификатора команды не должен давать вторую награду. Переводы
+отделены от трат. Открытие экрана или готовая цифра не являются самостоятельным
+свидетельством навыка; важны показанные условия, доступная альтернатива,
+ответ/действие и помощь.
+
+Показанная информация финансового события связывается с конкретными
+occurrence/revision; невидимые или устаревшие сведения не делают контекст полным.
+По FINANCE-UI-D-019 карточка булочки не повторяет сводку доступных монет,
+накоплений и еды до следующей недели. Она сохраняет цену и фактические источники
+списания в понятной фразе. Это не факт показа отсутствующей полной сводки.
+У булочки только покупка и «Пройти мимо»; обычный отказ не означает FIN-06
+или намерение сохранить деньги на цель. Там, где другой сценарий предлагает
+отдельное явное решение «Хочу позже — сначала цель», приоритет учитывается
+только после выбора; дальнейшая история проверяется отдельно.
+«Заработать на цель» связывает принятие дела с выбранной целью; максимальная
+награда остаётся возможной, а ловкость и скорость мини-игры не становятся
+финансовыми успехами.
+
+Для FIN-09 карточка с доступными альтернативами «монеты / силы» может показать
+конкретное незавершённое дело со сроком до конца сегодня, обе цены/затраты
+и checkbox «Хочу оставить силы на …». Предложение появляется только если
+после хотя бы одного допустимого выбора движок допускает это дело. Намерение
+не выбирается автоматически, передаёт идентификатор реального предложения
+и сбрасывается при смене события или ревизии. Без явного приоритета вывод
+остаётся нейтральным; интерфейс не придумывает будущий план ребёнка.
+
+## Родительские награды — 2026-09-27
+
+По PARENT-REWARD-D-001 родитель может подарить монеты или аксессуар. В текущем
+этапе подготовлен [сетевой контракт](../backend/parent-rewards.md); исполняемый
+переход начисления ещё не подключён. Предлагается отдельная атомарная операция
+над актуальным сохранением с проверкой прохождения и квитанции награды.
+По PARENT-REWARD-D-002 доставка проектируется без Firebase Messaging, через
+получение серверного журнала при возвращении связи/приложения и повторные
+проверки. Поздняя награда применяется в момент получения к текущему миру:
+прошедшие дни, покупки и решения не пересчитываются. Запись о выдаче на сервере
+сама по себе не меняет деньги на офлайн-клиенте. Результат родительского действия не считается
+самостоятельным заработком ребёнка или свидетельством освоения навыка.
+
+## Хроноскоп и границы сетевой части — 2026-09-24
+
+По FINANCE-D-007 машина времени работает с копией прошлого состояния:
+выбор доступной альтернативы → повтор сохранённой последовательности →
+сравнение → один вопрос → объяснение → возврат в настоящее.
+Ровно один вопрос после сравнения закреплён FINANCE-UI-D-001, 2026-09-25.
+Повторная попытка относится к тому же вопросу, а не открывает серию вопросов.
+По LEARNING-D-002 от 2026-09-27 способность видеть другие пути доступна с начала
+игры. Вход «А что, если…» находится в итогах дня; сюжетная находка прибора
+не является условием доступа. Поддержанные воспоминания — оплаченные
+необязательные покупки и ремонт с доступной тогда самостоятельной работой. Еда исключена.
+Текущий базовый UI сравнивает один изменённый выбор до конца сохранённой
+части того же дня. Если прежний следующий шаг больше недоступен, расчёт
+останавливается и объясняет границу. Несовместимый контент или отсутствующая
+история не заменяются выдуманным исходом.
+
+Реальные деньги, вещи, сюжет и награды от пересчёта не меняются. Сохраняется
+учебный ответ с признаком симуляции и поддержки. Просмотр готового сравнения
+сам по себе не доказывает FIN-11/12, раскрытый ответ не выдаётся за
+самостоятельное решение. Ежедневный обязательный квиз не вводится.
+[Контракт пересчёта](requirements/time-machine-contract-2026-09-24.md).
+
+## Повседневные ситуации и экипировка — 2026-09-24
+
+По BALANCE-D-001–002 новые планы используют весь адаптированный пул из25
+непредвиденных трат Figma,5 покупок Figma и3 временных предложений существующих
+аксессуаров. Планировщик учитывает предпосылки и историю действительных показов,
+паузы между повторами, одну новую неожиданную ситуацию за день и промежуток
+между обязательными расходами. Перенесённый остаток имеет приоритет и не теряется.
+Настройки частоты и соответствия исходников описаны в
+[каталоге адаптации](requirements/everyday-balance-2026-09-24.md).
+
+PauseEvent для неожиданной ситуации откладывает её до завтра без исполнения,
+списаний и выдачи награды. Уже показанная критическая проблема удерживает лор,
+но не блокирует дела, бюджет и заботу о питомце. До первого показа PENDING-событие
+не создаёт поломку. Покупка еды внутри карточки удовлетворяет дневной приём пищи,
+не возвращая силы. Покупка аксессуара сохраняет владение; SetPetLook проверяет
+владение и ожидаемый текущий lookId. Надевание/снятие не тратит деньги или шаг.
+Цвет/возраст/эмоция сохраняются, взрослые и детские варианты берутся из каталога.
+
+Офлайн-источник состояния — Room. В коде есть локальные снимки, проверяемое
+восстановление и очередь исходящих записей. HTTP-доставка, серверный перенос,
+код устройства, родительский UI и подтверждение домашних подарков ещё не
+подключены. Их наличие в целевом описании не означает готовую сетевую функцию.
+
+## Накопительная подцель — CAMPAIGN-D-001, 2026-09-24
+
+SelectSavingGoal(goalId, itemId, firstDay?) проверяет текущую главу, принадлежность
+предмета комплекту и отсутствие покупки. При первом выборе активирует главу,
+открывает её план периода и при необходимости готовит день без открытия события.
+В активной главе меняет только selectedSavingItemId и revision. Денег/шага нет.
+BuyGoalItem требует этот предмет выбранным; по ADVENTURE-D-018 списывает цену
+из копилки и недостающую часть из текущих статей,
+добавляет OwnedItem и шаг, очищает selectedSavingItemId атомарно. Все прежние
+ограничения еды, подтверждений и ревизии сохраняются. Повторный запрос через
+агрегатный репозиторий остаётся идемпотентным; новая покупка уже имеющегося
+предмета блокируется. После финала selectedGoalId и selectedSavingItemId пусты,
+следующая доступная глава определяется её финальным событием.
+
+В старых сохранениях completedGoalProjects остаётся историей того, какой
+проект был завершён. Она не определяет, какую главу пропустить. Согласование
+при prepare/restore сохраняет покупки, решения и текущий финансовый прогресс,
+не назначает подцель за игрока. Точные правила миграции —
+[в текущей модели кампании](campaign-choice.md#код-ui-и-хранение).
+
+
+### Уточнения подачи событий — 2026-09-26
+
+По ADVENTURE-D-004 подпись состояния NORMAL не показывается; другие подписи
+эмоций и потребностей остаются проекцией сохранённого состояния. Карточка
+при подтверждении не меняет размер и не исчезает до завершения навигации.
+Это локальное поведение UI, не дополнительная стадия игрового события.
+
+Правила D-062/D-076/D-079 остаются: предложенное дело можно выполнить позже
+в пределах исходного включительного срока. Исправлен ошибочный флаг удаления
+предложения настройки телескопа при «Не сейчас» для исходного и balance-v2
+контента. Пауза мини-игры не выдаёт награды, не продлевает срок и при новом
+открытии начинает раскладку заново. Сюжетные работы сохраняют существующую
+паузу и перенос лора, без нового искусственного срока истечения.
+
+
+### Первое распределение и владение аксессуаром — 2026-09-27
+
+CUST-D-022: после бюджетного объяснения новый агрегат создаётся сразу с
+INITIAL/ALLOCATION. Экран распределения открывается до главного меню, без
+повторного RECEIPT; Back и запуск дня сохраняют действующие ограничения
+незавершённого бюджета. После подтверждения открывается меню. Выбранные ранее
+selectedGoalId и selectedSavingItemId сохраняются; цель заново не выбирается.
+Повторное завершение onboarding не перезаписывает существующую игру и не
+выдаёт деньги второй раз. Ранее сохранённый RECEIPT остаётся совместимым.
+
+ADVENTURE-D-005: только выбранный стартовый BANDANA/BACKPACK становится
+принадлежащим предметом. PLAIN не создаёт предмет. Снятие меняет только образ;
+для повторного надевания проверяется владение. Старым сохранениям принадлежность
+согласуется технической транзакцией по исходному аксессуару, без изменения
+игровых денежных фактов или состава прежних приобретений.
+
+ADVENTURE-D-006: автоматически добавленный generic :skip у открытой лоровой
+карточки недоступен. Авторские варианты исхода, условия появления OPTIONAL
+сцен и пауза сохраняются. Старые решения остаются в истории. Бесплатные лоровые
+действия не показывают и не маркируют как показанный полный денежный контекст.
+Покупка показывает только цену и действительные источники оплаты одной фразой;
+обычный отказ не записывается как намеренное откладывание ради цели.

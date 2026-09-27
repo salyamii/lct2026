@@ -88,16 +88,18 @@ fun TargetStopScreen(
         val sceneHeight = if (maxHeight < 480.dp) 72.dp else 150.dp
         Column(Modifier.fillMaxSize()) {
             Box {
-                GameArtwork(R.drawable.location_observatory,
+                GameArtwork(deed?.sceneRes ?: R.drawable.location_observatory,
                     contentDescription = null,
                     modifier = Modifier.fillMaxWidth().height(sceneHeight),
                     contentScale = ContentScale.Crop,
                 )
+                if (sceneHeight >= 150.dp) deed?.activityArtworkRes?.let { art -> GameArtwork(art, null,
+                    Modifier.align(Alignment.BottomEnd).size(92.dp)) }
                 DeedHeader(deed?.title ?: stringResource(R.string.deeds_target_title), onBack = onBack)
             }
             DeedSheet(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
                 Text(
-                    if (deed != null) "Останови маркер в зелёной зоне. Ошибки уменьшают награду." else stringResource(R.string.deeds_target_prompt),
+                    deed?.instructions ?: if (deed != null) "Останови маркер в зелёной зоне. Ошибки уменьшают награду." else stringResource(R.string.deeds_target_prompt),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = Rubik,
@@ -109,7 +111,7 @@ fun TargetStopScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     DeedChip(stringResource(R.string.deeds_round, uiState.roundNumber, TargetStopState.ROUNDS))
-                    CoinChip(deed?.let { "Награда до ${it.maximumReward} монет" }
+                    if (deed?.storyAction != true) CoinChip(deed?.let { "Награда до ${it.maximumReward} монет" }
                         ?: stringResource(R.string.deeds_demo_reward, state.reward))
                 }
                 Spacer(Modifier.height(18.dp))

@@ -196,9 +196,11 @@ class MainMenuScreenTest {
         val name = compose.onNodeWithText(MainMenuPreviewState.pet.name)
         name.assertIsDisplayed().assertHasNoClickAction()
         name.performTouchInput { click() }
+        val goalSummary = compose.onNodeWithText(MainMenuPreviewState.goalTitle)
+        goalSummary.assertIsDisplayed().assertHasNoClickAction()
+        goalSummary.performTouchInput { click() }
         compose.runOnIdle { assertEquals(emptyList<MainMenuAction>(), selections) }
         val actions = listOf(
-            hasText(MainMenuPreviewState.goalTitle) to MainMenuAction.Goal,
             hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility, 100)) to
                 MainMenuAction.Coins,
             hasContentDescription(compose.activity.getString(R.string.menu_village)) to MainMenuAction.Village,

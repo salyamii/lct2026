@@ -1,0 +1,13 @@
+{
+  "gameRunId": "73d831fd-cf83-4a8c-9e99-973fe16fef4e",
+  "receipts": [
+    {
+      "rewardId": "5488c280-7f73-44e4-93a2-74d46e21a2e3",
+      "applicationId": "7e0f74aa-9354-47f4-a2a6-3857bf3b7571",
+      "historyEntryId": "reward-application:7e0f74aa-9354-47f4-a2a6-3857bf3b7571",
+      "historySequence": 18,
+      "outcome": "APPLIED"
+    }
+  ],
+  "schemaVersion": 1
+}

@@ -45,6 +45,8 @@ class GameEnginePersistenceTest {
         session.prepare()
         val before = games.read()!!
         assertTrue(session.dispatch(request(session.selectGoalCommand(before, catalog.goals.first().goalId))) is EngineResult.Applied)
+        val planning = checkNotNull(games.read()!!.economy.planning)
+        assertTrue(session.dispatch(request(EngineCommand.ConfirmBudget(planning.id, planning.revision))) is EngineResult.Applied)
         val result = session.dispatch(request(checkNotNull(session.advanceCommand(games.read()!!)))) as EngineResult.Applied
         val intro = result.state.engine!!.currentEvent!!
         assertEquals(catalog.introductionId, intro.eventId)

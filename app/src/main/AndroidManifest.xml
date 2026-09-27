@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".app.LctApplication"
         android:allowBackup="true"
@@ -12,6 +14,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.LCTApp">
+        <provider
+            android:name=".feature.settings.sharing.ParentQrFileProvider"
+            android:authorities="${applicationId}.parent-qr"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/parent_qr_paths" />
+        </provider>
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -2,11 +2,17 @@ package ru.nksk.lctapp.domain.engine
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import ru.nksk.lctapp.domain.content.StoryContent
 import ru.nksk.lctapp.domain.content.StoryContentRepository
 import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.pet.PetState
+import ru.nksk.lctapp.domain.pet.withStarterAccessoryOwnership
+import ru.nksk.lctapp.domain.economy.BudgetPlanningReason
+import ru.nksk.lctapp.domain.economy.BudgetPlanningStage
+import ru.nksk.lctapp.domain.economy.EconomyOperations
 
 /** Authored copy and artwork keys stay open data, independently of Android resources. */
 data class EventCardCopy(
@@ -21,6 +27,7 @@ data class EventCardCopy(
     val variants: List<EventCardVariant> = emptyList(),
     /** Short past-tense outcomes keyed by the choice actually made, for the day recap. */
     val summaryByChoiceId: Map<String, String> = emptyMap(),
+    val presentation: EventPresentation = EventPresentation(),
 )
 
 data class GameCatalog(
@@ -36,44 +43,19 @@ data class GameCatalog(
     val oneTimeEventIds: Set<String> = emptySet(),
     val goals: List<GoalCampaign> = emptyList(),
     val storyCampaign: StoryCampaign? = null,
+    /** Direct old -> current IDs for compatible, unresolved scheduled occurrences only. */
+    val eventReplacements: Map<String, String> = emptyMap(),
 ) {
+    // A derived helper has no backing field, so it does not become authored fingerprint data.
+    val mealPolicy: MealPolicy get() = MealPolicy(meals)
+
     fun storyProgress(state: GameState) = StoryProgress(content, policies, goals, storyCampaign, state)
 
     // Existing saves keep their current day reference; only a finale changes its chapter.
     fun dayId(state: GameState): String = state.story.currentDayId ?: storyDayId
 
-    /** Temporary deterministic content rotation; the selected plan is persisted by BeginDay. */
-    fun plan(state: GameState): List<String> {
-        val carried = state.engine?.events.orEmpty().filter {
-            it.status == EventStatus.CARRIED || it.status == EventStatus.CARRIED_ACTIVE
-        }.map { it.eventId }.take(5)
-        val introductionCompleted = state.story.decisions.any { decision ->
-            content.choices.any { it.id == decision.choiceId && it.eventId == introductionId }
-        }
-        val storyEvent = if (storyCampaign != null) storyProgress(state).nextEvent(carried.toSet())
-            else introductionId.takeUnless { (goals.isNotEmpty() && goals.selectedGoal(state) == null) || introductionCompleted || it in carried }
-        val remaining = carried + if (carried.size < 5 && storyEvent != null) listOf(storyEvent) else emptyList()
-        require(remaining.size <= 5 && deedPool.isNotEmpty())
-        val offset = (state.engine?.day ?: 0) * 3L
-        val completed = state.story.decisions.map { it.choiceId }.toSet()
-        val everyday = dailyEventPool.filter { id ->
-            id !in remaining && storyProgress(state).eligible(id) && (id !in oneTimeEventIds ||
-                content.choices.none { it.eventId == id && it.id in completed })
-        }
-        val extras = if (everyday.isEmpty()) emptyList() else List(minOf(2, everyday.size)) {
-            everyday[((state.engine?.day?.toLong() ?: 0L) + it).rem(everyday.size).toInt()]
-        }
-        val slots = (4 - remaining.size).coerceAtLeast(0)
-        // Keep an earning opportunity before expenses; carried entries always keep their prefix.
-        val fill = mutableListOf<String>()
-        val helpfulDeed = storyCampaign?.deedHints?.firstOrNull {
-            goals.selectedGoal(state) != null && storyProgress(state).meets(it.condition)
-        }?.eventId
-        if (slots > 0) fill += helpfulDeed ?: deedPool[(offset % deedPool.size).toInt()]
-        fill += extras.take((slots - fill.size).coerceAtLeast(0))
-        while (fill.size < slots) fill += deedPool[((offset + fill.size) % deedPool.size).toInt()]
-        return remaining + fill
-    }
+    /** Stable rotation of eligible content; actual exposure is recorded only when a card is shown. */
+    fun plan(state: GameState): List<String> = EventScheduler.plan(this, state)
 }
 
 /** Installs immutable content once, then delegates every game write to the aggregate engine. */
@@ -85,16 +67,66 @@ class GameSession(
 ) {
     private val preparation = Mutex()
     private var prepared = false
-    val engine = GameEngine(games, EventFactory(catalog.content, catalog.policies, catalog.meals, catalog.goals, catalog.storyCampaign), catalog.rules)
+    private val eventReplacements = EventOccurrenceReplacements(catalog)
+    val contentFingerprint = ru.nksk.lctapp.domain.timemachine.GameCatalogFingerprint.compute(catalog)
+    val engine = GameEngine(games, EventFactory(catalog.content, catalog.policies, catalog.meals, catalog.goals, catalog.storyCampaign), catalog.rules,
+        contentFingerprint)
+    val timeMachine = ru.nksk.lctapp.domain.timemachine.TimeMachine(games, engine, catalog, contentFingerprint)
+
+    fun observeHistory() = games.observeHistory()
+    suspend fun history() = games.readHistory()
+    suspend fun exportSnapshot() = games.exportSnapshot()
+    suspend fun restoreSnapshot(snapshot: ru.nksk.lctapp.domain.history.GameSnapshot,
+        guard: ru.nksk.lctapp.domain.history.RestoreGuard): GameState {
+        content.install(catalog.content)
+        games.restoreSnapshot(snapshot, guard)
+        eventReplacements.synchronize(games)
+        games.synchronizeStarterAccessory()
+        engine.synchronizeStoryAge()
+        return checkNotNull(games.read())
+    }
+    suspend fun recordFacts(facts: List<ru.nksk.lctapp.domain.analytics.AnalyticsFact>) = games.recordFacts(facts)
+
+    suspend fun skillProfiles(): List<ru.nksk.lctapp.domain.analytics.SkillProfile> {
+        val history = games.readHistory()
+        val runId = history.lastOrNull()?.runId ?: return emptyList()
+        return withContext(Dispatchers.Default) {
+            ru.nksk.lctapp.domain.analytics.SkillEvaluator().project(runId,
+                ru.nksk.lctapp.domain.history.HistoryLearningProjection.facts(history, catalog.content))
+        }
+    }
 
     /** Available projects for a new game, before there is a persisted aggregate. */
-    val onboardingGoals: List<GoalCampaign> get() = catalog.goals.filter { it.isAvailable(initial) }
+    val onboardingGoals: List<GoalCampaign> get() = catalog.goals.filter { catalog.storyProgress(initial).goalAvailable(it) }
+    val onboardingSavingItemIds: List<String> get() = onboardingGoals.flatMap { it.itemIds }
 
-    suspend fun prepare(pet: PetState? = null, goalId: String? = null) = preparation.withLock {
+    suspend fun prepare(
+        pet: PetState? = null,
+        goalId: String? = null,
+        savingItemId: String? = null,
+        beginInitialAllocation: Boolean = false,
+    ) = preparation.withLock {
         if (!prepared) {
             content.install(catalog.content)
             require(goalId == null || onboardingGoals.any { it.goalId == goalId }) { "Unavailable starting goal" }
-            games.initializeIfAbsent(initial.copy(pet = pet ?: initial.pet, selectedGoalId = goalId ?: initial.selectedGoalId))
+            require(savingItemId == null || savingItemId in onboardingSavingItemIds) { "Unavailable starting saving target" }
+            val startingGoal = savingItemId?.let { item -> onboardingGoals.first { item in it.itemIds }.goalId }
+                ?: goalId ?: initial.selectedGoalId
+            // The onboarding explanation already introduced these coins. Create the
+            // new save at allocation, atomically with its chosen target and accessory.
+            // initializeIfAbsent still preserves any save committed in the meantime.
+            val planning = initial.economy.planning
+            val economy = if (beginInitialAllocation && planning?.reason == BudgetPlanningReason.INITIAL &&
+                planning.stage == BudgetPlanningStage.RECEIPT) {
+                EconomyOperations.startAllocation(initial.economy, planning.id, planning.revision)
+            } else initial.economy
+            if (games.read() == null) {
+                games.initializeIfAbsent(initial.copy(pet = pet ?: initial.pet, economy = economy,
+                    selectedGoalId = startingGoal, selectedSavingItemId = savingItemId ?: initial.selectedSavingItemId)
+                    .withStarterAccessoryOwnership())
+            }
+            eventReplacements.synchronize(games)
+            games.synchronizeStarterAccessory()
             engine.synchronizeStoryAge()
             prepared = true
         }
@@ -112,6 +144,9 @@ class GameSession(
     }
 
     fun selectGoalCommand(state: GameState, goalId: String) = EngineCommand.SelectGoal(goalId,
+        if (state.engine == null) EngineCommand.BeginDay(catalog.dayId(state), catalog.plan(state)) else null)
+
+    fun selectSavingGoalCommand(state: GameState, goalId: String, itemId: String) = EngineCommand.SelectSavingGoal(goalId, itemId,
         if (state.engine == null) EngineCommand.BeginDay(catalog.dayId(state), catalog.plan(state)) else null)
 
     private fun awaitsIntroduction(state: GameState): Boolean = catalog.goals.selectedGoal(state)?.let { goal ->

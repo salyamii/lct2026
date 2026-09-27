@@ -14,6 +14,9 @@ sealed interface StoryCondition {
     data class EventCompleted(val eventId: String) : StoryCondition
     data class EventCompletions(val eventIds: Set<String>, val minimum: Int) : StoryCondition
     data class OwnsItem(val itemId: String) : StoryCondition
+    data class OwnsAnyItem(val itemIds: Set<String>) : StoryCondition
+    data class CurrentLocation(val locationId: String) : StoryCondition
+    data class EquippedLook(val lookId: String) : StoryCondition
     data class GoalCollected(val goalId: String) : StoryCondition
     data class FactsAtLeast(val factIds: Set<String>, val minimum: Int) : StoryCondition
     data class DayStepsAtLeast(val minimum: Int) : StoryCondition
@@ -28,10 +31,11 @@ data class StoryAct(
     val eventIds: List<String>,
     val finaleId: String,
     val petAge: PetAge? = null,
+    val goalId: String? = null,
 )
 data class StoryDeedHint(val condition: StoryCondition, val eventId: String)
 
-/** Act order is independent of the order in which personal projects are chosen. */
+/** Each authored chapter can bind its own kit; players choose purchase targets within it. */
 data class StoryCampaign(
     val acts: List<StoryAct>,
     val completionAliases: Map<String, Set<String>> = emptyMap(),
@@ -64,6 +68,14 @@ class StoryProgress(
     val currentAct: StoryAct? get() = campaign?.acts?.firstOrNull { !completed(it.finaleId) }
     val campaignComplete: Boolean get() = campaign != null && currentAct == null
 
+    val requiredGoal: GoalCampaign? get() = currentAct?.goalId?.let { id -> goals.first { it.goalId == id } }
+
+    fun goalAvailable(goal: GoalCampaign): Boolean = if (campaign?.acts?.any { it.goalId != null } == true)
+        requiredGoal?.goalId == goal.goalId else goal.isAvailable(state)
+
+    fun goalCompleted(goal: GoalCampaign): Boolean = campaign?.acts?.firstOrNull { it.goalId == goal.goalId }
+        ?.let { completed(it.finaleId) } ?: state.completedGoalProjects.any { it.goalId == goal.goalId }
+
     /** A completed campaign retains its final stage; catalogs without an age rule leave it alone. */
     val petAge: PetAge? get() = (currentAct ?: campaign?.acts?.last())?.petAge
 
@@ -78,6 +90,9 @@ class StoryProgress(
             content.choices.any { it.id == decision.choiceId && it.eventId in condition.eventIds }
         } >= condition.minimum
         is StoryCondition.OwnsItem -> state.ownedItems.any { it.itemId == condition.itemId }
+        is StoryCondition.OwnsAnyItem -> state.ownedItems.any { it.itemId in condition.itemIds }
+        is StoryCondition.CurrentLocation -> state.locationScene.location.code == condition.locationId
+        is StoryCondition.EquippedLook -> state.pet.selectedLookId == condition.lookId
         is StoryCondition.GoalCollected -> goals.firstOrNull { it.goalId == condition.goalId }?.progress(state, content)?.isCollected == true
         is StoryCondition.FactsAtLeast -> condition.factIds.count { it in facts } >= condition.minimum
         is StoryCondition.DayStepsAtLeast -> (state.engine?.steps ?: 0) >= condition.minimum
@@ -88,8 +103,20 @@ class StoryProgress(
     fun eligible(eventId: String): Boolean {
         val policy = policies.getValue(eventId)
         val act = policy.storyActId
-        return (act == null || (goals.selectedGoal(state) != null && currentAct?.id == act && !completed(eventId))) &&
+        // Item/location conditions decide whether a new problem can be offered. Once shown,
+        // changing clothes or leaving its background does not erase the unresolved situation.
+        if (act == null && wasPresented(eventId)) return true
+        if (act != null && state.engine?.events.orEmpty().any { occurrence ->
+                occurrence.status != EventStatus.COMPLETED && policies[occurrence.eventId]?.scheduling?.blocksStoryUntilResolved == true &&
+                    wasPresented(occurrence.eventId)
+            }) return false
+        val selected = goals.selectedGoal(state)
+        return (act == null || (selected != null && goalAvailable(selected) && currentAct?.id == act && !completed(eventId))) &&
             meets(policy.condition) && (!policy.finishesStoryAct || meets(StoryCondition.SelectedGoalCollected))
+    }
+
+    fun wasPresented(eventId: String): Boolean = state.engine?.events.orEmpty().any {
+        it.eventId == eventId && it.status in setOf(EventStatus.ACTIVE, EventStatus.RESULT, EventStatus.PAUSED, EventStatus.CARRIED_ACTIVE)
     }
 
     /** Only eligible content is scheduled; missing clues never occupy a blocking slot in an ordinary day. */

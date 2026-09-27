@@ -105,7 +105,7 @@ class MainMenuInitialStateTest {
     }
 
     @Test
-    fun unmappedStateDisplaysItsLabelWithoutTheBackpackImage() {
+    fun sickStateDisplaysItsArtworkWithoutTheBackpackImage() {
         val game = createInitialGameState().copy(
             pet = PetState("BACKPACK", PetVisualState.NEEDS_HELP),
         )
@@ -113,8 +113,9 @@ class MainMenuInitialStateTest {
             LCTAppTheme { MainMenuScreen(state = game.toMainMenuUiState(), onAction = {}) }
         }
 
-        compose.onNodeWithText(compose.activity.getString(R.string.menu_pet_needs_help, PetDefaults.FOX_NAME))
-            .assertIsDisplayed()
+        compose.onNode(hasContentDescription(
+            compose.activity.getString(R.string.menu_pet_needs_help, PetDefaults.FOX_NAME),
+        )).assertIsDisplayed()
         compose.onNode(hasContentDescription(
             compose.activity.getString(R.string.menu_fox_description, PetDefaults.FOX_NAME),
         )).assertDoesNotExist()

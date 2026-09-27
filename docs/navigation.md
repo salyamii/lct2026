@@ -36,9 +36,11 @@ is not a persistent tab bar requiring independent stacks.
 | Gear | `Gear` |
 | Tasks | `Tasks` |
 | Goal card / Goal shortcut | `Goal` |
-| Coins | `Coins` |
-| Village | `Village` |
+| Coins | `Economy` (`coins`) |
+| Savings balance / savings menu item | `Savings` (`savings`) |
+| Village | `GameMap` (`village`) |
 | Continue day | `Day` |
+| Settings gear | `Settings` (`settings`) |
 
 Four feature entries display a shared placeholder with Back. Gear displays the inventory
 with two sections, owned items only, and an entry-scoped Hilt ViewModel. Its saved
@@ -137,11 +139,18 @@ retention are unchanged; predictive Back still follows the gesture.
 
 ## Offered deed mini-games — 2026-09-19
 
-The new stable `deed_game` route carries only the occurrence ID. Its serializer
-is registered alongside all existing keys. Starting from a Day proposal replaces
+The stable `deed_game` route carries the occurrence ID and, since 2026-09-26,
+an optional `choiceId` for a practical STORY/RANDOM branch. Its default is null,
+so old routes still open the offered deed. Both values identify the entry and
+its board state; no game snapshot or financial context is stored in the key.
+Its serializer is registered alongside all existing keys. Starting from a Day proposal replaces
 that entry; starting from Tasks pushes the game. Completion returns directly to
 the menu. Both system and UI Back first save PauseEvent, then return to the menu.
 A failed save leaves the game visible with retry; it does not silently navigate.
+Back during loading waits for the saved occurrence before requesting its pause.
+Practical event branches use the same route after a successful admission check;
+their existing costs and story effects apply only on completion of the board.
+See [the event-work contract](design/story-work-minigames.md).
 
 DeedGameViewModel observes the aggregate; the existing board ViewModels belong
 to this game's entry and retain their small SavedStateHandle state on recreation.
@@ -284,4 +293,122 @@ Continue вновь открывает её. Этап RECEIPT/ALLOCATION чит�
 и Back возвращают к меню. Gameplay-защита независимо находится в домене;
 навигационный переход сам по себе не начисляет деньги.
 
-По D-142 «Монетки» всегда открывает редактор. MANUAL/ALLOCATION создаётся при первом изменении и сохраняет черновик; требует распределить все деньги, но не вводит недельный минимум35. Простое открытие ничего не начисляет и не блокирует игру. INITIAL/WEEKLY/MIGRATION сохраняют минимум35.
+По D-142 «Монетки» всегда открывает редактор текущих статей. MANUAL/ALLOCATION создаётся при первом изменении на их основе и сохраняет черновик; требует распределить все доступные деньги. По FINANCE-UI-D-015 минимум «Нужно» для INITIAL/WEEKLY — min(35, база), для MANUAL/MIGRATION — min(оставшаяся потребность в еде, база). Простое открытие ничего не начисляет и не блокирует игру; без редактирования выход не требует заново пополнять потраченное на еду. Автоматического распределения нет.
+
+## Выбор подцели — CAMPAIGN-D-001, 2026-09-24
+
+Маршрут онбординга сохранён: GoalBriefing → GoalSelection → Introduction.
+Выбирается savingItemId из четырёх предметов первой главы. GameSession создаёт
+игру с её комплектом и выбранным предметом; до финального подтверждения это
+только черновик. Существующая игра не подменяется черновиком. Goal показывает
+последовательные главы и выбор/прогресс накопления внутри текущей. Просмотр
+состава остаётся локальным состоянием навигации; выбранный предмет хранится
+в агрегате через команду движка.
+
+По реализации FINANCE-UI-D-009 экран Goal сразу показывает превью текущей
+главы, даже если подцель ещё не выбрана. Просмотр не выполняет SelectGoal.
+«Другие цели» открывает список превью; View запоминает источник входа в
+SavedStateHandle. Back из открытой таким способом главы возвращает список,
+а из первоначально открытой текущей главы — предыдущий маршрут. Суммы и
+предметы остаются в наблюдаемом игровом состоянии, не в ключе маршрута.
+
+## Копилка и Хроноскоп — FINANCE-UI-D-007/017, актуализация 2026-09-26
+
+`Savings` (`savings`) зарегистрирован в сериализации и принадлежит economy.
+Экран открывается из меню, HUD бюджета и задания. По реализации
+FINANCE-UI-D-017 это одна страница: постоянные переключатели «Пополнить» /
+«Взять», ввод суммы, последствия и результат записи. Промежуточного обзора
+и отдельного экрана RESULT больше нет. Подтверждение снятия и предупреждение
+о нехватке на еду появляются внутри этой же страницы. Режим, сумма,
+подтверждение и результат принадлежат `EconomyViewModel`; маршрут не содержит
+денег или снимка и не создаёт дополнительные ключи для этих состояний.
+
+Back при открытом подтверждении или предупреждении отменяет его без перевода;
+в остальных случаях возвращает к предыдущему разделу. Во время записи
+повторное действие и выход заблокированы. Отмена и повторное открытие никогда
+не отправляют перевод автоматически. До денежного решения сохраняются
+фактические доступные монеты, копилка, известная потребность в еде и последствия
+для выбранной цели; сокращение переходов не снимает доменные проверки.
+
+Перекрёстные переходы Goal ↔ Savings и Budget ↔ Learning используют
+`navigateToExisting`: если раздел уже находится ниже в стеке, удаляются только
+экраны над ним. Это сохраняет его ViewModel и исключает повтор одинакового ключа.
+Каждый callback проверяет текущий source. «На главный экран» отдельно связан
+с `returnToRoot`, обычный Back сохраняет порядок предыдущих экранов.
+
+По LEARNING-D-001/002 история, тренировка из «Дел» и пересмотр из итогов дня
+имеют отдельные entry-scoped ViewModel и UiState. Разделение реализации
+2026-09-27 сохраняет существующие ключи и их сериализацию:
+
+| Ключ / serialName | ViewModel | Экран |
+| --- | --- | --- |
+| `Learning` / `financial_learning` | `LearningHistoryViewModel` | `HistoryScreen` |
+| `SkillTraining` / `skill_training` | `TrainingViewModel` | `TrainingScreen` |
+| `OtherPaths(day)` / `other_paths` | `ReflectionViewModel` | `ReflectionScreen`, шаги в `ChronoscopeScreen` |
+
+День в `OtherPaths` — фильтр просмотра, не копия игры. Entry получает ViewModel
+через Hilt, собирает UiState с lifecycle и передаёт UI только состояние и callbacks.
+History и Reflection через `repeatOnLifecycle(RESUMED)` включают наблюдение
+в `setActive(true)` и при уходе отменяют только observer job. Это прекращает
+чтение журнала и построение отчётов скрытого экрана; при возврате подписка
+получает актуальный агрегат. Незавершённые команды и записи аналитики остаются
+в `viewModelScope` и не отменяются при переходе в STARTED/STOPPED.
+
+Шаги пересмотра принадлежат `ReflectionViewModel`: воспоминания → выбор →
+сравнение → вопрос → объяснение. Back возвращает по шагам; выход — к итогам.
+В тренировке Back закрывает вопрос с сохранением серии либо возвращает из
+списка тем. Автоматический переход после верного ответа выполняется только
+в RESUMED и несёт ID вопроса; закрытый или уже сменившийся вопрос не продвигается.
+Просмотр истории не меняет состояние игрового дня. Бюджетный gate и доменные
+ограничения планирования продолжают действовать.
+[Текущие сценарии и разделение состояния](design/skills-and-reflection.md).
+
+
+## Кнопка панели в главном меню — 2026-09-26
+
+По ADVENTURE-D-004 существующая debug-панель открывается шестерёнкой в верхней
+строке главного меню. `LctApp` передаёт необязательный composable-слот через
+`LctNavHost` и `mainMenuEntry`; feature/menu не зависит от feature/debug.
+Состояние панели остаётся локальным у владельца debug-панели, новый маршрут
+и поля игрового сохранения не добавлены. Release передаёт пустой слот и
+по-прежнему не включает отладочный модуль.
+
+
+## Распределение сразу после onboarding — 2026-09-27
+
+CUST-D-022: Introduction → INITIAL/ALLOCATION → MainMenu. Кнопка
+«Распределить монеты» завершает onboarding с уже выбранными целью и подцелью;
+сохранённая незавершённая сессия направляет в Economy. Пока gate переводит
+маршрут, меню не показывается промежуточным кадром. Перезапуск возвращает
+к тому же распределению без повторного дохода. Legacy INITIAL/RECEIPT остаётся
+читаемым и возобновляемым по прежним правилам; новый маршрут не содержит данных
+игрового сохранения.
+
+По ADVENTURE-D-008 верхняя плашка цели только информирует; кнопка настроек
+стоит отдельно справа. Переход к цели остаётся у нижней кнопки меню.
+
+
+## Settings — 2026-09-27
+
+The separate menu gear opens `feature/settings` in both debug and release builds.
+The `settings` key carries no game state, profile identifier, linking token or QR
+payload. Its entry owns the Hilt ViewModel, lifecycle-aware collection, copy action
+and Back callback. Back only pops the route; opening settings does not advance the
+day or change the budget. The pending-budget redirect allows this read-only route.
+
+`AppDebugOverlay` stays at the app composition root. Its optional launcher is passed
+to a developer-tools section inside Settings, so release builds retain real
+settings without developer controls. Parent linking uses a repository outside the
+game aggregate. An explicit button generates the QR offline from the saved profile
+UUID, without wrapping it in a URL or JSON. The entry then registers the profile
+when a backend is configured; registration failure leaves the QR visible and offers
+a separate retry. Without a configured server, the QR remains available with a
+short connection note. The QR has no expiry and is never serialized into route keys.
+
+The QR's «Поделиться QR-кодом» button opens the Android Sharesheet with a PNG
+of the displayed matrix. The entry owns this external navigation, guards it by
+RESUMED lifecycle and an in-flight flag, and shows a retry message if preparation
+or opening fails. PNG creation runs off the main thread; the coroutine is scoped
+to the entry. A private FileProvider exposes only `cache/parent_qr/` with temporary
+read access. Sharing does not register a profile, regenerate its ID or upload the
+world; it remains available offline. The user chooses the recipient application.

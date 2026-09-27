@@ -1,0 +1,30 @@
+{
+  "resource": "goal_preview_tower",
+  "category": "Goal chapter previews",
+  "generated_at": "2026-09-25",
+  "tool": "image_gen.imagegen",
+  "mode": "built-in generation",
+  "prompt": "Use case: stylized-concept.\nAsset type: final landscape chapter preview illustration for a polished cozy fantasy mobile adventure for children. Aspect ratio 3:2, 1536 x 1024 preferred.\nStyle: detailed dimensional 3D storybook game art, soft rounded craftsmanship, clean readable silhouettes, rich tactile stone/wood/brass textures, cinematic painterly lighting, premium production finish. The same coherent medieval fantasy world as a warm sandstone observatory with blue velvet banners, brass astronomy instruments, amber lanterns and distant castle mountains. Midnight blue and teal shadows, amber golden light.\nComposition: one strong centered subject immediately recognizable at small mobile-card size, natural perspective and coherent spatial depth, landscape full-bleed art only, keep essential subject within central 80% with comfortable margins. No fox, people, animals, characters, UI, borders, labels, logos, readable lettering, text, coins, graphs, finance motifs, collage or split panels. This is original game artwork, not a screenshot or app mockup.\nPrimary scene: A mysterious but welcoming northern stone watchtower on a forested mountain trail. The tower has crafted pale stone, a steep dark blue tiled roof and one gently glowing arched window, rising from the center of a pine woodland clearing. A winding stone path leads visibly to its wooden door. A small warm brass lantern and neatly coiled climbing rope rest on a rock in the lower foreground, secondary to the tower. Blue-hour teal forest, distant mountain silhouettes, warm amber light guiding exploration. Whole tower visible with roof margin. Inviting adventure and preparation, no horror, ruin, danger or storm.",
+  "reference_context": "Visual style inspected from app/src/main/res/drawable-nodpi/location_observatory.webp; no reference image supplied to generation tool.",
+  "generated_source_file": "C:\\Users\\User\\.codex\\generated_images\\01a0d849-d082-7633-9364-a9b22475f6e8\\exec-09b823e0-63e2-4414-8e0e-ccf6c8f3e5c8.png",
+  "source_file": "docs/design/assets/sources/goal-previews-2026-09-25/goal_preview_tower.png",
+  "source_sha256": "574d4783d83a7a5df928f2bfb4214082c2fd041b84ba2360b1acf67133f07d07",
+  "source_bytes": 2868938,
+  "path": "app/src/main/res/drawable-nodpi/goal_preview_tower.webp",
+  "sha256": "c1a775da89ad2a3cb455842d92ba6121652a8c2eb9a5251f5799c92d7485d12a",
+  "bytes": 2045162,
+  "width": 1536,
+  "height": 1024,
+  "rgba_sha256": "92f42fb0013a5aa63be5ef4d982981ead264b89881d981f388e4de854c47762d",
+  "conversion": "Pillow WebP lossless=True, exact=True, quality=100, method=6; full original canvas, no resizing, cropping, retouching or compositing.",
+  "verification": "PNG and WebP decoded RGBA dimensions and pixel bytes match exactly.",
+  "rgba_hash_format": "SHA-256(width uint32 big endian + height uint32 big endian + RGBA pixel bytes), matching verify_assets.py.",
+  "source_path": "docs/design/assets/sources/goal-previews-2026-09-25/goal_preview_tower.png",
+  "alpha_bounds": [
+    0,
+    0,
+    1536,
+    1024
+  ],
+  "lossless_rgba_verified": true
+}

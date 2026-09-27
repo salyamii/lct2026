@@ -2,11 +2,14 @@ package ru.nksk.lctapp
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasScrollToIndexAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dagger.hilt.android.testing.BindValue
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -31,7 +34,7 @@ class GoalNavigationTest {
     @BindValue @JvmField val drafts: ru.nksk.lctapp.domain.onboarding.OnboardingDraftRepository = TestOnboardingDraftRepository()
     @BindValue @JvmField val content: StoryContentRepository = TestStoryContentRepository()
 
-    @Test fun goalShortcutOpensTheSelectionScreenAndBackPreservesTheGame() {
+    @Test fun goalShortcutOpensTheCurrentGoalAndBackPreservesTheGame() {
         verifyGoalEntry(fromHeader = false, recreate = false)
     }
 
@@ -39,26 +42,50 @@ class GoalNavigationTest {
         verifyGoalEntry(fromHeader = true, recreate = true)
     }
 
-    private fun verifyGoalEntry(fromHeader: Boolean, recreate: Boolean) {
-        awaitText("Выбрать большую цель")
+    @Test fun detailOpenedFromOtherGoalsReturnsToThatListAfterRecreation() {
+        awaitText("Выбрать цель накопления")
         val before = runBlocking { repository.read() }
-        val label = if (fromHeader) "Выбрать большую цель" else compose.activity.getString(R.string.menu_goal)
+        compose.onNode(hasText(compose.activity.getString(R.string.menu_goal)) and hasClickAction()).performClick()
+        awaitText("Цели")
+        compose.onNodeWithText("Другие цели").performClick()
+        awaitGoalList()
+        compose.onAllNodesWithText("Открыть цель")[0].performClick()
+        awaitText("Ночь наблюдений")
+        compose.activityRule.scenario.recreate()
+        awaitText("Ночь наблюдений")
+        compose.runOnIdle { compose.activity.onBackPressedDispatcher.onBackPressed() }
+        awaitGoalList()
+        compose.runOnIdle { compose.activity.onBackPressedDispatcher.onBackPressed() }
+        awaitText("Выбрать цель накопления")
+        assertEquals(before, runBlocking { repository.read() })
+    }
+
+    private fun verifyGoalEntry(fromHeader: Boolean, recreate: Boolean) {
+        awaitText("Выбрать цель накопления")
+        val before = runBlocking { repository.read() }
+        val label = if (fromHeader) "Выбрать цель накопления" else compose.activity.getString(R.string.menu_goal)
         compose.onNode(hasText(label) and hasClickAction()).assertIsDisplayed().performClick()
-        awaitText("Большие цели")
+        awaitText("Цели")
         compose.onNodeWithText("Ночь наблюдений").assertIsDisplayed()
-        compose.onNodeWithText("Частей: 4 · всего 180 монет").assertIsDisplayed()
+        compose.onNodeWithText("Карта звёзд").assertIsDisplayed()
         assertEquals(before, runBlocking { repository.read() })
 
         if (recreate) {
             compose.activityRule.scenario.recreate()
-            awaitText("Большие цели")
+            awaitText("Цели")
             compose.onNodeWithText("Ночь наблюдений").assertIsDisplayed()
             compose.runOnIdle { compose.activity.onBackPressedDispatcher.onBackPressed() }
         } else {
-            compose.onNodeWithText("Назад").performClick()
+            compose.onNodeWithContentDescription("Назад").performClick()
         }
-        awaitText("Выбрать большую цель")
+        awaitText("Выбрать цель накопления")
         assertEquals(before, runBlocking { repository.read() })
+    }
+
+    private fun awaitGoalList() {
+        compose.waitUntil(10_000) { compose.onAllNodes(hasScrollToIndexAction()).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Открыть цель"))
+        compose.onAllNodesWithText("Открыть цель")[0].assertIsDisplayed()
     }
 
     private fun awaitText(text: String) {

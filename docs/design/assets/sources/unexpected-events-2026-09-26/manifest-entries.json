@@ -1,0 +1,794 @@
+[
+  {
+    "resource": "event_backpack_torn",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2305:2",
+      "node_name": "Предмет · Порванный рюкзак",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2305-2"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "16458be7f56e44e09c63041f103d410180a8364a",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_backpack_torn.png",
+    "source_sha256": "9ce0162bc7c97df805fa72d8366d2127938fe1377a7fc0b85da7176ef9e2db3e",
+    "source_bytes": 1223258,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 797476,
+    "sha256": "38dcaf6426e3284178d96180d85b8dbb3f6d60a3e3332f50246d2eea40602071",
+    "rgba_sha256": "0cecd5d1a81023826dc62d7bd675d66c1a23ae5dde502d966bb2ad138fac9b72",
+    "alpha_bounds": [
+      37,
+      19,
+      1224,
+      1254
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_backpack_torn.webp"
+  },
+  {
+    "resource": "event_map_wet",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2308:32",
+      "node_name": "Предмет · Промокшая карта",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2308-32"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "1b9333e329d881911ca7de307abb01de6237cd4c",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_map_wet.png",
+    "source_sha256": "c2f51e80b29d772c66b39a65577b52d45abedb9314374b94c2f6eec99c02d113",
+    "source_bytes": 1957686,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 1350918,
+    "sha256": "edb9f8725e77ffab0131c672e60d4650dc9f055c7bc1a84497d3c32b43d41951",
+    "rgba_sha256": "6c6942e3c009165304844190388f5794cddced22908f44644f0a27df61b0d42a",
+    "alpha_bounds": [
+      0,
+      20,
+      1225,
+      1236
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_map_wet.webp"
+  },
+  {
+    "resource": "event_backpack_resin",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2313:32",
+      "node_name": "Предмет · Рюкзак испачкан смолой",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2313-32"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "5b7be03af903954e2452fc3c3d0908d1d446e19b",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_backpack_resin.png",
+    "source_sha256": "36819c537feba63341d9f685b2817409b68c5ed43f57e00e7903bb9b20bd759b",
+    "source_bytes": 1970195,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 1348332,
+    "sha256": "8e844fb72150ea0420a94dad412e20c8b63450e56f5855c813eced3eefe95947",
+    "rgba_sha256": "4ce1d9a046e83527727b8fc487034053d4e06b5efae870d001261dedbbac9306",
+    "alpha_bounds": [
+      0,
+      21,
+      1208,
+      1254
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_backpack_resin.webp"
+  },
+  {
+    "resource": "event_rope_frayed",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2320:29",
+      "node_name": "Предмет · Верёвка перетёрлась",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2320-29"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "f1bee58ac1e61dd216cca8baaa3682f3a1dd0d13",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_rope_frayed.png",
+    "source_sha256": "d9d710b44ae330a74969583301eb60b32db6318d527510ae447bcd6cdafbdec3",
+    "source_bytes": 1557766,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 1070714,
+    "sha256": "e2322d64047916c1833907fd095feb89b30b94d27a89ee3c53ca6b44e08cac91",
+    "rgba_sha256": "e77fbb60efd5be088643b078d739af38b60a13ea4274ce0838f5712991dc31d4",
+    "alpha_bounds": [
+      0,
+      21,
+      1236,
+      1254
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_rope_frayed.webp"
+  },
+  {
+    "resource": "event_tripod_loose",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2320:77",
+      "node_name": "Предмет · Штатив шатается",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2320-77"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "3621313b97548a42b9aea169addbfb944383d753",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_tripod_loose.png",
+    "source_sha256": "0ba2d1d8a341190e3883a47db782e9ef3d7704925f41fc236e27db94417847b9",
+    "source_bytes": 740735,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 523150,
+    "sha256": "8879097f80d54dd28b168317048d7a37166daa39612560aabc2b17574c476d5a",
+    "rgba_sha256": "ef47753e71f0fe9fad1c6cb6657b9e6c5c40ef3fc7bee9686871ad96d1b4fb3e",
+    "alpha_bounds": [
+      29,
+      21,
+      1232,
+      1254
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_tripod_loose.webp"
+  },
+  {
+    "resource": "event_lens_mount_bent",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2320:125",
+      "node_name": "Предмет · Оправа погнулась",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2320-125"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "516815bfa7408922aea047dcef62888630ec2071",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_lens_mount_bent.png",
+    "source_sha256": "0d85798d0b95603097c55d8565d82f7dfc04ab67bc4602406d81fa666be00776",
+    "source_bytes": 1085677,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 742948,
+    "sha256": "5368600ba6fa5724691df318a2cfe44006fcbc3c289656de733f40a0eaed4b42",
+    "rgba_sha256": "bf26286c6fc520ae935f7639bf2be45e090ba1b2ca226b2eeadbaaec4e76901b",
+    "alpha_bounds": [
+      0,
+      51,
+      1216,
+      1254
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_lens_mount_bent.webp"
+  },
+  {
+    "resource": "event_lantern_sooty",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2320:173",
+      "node_name": "Предмет · Фонарь коптит",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2320-173"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "09ac95ed521467dd18a4a37317d9cbf2ce4c1636",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_lantern_sooty.png",
+    "source_sha256": "a047b598255c520bd417c885ebf07f5a2c6a28e41585b8f19f7275883b2c3637",
+    "source_bytes": 1309944,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 941424,
+    "sha256": "503ca0f2a4198d8d4f77eef95c3ee38f1822369372ed5f9db43533a069b1c559",
+    "rgba_sha256": "ae02c3fd71ad65cba02d4e72aa2cf7ddcbab7f303f45950f6652d051e9cc127d",
+    "alpha_bounds": [
+      49,
+      12,
+      1202,
+      1228
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_lantern_sooty.webp"
+  },
+  {
+    "resource": "event_workbench_broken",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2320:221",
+      "node_name": "Предмет · Верстак просел",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2320-221"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "28003f7355c5c05fd7bec178e5e6d69b30bd1dd6",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_workbench_broken.png",
+    "source_sha256": "3f3cced16c71ff82efb8f8aefba0baf897e80cf089650c9b90d8d92f992e6db0",
+    "source_bytes": 1283061,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 946916,
+    "sha256": "4f6721bdce770e4ca37559d48169e8ee5c007809895d95332852e7c9360103af",
+    "rgba_sha256": "70282c0392de83556300dd139606b298c83c60ce38f026ded94f303ab223f3a8",
+    "alpha_bounds": [
+      0,
+      21,
+      1228,
+      1254
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_workbench_broken.webp"
+  },
+  {
+    "resource": "event_roof_lens_misaligned",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2320:269",
+      "node_name": "Предмет · Линза на крыше перекосилась",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2320-269"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "19334fa3a8b10d530c367ed055bb7b679024126e",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_roof_lens_misaligned.png",
+    "source_sha256": "178f785fe4b8366264a67e5cbdd1bc64cc779387132e04a05f5525e23b619f48",
+    "source_bytes": 1204509,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 823014,
+    "sha256": "f544d3301045b887fdce630b45f9f1d44fede4d927c67cafff1cb7794f0ebac2",
+    "rgba_sha256": "c6cb2cafab1189ab5ffc2db3ddc8a233b2c0ec05cb5a93dcf5156a6caf97a48a",
+    "alpha_bounds": [
+      0,
+      16,
+      1234,
+      1228
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_roof_lens_misaligned.webp"
+  },
+  {
+    "resource": "event_map_plate_scratched",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2320:317",
+      "node_name": "Предмет · Пластина поцарапана",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2320-317"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "6ddb27ae279a5de776859d1e233d3106897835f5",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_map_plate_scratched.png",
+    "source_sha256": "37582e3fce0e50e0f7f7c7491309b018cd4f464be8c2a5eff6bef63968348b67",
+    "source_bytes": 1670765,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 1168814,
+    "sha256": "4c034a0f03127dc28ebce9826c9fa78c25d6b62a04f6b68218de6cc04a6e6cf6",
+    "rgba_sha256": "47950072d69b78718e7107b446696ee1545134a69ac6e54a13078fe32fb708c5",
+    "alpha_bounds": [
+      49,
+      19,
+      1206,
+      1223
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_map_plate_scratched.webp"
+  },
+  {
+    "resource": "event_compass_jammed",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2320:365",
+      "node_name": "Предмет · Стрелка застряла",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2320-365"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "f8a7562587c049d183336fd1ef06afc29996afa2",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_compass_jammed.png",
+    "source_sha256": "4f9a3397668c2795452de9037636a5a52f75b8739c1d2049f4ea3a5b870945bf",
+    "source_bytes": 1581564,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 1104066,
+    "sha256": "74a5cc4b8e9468aecf3e72cc910b1bb5485c7a0c801518401012aa908cb12a1d",
+    "rgba_sha256": "566ee2bfde24a9a337c52e49db504c8a48b3c6d9927352b8bb201e72abda0b35",
+    "alpha_bounds": [
+      49,
+      15,
+      1253,
+      1224
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_compass_jammed.webp"
+  },
+  {
+    "resource": "event_gear_tooth_broken",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2320:413",
+      "node_name": "Предмет · Шестерня без зубца",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2320-413"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "17402b3caec8c89151f1775f43514b3195f7d468",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_gear_tooth_broken.png",
+    "source_sha256": "4902fb7a3989ffb77847aadb2bdeca9e60401cab4a93b7ffdb6bbe201e9790b3",
+    "source_bytes": 1826160,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 1273496,
+    "sha256": "855e535113a30f0222ae86c60560e5bce001f2d91dee119e3bb7dd7f4fff9450",
+    "rgba_sha256": "c12e81e799869a37e69b13fc76636bfa35709f78a4d6cecbbb9f0892d37a0267",
+    "alpha_bounds": [
+      0,
+      17,
+      1226,
+      1254
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_gear_tooth_broken.webp"
+  },
+  {
+    "resource": "event_key_bent",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2326:43",
+      "node_name": "Предмет · Ключ погнулся",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2326-43"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "f5311cd3240ee9cde2d35136958c81e6f869d913",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_key_bent.png",
+    "source_sha256": "4329b6b87f2bbebea162089c86f103744c2f12a5a48c8a6a2b182641c838b008",
+    "source_bytes": 710827,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 496010,
+    "sha256": "b5b35caa1527dc470fd9fef9c774e7374dab72b6a0f9de291201b714ebc14adc",
+    "rgba_sha256": "f39659dbcde94012bdcab3012c9b32f8e760cea0d51dafa38c14aed09faf76ba",
+    "alpha_bounds": [
+      29,
+      21,
+      1192,
+      1228
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_key_bent.webp"
+  },
+  {
+    "resource": "event_scroll_fragile",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2326:91",
+      "node_name": "Предмет · Свиток рассыпается",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2326-91"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "c9d684cc11e51a00c122810b1d8ae632bd15a74f",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_scroll_fragile.png",
+    "source_sha256": "9cb66055d93e208e1529a087e4078c516ec0c6dae27896012152748a29f99a36",
+    "source_bytes": 1573338,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 1088052,
+    "sha256": "f632289d3fd3e67a7ac77d88a45df28ddeb8dffed7a30d765dd8fbac3565e850",
+    "rgba_sha256": "945a89d9be25b594792a14719e81295e26f672561eb7a126a6ef2e62d160efc8",
+    "alpha_bounds": [
+      49,
+      47,
+      1207,
+      1254
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_scroll_fragile.webp"
+  },
+  {
+    "resource": "event_journal_unbound",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2326:139",
+      "node_name": "Предмет · Журнал потерял переплёт",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2326-139"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "135712785935e737200e00b7d5d79fa8086be33e",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_journal_unbound.png",
+    "source_sha256": "c8a67948797d4421fba2f60a725a9ea9f69f820d3cec260f94a16ded9112e979",
+    "source_bytes": 1732087,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 1201442,
+    "sha256": "5d695560178f4c406e4fff2dab4fc877cbe6adb288103f64117d3a5f0647fe96",
+    "rgba_sha256": "baa1b5307218e50ea17f842e3c53778af548885f658e9dd196787bc5fdf80c2b",
+    "alpha_bounds": [
+      0,
+      21,
+      1236,
+      1228
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_journal_unbound.webp"
+  },
+  {
+    "resource": "event_star_plate_tarnished",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2326:187",
+      "node_name": "Предмет · Пластина покрылась налётом",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2326-187"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "97b231b86517190f784499d2f6d693002ee9b4d1",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_star_plate_tarnished.png",
+    "source_sha256": "83c03268e374742bc4b3e4286b99bd1a13db5dba2db6075ff2f43ebbdc1323a0",
+    "source_bytes": 2337338,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 1649310,
+    "sha256": "5f7ebe016b386fa244b8dac1e794b054e640f7fc56acd16c32f311380da1d48f",
+    "rgba_sha256": "8074b4263f4323a2678b2745592432ce69749b5867f85d3c558449144e72a05c",
+    "alpha_bounds": [
+      0,
+      19,
+      1222,
+      1254
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_star_plate_tarnished.webp"
+  },
+  {
+    "resource": "event_lens_cloudy",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2326:235",
+      "node_name": "Предмет · Линза помутнела",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2326-235"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "43fe00003c4846124b9f10a5230207e29b5146ef",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_lens_cloudy.png",
+    "source_sha256": "1659de1eac6537d2b903940a96ecbebfa55b29795c6a8df619f03d2be2a270c5",
+    "source_bytes": 1802639,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 1221668,
+    "sha256": "fc5fdd84141ad2b8752b1eea78b60e9dad5ec7fcd91931bd6718efb1b7160496",
+    "rgba_sha256": "e900d36e3f61387e0f60c72ed3f78a3f543d43da4363894902428bbed7e0b906",
+    "alpha_bounds": [
+      47,
+      88,
+      1229,
+      1228
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_lens_cloudy.webp"
+  },
+  {
+    "resource": "event_signal_lever_jammed",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2326:283",
+      "node_name": "Предмет · Заело сигнальный рычаг",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2326-283"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "c8f6fd3f7a3d2533fd370aedd19995ed663cdfeb",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_signal_lever_jammed.png",
+    "source_sha256": "8255330eef3f6971df20ea8343990d82fd43c025dcebfaf2066c404bfd1052b7",
+    "source_bytes": 1279199,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 892262,
+    "sha256": "df58aa5c27b460d23974060d66750d5a409f77552e397e07bbe9364b6e6995c6",
+    "rgba_sha256": "b6d43fb45b60aa18d39da47cc130a6ceb05d71cc3e14ad52d61ab854d972e5e9",
+    "alpha_bounds": [
+      0,
+      23,
+      1224,
+      1254
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_signal_lever_jammed.webp"
+  },
+  {
+    "resource": "event_roof_leak",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2326:331",
+      "node_name": "Предмет · Крыша пропускает воду",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2326-331"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "ce2bc06c6ef7b8e2179a42fc9bc3e3ed8d066da6",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_roof_leak.png",
+    "source_sha256": "cf65ca7f3d63cc5d0e4feb2f495d2740cdace713370680f194392f59fbb989e5",
+    "source_bytes": 1545238,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 1034160,
+    "sha256": "4766b6b77570d62de6be6cc86a3f19ffd6e1775de44c80233b10e7542e8e877f",
+    "rgba_sha256": "a64e5b569d63b18876277b573f1f8cbd6deb1cc0b66e7c3eca784b3fbc78f143",
+    "alpha_bounds": [
+      0,
+      21,
+      1239,
+      1254
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_roof_leak.webp"
+  },
+  {
+    "resource": "event_map_box_stuck",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2326:379",
+      "node_name": "Предмет · Ящик заклинило",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2326-379"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "03e1816e080c75fd48222a4609684e54f0acbba5",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_map_box_stuck.png",
+    "source_sha256": "ba50959f7809c7139e30361125814497345cbf5bda18483943807b75a9266075",
+    "source_bytes": 1649148,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 1180862,
+    "sha256": "1cc33b502a08f571f1853436960165290bb94f9f4c55de424c6699308e3bc9be",
+    "rgba_sha256": "e452d7ada0c6908e86508107b9aba4eaf24bb9d85633590a1dc98e164579d76f",
+    "alpha_bounds": [
+      0,
+      51,
+      1225,
+      1206
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_map_box_stuck.webp"
+  },
+  {
+    "resource": "event_calibration_ring_stuck",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2326:427",
+      "node_name": "Предмет · Кольцо не вращается",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2326-427"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "3cf15bb4e19e1fba020714700ecae2037335441b",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_calibration_ring_stuck.png",
+    "source_sha256": "a1ffcb429be8aeeaad2e8f415d405ebc529b997da2bfab95574842551a0ef1a2",
+    "source_bytes": 1675779,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 1171974,
+    "sha256": "58f0f4ca126ad3c86c1d76223e685b480db8405c558bbc22403d7bb4e927ae47",
+    "rgba_sha256": "40122e84ff43976bcdaa10fca3722ede8d4ffd47322206dc9f43e4ffb496fb0e",
+    "alpha_bounds": [
+      2,
+      23,
+      1240,
+      1254
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_calibration_ring_stuck.webp"
+  },
+  {
+    "resource": "event_station_window_broken",
+    "category": "Unexpected event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2326:475",
+      "node_name": "Предмет · Окно станции разбито",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2326-475"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "a992db5641487576572bc96ad641330ac8d96f8f",
+    "source_path": "docs/design/assets/sources/unexpected-events-2026-09-26/event_station_window_broken.png",
+    "source_sha256": "f660c42626363ee6a8d08fc8f83d78d79ffc96fac15760cac378ece046d7028f",
+    "source_bytes": 1597846,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "bytes": 1138680,
+    "sha256": "dceb26b3a44b4c667fd605947d8af4015b24f154ba64b2c0b7168a0158dacce8",
+    "rgba_sha256": "058877c235408b5a0391a0d37b204c357fc070dcd5aad29b3e01d560dd237c30",
+    "alpha_bounds": [
+      0,
+      17,
+      1248,
+      1230
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/event_station_window_broken.webp"
+  }
+]

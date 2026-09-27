@@ -3,6 +3,7 @@ package ru.nksk.lctapp.domain.engine
 import ru.nksk.lctapp.domain.game.GameState
 
 /** Actual committed changes during the current day, not estimates from catalog rewards. */
+@kotlinx.serialization.Serializable
 data class DayJournalEntry(
     val id: String,
     val kind: DayJournalKind,
@@ -38,12 +39,13 @@ internal fun recordDayChanges(before: GameState, after: GameState, request: Engi
         record(DayJournalKind.WEEKLY_INCOME, day.rulesId, Math.subtractExact(moneyDelta, openingCost))
         day.currentEvent?.let { record(DayJournalKind.EVENT_START, it.eventId, openingCost) }
     } else when (val command = request.command) {
-        is EngineCommand.Feed -> record(DayJournalKind.MEAL, command.mealId, moneyDelta)
+        is EngineCommand.Feed -> record(DayJournalKind.MEAL, command.mealId, moneyDelta,
+            day.energy - checkNotNull(before.engine).energy)
         is EngineCommand.BuyGoalItem -> record(DayJournalKind.ITEM_PURCHASE, command.itemId, moneyDelta)
         EngineCommand.OpenNextEvent -> day.currentEvent?.let {
             record(DayJournalKind.EVENT_START, it.eventId, moneyDelta)
         }
-        is EngineCommand.Choose, is EngineCommand.CompleteEvent, is EngineCommand.CompleteDeed -> {
+        is EngineCommand.Choose, is EngineCommand.CompleteEvent, is EngineCommand.CompleteDeed, is EngineCommand.CompleteStoryGame -> {
             val occurrence = checkNotNull(before.engine?.currentEvent)
             val event = factory.event(occurrence.eventId)
             val startCost = if (factory.policy(event.id).startEffectsTiming == EffectTiming.COMPLETE)

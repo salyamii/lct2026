@@ -2,11 +2,14 @@ package ru.nksk.lctapp.data.game.content
 
 import ru.nksk.lctapp.domain.content.*
 import ru.nksk.lctapp.domain.engine.EventCardCopy
+import ru.nksk.lctapp.domain.engine.EventMedia
+import ru.nksk.lctapp.domain.engine.EventPresentation
 import ru.nksk.lctapp.domain.engine.EventPolicy
 import ru.nksk.lctapp.domain.engine.GameCatalog
+import ru.nksk.lctapp.domain.minigame.DeedGameKind
 
 /** Independent Figma cards; chapter-specific failures await their actual item/location guards. */
-internal fun GameCatalog.withEverydayEvents(): GameCatalog {
+internal fun GameCatalog.withLegacyEverydayEvents(): GameCatalog {
     val cap = "figma-2164-2-v1"
     val resin = "figma-2313-2-v1"
     val item = "figma-2164-2-explorer-cap-v1"
@@ -35,15 +38,18 @@ internal fun GameCatalog.withEverydayEvents(): GameCatalog {
         ),
         policies = policies + mapOf(
             cap to EventPolicy(0),
-            resin to EventPolicy(0, choiceEnergyCosts = mapOf("$resin:clean" to 2)),
+            resin to EventPolicy(0, choiceEnergyCosts = mapOf("$resin:clean" to 2),
+                choiceGameKinds = mapOf("$resin:clean" to DeedGameKind.PRECISION)),
         ),
         cards = cards + mapOf(
             cap to EventCardCopy("Редкая находка", "Цена 25 монет", "Исчезнет завтра", null,
                 "Импульсная покупка · Только сегодня",
-                "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2164-2", "fair", null),
+                "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2164-2", "fair", null,
+                presentation = PurchasePresentation.LEGACY_EXPLORER_HAT.forEvent(cap)),
             resin to EventCardCopy("Неожиданная трата", "Очистка 4 монеты", "Самому: средне устанет", "Отложить",
                 "Неожиданная трата · Порт",
-                "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2313-2", "pier", null),
+                "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2313-2", "pier", null,
+                presentation = EventPresentation(media = EventMedia(game = StoryGamePresentation.CLEAN_RESIN.media))),
         ),
         dailyEventPool = dailyEventPool + listOf(cap, resin),
         oneTimeEventIds = oneTimeEventIds + cap,

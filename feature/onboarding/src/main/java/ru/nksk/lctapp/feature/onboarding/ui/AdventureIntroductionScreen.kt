@@ -80,7 +80,7 @@ private data class MoneyConcept(val title: String, val detail: String, val icon:
 private val concepts = listOf(
     MoneyConcept("Нужно", "Еда, уход и всё, без чего питомцу не обойтись.", "basket", Color(0xffedf4d8)),
     MoneyConcept("Хочу", "Игрушки, книги и развлечения — покупки, которые можно отложить.", "diamond", Color(0xffeeebf8)),
-    MoneyConcept("Коплю", "Монеты на мечту, на которую можно копить несколько приключений.", "goal", Color(0xffedf4d8)),
+    MoneyConcept("В копилку", "Решаем, сколько сберечь для цели. В копилку положим отдельно.", "goal", Color(0xffedf4d8)),
     MoneyConcept("Запас", "Поможет, если в дороге понадобится ремонт или лечение.", "reserve", Color(0xffeeebf8)),
 )
 
@@ -104,7 +104,7 @@ private fun IntroductionContent(
                 Text("Впереди — приключения!", fontFamily = artwork.titleFont, fontWeight = FontWeight.ExtraBold,
                     color = IntroInk, fontSize = 24.sp, lineHeight = 29.sp)
                 Spacer(Modifier.height(8.dp))
-                Text("Монет всегда немного — иногда нужно выбирать. Вместе со спутником ты будешь планировать траты, принимать решения и двигаться к большой цели.",
+                Text("Вместе со спутником исследуй мир, помогай друзьям и собирай снаряжение. Решай, какие покупки нужны сейчас, а на что будем копить.",
                     color = IntroMuted, fontSize = 14.sp, lineHeight = 20.sp)
                 Spacer(Modifier.height(18.dp))
                 if (grid) {

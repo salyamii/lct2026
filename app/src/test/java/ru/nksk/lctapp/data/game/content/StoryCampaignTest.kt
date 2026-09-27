@@ -15,6 +15,59 @@ import ru.nksk.lctapp.domain.pet.PetAge
 import ru.nksk.lctapp.domain.pet.PetColor
 
 class StoryCampaignTest {
+    @Test fun genericLoreSkipsAreRetiredWithoutRemovingHistoricalDefinitionsOrRealBranches() {
+        val catalog = bundledGameCatalog()
+        val genericSkips = sourceLoreCards.filter { it.optional && it.id != "G5.02" }.map { "${storyEventId(it.id)}:skip" }.toSet()
+        val retired = catalog.policies.values.flatMap { it.disabledChoiceIds }.toSet()
+        assertEquals(genericSkips, retired)
+        assertTrue(catalog.content.choices.map { it.id }.containsAll(retired))
+        for (id in retired) {
+            val choice = catalog.content.choices.single { it.id == id }
+            assertEquals("Вернуться позже", catalog.cards.getValue(choice.eventId).later)
+        }
+        val bridge = storyEventId("G2.03")
+        assertTrue(catalog.policies.getValue(bridge).disabledChoiceIds.isEmpty())
+        assertEquals(setOf("$bridge:repair", "$bridge:detour"),
+            catalog.content.choices.filter { it.eventId == bridge }.map { it.id }.toSet())
+        val route = storyEventId("G5.02")
+        assertTrue(catalog.policies.getValue(route).disabledChoiceIds.isEmpty())
+        assertEquals(setOf("$route:fast", "$route:detour", "$route:skip"),
+            catalog.content.choices.filter { it.eventId == route }.map { it.id }.toSet())
+    }
+
+    @Test fun legacyIndependentProjectAdoptsCurrentChapterWithoutResettingItsProgress() = runTest {
+        val f = Fixture()
+        val old = ru.nksk.lctapp.domain.finance.FinancialPeriods.adopt(f.initial.copy(
+            selectedGoalId = TOWER_GOAL,
+            ownedItems = listOf(OwnedItem("old-purchase", "$TOWER_GOAL:lantern")),
+            story = f.initial.story.copy(decisions = listOf(StoryDecision("clue", "${storyEventId("G1.01")}:continue")))))
+        val repo = MemoryRepository(old)
+        GameSession(repo, f.content, f.catalog, f.initial).prepare()
+        val adopted = repo.value
+        assertEquals(STARS_GOAL, adopted.selectedGoalId)
+        assertNull(adopted.selectedSavingItemId)
+        assertEquals(old.ownedItems, adopted.ownedItems)
+        assertEquals(old.story, adopted.story)
+        assertEquals(old.economy, adopted.economy)
+        assertEquals(old.financial.currentPeriod!!.copy(goalId = STARS_GOAL, imported = true), adopted.financial.currentPeriod)
+        GameSession(repo, f.content, f.catalog, f.initial).prepare()
+        assertEquals(adopted, repo.value)
+    }
+
+    @Test fun legacyProjectCompletedInAnotherActDoesNotSkipOrLockItsAuthoredChapter() {
+        val f = Fixture()
+        val old = f.initial.copy(story = f.initial.story.copy(decisions = listOf(
+            StoryDecision("old-invitation", f.catalog.goals.first().legacyAcceptanceChoiceIds.single()),
+            StoryDecision("old-final", "${storyEventId("G1.12")}:continue"))),
+            completedGoalProjects = listOf(CompletedGoalProject(TOWER_GOAL, "old-final")))
+        val progress = f.catalog.storyProgress(old)
+        assertNull(f.catalog.goals.selectedGoal(old))
+        assertEquals(TOWER_GOAL, progress.requiredGoal!!.goalId)
+        assertTrue(progress.goalAvailable(f.catalog.goals.single { it.goalId == TOWER_GOAL }))
+        assertFalse(progress.goalCompleted(f.catalog.goals.single { it.goalId == TOWER_GOAL }))
+        assertTrue(progress.goalCompleted(f.catalog.goals.single { it.goalId == STARS_GOAL }))
+    }
+
     @Test fun bundledRecapsCoverEveryChoiceAndDoNotReuseSuccessTextForSkips() {
         val catalog = bundledGameCatalog()
         for (choice in catalog.content.choices) {
@@ -26,8 +79,8 @@ class StoryCampaignTest {
     }
 
     @Test fun olderSaveAdoptsStoryAgeWithoutChangingAnythingElseAndPreparationIsIdempotent() = runTest {
-        val f = Fixture()
-        f.finishCampaign(listOf(TOWER_GOAL, HOME_GOAL, MAP_GOAL, STARS_GOAL, EXPEDITION_GOAL), skipOptional = true)
+        val f = Fixture(offerOptionalScenes = false)
+        f.finishCampaign(listOf(STARS_GOAL, TOWER_GOAL, HOME_GOAL, MAP_GOAL, EXPEDITION_GOAL))
         val old = f.state.copy(pet = f.state.pet.copy(age = PetAge.CUB))
         val repo = MemoryRepository(old)
         val session = GameSession(repo, f.content, f.catalog, f.initial)
@@ -41,13 +94,16 @@ class StoryCampaignTest {
         assertEquals(expected, repo.value)
     }
 
-    @Test fun allEighteenAllowedGoalOrdersReachTheSameCoreRevealsWithoutOptionalScenes() = runTest {
-        val orders = permutations(listOf(STARS_GOAL, TOWER_GOAL, HOME_GOAL, MAP_GOAL)).filter { it.first() != MAP_GOAL }
-        assertEquals(18, orders.size)
+    @Test fun authoredChapterOrderReachesAllCoreRevealsWithoutOptionalScenes() = runTest {
+        val orders = listOf(listOf(STARS_GOAL, TOWER_GOAL, HOME_GOAL, MAP_GOAL))
+        assertEquals(1, orders.size)
         for (order in orders) {
-            val f = Fixture()
-            f.finishCampaign(order + EXPEDITION_GOAL, skipOptional = true)
-            val expected = sourceLoreCards.filterNot { it.optional }.map { storyEventId(it.id) }
+            val f = Fixture(offerOptionalScenes = false)
+            f.finishCampaign(order + EXPEDITION_GOAL)
+            val expected = sourceLoreCards.filterNot { it.optional }.map { source ->
+                val originalId = storyEventId(source.id)
+                f.catalog.eventReplacements[originalId] ?: originalId
+            }
             val actual = f.state.story.decisions.map { decision -> f.catalog.content.choices.single { it.id == decision.choiceId }.eventId }
                 .filter { it in expected }
             assertEquals(order.toString(), expected, actual)
@@ -65,7 +121,7 @@ class StoryCampaignTest {
 
     @Test fun optionalRepairsProduceTheRestoredNetworkEndingAndDoNotNeedTheArchiveFallback() = runTest {
         val f = Fixture()
-        f.finishCampaign(listOf(HOME_GOAL, MAP_GOAL, TOWER_GOAL, STARS_GOAL, EXPEDITION_GOAL), skipOptional = false)
+        f.finishCampaign(listOf(STARS_GOAL, TOWER_GOAL, HOME_GOAL, MAP_GOAL, EXPEDITION_GOAL))
         val progress = f.catalog.storyProgress(f.state)
         assertTrue("beacon_chain_restored" in progress.facts)
         assertFalse("extra_archive_fragment" in progress.facts)
@@ -105,7 +161,7 @@ class StoryCampaignTest {
         val f = Fixture()
         val state = f.state.copy(ownedItems = f.catalog.goals.flatMap { it.itemIds }.mapIndexed { n, id -> OwnedItem("item-$n", id) })
         assertTrue(f.catalog.storyProgress(state).facts.isEmpty())
-        assertEquals(listOf(STARS_GOAL, TOWER_GOAL, HOME_GOAL), f.catalog.goals.filter { it.isAvailable(state) }.map { it.goalId })
+        assertEquals(listOf(STARS_GOAL), f.catalog.goals.filter { f.catalog.storyProgress(state).goalAvailable(it) }.map { it.goalId })
         assertFalse(f.catalog.storyProgress(state).eligible(storyEventId("G1.12")))
         assertFalse(f.catalog.goals.last().isAvailable(state))
         assertTrue(f.catalog.plan(state).none { f.catalog.policies.getValue(it).storyActId != null })
@@ -113,7 +169,8 @@ class StoryCampaignTest {
         assertFalse("A kit alone cannot open the finale", f.catalog.storyProgress(selected).eligible(storyEventId("G1.12")))
         val revealed = selected.copy(story = selected.story.copy(decisions = listOf(
             StoryDecision("signal", "${storyEventId("G1.11")}:continue"))))
-        assertTrue(f.catalog.storyProgress(revealed).eligible(storyEventId("G1.12")))
+        assertFalse("Wrong chapter kit cannot open the finale", f.catalog.storyProgress(revealed).eligible(storyEventId("G1.12")))
+        assertTrue(f.catalog.storyProgress(revealed.copy(selectedGoalId = STARS_GOAL)).eligible(storyEventId("G1.12")))
         assertFalse("Reveals alone cannot open the finale", f.catalog.storyProgress(revealed.copy(ownedItems = emptyList())).eligible(storyEventId("G1.12")))
     }
 
@@ -138,9 +195,17 @@ class StoryCampaignTest {
     }
 
     /** Drives public commands, including real deed result validation, feeding, sleep and purchases. */
-    private class Fixture {
-        val catalog = bundledGameCatalog()
-        val initial = createInitialGameState().let { it.copy(economy = EconomyState(BudgetPlan(0, 0, 10_000, 0)),
+    private class Fixture(offerOptionalScenes: Boolean = true) {
+        // Optional scenes may never be offered by the scheduler. This scenario
+        // verifies the core-only path without executing a retired generic skip.
+        val catalog = bundledGameCatalog().let { original ->
+            val optionalIds = sourceLoreCards.filter { it.optional }.map { storyEventId(it.id) }.toSet()
+            if (offerOptionalScenes) original else original.copy(policies = original.policies.mapValues { (id, policy) ->
+                if (id in optionalIds) policy.copy(condition = StoryCondition.Not(StoryCondition.Always)) else policy
+            })
+        }
+        val initial = createInitialGameState().let { it.copy(economy =
+            EconomyState(BudgetPlan(10_000, 0, 0, 0), availableBalance = 10_000, savingsBalance = 0),
             pet = it.pet.copy(name = "Тоша", color = PetColor.SAND, selectedLookId = "backend:scarf")) }
         val repo = MemoryRepository(initial)
         val content = object : StoryContentRepository {
@@ -150,37 +215,27 @@ class StoryCampaignTest {
         val session = GameSession(repo, content, catalog, initial)
         val state get() = repo.value
         var sequence = 0
-        suspend fun send(command: EngineCommand) {
+        suspend fun send(command: EngineCommand, context: ru.nksk.lctapp.domain.analytics.DecisionContext? = null) {
             val before = state
-            val result = session.dispatch(EngineRequest("campaign-${++sequence}", state.engine?.revision, command))
+            val result = session.dispatch(EngineRequest("campaign-${++sequence}", state.engine?.revision, command, context))
             assertTrue("${state.engine?.day}: $command -> $result", result is EngineResult.Applied)
             val expected = listOf(PetAge.CUB, PetAge.TEEN, PetAge.TEEN, PetAge.ADULT, PetAge.SENIOR, PetAge.SENIOR)
             assertEquals("Age must follow story completion for every goal order", expected[state.completedGoalProjects.size], state.pet.age)
             assertEquals(before.pet.copy(age = state.pet.age, visualState = state.pet.visualState), state.pet)
             if (before.completedGoalProjects == state.completedGoalProjects) assertEquals(before.pet.age, state.pet.age)
         }
-        suspend fun finishCampaign(order: List<String>, skipOptional: Boolean) {
+        suspend fun finishCampaign(order: List<String>) {
             repeat(4_000) {
                 if (catalog.storyProgress(state).campaignComplete) return
                 if (state.economy.planning != null) {
-                    repo.update { game ->
-                        var economy = game.economy
-                        fun session() = checkNotNull(economy.planning)
-                        if (session().stage == BudgetPlanningStage.RECEIPT)
-                            economy = EconomyOperations.startAllocation(economy, session().id, session().revision)
-                        economy = EconomyOperations.setAllocation(economy, session().id, session().revision,
-                            BudgetSection.NEEDS, maxOf(35, economy.plan.needs))
-                        economy = EconomyOperations.setAllocation(economy, session().id, session().revision,
-                            BudgetSection.SAVINGS, economy.plan.savings + economy.unallocated)
-                        game.copy(economy = EconomyOperations.confirm(economy, session().id, session().revision))
-                    }
+                    confirmPlan()
                 }
                 val day = state.engine
                 when {
                     day != null && day.phase != DayPhase.FINISHED && !day.ateToday -> send(EngineCommand.Feed("basic-v1"))
                     catalog.goals.selectedGoal(state) == null -> {
                         val next = order[state.completedGoalProjects.size]
-                        assertTrue(catalog.goals.single { it.goalId == next }.isAvailable(state))
+                        assertTrue(catalog.storyProgress(state).goalAvailable(catalog.goals.single { it.goalId == next }))
                         send(session.selectGoalCommand(state, next))
                     }
                     day?.phase == DayPhase.FINISHED -> {
@@ -191,12 +246,21 @@ class StoryCampaignTest {
                         val goal = catalog.goals.selectedGoal(state)!!
                         val missing = goal.progress(state, catalog.content).items.firstOrNull { item -> state.ownedItems.none { it.itemId == item.id } }
                         if (missing != null) {
+                            send(EngineCommand.SelectSavingGoal(goal.goalId, missing.id))
+                            val price = checkNotNull(missing.priceCoins)
+                            if (state.economy.savingsBalance < price)
+                                send(EngineCommand.DepositSavings(price - state.economy.savingsBalance))
                             val before = state.story
                             send(EngineCommand.BuyGoalItem(goal.goalId, missing.id, acceptFoodRisk = true))
                             assertEquals(before, state.story)
                         } else {
                             val active = state.engine!!.currentEvent
-                            if (active == null) send(checkNotNull(session.advanceCommand(state)))
+                            if (active == null) {
+                                val command = checkNotNull(session.advanceCommand(state))
+                                if (session.engine.blockReason(state, command) is BlockReason.FinancialPracticeRequired)
+                                    reviewPeriod()
+                                else send(command)
+                            }
                             else if (active.origin == EventOrigin.DEED) {
                                 send(EngineCommand.CompleteDeed(active.id, perfectScore(catalog.policies.getValue(active.eventId).deedGameKind!!)))
                             } else if (catalog.content.events.single { it.id == active.eventId }.type == EventType.EARNING) {
@@ -204,12 +268,17 @@ class StoryCampaignTest {
                                 if (session.engine.blockReason(state, accept) == null) send(accept)
                                 else send(EngineCommand.DismissDeedProposal(active.id))
                             } else {
-                                val choices = catalog.content.choices.filter { it.eventId == active.eventId }
-                                val selected = if (skipOptional) choices.firstOrNull { it.id.endsWith(":skip") } ?: choices.first() else choices.first()
-                                val command = EngineCommand.CompleteEvent(active.id, selected.id)
+                                val policy = catalog.policies.getValue(active.eventId)
+                                val selected = catalog.content.choices.first {
+                                    it.eventId == active.eventId && it.id !in policy.disabledChoiceIds
+                                }
+                                val command: EngineCommand = catalog.policies.getValue(active.eventId).choiceGameKinds[selected.id]
+                                    ?.let { EngineCommand.CompleteStoryGame(active.id, selected.id, perfectScore(it)) }
+                                    ?: EngineCommand.CompleteEvent(active.id, selected.id)
                                 when (session.engine.blockReason(state, command)) {
                                     null -> send(command)
                                     BlockReason.MustSleep -> send(EngineCommand.PauseEvent(active.id))
+                                    is BlockReason.FinancialPracticeRequired -> reviewPeriod()
                                     else -> error("Blocked story: $command ${session.engine.blockReason(state, command)}")
                                 }
                             }
@@ -218,6 +287,52 @@ class StoryCampaignTest {
                 }
             }
             fail("Campaign stuck: ${catalog.storyProgress(state).currentAct} ${catalog.storyProgress(state).facts} ${state.engine}")
+        }
+
+        private suspend fun confirmPlan() {
+            fun planning() = checkNotNull(state.economy.planning)
+            if (planning().stage == BudgetPlanningStage.RECEIPT)
+                send(EngineCommand.StartBudgetAllocation(planning().id, planning().revision))
+            // The scenario intentionally plans the remaining wallet for ordinary needs. Confirming
+            // this intent does not fund the goal; its purchase path above makes a real deposit.
+            for (section in BudgetSection.entries.filter { it != BudgetSection.NEEDS })
+                if (state.economy.displayPlan.amount(section) != 0L)
+                    send(EngineCommand.ChangeBudgetAllocation(planning().id, planning().revision, section, amount = 0))
+            send(EngineCommand.ChangeBudgetAllocation(planning().id, planning().revision, BudgetSection.NEEDS,
+                amount = EconomyOperations.planningAmount(state.economy)))
+            send(EngineCommand.ConfirmBudget(planning().id, planning().revision))
+        }
+
+        private suspend fun reviewPeriod() {
+            if (ru.nksk.lctapp.domain.finance.FinancialMilestone.SAVE_FOR_GOAL in state.financial.currentPeriod!!.missingMilestones) {
+                send(EngineCommand.RequestFinancialPractice(ru.nksk.lctapp.domain.finance.FinancialQuestionKind.SAVING_PRACTICE))
+                val saving = checkNotNull(state.financial.practice)
+                send(EngineCommand.AnswerFinancialQuestion(saving.id, saving.correctAnswerId))
+            }
+            send(EngineCommand.RequestFinancialPractice())
+            val question = checkNotNull(state.financial.practice)
+            send(EngineCommand.AnswerFinancialQuestion(question.id, question.correctAnswerId))
+            assertTrue(state.financial.currentPeriod!!.reviewedPlan)
+            if (ru.nksk.lctapp.domain.finance.FinancialMilestone.REVIEW_PLAN in state.financial.currentPeriod!!.missingMilestones) {
+                // This light fake intentionally has no audit ledger. Guided review therefore needs
+                // a real, feasible new plan rather than inventing historical category comparisons.
+                send(EngineCommand.ChangeBudgetAllocation("practice-plan-$sequence", 0, BudgetSection.RESERVE,
+                    amount = 0, startManual = true))
+                for (section in BudgetSection.entries.filter { it != BudgetSection.NEEDS }) {
+                    val draft = checkNotNull(state.economy.planning)
+                    if (state.economy.displayPlan.amount(section) != 0L)
+                        send(EngineCommand.ChangeBudgetAllocation(draft.id, draft.revision, section, amount = 0))
+                }
+                val draft = checkNotNull(state.economy.planning)
+                send(EngineCommand.ChangeBudgetAllocation(draft.id, draft.revision, BudgetSection.NEEDS,
+                    amount = state.economy.availableBalance))
+                val planning = checkNotNull(state.economy.planning)
+                send(EngineCommand.ConfirmBudget(planning.id, planning.revision),
+                    ru.nksk.lctapp.domain.analytics.DecisionContext(presentationId = "practice-plan-$sequence",
+                        informationPresented = true, complete = true, alternativeAvailable = true,
+                        before = ru.nksk.lctapp.domain.analytics.FinancialPosition(state.economy.availableBalance,
+                            state.economy.savingsBalance, foodCostUntilWeekEnd(state, catalog.meals.filter { it.price > 0 }.minOf { it.price }))))
+            }
         }
     }
 

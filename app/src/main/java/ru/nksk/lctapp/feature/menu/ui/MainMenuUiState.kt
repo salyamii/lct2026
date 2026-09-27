@@ -22,12 +22,15 @@ data class MainMenuUiState(
     val spendingPreview: String? = null,
 )
 
-/** Actual article balances once economy is connected; null keeps the current runtime HUD. */
+/** Last confirmed plan and the two real balances, projected from the same saved economy. */
 data class MenuBudgetUiState(
     val needs: Long,
     val wants: Long,
     val savings: Long,
     val reserve: Long,
+    val available: Long = needs + wants + savings + reserve,
+    val actualSavings: Long = 0,
+    val unallocated: Long = 0,
 )
 
 /** Preview-only presentation fixture. Runtime state comes from MainMenuViewModel. */
@@ -41,5 +44,5 @@ internal val MainMenuPreviewState = MainMenuUiState(
 
 /** UI intents are handled by the app host; the menu stays independent of navigation. */
 enum class MainMenuAction {
-    Gear, Tasks, Goal, Coins, Village, ContinueDay, Feed,
+    Gear, Tasks, Goal, Coins, Village, ContinueDay, Feed, Finance, Savings,
 }

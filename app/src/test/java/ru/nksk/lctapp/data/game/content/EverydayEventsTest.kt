@@ -87,7 +87,7 @@ class EverydayEventsTest {
         f.repo.update { it.copy(engine = it.engine!!.copy(energy = 1, ateToday = true)) }
         val active = f.day.currentEvent!!
         assertEquals(BlockReason.MustSleep, f.session.engine.blockReason(f.state,
-            EngineCommand.CompleteEvent(active.id, "$RESIN:clean")))
+            EngineCommand.StartStoryGame(active.id, "$RESIN:clean")))
         f.send(EngineCommand.PauseEvent(active.id))
         assertTrue(f.state.story.decisions.isEmpty())
         assertEquals(EngineCommand.FinishDay, f.session.advanceCommand(f.state))
@@ -165,7 +165,15 @@ class EverydayEventsTest {
         suspend fun begin(id: String) {
             send(EngineCommand.BeginDay(session.catalog.storyDayId, listOf(id) + session.catalog.deedPool.take(3), openFirst = true))
         }
-        suspend fun complete(choice: String) { send(EngineCommand.CompleteEvent(day.currentEvent!!.id, choice)) }
+        suspend fun complete(choice: String) {
+            val active = day.currentEvent!!
+            if (choice in session.catalog.policies.getValue(active.eventId).choiceGameKinds) {
+                send(EngineCommand.StartStoryGame(active.id, choice))
+                val score = checkNotNull(ru.nksk.lctapp.domain.minigame.DeedGameScore.fromPrecision(
+                    ru.nksk.lctapp.domain.minigame.TargetStopState.create().copy(round = 5, hits = 3, lastHit = true)))
+                send(EngineCommand.CompleteStoryGame(active.id, choice, score))
+            } else send(EngineCommand.CompleteEvent(active.id, choice))
+        }
     }
 
     private class MemoryGameRepository(initial: GameState) : GameRepository {

@@ -36,6 +36,7 @@ data class AdventureGoalOption(
     val subtitle: String,
     val introduction: String,
     val image: Int,
+    val itemImage: Int? = null,
 )
 
 @Composable
@@ -45,34 +46,24 @@ fun AdventureGoalBriefingScreen(
     onContinue: () -> Unit,
     saving: Boolean = false,
     saveFailed: Boolean = false,
+    chapterPreviewRes: Int? = null,
 ) {
-    AdventureGoalLayout(artwork, artwork.background, "Большое приключение",
-        "Назад к аксессуарам", onBack, saving = saving, stage = {}) {
+    AdventureGoalLayout(artwork, chapterPreviewRes ?: artwork.background, "Задание Смотрителей",
+        "Назад к аксессуарам", onBack, largeStage = true, saving = saving, stage = {}) {
         Column(
             Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())
-                .padding(horizontal = 22.dp, vertical = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+                .padding(horizontal = 22.dp, vertical = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            GoalHeading("Тебя ждёт большое приключение!", artwork, large = true)
-            Column(
-                Modifier.fillMaxWidth()
-                    .background(Color.White.copy(alpha = .75f), RoundedCornerShape(20.dp))
-                    .border(1.dp, Color(0xffe1deeb), RoundedCornerShape(20.dp))
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                Text("Каждое путешествие с чего-то начинается.",
-                    color = GoalInk, fontFamily = artwork.bodyFont,
-                    fontWeight = FontWeight.Bold, fontSize = 17.sp, lineHeight = 25.sp)
-                Text("Перед тобой три большие цели — выбери ту, которая тебе больше нравится, " +
-                    "и шаг за шагом двигайся к ней.",
-                    color = GoalInk.copy(alpha = .8f), fontFamily = artwork.bodyFont,
-                    fontSize = 17.sp, lineHeight = 26.sp)
-                HorizontalDivider(color = GoalPurple.copy(alpha = .15f))
-                Text("Вперёд, исследовать неизведанный мир!",
-                    color = GoalPurple, fontFamily = artwork.titleFont,
-                    fontWeight = FontWeight.Bold, fontSize = 20.sp, lineHeight = 27.sp)
-            }
+            GoalHeading("Впереди большое приключение", artwork)
+            Text("Ночь наблюдений", color = GoalPurple, fontFamily = artwork.titleFont,
+                fontWeight = FontWeight.Bold, fontSize = 20.sp, lineHeight = 26.sp)
+            Text("Это наше первое задание от Гильдии Смотрителей. " +
+                "Поможем подготовиться к наблюдениям за звёздами!",
+                color = GoalInk, fontFamily = artwork.bodyFont, fontSize = 16.sp, lineHeight = 23.sp)
+            Text("Нужны карта звёзд, штатив, телескоп и поездка. Выберем, с чего начать.",
+                color = GoalInk.copy(alpha = .8f), fontFamily = artwork.bodyFont,
+                fontSize = 15.sp, lineHeight = 22.sp)
         }
         if (saveFailed) GoalSaveError(artwork)
         GoalFooter("Дальше", artwork, !saving, onContinue)
@@ -90,11 +81,11 @@ fun AdventureGoalSelectionScreen(
     saving: Boolean = false,
     saveFailed: Boolean = false,
 ) {
-    AdventureGoalLayout(artwork, artwork.background, "Выбери большую цель",
+    AdventureGoalLayout(artwork, artwork.background, "Выбери цель накопления",
         "Назад к началу приключения", onBack, saving = saving, stage = {}) {
         Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())
             .padding(horizontal = 22.dp, vertical = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            GoalHeading("С чего начнётся твоё приключение?", artwork)
+            GoalHeading("На что будем копить сначала?", artwork)
             Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 goals.forEach { goal ->
                     val selected = goal.id == selectedGoalId
@@ -106,9 +97,10 @@ fun AdventureGoalSelectionScreen(
                         .selectable(selected, enabled = !saving, role = Role.RadioButton, onClick = { onSelect(goal.id) })
                         .padding(10.dp), verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Image(painterResource(goal.image), null,
-                            Modifier.size(width = 82.dp, height = 94.dp).clip(RoundedCornerShape(13.dp)),
-                            contentScale = ContentScale.Crop)
+                        goal.itemImage?.let { resource ->
+                            Image(painterResource(resource), null,
+                                Modifier.size(64.dp), contentScale = ContentScale.Fit)
+                        }
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                             Text(goal.title, fontFamily = artwork.titleFont, fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp, color = GoalInk)
@@ -120,10 +112,10 @@ fun AdventureGoalSelectionScreen(
                     }
                 }
             }
-            GoalBody("Выбери одну цель. Остальные ждут впереди.", artwork)
+            GoalBody("Это части одного задания. Выбор можно изменить позже — накопленные монеты сохранятся.", artwork)
         }
         if (saveFailed) GoalSaveError(artwork)
-        GoalFooter(if (saving) "Сохраняем…" else "Выбрать цель", artwork,
+        GoalFooter(if (saving) "Сохраняем…" else "Начать с этого", artwork,
             !saving && goals.any { it.id == selectedGoalId }, onConfirm)
     }
 }

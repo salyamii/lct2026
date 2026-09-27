@@ -1,6 +1,7 @@
 package ru.nksk.lctapp.domain.pet
 
 /** One current state and a separate saved look. No timers, hidden states, or queues. */
+@kotlinx.serialization.Serializable
 data class PetState(
     val selectedLookId: String,
     val visualState: PetVisualState,

@@ -1,6 +1,5 @@
 package ru.nksk.lctapp.feature.economy.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -22,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.components.GameInk
 import ru.nksk.lctapp.core.ui.components.GamePaper
+import ru.nksk.lctapp.core.ui.components.GameArtwork
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
@@ -30,12 +30,14 @@ import ru.nksk.lctapp.core.ui.theme.Rubik
 internal data class WeeklyIncomeUiState(
     val amount: Long = 100,
     val header: String = "Новая неделя",
-    val amountCaption: String = "монет на 7 дней",
+    val amountCaption: String = "монет на эту неделю",
     val title: String = "Новый запас на неделю",
-    val description: String = "Монеты уже в общей копилке. Теперь распредели их по статьям.",
-    val nextIncome: String = "Следующее пополнение — через 7 дней",
-    val hint: String = "План поможет позаботиться о нужном и приблизиться к цели.",
+    val description: String = "Сначала позаботимся о еде. Остальное разделим между желаниями, большой целью и запасом на неожиданности.",
+    val nextIncome: String = "Новые монеты получим через 7 игровых дней.",
+    val hint: String = "План можно менять. В копилку положим монеты отдельно.",
     val action: String = "Распределить монеты",
+    val availableBalance: Long? = null,
+    val savingsBalance: Long? = null,
 )
 
 @Composable
@@ -63,7 +65,7 @@ internal fun WeeklyIncomeScreen(
 @Composable
 private fun IncomeHero(state: WeeklyIncomeUiState, onBack: () -> Unit, modifier: Modifier) {
     Box(modifier) {
-        Image(painterResource(R.drawable.event_weekly_income_background), null, Modifier.matchParentSize(),
+        GameArtwork(R.drawable.event_weekly_income_background, null, Modifier.matchParentSize(),
             contentScale = ContentScale.Crop, alignment = Alignment.BottomCenter)
         Column(Modifier.fillMaxSize()
             .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))) {
@@ -76,24 +78,9 @@ private fun IncomeHero(state: WeeklyIncomeUiState, onBack: () -> Unit, modifier:
                     }
                 }
                 Surface(shape = RoundedCornerShape(28.dp), color = GameInk.copy(alpha = 0.9f)) {
-                    Text(state.header, Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
-                        color = Color.White, fontFamily = Rubik, fontWeight = FontWeight.ExtraBold, fontSize = 23.sp)
+                    Text(state.header, Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                        color = Color.White, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
                 }
-            }
-            Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically)) {
-                Surface(shape = RoundedCornerShape(28.dp), color = GameInk.copy(alpha = 0.94f)) {
-                    Column(Modifier.padding(horizontal = 28.dp, vertical = 12.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("+${state.amount}", color = AdventureLime, fontFamily = Rubik,
-                            fontWeight = FontWeight.ExtraBold, fontSize = 60.sp)
-                        Text(state.amountCaption, color = Color.White, fontFamily = Nunito,
-                            fontWeight = FontWeight.ExtraBold, fontSize = 22.sp, textAlign = TextAlign.Center)
-                    }
-                }
-                // Reserve the foreground for the coin pile painted into the event background.
-                Spacer(Modifier.height(88.dp))
             }
         }
     }
@@ -107,25 +94,49 @@ private fun IncomeInvitation(state: WeeklyIncomeUiState, onPlan: () -> Unit, mod
             .padding(horizontal = 20.dp, vertical = 14.dp),
             horizontalAlignment = Alignment.CenterHorizontally) {
             Column(Modifier.weight(1f).widthIn(max = 520.dp).verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(14.dp),
-                horizontalAlignment = Alignment.CenterHorizontally) {
+                verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(state.title, color = GameInk, fontFamily = Rubik, fontWeight = FontWeight.ExtraBold,
-                    fontSize = 26.sp, textAlign = TextAlign.Center)
-                Text(state.description, color = GameInk, fontFamily = Nunito, fontSize = 17.sp,
-                    textAlign = TextAlign.Center)
-                Surface(color = Color(0xFFECE5FF), shape = RoundedCornerShape(18.dp)) {
-                    Text(state.nextIncome, Modifier.fillMaxWidth().padding(16.dp),
-                        color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp, textAlign = TextAlign.Center)
+                    fontSize = 22.sp, lineHeight = 28.sp)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    GameArtwork(R.drawable.menu_coin, null, Modifier.size(32.dp), contentScale = ContentScale.Fit)
+                    Text("+${state.amount} ${state.amountCaption}", color = GameInk, fontFamily = Nunito,
+                        fontWeight = FontWeight.ExtraBold, fontSize = 19.sp, lineHeight = 25.sp)
+                }
+                Text(state.description, color = GameInk, fontFamily = Nunito, fontSize = 16.sp, lineHeight = 23.sp)
+                IncomeDestinations()
+                state.availableBalance?.takeIf { it != state.amount }?.let { available ->
+                    Text("Вместе с оставшимися монетами у нас теперь $available.", color = GameInk,
+                        fontFamily = Nunito, fontSize = 15.sp, lineHeight = 21.sp)
                 }
                 Text(state.hint, color = Color(0xFF6B6394), fontFamily = Nunito,
-                    fontSize = 14.sp, textAlign = TextAlign.Center)
+                    fontSize = 14.sp, lineHeight = 20.sp)
+                Text(state.nextIncome, color = Color(0xFF6B6394), fontFamily = Nunito,
+                    fontSize = 14.sp, lineHeight = 20.sp)
             }
             Button(onClick = onPlan, modifier = Modifier.widthIn(max = 520.dp).fillMaxWidth().padding(top = 10.dp)
                 .heightIn(min = 56.dp), shape = RoundedCornerShape(28.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = AdventureLime, contentColor = GameInk)) {
-                Text(state.action, fontFamily = Rubik, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp,
+                Text(state.action, fontFamily = Rubik, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp,
                     textAlign = TextAlign.Center)
+            }
+        }
+    }
+}
+
+@Composable
+private fun IncomeDestinations() {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        listOf(
+            R.drawable.budget_needs to "Нужно",
+            R.drawable.budget_wants to "Хочу",
+            R.drawable.budget_savings to "В копилку",
+            R.drawable.budget_reserve to "Запас",
+        ).forEach { (art, label) ->
+            Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                GameArtwork(art, null, Modifier.size(44.dp), contentScale = ContentScale.Fit)
+                Text(label, color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp, lineHeight = 17.sp, textAlign = TextAlign.Center)
             }
         }
     }

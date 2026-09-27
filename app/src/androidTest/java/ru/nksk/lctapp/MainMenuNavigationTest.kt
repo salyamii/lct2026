@@ -1,6 +1,7 @@
 package ru.nksk.lctapp
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
@@ -34,7 +35,7 @@ class MainMenuNavigationTest {
     @Before
     fun waitForSavedGame() {
         compose.waitUntil(10_000) {
-            compose.onAllNodesWithText("Выбрать большую цель")
+            compose.onAllNodesWithText("Выбрать цель накопления")
                 .fetchSemanticsNodes().isNotEmpty()
         }
     }
@@ -52,9 +53,9 @@ class MainMenuNavigationTest {
 
     @Test
     fun everyMenuActionOpensItsDestinationAndReturnsToTheMenu() {
+        compose.onNodeWithText("Выбрать цель накопления").assertHasNoClickAction()
         fun label(id: Int) = hasText(compose.activity.getString(id))
         val actions = listOf(
-            hasText("Выбрать большую цель") to R.string.menu_goal,
             hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility, 100)) to
                 R.string.menu_coins,
             label(R.string.menu_gear) to R.string.gear_title,
@@ -66,8 +67,15 @@ class MainMenuNavigationTest {
 
         actions.forEach { (action, title) ->
             compose.onNode(action and hasClickAction()).assertIsDisplayed().performClick()
-            compose.onNodeWithText(when (title) { R.string.menu_village -> "Карта приключений"; R.string.menu_continue -> "Смотритель просит помочь"; R.string.menu_goal -> "Большие цели"; else -> compose.activity.getString(title) }).assertIsDisplayed()
-            compose.onNode(hasText(compose.activity.getString(R.string.navigation_back)) or hasContentDescription(compose.activity.getString(R.string.navigation_back)))
+            compose.onNodeWithText(when (title) {
+                R.string.menu_village -> "Карта приключений"
+                R.string.menu_continue -> "Первый бюджет"
+                R.string.menu_goal -> "Цели"
+                R.string.menu_coins -> "Первый бюджет"
+                else -> compose.activity.getString(title)
+            }).assertIsDisplayed()
+            compose.onNode(hasText(compose.activity.getString(R.string.navigation_back)) or
+                hasContentDescription(compose.activity.getString(R.string.navigation_back)) or hasContentDescription("В главное меню"))
                 .assertIsDisplayed().performClick()
             assertMenuIsDisplayed()
         }
@@ -97,7 +105,7 @@ class MainMenuNavigationTest {
     }
 
     private fun assertMenuIsDisplayed() {
-        compose.onNodeWithText("Выбрать большую цель").assertIsDisplayed()
+        compose.onNodeWithText("Выбрать цель накопления").assertIsDisplayed()
         compose.onNode(
             hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility, 100)),
         ).assertIsDisplayed()

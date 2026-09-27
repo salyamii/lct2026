@@ -3,6 +3,7 @@ package ru.nksk.lctapp.domain.engine
 import ru.nksk.lctapp.domain.story.StoryDecision
 
 /** Calendar days are independent of authored story days and of the number of actions. */
+@kotlinx.serialization.Serializable
 data class EngineState(
     val rulesId: String,
     val revision: Long,
@@ -46,6 +47,7 @@ enum class DayPhase { RUNNING, READY_TO_END, FINISHED }
 enum class EventStatus { PENDING, ACTIVE, RESULT, COMPLETED, CARRIED, PAUSED, CARRIED_ACTIVE }
 enum class EventOrigin { SCHEDULE, DEED }
 
+@kotlinx.serialization.Serializable
 data class EventOccurrence(
     val id: String,
     val eventId: String,
@@ -54,6 +56,7 @@ data class EventOccurrence(
     val deedOfferId: String? = null,
 )
 
+@kotlinx.serialization.Serializable
 data class DeedOffer(
     val id: String,
     val eventId: String,

@@ -20,6 +20,7 @@ enum class GameLocation(val code: String) {
 
 enum class LocationLighting { DAY, EVENING }
 
+@kotlinx.serialization.Serializable
 data class LocationScene(
     val location: GameLocation = GameLocation.CITY,
     val lighting: LocationLighting = LocationLighting.DAY,

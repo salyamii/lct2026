@@ -1,0 +1,30 @@
+{
+  "resource": "goal_preview_home",
+  "category": "Goal chapter previews",
+  "generated_at": "2026-09-25",
+  "tool": "image_gen.imagegen",
+  "mode": "built-in generation",
+  "prompt": "Use case: stylized-concept.\nAsset type: final landscape chapter preview illustration for a polished cozy fantasy mobile adventure for children. Aspect ratio 3:2, 1536 x 1024 preferred.\nStyle: detailed dimensional 3D storybook game art, soft rounded craftsmanship, clean readable silhouettes, rich tactile stone/wood/brass textures, cinematic painterly lighting, premium production finish. The same coherent medieval fantasy world as a warm sandstone observatory with blue velvet banners, brass astronomy instruments, amber lanterns and distant castle mountains. Midnight blue and teal shadows, amber golden light.\nComposition: one strong centered subject immediately recognizable at small mobile-card size, natural perspective and coherent spatial depth, landscape full-bleed art only, keep essential subject within central 80% with comfortable margins. No fox, people, animals, characters, UI, borders, labels, logos, readable lettering, text, coins, graphs, finance motifs, collage or split panels. This is original game artwork, not a screenshot or app mockup.\nPrimary scene: A cozy researcher's small stone-and-timber home, centered in a sheltered mountain village garden, with a warm open workshop doorway. Attractive crafted pale stone walls, dark blue roof tiles, timber beams, amber windows, small chimney. A neat workbench with a few wood planks and spare roof tiles can be glimpsed beside the doorway, suggesting thoughtful preparation and building, without rubble or mess. Home fully visible with comfortable roof margin; clear curved path through low flowers. Rich blue twilight behind, golden lantern glow from the doorway, welcoming and sturdy, not a wreck and not a construction site.",
+  "reference_context": "Visual style inspected from app/src/main/res/drawable-nodpi/location_observatory.webp; no reference image supplied to generation tool.",
+  "generated_source_file": "C:\\Users\\User\\.codex\\generated_images\\01a0d849-d082-7633-9364-a9b22475f6e8\\exec-e43b2bfe-3d1f-469b-ac0e-567af76dd806.png",
+  "source_file": "docs/design/assets/sources/goal-previews-2026-09-25/goal_preview_home.png",
+  "source_sha256": "0f8240c737b153005c7c979b631028f4f1957b18753e24c052205ba3c06efd30",
+  "source_bytes": 2812256,
+  "path": "app/src/main/res/drawable-nodpi/goal_preview_home.webp",
+  "sha256": "40a6872de522cf83a044487873751152986eb50d69cbf6e5ff042cdb86dc2b89",
+  "bytes": 1980248,
+  "width": 1536,
+  "height": 1024,
+  "rgba_sha256": "e5245b2b09691f0aab9d05c1af4d64a2ecc608e7e74148ab1352021703279c42",
+  "conversion": "Pillow WebP lossless=True, exact=True, quality=100, method=6; full original canvas, no resizing, cropping, retouching or compositing.",
+  "verification": "PNG and WebP decoded RGBA dimensions and pixel bytes match exactly.",
+  "rgba_hash_format": "SHA-256(width uint32 big endian + height uint32 big endian + RGBA pixel bytes), matching verify_assets.py.",
+  "source_path": "docs/design/assets/sources/goal-previews-2026-09-25/goal_preview_home.png",
+  "alpha_bounds": [
+    0,
+    0,
+    1536,
+    1024
+  ],
+  "lossless_rgba_verified": true
+}

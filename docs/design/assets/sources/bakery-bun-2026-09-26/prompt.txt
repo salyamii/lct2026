@@ -1,0 +1,7 @@
+Use case: stylized-concept.
+Asset type: one final isolated inventory prop for a polished cozy fantasy mobile adventure for children ages 7–11, a transparent Android game asset, square canvas 1024 x 1024 preferred.
+Primary request: one freshly baked appetizing round bread bun from a fairytale bakery. Plump, softly domed round silhouette, amber-golden toasted crust, three gentle scored cuts showing fluffy pale bread inside, a delicate natural dusting of flour. A simple beautiful bun, no filling or icing, not a croissant, not a large loaf.
+Style/medium: premium dimensional 3D storybook game art, softly rounded shapes, finely crafted rich textures and warm golden light, readable clean silhouette matching polished children's fantasy adventure inventory props. Camera in a slight three-quarter view from above. Bun large and centered, entirely visible with comfortable transparent margins on every side. Include only the single bun itself, no plate or board, no environment, no ground plane.
+Lighting: soft warm key from upper left, gentle fill, appetizing natural toasted colors, bright readable detail without dark crushed shadows.
+Background: genuinely transparent alpha background, clean anti-aliased cutout edges. The entire area outside the bun must be transparent, not white, gray, black or checkerboard; no background color or baked backdrop.
+Constraints: one object only. No text, letters, price, coin, label, UI, border, watermark, animal, fox, character, limbs, face or scenery. No hard outer glow.

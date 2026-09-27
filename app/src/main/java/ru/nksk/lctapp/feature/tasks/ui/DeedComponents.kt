@@ -1,9 +1,11 @@
 package ru.nksk.lctapp.feature.tasks.ui
 
 import ru.nksk.lctapp.core.ui.components.GameArtwork
+import ru.nksk.lctapp.core.ui.components.GameActionButton
+import ru.nksk.lctapp.core.ui.components.GameActionButtonDefaults
+import ru.nksk.lctapp.core.ui.components.GameActionStyle
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,7 +33,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -136,47 +137,23 @@ fun CoinChip(text: String, modifier: Modifier = Modifier, lime: Boolean = false)
 
 /** Лаймовая пилюля-действие. */
 @Composable
-fun DeedButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(52.dp)
-            .clip(RoundedCornerShape(30.dp))
-            .background(DeedColors.Lime)
-            .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text,
-            color = DeedColors.Text,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.ExtraBold,
-            fontFamily = Rubik,
-        )
-    }
+fun DeedButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier,
+    enabled: Boolean = true, loading: Boolean = false) {
+    GameActionButton(text, onClick, modifier, enabled = enabled, loading = loading,
+        minHeight = 52.dp, shape = RoundedCornerShape(30.dp),
+        containerColor = DeedColors.Lime, contentColor = DeedColors.Text)
 }
 
 /** Белая пилюля-действие (вторичный выбор). */
 @Composable
-fun DeedButtonSoft(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(52.dp)
-            .clip(RoundedCornerShape(30.dp))
-            .background(DeedColors.CreamCard)
-            .border(1.dp, DeedColors.Border, RoundedCornerShape(30.dp))
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text,
-            color = DeedColors.Text,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.ExtraBold,
-            fontFamily = Rubik,
-        )
-    }
+fun DeedButtonSoft(text: String, onClick: () -> Unit, modifier: Modifier = Modifier,
+    enabled: Boolean = true, loading: Boolean = false) {
+    GameActionButton(text, onClick, modifier, enabled = enabled, loading = loading,
+        style = GameActionStyle.SECONDARY,
+        minHeight = 52.dp, shape = RoundedCornerShape(30.dp),
+        textStyle = GameActionButtonDefaults.PrimaryText.copy(fontSize = 15.sp, lineHeight = 21.sp),
+        containerColor = DeedColors.CreamCard, contentColor = DeedColors.Text,
+        borderColor = DeedColors.Border)
 }
 
 /** Кремовый лист события с закруглённым верхом поверх ночной сцены. */

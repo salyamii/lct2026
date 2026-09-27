@@ -6,7 +6,7 @@ import androidx.room3.ForeignKey
 import androidx.room3.Index
 import androidx.room3.PrimaryKey
 
-/** An optional player choice, independent of the day template's chapter. No derived progress. */
+/** The activated chapter kit. Purchase target is a separate BCNF relation; no derived progress. */
 @Entity(tableName = "GOAL_SELECTION", foreignKeys = [
     ForeignKey(entity = GameStateEntity::class, parentColumns = ["id"], childColumns = ["game_state_id"]),
     ForeignKey(entity = GoalEntity::class, parentColumns = ["id"], childColumns = ["goal_id"]),

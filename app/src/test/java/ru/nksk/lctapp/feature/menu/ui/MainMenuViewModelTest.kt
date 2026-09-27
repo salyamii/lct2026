@@ -88,7 +88,7 @@ class MainMenuViewModelTest {
             EngineCommand.Feed(session.catalog.meals.first { it.price > 0 }.id))) is EngineResult.Applied)
         advanceUntilIdle()
         val menu = (model.uiState.value as MainMenuLoadState.Ready).menu
-        assertTrue(menu.dayStatus!!.endsWith("Сыт"))
+        assertTrue(menu.dayStatus!!.endsWith("сыт"))
         assertNull(menu.notice)
         assertFalse(menu.canFeed)
         assertEquals("Продолжить день", menu.continueLabel)
@@ -137,7 +137,7 @@ class MainMenuViewModelTest {
         val fed = repository.read()!!
         assertTrue(fed.engine!!.ateToday)
         assertEquals(3, fed.engine!!.nextMorningEnergy)
-        assertEquals(5, fed.engine!!.energy)
+        assertEquals(0, fed.engine!!.energy)
         assertEquals(1, fed.engine!!.steps)
         assertNull(fed.engine!!.currentEvent)
         assertEquals(0L, fed.economy.balance)

@@ -34,8 +34,8 @@
     <string name="deeds_card_hidden">Карта %1$d, закрыта</string>
     <string name="deeds_card_open">Карта %1$d, %2$s</string>
     <string name="deeds_card_matched">Карта %1$d, %2$s, пара найдена</string>
-    <string name="deeds_resources">Голод: %1$d/100 · Усталость: %2$d/100</string>
-    <string name="deeds_cost">При успехе: +%1$d голода · +%2$d усталости</string>
+    <string name="deeds_resources">Голод: %1$d/100, усталость: %2$d/100</string>
+    <string name="deeds_cost">При успехе: +%1$d голода и +%2$d усталости</string>
     <string name="deeds_unavailable">Недоступно: не хватает запаса сил или сытости</string>
     <string name="deeds_saving">Сохраняем результат…</string>
     <string name="deeds_save_error">Не удалось сохранить результат. Повторите сохранение.</string>

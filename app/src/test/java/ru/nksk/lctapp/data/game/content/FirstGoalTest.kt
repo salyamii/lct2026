@@ -15,6 +15,37 @@ import ru.nksk.lctapp.domain.story.StoryDecision
 import ru.nksk.lctapp.feature.menu.ui.toMainMenuUiState
 
 class FirstGoalTest {
+    @Test fun onlyFirstChapterIsAvailableAndItOffersAtLeastThreeSavingTargets() = runTest {
+        val f = Fixture()
+        assertEquals(listOf(STARS_GOAL), f.session.onboardingGoals.map { it.goalId })
+        assertTrue(f.session.onboardingSavingItemIds.distinct().size >= 3)
+        for (id in listOf(TOWER_GOAL, HOME_GOAL, MAP_GOAL, EXPEDITION_GOAL)) {
+            assertEquals(EngineResult.Blocked(BlockReason.GoalUnavailable),
+                f.session.dispatch(f.request(f.session.selectGoalCommand(f.state, id))))
+        }
+        assertNull(f.state.selectedGoalId)
+        assertNull(f.state.engine)
+    }
+
+    @Test fun changingSavingTargetPreservesMoneyStoryStepsAndTheFinancialPeriod() = runTest {
+        val f = Fixture()
+        f.select()
+        f.send(EngineCommand.DepositSavings(20))
+        val before = f.state
+        val target = f.goal.itemIds[1]
+        f.send(EngineCommand.SelectSavingGoal(f.goal.goalId, target))
+        assertEquals(before.copy(selectedSavingItemId = target,
+            engine = before.engine!!.copy(revision = before.engine!!.revision + 1)), f.state)
+        val archive = ru.nksk.lctapp.domain.history.HistoryCodec.snapshot("test", f.state, emptyList())
+        assertEquals(f.state, ru.nksk.lctapp.domain.history.HistoryCodec.decodeSnapshot(
+            ru.nksk.lctapp.domain.history.HistoryCodec.encodeSnapshot(archive)).state)
+        assertEquals(EngineResult.Blocked(BlockReason.GoalUnavailable), f.session.dispatch(f.request(
+            EngineCommand.BuyGoalItem(f.goal.goalId, f.goal.itemIds.first()))))
+        assertEquals(EngineResult.Blocked(BlockReason.GoalUnavailable), f.session.dispatch(f.request(
+            EngineCommand.SelectSavingGoal(TOWER_GOAL, "$TOWER_GOAL:lantern"))))
+        assertEquals(before.financial, f.state.financial)
+    }
+
     @Test fun selectionOpensNoEventAndNextContinueIntroducesGoalWithoutDroppingEverydayPlan() = runTest {
         val f = Fixture()
         assertTrue(f.catalog.plan(f.state).all { id -> f.catalog.content.events.first { it.id == id }.type != EventType.STORY })
@@ -35,6 +66,7 @@ class FirstGoalTest {
     @Test fun purchaseIsAtomicConsumesOneStepAndRejectsReplayOrSecondCopy() = runTest {
         val f = Fixture()
         f.select()
+        f.send(EngineCommand.DepositSavings(24))
         val before = f.state
         val itemId = f.goal.itemIds.first()
         val request = f.request(EngineCommand.BuyGoalItem(f.goal.goalId, itemId))
@@ -45,6 +77,7 @@ class FirstGoalTest {
         assertTrue(f.session.dispatch(request) is EngineResult.Applied)
         assertEquals(76L, f.state.economy.balance)
         assertEquals(listOf(itemId), f.state.ownedItems.map { it.itemId })
+        assertNull(f.state.selectedSavingItemId)
         assertEquals(before.engine!!.steps + 1, f.state.engine!!.steps)
         assertEquals(before.engine!!.energy, f.state.engine!!.energy)
         assertEquals(before.story, f.state.story)
@@ -97,7 +130,7 @@ class FirstGoalTest {
     @Test fun warningReservesNothingAndConfirmationUsesTheOriginalRevision() = runTest {
         val f = Fixture()
         f.select()
-        val command = EngineCommand.BuyGoalItem(f.goal.goalId, f.goal.itemIds[2])
+        val command = EngineCommand.DepositSavings(90)
         val request = f.request(command)
         val before = f.state
         assertEquals(EngineResult.Blocked(BlockReason.FoodBudgetWarning(10, 35)), f.session.dispatch(request))
@@ -107,16 +140,25 @@ class FirstGoalTest {
             f.session.dispatch(request.copy(command = command.copy(acceptFoodRisk = true))))
         assertTrue(f.state.ownedItems.isEmpty())
         f.send(command.copy(acceptFoodRisk = true))
+        assertEquals(95L, f.state.economy.balance)
+        assertEquals(90L, f.state.economy.savingsBalance)
+        f.send(EngineCommand.SelectSavingGoal(f.goal.goalId, f.goal.itemIds[2]))
+        f.send(EngineCommand.BuyGoalItem(f.goal.goalId, f.goal.itemIds[2], acceptFoodRisk = true))
         assertEquals(5L, f.state.economy.balance)
-        assertEquals(before.economy.plan, f.state.economy.plan)
+        assertEquals(BudgetPlan(5, 0, 0, 0), f.state.economy.plan)
+        assertEquals(before.financial.plans, f.state.financial.plans)
     }
 
     @Test fun collectingAllPartsDoesNotFinishLoreOrUnlockAnotherGoal() = runTest {
         val f = Fixture(250)
         f.select()
         f.send(EngineCommand.Feed("basic-v1"))
+        f.send(EngineCommand.DepositSavings(180))
         val story = f.state.story
-        f.goal.itemIds.reversed().forEach { f.send(EngineCommand.BuyGoalItem(f.goal.goalId, it)) }
+        f.goal.itemIds.reversed().forEach {
+            f.send(EngineCommand.SelectSavingGoal(f.goal.goalId, it))
+            f.send(EngineCommand.BuyGoalItem(f.goal.goalId, it))
+        }
         val progress = f.goal.progress(f.state, f.catalog.content)
         assertTrue(progress.isCollected)
         assertEquals(180L, progress.totalPrice)
@@ -136,6 +178,7 @@ class FirstGoalTest {
         val command = EngineCommand.BuyGoalItem(f.goal.goalId, f.goal.itemIds.first(), acceptFoodRisk = true)
         assertEquals(EngineResult.Blocked(BlockReason.GoalUnavailable), f.session.dispatch(f.request(command)))
         f.select()
+        f.send(EngineCommand.DepositSavings(20, acceptFoodRisk = true))
         assertEquals(EngineResult.Blocked(BlockReason.InsufficientMoney(4)), f.session.dispatch(f.request(command)))
         f.repo.update { it.copy(engine = it.engine!!.copy(steps = 3)) }
         val before = f.state
@@ -173,7 +216,8 @@ class FirstGoalTest {
     private class Fixture(balance: Long = 100) {
         val catalog = bundledGameCatalog()
         val goal = catalog.goals.first { it.goalId == "figma-stargazing-180-v1" }
-        private val initial = createInitialGameState().let { it.copy(economy = EconomyState(BudgetPlan(0, 0, balance, 0))) }
+        private val initial = createInitialGameState().let { it.copy(economy =
+            EconomyState(BudgetPlan(balance, 0, 0, 0), availableBalance = balance, savingsBalance = 0)) }
         val repo = MemoryRepository(initial)
         val session = GameSession(repo, object : StoryContentRepository {
             override suspend fun read() = catalog.content
@@ -186,7 +230,11 @@ class FirstGoalTest {
             val result = session.dispatch(request(command))
             assertTrue("$result", result is EngineResult.Applied)
         }
-        suspend fun select() = send(session.selectGoalCommand(state, goal.goalId))
+        suspend fun select() {
+            send(session.selectSavingGoalCommand(state, goal.goalId, goal.itemIds.first()))
+            val planning = checkNotNull(state.economy.planning)
+            send(EngineCommand.ConfirmBudget(planning.id, planning.revision))
+        }
     }
 
     private class MemoryRepository(initial: GameState) : GameRepository {

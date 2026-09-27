@@ -17,6 +17,8 @@ data class GoalCampaign(
 
 fun List<GoalCampaign>.selectedGoal(state: GameState): GoalCampaign? {
     state.selectedGoalId?.let { id -> return firstOrNull { it.goalId == id } }
+    // A legacy invitation starts the first project only; it must not reactivate it after a finale.
+    if (state.completedGoalProjects.isNotEmpty()) return null
     // The old introduction already recorded accepting this goal. Never replay or rewrite that history.
     return firstOrNull { goal -> state.completedGoalProjects.none { it.goalId == goal.goalId } &&
         state.story.decisions.any { it.choiceId in goal.legacyAcceptanceChoiceIds } }
@@ -27,6 +29,7 @@ fun GoalCampaign.isAvailable(state: GameState): Boolean =
         state.completedGoalProjects.map { it.goalId }.toSet().containsAll(requiredCompletedGoalIds)
 
 /** Historical association between a passed chapter finale and the personal project collected for it. */
+@kotlinx.serialization.Serializable
 data class CompletedGoalProject(val goalId: String, val decisionId: String)
 
 data class GoalProgress(val items: List<ItemDefinition>, val ownedItemIds: Set<String>) {

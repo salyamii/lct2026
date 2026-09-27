@@ -23,6 +23,7 @@ private fun AdventureGoalBriefingPreview() {
         AdventureGoalBriefingScreen(
             artwork = customizationArtwork().copy(background = R.drawable.location_hill_day),
             onBack = {}, onContinue = {},
+            chapterPreviewRes = R.drawable.goal_preview_stargazing,
         )
     }
 }

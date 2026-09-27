@@ -1,0 +1,542 @@
+[
+  {
+    "resource": "collection_home_entrance",
+    "category": "Inventory collection",
+    "path": "app/src/main/res/drawable-nodpi/collection_home_entrance.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1562104,
+    "sha256": "e41c980a0683cc42b1f54506623171210e3e5d1b2fcf5cfb0148c7e77d769350",
+    "rgba_sha256": "7859833165fff04f38dca09ed43dfbd060154a340636ae7d7cac369956782f88",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/collection_home_entrance.png",
+    "source_sha256": "1edd4513fa28eb4244641011a399b76d9f62d09254ee62bbc10d3777ad3c25f3",
+    "source_bytes": 2169174,
+    "source_format": "png",
+    "source_method": "generated_image",
+    "lossless_rgba_verified": true,
+    "item_id": "campaign-researcher-home-v1:entrance",
+    "provenance": {
+      "type": "generated-artwork",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in",
+      "prompt_path": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/collection_home_entrance.prompt.txt",
+      "generation_records": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/generation-records.json",
+      "style_reference": {
+        "resource": "prop_fair_explorer_hat",
+        "figma_url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2654-77",
+        "role": "Visual palette/material reference only; generated independently, not a Figma export or edit."
+      },
+      "details": "One built-in call per asset, no external API/CLI. Intentional opaque warm cream parchment canvas; no transparency extraction, crop, resize or manual retouching."
+    },
+    "visual_review": "Accepted after visual inspection: entire item visible, warm cream canvas, navy/brass/wood palette, clear silhouette, no text or characters.",
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "resized": false,
+      "cropped": false,
+      "pillow_version": "10.2.0",
+      "details": "Complete generated canvas retained. Decoded PNG and WebP RGBA pixels match exactly."
+    }
+  },
+  {
+    "resource": "collection_home_roof",
+    "category": "Inventory collection",
+    "path": "app/src/main/res/drawable-nodpi/collection_home_roof.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1614636,
+    "sha256": "8247339398a0a61bbffabf22530cbbb8a4cc05daadc271ef7a1945338fa8be28",
+    "rgba_sha256": "73d53de2bc25acb0e195e824c8725c4b38202177539fea79cd2ef4667645013f",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/collection_home_roof.png",
+    "source_sha256": "24ed65cac48d8b80a912b3ffa2261f284f51893c2258d127ad4568496b5941fe",
+    "source_bytes": 2261248,
+    "source_format": "png",
+    "source_method": "generated_image",
+    "lossless_rgba_verified": true,
+    "item_id": "campaign-researcher-home-v1:roof",
+    "provenance": {
+      "type": "generated-artwork",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in",
+      "prompt_path": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/collection_home_roof.prompt.txt",
+      "generation_records": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/generation-records.json",
+      "style_reference": {
+        "resource": "prop_fair_explorer_hat",
+        "figma_url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2654-77",
+        "role": "Visual palette/material reference only; generated independently, not a Figma export or edit."
+      },
+      "details": "One built-in call per asset, no external API/CLI. Intentional opaque warm cream parchment canvas; no transparency extraction, crop, resize or manual retouching."
+    },
+    "visual_review": "Accepted after visual inspection: entire item visible, warm cream canvas, navy/brass/wood palette, clear silhouette, no text or characters.",
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "resized": false,
+      "cropped": false,
+      "pillow_version": "10.2.0",
+      "details": "Complete generated canvas retained. Decoded PNG and WebP RGBA pixels match exactly."
+    }
+  },
+  {
+    "resource": "collection_home_workbench",
+    "category": "Inventory collection",
+    "path": "app/src/main/res/drawable-nodpi/collection_home_workbench.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1579634,
+    "sha256": "3661126a8af7ae611b88f7094f9bc2b2fc8ad36fa58a6ebd4b6d7282e25db25e",
+    "rgba_sha256": "0938a0078e6e92b45f29b776f81e05c9139ba34000d77ad9d33006adb8c2c523",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/collection_home_workbench.png",
+    "source_sha256": "1ca461a68b7606889f6549f1d9a43233e24adabe6e36b408276477e7a85d6190",
+    "source_bytes": 2193806,
+    "source_format": "png",
+    "source_method": "generated_image",
+    "lossless_rgba_verified": true,
+    "item_id": "campaign-researcher-home-v1:workbench",
+    "provenance": {
+      "type": "generated-artwork",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in",
+      "prompt_path": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/collection_home_workbench.prompt.txt",
+      "generation_records": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/generation-records.json",
+      "style_reference": {
+        "resource": "prop_fair_explorer_hat",
+        "figma_url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2654-77",
+        "role": "Visual palette/material reference only; generated independently, not a Figma export or edit."
+      },
+      "details": "One built-in call per asset, no external API/CLI. Intentional opaque warm cream parchment canvas; no transparency extraction, crop, resize or manual retouching."
+    },
+    "visual_review": "Accepted after visual inspection: entire item visible, warm cream canvas, navy/brass/wood palette, clear silhouette, no text or characters.",
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "resized": false,
+      "cropped": false,
+      "pillow_version": "10.2.0",
+      "details": "Complete generated canvas retained. Decoded PNG and WebP RGBA pixels match exactly."
+    }
+  },
+  {
+    "resource": "collection_home_desk",
+    "category": "Inventory collection",
+    "path": "app/src/main/res/drawable-nodpi/collection_home_desk.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1541182,
+    "sha256": "09c6d00bd139726e7c808b47ea431f169b739380de4eea40b5394f6dcabaaa8d",
+    "rgba_sha256": "fca034e49bdd8fd36366374778514556f5c2e8979e6c5c2828c94663ed3b3a13",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/collection_home_desk.png",
+    "source_sha256": "f4b6e53d5448f73f6d3b18677857aa7ea70ff0db16638da2308d26d1f26dd0bd",
+    "source_bytes": 2133503,
+    "source_format": "png",
+    "source_method": "generated_image",
+    "lossless_rgba_verified": true,
+    "item_id": "campaign-researcher-home-v1:desk",
+    "provenance": {
+      "type": "generated-artwork",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in",
+      "prompt_path": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/collection_home_desk.prompt.txt",
+      "generation_records": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/generation-records.json",
+      "style_reference": {
+        "resource": "prop_fair_explorer_hat",
+        "figma_url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2654-77",
+        "role": "Visual palette/material reference only; generated independently, not a Figma export or edit."
+      },
+      "details": "One built-in call per asset, no external API/CLI. Intentional opaque warm cream parchment canvas; no transparency extraction, crop, resize or manual retouching."
+    },
+    "visual_review": "Accepted after visual inspection: full readable subject, warm cream canvas, coherent navy/brass/wood palette, no labels or characters.",
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "resized": false,
+      "cropped": false,
+      "pillow_version": "10.2.0",
+      "details": "Complete generated canvas retained. Decoded PNG and WebP RGBA pixels match exactly."
+    }
+  },
+  {
+    "resource": "collection_home_shelves",
+    "category": "Inventory collection",
+    "path": "app/src/main/res/drawable-nodpi/collection_home_shelves.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1516902,
+    "sha256": "0c01146777955adaae7f2afd8a8525d6e55190befc928a2fb0a59345b0e1cbe7",
+    "rgba_sha256": "f1d380b478f1cbd18b08f48edee7152e3b52fa4d80063ae12846076987e09085",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/collection_home_shelves.png",
+    "source_sha256": "ec1d03221a43061a3ffe36d8fe62b760f0b9b0668101c0d0a3e3b2cfece9a4f9",
+    "source_bytes": 2102559,
+    "source_format": "png",
+    "source_method": "generated_image",
+    "lossless_rgba_verified": true,
+    "item_id": "campaign-researcher-home-v1:shelves",
+    "provenance": {
+      "type": "generated-artwork",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in",
+      "prompt_path": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/collection_home_shelves.prompt.txt",
+      "generation_records": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/generation-records.json",
+      "style_reference": {
+        "resource": "prop_fair_explorer_hat",
+        "figma_url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2654-77",
+        "role": "Visual palette/material reference only; generated independently, not a Figma export or edit."
+      },
+      "details": "One built-in call per asset, no external API/CLI. Intentional opaque warm cream parchment canvas; no transparency extraction, crop, resize or manual retouching."
+    },
+    "visual_review": "Accepted after visual inspection: full readable subject, warm cream canvas, coherent navy/brass/wood palette, no labels or characters.",
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "resized": false,
+      "cropped": false,
+      "pillow_version": "10.2.0",
+      "details": "Complete generated canvas retained. Decoded PNG and WebP RGBA pixels match exactly."
+    }
+  },
+  {
+    "resource": "collection_expedition_backpack",
+    "category": "Inventory collection",
+    "path": "app/src/main/res/drawable-nodpi/collection_expedition_backpack.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1761076,
+    "sha256": "b98a44ba75461b9018ffb285ff6093893b79577a37b1e2fcb187e24a1c5e5a60",
+    "rgba_sha256": "c8c0b4b8054df144fd829707ccc2d882c9f46221e0cc9f1035af971fb5634aa6",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/collection_expedition_backpack.png",
+    "source_sha256": "a9802e50f3aeb11678e631af05aeb176d9fc27e7b05a1dc2e451099f6bacf990",
+    "source_bytes": 2523985,
+    "source_format": "png",
+    "source_method": "generated_image",
+    "lossless_rgba_verified": true,
+    "item_id": "campaign-great-expedition-v1:backpack",
+    "provenance": {
+      "type": "generated-artwork",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in",
+      "prompt_path": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/collection_expedition_backpack.prompt.txt",
+      "generation_records": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/generation-records.json",
+      "style_reference": {
+        "resource": "prop_fair_explorer_hat",
+        "figma_url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2654-77",
+        "role": "Visual palette/material reference only; generated independently, not a Figma export or edit."
+      },
+      "details": "One built-in call per asset, no external API/CLI. Intentional opaque warm cream parchment canvas; no transparency extraction, crop, resize or manual retouching."
+    },
+    "visual_review": "Accepted after visual inspection: full readable subject, warm cream canvas, coherent navy/brass/wood palette, no labels or characters.",
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "resized": false,
+      "cropped": false,
+      "pillow_version": "10.2.0",
+      "details": "Complete generated canvas retained. Decoded PNG and WebP RGBA pixels match exactly."
+    }
+  },
+  {
+    "resource": "collection_expedition_compass",
+    "category": "Inventory collection",
+    "path": "app/src/main/res/drawable-nodpi/collection_expedition_compass.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1585562,
+    "sha256": "a2fd72b6f3703076ff6188c1e68bdb0e87f1407928df08028fcaf937e5447dfe",
+    "rgba_sha256": "4f5ff2f75da73f7f3a7a327bd2ccaae40cd80991118910027118d4d02a5d762e",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/collection_expedition_compass.png",
+    "source_sha256": "87706b3388296d466a32fd5c3d73effd3af29c2ba937c6e8f33b3d339bd70cd9",
+    "source_bytes": 2290630,
+    "source_format": "png",
+    "source_method": "generated_image",
+    "lossless_rgba_verified": true,
+    "item_id": "campaign-great-expedition-v1:compass",
+    "provenance": {
+      "type": "generated-artwork",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in",
+      "prompt_path": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/collection_expedition_compass.prompt.txt",
+      "generation_records": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/generation-records.json",
+      "style_reference": {
+        "resource": "prop_fair_explorer_hat",
+        "figma_url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2654-77",
+        "role": "Visual palette/material reference only; generated independently, not a Figma export or edit."
+      },
+      "details": "One built-in call per asset, no external API/CLI. Intentional opaque warm cream parchment canvas; no transparency extraction, crop, resize or manual retouching."
+    },
+    "visual_review": "Accepted after visual inspection: complete functional expedition object/kit; cream canvas, navy/brass/leather, no text or characters. Compass is an instrument without keyring; lantern distinct navy storm form; supplies contain blanket/flask/tent, no food.",
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "resized": false,
+      "cropped": false,
+      "pillow_version": "10.2.0",
+      "details": "Complete generated canvas retained. Decoded PNG and WebP RGBA pixels match exactly."
+    }
+  },
+  {
+    "resource": "collection_expedition_light",
+    "category": "Inventory collection",
+    "path": "app/src/main/res/drawable-nodpi/collection_expedition_light.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1496430,
+    "sha256": "4efd68f3f2a70d92b4f4dae0d7665000edb380e83f63c175f7c6cce1aaacec51",
+    "rgba_sha256": "b3153ed0e0205f74334bc93a73b0c4066516357a6376433ec9916c12c17b6367",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/collection_expedition_light.png",
+    "source_sha256": "1ada2b7000a7bb0febc9ddc38e425f396ddd19939a0d69d6064bebc7e191074d",
+    "source_bytes": 2074892,
+    "source_format": "png",
+    "source_method": "generated_image",
+    "lossless_rgba_verified": true,
+    "item_id": "campaign-great-expedition-v1:light",
+    "provenance": {
+      "type": "generated-artwork",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in",
+      "prompt_path": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/collection_expedition_light.prompt.txt",
+      "generation_records": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/generation-records.json",
+      "style_reference": {
+        "resource": "prop_fair_explorer_hat",
+        "figma_url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2654-77",
+        "role": "Visual palette/material reference only; generated independently, not a Figma export or edit."
+      },
+      "details": "One built-in call per asset, no external API/CLI. Intentional opaque warm cream parchment canvas; no transparency extraction, crop, resize or manual retouching."
+    },
+    "visual_review": "Accepted after visual inspection: complete functional expedition object/kit; cream canvas, navy/brass/leather, no text or characters. Compass is an instrument without keyring; lantern distinct navy storm form; supplies contain blanket/flask/tent, no food.",
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "resized": false,
+      "cropped": false,
+      "pillow_version": "10.2.0",
+      "details": "Complete generated canvas retained. Decoded PNG and WebP RGBA pixels match exactly."
+    }
+  },
+  {
+    "resource": "collection_expedition_supplies",
+    "category": "Inventory collection",
+    "path": "app/src/main/res/drawable-nodpi/collection_expedition_supplies.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1688314,
+    "sha256": "a52f1e300ddd9195abaa563064f7db7f54a2fe7c29e6929e06e554431940bd04",
+    "rgba_sha256": "9fa5ff756066012f35dfe9e9d67347e01e6f40bb59ee3a2c2ef7591987c16e2f",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/collection_expedition_supplies.png",
+    "source_sha256": "1509d0d35890327be5069fe9f5cfb4c3cf80687ba7d58c58c751cba957b42df9",
+    "source_bytes": 2372953,
+    "source_format": "png",
+    "source_method": "generated_image",
+    "lossless_rgba_verified": true,
+    "item_id": "campaign-great-expedition-v1:supplies",
+    "provenance": {
+      "type": "generated-artwork",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in",
+      "prompt_path": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/collection_expedition_supplies.prompt.txt",
+      "generation_records": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/generation-records.json",
+      "style_reference": {
+        "resource": "prop_fair_explorer_hat",
+        "figma_url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2654-77",
+        "role": "Visual palette/material reference only; generated independently, not a Figma export or edit."
+      },
+      "details": "One built-in call per asset, no external API/CLI. Intentional opaque warm cream parchment canvas; no transparency extraction, crop, resize or manual retouching."
+    },
+    "visual_review": "Accepted after visual inspection: complete functional expedition object/kit; cream canvas, navy/brass/leather, no text or characters. Compass is an instrument without keyring; lantern distinct navy storm form; supplies contain blanket/flask/tent, no food.",
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "resized": false,
+      "cropped": false,
+      "pillow_version": "10.2.0",
+      "details": "Complete generated canvas retained. Decoded PNG and WebP RGBA pixels match exactly."
+    }
+  },
+  {
+    "resource": "collection_expedition_transport",
+    "category": "Inventory collection",
+    "path": "app/src/main/res/drawable-nodpi/collection_expedition_transport.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1655470,
+    "sha256": "7131201f37164cfc7fd2ee765c2e165c0bc47a35d3fca1b7885a83607a9437b8",
+    "rgba_sha256": "7647135bd9c2367dc5c63d15dd8a50b7c6f8211da8ce98b208dc38b374e0e03c",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/collection_expedition_transport.png",
+    "source_sha256": "2e633da1f457e0c59e37571db8560dec597873d6032e13986d192dab902e4b6a",
+    "source_bytes": 2255574,
+    "source_format": "png",
+    "source_method": "generated_image",
+    "lossless_rgba_verified": true,
+    "item_id": "campaign-great-expedition-v1:transport",
+    "provenance": {
+      "type": "generated-artwork",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in",
+      "prompt_path": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/collection_expedition_transport.prompt.txt",
+      "generation_records": "docs/design/assets/sources/inventory-collection-2026-09-26/home-expedition/generation-records.json",
+      "style_reference": {
+        "resource": "prop_fair_explorer_hat",
+        "figma_url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2654-77",
+        "role": "Visual palette/material reference only; generated independently, not a Figma export or edit."
+      },
+      "details": "One built-in call per asset, no external API/CLI. Intentional opaque warm cream parchment canvas; no transparency extraction, crop, resize or manual retouching."
+    },
+    "visual_review": "Accepted after visual inspection: whole physical ticket with carriage and mountains, intentional cream paper/canvas, no letters, price or dates. Ticket decoration stays on the physical object.",
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "resized": false,
+      "cropped": false,
+      "pillow_version": "10.2.0",
+      "details": "Complete generated canvas retained. Decoded PNG and WebP RGBA pixels match exactly."
+    }
+  }
+]

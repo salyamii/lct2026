@@ -24,12 +24,19 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import ru.nksk.lctapp.feature.economy.ui.EconomyScreen
 import ru.nksk.lctapp.feature.economy.ui.EconomyViewModel
+import ru.nksk.lctapp.feature.economy.ui.SavingsScreen
+import ru.nksk.lctapp.feature.economy.ui.savingsBackAction
 
 @Serializable
 @SerialName("coins") // Preserve the saved route ID of the former placeholder.
 data object Economy : NavKey
 
-fun EntryProviderScope<NavKey>.economyEntry(onBack: (Economy) -> Unit, onConfirmed: (Economy) -> Unit) {
+@Serializable
+@SerialName("savings")
+data object Savings : NavKey
+
+fun EntryProviderScope<NavKey>.economyEntry(onBack: (Economy) -> Unit, onConfirmed: (Economy) -> Unit,
+    onOpenSavings: (Economy) -> Unit = {}) {
     entry<Economy> { source ->
         val model = hiltViewModel<EconomyViewModel>()
         val state by model.uiState.collectAsStateWithLifecycle()
@@ -41,18 +48,23 @@ fun EntryProviderScope<NavKey>.economyEntry(onBack: (Economy) -> Unit, onConfirm
             when {
                 state.error != null -> Unit
                 economy == null || economy.planning?.stage == BudgetPlanningStage.RECEIPT -> onBack(source)
-                economy.unallocated > 0 -> exitMessage = "Распредели оставшиеся ${economy.unallocated} монет, чтобы продолжить."
-                economy.plan.needs < EconomyOperations.minimumNeeds(economy) ->
-                    exitMessage = "Добавь в «Нужно» ещё ${EconomyOperations.minimumNeeds(economy) - economy.plan.needs} монет, чтобы завершить бюджет."
+                economy.planning == null -> onBack(source)
+                EconomyOperations.allocationRemaining(economy) > 0 -> exitMessage = "Распредели оставшиеся ${EconomyOperations.allocationRemaining(economy)} монет, чтобы продолжить."
+                economy.displayPlan.needs < EconomyOperations.minimumNeeds(economy, state.knownNeeds) ->
+                    exitMessage = "Оставь ещё ${EconomyOperations.minimumNeeds(economy, state.knownNeeds) - economy.displayPlan.needs} монет на необходимое, чтобы на всё хватило."
                 else -> model.onAction(EconomyAction.Confirm)
             }
         }
-        val back: () -> Unit = { if (state.saving) exitAfterSave = true else finishExit() }
+        val back: () -> Unit = {
+            if (state.budgetConfirmation == null) {
+                if (state.saving) exitAfterSave = true else finishExit()
+            }
+        }
         BackHandler { back() }
         LaunchedEffect(state.saving, state.error, exitAfterSave) {
             if (exitAfterSave && !state.saving) {
                 exitAfterSave = false
-                if (state.error == null) finishExit()
+                if (state.error == null && state.budgetConfirmation == null) finishExit()
             }
         }
         LaunchedEffect(model, lifecycle) {
@@ -69,7 +81,33 @@ fun EntryProviderScope<NavKey>.economyEntry(onBack: (Economy) -> Unit, onConfirm
             )
         }
         EconomyScreen(state, onAction = {
-            if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) model.onAction(it)
-        }, onBack = dropUnlessResumed { back() })
+            if (it is EconomyAction.ContextPresented || lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) model.onAction(it)
+        }, onBack = dropUnlessResumed { back() },
+            onOpenSavings = dropUnlessResumed { onOpenSavings(source) })
+    }
+}
+
+fun EntryProviderScope<NavKey>.savingsEntry(onBack: (Savings) -> Unit,
+    onOpenGoal: (Savings) -> Unit, onOpenBudget: (Savings) -> Unit) {
+    entry<Savings> { source ->
+        val model = hiltViewModel<EconomyViewModel>()
+        val state by model.uiState.collectAsStateWithLifecycle()
+        val back: () -> Unit = {
+            if (!state.saving) {
+                val cancel = savingsBackAction(state)
+                if (cancel != null) model.onAction(cancel) else onBack(source)
+            }
+        }
+        BackHandler { back() }
+        val lifecycle = LocalLifecycleOwner.current.lifecycle
+        SavingsScreen(state, onAction = { action ->
+            if (action is EconomyAction.TransferContextPresented || lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) model.onAction(action)
+        }, onBack = dropUnlessResumed { back() },
+            onOpenGoal = dropUnlessResumed {
+                if (!state.saving) { model.onAction(EconomyAction.OpenSavingsHub); onOpenGoal(source) }
+            },
+            onOpenBudget = dropUnlessResumed {
+                if (!state.saving) { model.onAction(EconomyAction.OpenSavingsHub); onOpenBudget(source) }
+            })
     }
 }

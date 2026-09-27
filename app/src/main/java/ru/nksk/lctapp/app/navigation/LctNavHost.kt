@@ -14,6 +14,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
@@ -39,6 +40,8 @@ import ru.nksk.lctapp.core.ui.components.GameCompletionSnackbar
 import ru.nksk.lctapp.core.ui.theme.AdventureNight
 import ru.nksk.lctapp.feature.economy.navigation.Economy
 import ru.nksk.lctapp.feature.economy.navigation.economyEntry
+import ru.nksk.lctapp.feature.economy.navigation.Savings
+import ru.nksk.lctapp.feature.economy.navigation.savingsEntry
 import ru.nksk.lctapp.feature.day.navigation.Day
 import ru.nksk.lctapp.feature.day.navigation.dayEntry
 import ru.nksk.lctapp.feature.gear.navigation.Gear
@@ -58,6 +61,13 @@ import ru.nksk.lctapp.feature.tasks.navigation.tasksEntry
 import ru.nksk.lctapp.feature.tasks.ui.DeedsAction
 import ru.nksk.lctapp.feature.map.navigation.GameMap
 import ru.nksk.lctapp.feature.map.navigation.mapEntry
+import ru.nksk.lctapp.feature.learning.navigation.Learning
+import ru.nksk.lctapp.feature.learning.navigation.SkillTraining
+import ru.nksk.lctapp.feature.learning.navigation.OtherPaths
+import ru.nksk.lctapp.feature.learning.navigation.learningEntry
+import ru.nksk.lctapp.feature.settings.navigation.Settings
+import ru.nksk.lctapp.feature.settings.navigation.settingsEntry
+import ru.nksk.lctapp.feature.settings.ui.SettingsGearButton
 
 private const val NavigationTransitionMillis = 160
 
@@ -68,6 +78,7 @@ private class CompletionNotice(val message: String)
 @Composable
 fun LctNavHost(
     modifier: Modifier = Modifier,
+    debugSettingsButton: (@Composable () -> Unit)? = null,
 ) {
     val backStack = rememberNavBackStack(AppNavigationSavedStateConfiguration, MainMenu)
     val navigator = remember(backStack) { AppNavigator(backStack) }
@@ -89,9 +100,10 @@ fun LctNavHost(
             presentedPlanningId = pending.id
         }
     }
-    if (gate.loading || gate.failed) {
+    val redirectingToBudget = shouldPresentBudget(pending, destination, presentedPlanningId)
+    if (gate.loading || gate.failed || redirectingToBudget) {
         Box(Modifier.fillMaxSize().background(AdventureNight), contentAlignment = Alignment.Center) {
-            if (gate.loading) CircularProgressIndicator()
+            if (gate.loading || redirectingToBudget) CircularProgressIndicator()
             else Column {
                 Text("Не удалось прочитать бюджет")
                 Button(onClick = gateModel::retry) { Text("Повторить") }
@@ -139,7 +151,9 @@ fun LctNavHost(
                 rememberViewModelStoreNavEntryDecorator(),
             ),
             entryProvider = entryProvider {
-                mainMenuEntry { source, action ->
+                mainMenuEntry(settingsButton = {
+                    SettingsGearButton(dropUnlessResumed { navigator.navigate(MainMenu, Settings) })
+                }) { source, action ->
                     navigator.navigate(
                         source = source,
                         destination = when (action) {
@@ -147,11 +161,14 @@ fun LctNavHost(
                             MainMenuAction.Tasks -> Tasks
                             MainMenuAction.Goal -> Goal
                             MainMenuAction.Coins -> Economy
+                            MainMenuAction.Finance -> Learning
+                            MainMenuAction.Savings -> Savings
                             MainMenuAction.Village -> GameMap
                             MainMenuAction.ContinueDay, MainMenuAction.Feed -> if (pending != null) Economy else Day
                         },
                     )
                 }
+                settingsEntry(onBack = navigator::goBack, debugButton = debugSettingsButton)
                 gearEntry(onBack = navigator::goBack)
                 tasksEntry(
                     onEvent = { source -> navigator.navigate(source, Day) },
@@ -161,15 +178,27 @@ fun LctNavHost(
                             DeedsAction.StarPlates -> StarPlates
                             DeedsAction.PriceCheck -> PriceCheck
                             DeedsAction.Telescope -> Telescope
+                            DeedsAction.SkillTraining -> SkillTraining
                         })
                     },
                     onBack = navigator::goBack,
                 )
-                goalEntry(onBack = navigator::goBack)
-                economyEntry(onBack = navigator::returnToRoot, onConfirmed = navigator::returnToRoot)
+                goalEntry(onBack = navigator::goBack,
+                    onOpenSavings = { source -> navigator.navigateToExisting(source, Savings) },
+                    onReturnHome = navigator::returnToRoot)
+                economyEntry(onBack = navigator::returnToRoot, onConfirmed = navigator::returnToRoot,
+                    onOpenSavings = { source -> navigator.navigateToExisting(source, Savings) })
+                savingsEntry(onBack = navigator::goBack,
+                    onOpenGoal = { source -> navigator.navigateToExisting(source, Goal) },
+                    onOpenBudget = { source -> navigator.navigateToExisting(source, Economy) })
+                learningEntry(onBack = navigator::goBack,
+                    onOpenBudget = { source -> navigator.navigateToExisting(source, Economy) })
                 mapEntry(onBack = navigator::goBack, onSelected = navigator::returnToRoot)
                 dayEntry(onBack = navigator::goBack, onFinished = finish,
-                    onGame = { source, id -> navigator.replace(source, DeedGame(id)) })
+                    onGame = { source, id -> navigator.replace(source, DeedGame(id)) },
+                    onStoryGame = { source, id, choice -> navigator.replace(source, DeedGame(id, choice)) },
+                    onLearning = { source -> navigator.navigate(source, SkillTraining) },
+                    onReflection = { source, day -> navigator.navigate(source, OtherPaths(day)) })
                 deedGameEntry(onFinished = finish)
             },
         )

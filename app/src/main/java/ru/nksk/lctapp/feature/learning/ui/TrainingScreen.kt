@@ -1,0 +1,203 @@
+package ru.nksk.lctapp.feature.learning.ui
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.selection.selectableGroup
+import ru.nksk.lctapp.core.ui.components.GameQuizOption
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.currentStateAsState
+import ru.nksk.lctapp.R
+import ru.nksk.lctapp.core.ui.components.GameArtwork
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import ru.nksk.lctapp.core.ui.components.AdventureBody
+import ru.nksk.lctapp.core.ui.components.AdventureHeading
+import ru.nksk.lctapp.core.ui.components.GameInk
+import ru.nksk.lctapp.core.ui.game.asGameUiText
+import ru.nksk.lctapp.domain.finance.FinancialQuestion
+import ru.nksk.lctapp.domain.finance.FinancialQuestionKind
+
+@Composable
+internal fun TrainingScreen(state: TrainingUiState, onAction: (TrainingAction) -> Unit, onBack: () -> Unit,
+    onOpenBudget: () -> Unit = {}) {
+    val question = state.question.takeIf { state.practiceOpen }
+    val closeQuestion = {
+        if (!state.busy) {
+            if (state.needsBudgetPlanning || state.practiceRetryRequired) onBack()
+            else onAction(TrainingAction.CloseQuestion)
+        }
+    }
+    BackHandler(enabled = question != null) { closeQuestion() }
+    if (question != null) {
+        key(question.id) { PracticeQuestionScreen(state, question, onAction, closeQuestion, onOpenBudget) }
+    } else LearningPage("Тренировка навыков", onBack) {
+        learningStatus(state.loading, state.busy, state.error, state.practiceRetryRequired) { onAction(TrainingAction.Retry) }
+        if (!state.loading && state.hasGame) {
+            item {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                    GameArtwork(R.drawable.menu_tasks, null, Modifier.size(76.dp))
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text("Разберёмся с монетами", color = GameInk, style = MaterialTheme.typography.titleMedium)
+                        AdventureBody("Выбери тему и разбирайся с монетами в своём темпе.")
+                    }
+                }
+            }
+            if (state.needsBudgetPlanning || state.needsBudgetRevision) item {
+                BudgetReminder(state.needsBudgetPlanning, !state.busy && !state.practiceRetryRequired, onOpenBudget)
+            }
+            val enabled = state.canReview && !state.busy && !state.practiceRetryRequired
+            if (!state.canReview && !state.needsBudgetPlanning) item {
+                AdventureBody("Сначала выберем, что собрать для большого приключения.")
+            }
+            FinancialQuestionKind.entries.forEach { kind -> item {
+                val current = state.question?.takeIf { it.kind == kind && it.series != null && !(it.correct && it.series?.isLast == true) }
+                TrainingTopic(kind, current?.series?.questionNumber, enabled) { onAction(kind.startAction()) }
+            } }
+        }
+    }
+}
+
+@Composable
+private fun TrainingTopic(kind: FinancialQuestionKind, resumeAt: Int?, enabled: Boolean, onClick: () -> Unit) {
+    val tint = when (kind) {
+        FinancialQuestionKind.PLAN_REVIEW -> Color(0xFFEAF4FC)
+        FinancialQuestionKind.CONSEQUENCE -> Color(0xFFFFF0DF)
+        FinancialQuestionKind.TRANSACTION_ACCOUNTING -> Color(0xFFF0ECFA)
+        FinancialQuestionKind.SAVING_PRACTICE -> Color(0xFFEEF5D9)
+    }
+    Surface(onClick = onClick, enabled = enabled, modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp), color = tint, contentColor = GameInk,
+        border = BorderStroke(1.dp, PracticeBorder)) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            GameArtwork(kind.trainingArtwork(), null, Modifier.size(58.dp))
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(kind.trainingTitle(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
+                Text(resumeAt?.let { "Продолжить тренировку" } ?: kind.trainingDescription(),
+                    style = MaterialTheme.typography.bodyMedium)
+            }
+            Text("›", fontSize = 30.sp)
+        }
+    }
+}
+
+@Composable
+private fun PracticeQuestionScreen(state: TrainingUiState, question: FinancialQuestion,
+    onAction: (TrainingAction) -> Unit, onBack: () -> Unit, onOpenBudget: () -> Unit) {
+    var retrying by rememberSaveable(question.id, question.attempts) { mutableStateOf(false) }
+    val series = question.series
+    val advancing = question.correct && series != null
+    var selectedAnswer by rememberSaveable(question.id, question.attempts) { mutableStateOf<String?>(null) }
+    val showExplanation = question.answeredOptionId != null && !retrying
+    val enabled = !state.busy && !state.needsBudgetPlanning && !state.practiceRetryRequired
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val lifecycleState by lifecycle.currentStateAsState()
+    val questionExposure = remember(question.id, question.prompt, question.options) {
+        QuestionExposure(question.options.map { it.id })
+    }
+    val questionCoordinates = remember(questionExposure) { mutableMapOf<String, LayoutCoordinates>() }
+    val showingQuestion = !advancing && !showExplanation
+    fun recordQuestionPart(part: String, coordinates: LayoutCoordinates) {
+        questionCoordinates[part] = coordinates
+        if (showingQuestion && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) &&
+            questionExposure.record(part, coordinates.fullyVisibleForPractice())) {
+            onAction(TrainingAction.QuestionPresented(question.id))
+        }
+    }
+    LaunchedEffect(showingQuestion, lifecycleState, questionExposure) {
+        if (showingQuestion && lifecycleState.isAtLeast(Lifecycle.State.RESUMED)) {
+            questionCoordinates.toList().forEach { (part, coordinates) -> recordQuestionPart(part, coordinates) }
+        }
+    }
+    val automaticAdvance = state.automaticAdvance(lifecycleState.isAtLeast(Lifecycle.State.RESUMED))
+    LaunchedEffect(automaticAdvance) { automaticAdvance?.let(onAction) }
+    LearningPage(question.kind.trainingTitle(), onBack, backEnabled = !state.busy) {
+        learningStatus(state.loading, state.busy, state.error, state.practiceRetryRequired) { onAction(TrainingAction.Retry) }
+        if (state.needsBudgetPlanning) item { BudgetReminder(true, !state.busy && !state.practiceRetryRequired, onOpenBudget) }
+        if (advancing) {
+            item { AdventureHeading("Верно!") }
+        } else {
+            item {
+                LearningCard {
+                    Text(question.prompt.asGameUiText(), color = GameInk, style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.onGloballyPositioned { recordQuestionPart(QuestionExposure.PROMPT, it) })
+                }
+            }
+            if (showExplanation) {
+                item { LearningCard(if (question.correct) "Верно!" else "Давай разберёмся") {
+                    AdventureBody(question.explanation.asGameUiText())
+                } }
+                item {
+                    if (!question.correct) PracticeButton("Попробовать ещё раз", enabled) { retrying = true }
+                    else PracticeButton("Выбрать тему", enabled, onClick = onBack)
+                }
+            } else {
+                item {
+                    Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        question.options.forEach { option ->
+                            Box(Modifier.fillMaxWidth().onGloballyPositioned {
+                                recordQuestionPart(QuestionExposure.optionPart(option.id), it)
+                            }) {
+                                GameQuizOption(option.text.asGameUiText(), selectedAnswer == option.id, enabled) {
+                                    selectedAnswer = option.id
+                                }
+                            }
+                        }
+                    }
+                }
+                item {
+                    PracticeButton("Ответить", enabled && selectedAnswer != null) {
+                        selectedAnswer?.let { onAction(TrainingAction.Answer(it)) }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun FinancialQuestionKind.trainingTitle(): String = when (this) {
+    FinancialQuestionKind.PLAN_REVIEW -> "План и траты"
+    FinancialQuestionKind.CONSEQUENCE -> "Последствия решений"
+    FinancialQuestionKind.TRANSACTION_ACCOUNTING -> "Доходы и расходы"
+    FinancialQuestionKind.SAVING_PRACTICE -> "Копим на цель"
+}
+
+private fun FinancialQuestionKind.trainingDescription(): String = when (this) {
+    FinancialQuestionKind.PLAN_REVIEW -> "Планируем и замечаем, что изменилось"
+    FinancialQuestionKind.CONSEQUENCE -> "Думаем на шаг вперёд"
+    FinancialQuestionKind.TRANSACTION_ACCOUNTING -> "Различаем доход, трату и перевод"
+    FinancialQuestionKind.SAVING_PRACTICE -> "Приближаемся к большой покупке"
+}
+
+private fun FinancialQuestionKind.trainingArtwork(): Int = when (this) {
+    FinancialQuestionKind.PLAN_REVIEW -> R.drawable.budget_needs
+    FinancialQuestionKind.CONSEQUENCE -> R.drawable.budget_reserve
+    FinancialQuestionKind.TRANSACTION_ACCOUNTING -> R.drawable.menu_coin
+    FinancialQuestionKind.SAVING_PRACTICE -> R.drawable.budget_savings
+}
+
+private fun FinancialQuestionKind.startAction(): TrainingAction = when (this) {
+    FinancialQuestionKind.PLAN_REVIEW -> TrainingAction.Review
+    FinancialQuestionKind.CONSEQUENCE -> TrainingAction.ReviewConsequences
+    FinancialQuestionKind.TRANSACTION_ACCOUNTING -> TrainingAction.ReviewTransactions
+    FinancialQuestionKind.SAVING_PRACTICE -> TrainingAction.PracticeSaving
+}
+
+private fun LayoutCoordinates.fullyVisibleForPractice(): Boolean {
+    if (!isAttached) return false
+    val visible = boundsInWindow()
+    return visible.width > 0 && visible.height > 0 && visible.width >= size.width - 1 && visible.height >= size.height - 1
+}

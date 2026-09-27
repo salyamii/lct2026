@@ -50,7 +50,12 @@ fun EntryProviderScope<NavKey>.tasksEntry(
         val state by viewModel.uiState.collectAsStateWithLifecycle()
         LaunchedEffect(viewModel, lifecycle) {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                viewModel.openEvent.collect { onGame(source, it) }
+                viewModel.onScreenResumed()
+                try {
+                    viewModel.openEvent.collect { onGame(source, it) }
+                } finally {
+                    viewModel.onScreenHidden()
+                }
             }
         }
         DeedsScreen(

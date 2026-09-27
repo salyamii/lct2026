@@ -8,6 +8,34 @@ class AppNavigatorTest {
     private data object Home : NavKey
     private data class Detail(val id: String) : NavKey
 
+    @Test fun goalAndSavingsCrossLinksReuseTheOriginalEntry() {
+        val goal = Detail("goal")
+        val savings = Detail("savings")
+        val stack = mutableListOf<NavKey>(Home, goal)
+        val navigator = AppNavigator(stack)
+        repeat(3) {
+            navigator.navigateToExisting(goal, savings)
+            navigator.navigateToExisting(savings, goal)
+            assertEquals(listOf(Home, goal), stack)
+        }
+        navigator.goBack(goal)
+        assertEquals(listOf(Home), stack)
+    }
+
+    @Test fun returningToExistingBudgetIgnoresStaleCrossLinkCallbacks() {
+        val budget = Detail("budget")
+        val savings = Detail("savings")
+        val goal = Detail("goal")
+        val stack = mutableListOf<NavKey>(Home, budget, savings, goal)
+        val navigator = AppNavigator(stack)
+        navigator.navigateToExisting(savings, budget)
+        assertEquals(listOf(Home, budget, savings, goal), stack)
+        navigator.navigateToExisting(goal, budget)
+        assertEquals(listOf(Home, budget), stack)
+        navigator.navigateToExisting(budget, budget)
+        assertEquals(listOf(Home, budget), stack)
+    }
+
     @Test fun startingAGameReplacesItsProposalAndIgnoresTheOldCallback() {
         val proposal = Detail("day")
         val game = Detail("game")

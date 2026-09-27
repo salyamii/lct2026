@@ -17,15 +17,21 @@ import ru.nksk.lctapp.feature.goal.ui.GoalAction
 @SerialName("goal")
 data object Goal : NavKey
 
-fun EntryProviderScope<NavKey>.goalEntry(onBack: (Goal) -> Unit) {
+fun EntryProviderScope<NavKey>.goalEntry(onBack: (Goal) -> Unit, onOpenSavings: (Goal) -> Unit = {},
+    onReturnHome: (Goal) -> Unit = onBack) {
     entry<Goal> { source ->
         val model = hiltViewModel<GoalViewModel>()
         val state by model.uiState.collectAsStateWithLifecycle()
-        BackHandler(enabled = !state.loading && !state.showList) { model.onAction(GoalAction.ShowList) }
+        BackHandler(enabled = !state.loading &&
+            (state.purchaseResult != null || (!state.showList && state.returnToList))) {
+            model.onAction(if (state.purchaseResult != null) GoalAction.DismissPurchaseResult else GoalAction.ShowList)
+        }
         GoalScreen(
             state = state,
             onAction = model::onAction,
             onBack = dropUnlessResumed { onBack(source) },
+            onOpenSavings = dropUnlessResumed { onOpenSavings(source) },
+            onReturnHome = dropUnlessResumed { onReturnHome(source) },
         )
     }
 }

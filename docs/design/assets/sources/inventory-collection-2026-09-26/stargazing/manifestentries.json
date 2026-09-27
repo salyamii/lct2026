@@ -1,0 +1,317 @@
+[
+  {
+    "resource": "collection_stars_map",
+    "category": "Inventory collection",
+    "path": "app/src/main/res/drawable-nodpi/collection_stars_map.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1520680,
+    "sha256": "fd71ffa0d5e009411737db2c88a18d5064aadbe6d092c119f22fa808b64eeb5d",
+    "rgba_sha256": "9c3cc83e3a72ba97800b6ff981e15c6d6f1cef144cd9077b8deb8e570b03aa49",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/stargazing/collection_stars_map.png",
+    "source_sha256": "e0bc67008d801a03bcfbc44e711c9f2fd546355301270cd3fecf1538ae30ffe1",
+    "source_bytes": 2142773,
+    "figma": {},
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in",
+      "prompt_file": "docs/design/assets/sources/inventory-collection-2026-09-26/stargazing/generation-specs.json",
+      "prompt_name": "collection_stars_map",
+      "details": "New generated artwork, not a Figma export. Full original canvas retained."
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "pillow_version": "12.3.0",
+      "resized": false,
+      "cropped": false,
+      "lossless_rgba_verified": true
+    }
+  },
+  {
+    "resource": "collection_stars_tripod",
+    "category": "Inventory collection",
+    "path": "app/src/main/res/drawable-nodpi/collection_stars_tripod.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1390948,
+    "sha256": "03e2eb0edefffdc040c69c9f39a78f213db2838762e3221e51784ce8adeec9be",
+    "rgba_sha256": "2cacfa540c6f2ac446c3c74ba8b92380ccc4ea4bbe670c7a20f1b05b07b13584",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/stargazing/collection_stars_tripod.png",
+    "source_sha256": "6db7041e1a4bb2ff3cab448ee3a0984f7e021b5e09c8896f1b4581735d1d5c0e",
+    "source_bytes": 1936011,
+    "figma": {},
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in",
+      "prompt_file": "docs/design/assets/sources/inventory-collection-2026-09-26/stargazing/generation-specs.json",
+      "prompt_name": "collection_stars_tripod",
+      "details": "New generated artwork, not a Figma export. Full original canvas retained."
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "pillow_version": "12.3.0",
+      "resized": false,
+      "cropped": false,
+      "lossless_rgba_verified": true
+    }
+  },
+  {
+    "resource": "collection_stars_telescope",
+    "category": "Inventory collection",
+    "path": "app/src/main/res/drawable-nodpi/collection_stars_telescope.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1314504,
+    "sha256": "c2cfb7d32cc3ba01f75aa55747a7e9c67afc93b78f6e99d209e3c5247ffe2d4c",
+    "rgba_sha256": "0769511640947c56bfc435286181e4c82a3e719bd21eddc1398b0021ea6c881e",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/stargazing/collection_stars_telescope.png",
+    "source_sha256": "0477fe57c077ccbffd64188f73e35ba8e2662ea5be14dc0952473634ba559810",
+    "source_bytes": 1846932,
+    "figma": {},
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in",
+      "prompt_file": "docs/design/assets/sources/inventory-collection-2026-09-26/stargazing/generation-specs.json",
+      "prompt_name": "collection_stars_telescope",
+      "details": "New generated artwork, not a Figma export. Full original canvas retained."
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "pillow_version": "12.3.0",
+      "resized": false,
+      "cropped": false,
+      "lossless_rgba_verified": true
+    }
+  },
+  {
+    "resource": "collection_stars_ticket",
+    "category": "Inventory collection",
+    "path": "app/src/main/res/drawable-nodpi/collection_stars_ticket.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1459440,
+    "sha256": "42618ca13a45282b6e6f481b1ca4aa5fd06349b5fe0335ac12ea0b8fb629d8a2",
+    "rgba_sha256": "a81612845270a24aa2fffe88979883588d79c85c65822507e6f87e038a240039",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/stargazing/collection_stars_ticket.png",
+    "source_sha256": "44ca3a52304e965f4db4b44caebe6d0b4f88138377f5b9fb310645f34539aad3",
+    "source_bytes": 2065743,
+    "figma": {},
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in",
+      "prompt_file": "docs/design/assets/sources/inventory-collection-2026-09-26/stargazing/generation-specs.json",
+      "prompt_name": "collection_stars_ticket",
+      "details": "New generated artwork, not a Figma export. Full original canvas retained."
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "pillow_version": "12.3.0",
+      "resized": false,
+      "cropped": false,
+      "lossless_rgba_verified": true
+    }
+  },
+  {
+    "resource": "collection_sky_orion",
+    "category": "Inventory collection",
+    "path": "app/src/main/res/drawable-nodpi/collection_sky_orion.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1632802,
+    "sha256": "72e3ad3026bea89b481c8a7511e2f9b8ca5e8b339463c60cbf7fdb016bc11741",
+    "rgba_sha256": "965de90e4169ea7d2455c5dc04da77d9ca4c3ef78f5e59c72a89780baf3e3d52",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/stargazing/collection_sky_orion.png",
+    "source_sha256": "a3dec988facc439c7307c4faa60dac4efa9ed71ffe7a249063f54ac6d5cb1239",
+    "source_bytes": 2290592,
+    "figma": {},
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in",
+      "prompt_file": "docs/design/assets/sources/inventory-collection-2026-09-26/stargazing/generation-specs.json",
+      "prompt_name": "collection_sky_orion",
+      "details": "New generated artwork, not a Figma export. Full original canvas retained."
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "pillow_version": "12.3.0",
+      "resized": false,
+      "cropped": false,
+      "lossless_rgba_verified": true
+    }
+  },
+  {
+    "resource": "collection_sky_ursa_major",
+    "category": "Inventory collection",
+    "path": "app/src/main/res/drawable-nodpi/collection_sky_ursa_major.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1428472,
+    "sha256": "c81ccc17b6dc56ad2714fb69d161749c6801af98b6da76e913ea09443f6cbeaf",
+    "rgba_sha256": "4123a210658c2e922350c9d21670c0b96877e05b07882620f6cce98a224b07c7",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/stargazing/collection_sky_ursa_major.png",
+    "source_sha256": "c12759e564074e03449a59e209a02695a8a81ae0c94afc894d1955bf2a164975",
+    "source_bytes": 1910611,
+    "figma": {},
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in",
+      "prompt_file": "docs/design/assets/sources/inventory-collection-2026-09-26/stargazing/generation-specs.json",
+      "prompt_name": "collection_sky_ursa_major",
+      "details": "New generated artwork, not a Figma export. Full original canvas retained."
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "pillow_version": "12.3.0",
+      "resized": false,
+      "cropped": false,
+      "lossless_rgba_verified": true
+    }
+  },
+  {
+    "resource": "collection_sky_milky_way",
+    "category": "Inventory collection",
+    "path": "app/src/main/res/drawable-nodpi/collection_sky_milky_way.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 2233760,
+    "sha256": "1ece62b46acde5c5aaeedd5f24ff930c2e179111c9f19015a4e2bc57fe40f31f",
+    "rgba_sha256": "97967eab74db9bc8aa44e79ae87a163beb6f18877c81afa83abce1db6f506b27",
+    "alpha_bounds": [
+      0,
+      0,
+      1254,
+      1254
+    ],
+    "design_canvas": [
+      1254,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/inventory-collection-2026-09-26/stargazing/collection_sky_milky_way.png",
+    "source_sha256": "78429a76d1e5eb8c04b81bd025eb2a2217cf0a2cf95bcd4ae83f53fb7c3519d0",
+    "source_bytes": 3195747,
+    "figma": {},
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-09-26",
+      "tool": "image_gen.imagegen",
+      "mode": "built-in",
+      "prompt_file": "docs/design/assets/sources/inventory-collection-2026-09-26/stargazing/generation-specs.json",
+      "prompt_name": "collection_sky_milky_way",
+      "details": "New generated artwork, not a Figma export. Full original canvas retained."
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "quality": 100,
+      "method": 6,
+      "pillow_version": "12.3.0",
+      "resized": false,
+      "cropped": false,
+      "lossless_rgba_verified": true
+    }
+  }
+]

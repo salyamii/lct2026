@@ -11,6 +11,7 @@ internal data class OnboardingDraftEntity(
     @ColumnInfo(defaultValue = "'PROFILE'") val step: String = "PROFILE",
     @ColumnInfo(name = "accessory_id", defaultValue = "'BACKPACK'") val accessoryId: String = "BACKPACK",
     @ColumnInfo(name = "goal_id") val goalId: String? = null,
+    @ColumnInfo(name = "saving_item_id") val savingItemId: String? = null,
 )
 
 @Dao

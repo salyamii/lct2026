@@ -9,11 +9,11 @@ data class OnboardingDraft(
     val profile: PetCustomization,
     val step: OnboardingStep = OnboardingStep.Profile,
     val accessoryId: String = "BACKPACK",
-    val goalId: String? = null,
+    val savingItemId: String? = null,
 ) {
     val hasValidChoices: Boolean get() = profile.name.isNotBlank() &&
         accessoryId in setOf("PLAIN", "BACKPACK", "BANDANA")
-    val canFinish: Boolean get() = step == OnboardingStep.Introduction && hasValidChoices && !goalId.isNullOrBlank()
+    val canFinish: Boolean get() = step == OnboardingStep.Introduction && hasValidChoices && !savingItemId.isNullOrBlank()
 }
 
 interface OnboardingDraftRepository {

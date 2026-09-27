@@ -1,0 +1,218 @@
+[
+  {
+    "resource": "npc_butcher_tray",
+    "category": "Butcher event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2289:23",
+      "node_name": "Медведь · Заказы на подносе",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2289-23"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "0f557a944fa80695e9813b3dbcf8961871def397",
+    "source_path": "docs/design/assets/sources/butcher-events-2026-09-26/npc_butcher_tray.png",
+    "source_sha256": "0c8aaf0ad3403a6025d8e401595555411ea1e252b2f009c11610904d5a69e7b1",
+    "source_bytes": 1703463,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1083,
+    "height": 1452,
+    "design_canvas": [
+      1083,
+      1452
+    ],
+    "bytes": 1148052,
+    "sha256": "d6cce0c473a70bb7a002405ba9839ab19a5698972a0c760453c98bdff71e7440",
+    "rgba_sha256": "cecce40e6addc9761c681c9571d0731c3dd46f48a6621cf3414c3f2ed2e80d0f",
+    "alpha_bounds": [
+      0,
+      0,
+      1083,
+      1436
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/npc_butcher_tray.webp"
+  },
+  {
+    "resource": "npc_butcher_tying",
+    "category": "Butcher event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2289:77",
+      "node_name": "Медведь · Крепкий узел",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2289-77"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "ad63defe5949ac4efbc78fe52d6340ba3140dc4a",
+    "source_path": "docs/design/assets/sources/butcher-events-2026-09-26/npc_butcher_tying.png",
+    "source_sha256": "0d3f2b799e0e6e9398cd16a34ab9821aec2fed9699e8c8f10df7cb92d45f2506",
+    "source_bytes": 1672923,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1086,
+    "height": 1448,
+    "design_canvas": [
+      1086,
+      1448
+    ],
+    "bytes": 1106962,
+    "sha256": "e8bdce57db53b57085ae707a2850d625bfdb5d814c56f680bde13e485f249e1e",
+    "rgba_sha256": "ee23d1f0daf30cccf0b9bbf7a11ca0177a743e389b75cd581ee0841b566c4c91",
+    "alpha_bounds": [
+      0,
+      25,
+      1074,
+      1433
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/npc_butcher_tying.webp"
+  },
+  {
+    "resource": "npc_butcher_pointing",
+    "category": "Butcher event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2289:131",
+      "node_name": "Медведь · Порядок на витрине",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2289-131"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "e5036132aea70de048070a5e7d808a52e9c98f72",
+    "source_path": "docs/design/assets/sources/butcher-events-2026-09-26/npc_butcher_pointing.png",
+    "source_sha256": "980048321179d4b22b09fc3fad3f210b43613037b09bdf2515d70f9bc3b42f94",
+    "source_bytes": 1698053,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1086,
+    "height": 1448,
+    "design_canvas": [
+      1086,
+      1448
+    ],
+    "bytes": 1140694,
+    "sha256": "01ee20d5caa300b95bc4d2c6ce8bbd7f942698666b722f147c327c6c66b2f16e",
+    "rgba_sha256": "9521cac6b17312424f01a72f1ec6498de3562f5c78b4b513b89a263b25b3b9e3",
+    "alpha_bounds": [
+      0,
+      17,
+      1086,
+      1424
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/npc_butcher_pointing.webp"
+  },
+  {
+    "resource": "npc_butcher_orders",
+    "category": "Butcher event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2289:185",
+      "node_name": "Медведь · Ни одного забытого заказа",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2289-185"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "b8a3861f9b570caed1b3083ec92e0e46a5a700db",
+    "source_path": "docs/design/assets/sources/butcher-events-2026-09-26/npc_butcher_orders.png",
+    "source_sha256": "829060eca2e7757eaa7fee98db0e1eb1e24f3f168421bb5514cb2d2285ccae07",
+    "source_bytes": 1690430,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1086,
+    "height": 1448,
+    "design_canvas": [
+      1086,
+      1448
+    ],
+    "bytes": 1111084,
+    "sha256": "fc3d0e93512e5c350ceabb0ad4df9cc45eb175432d890b20089948e109ae6dc3",
+    "rgba_sha256": "256a19138506288ef629be4576dcb52d2aeb14029f9bff2677e349cbfc5f12a0",
+    "alpha_bounds": [
+      0,
+      21,
+      1082,
+      1448
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/npc_butcher_orders.webp"
+  },
+  {
+    "resource": "npc_butcher_scales",
+    "category": "Butcher event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2289:239",
+      "node_name": "Медведь · Весы любят точность",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2289-239"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "9660ab7560d0a2287c410f44ec5339e00236518b",
+    "source_path": "docs/design/assets/sources/butcher-events-2026-09-26/npc_butcher_scales.png",
+    "source_sha256": "35ae650fd822ed8520067bb55e7b719a21d0d6088baf48bb466b038c402671e5",
+    "source_bytes": 1890600,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1086,
+    "height": 1448,
+    "design_canvas": [
+      1086,
+      1448
+    ],
+    "bytes": 1290624,
+    "sha256": "2bd48cf7dec4dffb6379c49fcc0e9ac86140a050f4712d4916c8155957b78adc",
+    "rgba_sha256": "9b559fc5b70f205783680041998cafe2d1eae5afb3eebc07a5e09d1c58c292a3",
+    "alpha_bounds": [
+      0,
+      14,
+      1080,
+      1448
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/npc_butcher_scales.webp"
+  },
+  {
+    "resource": "location_butcher_shop",
+    "category": "Butcher event originals — 2026-09-26",
+    "figma": {
+      "file_key": "bAod1cKtTX9Q8omQ067q3q",
+      "node_id": "2289:4",
+      "node_name": "BG · Мясная лавка",
+      "collection_id": null,
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2289-4"
+    },
+    "source_method": "figma_download_assets_original_image_bytes",
+    "source_notes": "Verified original active image fill. Full canvas, transparent margins and pixels retained; no trimming or resampling. Current pet is rendered separately from saved state.",
+    "figma_image_sha1": "6aa2192cc5a0c7feb98058cb456e5ee646390088",
+    "source_path": "docs/design/assets/sources/butcher-events-2026-09-26/location_butcher_shop.png",
+    "source_sha256": "032fdc5ce7f61b750eb59a8e5474d2f154b44dbe1f306f7e2f018b340484453a",
+    "source_bytes": 2271800,
+    "source_format": "png",
+    "format": "webp",
+    "width": 1086,
+    "height": 1448,
+    "design_canvas": [
+      1086,
+      1448
+    ],
+    "bytes": 1724510,
+    "sha256": "b8122d6e110878f550af12a8326361a505aba438f71ba2478b99ee5f6f96a4fb",
+    "rgba_sha256": "c3fa250225dafbc63ed6ddbd164fa7694d794d2e093bdb901010d47023f6a91c",
+    "alpha_bounds": [
+      0,
+      0,
+      1086,
+      1448
+    ],
+    "lossless_rgba_verified": true,
+    "path": "app/src/main/res/drawable-nodpi/location_butcher_shop.webp"
+  }
+]

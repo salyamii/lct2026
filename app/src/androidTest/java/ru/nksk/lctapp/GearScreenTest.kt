@@ -1,5 +1,9 @@
 package ru.nksk.lctapp
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -10,6 +14,8 @@ import org.junit.Rule
 import org.junit.Test
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
 import ru.nksk.lctapp.feature.gear.ui.GearItemUiState
+import ru.nksk.lctapp.feature.gear.ui.GearContentPage
+import ru.nksk.lctapp.feature.gear.ui.GearItemDetails
 import ru.nksk.lctapp.feature.gear.ui.GearLoadState
 import ru.nksk.lctapp.feature.gear.ui.GearScreen
 import ru.nksk.lctapp.feature.gear.ui.GearUiState
@@ -30,7 +36,7 @@ class GearScreenTest {
         assertEquals(1, backs)
     }
 
-    @Test fun ownedCardsShowPriceAndImageDescription() {
+    @Test fun ownedCardsShowTheirContentWithoutPrices() {
         compose.setContent {
             LCTAppTheme {
                 GearScreen(GearLoadState.Ready(GearUiState(
@@ -41,9 +47,9 @@ class GearScreenTest {
         }
         compose.onNodeWithText("Карта").assertIsDisplayed()
         compose.onNodeWithText("Старинный пергамент").assertIsDisplayed()
-        compose.onNodeWithText("50 монет").assertIsDisplayed()
+        compose.onNodeWithText("50 монет").assertDoesNotExist()
         compose.onNodeWithText("Шляпа").performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText("Цена не указана").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Цена не указана").assertDoesNotExist()
     }
 
     @Test fun errorOffersRetryWithoutClaimingInventoryIsEmpty() {
@@ -52,5 +58,26 @@ class GearScreenTest {
         compose.onNodeWithText("Пока нет аксессуаров").assertDoesNotExist()
         compose.onNodeWithText("Повторить").performClick()
         assertEquals(1, retries)
+    }
+
+    @Test fun equipmentFailureIsVisibleWithoutChangingTheOpenPage() {
+        var message by mutableStateOf<Int?>(null)
+        var errorText = ""
+        val item = GearItemUiState("owned-hat", "Кепка", "Кепка исследователя", null,
+            lookId = "HAT", pages = listOf(
+                GearContentPage("first", "Снаружи", null, "Вид снаружи"),
+                GearContentPage("second", "Детали", null, "Внутренняя отделка кепки"),
+            ))
+        compose.setContent {
+            errorText = stringResource(R.string.gear_equip_error)
+            LCTAppTheme {
+                GearItemDetails(item, "second", {}, {}, {}, busy = false, actionMessage = message)
+            }
+        }
+        compose.onNodeWithText("Внутренняя отделка кепки").performScrollTo().assertIsDisplayed()
+        compose.runOnIdle { message = R.string.gear_equip_error }
+        compose.onNodeWithText(errorText).assertIsDisplayed()
+        compose.onNodeWithText("Внутренняя отделка кепки").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Вид снаружи").assertDoesNotExist()
     }
 }

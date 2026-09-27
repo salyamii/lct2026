@@ -57,7 +57,8 @@ class EconomyMigrationTest {
             assertEquals(maxOf(oldBalance, 35), migrated.economy.balance)
             assertEquals(BudgetPlan(0, 0, 0, 0), migrated.economy.plan)
             assertEquals(BudgetPlanning("migration-16-current", BudgetPlanningReason.MIGRATION,
-                BudgetPlanningStage.ALLOCATION, 0, 0), migrated.economy.planning)
+                BudgetPlanningStage.ALLOCATION, 0, 0, draft = BudgetPlan(0, 0, 0, 0),
+                baseAmount = maxOf(oldBalance, 35)), migrated.economy.planning)
             assertEquals(73, migrated.satiety)
             assertEquals(29, migrated.fatigue)
             assertEquals(42L, migrated.engine!!.revision)

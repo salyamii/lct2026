@@ -92,7 +92,7 @@ class OnboardingAdaptiveTest(private val width: Int, private val height: Int, pr
             AdventureIntroductionScreen(art, art.copper, introductionIcons(), {}, { starts++ })
         }
         assertActionSafe("Начать приключение")
-        listOf("Нужно", "Хочу", "Коплю", "Запас").forEach {
+        listOf("Нужно", "Хочу", "В копилку", "Запас").forEach {
             compose.onNodeWithText(it).performScrollTo().assertIsDisplayed().assertHasNoClickAction()
         }
         compose.onNodeWithText("Поможет, если в дороге понадобится ремонт или лечение.")
@@ -110,15 +110,14 @@ class OnboardingAdaptiveTest(private val width: Int, private val height: Int, pr
                 onBack = {}, onContinue = { continues++ },
             )
         }
-        assertActionSafe("Дальше")
-        listOf("Нужно", "Хочу", "Коплю", "Запас").forEach {
+        assertActionSafe("Распределить монеты")
+        listOf("Нужно", "Хочу", "В копилку", "Запас").forEach {
             compose.onNodeWithText(it).performScrollTo().assertIsDisplayed().assertHasNoClickAction()
         }
-        compose.onNodeWithText("Распредели все монетки между четырьмя категориями. " +
-            "Если планы изменятся, распределение тоже можно изменить.")
+        compose.onNodeWithText("Когда решишь отложить монеты, переложи их в копилку.")
             .performScrollTo().assertIsDisplayed()
-        assertActionSafe("Дальше")
-        compose.onNodeWithText("Дальше").performClick()
+        assertActionSafe("Распределить монеты")
+        compose.onNodeWithText("Распределить монеты").performClick()
         compose.runOnIdle { assertEquals(1, continues) }
     }
 

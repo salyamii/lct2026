@@ -38,6 +38,8 @@ internal class MainMenuViewModel @Inject constructor(
     private var freeMealRequested = false
     private val dayNavigation = Channel<Unit>(Channel.BUFFERED)
     val openDay = dayNavigation.receiveAsFlow()
+    private val financeNavigation = Channel<Unit>(Channel.BUFFERED)
+    val openFinance = financeNavigation.receiveAsFlow()
 
     init { retry() }
 
@@ -52,8 +54,7 @@ internal class MainMenuViewModel @Inject constructor(
                     // A notice describes the previous attempted action, not the updated save.
                     if (this@MainMenuViewModel.saved != game) {
                         notice = null
-                        if (game.engine?.ateToday != false || game.engine?.phase == DayPhase.FINISHED ||
-                            game.economy.balance >= session.catalog.meals.first { it.price > 0 }.price) {
+                        if (!session.catalog.mealPolicy.canOfferFreeMeal(game)) {
                             freeMealRequested = false
                         }
                     }
@@ -85,7 +86,7 @@ internal class MainMenuViewModel @Inject constructor(
             viewModelScope.launch { dayNavigation.send(Unit) }
             return
         }
-        act(game, EngineCommand.Feed(session.catalog.meals.first { it.price > 0 }.id), open = false)
+        act(game, EngineCommand.Feed(session.catalog.mealPolicy.basicMeal.id), open = false)
     }
 
     fun feedFree() {
@@ -95,7 +96,7 @@ internal class MainMenuViewModel @Inject constructor(
             viewModelScope.launch { dayNavigation.send(Unit) }
             return
         }
-        act(game, EngineCommand.Feed(session.catalog.meals.first { it.price == 0L }.id), open = false)
+        act(game, EngineCommand.Feed(checkNotNull(session.catalog.mealPolicy.freeMeal).id), open = false)
     }
 
     fun dismissFreeMeal() {
@@ -105,9 +106,7 @@ internal class MainMenuViewModel @Inject constructor(
         render()
     }
 
-    private fun offersFreeMeal(game: GameState): Boolean = freeMealRequested &&
-        game.engine?.let { !it.ateToday && it.phase != DayPhase.FINISHED } == true &&
-        game.economy.balance < session.catalog.meals.first { it.price > 0 }.price
+    private fun offersFreeMeal(game: GameState): Boolean = freeMealRequested && session.catalog.mealPolicy.canOfferFreeMeal(game)
 
     private fun act(game: GameState, command: EngineCommand?, open: Boolean) {
         if (busy) return
@@ -128,7 +127,9 @@ internal class MainMenuViewModel @Inject constructor(
                     }
                     null -> Unit
                 }
-                if (open) dayNavigation.send(Unit)
+                if (result is EngineResult.Blocked && result.reason is BlockReason.FinancialPracticeRequired)
+                    financeNavigation.send(Unit)
+                else if (open) dayNavigation.send(Unit)
             } catch (cancelled: CancellationException) { throw cancelled
             } catch (_: Exception) {
                 notice = "Не удалось сохранить действие. Попробуй ещё раз."
@@ -143,7 +144,7 @@ internal class MainMenuViewModel @Inject constructor(
             mutableState.value = MainMenuLoadState.Ready(menu.copy(
                 busy = busy, notice = notice, spendingPreview = session.previewAdvanceSpending(it)?.let { preview ->
                     preview.quote.playerDescription(preview.kind)
-                }, mealPrice = session.catalog.meals.first { meal -> meal.price > 0 }.price,
+                }, mealPrice = session.catalog.mealPolicy.basicMeal.price,
                 showFreeMeal = offersFreeMeal(it),
                 continueLabel = if (it.engine?.phase == DayPhase.FINISHED) menu.continueLabel else when (session.advanceCommand(it)) {
                     EngineCommand.FinishDay -> "Закончить день"

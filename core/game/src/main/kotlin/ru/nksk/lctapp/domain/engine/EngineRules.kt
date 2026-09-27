@@ -34,6 +34,15 @@ data class EventPolicy(
     val factsByChoiceId: Map<String, Set<String>> = emptyMap(),
     val storyActId: String? = null,
     val finishesStoryAct: Boolean = false,
+    val scheduling: EventSchedulingPolicy = EventSchedulingPolicy(),
+    /** Authored food purchases satisfy the daily meal, without restoring energy. */
+    val feedsPetChoiceIds: Set<String> = emptySet(),
+    /** Practical STORY/RANDOM actions complete only after this choice's mini-game. */
+    val choiceGameKinds: Map<String, DeedGameKind> = emptyMap(),
+    /** Retired actions remain in immutable content for saved decisions, but cannot be chosen again. */
+    val disabledChoiceIds: Set<String> = emptySet(),
+    /** This opened event needs care until its choice resolves it; it adds no financial or energy effect. */
+    val requiresPetHelp: Boolean = false,
 ) {
     init {
         require(energyCost in 0..3)
