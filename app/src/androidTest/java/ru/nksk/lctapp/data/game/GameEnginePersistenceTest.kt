@@ -19,6 +19,9 @@ import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.game.OwnedItem
 import ru.nksk.lctapp.data.game.content.bundledGameCatalog
+import ru.nksk.lctapp.domain.location.GameLocation
+import ru.nksk.lctapp.domain.location.LocationLighting
+import ru.nksk.lctapp.domain.location.LocationScene
 
 @RunWith(AndroidJUnit4::class)
 class GameEnginePersistenceTest {
@@ -40,6 +43,7 @@ class GameEnginePersistenceTest {
     @After fun close() { db.close(); context.deleteDatabase(name) }
 
     @Test fun bundledSessionInstallsIdempotentlyAndResumesTheRealIntroduction() = runBlocking {
+        games.update { it.copy(locationScene = LocationScene(GameLocation.CITY, LocationLighting.EVENING)) }
         val catalog = bundledGameCatalog()
         val session = GameSession(games, RoomStoryContentRepository(db), catalog, createInitialGameState())
         session.prepare()
@@ -51,8 +55,11 @@ class GameEnginePersistenceTest {
         val intro = result.state.engine!!.currentEvent!!
         assertEquals(catalog.introductionId, intro.eventId)
         assertEquals(100L, result.state.economy.balance)
+        assertEquals(LocationScene(GameLocation.CITY, LocationLighting.EVENING), result.state.locationScene)
         val choiceId = catalog.content.choices.single { it.eventId == intro.eventId }.id
-        val chosen = session.dispatch(request(EngineCommand.Choose(intro.id, choiceId))) as EngineResult.Applied
+        val travelRequest = request(EngineCommand.Choose(intro.id, choiceId))
+        val chosen = session.dispatch(travelRequest) as EngineResult.Applied
+        assertEquals(LocationScene(GameLocation.OBSERVATORY, LocationLighting.EVENING), chosen.state.locationScene)
         reopen()
         val restored = GameSession(games, RoomStoryContentRepository(db), catalog, createInitialGameState())
         restored.prepare()
@@ -61,6 +68,9 @@ class GameEnginePersistenceTest {
             .filter { stored -> catalog.content.events.any { it.id == stored.id } }.toSet())
         assertTrue(restored.dispatch(request(EngineCommand.AcknowledgeResult(intro.id))) is EngineResult.Applied)
         assertEquals(100L, games.read()!!.economy.balance)
+        val movedLater = games.update { it.copy(locationScene = it.locationScene.copy(location = GameLocation.PIER)) }
+        assertTrue(restored.dispatch(travelRequest) is EngineResult.Applied)
+        assertEquals(movedLater, games.read())
     }
 
     @Test fun pausedAndCarriedActiveEventsRoundTripWithoutLosingTheirIdentity() = runBlocking {

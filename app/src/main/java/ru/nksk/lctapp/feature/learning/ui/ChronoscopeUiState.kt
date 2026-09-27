@@ -1,10 +1,19 @@
 package ru.nksk.lctapp.feature.learning.ui
 
 import ru.nksk.lctapp.core.ui.game.asGameUiText
+import ru.nksk.lctapp.core.ui.game.asGameActionLabel
+import ru.nksk.lctapp.core.ui.game.AdventurePetPresentation
+import ru.nksk.lctapp.core.ui.game.toAdventurePetPresentation
+import ru.nksk.lctapp.domain.content.ItemOperation
+import ru.nksk.lctapp.domain.engine.DayPhase
+import ru.nksk.lctapp.domain.engine.EngineCommand
 import ru.nksk.lctapp.domain.engine.GameCatalog
+import ru.nksk.lctapp.domain.engine.displayAction
+import ru.nksk.lctapp.domain.engine.displayOutcome
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.history.AuditEntry
 import ru.nksk.lctapp.domain.pet.renderPetText
+import ru.nksk.lctapp.domain.pet.PetCosmetics
 import ru.nksk.lctapp.domain.timemachine.TimeMachineBranch
 import ru.nksk.lctapp.domain.timemachine.TimeMachineDecision
 import ru.nksk.lctapp.domain.timemachine.TimeMachineResult
@@ -22,10 +31,12 @@ internal data class ChronoscopeMemory(
     val originalAction: String,
     val knownNeeds: Long?,
     val sceneKey: String?,
+    val originalChoice: String,
 )
 
 internal data class ChronoscopePath(
     val state: GameState,
+    val petPresentation: AdventurePetPresentation,
     val money: List<Pair<String, Long>>,
     val gainedItems: List<ChronoscopeItemOutcome>,
     val usedItems: List<ChronoscopeItemOutcome>,
@@ -42,29 +53,54 @@ internal data class ChronoscopeDifferences(
 internal fun chronoscopeMemory(decision: TimeMachineDecision, entry: AuditEntry, catalog: GameCatalog): ChronoscopeMemory? {
     val before = entry.before ?: return null
     val eventId = before.engine?.currentEvent?.eventId
+    val selectedId = when (val command = entry.request?.command) {
+        is EngineCommand.Choose -> command.choiceId
+        is EngineCommand.CompleteEvent -> command.choiceId
+        is EngineCommand.CompleteStoryGame -> command.choiceId
+        else -> null
+    }
+    val choice = catalog.content.choices.find { it.id == selectedId && it.eventId == eventId }
+    fun text(value: String) = renderPetText(value, before.pet.name).asGameUiText()
+    val choiceLabel = choice?.let { renderPetText(catalog.displayAction(it), before.pet.name).asGameActionLabel() }
     return ChronoscopeMemory(
         decision = decision,
         runId = entry.runId,
         before = before,
-        originalAction = learningHistoryRows(listOf(entry), catalog, before.pet.name, includeDay = false)
-            .joinToString("\n").ifBlank { "Выбрали этот поступок." },
+        originalAction = choice?.let(catalog::displayOutcome)?.let(::text)
+            ?: choiceLabel?.let { "Выбрали «$it»." }
+            ?: learningHistoryRows(listOf(entry), catalog, before.pet.name, includeDay = false)
+                .firstOrNull() ?: "Выбрали этот поступок.",
         knownNeeds = (entry.context ?: entry.request?.context)?.before?.knownNeeds,
         sceneKey = eventId?.let { catalog.cards[it]?.scene },
+        originalChoice = choiceLabel ?: "Прежний поступок",
     )
 }
 
 internal fun chronoscopePath(branch: TimeMachineBranch, initial: GameState, catalog: GameCatalog): ChronoscopePath {
     val oldIds = initial.ownedItems.map { it.id }.toSet()
     val newIds = branch.state.ownedItems.map { it.id }.toSet()
+    val gained = branch.state.ownedItems.filter { it.id !in oldIds }
+    // Preview the accessory from this decision, not unrelated purchases later in the day.
+    val eventId = initial.engine?.currentEvent?.eventId
+    val choiceIds = catalog.content.choices.filter { it.eventId == eventId }.map { it.id }.toSet()
+    val accessories = catalog.content.choiceItemEffects
+        .filter { it.choiceId in choiceIds && it.operation == ItemOperation.ADD }
+        .mapNotNull { effect -> PetCosmetics.forItem(effect.itemId)?.let { effect.itemId to it.lookId } }
+        .toMap()
+    val acquiredLook = gained.firstNotNullOfOrNull { accessories[it.itemId] }
+    val petPresentation = if (accessories.isEmpty()) branch.state.pet.toAdventurePetPresentation()
+        else branch.state.pet.copy(selectedLookId = acquiredLook ?: branch.state.pet.selectedLookId)
+            .toAdventurePetPresentation(showReaction = false)
     fun items(values: List<ru.nksk.lctapp.domain.game.OwnedItem>): List<ChronoscopeItemOutcome> =
         values.groupingBy { it.itemId }.eachCount().map { (itemId, count) ->
             ChronoscopeItemOutcome(itemId,
                 renderPetText(catalog.content.items.find { it.id == itemId }?.name ?: "Предмет", initial.pet.name).asGameUiText(), count)
         }
     return ChronoscopePath(branch.state,
+        petPresentation = petPresentation,
         money = listOf("Получено" to branch.income, "Потрачено" to branch.spent,
             "Отложено" to branch.deposited, "Взято из копилки" to branch.withdrawn),
-        gainedItems = items(branch.state.ownedItems.filter { it.id !in oldIds }),
+        gainedItems = items(gained),
         usedItems = items(initial.ownedItems.filter { it.id !in newIds }),
     )
 }
@@ -104,8 +140,8 @@ internal fun chronoscopeDifferences(original: ChronoscopePath, alternative: Chro
             fun effort(own: Int, other: Int) = when {
                 own == 0 -> "Силы закончились — нужен отдых"
                 other == 0 -> "Силы ещё остались"
-                own > other -> "Сохранили больше сил"
-                else -> "Потратили больше сил"
+                own > other -> "Устал меньше"
+                else -> "Устал больше"
             }
             originalLines += effort(before.energy, after.energy)
             alternativeLines += effort(after.energy, before.energy)
@@ -136,9 +172,14 @@ internal fun TimeMachineResult.hasComparablePaths(targetSequence: Long): Boolean
         simulationId != null && reached in targetSequence..requested
 }
 
-internal fun chronoscopeHorizon(result: TimeMachineResult, day: Int?): String =
-    if (result.status == TimeMachineStatus.DIVERGED) "День ${day ?: result.baseline?.state?.engine?.day ?: 1}: до момента, когда пути разошлись"
-    else "Сравниваем сыгранную часть дня ${day ?: result.baseline?.state?.engine?.day ?: 1}"
+internal fun chronoscopeHorizon(result: TimeMachineResult, day: Int?): String {
+    val shownDay = day ?: result.baseline?.state?.engine?.day ?: 1
+    return when {
+        result.status == TimeMachineStatus.DIVERGED -> "День $shownDay. Посмотрим, что успело бы произойти."
+        result.baseline?.state?.engine?.phase == DayPhase.FINISHED -> "Что изменилось бы к концу дня $shownDay"
+        else -> "Что изменилось бы в день $shownDay к этому моменту"
+    }
+}
 
 /** A partial result names the reached moment without presenting a later blocked action as completed. */
 internal fun chronoscopeBoundary(result: TimeMachineResult, history: List<AuditEntry>, catalog: GameCatalog): String? {
@@ -147,8 +188,22 @@ internal fun chronoscopeBoundary(result: TimeMachineResult, history: List<AuditE
     if (reached < target.sequence) return null
     val afterTarget = history.filter { it.runId == target.runId && it.sequence > target.sequence && it.sequence <= reached }
     val action = learningHistoryRows(afterTarget, catalog, target.before?.pet?.name.orEmpty(), includeDay = false).firstOrNull()
-    return action?.let { "Последний общий момент: $it" }
+    return action?.let { "Здесь останавливаемся: $it" }
 }
+
+/** Each amount stays next to the choice it belongs to; no separate table to mentally match. */
+internal fun chronoscopeMoneyLines(differences: ChronoscopeDifferences, alternative: Boolean): List<String> =
+    differences.money.map { row ->
+        val amount = if (alternative) row.alternative else row.original
+        val label = when (row.label) {
+            "Осталось монет" -> "Монеты с собой"
+            "Потрачено" -> "Потратили за это время"
+            "Получено" -> "Получили за это время"
+            "Отложено" -> "Положили в копилку"
+            else -> row.label
+        }
+        "$label: $amount"
+    }
 
 internal fun chronoscopeBack(step: ChronoscopeStep): ChronoscopeStep? = when (step) {
     ChronoscopeStep.INTRO, ChronoscopeStep.MOMENTS, ChronoscopeStep.PRESENT -> null

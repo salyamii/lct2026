@@ -5,12 +5,17 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import ru.nksk.lctapp.domain.parentlink.*
+import ru.nksk.lctapp.domain.media.MediaPreferences
+import ru.nksk.lctapp.domain.media.MediaPreferencesRepository
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModelTest {
@@ -122,8 +127,102 @@ class SettingsViewModelTest {
         assertEquals(1, repository.registrationCalls)
     }
 
-    private fun model(repository: ParentLinkRepository) = SettingsViewModel(repository)
+    @Test fun soundReadFailureDoesNotInventAValueAndDoesNotBlockParentCode() = runTest(dispatcher) {
+        val sound = FakeMediaRepository().apply { readFailure = true }
+        val model = model(FakeRepository(configured = false), sound)
+        runCurrent()
+        assertNull(model.uiState.value.sound.enabled)
+        assertFalse(model.uiState.value.sound.canChange)
+        assertEquals(SoundSettingsError.READ, model.uiState.value.sound.error)
+        model.onAction(SettingsAction.SetSoundEnabled(false))
+        model.onAction(SettingsAction.CreateParentCode)
+        runCurrent()
+        assertEquals(0, sound.writeCalls)
+        assertEquals(ParentCodeStatus.READY, model.uiState.value.codeStatus)
+        sound.readFailure = false
+        sound.saved.value = MediaPreferences(soundEnabled = false)
+        model.onAction(SettingsAction.RetrySound)
+        runCurrent()
+        assertEquals(false, model.uiState.value.sound.enabled)
+        assertTrue(model.uiState.value.sound.canChange)
+        assertNull(model.uiState.value.sound.error)
+    }
+
+    @Test fun failedSoundWriteKeepsConfirmedValueAndRetrySavesTheSameChoice() = runTest(dispatcher) {
+        val sound = FakeMediaRepository().apply { writeFailure = true }
+        val model = model(FakeRepository(), sound)
+        runCurrent()
+        model.onAction(SettingsAction.SetSoundEnabled(false))
+        runCurrent()
+        assertEquals(true, model.uiState.value.sound.enabled)
+        assertEquals(SoundSettingsError.WRITE, model.uiState.value.sound.error)
+        assertFalse(model.uiState.value.sound.saving)
+        sound.writeFailure = false
+        model.onAction(SettingsAction.RetrySound)
+        runCurrent()
+        assertEquals(false, model.uiState.value.sound.enabled)
+        assertEquals(listOf(false, false), sound.writes)
+        assertNull(model.uiState.value.sound.error)
+    }
+
+    @Test fun soundWriteBlocksDuplicateTapsAndScreenRecreationReadsSavedValue() = runTest(dispatcher) {
+        val sound = FakeMediaRepository().apply { pendingWrite = CompletableDeferred() }
+        val model = model(FakeRepository(), sound)
+        runCurrent()
+        model.onAction(SettingsAction.SetSoundEnabled(false))
+        model.onAction(SettingsAction.SetSoundEnabled(true))
+        model.onAction(SettingsAction.RetrySound)
+        runCurrent()
+        assertTrue(model.uiState.value.sound.saving)
+        assertEquals(true, model.uiState.value.sound.enabled)
+        assertEquals(1, sound.writeCalls)
+        sound.pendingWrite!!.complete(Unit)
+        runCurrent()
+        assertFalse(model.uiState.value.sound.saving)
+        val reopened = this@SettingsViewModelTest.model(FakeRepository(), sound)
+        runCurrent()
+        assertEquals(false, reopened.uiState.value.sound.enabled)
+        assertEquals(1, sound.writeCalls)
+    }
+
+    @Test fun successfulExternalSoundChangeConfirmsAnEarlierFailedToggle() = runTest(dispatcher) {
+        val sound = FakeMediaRepository().apply { writeFailure = true }
+        val model = model(FakeRepository(), sound)
+        runCurrent()
+        model.onAction(SettingsAction.SetSoundEnabled(false))
+        runCurrent()
+        assertEquals(SoundSettingsError.WRITE, model.uiState.value.sound.error)
+        sound.saved.value = MediaPreferences(false)
+        runCurrent()
+        assertFalse(checkNotNull(model.uiState.value.sound.enabled))
+        assertNull(model.uiState.value.sound.error)
+        model.onAction(SettingsAction.RetrySound)
+        runCurrent()
+        assertEquals(1, sound.writeCalls)
+    }
+
+    private fun model(repository: ParentLinkRepository, sound: MediaPreferencesRepository = FakeMediaRepository()) = SettingsViewModel(repository, sound)
         .also { store.put("settings", it) }
+
+    private class FakeMediaRepository : MediaPreferencesRepository {
+        val saved = MutableStateFlow(MediaPreferences())
+        var readFailure = false
+        var writeFailure = false
+        var pendingWrite: CompletableDeferred<Unit>? = null
+        val writes = mutableListOf<Boolean>()
+        val writeCalls get() = writes.size
+        override fun observe() = flow {
+            if (readFailure) error("Preference read failed")
+            emitAll(saved)
+        }
+        override suspend fun read() = observe().first()
+        override suspend fun setSoundEnabled(enabled: Boolean) {
+            writes += enabled
+            pendingWrite?.await()
+            if (writeFailure) error("Preference write failed")
+            saved.value = MediaPreferences(enabled)
+        }
+    }
 
     private class FakeRepository(private val configured: Boolean = true) : ParentLinkRepository {
         var profileFailure = false

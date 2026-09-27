@@ -28,6 +28,7 @@ data class EventMedia(
     val narrationCueKey: String? = null,
     val actionAudio: Map<String, EventActionAudio> = emptyMap(),
     val game: EventGameMedia? = null,
+    val appearanceCueKey: String? = null,
 )
 
 data class EventActionAudio(val soundCueKey: String? = null, val voiceCueKey: String? = null)

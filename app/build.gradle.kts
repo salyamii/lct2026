@@ -48,6 +48,9 @@ android {
         compose = true
         buildConfig = true
     }
+    androidResources {
+        noCompress += listOf("mp3", "mp4")
+    }
 }
 
 room3 {
@@ -105,6 +108,9 @@ tasks.withType<Test>().configureEach {
     val mainSources = layout.projectDirectory.dir("src/main/java")
     inputs.dir(mainSources).withPathSensitivity(PathSensitivity.RELATIVE)
     systemProperty("lctapp.mainSourceDir", mainSources.asFile.absolutePath)
+    inputs.dir(layout.projectDirectory.dir("src/main/assets/media")).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/design/assets/media-manifest.json"))
+        .withPathSensitivity(PathSensitivity.RELATIVE)
     val domainSources = rootProject.layout.projectDirectory.dir("core/game/src/main/kotlin")
     inputs.dir(domainSources).withPathSensitivity(PathSensitivity.RELATIVE)
     systemProperty("lctapp.domainSourceDir", domainSources.asFile.absolutePath)

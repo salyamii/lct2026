@@ -15,6 +15,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import ru.nksk.lctapp.feature.day.ui.DayScreen
 import ru.nksk.lctapp.feature.day.ui.DayViewModel
 import ru.nksk.lctapp.feature.day.ui.DayAction
+import ru.nksk.lctapp.core.ui.game.EventAudioEffect
 
 @Serializable
 @SerialName("day")
@@ -23,11 +24,12 @@ data object Day : NavKey
 fun EntryProviderScope<NavKey>.dayEntry(onBack: (Day) -> Unit, onFinished: (Day, String?) -> Unit,
     onGame: (Day, String) -> Unit, onLearning: (Day) -> Unit = {},
     onStoryGame: (Day, String, String) -> Unit = { _, _, _ -> },
-    onReflection: (Day, Int) -> Unit = { _, _ -> }) {
+    onReflection: (Day, Int) -> Unit = { _, _ -> }, isCurrentEntry: (Day) -> Boolean = { true }) {
     entry<Day> { source ->
         val viewModel = hiltViewModel<DayViewModel>()
         val state by viewModel.uiState.collectAsStateWithLifecycle()
         val lifecycle = LocalLifecycleOwner.current.lifecycle
+        EventAudioEffect(state.audioOccurrenceId, state.eventMedia, isCurrentEntry(source))
         LaunchedEffect(viewModel, lifecycle) {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.exit.collect { onFinished(source, it) }

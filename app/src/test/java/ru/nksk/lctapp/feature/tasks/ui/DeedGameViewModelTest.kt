@@ -43,6 +43,16 @@ class DeedGameViewModelTest {
     @Before fun setup() { Dispatchers.setMain(dispatcher) }
     @After fun cleanup() { store.clear(); Dispatchers.resetMain() }
 
+    @Test fun activeDeedKeepsItsOwnLocationAudioAndOccurrenceIdentity() = runTest(dispatcher) {
+        val f = fixture()
+        runCurrent()
+        val occurrence = f.repo.read().engine!!.events.single { it.id == f.id }
+        assertEquals(f.id, f.model.uiState.value.audioOccurrenceId)
+        assertEquals("ambient.port", f.model.uiState.value.eventMedia.ambientCueKey)
+        assertEquals(f.session.catalog.cards.getValue(occurrence.eventId).presentation.media,
+            f.model.uiState.value.eventMedia)
+    }
+
     @Test fun completedGameWaitsForSavingAndCannotPayTwiceOrShowAnotherBoard() = runTest(dispatcher) {
         val f = fixture()
         runCurrent()

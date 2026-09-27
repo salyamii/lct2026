@@ -13,6 +13,17 @@ import ru.nksk.lctapp.domain.economy.SpendingKind
 import ru.nksk.lctapp.domain.game.OwnedItem
 import ru.nksk.lctapp.domain.engine.DayPhase
 import ru.nksk.lctapp.domain.engine.EngineState
+import ru.nksk.lctapp.domain.engine.EngineCommand
+import ru.nksk.lctapp.domain.engine.EngineRequest
+import ru.nksk.lctapp.domain.engine.EventOccurrence
+import ru.nksk.lctapp.domain.engine.EventOrigin
+import ru.nksk.lctapp.domain.engine.EventStatus
+import ru.nksk.lctapp.domain.content.EventType
+import ru.nksk.lctapp.core.ui.game.petArtwork
+import ru.nksk.lctapp.core.ui.game.toAdventurePetPresentation
+import ru.nksk.lctapp.domain.pet.PetAge
+import ru.nksk.lctapp.domain.pet.PetColor
+import ru.nksk.lctapp.domain.pet.PetVisualState
 import ru.nksk.lctapp.domain.history.AuditEntry
 import ru.nksk.lctapp.domain.history.AuditType
 import ru.nksk.lctapp.domain.timemachine.*
@@ -33,8 +44,37 @@ class ChronoscopeUiStateTest {
 
     @Test fun horizonDoesNotCallASavedFragmentTheEndOfTheDay() {
         val result = TimeMachineResult(TimeMachineStatus.COMPLETE, request)
-        assertEquals("Сравниваем сыгранную часть дня 9", chronoscopeHorizon(result, 9))
-        assertEquals("День 9: до момента, когда пути разошлись", chronoscopeHorizon(result.copy(status = TimeMachineStatus.DIVERGED), 9))
+        assertEquals("Что изменилось бы в день 9 к этому моменту", chronoscopeHorizon(result, 9))
+        assertEquals("День 9. Посмотрим, что успело бы произойти.", chronoscopeHorizon(result.copy(status = TimeMachineStatus.DIVERGED), 9))
+    }
+
+    @Test fun finishedDayIsNamedAsTheComparisonEndpoint() {
+        val finished = initial.copy(engine = EngineState(bundledGameCatalog().rules.id, 1, 9,
+            DayPhase.FINISHED, 4, 0, true, null, 100, emptyList(), emptyList()))
+        val result = TimeMachineResult(TimeMachineStatus.COMPLETE, request,
+            baseline = TimeMachineBranch(finished, emptyList()))
+        assertEquals("Что изменилось бы к концу дня 9", chronoscopeHorizon(result, null))
+        assertFalse(chronoscopeHorizon(result.copy(status = TimeMachineStatus.DIVERGED), 9).contains("к концу дня"))
+    }
+
+    @Test fun memoryNamesTheChosenActionRatherThanMoneyReceiptsOrALaterEvent() {
+        val catalog = bundledGameCatalog()
+        val event = catalog.content.events.first { it.type == EventType.WANT }
+        val paidChoice = catalog.content.choices.first { it.eventId == event.id && it.moneyDelta < 0 }
+        val before = initial.copy(engine = EngineState(catalog.rules.id, 1, 1, DayPhase.RUNNING,
+            0, 4, true, null, 100, listOf(EventOccurrence("offer", event.id, EventOrigin.SCHEDULE,
+                EventStatus.ACTIVE)), emptyList()))
+        val later = before.copy(engine = before.engine!!.copy(events = emptyList()))
+        val entry = AuditEntry("choice", 1, "run", AuditType.COMMAND,
+            request = EngineRequest("request", 1, EngineCommand.CompleteEvent("offer", paidChoice.id)),
+            before = before, after = later,
+            operations = listOf(LedgerEntry("price", LedgerKind.AVAILABLE_EXPENSE, -paidChoice.moneyDelta)))
+        val memory = checkNotNull(chronoscopeMemory(TimeMachineDecision("choice", 1, 1, event.title, emptyList()), entry, catalog))
+        assertTrue(memory.originalChoice.isNotBlank())
+        assertNotEquals("Прежний поступок", memory.originalChoice)
+        assertFalse(memory.originalChoice.contains(" · "))
+        assertFalse(memory.originalChoice.contains("price"))
+        assertFalse(memory.originalAction.contains("\n"))
     }
 
     @Test fun partialBoundaryNamesOnlyAnActionThatWasActuallyReached() {
@@ -46,7 +86,7 @@ class ChronoscopeUiStateTest {
         val result = TimeMachineResult(TimeMachineStatus.DIVERGED, request, reachedSequence = 1, requestedSequence = 2)
         assertNull(chronoscopeBoundary(result, listOf(target, meal), catalogue))
         val reachedBoundary = chronoscopeBoundary(result.copy(reachedSequence = 2), listOf(target, meal), catalogue)!!
-        assertTrue(reachedBoundary.startsWith("Последний общий момент:"))
+        assertTrue(reachedBoundary.startsWith("Здесь останавливаемся:"))
         assertTrue(reachedBoundary.contains("5 монет"))
         assertNull(chronoscopeBoundary(result.copy(reachedSequence = 0), listOf(target, meal), catalogue))
     }
@@ -115,8 +155,8 @@ class ChronoscopeUiStateTest {
         val second = chronoscopePath(TimeMachineBranch(tired, emptyList()), initial, catalog)
         val compared = chronoscopeDifferences(first, second)
 
-        assertEquals(listOf("Сохранили больше сил"), compared.original)
-        assertEquals(listOf("Потратили больше сил"), compared.alternative)
+        assertEquals(listOf("Устал меньше"), compared.original)
+        assertEquals(listOf("Устал больше"), compared.alternative)
         assertEquals(3L, compared.money.single { it.label == "Осталось монет" }.alternative -
             compared.money.single { it.label == "Осталось монет" }.original)
         assertEquals(ChronoscopeAmountDifference("Потрачено", 3, 0), compared.money.single { it.label == "Потрачено" })
@@ -140,6 +180,59 @@ class ChronoscopeUiStateTest {
         assertEquals(ChronoscopeStep.ALTERNATIVES, chronoscopeBack(ChronoscopeStep.CONSEQUENCES))
         assertNull(chronoscopeBack(ChronoscopeStep.PRESENT))
     }
+
+    @Test fun accessoryPurchaseShowsTheBoughtLookAndSkipKeepsTheEquippedLookWithoutChangingEitherWorld() {
+        val catalog = bundledGameCatalog()
+        val itemId = "cosmetic-compass-v1"
+        val choiceId = catalog.content.choiceItemEffects.first { it.itemId == itemId }.choiceId
+        val eventId = catalog.content.choices.first { it.id == choiceId }.eventId
+        for (age in PetAge.entries) for (color in PetColor.entries) {
+            val before = beforeComparison(eventId).copy(pet = initial.pet.copy(
+                selectedLookId = "BACKPACK", visualState = PetVisualState.HAPPY, age = age, color = color))
+            val purchased = before.copy(ownedItems = before.ownedItems + OwnedItem("bought", itemId))
+            val boughtPath = chronoscopePath(TimeMachineBranch(purchased, emptyList()), before, catalog)
+            val skippedPath = chronoscopePath(TimeMachineBranch(before, emptyList()), before, catalog)
+
+            assertEquals(petArtwork(age, color).compass, boughtPath.petPresentation.artworkRes)
+            assertEquals(petArtwork(age, color).backpack, skippedPath.petPresentation.artworkRes)
+            assertSame(purchased, boughtPath.state)
+            assertSame(before, skippedPath.state)
+            assertEquals("BACKPACK", purchased.pet.selectedLookId)
+            assertEquals(PetVisualState.HAPPY, purchased.pet.visualState)
+        }
+    }
+
+    @Test fun comparisonDoesNotTryOnAnUnrelatedAccessoryBoughtLater() {
+        val catalog = bundledGameCatalog()
+        val targetItem = "cosmetic-compass-v1"
+        val choiceId = catalog.content.choiceItemEffects.first { it.itemId == targetItem }.choiceId
+        val eventId = catalog.content.choices.first { it.id == choiceId }.eventId
+        val before = beforeComparison(eventId)
+        val laterHat = before.copy(ownedItems = before.ownedItems + OwnedItem("later-hat", "cosmetic-explorer-hat-v2"))
+        val result = chronoscopePath(TimeMachineBranch(laterHat, emptyList()), before, catalog)
+
+        assertEquals(before.pet.toAdventurePetPresentation(showReaction = false), result.petPresentation)
+        val withTarget = laterHat.copy(ownedItems = laterHat.ownedItems + OwnedItem("bought-compass", targetItem))
+        assertEquals(petArtwork(before.pet.age, before.pet.color).compass,
+            chronoscopePath(TimeMachineBranch(withTarget, emptyList()), before, catalog).petPresentation.artworkRes)
+    }
+
+    @Test fun nonMaterialPurchaseKeepsItsReactionEvenIfAnAccessoryWasBoughtLater() {
+        val catalog = bundledGameCatalog()
+        val before = beforeComparison("figma-2654-98-purchase-v2")
+        val played = before.copy(pet = before.pet.copy(visualState = PetVisualState.HAPPY),
+            ownedItems = before.ownedItems + OwnedItem("later-hat", "cosmetic-explorer-hat-v2"))
+        val result = chronoscopePath(TimeMachineBranch(played, emptyList()), before, catalog)
+
+        assertEquals(petArtwork(played.pet.age, played.pet.color).happy, result.petPresentation.artworkRes)
+        assertSame(played, result.state)
+    }
+
+    private fun beforeComparison(eventId: String) = initial.copy(
+        pet = initial.pet.copy(selectedLookId = "BACKPACK", visualState = PetVisualState.HAPPY),
+        engine = EngineState(bundledGameCatalog().rules.id, 1, 1, DayPhase.RUNNING, 0, 4, true, null, 100,
+            listOf(EventOccurrence("offer", eventId, EventOrigin.SCHEDULE, EventStatus.ACTIVE)), emptyList()),
+    )
 
     @Test fun shorterReflectionFlowDoesNotReopenRetiredIntermediateScreens() {
         assertEquals(ChronoscopeStep.ALTERNATIVES, chronoscopeBack(ChronoscopeStep.COMPARISON))

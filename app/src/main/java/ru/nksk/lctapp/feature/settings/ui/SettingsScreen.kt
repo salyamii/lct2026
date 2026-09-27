@@ -2,6 +2,7 @@ package ru.nksk.lctapp.feature.settings.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -15,12 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.components.*
 import ru.nksk.lctapp.core.ui.theme.AdventureNight
+import ru.nksk.lctapp.core.ui.theme.AdventureLime
 
 @Composable
 internal fun SettingsGearButton(onClick: () -> Unit) {
@@ -43,6 +46,7 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
         }
         Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            SoundSettingsCard(state.sound, onAction)
             SettingsCard {
                 Text("Для родителей", color = GameInk, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 AdventureBody("Подключите родительский профиль, чтобы видеть, чему учится ребёнок.")
@@ -77,6 +81,36 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SoundSettingsCard(state: SoundSettingsUiState, onAction: (SettingsAction) -> Unit) {
+    SettingsCard {
+        Row(Modifier.fillMaxWidth().heightIn(min = 56.dp)
+            .toggleable(value = state.enabled == true, enabled = state.canChange, role = Role.Switch,
+                onValueChange = { onAction(SettingsAction.SetSoundEnabled(it)) }),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text("Звук", color = GameInk, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                AdventureBody("Музыка, голоса, звуки событий и видео")
+            }
+            Switch(checked = state.enabled == true, onCheckedChange = null, enabled = state.canChange,
+                colors = SwitchDefaults.colors(checkedTrackColor = AdventureLime, checkedThumbColor = GameInk,
+                    uncheckedTrackColor = GamePaper, uncheckedThumbColor = GameInk,
+                    uncheckedBorderColor = GameInk.copy(alpha = .35f)))
+        }
+        if (state.loading || state.saving) {
+            LinearProgressIndicator(Modifier.fillMaxWidth())
+            AdventureBody(if (state.saving) "Сохраняем…" else "Открываем настройку звука…")
+        }
+        state.error?.let { error ->
+            AdventureBody(if (error == SoundSettingsError.READ)
+                "Не удалось прочитать настройку звука. Попробуйте ещё раз."
+            else "Не удалось сохранить настройку звука. Попробуйте ещё раз.")
+            GameActionButton("Повторить", { onAction(SettingsAction.RetrySound) }, enabled = !state.saving,
+                style = GameActionStyle.SECONDARY)
         }
     }
 }

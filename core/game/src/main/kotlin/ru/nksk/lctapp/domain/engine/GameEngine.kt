@@ -20,11 +20,13 @@ class GameEngine(
     private val factory: EventFactory,
     private val rules: EngineRules,
     private val contentVersion: String = rules.id,
+    private val onApplied: (AppliedGameCommand) -> Unit = {},
 ) {
     private val analytics = EngineAnalytics(factory, rules, contentVersion, ::preview, ::previewEventChoice)
     suspend fun dispatch(request: EngineRequest): EngineResult = try {
+        var applied: AppliedGameCommand? = null
         val practiceHistory = if (request.command is EngineCommand.RequestFinancialPractice) games.readHistory() else emptyList()
-        EngineResult.Applied(games.commit(request, request.context,
+        val saved = games.commit(request, request.context,
             contentFingerprint = contentVersion,
             facts = { before, after, runId, sequence -> analytics.facts(request, before, after, runId, sequence) }
         ) { current ->
@@ -46,8 +48,16 @@ class GameEngine(
             // Reports are built from repository receipts, never from UI-supplied totals. A concurrent
             // change invalidates this read rather than combining historical facts with a newer save.
             if (practiceHistory.isNotEmpty()) ensure(practiceHistory.lastOrNull { it.after != null }?.after == current, BlockReason.StaleRevision)
-            transition(current, request, practiceHistory)
-        })
+            transition(current, request, practiceHistory).also { next ->
+                applied = AppliedGameCommand(request, current, next)
+            }
+        }
+        // A deduplicated request does not execute the transform. Failed/uncertain commits do not
+        // reach this point, and a transient observer must never turn a saved action into an error.
+        applied?.let { command ->
+            try { onApplied(command.copy(after = saved)) } catch (_: Exception) { /* Presentation is best effort. */ }
+        }
+        EngineResult.Applied(saved)
     } catch (blocked: Rejected) {
         games.recordRejected(request, blocked.reason::class.simpleName ?: "Blocked", contentVersion)
         EngineResult.Blocked(blocked.reason)
@@ -526,6 +536,8 @@ class GameEngine(
         }
         next = next.copy(
             story = next.story.copy(decisions = next.story.decisions + StoryDecision("${occurrence.id}:decision", choice.id)),
+            locationScene = policy.choiceDestinations[choice.id]?.let { next.locationScene.copy(location = it) }
+                ?: next.locationScene,
             engine = day.copy(
                 energy = day.energy - energyCost,
                 ateToday = day.ateToday || choice.id in policy.feedsPetChoiceIds,

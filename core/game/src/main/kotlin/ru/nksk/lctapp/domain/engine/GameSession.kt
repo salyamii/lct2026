@@ -4,6 +4,9 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import ru.nksk.lctapp.domain.content.StoryContent
 import ru.nksk.lctapp.domain.content.StoryContentRepository
 import ru.nksk.lctapp.domain.game.GameRepository
@@ -68,9 +71,14 @@ class GameSession(
     private val preparation = Mutex()
     private var prepared = false
     private val eventReplacements = EventOccurrenceReplacements(catalog)
+    private val mutableAppliedCommands = MutableSharedFlow<AppliedGameCommand>(
+        replay = 0, extraBufferCapacity = 16, onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
+    /** Only newly confirmed commands. No history replay, durable delivery, or lifecycle catch-up. */
+    val appliedCommands = mutableAppliedCommands.asSharedFlow()
     val contentFingerprint = ru.nksk.lctapp.domain.timemachine.GameCatalogFingerprint.compute(catalog)
     val engine = GameEngine(games, EventFactory(catalog.content, catalog.policies, catalog.meals, catalog.goals, catalog.storyCampaign), catalog.rules,
-        contentFingerprint)
+        contentFingerprint, onApplied = { mutableAppliedCommands.tryEmit(it) })
     val timeMachine = ru.nksk.lctapp.domain.timemachine.TimeMachine(games, engine, catalog, contentFingerprint)
 
     fun observeHistory() = games.observeHistory()

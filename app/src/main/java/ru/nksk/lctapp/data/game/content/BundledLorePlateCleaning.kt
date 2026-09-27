@@ -29,7 +29,10 @@ internal fun GameCatalog.withLorePlateCleaningChoice(): GameCatalog {
         policy = oldPolicy.copy(energyCost = 0, choiceEnergyCosts = emptyMap(), factsByChoiceId = emptyMap(), choiceGameKinds = emptyMap()),
         card = oldCard.copy(
             impact = "", effort = "", summaryByChoiceId = emptyMap(),
-            presentation = oldCard.presentation.copy(media = oldCard.presentation.media.copy(game = null)),
+            presentation = oldCard.presentation.copy(
+                actionLabels = oldCard.presentation.actionLabels + (manualId to "Почистить самим · немного устанет"),
+                media = oldCard.presentation.media.copy(game = null,
+                    actionAudio = paymentActionAudio(LORE_PLATE_CLEANING, listOf("pay")))),
         ),
     )
     val compiled = withEventSpecs(listOf(spec))

@@ -24,8 +24,80 @@ import ru.nksk.lctapp.domain.minigame.DeedGameKind
 import ru.nksk.lctapp.domain.minigame.DeedGameScore
 import ru.nksk.lctapp.domain.minigame.PriceQuizState
 import ru.nksk.lctapp.domain.minigame.TargetStopState
+import ru.nksk.lctapp.domain.location.GameLocation
+import ru.nksk.lctapp.domain.location.LocationLighting
+import ru.nksk.lctapp.domain.location.LocationScene
 
 class GameEngineTest {
+    @Test fun travelIsCommittedWithTheChosenOutcomeAndKeepsLightingForAllCompletionPaths() = runTest {
+        for (completion in listOf("choose", "complete", "game")) {
+            val f = Fixture()
+            val policy = f.policies.getValue("lore").copy(energyCost = 1,
+                choiceDestinations = mapOf("lore-choice" to GameLocation.OBSERVATORY),
+                choiceGameKinds = if (completion == "game") mapOf("lore-choice" to DeedGameKind.PRECISION) else emptyMap())
+            val engine = GameEngine(f.repo, EventFactory(f.content, f.policies + ("lore" to policy), emptyList()), f.rules)
+            f.repo.update { it.copy(locationScene = LocationScene(GameLocation.PIER, LocationLighting.EVENING)) }
+            f.begin(listOf("lore", "quiet", "quiet", "quiet"))
+            assertTrue(engine.dispatch(f.request(EngineCommand.OpenNextEvent)) is EngineResult.Applied)
+            val occurrence = f.day.currentEvent!!.id
+            assertEquals(GameLocation.PIER, f.state.locationScene.location)
+            assertTrue(engine.dispatch(f.request(EngineCommand.PauseEvent(occurrence))) is EngineResult.Applied)
+            assertEquals(GameLocation.PIER, f.state.locationScene.location)
+            assertTrue(engine.dispatch(f.request(EngineCommand.OpenNextEvent)) is EngineResult.Applied)
+            if (completion == "game") {
+                assertTrue(engine.dispatch(f.request(EngineCommand.StartStoryGame(occurrence, "lore-choice"))) is EngineResult.Applied)
+                assertEquals(GameLocation.PIER, f.state.locationScene.location)
+            }
+            val before = f.state
+            val preview = engine.previewEventChoice(before, occurrence, "lore-choice") as EngineResult.Applied
+            assertEquals(GameLocation.OBSERVATORY, preview.state.locationScene.location)
+            assertEquals(before, f.state)
+            val command = when (completion) {
+                "choose" -> EngineCommand.Choose(occurrence, "lore-choice")
+                "complete" -> EngineCommand.CompleteEvent(occurrence, "lore-choice")
+                else -> EngineCommand.CompleteStoryGame(occurrence, "lore-choice",
+                    checkNotNull(DeedGameScore.fromPrecision(TargetStopState(10, round = 5, hits = 5, lastHit = true))))
+            }
+            assertTrue(engine.dispatch(f.request(command)) is EngineResult.Applied)
+            assertEquals(LocationScene(GameLocation.OBSERVATORY, LocationLighting.EVENING), f.state.locationScene)
+            assertEquals(before.engine!!.energy - 1, f.day.energy)
+            assertEquals(before.economy, f.state.economy)
+            assertEquals("lore-choice", f.state.story.decisions.last().choiceId)
+        }
+    }
+
+    @Test fun rejectedOrFailedTravelLeavesTheWholeWorldUntouchedAndNoDestinationKeepsTheLatestLocation() = runTest {
+        val f = Fixture(balance = 2)
+        val engine = GameEngine(f.repo, EventFactory(f.content, f.policies +
+            ("expensive" to f.policies.getValue("expensive").copy(choiceDestinations = mapOf("expensive-choice" to GameLocation.OBSERVATORY))), emptyList()), f.rules)
+        f.begin(listOf("expensive", "quiet", "quiet", "quiet"))
+        f.apply(EngineCommand.OpenNextEvent)
+        val command = EngineCommand.CompleteEvent(f.day.currentEvent!!.id, "expensive-choice")
+        val before = f.state
+        assertEquals(EngineResult.Blocked(BlockReason.InsufficientMoney(2)), engine.dispatch(f.request(command)))
+        assertEquals(before, f.state)
+        f.repo.update { it.copy(economy = EconomyState(BudgetPlan(0, 0, 0, 10), availableBalance = 10)) }
+        val funded = f.state
+        f.repo.failCommit = true
+        try { engine.dispatch(f.request(command)); fail("Storage error must propagate") } catch (_: IOException) { }
+        assertEquals(funded, f.state)
+        f.repo.failCommit = false
+        assertTrue(engine.dispatch(f.request(command)) is EngineResult.Applied)
+        assertEquals(GameLocation.OBSERVATORY, f.state.locationScene.location)
+        f.apply(EngineCommand.OpenNextEvent)
+        f.repo.update { it.copy(locationScene = LocationScene(GameLocation.FAIR, LocationLighting.EVENING)) }
+        f.choose()
+        assertEquals(LocationScene(GameLocation.FAIR, LocationLighting.EVENING), f.state.locationScene)
+    }
+
+    @Test fun destinationCannotReferToAnotherEventsChoice() {
+        val f = Fixture()
+        assertThrows(IllegalArgumentException::class.java) {
+            EventFactory(f.content, f.policies + ("lore" to f.policies.getValue("lore").copy(
+                choiceDestinations = mapOf("quiet-choice" to GameLocation.OBSERVATORY))), emptyList())
+        }
+    }
+
     @Test fun retiredLoreChoiceRemainsReadableButCannotCompleteOrPreviewANewAction() = runTest {
         val f = Fixture()
         val oldSkip = f.content.choices.single { it.id == "lore-choice" }.copy(id = "lore-skip", position = 1)

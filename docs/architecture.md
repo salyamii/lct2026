@@ -13,6 +13,7 @@ historical decisions and migrations live in the design documents.
 | `:app` / `feature/<name>` | Feature UI, immutable screen state, ViewModels, actions and navigation entries |
 | `:app` / `core/ui/components` | Domain-independent reusable Compose components and interaction states |
 | `:app` / `core/ui/game` | Shared read-only domain-to-presentation adapters and game-action presentation helpers |
+| `:app` / `core/ui/media` | Local asset playback, shared audio focus and lifecycle-aware media effects |
 | `:app` / `core/ui/theme` | Colors, typography and visual tokens |
 | `:app` / `data` | Room, content installation, backend transport and device identity |
 | `:feature:onboarding` | Onboarding UI; app supplies artwork and persistence callbacks |
@@ -68,11 +69,60 @@ whether an image exists. Screens, history and reflection use the same presentati
 lookup. Android resolves semantic artwork keys to bundled resources; the domain
 never receives resource integers.
 
-Media metadata has places for music, ambience, narration and action sound/voice
-cues. These keys do not play audio, perform I/O or advance the game. Current audio
-keys are absent until actual assets are supplied. A future lifecycle-owned player
-can consume this metadata without adding per-screen event-ID conditions. It must
-pause on leaving the foreground and never replay purchases or rewards.
+Media metadata supplies chapter music, appearance, ambience, narration and action
+sound/voice cues. `BundledMediaCatalog` resolves these semantic keys to the
+bundled MP3 assets; metadata itself never performs I/O or advances the game.
+`StoryChapterPresentation` assigns one music key to the authored lore group. The app
+reads the current story act's presentation to select its global background track:
+the same chapter continues across screens, a new chapter changes the track, and
+music is quieter under voice. Narration and short appearance/action cues belong to
+the active scene or confirmed action. Playback is lifecycle-owned, pauses when the
+app leaves the foreground, shares the global sound preference, and never replays a
+purchase or reward. See [media provenance](design/assets/media-catalog.md).
+
+`MediaPlaybackViewModel` observes the current world only to select a chapter theme;
+it does not initialize a game or read/replay its journal. It retains the playback
+controller across activity recreation. The Compose host releases native players
+outside the foreground; their positions and occurrence deduplication stay in the
+controller. Leaving a scene stops its narration. The intro owns a separate video
+player with its position retained in the startup ViewModel.
+
+Music loops on its own lane; short cues and voice use a sequential lane which
+ducks the music. Short location clips play twice (MEDIA-D-005); narration and
+action effects play once. Scene deduplication records each completed clip/pass,
+not an attempted async preparation. A cancelled or failed clip can play again
+on reopening/unmuting; ordinary recomposition does not restart it, and decoder
+failure cannot create an automatic retry loop. Both lanes share one audio-focus lease. Permanent focus loss
+pauses playback until a new interaction or a foreground restart; transient loss
+waits for focus gain. Muting releases audio playback, while the intro continues
+silently. The preference lives in device DataStore, outside the world snapshot.
+
+Payment audio listens only to fresh, successfully committed commands, with request
+ID deduplication. Rejected commands, previews, history, restores and idempotent
+retries produce no payment sound. An uncertain write whose commit reply failed
+stays silent, even if a later retry discovers the commit; feedback must never cause
+another game command. Background/muted action cues are dropped rather than replayed
+on return. Screens contain no MediaPlayer or filesystem calls.
+
+Native player construction, asset access, preparation, playback controls and release
+run on one media worker, outside the Compose/main thread. Main-thread scene state and
+audio focus communicate with it asynchronously; player callbacks return to main and
+discard stale completions. Reading video position uses a cached value instead of a
+synchronous native call. The active, unmuted session prepares only the five short
+location/action clips in advance; idle prepared clips are released on mute/background.
+A newly opened event cancels any leftover action queue from the previous event.
+The navigation host identifies the current entry explicitly, so its event audio
+can start while the incoming card is already visible in STARTED, without waiting
+for the slide to finish. Outgoing entries and predictive Back previews cannot
+replace the current scene. Playback, focus and release work take priority over
+speculative preparation; a cancelled focus request clears its pending state.
+Music and long narration are not loaded into that short-clip cache.
+Actual music decoder errors release the failed player. A new event/action, unmute
+or foreground return can retry the same chapter; ordinary recomposition cannot
+start a retry loop, and stale callbacks cannot close a replacement track.
+Chapter selection first deduplicates story decisions and runs its projection on a
+computation dispatcher; unrelated wallet, clothing and UI updates do not recompute
+the chapter on main. Repository observation keeps its existing error/retry contract.
 
 Historical content IDs and installed definitions remain readable. Compatibility
 aliases/replacements belong to explicit compatibility data, not the rendering

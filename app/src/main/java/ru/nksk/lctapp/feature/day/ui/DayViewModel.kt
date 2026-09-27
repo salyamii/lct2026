@@ -65,6 +65,8 @@ internal data class DayUiState(
     val eventArtwork: EventSceneArtwork? = null,
     val eventBackgroundRes: Int = R.drawable.menu_village,
     val deedDeadline: String? = null,
+    val audioOccurrenceId: String? = null,
+    val eventMedia: EventMedia = EventMedia(),
 )
 
 internal sealed interface DayAction {
@@ -420,6 +422,8 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
         if (resourcePriority?.offerId != selectedResourcePriority) selectedResourcePriority = null
         mutableState.value = DayUiState(
             loading = false, busy = busy, petName = saved.pet.name,
+            audioOccurrenceId = occurrence?.id.takeIf { !result && summary == null },
+            eventMedia = presentation.media,
             summary = summary?.toUiState(catalog, saved.pet.name, saved.economy),
             reflectionAvailable = summary != null && summary.day == reflectionDay,
             restingPetRes = summary?.let { restingPetArtwork(saved.pet) },
