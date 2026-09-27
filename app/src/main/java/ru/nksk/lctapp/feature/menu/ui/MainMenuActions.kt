@@ -16,8 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -36,12 +36,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
+import ru.nksk.lctapp.core.ui.components.GameActionButton
 import ru.nksk.lctapp.core.ui.theme.AdventureLabel
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
 import ru.nksk.lctapp.core.ui.theme.AdventureNight
@@ -70,9 +70,17 @@ internal fun MenuActions(onAction: (MainMenuAction) -> Unit, viewport: DpSize, s
             )
         }
         state.notice?.let { Text(it, Modifier.padding(horizontal = 20.dp), color = AdventureLabel, fontFamily = Rubik) }
-        if (state.canFeed) Button({ onAction(MainMenuAction.Feed) }, Modifier.padding(horizontal = 18.dp).fillMaxWidth(), enabled = !state.busy) {
-            Text(state.mealPrice?.let { "Покормить за $it монет" } ?: "Покормить")
-        }
+        if (state.canFeed) GameActionButton(
+            text = state.mealPrice?.let { "Покормить за $it монет" } ?: "Покормить",
+            onClick = { onAction(MainMenuAction.Feed) },
+            modifier = Modifier.padding(horizontal = 18.dp),
+            interactionBlocked = state.busy,
+            minHeight = ButtonDefaults.MinHeight,
+            shape = ButtonDefaults.shape,
+            textStyle = MaterialTheme.typography.labelLarge,
+            contentPadding = ButtonDefaults.ContentPadding,
+            containerColor = AdventureLime, contentColor = AdventureNight,
+        )
         Box(
             Modifier.padding(horizontal = 12.dp).fillMaxWidth()
                 .shadow(12.dp, RoundedCornerShape(34.dp))
@@ -104,20 +112,17 @@ internal fun MenuActions(onAction: (MainMenuAction) -> Unit, viewport: DpSize, s
             }
         }
         state.spendingPreview?.let { Text(it, Modifier.padding(horizontal = 20.dp), color = AdventureLabel, fontFamily = Rubik) }
-        Button(
+        GameActionButton(
+            text = state.continueLabel ?: stringResource(R.string.menu_continue),
             onClick = { onAction(MainMenuAction.ContinueDay) },
-            enabled = !state.busy,
-            modifier = Modifier.padding(horizontal = 18.dp).fillMaxWidth().heightIn(min = 60.dp)
+            interactionBlocked = state.busy,
+            modifier = Modifier.padding(horizontal = 18.dp)
                 .shadow(12.dp, RoundedCornerShape(30.dp)),
+            minHeight = 60.dp,
             shape = RoundedCornerShape(30.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = AdventureLime, contentColor = AdventureNight),
-        ) {
-            Text(
-                state.continueLabel ?: stringResource(R.string.menu_continue),
-                fontFamily = Rubik, fontWeight = FontWeight.ExtraBold,
-                fontSize = 16.sp, lineHeight = 22.sp, textAlign = TextAlign.Center,
-            )
-        }
+            contentPadding = ButtonDefaults.ContentPadding,
+            containerColor = AdventureLime, contentColor = AdventureNight,
+        )
     }
 }
 
