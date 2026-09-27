@@ -92,6 +92,7 @@ for filename, schema_name in schema_map.items():
     if "profileId" in examples[filename]: assert examples[filename]["profileId"] == DEVICE
 
 archive = (BASE / "examples/world-snapshot.json").read_text(encoding="utf-8")
+assert examples["world-snapshot.json"]["formatVersion"] == 5
 assert examples["snapshot-upload.json"]["snapshotJson"] == archive
 assert examples["snapshot-download-response.json"]["snapshotJson"] == archive
 assert examples["snapshot-upload-response.json"]["checksum"] == examples["world-snapshot.json"]["checksum"]

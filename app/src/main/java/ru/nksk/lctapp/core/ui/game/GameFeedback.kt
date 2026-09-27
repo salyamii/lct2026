@@ -53,7 +53,7 @@ internal fun energyDescription(remaining: Int, maximum: Int): String = when {
 
 internal fun BlockReason.playerMessage(petName: String): String = when (this) {
     BlockReason.BudgetPlanningRequired -> "Сначала распредели монеты по статьям и подтверди бюджет."
-    is BlockReason.FinancialPracticeRequired -> "Комплект собран. Перед финалом главы осталось попробовать финансовые решения — открой практику."
+    is BlockReason.FinancialPracticeRequired -> "Всё готово! Ответим на вопросы о наших решениях — и продолжим историю."
     BlockReason.SavingsWithdrawalConfirmationRequired -> "Чтобы взять монеты из копилки, сначала подтверди решение."
     BlockReason.InvalidPetName -> "Введи непустое имя в одну строку."
     BlockReason.MustEat -> "$petName проголодался. Сначала нужно поесть, затем можно продолжить."

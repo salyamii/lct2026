@@ -26,6 +26,7 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
     private val dao = database.gameStateDao()
     private val history = database.gameHistoryDao()
     private val finance = database.financialProgressDao()
+    private val archives = database.gameRunArchiveDao()
     private val budgetPreparation = Mutex()
     @Volatile private var budgetModelReady = false
 
@@ -357,7 +358,50 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
     override suspend fun exportSnapshot(): GameSnapshot = withLiveBudgetWrite {
         val current = checkNotNull(readInTransaction()) { "Game has not been initialized" }
         val run = ensureBaseline(current)
-        HistoryCodec.snapshot(run.runId, current, history.read().map { it.decode() })
+        HistoryCodec.snapshot(run.runId, current, history.read().map { it.decode() }, archives.read().map { it.decodeArchive() })
+    }
+
+    override suspend fun archivedRuns(): List<ArchivedGameRunSummary> = withLiveBudgetRead {
+        archives.read().map { row -> row.decodeArchive().snapshot.let {
+            ArchivedGameRunSummary(it.runId, it.state.pet.name, it.state.engine?.day, it.history.size)
+        } }
+    }
+
+    override suspend fun archivedRun(runId: String): GameSnapshot? = withLiveBudgetRead {
+        archives.find(runId)?.decodeArchive()?.snapshot
+    }
+
+    override suspend fun restartCampaign(request: CampaignRestartRequest,
+        transform: (GameState, GameState?) -> GameState): GameState = withLiveBudgetWrite {
+        val current = checkNotNull(readInTransaction()) { "Game has not been initialized" }
+        val run = ensureBaseline(current)
+        archives.forRestart(request.id)?.decodeArchive()?.let { prior ->
+            require(prior.snapshot.runId == request.expectedRunId &&
+                prior.snapshot.state.engine?.revision == request.expectedEngineRevision &&
+                prior.snapshot.historySequence == request.expectedHistorySequence) { "Conflicting rewind identity" }
+            if (prior.nextRunId != run.runId) throw CampaignRestartConflictException()
+            return@withLiveBudgetWrite current
+        }
+        if (run.runId != request.expectedRunId || current.engine?.revision != request.expectedEngineRevision ||
+            history.sequence() != request.expectedHistorySequence) throw CampaignRestartConflictException()
+        val previousHistory = history.read().map { it.decode() }
+        val previous = HistoryCodec.snapshot(run.runId, current, previousHistory)
+        HistoryCodec.validate(previous)
+        val initial = previousHistory.firstOrNull { it.type == AuditType.INITIALIZED }?.after
+        val next = transform(current, initial)
+        require(next.economy.hasValidLiveBudget()) { "Invalid new-game budget" }
+        val nextRunId = UUID.randomUUID().toString()
+        archives.insert(GameRunArchiveEntity(run.runId, archives.read().size, request.id,
+            nextRunId, HistoryCodec.encodeSnapshot(previous)))
+        finance.clearPractice(); finance.clearCursor(); finance.clearPlans(); finance.clearPeriods()
+        history.clearOutbox(); history.clearFacts(); history.clearAudit(); history.clearRun()
+        persistGame(next)
+        database.onboardingDraftDao().clear()
+        history.insertRun(GameRunEntity(CURRENT_GAME_ID, nextRunId))
+        val saved = checkNotNull(readInTransaction())
+        check(HistoryCodec.encodeState(saved) == HistoryCodec.encodeState(next)) { "New run was not preserved completely" }
+        appendAudit(AuditEntry("initialize:$nextRunId", 1, nextRunId, AuditType.INITIALIZED, after = saved))
+        saved
     }
 
     override suspend fun restoreSnapshot(snapshot: GameSnapshot, expected: RestoreGuard): GameState {
@@ -376,6 +420,11 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
             }
             finance.clearPractice(); finance.clearCursor(); finance.clearPlans(); finance.clearPeriods()
             history.clearOutbox(); history.clearFacts(); history.clearAudit(); history.clearRun()
+            archives.clear()
+            snapshot.archivedRuns.forEachIndexed { position, archive ->
+                archives.insert(GameRunArchiveEntity(archive.snapshot.runId, position, archive.restartRequestId,
+                    archive.nextRunId, HistoryCodec.encodeSnapshot(archive.snapshot)))
+            }
             if (current == null) {
                 dao.insertState(snapshot.state.toEntity())
                 writeChildren(snapshot.state)
@@ -457,6 +506,12 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
         check(it.id == id && it.sequence == sequence && it.runId == runId && it.type.name == type && it.formatVersion == formatVersion) {
             "Historical payload does not match its index"
         }
+    }
+
+    private fun GameRunArchiveEntity.decodeArchive(): ArchivedGameRun {
+        val snapshot = HistoryCodec.decodeSnapshot(snapshotPayload)
+        check(snapshot.runId == runId) { "Archived snapshot does not match its index" }
+        return ArchivedGameRun(restartRequestId, nextRunId, snapshot)
     }
 
 }

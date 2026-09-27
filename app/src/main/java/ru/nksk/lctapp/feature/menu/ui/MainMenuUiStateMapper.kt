@@ -14,6 +14,7 @@ internal fun GameState.toMainMenuUiState(fullEnergy: Int = 5, catalog: GameCatal
     val progress = goal?.progress(this, catalog.content)
     return MainMenuUiState(
     coins = economy.availableBalance,
+    canRestartCampaign = catalog?.storyProgress(this)?.campaignComplete == true,
     budget = MenuBudgetUiState(economy.displayPlan.needs, economy.displayPlan.wants, economy.displayPlan.savings, economy.displayPlan.reserve,
         available = economy.availableBalance, actualSavings = economy.savingsBalance,
         unallocated = economy.availableBalance - economy.displayPlan.total),

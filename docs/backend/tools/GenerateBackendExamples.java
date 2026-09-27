@@ -68,7 +68,7 @@ public final class GenerateBackendExamples {
         AuditEntry initialized = HistoryCodec.INSTANCE.decodeEntry("""
             {"id":"%s:initialized","sequence":1,"runId":"%s","type":"INITIALIZED","after":%s}
             """.formatted(RUN_ID, RUN_ID, stateJson));
-        GameSnapshot snapshot = HistoryCodec.INSTANCE.snapshot(RUN_ID, state, List.of(initialized));
+        GameSnapshot snapshot = HistoryCodec.INSTANCE.snapshot(RUN_ID, state, List.of(initialized), List.of());
         String archive = HistoryCodec.INSTANCE.encodeSnapshot(snapshot);
         require(snapshot.equals(HistoryCodec.INSTANCE.decodeSnapshot(archive)), "Snapshot did not round-trip");
 

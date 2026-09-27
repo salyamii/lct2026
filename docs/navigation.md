@@ -46,7 +46,13 @@ The registered features render their working screens. Gear displays the inventor
 with two sections, owned items only, and an entry-scoped Hilt ViewModel. Its saved
 route ID remains `gear`; Back returns to the menu without changing game state.
 Tasks displays current offered deeds and a Skill Training entry. The app host
-maps its training callback to `SkillTraining`; accepted gameplay work uses
+maps its training callback to `SkillTraining`.
+`ChapterPractice` (`chapter_practice`) is the separate finite catch-up route used
+by blocked chapter continuations from MainMenu, Goal and Day (LEARNING-D-005).
+It uses its own entry-scoped TrainingViewModel and the current saved milestones;
+the route stores no question or world snapshot. Its Continue story callback opens
+the existing Day entry when present. Voluntary Tasks training remains continuous.
+Accepted gameplay work uses
 `DeedGame` with the event occurrence ID. By ADVENTURE-D-020, Tasks has no demo
 mini-game entry points. `StarPlates`, `PriceCheck` and `Telescope` retain the stable
 IDs `tasks_star_plates`, `tasks_price_check` and `tasks_telescope` and their entries
@@ -212,6 +218,17 @@ They are compiled only under the user's verification preference; this does not
 claim an on-device result.
 
 ## Pet name and floating village action — 2026-09-19
+
+### Финальный Хроноскоп и архив прохождений — 2026-09-28
+
+После завершения пятой главы главное действие меню открывает `CampaignArchive`
+(`campaign_archive`), где ребёнок явно выбирает «Вернуться в начало». Только
+успешный атомарный restart возвращает стек к меню; новый начальный бюджет открывает
+существующий budget gate. При неопределённой записи повторяется исходный запрос.
+В истории текущего приключения есть вход «Прошлые приключения» в тот же экран.
+Выбор архива читает его полную историю для просмотра, без restore и игровых команд.
+Back из архивной детализации возвращает к списку. Ни snapshot, ни mutable state
+не записываются в route key; идентичность устройства остаётся прежней.
 
 Under D-093/D-094 the name badge is read-only, below the goal and to the right
 of the coins. It has no click action, age label or menu editor. The saved name

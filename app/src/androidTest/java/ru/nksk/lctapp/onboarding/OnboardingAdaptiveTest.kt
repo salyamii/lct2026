@@ -146,6 +146,30 @@ class OnboardingAdaptiveTest(private val width: Int, private val height: Int, pr
         compose.runOnIdle { assertEquals(1, continues) }
     }
 
+    @Test fun welcomeCardCoversTheBottomOfTallWindowsWithoutExposingTheScene() {
+        // This checks unused space after a fully visible card. On short windows, scrolling
+        // the button into view can put the button itself under the bottom pixel probe.
+        // Reachability and minimum action height are covered by the separate welcome test.
+        if (height < 1000 || fontScale != 1f || (width >= 700 && width > height)) return
+        render {
+            OnboardingScreen(OnboardingUiState(foxSelected = true),
+                OnboardingArtwork(R.drawable.onboarding_castle, R.drawable.onboarding_ryzhik,
+                    R.drawable.npc_luna_body, R.drawable.onboarding_tiko_unavailable,
+                    R.drawable.menu_ground_shadow, Rubik, Nunito),
+                saving = false, saveFailed = false, onAction = {}, onStart = {})
+        }
+        assertActionSafe("Начать приключение", scrollAction = false, darkNavigation = true)
+        val root = compose.onNodeWithTag("test_window").fetchSemanticsNode().boundsInRoot
+        val card = compose.onNodeWithTag("onboarding_welcome_card").fetchSemanticsNode().boundsInRoot
+        val pxPerDp = root.width / width
+        assertTrue("Castle is visible below the welcome card", card.bottom >= root.bottom - 24 * pxPerDp - 1)
+        // Probe above the system bar too: its own painted strip used to hide the gap from this test.
+        val pixels = compose.onNodeWithTag("test_window").captureToImage().toPixelMap()
+        val color = pixels[pixels.width / 2, (pixels.height - 26 * pxPerDp).toInt()]
+        assertTrue("Card background must cover the bottom of the content viewport",
+            color.red < .2f && color.green < .15f && color.blue < .35f)
+    }
+
     @Test fun goalBriefingKeepsItsActionAfterLongCopyAndSaveError() {
         var continues = 0
         render {

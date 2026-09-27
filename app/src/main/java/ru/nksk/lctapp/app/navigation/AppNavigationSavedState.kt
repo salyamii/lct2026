@@ -18,6 +18,8 @@ import ru.nksk.lctapp.feature.tasks.navigation.DeedGame
 import ru.nksk.lctapp.feature.map.navigation.GameMap
 import ru.nksk.lctapp.feature.learning.navigation.Learning
 import ru.nksk.lctapp.feature.learning.navigation.SkillTraining
+import ru.nksk.lctapp.feature.learning.navigation.ChapterPractice
+import ru.nksk.lctapp.feature.learning.navigation.CampaignArchive
 import ru.nksk.lctapp.feature.learning.navigation.OtherPaths
 import ru.nksk.lctapp.feature.settings.navigation.Settings
 
@@ -39,6 +41,8 @@ internal val AppNavigationSavedStateConfiguration = SavedStateConfiguration {
             subclass(GameMap::class, GameMap.serializer())
             subclass(Learning::class, Learning.serializer())
             subclass(SkillTraining::class, SkillTraining.serializer())
+            subclass(ChapterPractice::class, ChapterPractice.serializer())
+            subclass(CampaignArchive::class, CampaignArchive.serializer())
             subclass(OtherPaths::class, OtherPaths.serializer())
             subclass(Settings::class, Settings.serializer())
 

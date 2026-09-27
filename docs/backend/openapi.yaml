@@ -74,8 +74,9 @@ paths:
       summary: Store the complete game archive
       description: Idempotency-Key must equal uploadId. Compare expectedServerRevision atomically; null means no existing
         save. Validate envelope metadata against snapshotJson. Persist the entire archive before publishing a new
-        serverRevision. Same upload does not increase the revision. Different gameRunId requires an explicitly agreed
-        reset policy; otherwise GAME_RUN_CONFLICT. Keep snapshotJson unchanged. After long offline periods a 409 conflict
+        serverRevision. Same upload does not increase the revision. A new gameRunId is allowed when snapshot format 5
+        contains the current server run in archivedRuns and its nextRunId chain ends at the uploaded run; the archived
+        history must preserve the server history prefix. Otherwise return GAME_RUN_CONFLICT. Keep snapshotJson unchanged. After long offline periods a 409 conflict
         preserves the current local world, reward receipts and outbox. Do not download-and-overwrite automatically,
         bypass compare-and-swap with a guessed revision or merge balances using timestamps.
       tags:
@@ -540,7 +541,7 @@ components:
         snapshotFormatVersion:
           type: integer
           minimum: 1
-          maximum: 4
+          maximum: 5
         checksum:
           type: string
           pattern: ^[a-f0-9]{64}$

@@ -14,6 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -35,11 +37,24 @@ fun BudgetIntroductionScreen(
 ) {
     BoxWithConstraints(Modifier.fillMaxSize().background(GoalCream)) {
         val scrollAll = needsOnboardingScroll(maxHeight)
-        Image(painterResource(artwork.background), null, Modifier.matchParentSize(), contentScale = ContentScale.Crop)
         Column(Modifier.fillMaxSize().then(if (scrollAll) Modifier.verticalScroll(rememberScrollState()) else Modifier)) {
-            CustomizationHeader(onBack, artwork, saving = saving, title = "Монеты для приключения",
-                backDescription = "Назад к выбору цели")
-            Spacer(Modifier.height(12.dp))
+            // The illustration belongs to the header. The cream root fills unused space
+            // beneath a short panel, including when the whole page is scrollable.
+            Layout(modifier = Modifier.fillMaxWidth(), content = {
+                Column {
+                    CustomizationHeader(onBack, artwork, saving = saving, title = "Монеты для приключения",
+                        backDescription = "Назад к выбору цели")
+                    Spacer(Modifier.height(12.dp))
+                }
+                Image(painterResource(artwork.background), null, contentScale = ContentScale.Crop)
+            }) { measurables, constraints ->
+                val header = measurables[0].measure(constraints.copy(minHeight = 0))
+                val background = measurables[1].measure(Constraints.fixed(header.width, header.height + 28.dp.roundToPx()))
+                layout(header.width, header.height) {
+                    background.placeRelative(0, 0)
+                    header.placeRelative(0, 0)
+                }
+            }
             Surface(Modifier.fillMaxWidth().then(if (scrollAll) Modifier else Modifier.weight(1f)), color = GoalCream,
                 shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)) {
                 Box(Modifier.fillMaxWidth().then(if (scrollAll) Modifier else Modifier.fillMaxSize()).windowInsetsPadding(WindowInsets.safeDrawing.only(

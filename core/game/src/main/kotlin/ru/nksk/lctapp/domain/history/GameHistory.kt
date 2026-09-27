@@ -59,8 +59,8 @@ data class AuditEntry(
 enum class AuditType { INITIALIZED, IMPORTED_BASELINE, COMMAND, TECHNICAL_UPDATE, FACTS, RESTORED, REJECTED, PARENT_REWARD }
 
 const val HISTORY_FORMAT_VERSION = 1
-/** Format 4 keeps the wire fields but identifies live budget allocations instead of legacy intentions. */
-const val SNAPSHOT_FORMAT_VERSION = 4
+/** Format 5 adds a flat list of complete archived runs; formats 1–4 retain their original signatures. */
+const val SNAPSHOT_FORMAT_VERSION = 5
 
 /** Global storage sequence closes the gap left by map writes without an engine revision. */
 data class RestoreGuard(
@@ -71,6 +71,7 @@ data class RestoreGuard(
 )
 
 @Serializable
+@OptIn(ExperimentalSerializationApi::class)
 data class GameSnapshot(
     val formatVersion: Int = SNAPSHOT_FORMAT_VERSION,
     val runId: String,
@@ -79,6 +80,8 @@ data class GameSnapshot(
     val historySequence: Long,
     val rulesId: String? = state.engine?.rulesId,
     val checksum: String,
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
+    val archivedRuns: List<ArchivedGameRun> = emptyList(),
 ) {
     init {
         require(formatVersion in 1..SNAPSHOT_FORMAT_VERSION) { "Unsupported snapshot format" }
@@ -87,6 +90,11 @@ data class GameSnapshot(
         require(history.all { it.runId == runId && it.sequence <= historySequence })
         require(history.zipWithNext().all { (a, b) -> a.sequence < b.sequence })
         require(history.map { it.id }.distinct().size == history.size)
+        require(formatVersion >= 5 || archivedRuns.isEmpty())
+        require(archivedRuns.none { it.snapshot.runId == runId })
+        require(archivedRuns.map { it.snapshot.runId }.distinct().size == archivedRuns.size)
+        require(archivedRuns.map { it.restartRequestId }.distinct().size == archivedRuns.size)
+        require(archivedRuns.map { it.nextRunId }.distinct().size == archivedRuns.size)
     }
 }
 
@@ -102,19 +110,26 @@ object HistoryCodec {
     fun encodeQuestion(question: FinancialQuestion): String = json.encodeToString(question)
     fun decodeQuestion(value: String): FinancialQuestion = json.decodeFromString(value)
     fun encodeSnapshot(snapshot: GameSnapshot): String {
-        val encoded = json.encodeToString(snapshot.copy(state = normalize(snapshot.state), history = snapshot.history.map(::normalize)))
-        return versioned(encoded, snapshot.formatVersion)
+        val value = json.parseToJsonElement(json.encodeToString(snapshot.copy(
+            state = normalize(snapshot.state), history = snapshot.history.map(::normalize), archivedRuns = emptyList()))).jsonObject
+        // Keep old inner wire versions exactly as their own codec emits them. A parent
+        // format5 must not reintroduce new default fields into an archived format1.
+        val encoded = if (snapshot.archivedRuns.isEmpty()) value else
+            JsonObject(value + ("archivedRuns" to archivePayload(snapshot.archivedRuns)))
+        return versioned(encoded.toString(), snapshot.formatVersion)
     }
     fun decodeSnapshot(value: String): GameSnapshot = json.decodeFromString<GameSnapshot>(value).also(::validate)
 
-    fun snapshot(runId: String, state: GameState, history: List<AuditEntry>): GameSnapshot {
+    fun snapshot(runId: String, state: GameState, history: List<AuditEntry>, archivedRuns: List<ArchivedGameRun> = emptyList()): GameSnapshot {
         val sequence = history.lastOrNull()?.sequence ?: 0
         return GameSnapshot(runId = runId, state = state, history = history, historySequence = sequence,
-            checksum = checksum(runId, state, history, sequence))
+            checksum = checksum(runId, state, history, sequence, archivedRuns = archivedRuns), archivedRuns = archivedRuns)
     }
 
     fun validate(snapshot: GameSnapshot) {
-        require(snapshot.checksum == checksum(snapshot.runId, snapshot.state, snapshot.history, snapshot.historySequence, snapshot.formatVersion)) {
+        snapshot.archivedRuns.forEach { validate(it.snapshot) }
+        require(snapshot.checksum == checksum(snapshot.runId, snapshot.state, snapshot.history, snapshot.historySequence,
+            snapshot.formatVersion, snapshot.archivedRuns)) {
             "Snapshot checksum mismatch"
         }
         require(snapshot.historySequence == (snapshot.history.lastOrNull()?.sequence ?: 0))
@@ -146,9 +161,16 @@ object HistoryCodec {
     }
 
     private fun checksum(runId: String, state: GameState, history: List<AuditEntry>, sequence: Long,
-        version: Int = SNAPSHOT_FORMAT_VERSION): String {
-        return sha256("$version\n$runId\n$sequence\n${versioned(encodeState(state), version)}\n${versioned(json.encodeToString(history.map(::normalize)), version)}")
+        version: Int = SNAPSHOT_FORMAT_VERSION, archivedRuns: List<ArchivedGameRun> = emptyList()): String {
+        val original = "$version\n$runId\n$sequence\n${versioned(encodeState(state), version)}\n${versioned(json.encodeToString(history.map(::normalize)), version)}"
+        return sha256(if (version < 5) original else "$original\n${archivePayload(archivedRuns)}")
     }
+
+    private fun archivePayload(archivedRuns: List<ArchivedGameRun>) = JsonArray(archivedRuns.map { archive -> buildJsonObject {
+            put("restartRequestId", archive.restartRequestId)
+            put("nextRunId", archive.nextRunId)
+            put("snapshot", json.parseToJsonElement(encodeSnapshot(archive.snapshot)))
+        } })
 
     private fun versioned(encoded: String, version: Int): String {
         if (version >= 3) return encoded

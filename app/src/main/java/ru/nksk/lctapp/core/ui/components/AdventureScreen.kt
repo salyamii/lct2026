@@ -45,6 +45,7 @@ internal fun AdventureScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     @DrawableRes backgroundRes: Int = R.drawable.location_observatory_stage,
+    artworkSceneKey: Any? = backgroundRes,
     available: Long? = null,
     savings: Long? = null,
     onOpenSavings: (() -> Unit)? = null,
@@ -64,7 +65,8 @@ internal fun AdventureScreen(
     footer: (@Composable ColumnScope.() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    BoxWithConstraints(modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding().imePadding()) {
+    GameArtworkScene(artworkSceneKey, modifier.fillMaxSize().background(GamePaper)) {
+    BoxWithConstraints(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding().imePadding()) {
         val pageScroll = contentScrollState ?: rememberScrollState()
         val fixedActionScroll = rememberScrollState()
         val density = LocalDensity.current
@@ -117,9 +119,10 @@ internal fun AdventureScreen(
                             actions = { if (includeFooter) footer?.invoke(this) },
                             content = content,
                         )
-                    } else Column(Modifier.widthIn(max = 640.dp).fillMaxWidth().let {
+                    } else Column(Modifier.widthIn(max = 640.dp).fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 20.dp).let {
                         if (scrollContent && !pinFooter) it.verticalScroll(pageScroll) else it
-                    }.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    }, verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(contentSpacing),
                             content = content)
                         if (includeFooter) footer?.let {
@@ -172,6 +175,7 @@ internal fun AdventureScreen(
                 }
             }
         }
+    }
     }
 }
 

@@ -78,7 +78,7 @@ class FinancialTrainingTest {
         val stateWire = HistoryCodec.encodeState(legacyState)
         assertFalse(stateWire.contains("\"series\""))
         val checksum = HistoryCodec.sha256("4\nold-run\n0\n$stateWire\n[]")
-        val snapshot = GameSnapshot(runId = "old-run", state = legacyState, history = emptyList(), historySequence = 0, checksum = checksum)
+        val snapshot = GameSnapshot(formatVersion = 4, runId = "old-run", state = legacyState, history = emptyList(), historySequence = 0, checksum = checksum)
         assertEquals(checksum, HistoryCodec.decodeSnapshot(HistoryCodec.encodeSnapshot(snapshot)).checksum)
     }
 }

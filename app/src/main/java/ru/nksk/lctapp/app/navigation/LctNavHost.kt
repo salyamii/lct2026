@@ -59,8 +59,11 @@ import ru.nksk.lctapp.feature.map.navigation.GameMap
 import ru.nksk.lctapp.feature.map.navigation.mapEntry
 import ru.nksk.lctapp.feature.learning.navigation.Learning
 import ru.nksk.lctapp.feature.learning.navigation.SkillTraining
+import ru.nksk.lctapp.feature.learning.navigation.ChapterPractice
 import ru.nksk.lctapp.feature.learning.navigation.OtherPaths
 import ru.nksk.lctapp.feature.learning.navigation.learningEntry
+import ru.nksk.lctapp.feature.learning.navigation.CampaignArchive
+import ru.nksk.lctapp.feature.learning.navigation.campaignArchiveEntry
 import ru.nksk.lctapp.feature.settings.navigation.Settings
 import ru.nksk.lctapp.feature.settings.navigation.settingsEntry
 import ru.nksk.lctapp.feature.settings.ui.SettingsGearButton
@@ -149,7 +152,7 @@ fun LctNavHost(
             entryProvider = entryProvider {
                 mainMenuEntry(settingsButton = {
                     SettingsGearButton(dropUnlessResumed { navigator.navigate(MainMenu, Settings) })
-                }, onTraining = { source -> navigator.navigate(source, SkillTraining) }) { source, action ->
+                }, onTraining = { source -> navigator.navigate(source, ChapterPractice) }) { source, action ->
                     navigator.navigate(
                         source = source,
                         destination = when (action) {
@@ -159,6 +162,7 @@ fun LctNavHost(
                             MainMenuAction.Coins -> Economy
                             MainMenuAction.Finance -> Learning
                             MainMenuAction.Savings -> Savings
+                            MainMenuAction.CampaignArchive -> CampaignArchive
                             MainMenuAction.Village -> GameMap
                             MainMenuAction.ContinueDay, MainMenuAction.Feed -> if (pending != null) Economy else Day
                         },
@@ -176,20 +180,23 @@ fun LctNavHost(
                     onOpenSavings = { source -> navigator.navigateToExisting(source, Savings) },
                     onContinueDay = { source -> navigator.replace(source, Day) },
                     onBudget = { source -> navigator.navigateToExisting(source, Economy) },
-                    onTraining = { source -> navigator.navigateToExisting(source, SkillTraining) })
+                    onTraining = { source -> navigator.navigateToExisting(source, ChapterPractice) })
                 economyEntry(onBack = navigator::returnToRoot, onConfirmed = navigator::returnToRoot,
                     onOpenSavings = { source -> navigator.navigateToExisting(source, Savings) })
                 savingsEntry(onBack = navigator::goBack,
                     onOpenGoal = { source -> navigator.navigateToExisting(source, Goal) },
                     onOpenBudget = { source -> navigator.navigateToExisting(source, Economy) })
                 learningEntry(onBack = navigator::goBack,
-                    onOpenBudget = { source -> navigator.navigateToExisting(source, Economy) })
+                    onOpenBudget = { source -> navigator.navigateToExisting(source, Economy) },
+                    onContinueStory = { source -> navigator.navigateToExisting(source, Day) },
+                    onArchives = { source -> navigator.navigate(source, CampaignArchive) })
+                campaignArchiveEntry(onBack = navigator::goBack, onRestarted = navigator::returnToRoot)
                 mapEntry(onBack = navigator::goBack, onSelected = navigator::returnToRoot)
                 dayEntry(onBack = navigator::goBack, onFinished = finish,
                     isCurrentEntry = { destination == it },
                     onGame = { source, id -> navigator.replace(source, DeedGame(id)) },
                     onStoryGame = { source, id, choice -> navigator.replace(source, DeedGame(id, choice)) },
-                    onLearning = { source -> navigator.navigate(source, SkillTraining) },
+                    onLearning = { source -> navigator.navigate(source, ChapterPractice) },
                     onReflection = { source, day -> navigator.navigate(source, OtherPaths(day)) })
                 deedGameEntry(onFinished = finish, isCurrentEntry = { destination == it })
             },

@@ -60,9 +60,13 @@ internal class RemoteCloudSyncRepository @Inject constructor(
                 var metadata = metadata(identity, snapshot)
                 metadata = recoverRestore(identity, metadata, snapshot)
                 if (metadata.localGeneration != snapshot.localGeneration()) {
+                    val previousRun = snapshot.predecessorSnapshots().firstOrNull {
+                        it.runId == metadata.gameRunId && it.localGeneration() == metadata.localGeneration
+                    }
+                    if (previousRun != null) metadata = finishArchivedRequests(identity, metadata, previousRun)
                     metadata = metadata.copy(gameRunId = snapshot.runId, localGeneration = snapshot.localGeneration(),
                         lastSnapshotChecksum = null, lastAnalyticsSequence = 0, rewardFetchCursor = null, skillsPayload = null)
-                    store.replaceAfterRestore(metadata)
+                    if (previousRun != null) store.replaceAfterRestart(metadata) else store.replaceAfterRestore(metadata)
                 }
                 mutableState.value = mutableState.value.copy(lastSyncedAt = metadata.lastSyncedAtEpochMs?.let(::displayTime),
                     skills = metadata.skillsPayload?.let { BackendJson.decodeFromString<SkillAssessmentsResponse>(it) })
@@ -123,8 +127,11 @@ internal class RemoteCloudSyncRepository @Inject constructor(
             if (remote != null) {
                 val archive = remote.archive()
                 // Recover a lost transport journal only when the cloud history is an exact prefix.
-                if (archive.runId != snapshot.runId || archive.history.size > snapshot.history.size ||
-                    archive.history.indices.any { HistoryCodec.encode(archive.history[it]) != HistoryCodec.encode(snapshot.history[it]) }) {
+                // The cloud may still contain an archived predecessor after an offline restart.
+                val matchingRun = if (archive.runId == snapshot.runId) snapshot
+                    else snapshot.predecessorSnapshots().firstOrNull { it.runId == archive.runId }
+                if (matchingRun == null || !archive.isHistoryPrefixOf(matchingRun) ||
+                    archive.archivedRuns.any { remoteRun -> snapshot.archivedRuns.none { localRun -> remoteRun == localRun } }) {
                     throw CloudConflict("На сервере другая история. Откройте облачную копию в настройках.")
                 }
                 metadata = metadata.copy(serverRevision = remote.serverRevision)
@@ -149,6 +156,34 @@ internal class RemoteCloudSyncRepository @Inject constructor(
         // A frozen retry can precede newer local actions. The next pass must upload those as well.
         return metadata
     }
+
+    /** A late reply belongs to the archived run; it never applies that run's state to the live game. */
+    private suspend fun finishArchivedRequests(identity: ParentIdentity, saved: BackendSyncStateEntity,
+        archived: GameSnapshot): BackendSyncStateEntity {
+        var metadata = saved
+        if (store.pending(identity.profileId, SNAPSHOT) != null) metadata = uploadWorld(identity, metadata, archived)
+        if (store.pending(identity.profileId, ANALYTICS) != null) metadata = uploadSkills(identity, metadata, archived)
+        sendPendingAck(identity, archived.runId)
+        return metadata
+    }
+
+    /** Follow explicit restart links, rather than treating every retained archive as an ancestor. */
+    private fun GameSnapshot.predecessorSnapshots(): List<GameSnapshot> {
+        val result = mutableListOf<GameSnapshot>()
+        val visited = mutableSetOf(runId)
+        var nextRun = runId
+        while (true) {
+            val archive = archivedRuns.firstOrNull { it.nextRunId == nextRun } ?: return result
+            check(visited.add(archive.snapshot.runId)) { "Cyclic archived game runs" }
+            result += archive.snapshot
+            nextRun = archive.snapshot.runId
+        }
+    }
+
+    private fun GameSnapshot.isHistoryPrefixOf(other: GameSnapshot): Boolean =
+        runId == other.runId && history.size <= other.history.size && history.indices.all {
+            HistoryCodec.encode(history[it]) == HistoryCodec.encode(other.history[it])
+        }
 
     private suspend fun uploadSkills(identity: ParentIdentity, metadata: BackendSyncStateEntity,
         snapshot: GameSnapshot): BackendSyncStateEntity {
@@ -269,14 +304,26 @@ internal class RemoteCloudSyncRepository @Inject constructor(
             return metadata
         }
         val remote = intent.response.archive()
-        val marker = local.history.getOrNull(remote.history.size)
-        check(local.runId == remote.runId && local.localGeneration() != intent.previousGeneration &&
-            marker?.type == AuditType.RESTORED && marker.after?.let(HistoryCodec::encodeState) == HistoryCodec.encodeState(remote.state) &&
-            remote.history.indices.all { HistoryCodec.encode(remote.history[it]) == HistoryCodec.encode(local.history[it]) }) {
+        // A confirmed restore can commit immediately before an offline rewind. Its receipt
+        // remains in the predecessor archive and still recovers the same server revision.
+        val predecessors = local.predecessorSnapshots()
+        val restored = (listOf(local) + predecessors).firstOrNull { candidate ->
+            val marker = candidate.history.getOrNull(remote.history.size)
+            candidate.runId == remote.runId && candidate.localGeneration() != intent.previousGeneration &&
+                marker?.type == AuditType.RESTORED &&
+                marker.after?.let(HistoryCodec::encodeState) == HistoryCodec.encodeState(remote.state) &&
+                remote.isHistoryPrefixOf(candidate)
+        }
+        if (restored == null && predecessors.any { it.localGeneration() == intent.previousGeneration }) {
+            // The intent never replaced the old world, which was subsequently archived.
+            store.clear(identity.profileId, RESTORE, pending.requestId)
+            return metadata
+        }
+        checkNotNull(restored) {
             "Восстановление было прервано. Снова откройте облачную копию в настройках."
         }
         return metadata.copy(serverRevision = intent.response.serverRevision, lastSnapshotChecksum = remote.checksum,
-            gameRunId = local.runId, localGeneration = local.localGeneration(), lastAnalyticsSequence = 0,
+            gameRunId = restored.runId, localGeneration = restored.localGeneration(), lastAnalyticsSequence = 0,
             rewardFetchCursor = null, skillsPayload = null, lastSyncedAtEpochMs = null).also { store.replaceAfterRestore(it) }
     }
 

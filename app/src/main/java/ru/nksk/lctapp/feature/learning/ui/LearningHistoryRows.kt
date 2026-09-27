@@ -19,8 +19,8 @@ import ru.nksk.lctapp.domain.pet.renderPetText
 
 /** Names come from content; amounts come only from committed receipts, never catalog prices. */
 internal fun learningHistoryRows(history: List<AuditEntry>, catalog: GameCatalog, petName: String,
-    includeDay: Boolean = true): List<String> =
-    history.asReversed().asSequence().flatMap { it.activityRows(catalog, petName, includeDay).asSequence() }.take(50).toList()
+    includeDay: Boolean = true, limit: Int = 50): List<String> =
+    history.asReversed().asSequence().flatMap { it.activityRows(catalog, petName, includeDay).asSequence() }.take(limit).toList()
 
 private fun AuditEntry.activityRows(catalog: GameCatalog, petName: String, includeDay: Boolean): List<String> {
     // A baseline is a checkpoint, not evidence that all its older choices happened now.

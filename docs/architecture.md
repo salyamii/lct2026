@@ -87,6 +87,16 @@ outside the foreground; their positions and occurrence deduplication stay in the
 controller. Leaving a scene stops its narration. The intro owns a separate video
 player with its position retained in the startup ViewModel.
 
+Music, narration and intro pause directly in `ON_PAUSE`/`ON_STOP` lifecycle
+callbacks through `PlaybackLifecycleEffect`. This must not wait for a Compose
+SideEffect: a background window can stop scheduling frames before recomposition.
+Foreground return resumes the retained playback position and keeps sound preferences.
+
+Illustrated adventure screens and the menu use `GameArtworkScene` to reveal their
+initial image group together after asynchronous decode. Errors release the barrier;
+later pose or clothing updates do not hide a scene already on screen. Scene identity
+is an event/location key, never the changing world revision or animation phase.
+
 Before a world exists, the same music projection selects the first authored act's
 theme for onboarding. App composition suppresses the music cue only while the
 intro video is shown, independently of the shared sound preference. The video's

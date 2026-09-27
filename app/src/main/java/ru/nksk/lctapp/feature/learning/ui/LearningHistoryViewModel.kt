@@ -63,7 +63,8 @@ internal class LearningHistoryViewModel @Inject constructor(private val session:
     }
 }
 
-internal fun historyPresentation(game: GameState, shownHistory: List<AuditEntry>, catalog: GameCatalog): HistoryUiState {
+internal fun historyPresentation(game: GameState, shownHistory: List<AuditEntry>, catalog: GameCatalog,
+    historyRowLimit: Int = 50): HistoryUiState {
     val reports = FinancialBudgetProjection.report(game, shownHistory, catalog.content).associateBy { it.periodId }
     val coinMovements = budgetHistoryUi(game, shownHistory)
     val periods = game.financial.periods.reversed().map { period ->
@@ -117,7 +118,7 @@ internal fun historyPresentation(game: GameState, shownHistory: List<AuditEntry>
             note = if (!report.complete) "В старой истории не хватает подробностей. Показываем только то, что знаем точно."
                 else "Чтобы сравнить накопления с планом, из пополнений вычитаем монеты, которые взяли обратно. Купленное для цели показываем отдельно.")
     }
-    val operations = learningHistoryRows(shownHistory, catalog, game.pet.name)
+    val operations = learningHistoryRows(shownHistory, catalog, game.pet.name, limit = historyRowLimit)
     return HistoryUiState(loading = false, periods = periods, operations = operations,
         coinMovements = coinMovements, hasPlans = game.financial.plans.isNotEmpty())
 }

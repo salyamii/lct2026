@@ -15,6 +15,7 @@ internal interface BackendSyncStore {
     suspend fun stage(request: PendingBackendRequestEntity)
     suspend fun complete(state: BackendSyncStateEntity, kind: String, requestId: String)
     suspend fun replaceAfterRestore(state: BackendSyncStateEntity)
+    suspend fun replaceAfterRestart(state: BackendSyncStateEntity)
     suspend fun clear(profileId: String, kind: String, requestId: String)
 }
 
@@ -38,6 +39,16 @@ internal class RoomBackendSyncStore @Inject constructor(private val database: Ga
             listOf("snapshot", "analytics", "ack", "restore").forEach { kind ->
                 dao.readPending(state.profileId, kind)?.let { dao.deletePending(it.profileId, it.kind, it.requestId) }
             }
+        }
+    }
+    override suspend fun replaceAfterRestart(state: BackendSyncStateEntity) {
+        database.withWriteTransaction {
+            // A restart keeps the previous world in the archive. Lost HTTP replies must be
+            // recovered using their frozen IDs before moving the transport to the new run.
+            check(listOf("snapshot", "analytics", "ack", "restore").all {
+                dao.readPending(state.profileId, it) == null
+            }) { "Previous game run still has an unacknowledged request" }
+            dao.upsertState(state)
         }
     }
 }

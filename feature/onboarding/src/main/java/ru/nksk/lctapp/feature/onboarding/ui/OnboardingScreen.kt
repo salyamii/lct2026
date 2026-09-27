@@ -15,6 +15,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -62,19 +64,33 @@ fun OnboardingScreen(
                 val availableHeight = maxHeight
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally) {
-                    Column(Modifier.widthIn(max = 480.dp).fillMaxWidth().heightIn(min = availableHeight)) {
-                        Brand(artwork)
-                        CharacterScene(artwork, state, actions)
-                        // Weighted content in a scroll container only receives the remaining
-                        // viewport height. Let the card grow so its action can never collapse.
-                        WelcomeCard(state, artwork, saving, saveFailed, onStart)
+                    Layout(
+                        modifier = Modifier.widthIn(max = 480.dp).fillMaxWidth(),
+                        content = {
+                            Column {
+                                Brand(artwork)
+                                CharacterScene(artwork, state, actions)
+                            }
+                            WelcomeCard(state, artwork, saving, saveFailed, onStart)
+                        },
+                    ) { measurables, constraints ->
+                        val scene = measurables[0].measure(constraints.copy(minHeight = 0))
+                        // Fill the viewport with the card, but keep its maximum height
+                        // unbounded so long copy and the button can still scroll normally.
+                        val card = measurables[1].measure(constraints.copy(
+                            minHeight = (availableHeight.roundToPx() - scene.height).coerceAtLeast(0),
+                        ))
+                        layout(constraints.maxWidth, scene.height + card.height) {
+                            scene.placeRelative(0, 0)
+                            card.placeRelative(0, scene.height)
+                        }
                     }
                 }
             }
         }
         // Content respects safeDrawing; extend the card color behind the transparent system bar.
         Spacer(Modifier.align(Alignment.BottomCenter).fillMaxWidth()
-            .windowInsetsBottomHeight(WindowInsets.navigationBars).background(Night))
+            .windowInsetsBottomHeight(WindowInsets.safeDrawing).background(Night))
         if (state.selectionRequired) {
             AlertDialog(
                 onDismissRequest = { onAction(OnboardingAction.DismissSelectionDialog) },
@@ -109,7 +125,7 @@ private fun WelcomeCard(
     modifier: Modifier = Modifier,
 ) {
     val chooseFirst = stringResource(R.string.onboarding_choose_first)
-    Column(modifier.fillMaxWidth().heightIn(min = 324.dp)
+    Column(modifier.fillMaxWidth().heightIn(min = 324.dp).testTag("onboarding_welcome_card")
         .background(Brush.verticalGradient(listOf(Color(0xf2170f38), Night)), RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
         .padding(start = 20.dp, end = 20.dp, top = 28.dp, bottom = 32.dp)) {
         Text(stringResource(R.string.onboarding_title), color = Color.White,
