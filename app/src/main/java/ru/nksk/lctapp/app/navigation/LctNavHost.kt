@@ -51,14 +51,10 @@ import ru.nksk.lctapp.feature.goal.navigation.goalEntry
 import ru.nksk.lctapp.feature.menu.navigation.MainMenu
 import ru.nksk.lctapp.feature.menu.navigation.mainMenuEntry
 import ru.nksk.lctapp.feature.menu.ui.MainMenuAction
-import ru.nksk.lctapp.feature.tasks.navigation.StarPlates
-import ru.nksk.lctapp.feature.tasks.navigation.PriceCheck
-import ru.nksk.lctapp.feature.tasks.navigation.Telescope
 import ru.nksk.lctapp.feature.tasks.navigation.Tasks
 import ru.nksk.lctapp.feature.tasks.navigation.DeedGame
 import ru.nksk.lctapp.feature.tasks.navigation.deedGameEntry
 import ru.nksk.lctapp.feature.tasks.navigation.tasksEntry
-import ru.nksk.lctapp.feature.tasks.ui.DeedsAction
 import ru.nksk.lctapp.feature.map.navigation.GameMap
 import ru.nksk.lctapp.feature.map.navigation.mapEntry
 import ru.nksk.lctapp.feature.learning.navigation.Learning
@@ -153,7 +149,7 @@ fun LctNavHost(
             entryProvider = entryProvider {
                 mainMenuEntry(settingsButton = {
                     SettingsGearButton(dropUnlessResumed { navigator.navigate(MainMenu, Settings) })
-                }) { source, action ->
+                }, onTraining = { source -> navigator.navigate(source, SkillTraining) }) { source, action ->
                     navigator.navigate(
                         source = source,
                         destination = when (action) {
@@ -173,19 +169,14 @@ fun LctNavHost(
                 tasksEntry(
                     onEvent = { source -> navigator.navigate(source, Day) },
                     onGame = { source, id -> navigator.navigate(source, DeedGame(id)) },
-                    onOpen = { source, action ->
-                        navigator.navigate(source, when (action) {
-                            DeedsAction.StarPlates -> StarPlates
-                            DeedsAction.PriceCheck -> PriceCheck
-                            DeedsAction.Telescope -> Telescope
-                            DeedsAction.SkillTraining -> SkillTraining
-                        })
-                    },
+                    onTraining = { source -> navigator.navigate(source, SkillTraining) },
                     onBack = navigator::goBack,
                 )
                 goalEntry(onBack = navigator::goBack,
                     onOpenSavings = { source -> navigator.navigateToExisting(source, Savings) },
-                    onReturnHome = navigator::returnToRoot)
+                    onContinueDay = { source -> navigator.replace(source, Day) },
+                    onBudget = { source -> navigator.navigateToExisting(source, Economy) },
+                    onTraining = { source -> navigator.navigateToExisting(source, SkillTraining) })
                 economyEntry(onBack = navigator::returnToRoot, onConfirmed = navigator::returnToRoot,
                     onOpenSavings = { source -> navigator.navigateToExisting(source, Savings) })
                 savingsEntry(onBack = navigator::goBack,

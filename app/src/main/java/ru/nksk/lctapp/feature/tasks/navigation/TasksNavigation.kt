@@ -13,7 +13,6 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import ru.nksk.lctapp.feature.tasks.ui.DeedsAction
 import ru.nksk.lctapp.feature.tasks.ui.DeedsScreen
 import ru.nksk.lctapp.feature.tasks.ui.MemoryGameScreen
 import ru.nksk.lctapp.feature.tasks.ui.MemoryGameViewModel
@@ -39,7 +38,7 @@ data object PriceCheck : NavKey
 data object Telescope : NavKey
 
 fun EntryProviderScope<NavKey>.tasksEntry(
-    onOpen: (Tasks, DeedsAction) -> Unit,
+    onTraining: (Tasks) -> Unit,
     onBack: (NavKey) -> Unit,
     onEvent: (Tasks) -> Unit,
     onGame: (Tasks, String) -> Unit,
@@ -64,12 +63,11 @@ fun EntryProviderScope<NavKey>.tasksEntry(
             onFeed = { if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) viewModel.feed(it) },
             onRetry = viewModel::retry,
             onCurrentEvent = dropUnlessResumed { onEvent(source) },
-            onOpen = { action ->
-                if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) onOpen(source, action)
-            },
+            onTraining = dropUnlessResumed { onTraining(source) },
             onExit = dropUnlessResumed { onBack(source) },
         )
     }
+    // Kept only for back stacks saved before demo entry points were removed from Tasks.
     entry<StarPlates> { source ->
         val viewModel = hiltViewModel<MemoryGameViewModel>()
         val state by viewModel.uiState.collectAsStateWithLifecycle()

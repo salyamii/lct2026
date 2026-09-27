@@ -1,6 +1,8 @@
 package ru.nksk.lctapp.domain.history
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 import ru.nksk.lctapp.domain.analytics.AnalyticsFact
@@ -9,10 +11,12 @@ import ru.nksk.lctapp.domain.analytics.LedgerEntry
 import ru.nksk.lctapp.domain.engine.EngineRequest
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.finance.FinancialQuestion
+import ru.nksk.lctapp.domain.backend.ParentRewardApplication
 import java.security.MessageDigest
 
 /** Historical aggregates are separate from the small observable live game state. */
 @Serializable
+@OptIn(ExperimentalSerializationApi::class)
 data class AuditEntry(
     val id: String,
     val sequence: Long,
@@ -26,6 +30,9 @@ data class AuditEntry(
     val operations: List<LedgerEntry> = emptyList(),
     val formatVersion: Int = HISTORY_FORMAT_VERSION,
     val contentFingerprint: String? = null,
+    /** Omitted for old records so decoding/re-encoding keeps their exact historical checksums. */
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
+    val parentReward: ParentRewardApplication? = null,
 ) {
     init {
         require(id.isNotBlank() && runId.isNotBlank() && sequence > 0)
@@ -38,11 +45,18 @@ data class AuditEntry(
         require(type != AuditType.COMMAND || facts.all { it.actionId == request?.id })
         require(type != AuditType.FACTS || (before == null && after == null && request == null))
         require(type != AuditType.REJECTED || (request != null && before == null && after == null && operations.isEmpty()))
+        require((type == AuditType.PARENT_REWARD) == (parentReward != null))
+        parentReward?.let { application ->
+            require(request == null && before != null && after != null)
+            require(application.reward.gameRunId == runId)
+            require(application.receipt.historyEntryId == id && application.receipt.historySequence == sequence)
+            require(facts.all { it.actor == ru.nksk.lctapp.domain.analytics.AnalyticsActor.PARENT })
+        }
     }
 }
 
 @Serializable
-enum class AuditType { INITIALIZED, IMPORTED_BASELINE, COMMAND, TECHNICAL_UPDATE, FACTS, RESTORED, REJECTED }
+enum class AuditType { INITIALIZED, IMPORTED_BASELINE, COMMAND, TECHNICAL_UPDATE, FACTS, RESTORED, REJECTED, PARENT_REWARD }
 
 const val HISTORY_FORMAT_VERSION = 1
 /** Format 4 keeps the wire fields but identifies live budget allocations instead of legacy intentions. */
@@ -113,12 +127,16 @@ object HistoryCodec {
         require(requestIds.distinct().size == requestIds.size) { "Repeated command identity" }
         val operationIds = snapshot.history.flatMap { it.operations }.map { it.operationId }
         require(operationIds.distinct().size == operationIds.size) { "Repeated financial receipt identity" }
+        val rewards = snapshot.history.mapNotNull { it.parentReward }
+        require(rewards.map { it.reward.rewardId }.distinct().size == rewards.size) { "Repeated parent reward identity" }
+        require(rewards.map { it.receipt.applicationId }.distinct().size == rewards.size) { "Repeated parent reward application" }
+        require(rewards.map { it.reward.profileId }.distinct().size <= 1) { "Parent rewards belong to different profiles" }
         var previous: GameState? = null
         snapshot.history.forEach { entry ->
             if (entry.before != null && previous != null) {
                 require(encodeState(entry.before) == encodeState(checkNotNull(previous))) { "Historical checkpoint chain is broken" }
             }
-            if (entry.type == AuditType.COMMAND) {
+            if (entry.type == AuditType.COMMAND || entry.type == AuditType.PARENT_REWARD) {
                 CanonicalLedger.validate(checkNotNull(entry.before), checkNotNull(entry.after), entry.operations)
             }
             if (entry.after != null) previous = entry.after

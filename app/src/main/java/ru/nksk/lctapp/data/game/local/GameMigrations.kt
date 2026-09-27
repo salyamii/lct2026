@@ -4,6 +4,24 @@ import androidx.room3.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 
+/** Transport cursors and frozen requests do not replace or rewrite any saved gameplay. */
+internal val MIGRATION_20_21 = object : Migration(20, 21) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS BACKEND_SYNC_STATE (
+                profile_id TEXT NOT NULL, backend_url TEXT NOT NULL, server_revision INTEGER,
+                last_snapshot_checksum TEXT, last_analytics_sequence INTEGER NOT NULL,
+                last_synced_at_epoch_ms INTEGER, skills_payload TEXT, game_run_id TEXT,
+                local_generation TEXT, reward_fetch_cursor INTEGER, PRIMARY KEY(profile_id))
+        """.trimIndent())
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS PENDING_BACKEND_REQUEST (
+                profile_id TEXT NOT NULL, kind TEXT NOT NULL, request_id TEXT NOT NULL,
+                payload TEXT NOT NULL, PRIMARY KEY(profile_id, kind))
+        """.trimIndent())
+    }
+}
+
 /** Upgrade the complete aggregate through the repository before exposing it; never guess past envelope expenses in SQL. */
 internal val MIGRATION_19_20 = object : Migration(19, 20) {
     override suspend fun migrate(connection: SQLiteConnection) {

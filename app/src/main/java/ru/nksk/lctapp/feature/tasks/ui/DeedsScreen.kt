@@ -41,10 +41,8 @@ import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 
-enum class DeedsAction { StarPlates, PriceCheck, Telescope, SkillTraining }
-
 @Composable
-fun DeedsScreen(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit,
+fun DeedsScreen(onTraining: () -> Unit, onExit: () -> Unit,
     state: DeedsUiState = DeedsUiState(), onStart: (String) -> Unit = {}, onRetry: () -> Unit = {},
     onFeed: (String) -> Unit = {}, onCurrentEvent: () -> Unit = {},
 ) {
@@ -52,7 +50,7 @@ fun DeedsScreen(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit,
     Box(Modifier.fillMaxSize()) {
         DeedsContent(
             state = state.copy(busy = false),
-            onOpen = { if (!state.busy) onOpen(it) },
+            onTraining = { if (!state.busy) onTraining() },
             onExit = { if (!state.busy) onExit() },
             onStart = { if (!state.busy) onStart(it) },
             onRetry = { if (!state.busy) onRetry() },
@@ -70,7 +68,7 @@ fun DeedsScreen(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit,
 }
 
 @Composable
-private fun DeedsContent(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit,
+private fun DeedsContent(onTraining: () -> Unit, onExit: () -> Unit,
     state: DeedsUiState, onStart: (String) -> Unit, onRetry: () -> Unit,
     onFeed: (String) -> Unit, onCurrentEvent: () -> Unit,
 ) {
@@ -121,7 +119,7 @@ private fun DeedsContent(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit,
                 }
                 item(key = "skill-training", contentType = "training") {
                     Spacer(Modifier.height(16.dp))
-                    Surface(onClick = { onOpen(DeedsAction.SkillTraining) }, enabled = !state.busy,
+                    Surface(onClick = onTraining, enabled = !state.busy,
                         modifier = Modifier.fillMaxWidth(), color = Color(0xFFF0F5DF),
                         shape = RoundedCornerShape(22.dp), border = BorderStroke(1.dp, Color(0xFFD1DCAF))) {
                         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically,
@@ -149,57 +147,6 @@ private fun DeedsContent(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit,
                         onOpen = { if (!state.busy) onStart(offer.id) },
                     )
                 }
-                item(key = "training-heading", contentType = "heading") {
-                    Column {
-                        Spacer(Modifier.height(24.dp))
-                        Text("Тренировка в мини-играх", fontFamily = Rubik, fontWeight = FontWeight.Bold, color = DeedColors.Text)
-                        Text(
-                            stringResource(R.string.deeds_subtitle),
-                            fontSize = 13.sp,
-                            fontFamily = Nunito,
-                            color = DeedColors.TextSoft,
-                        )
-                        Spacer(Modifier.height(14.dp))
-                    }
-                }
-                item(key = "training-stars", contentType = "deed") {
-                    DeedCard(
-                        title = stringResource(R.string.deeds_star_title),
-                        description = stringResource(R.string.deeds_star_description),
-                        rewardLabel = stringResource(R.string.deeds_demo_max),
-                        scene = R.drawable.location_hill,
-                        onOpen = { onOpen(DeedsAction.StarPlates) },
-                    )
-                    Spacer(Modifier.height(14.dp))
-                }
-                item(key = "training-prices", contentType = "deed") {
-                    DeedCard(
-                        title = stringResource(R.string.deeds_price_title),
-                        description = stringResource(R.string.deeds_price_description, state.petName),
-                        rewardLabel = stringResource(R.string.deeds_demo_max),
-                        scene = R.drawable.location_workshop,
-                        onOpen = { onOpen(DeedsAction.PriceCheck) },
-                    )
-                    Spacer(Modifier.height(14.dp))
-                }
-                item(key = "training-telescope", contentType = "deed") {
-                    DeedCard(
-                        title = stringResource(R.string.deeds_target_title),
-                        description = stringResource(R.string.deeds_target_description),
-                        rewardLabel = stringResource(R.string.deeds_demo_max),
-                        scene = R.drawable.location_trail,
-                        onOpen = { onOpen(DeedsAction.Telescope) },
-                    )
-                }
-                item(key = "training-note", contentType = "footer") {
-                    Column {
-                        Spacer(Modifier.height(14.dp))
-                        DeedChip(stringResource(R.string.deeds_demo_notice))
-                        Spacer(Modifier.height(16.dp))
-                        Spacer(Modifier.height(20.dp))
-                    }
-                }
-
             }
         }
     }

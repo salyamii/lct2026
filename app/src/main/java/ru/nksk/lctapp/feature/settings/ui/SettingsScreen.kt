@@ -49,7 +49,7 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
             SoundSettingsCard(state.sound, onAction)
             SettingsCard {
                 Text("Для родителей", color = GameInk, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                AdventureBody("Подключите родительский профиль, чтобы видеть, чему учится ребёнок.")
+                AdventureBody("Покажите код родителю, чтобы он мог видеть прогресс и присылать подарки.")
                 if (state.loading) {
                     LinearProgressIndicator(Modifier.fillMaxWidth())
                     AdventureBody("Открываем настройки…")
@@ -63,7 +63,7 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
             state.profileId?.let { profileId ->
                 var copied by rememberSaveable(profileId) { mutableStateOf(false) }
                 SettingsCard {
-                    Text("Номер профиля", color = GameInk, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text("Номер устройства", color = GameInk, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Text(profileId, color = GameInk, style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Monospace)
                     OutlinedButton(onClick = { onCopyProfile(profileId); copied = true }, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = GameInk)) {
@@ -71,6 +71,9 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
                     }
                 }
             }
+            CloudSettingsCard(state.cloud,
+                configured = state.backendConfigured && !state.loading && !state.profileError,
+                onAction = onAction)
             debugButton?.let {
                 SettingsCard {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
@@ -82,6 +85,9 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
                 }
             }
         }
+    }
+    state.cloud.restorePreview?.let { preview ->
+        CloudRestoreDialog(preview, busy = state.cloud.busy, onAction = onAction)
     }
 }
 
@@ -158,7 +164,7 @@ private fun ParentCodeContent(state: SettingsUiState, onAction: (SettingsAction)
 }
 
 @Composable
-private fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
+internal fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
     Surface(Modifier.fillMaxWidth(), color = Color.White, shape = RoundedCornerShape(24.dp),
         border = BorderStroke(1.dp, GameInk.copy(alpha = .12f))) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp), content = content)

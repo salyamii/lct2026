@@ -176,6 +176,8 @@ internal class AssetMediaPlayer(
         if (!shouldKeepPlayer()) { releasePlayer(); return }
         try {
             prepared = true
+            // Fill the intro surface on tall phones without stretching the original portrait frame.
+            if (video) current.setVideoScalingMode(MediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING)
             current.isLooping = repeat
             if (position > 0) {
                 val target = position.coerceAtMost((current.duration - 1).coerceAtLeast(0).toLong())

@@ -65,7 +65,9 @@ fun OnboardingScreen(
                     Column(Modifier.widthIn(max = 480.dp).fillMaxWidth().heightIn(min = availableHeight)) {
                         Brand(artwork)
                         CharacterScene(artwork, state, actions)
-                        WelcomeCard(state, artwork, saving, saveFailed, onStart, Modifier.weight(1f))
+                        // Weighted content in a scroll container only receives the remaining
+                        // viewport height. Let the card grow so its action can never collapse.
+                        WelcomeCard(state, artwork, saving, saveFailed, onStart)
                     }
                 }
             }

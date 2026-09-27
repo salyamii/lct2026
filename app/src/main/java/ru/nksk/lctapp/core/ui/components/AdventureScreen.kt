@@ -66,15 +66,17 @@ internal fun AdventureScreen(
 ) {
     BoxWithConstraints(modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding().imePadding()) {
         val pageScroll = contentScrollState ?: rememberScrollState()
+        val fixedActionScroll = rememberScrollState()
         val density = LocalDensity.current
         val fontScale = density.fontScale
         val largeText = fontScale >= 1.4f
-        val compact = maxHeight < 600.dp || largeText
         // Illustrated custom scenes retain their own framing. Adviser scenes wrap the
         // header, balances and character instead of reserving a percentage of empty floor.
         val customStageHeight = if (sceneAspectRatio != null) (maxWidth / sceneAspectRatio).coerceIn(180.dp, 440.dp)
             else (maxHeight * sceneFraction.coerceIn(.30f, .70f)).coerceIn(240.dp, 420.dp)
         var measuredStageHeight by remember { mutableIntStateOf(0) }
+        val compact = maxHeight < 600.dp || largeText || (measuredStageHeight > 0 &&
+            maxHeight - with(density) { measuredStageHeight.toDp() } < 200.dp)
         val backgroundHeight = if (measuredStageHeight > 0) with(density) { measuredStageHeight.toDp() }
             else if (scene != null) customStageHeight else 340.dp
         @Composable fun Stage() {
@@ -107,11 +109,18 @@ internal fun AdventureScreen(
             Surface(panelModifier.fillMaxWidth().background(sceneBottomColor), color = GamePaper,
                 shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)) {
                 Box(contentAlignment = Alignment.TopCenter) {
-                    Column(Modifier.widthIn(max = 640.dp).fillMaxWidth().let {
+                    if (scrollContent && pinFooter) {
+                        AdaptiveActionPanel(
+                            modifier = Modifier.widthIn(max = 640.dp).fillMaxWidth(),
+                            contentSpacing = contentSpacing,
+                            contentScrollState = pageScroll,
+                            actions = { if (includeFooter) footer?.invoke(this) },
+                            content = content,
+                        )
+                    } else Column(Modifier.widthIn(max = 640.dp).fillMaxWidth().let {
                         if (scrollContent && !pinFooter) it.verticalScroll(pageScroll) else it
                     }.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Column(if (scrollContent && pinFooter) Modifier.weight(1f, fill = false).verticalScroll(pageScroll)
-                            else Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(contentSpacing),
+                        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(contentSpacing),
                             content = content)
                         if (includeFooter) footer?.let {
                             Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp), content = it)
@@ -146,6 +155,7 @@ internal fun AdventureScreen(
                     Surface(Modifier.fillMaxWidth(), color = GamePaper) {
                         Box(contentAlignment = Alignment.TopCenter) {
                             Column(Modifier.widthIn(max = 640.dp).fillMaxWidth()
+                                .verticalScroll(fixedActionScroll)
                                 .padding(horizontal = 20.dp).padding(top = 8.dp, bottom = 12.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp), content = it)
                         }

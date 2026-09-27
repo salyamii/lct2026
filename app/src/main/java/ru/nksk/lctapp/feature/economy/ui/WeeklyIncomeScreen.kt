@@ -2,10 +2,8 @@ package ru.nksk.lctapp.feature.economy.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,6 +20,7 @@ import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.components.GameInk
 import ru.nksk.lctapp.core.ui.components.GamePaper
 import ru.nksk.lctapp.core.ui.components.GameArtwork
+import ru.nksk.lctapp.core.ui.components.AdaptiveActionPanel
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
@@ -89,12 +88,23 @@ private fun IncomeHero(state: WeeklyIncomeUiState, onBack: () -> Unit, modifier:
 @Composable
 private fun IncomeInvitation(state: WeeklyIncomeUiState, onPlan: () -> Unit, modifier: Modifier) {
     Surface(modifier, color = GamePaper, shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)) {
-        Column(Modifier.fillMaxSize().windowInsetsPadding(
-            WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal))
-            .padding(horizontal = 20.dp, vertical = 14.dp),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-            Column(Modifier.weight(1f).widthIn(max = 520.dp).verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Box(Modifier.fillMaxSize().windowInsetsPadding(
+            WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)),
+            contentAlignment = Alignment.TopCenter) {
+            AdaptiveActionPanel(
+                modifier = Modifier.widthIn(max = 560.dp).fillMaxWidth(),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp),
+                sectionSpacing = 10.dp,
+                fillBody = true,
+                actions = {
+                    Button(onClick = onPlan, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                        shape = RoundedCornerShape(28.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = AdventureLime, contentColor = GameInk)) {
+                        Text(state.action, fontFamily = Rubik, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp,
+                            textAlign = TextAlign.Center)
+                    }
+                },
+            ) {
                 Text(state.title, color = GameInk, fontFamily = Rubik, fontWeight = FontWeight.ExtraBold,
                     fontSize = 22.sp, lineHeight = 28.sp)
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -112,12 +122,6 @@ private fun IncomeInvitation(state: WeeklyIncomeUiState, onPlan: () -> Unit, mod
                     fontSize = 14.sp, lineHeight = 20.sp)
                 Text(state.nextIncome, color = Color(0xFF6B6394), fontFamily = Nunito,
                     fontSize = 14.sp, lineHeight = 20.sp)
-            }
-            Button(onClick = onPlan, modifier = Modifier.widthIn(max = 520.dp).fillMaxWidth().padding(top = 10.dp)
-                .heightIn(min = 56.dp), shape = RoundedCornerShape(28.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = AdventureLime, contentColor = GameInk)) {
-                Text(state.action, fontFamily = Rubik, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp,
-                    textAlign = TextAlign.Center)
             }
         }
     }

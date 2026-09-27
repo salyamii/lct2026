@@ -4,6 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import java.text.ParsePosition
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,6 +16,8 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.nksk.lctapp.domain.media.MediaPreferencesRepository
 import ru.nksk.lctapp.domain.parentlink.ParentLinkRepository
+import ru.nksk.lctapp.domain.backend.CloudSyncRepository
+import ru.nksk.lctapp.domain.backend.CloudSyncResult
 
 internal enum class ParentCodeStatus { NONE, LOADING, READY, ERROR }
 internal enum class ProfileRegistrationStatus { NONE, LOADING, REGISTERED, ERROR }
@@ -33,6 +39,7 @@ internal data class SettingsUiState(
     val qr: ParentLinkQrMatrix? = null,
     val registrationStatus: ProfileRegistrationStatus = ProfileRegistrationStatus.NONE,
     val sound: SoundSettingsUiState = SoundSettingsUiState(),
+    val cloud: CloudSettingsUiState = CloudSettingsUiState(),
 )
 
 internal sealed interface SettingsAction {
@@ -41,12 +48,17 @@ internal sealed interface SettingsAction {
     data object RetryRegistration : SettingsAction
     data class SetSoundEnabled(val enabled: Boolean) : SettingsAction
     data object RetrySound : SettingsAction
+    data object SyncCloud : SettingsAction
+    data object PrepareCloudRestore : SettingsAction
+    data class ConfirmCloudRestore(val previewId: String) : SettingsAction
+    data class DismissCloudRestore(val previewId: String) : SettingsAction
 }
 
 @HiltViewModel
 internal class SettingsViewModel @Inject constructor(
     private val repository: ParentLinkRepository,
     private val mediaPreferences: MediaPreferencesRepository,
+    private val cloudRepository: CloudSyncRepository,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(SettingsUiState())
     val uiState = mutableState.asStateFlow()
@@ -55,7 +67,7 @@ internal class SettingsViewModel @Inject constructor(
     private var soundObserver: Job? = null
     private var pendingSoundEnabled: Boolean? = null
 
-    init { loadProfile(); observeSound() }
+    init { loadProfile(); observeSound(); observeCloud() }
 
     fun onAction(action: SettingsAction) {
         when (action) {
@@ -69,7 +81,118 @@ internal class SettingsViewModel @Inject constructor(
                     else pendingSoundEnabled?.let(::setSoundEnabled)
                 }
             }
+            SettingsAction.SyncCloud -> synchronizeCloud()
+            SettingsAction.PrepareCloudRestore -> prepareCloudRestore()
+            is SettingsAction.ConfirmCloudRestore -> restoreCloud(action.previewId)
+            is SettingsAction.DismissCloudRestore -> dismissCloudRestore(action.previewId)
         }
+    }
+
+    private fun observeCloud() {
+        viewModelScope.launch {
+            cloudRepository.state.collect { sync ->
+                val current = mutableState.value
+                mutableState.value = current.copy(cloud = current.cloud.copy(sync = sync,
+                    feedback = current.cloud.feedback.takeUnless {
+                        current.cloud.operation == null && sync != current.cloud.sync
+                    },
+                    lastSyncedLabel = sync.lastSyncedAt?.let(::lastSyncedLabel)))
+            }
+        }
+    }
+
+    private fun canStartCloudOperation(): Boolean {
+        val current = mutableState.value
+        return current.backendConfigured && !current.loading && !current.profileError &&
+            !current.cloud.busy && current.cloud.restorePreview == null
+    }
+
+    private fun synchronizeCloud() {
+        if (!canStartCloudOperation()) return
+        updateCloud { copy(operation = CloudSettingsOperation.SYNC, feedback = null) }
+        viewModelScope.launch {
+            try {
+                val result = cloudRepository.synchronize()
+                updateCloud { copy(feedback = when (result) {
+                    CloudSyncResult.SUCCESS -> "Игра синхронизирована с облаком."
+                    CloudSyncResult.RETRY -> cloudRepository.state.value.message
+                        ?: "Не удалось завершить синхронизацию. Попробуйте ещё раз позже."
+                    CloudSyncResult.NEEDS_ATTENTION -> cloudRepository.state.value.message
+                        ?: "Не удалось завершить синхронизацию. Проверьте состояние облака."
+                    CloudSyncResult.NO_GAME -> "Сначала начните приключение, чтобы сохранить его в облаке."
+                }) }
+            } catch (cancelled: CancellationException) { throw cancelled
+            } catch (_: Exception) {
+                updateCloud { copy(feedback = "Не удалось синхронизировать игру. Попробуйте ещё раз.") }
+            } finally {
+                updateCloud { copy(operation = null) }
+            }
+        }
+    }
+
+    private fun prepareCloudRestore() {
+        if (!canStartCloudOperation()) return
+        updateCloud { copy(operation = CloudSettingsOperation.DOWNLOAD, feedback = null) }
+        viewModelScope.launch {
+            try {
+                val preview = cloudRepository.prepareRestore()
+                updateCloud { copy(restorePreview = preview) }
+            } catch (cancelled: CancellationException) { throw cancelled
+            } catch (_: Exception) {
+                updateCloud { copy(feedback = "Не удалось загрузить копию из облака. Попробуйте ещё раз.") }
+            } finally {
+                updateCloud { copy(operation = null) }
+            }
+        }
+    }
+
+    private fun restoreCloud(previewId: String) {
+        val cloud = mutableState.value.cloud
+        val preview = cloud.restorePreview ?: return
+        if (cloud.busy || preview.id != previewId) return
+        updateCloud { copy(operation = CloudSettingsOperation.RESTORE, feedback = null) }
+        viewModelScope.launch {
+            try {
+                cloudRepository.restore(preview.id)
+                updateCloud { copy(restorePreview = null, feedback = "Игра восстановлена из облака.") }
+            } catch (cancelled: CancellationException) { throw cancelled
+            } catch (_: Exception) {
+                cloudRepository.dismissRestore(preview.id)
+                updateCloud { copy(restorePreview = null,
+                    feedback = "Не удалось подтвердить восстановление. Загрузите копию из облака ещё раз.") }
+            } finally {
+                updateCloud { copy(operation = null) }
+            }
+        }
+    }
+
+    private fun dismissCloudRestore(previewId: String) {
+        val cloud = mutableState.value.cloud
+        val preview = cloud.restorePreview ?: return
+        if (cloud.busy || preview.id != previewId) return
+        cloudRepository.dismissRestore(preview.id)
+        updateCloud { copy(restorePreview = null, feedback = null) }
+    }
+
+    private inline fun updateCloud(transform: CloudSettingsUiState.() -> CloudSettingsUiState) {
+        val current = mutableState.value
+        mutableState.value = current.copy(cloud = current.cloud.transform())
+    }
+
+    override fun onCleared() {
+        mutableState.value.cloud.restorePreview?.let { cloudRepository.dismissRestore(it.id) }
+        super.onCleared()
+    }
+
+    private fun lastSyncedLabel(value: String): String? {
+        val date = listOf("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss'Z'").firstNotNullOfOrNull { pattern ->
+            val position = ParsePosition(0)
+            SimpleDateFormat(pattern, Locale.ROOT).apply {
+                isLenient = false
+                timeZone = TimeZone.getTimeZone("UTC")
+            }.parse(value, position)?.takeIf { position.index == value.length }
+        } ?: return null
+        return SimpleDateFormat("d MMM, HH:mm", Locale.forLanguageTag("ru")).format(date)
     }
 
     private fun observeSound() {

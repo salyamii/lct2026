@@ -20,9 +20,9 @@ android {
         minSdk = 24
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.1"
 
-        // Intentionally empty until a backend is available; never send data to a demo host.
+        // Team endpoint lives in gradle.properties; an explicit empty override keeps the app offline.
         val backendUrl = providers.gradleProperty("LCT_BACKEND_BASE_URL").orElse("").get().trim()
         require(backendUrl.isEmpty() || (backendUrl.startsWith("https://") && backendUrl.endsWith("/") &&
             backendUrl.none { it == '"' || it == '\\' || it.isWhitespace() })) {
@@ -63,6 +63,9 @@ dependencies {
     implementation(libs.retrofit.kotlinx.serialization)
     implementation(libs.okhttp)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.coil.compose)
     implementation(project(":feature:onboarding"))

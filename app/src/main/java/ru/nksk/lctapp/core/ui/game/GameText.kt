@@ -1,5 +1,11 @@
 package ru.nksk.lctapp.core.ui.game
 
+internal fun deedDeadline(currentDay: Int, expiresDay: Int): String = when (expiresDay - currentDay) {
+    0 -> "Можно выполнить сегодня"
+    1 -> "Можно выполнить сегодня или завтра"
+    else -> "Можно выполнить до конца $expiresDay-го дня"
+}
+
 private val decorativeSeparator = Regex("\\s*\u00b7\\s*")
 private val pricedAction = Regex("^(.+?)\\s*\u00b7\\s*(\\+?)(\\d+)(?:\\s+монет[аы]?)?$")
 

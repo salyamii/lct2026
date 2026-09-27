@@ -26,7 +26,7 @@ class DeedsListTest {
         var selected: String? = null
         compose.setContent {
             LCTAppTheme {
-                DeedsScreen(onOpen = {}, onExit = {},
+                DeedsScreen(onTraining = {}, onExit = {},
                     state = DeedsUiState(loading = false, offers = offers),
                     onStart = { selected = it })
             }

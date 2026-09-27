@@ -316,6 +316,25 @@ class GameEngineTest {
         assertEquals(completed, f.state)
     }
 
+    @Test fun completedDeedWithNoCorrectAnswersCreditsOneCoinToWalletReserveAndJournal() = runTest {
+        val f = Fixture(deedKind = DeedGameKind.COMPARISON)
+        f.begin(listOf("small", "quiet", "quiet", "quiet"))
+        f.apply(EngineCommand.OpenNextEvent)
+        f.apply(EngineCommand.AcceptDeedProposal(f.day.currentEvent!!.id))
+        val before = f.state.economy
+        val score = checkNotNull(DeedGameScore.fromComparison(PriceQuizState.create().copy(current = 5, correctAnswers = 0)))
+        val command = EngineCommand.CompleteDeed(f.day.currentEvent!!.id, score)
+        f.apply(command)
+        assertEquals(before.availableBalance + 1, f.state.economy.availableBalance)
+        assertEquals(before.plan.reserve + 1, f.state.economy.plan.reserve)
+        assertEquals(before.savingsBalance, f.state.economy.savingsBalance)
+        assertEquals(1L, f.day.journal.single { it.kind == DayJournalKind.DEED }.moneyDelta)
+        assertTrue(f.day.deeds.single().completed)
+        val completed = f.state
+        assertEquals(BlockReason.InvalidEventAction, f.blocked(command))
+        assertEquals(completed, f.state)
+    }
+
     @Test fun completionClosesTheEventAndCommitsItsEffectsOnlyOnce() = runTest {
         val f = Fixture()
         f.begin(listOf("small", "quiet", "quiet", "quiet"))

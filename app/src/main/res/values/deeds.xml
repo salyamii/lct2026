@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="deeds_subtitle">Три мини-игры с пробными наградами</string>
-    <string name="deeds_demo_notice">Демо-монеты не меняют общий баланс</string>
-    <string name="deeds_demo_max">До 10 демо-монет</string>
     <string name="deeds_star_title">Перепутанные находки</string>
     <string name="deeds_price_title">Сверка счетов</string>
     <string name="deeds_target_title">Настрой телескоп</string>
-    <string name="deeds_star_description">Смотритель свалил находки в кучу. Открывай пласты и собирай пары одинаковых предметов.</string>
-    <string name="deeds_price_description">Гонец привёз счета из деревенской лавки. %1$s ищет самую дорогую покупку. Помоги сравнить суммы.</string>
-    <string name="deeds_target_description">Ловящий сигнал уходит в сторону. Останови бегунок в зелёной зоне — и башня снова найдёт звезду.</string>
     <string name="deeds_start">Взяться за дело</string>
     <string name="deeds_again">Сделать ещё раз</string>
     <string name="deeds_back_to_list">К списку дел</string>

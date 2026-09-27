@@ -61,6 +61,12 @@ data class GameCatalog(
     fun plan(state: GameState): List<String> = EventScheduler.plan(this, state)
 }
 
+/** An explicit continuation resumes the current day or its summary, never skips planning. */
+sealed interface ContinueDayPlan {
+    data object NeedsBudget : ContinueDayPlan
+    data class Day(val command: EngineCommand?) : ContinueDayPlan
+}
+
 /** Installs immutable content once, then delegates every game write to the aggregate engine. */
 class GameSession(
     private val games: GameRepository,
@@ -82,6 +88,7 @@ class GameSession(
     val timeMachine = ru.nksk.lctapp.domain.timemachine.TimeMachine(games, engine, catalog, contentFingerprint)
 
     fun observeHistory() = games.observeHistory()
+    fun observeHistorySequence() = games.observeHistorySequence()
     suspend fun history() = games.readHistory()
     suspend fun exportSnapshot() = games.exportSnapshot()
     suspend fun restoreSnapshot(snapshot: ru.nksk.lctapp.domain.history.GameSnapshot,
@@ -164,6 +171,13 @@ class GameSession(
     } == true
 
     fun previewAdvanceSpending(state: GameState): EventSpendingPreview? = engine.advanceSpending(state, advanceCommand(state))
+
+    fun continueDayPlan(state: GameState): ContinueDayPlan = when {
+        state.economy.planning != null || state.economy.unallocated != 0L -> ContinueDayPlan.NeedsBudget
+        // Only the separate wake-up action on the summary may begin another day.
+        state.engine?.phase == DayPhase.FINISHED -> ContinueDayPlan.Day(null)
+        else -> ContinueDayPlan.Day(advanceCommand(state))
+    }
 
     fun advanceCommand(state: GameState): EngineCommand? = when {
         state.economy.planning != null || state.economy.unallocated != 0L -> null

@@ -3,7 +3,6 @@ package ru.nksk.lctapp.core.ui.media
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,7 +13,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.currentStateAsState
 import kotlinx.coroutines.delay
 
-/** Fits the original portrait frame. The shared local player handles focus, mute and release. */
+/** Fills the window; the shared player crops the video proportionally and owns focus/mute/release. */
 @Composable
 internal fun IntroVideoPlayer(assetPath: String, positionMs: Long, soundEnabled: Boolean,
     onPositionChanged: (Long) -> Unit, onCompleted: () -> Unit, onError: () -> Unit, modifier: Modifier = Modifier) {
@@ -52,6 +51,6 @@ internal fun IntroVideoPlayer(assetPath: String, positionMs: Long, soundEnabled:
                     }
                 })
             }
-        }, modifier = Modifier.aspectRatio(9f / 16f).fillMaxSize(), onRelease = { player.attachSurface(null) })
+        }, modifier = Modifier.fillMaxSize(), onRelease = { player.attachSurface(null) })
     }
 }

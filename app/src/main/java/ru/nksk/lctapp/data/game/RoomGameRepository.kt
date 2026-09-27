@@ -18,9 +18,11 @@ import ru.nksk.lctapp.domain.engine.CampaignReconciliation
 import ru.nksk.lctapp.domain.finance.FinancialProgress
 import ru.nksk.lctapp.domain.history.*
 import ru.nksk.lctapp.domain.pet.withStarterAccessoryOwnership
+import ru.nksk.lctapp.domain.backend.*
 import java.util.UUID
 
-internal class RoomGameRepository @Inject constructor(private val database: GameDatabase) : GameRepository {
+internal class RoomGameRepository @Inject constructor(private val database: GameDatabase,
+    private val parentRewardPolicy: ParentRewardPolicy = ParentRewardPolicy()) : GameRepository {
     private val dao = database.gameStateDao()
     private val history = database.gameHistoryDao()
     private val finance = database.financialProgressDao()
@@ -265,6 +267,9 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
     override fun observeHistory(): Flow<List<AuditEntry>> = database.invalidationTracker.createFlow("GAME_AUDIT")
         .map { readHistory() }
 
+    override fun observeHistorySequence(): Flow<Long> = database.invalidationTracker.createFlow("GAME_AUDIT")
+        .map { withLiveBudgetRead { history.sequence() } }
+
     override suspend fun recordFacts(facts: List<AnalyticsFact>, sourceGuard: HistorySourceGuard?) {
         if (facts.isEmpty()) return
         withLiveBudgetWrite {
@@ -297,6 +302,56 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
 
     override suspend fun acknowledgeOutbox(ids: Set<String>) = withLiveBudgetWrite {
         if (ids.isNotEmpty()) history.acknowledge(ids.toList())
+    }
+
+    override suspend fun applyParentRewards(profileId: String, gameRunId: String, rewards: List<ParentRewardDto>,
+        expectedRestoreGeneration: String): List<ParentRewardReceiptDto> = withLiveBudgetWrite {
+        require(profileId.isNotBlank() && gameRunId.isNotBlank() && expectedRestoreGeneration.isNotBlank())
+        var current = checkNotNull(readInTransaction()) { "Game has not been initialized" }
+        val run = ensureBaseline(current)
+        if (run.runId != gameRunId || localGameGeneration(run.runId, history.latestRestoreId(run.runId)) != expectedRestoreGeneration)
+            throw ParentRewardTargetChangedException()
+        require(rewards.all { it.profileId == profileId && it.gameRunId == gameRunId }) { "Parent reward belongs to another profile or game run" }
+        history.firstParentReward(run.runId)?.decode()?.parentReward?.let {
+            require(it.reward.profileId == profileId) { "Parent rewards are already bound to another profile" }
+        }
+        val unique = rewards.groupBy { it.rewardId }.map { (id, copies) ->
+            if (copies.any { it != copies.first() }) throw ParentRewardConflictException(id)
+            copies.first()
+        }
+        fun entryId(rewardId: String) = "parent-reward:" + HistoryCodec.sha256(
+            listOf(run.runId, rewardId).joinToString("") { "${it.length}:$it" })
+        // Validate every previously committed identity before applying any new grant in this batch.
+        val previous = unique.mapNotNull { reward -> history.find(entryId(reward.rewardId))?.decode()?.let { entry ->
+            val application = entry.parentReward
+            if (application == null || application.reward != reward) throw ParentRewardConflictException(reward.rewardId)
+            reward.rewardId to application.receipt
+        } }.toMap()
+        val accessories = database.storyContentDao().readItem().filter { it.category == "ACCESSORY" }.map { it.id }.toSet()
+        val receipts = mutableListOf<ParentRewardReceiptDto>()
+        for (reward in unique) {
+            val priorReceipt = previous[reward.rewardId]
+            if (priorReceipt != null) { receipts += priorReceipt; continue }
+            val applicationId = "parent-application:${UUID.randomUUID()}"
+            val change = parentRewardPolicy.apply(current, reward, applicationId, accessories) ?: continue
+            CanonicalLedger.validate(current, change.state, change.operations)
+            val sequence = nextSequence()
+            val identity = entryId(reward.rewardId)
+            val receipt = ParentRewardReceiptDto(reward.rewardId, applicationId, identity, sequence, change.outcome)
+            if (change.state != current) persistGame(change.state)
+            val saved = checkNotNull(readInTransaction())
+            val fact = AnalyticsFact("$applicationId:fact", run.runId, applicationId, applicationId, sequence,
+                FactDetail.Interaction("parent_reward:${change.outcome.name}"),
+                DecisionContext(day = saved.engine?.day), actor = AnalyticsActor.PARENT,
+                contextFamily = "parent_reward", contentVersion = "parent-reward-v1",
+                gameRulesVersion = saved.engine?.rulesId ?: "not-started")
+            appendAudit(AuditEntry(identity, sequence, run.runId, AuditType.PARENT_REWARD,
+                before = current, after = saved, facts = listOf(fact), operations = change.operations,
+                parentReward = ParentRewardApplication(reward, receipt)))
+            current = saved
+            receipts += receipt
+        }
+        receipts
     }
 
     override suspend fun exportSnapshot(): GameSnapshot = withLiveBudgetWrite {

@@ -1,0 +1,67 @@
+{
+  "gameRunId": "73d831fd-cf83-4a8c-9e99-973fe16fef4e",
+  "basedOnHistorySequence": 1,
+  "skills": [
+    {
+      "skillId": "FIN-01",
+      "status": "NO_DATA",
+      "policyVersion": "example-no-data-v1"
+    },
+    {
+      "skillId": "FIN-02",
+      "status": "NO_DATA",
+      "policyVersion": "example-no-data-v1"
+    },
+    {
+      "skillId": "FIN-03",
+      "status": "NO_DATA",
+      "policyVersion": "example-no-data-v1"
+    },
+    {
+      "skillId": "FIN-04",
+      "status": "NO_DATA",
+      "policyVersion": "example-no-data-v1"
+    },
+    {
+      "skillId": "FIN-05",
+      "status": "NO_DATA",
+      "policyVersion": "example-no-data-v1"
+    },
+    {
+      "skillId": "FIN-06",
+      "status": "NO_DATA",
+      "policyVersion": "example-no-data-v1"
+    },
+    {
+      "skillId": "FIN-07",
+      "status": "NO_DATA",
+      "policyVersion": "example-no-data-v1"
+    },
+    {
+      "skillId": "FIN-08",
+      "status": "NO_DATA",
+      "policyVersion": "example-no-data-v1"
+    },
+    {
+      "skillId": "FIN-09",
+      "status": "NO_DATA",
+      "policyVersion": "example-no-data-v1"
+    },
+    {
+      "skillId": "FIN-10",
+      "status": "NO_DATA",
+      "policyVersion": "example-no-data-v1"
+    },
+    {
+      "skillId": "FIN-11",
+      "status": "NO_DATA",
+      "policyVersion": "example-no-data-v1"
+    },
+    {
+      "skillId": "FIN-12",
+      "status": "NO_DATA",
+      "policyVersion": "example-no-data-v1"
+    }
+  ],
+  "schemaVersion": 1
+}

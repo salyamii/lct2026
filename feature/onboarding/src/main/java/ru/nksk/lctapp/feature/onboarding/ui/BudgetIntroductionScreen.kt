@@ -33,18 +33,19 @@ fun BudgetIntroductionScreen(
     saving: Boolean = false,
     saveFailed: Boolean = false,
 ) {
-    Box(Modifier.fillMaxSize().background(GoalCream)) {
+    BoxWithConstraints(Modifier.fillMaxSize().background(GoalCream)) {
+        val scrollAll = needsOnboardingScroll(maxHeight)
         Image(painterResource(artwork.background), null, Modifier.matchParentSize(), contentScale = ContentScale.Crop)
-        Column(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize().then(if (scrollAll) Modifier.verticalScroll(rememberScrollState()) else Modifier)) {
             CustomizationHeader(onBack, artwork, saving = saving, title = "Монеты для приключения",
                 backDescription = "Назад к выбору цели")
             Spacer(Modifier.height(12.dp))
-            Surface(Modifier.weight(1f).fillMaxWidth(), color = GoalCream,
+            Surface(Modifier.fillMaxWidth().then(if (scrollAll) Modifier else Modifier.weight(1f)), color = GoalCream,
                 shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)) {
-                Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing.only(
+                Box(Modifier.fillMaxWidth().then(if (scrollAll) Modifier else Modifier.fillMaxSize()).windowInsetsPadding(WindowInsets.safeDrawing.only(
                     WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)), contentAlignment = Alignment.TopCenter) {
-                    Column(Modifier.widthIn(max = 560.dp).fillMaxHeight()) {
-                        BudgetIntroductionContent(artwork, categoryArtwork, saveFailed)
+                    Column(Modifier.widthIn(max = 560.dp).fillMaxWidth().then(if (scrollAll) Modifier else Modifier.fillMaxHeight())) {
+                        BudgetIntroductionContent(artwork, categoryArtwork, saveFailed, scrollAll)
                         GoalFooter("Распределить монеты", artwork, !saving, onContinue)
                     }
                 }
@@ -58,9 +59,10 @@ private fun ColumnScope.BudgetIntroductionContent(
     artwork: CustomizationArtwork,
     categoryArtwork: @Composable (OnboardingBudgetCategory, Modifier) -> Unit,
     saveFailed: Boolean,
+    scrollAll: Boolean,
 ) {
     Column(
-        Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())
+        Modifier.fillMaxWidth().then(if (scrollAll) Modifier else Modifier.weight(1f).verticalScroll(rememberScrollState()))
             .padding(horizontal = 22.dp, vertical = 20.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {

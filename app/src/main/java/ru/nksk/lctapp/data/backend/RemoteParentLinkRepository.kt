@@ -30,15 +30,13 @@ internal class RemoteParentLinkRepository @Inject constructor(
             if (identity.registration == null) {
                 val pet = checkNotNull(games.read()) { "No game to register" }.pet.registrationDto()
                 identity = identities.update { it.copy(backendUrl = url,
-                    registration = RegisterProfileRequest(it.profileId, it.installationId, pet)) }
+                    registration = RegisterProfileRequest(it.profileId, pet)) }
             }
-            val registered = connection.api.registerProfile(identity.authorization(), identity.registrationRequestId,
+            val registered = connection.api.registerProfile(identity.registrationRequestId,
                 checkNotNull(identity.registration))
-            check(registered.profileId == identity.profileId && registered.installationId == identity.installationId)
+            check(registered.deviceId == identity.profileId)
             identities.update { it.copy(registered = true) }
         }
         Unit
     }
-
-    private fun ParentIdentity.authorization() = "Bearer $credential"
 }

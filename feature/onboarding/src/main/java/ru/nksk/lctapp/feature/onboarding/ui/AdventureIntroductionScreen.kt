@@ -41,7 +41,22 @@ fun AdventureIntroductionScreen(
         bodyMedium = MaterialTheme.typography.bodyMedium.copy(fontFamily = artwork.bodyFont),
     )) {
         BoxWithConstraints(Modifier.fillMaxSize().background(IntroCream)) {
-            if (maxWidth >= 720.dp) {
+            if (needsOnboardingScroll(maxHeight)) {
+                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+                    Box(Modifier.fillMaxWidth()) {
+                        Image(painterResource(artwork.background), null, Modifier.matchParentSize()
+                            .testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
+                        Column {
+                            CustomizationHeader(onBack, artwork, saving = saving, title = "Всё готово!", backDescription = "Назад к аксессуарам")
+                            Image(painterResource(portrait), "Твой спутник готов к приключениям",
+                                Modifier.fillMaxWidth().height(140.dp), contentScale = ContentScale.Fit)
+                        }
+                    }
+                    IntroductionContent(artwork, Modifier.fillMaxWidth().windowInsetsPadding(
+                        WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)),
+                        icons = icons, onStart = onStart, saving = saving, saveFailed = saveFailed, scrollAll = true)
+                }
+            } else if (maxWidth >= 720.dp) {
                 Row(Modifier.fillMaxSize()) {
                     BoxWithConstraints(Modifier.weight(1f).fillMaxHeight()) {
                         Image(painterResource(artwork.background), null, Modifier.matchParentSize().testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
@@ -88,6 +103,7 @@ private val concepts = listOf(
 private fun IntroductionContent(
     artwork: CustomizationArtwork, modifier: Modifier, centerContent: Boolean = false,
     icons: Map<String, Int>, onStart: () -> Unit, saving: Boolean, saveFailed: Boolean,
+    scrollAll: Boolean = false,
 ) {
     val density = LocalDensity.current
     var actionHeight by remember { mutableStateOf(88.dp) }
@@ -95,9 +111,10 @@ private fun IntroductionContent(
         val grid = maxWidth >= 540.dp
         val compact = maxHeight < 480.dp
         val topSpacing = if (compact) 8.dp else 12.dp
-        val availableHeight = (maxHeight - actionHeight - 8.dp - topSpacing).coerceAtLeast(0.dp)
-        Box(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-            .padding(horizontal = 22.dp).padding(top = topSpacing, bottom = actionHeight + 8.dp)) {
+        val availableHeight = if (scrollAll) 0.dp else (maxHeight - actionHeight - 8.dp - topSpacing).coerceAtLeast(0.dp)
+        val body: @Composable () -> Unit = {
+        Box(Modifier.fillMaxWidth().then(if (scrollAll) Modifier else Modifier.fillMaxSize().verticalScroll(rememberScrollState()))
+            .padding(horizontal = 22.dp).padding(top = topSpacing, bottom = if (scrollAll) 8.dp else actionHeight + 8.dp)) {
             Column(Modifier.align(Alignment.TopCenter).widthIn(max = 680.dp).fillMaxWidth()
                 .heightIn(min = if (centerContent) availableHeight else 0.dp),
                 verticalArrangement = if (centerContent) Arrangement.Center else Arrangement.Top) {
@@ -122,7 +139,9 @@ private fun IntroductionContent(
                 }
             }
         }
-        Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth().onSizeChanged {
+        }
+        val action: @Composable (Modifier) -> Unit = { actionModifier ->
+        Column(actionModifier.fillMaxWidth().onSizeChanged {
             actionHeight = with(density) { it.height.toDp() }
         }.padding(start = 22.dp, end = 22.dp, top = 12.dp, bottom = if (compact) 8.dp else 16.dp)) {
             if (saveFailed) Text("Не удалось сохранить настройки. Попробуй ещё раз.",
@@ -135,6 +154,9 @@ private fun IntroductionContent(
                 Text(if (saving) "Сохраняем…" else "Начать приключение", fontFamily = artwork.titleFont, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
             }
         }
+        }
+        if (scrollAll) Column { body(); action(Modifier) }
+        else { body(); action(Modifier.align(Alignment.BottomCenter)) }
     }
 }
 
