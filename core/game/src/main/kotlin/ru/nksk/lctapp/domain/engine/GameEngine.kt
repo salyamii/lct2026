@@ -417,7 +417,7 @@ class GameEngine(
             BlockReason.GoalUnavailable)
         foodGuard(day)
         val definition = factory.content.items.first { it.id == command.itemId }
-        val paid = money(state, -checkNotNull(definition.priceCoins), SpendingKind.GOAL)
+        val paid = state.copy(economy = EconomyOperations.purchaseGoal(state.economy, checkNotNull(definition.priceCoins)))
         val food = foodCostUntilWeekEnd(state, factory.basicMealPrice())
         ensure(command.acceptFoodRisk || paid.economy.availableBalance >= food,
             BlockReason.FoodBudgetWarning(paid.economy.availableBalance, food))

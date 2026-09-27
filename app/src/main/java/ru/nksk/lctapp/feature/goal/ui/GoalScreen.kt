@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.layout.*
@@ -18,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
@@ -134,7 +136,7 @@ internal fun GoalScreen(
             result != null -> {
                 GoalItemIllustration(result.itemId, Modifier.size(88.dp).align(Alignment.CenterHorizontally))
                 AdventureHeading("${result.itemTitle} теперь у нас!")
-                AdventureBody("В копилке осталось ${goalCoins(state.balance)}.")
+                AdventureBody("Предмет останется в инвентаре.")
                 AdventureBody(if (ready) "Всё подготовлено. Продолжим историю!" else "Выбери, на что будем копить дальше.")
             }
             else -> {
@@ -147,16 +149,11 @@ internal fun GoalScreen(
                 }
                 if (state.selected && target != null) {
                     GoalSavingProgress(target, state.balance, Modifier.bringIntoViewRequester(selectedGoalAnchor)) {
-                        if (target.remainingCoins == 0L) {
-                            GoalFinancialContext(state) { onAction(GoalAction.ContextPresented(it)) }
-                            AdventurePrimaryButton("Купить за ${goalCoins(target.price)}", {
-                                onAction(GoalAction.Buy(checkNotNull(state.goalId), target.id))
-                            }, enabled = target.canBuy && !state.busy)
-                            target.blockedMessage?.let { GoalCaption(it) }
-                            AdventureQuietButton("Открыть копилку", onOpenSavings, enabled = !state.busy)
-                        } else {
-                            AdventurePrimaryButton("Открыть копилку", onOpenSavings, enabled = !state.busy)
-                        }
+                        AdventurePrimaryButton("Купить за ${goalPaymentCoins(target.price)}", {
+                            onAction(GoalAction.Buy(checkNotNull(state.goalId), target.id))
+                        }, enabled = target.canBuy && !state.busy)
+                        target.blockedMessage?.let { GoalCaption(it) }
+                        AdventureQuietButton("Открыть копилку", onOpenSavings, enabled = !state.busy)
                     }
                 }
                 Text(if (state.selected && target != null) "Что ещё понадобится" else "Что нужно подготовить", fontFamily = Nunito, fontSize = 17.sp,
@@ -167,24 +164,10 @@ internal fun GoalScreen(
                 if (state.selected && !state.transfersEnabled && !ready) GoalCaption("Сначала заверши план монет.")
             }
         }
-        state.message?.let { AdventureBody(it) }
+        if (state.confirmation == null) state.message?.let { AdventureBody(it) }
         state.celebration?.let { AdventureBody(it) }
     }
-    state.confirmation?.let { confirmation ->
-        AlertDialog(onDismissRequest = { if (!state.busy) onAction(GoalAction.CancelPurchase) },
-            containerColor = GamePaper, titleContentColor = GameInk, textContentColor = GameInk, iconContentColor = GameInk,
-            title = { AdventureHeading("На еду может не хватить") },
-            text = { AdventureBody("${confirmation.itemTitle} стоит ${goalCoins(confirmation.price)} из копилки. " +
-                "С собой останется ${goalCoins(confirmation.remainingBalance)}, а на еду нужно ${goalCoins(confirmation.foodNeeded)}. Купить сейчас?") },
-            confirmButton = { TextButton(onClick = { onAction(GoalAction.ConfirmPurchase) }, enabled = !state.busy,
-                colors = ButtonDefaults.textButtonColors(contentColor = GameInk, disabledContentColor = Color(0xFF625E80))) {
-                Text("Купить сейчас")
-            } },
-            dismissButton = { TextButton(onClick = { onAction(GoalAction.CancelPurchase) }, enabled = !state.busy,
-                colors = ButtonDefaults.textButtonColors(contentColor = GameInk, disabledContentColor = Color(0xFF625E80))) {
-                Text("Вернуться")
-            } })
-    }
+    state.confirmation?.let { GoalPurchaseDialog(it, state.busy, state.message, onAction) }
 }
 
 @Composable
@@ -272,7 +255,12 @@ private fun GoalSavingProgress(part: GoalPartUiState, savings: Long, anchor: Mod
                 contentDescription = "Для покупки ${part.savedCoins} из ${part.price} монет"
             },
             color = AdventureLime, trackColor = Color(0xFFE3E3CE), drawStopIndicator = {})
-        Text(if (part.remainingCoins > 0) "Осталось отложить ${goalCoins(part.remainingCoins)}" else "На покупку уже хватает",
+        Text(when {
+            part.missingCoins != null -> "Для покупки не хватает ${goalMissingCoins(part.missingCoins)}."
+            part.availableContribution > 0 -> "Для покупки добавим ${goalPaymentCoins(part.availableContribution)} из бюджета."
+            part.remainingCoins > 0 -> "Можно оплатить накоплениями и текущими деньгами."
+            else -> "На покупку уже хватает"
+        },
             color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 14.sp, lineHeight = 19.sp)
         GoalCaption("Копилка общая. При смене цели монеты останутся в ней.")
         actions()
@@ -292,17 +280,56 @@ private fun GoalSavingsLink(balance: Long, onClick: () -> Unit, enabled: Boolean
     }
 }
 
-/** Record purchase evidence only after all three real amounts are visibly presented. */
 @Composable
-private fun GoalFinancialContext(state: GoalUiState, onPresented: (String) -> Unit) {
-    Column(Modifier.fillMaxWidth().onGloballyPositioned { coordinates ->
+private fun GoalPurchaseDialog(confirmation: PurchaseConfirmation, busy: Boolean, message: String?,
+    onAction: (GoalAction) -> Unit) {
+    val seen = remember(confirmation.contextId) { mutableStateMapOf<String, Boolean>() }
+    fun exposure(key: String) = Modifier.onGloballyPositioned { coordinates ->
         val visible = coordinates.boundsInWindow()
         if (visible.width >= coordinates.size.width - 1 && visible.height >= coordinates.size.height - 1 &&
-            visible.width > 0 && visible.height > 0) state.contextId?.let(onPresented)
-    }, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        GoalCaption("В копилке ${goalCoins(state.balance)}. С собой ${goalCoins(state.availableBalance)}.")
-        GoalCaption("На еду нужно ${goalCoins(state.knownNeeds)}. Покупка займёт один шаг.")
+            visible.width > 0 && visible.height > 0) seen[key] = true
     }
+    LaunchedEffect(confirmation.contextId, seen.size) {
+        // With no savings involved, omit that irrelevant row and do not claim its balance was shown.
+        if (listOf("sources", "savings", "available", "food").all { seen[it] == true })
+            onAction(GoalAction.ContextPresented(confirmation.contextId))
+    }
+    AlertDialog(onDismissRequest = { if (!busy) onAction(GoalAction.CancelPurchase) },
+        containerColor = GamePaper, titleContentColor = GameInk, textContentColor = GameInk,
+        title = { AdventureHeading(confirmation.itemTitle) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                GoalItemIllustration(confirmation.itemId, Modifier.size(76.dp).align(Alignment.CenterHorizontally))
+                Text(confirmation.paymentDescription(), exposure("sources"), color = GameInk,
+                    fontFamily = Nunito, fontSize = 15.sp, lineHeight = 21.sp)
+                if (confirmation.fromSavings > 0) Text(
+                    "В копилке: ${confirmation.savingsBefore} → ${confirmation.remainingSavings}.", exposure("savings"),
+                    color = GoalMuted, fontFamily = Nunito, fontSize = 14.sp, lineHeight = 20.sp)
+                Text(if (confirmation.availableBefore != confirmation.remainingBalance)
+                    "С собой: ${confirmation.availableBefore} → ${goalCoins(confirmation.remainingBalance)}."
+                    else "С собой останется ${goalCoins(confirmation.remainingBalance)}.", exposure("available"),
+                    color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 15.sp, lineHeight = 21.sp)
+                Text("На еду до следующей недели нужно ${goalPaymentCoins(confirmation.foodNeeded)}.", exposure("food"),
+                    color = GameInk, fontFamily = Nunito, fontSize = 15.sp, lineHeight = 21.sp)
+                if (confirmation.foodShortfall > 0) Text(
+                    "После покупки на еду не хватит ${goalMissingCoins(confirmation.foodShortfall)}. Всё равно купить?",
+                    color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, lineHeight = 22.sp)
+                message?.let { AdventureBody(it) }
+            }
+        },
+        confirmButton = {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                listOf("Отмена" to GoalAction.CancelPurchase,
+                    (if (message == null) "Купить" else "Повторить") to GoalAction.ConfirmPurchase).forEach { (label, action) ->
+                    OutlinedButton(onClick = { onAction(action) }, enabled = !busy,
+                        modifier = Modifier.weight(1f).heightIn(min = 52.dp), shape = RoundedCornerShape(20.dp),
+                        border = BorderStroke(1.dp, GoalMuted),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = GameInk)) {
+                        Text(label, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold)
+                    }
+                }
+            }
+        })
 }
 
 @Composable

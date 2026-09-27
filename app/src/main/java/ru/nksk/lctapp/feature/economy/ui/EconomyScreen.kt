@@ -14,11 +14,10 @@ import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 import ru.nksk.lctapp.domain.economy.BudgetPlanningReason
 import ru.nksk.lctapp.domain.economy.BudgetPlanningStage
-import ru.nksk.lctapp.domain.economy.BudgetRevisionReason
 
 @Composable
 internal fun EconomyScreen(state: EconomyUiState, onAction: (EconomyAction) -> Unit, onBack: () -> Unit,
-    onOpenHistory: () -> Unit = {}, onOpenSavings: () -> Unit = {}) {
+    onOpenSavings: () -> Unit = {}) {
     val economy = state.economy
     if (economy == null) {
         Surface(Modifier.fillMaxSize(), color = GamePaper) {
@@ -44,20 +43,11 @@ internal fun EconomyScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
                 interactionsBlocked = state.budgetConfirmation != null,
                 onAmountChange = { article, amount -> onAction(EconomyAction.SetAmount(article, amount)) },
                 onConfirm = { onAction(EconomyAction.Confirm) }, onBack = onBack,
-                onOpenChanges = if (display.historyAvailable) ({ onAction(EconomyAction.OpenBudgetHistory) }) else null,
                 onAdjust = { article, increase -> onAction(EconomyAction.Adjust(article, increase)) },
                 onOpenSavings = onOpenSavings,
                 pet = display.pet,
-                revisionReason = display.revisionReason,
-                onReasonChange = { onAction(EconomyAction.SetReason(it)) },
-                onOpenHistory = onOpenHistory.takeIf { display.historyAvailable },
                 contextId = display.contextId,
-                onContextPresented = { onAction(EconomyAction.ContextPresented(it)) },
-                revisionDetails = {
-                    if (display.revisionReason == BudgetRevisionReason.UNEXPECTED_EXPENSE) {
-                        UnexpectedExpenseSelection(state, onAction)
-                    }
-                })
+                onContextPresented = { onAction(EconomyAction.ContextPresented(it)) })
         }
     }
     EconomyFeedback(state, onAction)
@@ -110,40 +100,3 @@ internal fun EconomyFeedback(state: EconomyUiState, onAction: (EconomyAction) ->
             })
     }
 }
-
-@Composable
-private fun UnexpectedExpenseSelection(state: EconomyUiState, onAction: (EconomyAction) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    val selected = state.unexpectedExpenses.find { it.operationId == state.selectedExpenseOperationId }
-    Column {
-        Text("Из-за какой траты меняешь план?", color = GameInk)
-        when {
-            state.expenseHistoryLoading -> Text("Загружаем траты…", color = GameInk)
-            state.expenseHistoryUnavailable -> {
-                Text("Не удалось загрузить историю. Можно сохранить причину без выбора траты.", color = GameInk)
-                TextButton(onClick = { onAction(EconomyAction.RetryExpenseHistory) }) { Text("Загрузить траты") }
-            }
-            state.unexpectedExpenses.isEmpty() -> Text("В истории пока нет подходящей траты. Можно оставить только причину.", color = GameInk)
-            else -> Box {
-                TextButton(onClick = { expanded = true }, enabled = !state.saving) {
-                    Text(selected?.expenseLabel() ?: "Выбрать трату — необязательно", color = GameInk)
-                }
-                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                    DropdownMenuItem(text = { Text("Без выбора траты") }, onClick = {
-                        expanded = false
-                        onAction(EconomyAction.SelectUnexpectedExpense(null))
-                    })
-                    state.unexpectedExpenses.forEach { expense ->
-                        DropdownMenuItem(text = { Text(expense.expenseLabel()) }, onClick = {
-                            expanded = false
-                            onAction(EconomyAction.SelectUnexpectedExpense(expense.operationId))
-                        })
-                    }
-                }
-            }
-        }
-    }
-}
-
-private fun UnexpectedExpenseUi.expenseLabel(): String =
-    (day?.let { "День $it\n" } ?: "") + "$title: $amount монет"

@@ -151,6 +151,23 @@ object EconomyOperations {
             listOf(BudgetSection.SAVINGS, BudgetSection.RESERVE, BudgetSection.WANTS, BudgetSection.NEEDS))
     }
 
+    /** A goal uses real savings first; its remainder follows the existing planned-saving priority. */
+    fun goalPurchaseQuote(state: EconomyState, amount: Long): GoalPurchaseQuote {
+        require(amount >= 0)
+        val fromSavings = minOf(state.savingsBalance, amount)
+        return GoalPurchaseQuote(fromSavings, depositQuote(state, amount - fromSavings))
+    }
+
+    /** One purchase, without an intermediate deposit, withdrawal, or invented saving evidence. */
+    fun purchaseGoal(state: EconomyState, amount: Long): EconomyState {
+        requireReady(state)
+        val quote = goalPurchaseQuote(state, amount)
+        if (!quote.affordable) throw EconomyViolation(EconomyFailure.INSUFFICIENT_MONEY, quote.missing)
+        return state.copy(savingsBalance = state.savingsBalance - quote.fromSavings,
+            availableBalance = state.availableBalance - quote.fromAvailableAmount,
+            plan = deduct(state.plan, quote.fromAvailable.parts))
+    }
+
     fun deposit(state: EconomyState, amount: Long): EconomyState {
         require(amount > 0)
         requireReady(state)

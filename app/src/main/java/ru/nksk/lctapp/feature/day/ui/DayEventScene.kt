@@ -17,20 +17,22 @@ import androidx.compose.ui.unit.dp
 import ru.nksk.lctapp.core.ui.components.GameArtwork
 import ru.nksk.lctapp.core.ui.components.GameInk
 import ru.nksk.lctapp.core.ui.components.GamePaper
+import ru.nksk.lctapp.core.ui.components.MovingNpcArtwork
 import ru.nksk.lctapp.core.ui.components.MovingPetArtwork
+import ru.nksk.lctapp.core.ui.game.forLiveDisplay
 
 /** One scene composition for lore, work and unexpected events, using the actual saved pet. */
 @Composable
 internal fun DayEventScene(state: DayUiState, modifier: Modifier = Modifier) {
     BoxWithConstraints(modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
         val focus = state.eventArtwork
-        val pet = state.pet
+        val pet = state.pet?.forLiveDisplay()
         val petSize = minOf(maxHeight, maxWidth * if (focus == null) .86f else .56f)
         focus?.let { art ->
             val focusSize = minOf(maxHeight, maxWidth * .67f)
             if (art.isCharacter) {
-                GameArtwork(art.resource, art.description,
-                    Modifier.size(focusSize).align(Alignment.BottomStart), contentScale = ContentScale.Fit)
+                MovingNpcArtwork(art.resource, art.description,
+                    Modifier.size(focusSize).align(Alignment.BottomStart))
             } else {
                 GameArtwork(art.resource, art.description,
                     Modifier.size(focusSize).align(Alignment.CenterStart),

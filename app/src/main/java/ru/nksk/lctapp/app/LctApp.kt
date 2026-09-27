@@ -3,6 +3,7 @@ package ru.nksk.lctapp.app
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -33,6 +34,8 @@ import ru.nksk.lctapp.feature.onboarding.ui.CharacterFur
 import ru.nksk.lctapp.feature.onboarding.ui.CharacterTemperament
 import ru.nksk.lctapp.domain.pet.PetFur
 import ru.nksk.lctapp.domain.pet.PetTemperament
+import ru.nksk.lctapp.app.presentation.PetReactionViewModel
+import ru.nksk.lctapp.core.ui.game.LocalLivePetReaction
 
 /** Composition root for shared presentation and app-owned navigation. */
 @Composable
@@ -48,7 +51,13 @@ private fun LctAppContent(debugSettingsButton: (@Composable () -> Unit)?) {
         val startup: AppStartupViewModel = hiltViewModel()
         val state by startup.uiState.collectAsStateWithLifecycle()
         when (val current = state) {
-            AppStartupState.Ready -> LctNavHost(debugSettingsButton = debugSettingsButton)
+            AppStartupState.Ready -> {
+                val reactions: PetReactionViewModel = hiltViewModel()
+                val reaction by reactions.uiState.collectAsStateWithLifecycle()
+                CompositionLocalProvider(LocalLivePetReaction provides reaction) {
+                    LctNavHost(debugSettingsButton = debugSettingsButton)
+                }
+            }
             is AppStartupState.Choose -> OnboardingEntry(
                 artwork = OnboardingArtwork(
                     background = R.drawable.onboarding_castle,

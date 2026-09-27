@@ -18,6 +18,7 @@ import ru.nksk.lctapp.core.ui.game.playerMessage
 import ru.nksk.lctapp.core.ui.game.adventurePetArtwork
 import ru.nksk.lctapp.domain.analytics.DecisionContext
 import ru.nksk.lctapp.domain.analytics.FinancialPosition
+import ru.nksk.lctapp.domain.economy.EconomyOperations
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
 
@@ -34,6 +35,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
     private var pending: EngineRequest? = null
     private var confirmation: PurchaseConfirmation? = null
     private var presentedContext: String? = null
+    private var purchaseSubmitted = false
 
     init { load() }
 
@@ -48,7 +50,9 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
                     if (saved != game) {
                         message = null
                         if (pending?.expectedRevision != game.engine?.revision || saved?.economy != game.economy) {
-                            pending = null; confirmation = null
+                            val interruptedPreview = confirmation != null && !busy
+                            clearPurchase()
+                            if (interruptedPreview) message = "Монеты или события изменились. Проверь покупку ещё раз."
                         }
                     }
                     saved = game
@@ -61,7 +65,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
 
     fun onAction(action: GoalAction) {
         if (action is GoalAction.ContextPresented) {
-            if (mutableState.value.contextId == action.id) presentedContext = action.id
+            if (confirmation?.contextId == action.id) presentedContext = action.id
             return
         }
         if (busy) return
@@ -73,44 +77,85 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
                 handle["return_to_list"] = mutableState.value.showList || mutableState.value.returnToList
                 handle["viewed_goal"] = action.goalId; handle["show_list"] = false
                 handle.remove<String>("purchase_result_item")
-                pending = null; confirmation = null; message = null; render()
+                clearPurchase(); message = null; render()
             }
             GoalAction.ShowList -> {
                 handle["show_list"] = true; handle.remove<String>("purchase_result_item")
                 handle["return_to_list"] = false
-                pending = null; confirmation = null; message = null; render()
+                clearPurchase(); message = null; render()
             }
             GoalAction.DismissPurchaseResult -> { handle.remove<String>("purchase_result_item"); render() }
             is GoalAction.Select -> execute(request(game, session.selectGoalCommand(game, action.goalId)))
             is GoalAction.SelectSavingGoal -> execute(request(game, session.selectSavingGoalCommand(game, action.goalId, action.itemId)))
-            is GoalAction.Buy -> execute(request(game, EngineCommand.BuyGoalItem(action.goalId, action.itemId)))
-            GoalAction.ConfirmPurchase -> pending?.let { old ->
-                val command = old.command as? EngineCommand.BuyGoalItem ?: return@let
-                execute(old.copy(id = UUID.randomUUID().toString(), command = command.copy(acceptFoodRisk = true)))
-            }
-            GoalAction.CancelPurchase -> { pending = null; confirmation = null; render() }
+            is GoalAction.Buy -> previewPurchase(game, action)
+            GoalAction.ConfirmPurchase -> confirmPurchase(game)
+            GoalAction.CancelPurchase -> { clearPurchase(); message = null; render() }
             GoalAction.Retry -> Unit
             is GoalAction.ContextPresented -> Unit
         }
     }
 
-    private fun request(game: GameState, command: EngineCommand): EngineRequest {
-        val shown = mutableState.value
-        val context = if (command is EngineCommand.BuyGoalItem) {
-            val position = FinancialPosition(shown.availableBalance, shown.balance, shown.knownNeeds)
-            DecisionContext(presentationId = shown.contextId,
-                informationPresented = presentedContext == shown.contextId,
-                complete = presentedContext == shown.contextId && position == FinancialPosition(game.economy.availableBalance, game.economy.savingsBalance, knownNeeds(game)),
-                before = position, alternativeAvailable = true)
-        } else null
-        return EngineRequest(UUID.randomUUID().toString(), game.engine?.revision, command, context)
+    private fun request(game: GameState, command: EngineCommand) =
+        EngineRequest(UUID.randomUUID().toString(), game.engine?.revision, command)
+
+    private fun clearPurchase() {
+        pending = null
+        confirmation = null
+        presentedContext = null
+        purchaseSubmitted = false
+    }
+
+    /** Opening and cancelling a quote never dispatch a gameplay command. */
+    private fun previewPurchase(game: GameState, action: GoalAction.Buy) {
+        if (confirmation != null) return
+        val command = EngineCommand.BuyGoalItem(action.goalId, action.itemId)
+        val block = session.engine.blockReason(game, command)
+        if (block != null && block !is BlockReason.FoodBudgetWarning) {
+            message = block.playerMessage(game.pet.name); render(); return
+        }
+        val item = session.catalog.content.items.firstOrNull { it.id == action.itemId } ?: return
+        val price = item.priceCoins ?: return
+        val quote = EconomyOperations.goalPurchaseQuote(game.economy, price)
+        if (!quote.affordable) return
+        val remaining = game.economy.availableBalance - quote.fromAvailableAmount
+        val food = knownNeeds(game)
+        clearPurchase()
+        val prepared = request(game, command.copy(acceptFoodRisk = remaining < food))
+        pending = prepared
+        confirmation = PurchaseConfirmation(item.id, renderPetText(item.name, game.pet.name), price,
+            quote.fromSavings, quote.fromAvailable.parts, game.economy.availableBalance, game.economy.savingsBalance,
+            remaining, game.economy.savingsBalance - quote.fromSavings, food, "goal-purchase:${prepared.id}")
+        message = null
+        render()
+    }
+
+    private fun confirmPurchase(game: GameState) {
+        val shown = confirmation ?: return
+        var prepared = pending ?: return
+        if (!purchaseSubmitted) {
+            val before = FinancialPosition(shown.availableBefore, shown.savingsBefore, shown.foodNeeded)
+            val visible = presentedContext == shown.contextId
+            prepared = prepared.copy(context = DecisionContext(presentationId = shown.contextId,
+                informationPresented = visible,
+                complete = visible && before == FinancialPosition(game.economy.availableBalance,
+                    game.economy.savingsBalance, knownNeeds(game)),
+                before = before, after = FinancialPosition(shown.remainingBalance, shown.remainingSavings, shown.foodNeeded),
+                alternativeAvailable = true))
+            pending = prepared
+            purchaseSubmitted = true
+        }
+        // An uncertain write retries the exact same request and exposure evidence.
+        execute(prepared)
     }
 
     private fun knownNeeds(game: GameState): Long = foodCostUntilWeekEnd(game,
         session.catalog.meals.filter { it.price > 0 }.minOf { it.price })
 
     private fun execute(request: EngineRequest) {
-        busy = true; message = null; pending = null; confirmation = null; render()
+        val purchasing = request.command is EngineCommand.BuyGoalItem
+        busy = true; message = null
+        if (!purchasing) clearPurchase()
+        render()
         viewModelScope.launch {
             try {
                 when (val result = session.dispatch(request)) {
@@ -124,6 +169,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
                             handle["viewed_goal"] = command.goalId; handle["show_list"] = false
                         }
                         if (command is EngineCommand.BuyGoalItem) {
+                            clearPurchase()
                             handle["purchase_result_item"] = command.itemId
                         }
                         toast?.cancel()
@@ -133,15 +179,8 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
                     }
                     is EngineResult.Blocked -> {
                         saved = checkNotNull(session.read())
-                        val reason = result.reason
-                        val command = request.command
-                        if (reason is BlockReason.FoodBudgetWarning && command is EngineCommand.BuyGoalItem &&
-                            saved?.engine?.revision == request.expectedRevision) {
-                            val item = session.catalog.content.items.first { it.id == command.itemId }
-                            pending = request
-                            confirmation = PurchaseConfirmation(item.name, checkNotNull(item.priceCoins),
-                                reason.remainingBalance, reason.neededForFood)
-                        } else message = reason.playerMessage(checkNotNull(saved).pet.name)
+                        clearPurchase()
+                        message = result.reason.playerMessage(checkNotNull(saved).pet.name)
                     }
                 }
             } catch (cancelled: CancellationException) { throw cancelled
@@ -208,6 +247,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
             parts = progress.items.map { item ->
                 val owned = item.id in progress.ownedItemIds
                 val target = game.selectedSavingItemId == item.id
+                val quote = EconomyOperations.goalPurchaseQuote(game.economy, checkNotNull(item.priceCoins))
                 val block = if (selected && target && !owned) session.engine.blockReason(game,
                     EngineCommand.BuyGoalItem(goal.goalId, item.id)) else null
                 GoalPartUiState(item.id, renderPetText(item.name, game.pet.name), renderPetText(item.description, game.pet.name), checkNotNull(item.priceCoins), owned,
@@ -216,7 +256,8 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
                     (block as? BlockReason.InsufficientMoney)?.missing,
                     savingTarget = target, canSelect = selected && !owned && game.economy.planning == null && game.economy.unallocated == 0L,
                     savedCoins = minOf(game.economy.savingsBalance, checkNotNull(item.priceCoins)),
-                    remainingCoins = maxOf(0L, checkNotNull(item.priceCoins) - game.economy.savingsBalance))
+                    remainingCoins = maxOf(0L, checkNotNull(item.priceCoins) - game.economy.savingsBalance),
+                    availableContribution = if (quote.affordable) quote.fromAvailableAmount else 0L)
             },
             storyHint = when {
                 completed -> "Эта глава пройдена. Купленные вещи остаются у тебя."

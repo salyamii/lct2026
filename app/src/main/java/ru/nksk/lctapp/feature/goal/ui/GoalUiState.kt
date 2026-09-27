@@ -1,5 +1,7 @@
 package ru.nksk.lctapp.feature.goal.ui
 
+import ru.nksk.lctapp.domain.economy.SpendPart
+
 internal data class GoalUiState(
     val loading: Boolean = true,
     val failed: Boolean = false,
@@ -53,11 +55,24 @@ internal data class GoalPartUiState(
     val canSelect: Boolean = false,
     val savedCoins: Long = 0,
     val remainingCoins: Long = 0,
+    val availableContribution: Long = 0,
 )
 
 internal data class PurchaseConfirmation(
-    val itemTitle: String, val price: Long, val remainingBalance: Long, val foodNeeded: Long,
-)
+    val itemId: String,
+    val itemTitle: String,
+    val price: Long,
+    val fromSavings: Long,
+    val availableParts: List<SpendPart>,
+    val availableBefore: Long,
+    val savingsBefore: Long,
+    val remainingBalance: Long,
+    val remainingSavings: Long,
+    val foodNeeded: Long,
+    val contextId: String,
+) {
+    val foodShortfall: Long get() = (foodNeeded - remainingBalance).coerceAtLeast(0)
+}
 
 internal data class GoalPurchaseResult(val itemId: String, val itemTitle: String, val price: Long)
 

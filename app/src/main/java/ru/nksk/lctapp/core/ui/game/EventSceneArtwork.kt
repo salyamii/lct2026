@@ -97,6 +97,7 @@ private val eventIllustrations: Map<String, EventSceneArtwork> = buildMap {
         val key = "campaign-choice-v1:$storyId"
         if (get(key)?.isCharacter != true) put(key, art)
     }
+    put("campaign-choice-v2:G1.03", getValue("campaign-choice-v1:G1.03"))
 
     add(item(R.drawable.event_broken_wheel, "Повреждённое колесо"), "figma-2164-46-v2")
     add(item(R.drawable.gear_lantern, "Фонарь"), "figma-2164-92-v2")
@@ -115,7 +116,7 @@ private val eventIllustrations: Map<String, EventSceneArtwork> = buildMap {
     add(item(R.drawable.event_key_bent, "Погнутый ключ"), "figma-2326-16-v2")
     add(item(R.drawable.event_scroll_fragile, "Рассыпающийся свиток"), "figma-2326-64-v2")
     add(item(R.drawable.event_journal_unbound, "Журнал с порванным переплётом"), "figma-2326-112-v2")
-    add(item(R.drawable.event_star_plate_tarnished, "Звёздная пластина с налётом"), "figma-2326-160-v2")
+    add(item(R.drawable.event_star_plate_tarnished, "Звёздная пластина с налётом"), "figma-2326-160-v2", "figma-2326-160-v3")
     add(item(R.drawable.event_lens_cloudy, "Помутневшая линза"), "figma-2326-208-v2")
     add(item(R.drawable.event_signal_lever_jammed, "Заевший сигнальный рычаг"), "figma-2326-256-v2")
     add(item(R.drawable.event_roof_leak, "Повреждённая крыша"), "figma-2326-304-v2")

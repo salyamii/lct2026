@@ -17,7 +17,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.boundsInWindow
@@ -42,6 +41,8 @@ import ru.nksk.lctapp.core.ui.theme.AdventureLime
 import ru.nksk.lctapp.domain.pet.renderPetText
 import ru.nksk.lctapp.domain.timemachine.TimeMachineQuizKind
 import ru.nksk.lctapp.domain.timemachine.TimeMachineStatus
+
+private val PathRule = Color(0xFFE5DCC6)
 
 @Composable
 internal fun ChronoscopeScreen(state: LearningUiState, onAction: (LearningAction) -> Unit, onExit: () -> Unit) {
@@ -314,19 +315,22 @@ private fun PathsComparison(state: LearningUiState) {
     val alternative = state.alternativePath ?: return
     val differences = chronoscopeDifferences(original, alternative,
         showLedgerTotal = state.quiz?.kind == TimeMachineQuizKind.LEDGER)
-    if (differences.original.isNotEmpty()) PathConsequences("В нашей истории", differences.original, Color(0xFFE4EFF8))
-    if (differences.alternative.isNotEmpty()) PathConsequences("При другом выборе", differences.alternative, Color(0xFFECF4D7))
-    if (differences.money.isNotEmpty()) Surface(shape = RoundedCornerShape(20.dp), color = Color.White,
-        border = BorderStroke(1.dp, GameInk.copy(alpha = .10f))) {
+    if (differences.original.isNotEmpty()) PathConsequences("В нашей истории", differences.original)
+    if (differences.alternative.isNotEmpty()) PathConsequences("При другом выборе", differences.alternative)
+    if (differences.money.isNotEmpty()) Surface(shape = RoundedCornerShape(20.dp), color = GamePaper,
+        border = BorderStroke(1.dp, PathRule)) {
         BoxWithConstraints(Modifier.fillMaxWidth().padding(14.dp)) {
             val stacked = maxWidth < 280.dp || LocalDensity.current.fontScale >= 1.4f
             Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 if (!stacked) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Spacer(Modifier.weight(1.25f))
-                    PathLabel("Было", Color(0xFFE4EFF8), Modifier.weight(1f))
-                    PathLabel("Могло быть", Color(0xFFECF4D7), Modifier.weight(1f))
+                    PathLabel("Было", Modifier.weight(1f))
+                    PathLabel("Могло быть", Modifier.weight(1f))
                 }
-                differences.money.forEach { row -> ComparisonAmount(row.label, row.original, row.alternative, stacked) }
+                differences.money.forEachIndexed { index, row ->
+                    if (!stacked || index > 0) HorizontalDivider(color = PathRule)
+                    ComparisonAmount(row.label, row.original, row.alternative, stacked)
+                }
             }
         }
     }
@@ -338,8 +342,8 @@ private fun ComparisonAmount(label: String, original: Long, alternative: Long, s
         Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(label, color = GameInk, style = MaterialTheme.typography.bodyMedium)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                PathLabel("Было\n$original", Color(0xFFE4EFF8), Modifier.weight(1f))
-                PathLabel("Могло быть\n$alternative", Color(0xFFECF4D7), Modifier.weight(1f))
+                PathLabel("Было\n$original", Modifier.weight(1f))
+                PathLabel("Могло быть\n$alternative", Modifier.weight(1f))
             }
         }
     } else {
@@ -355,41 +359,33 @@ private fun ComparisonAmount(label: String, original: Long, alternative: Long, s
 }
 
 @Composable
-private fun PathLabel(text: String, color: Color, modifier: Modifier) {
-    Surface(modifier, shape = RoundedCornerShape(10.dp), color = color) {
-        Text(text, Modifier.padding(horizontal = 5.dp, vertical = 7.dp), color = GameInk,
-            style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-    }
+private fun PathLabel(text: String, modifier: Modifier) {
+    Text(text, modifier.padding(horizontal = 5.dp, vertical = 4.dp), color = GameInk,
+        style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
 }
 
 @Composable
-private fun PathConsequences(title: String, consequences: List<String>, color: Color) {
-    Surface(shape = RoundedCornerShape(18.dp), color = color) {
-        Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(title, color = GameInk, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
-            consequences.forEach { GameBody(it) }
+private fun PathConsequences(title: String, consequences: List<String>) {
+    Surface(shape = RoundedCornerShape(18.dp), color = GamePaper, border = BorderStroke(1.dp, PathRule)) {
+        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(title, color = GameInk.copy(alpha = .72f), style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold)
+            consequences.forEach { Text(it, color = GameInk, style = MaterialTheme.typography.bodyLarge) }
         }
     }
 }
 
 @Composable
 private fun ComparisonScene(state: LearningUiState) {
-    // Both outcomes share one calm stage. The full transparent character canvases
-    // keep the same movement and ground-contact treatment as the rest of the game.
-    Box(Modifier.fillMaxSize().background(Brush.verticalGradient(
-        listOf(Color(0xFFDAD9E9), Color(0xFFF5F1E7)),
-    ))) {
-        Row(Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            listOf(
-                Triple("Было", state.originalPath, Color(0xFFE8EFF5)),
-                Triple("Могло быть", state.alternativePath, Color(0xFFF0F2E4)),
-            ).forEach { (label, path, tint) ->
-                Column(Modifier.weight(1f).fillMaxHeight().clip(RoundedCornerShape(24.dp))
-                    .background(tint.copy(alpha = .7f)).padding(top = 10.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally) {
+    // Keep the adventure scene visible; only each pet has a quiet paper backdrop.
+    Row(Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        listOf("Было" to state.originalPath, "Могло быть" to state.alternativePath).forEach { (label, path) ->
+            Surface(Modifier.weight(1f).fillMaxHeight(), shape = RoundedCornerShape(24.dp),
+                color = GamePaper, border = BorderStroke(1.dp, PathRule)) {
+                Column(Modifier.fillMaxSize().padding(top = 10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(label, Modifier.padding(horizontal = 8.dp), color = GameInk,
-                        style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold,
                         textAlign = TextAlign.Center)
                     Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
                         path?.state?.pet?.let { pet -> adventurePetArtwork(pet)?.let { art ->

@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.core.ui.components.*
 import ru.nksk.lctapp.core.ui.game.availableSourcesDescription
-import ru.nksk.lctapp.core.ui.game.toAdventurePetPresentation
+import ru.nksk.lctapp.core.ui.game.toLiveAdventurePetPresentation
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
@@ -45,7 +45,7 @@ internal fun SavingsScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
     val planningRequired = economy?.let { it.planning != null || it.unallocated != 0L } == true
     val valid = economy != null && !planningRequired && amount != null && amount > 0 && amount <= maximum
     val confirming = state.withdrawal != null || state.depositWarning != null
-    val pet = state.pet?.toAdventurePetPresentation()
+    val pet = state.pet?.toLiveAdventurePetPresentation()
     val focus = LocalFocusManager.current
     LaunchedEffect(state.transferReceipt, confirming) {
         if (state.transferReceipt != null || confirming) focus.clearFocus()

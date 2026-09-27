@@ -11,6 +11,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import ru.nksk.lctapp.core.ui.game.BudgetHistoryUi
+import ru.nksk.lctapp.core.ui.game.budgetHistoryUi
 import ru.nksk.lctapp.core.ui.game.playerMessage
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.finance.FinancialQuestion
@@ -30,6 +32,7 @@ internal data class BudgetComparisonUi(val title: String, val rows: List<String>
 internal data class LearningUiState(
     val loading: Boolean = true, val busy: Boolean = false, val error: String? = null,
     val money: String = "", val periods: List<PeriodUi> = emptyList(), val operations: List<String> = emptyList(),
+    val coinMovements: BudgetHistoryUi? = null,
     val canReview: Boolean = false,
     val question: FinancialQuestion? = null,
     val practiceOpen: Boolean = true,
@@ -129,8 +132,9 @@ internal class LearningViewModel @Inject constructor(private val session: GameSe
 
     private suspend fun render(game: GameState) {
         val shownHistory = history
-        val reports = withContext(Dispatchers.Default) {
-            FinancialBudgetProjection.report(game, shownHistory, session.catalog.content).associateBy { it.periodId }
+        val (reports, coinMovements) = withContext(Dispatchers.Default) {
+            FinancialBudgetProjection.report(game, shownHistory, session.catalog.content).associateBy { it.periodId } to
+                budgetHistoryUi(game, shownHistory)
         }
         if (saved != game) return
         val periods = game.financial.periods.reversed().map { period ->
@@ -144,6 +148,7 @@ internal class LearningViewModel @Inject constructor(private val session: GameSe
                     add("На неожиданности и другие покупки потратили $reserve монет")
                     add("Пополнения копилки за вычетом снятого: $netSaved монет")
                     add("Из копилки потратили $goalPurchases монет на снаряжение для цели")
+                    if (goalPurchasesAvailable > 0) add("На предметы цели из текущих денег потратили $goalPurchasesAvailable монет")
                     if (unknownExpenses > 0) add("Назначение старых трат неизвестно: $unknownExpenses монет")
                 } },
                 comparisons = report.comparisons.map { comparison ->
@@ -203,7 +208,7 @@ internal class LearningViewModel @Inject constructor(private val session: GameSe
         if (saved != game) return
         state.value = state.value.copy(loading = false, realGame = game,
             money = "Можно потратить: ${game.economy.availableBalance}. В копилке: ${game.economy.savingsBalance}",
-            periods = periods, operations = operations, question = displayedPractice,
+            periods = periods, operations = operations, coinMovements = coinMovements, question = displayedPractice,
             canReview = game.economy.planning == null && game.economy.unallocated == 0L,
             needsBudgetPlanning = game.economy.planning != null || game.economy.unallocated != 0L,
             needsBudgetRevision = game.financial.currentPeriod?.reviewEvidence?.let {

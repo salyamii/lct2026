@@ -44,6 +44,8 @@ private fun unexpectedWorkTheme(eventId: String): StoryGameTheme? = when (eventI
     "figma-2320-338-v2" -> StoryGameTheme("Очистим механизм компаса. Останавливай маркер в зелёной зоне.")
     "figma-2326-64-v2" -> StoryGameTheme("Сохраним записи старого свитка. Найди одинаковые пары записей и карт.", archivePairs)
     "figma-2326-112-v2" -> StoryGameTheme("Сошьём страницы журнала. Останавливай маркер в зелёной зоне, чтобы делать ровные стежки.")
+    "figma-2326-160-v3" -> StoryGameTheme("Аккуратно очистим налёт с пластины. Останавливай маркер в зелёной зоне.",
+        objectRes = R.drawable.event_star_plate_tarnished)
     "figma-2326-256-v2" -> StoryGameTheme("Разберём и очистим рычаг. Останавливай маркер в зелёной зоне.")
     "figma-2326-352-v2" -> StoryGameTheme("Подгоним края ящика. Останавливай маркер в зелёной зоне.")
     "figma-2326-448-v2" -> StoryGameTheme("Закроем разбитое окно досками. Останавливай маркер в зелёной зоне.")

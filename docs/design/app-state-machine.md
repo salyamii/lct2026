@@ -16,8 +16,37 @@
 > обычные голод и усталость. Еда и переход к следующему дню не лечат болезнь.
 > Для сохранений с уже открытой карточкой UI применяет тот же признак без
 > записи в базу. Используются импортированные прозрачные `state_sick`.
+> Временный показ позы по ADVENTURE-D-011 не снимает условие болезни.
 
 # Ryzhik: app state-machine specification
+
+> **Оплата предметов цели, 2026-09-27, ADVENTURE-D-018.** Можно сразу оплатить
+> предмет реальными накоплениями и текущими деньгами вместе. Расчёт показывает
+> расход копилки и каждой затронутой текущей статьи; недостаток на еду до
+> следующей недели требует явного подтверждения риска. До подтверждения
+> нет записи в игру. Старое подтверждение не применяется к новой ревизии.
+> BuyGoalItem атомарно записывает предмет и фактические расходы двух счетов.
+> Переводы в копилку и из неё из этой покупки не создаются; аналитика не
+> приписывает прямой оплате факт накопления. Старые квитанции остаются читаемыми.
+
+> **Лоровая пластина, 2026-09-27, ADVENTURE-D-015.** Сюжетный G1.03
+> «Пластина с тем же знаком» отличается от случайного налёта ниже.
+> Новый `campaign-choice-v2:G1.03` завершается напрямую: состав за 3 монеты
+> без сил или ручная очистка за прежнюю 1 силу без монет. Мини-игры нет.
+> Обе ветки открывают `plate_found` и `plate_symbol` и разрешают следующий
+> сюжетный шаг. «Вернуться позже» оставляет событие нерешённым и ничего
+> не списывает. Старый пройденный G1.03 засчитывается через completionAliases;
+> нерешённый экземпляр получает новую версию при prepare/restore.
+
+> **Очистка пластины, 2026-09-27, ADVENTURE-D-012.** Варианты нового
+> `figma-2326-160-v3`: состав за 3 монеты без расхода сил или «Почистить самому»
+> через мини-игру точности за 2 силы без монет. Открытие мини-игры не завершает
+> событие и не списывает ресурсы. Успешное завершение применяет последствия
+> один раз и снимает блокировку сюжета; нехватка сил блокирует ручную работу.
+> Перенос на завтра остаётся откладыванием, без фиктивной очистки.
+> При подготовке/восстановлении сохранения нерешённые экземпляры v2 получают
+> ссылку на v3; RESULT/COMPLETED и экземпляры с решением остаются прежними.
+> Это согласование версий, без хода дня, трат или переписывания истории.
 
 > **Тренировки и пересмотр, 2026-09-27, LEARNING-D-001/002.**
 > [Текущий сценарий](skills-and-reflection.md): непрерывная практика в «Делах»
@@ -28,12 +57,16 @@
 > скрытые сведения не записываются как показанные.
 
 > **Герой в текущем игровом цикле, 2026-09-26, ADVENTURE-D-001/003.**
-> По ADVENTURE-D-009 отдельные подписи эмоций в меню убраны; поза отражает состояние. Радость/огорчение
-> сменяются при начале нового события; перед выбором герой задумывается.
-> Голод, усталость, питание и отдых обновляют позу по фактическим переходам
-> дня. Используются существующие пороги еды и сил, без таймеров и новых шкал.
+> По ADVENTURE-D-009 отдельные подписи эмоций в меню убраны. Сохранённые
+> радость/огорчение сменяются при начале нового события; перед выбором герой
+> задумывается. Голод, усталость, питание и отдых обновляют состояние по
+> фактическим переходам дня, с существующими порогами еды и сил.
 > Повторный показ карточки, возвращение из копилки и обычная навигация
 > состояние не сбрасывают. Одновременно активно только одно состояние.
+> По ADVENTURE-D-011 от 2026-09-27 особая поза текущего питомца показывается
+> несколько секунд и плавно сменяется обычным выбранным образом. Это таймер
+> представления: сохранённые состояние, одежда, потребности и история остаются.
+> Сон в кровати и исторические/смоделированные учебные сцены отделены от него.
 
 > **Постоянные приобретения и страницы вещей, 2026-09-26, FINANCE-UI-D-021.**
 > Купленные предметы остаются в инвентаре после выполнения цели и перехода
@@ -104,11 +137,11 @@
 > v16 ниже и над историческими примерами общего баланса: два реальных остатка
 > «Доступно» и «Копилка»; четыре текущие статьи распределяют доступные деньги.
 > Статья «В копилку» ещё не является накоплениями. Подтверждение бюджета не переводит
-> деньги, части цели покупаются только из копилки, снятие подтверждается
+> деньги; по ADVENTURE-D-018 покупка цели может дополнить копилку текущими деньгами, снятие подтверждается
 > отдельно. Пять больших целей задают пять финансовых периодов. Текущая
 > реализация — Room v20; текущий бюджет введён переносом 19 → 20,
 > выбранная подцель — 18 → 19. Технические версии: формат снимка 4,
-> отпечаток переходов 8. Старые записи Хроноскопа не исполняются по новым правилам.
+> отпечаток переходов 9. Старые записи Хроноскопа не исполняются по новым правилам.
 > [Подробная модель и статус](requirements/engine-refactor-plan-2026-09-24.md),
 > [карточки для дизайнера](requirements/designer-handoff-2026-09-24.md).
 > Авторская расшифровка Figma в приложении этого документа не переписана.
@@ -202,10 +235,11 @@ unresolved. Do not infer automatic visual transitions or unspecified thresholds.
 | Concept | Meaning | Values documented on the board |
 | --- | --- | --- |
 | `PetLook` / selected look | Saved cosmetic appearance; not a machine state | ОБЫЧНЫЙ (plain), БАНДАНА (bandana), РЮКЗАК (backpack), ОЧКИ (glasses), ШЛЯПА (hat) |
-| `PetVisualState` | Current visual state; special states temporarily replace the entire selected appearance | Eight states in section 3 |
+| `PetVisualState` | Saved current state, changed by gameplay; live presentation briefly shows its special artwork under ADVENTURE-D-011 | Eight states in section 3 |
 
-The selected look remains remembered while a special state is displayed. Ending
-a special state restores that look when the resolved state is ОБЫЧНОЕ.
+The selected look remains remembered while a special state is displayed. The
+live presentation returns to that look after its brief reaction, without
+changing the saved state. A gameplay transition to ОБЫЧНОЕ also shows that look.
 ОБЫЧНЫЙ is a cosmetic look; ОБЫЧНОЕ is a visual state. Do not conflate them.
 
 Do not create combined states such as ГОЛОДЕН_С_БАНДАНОЙ,
@@ -274,7 +308,9 @@ additional ways to obtain goal items from the historical common-balance example.
 ## 2. Rendering contract
 
 ```text
-if visualState == ОБЫЧНОЕ:
+if displaying the sleeping day recap:
+    display the age/color sleeping artwork with its bed
+else if live presentation's reaction has finished, or visualState == ОБЫЧНОЕ:
     display the saved selectedLook
 else:
     display the dedicated image for visualState
@@ -283,8 +319,31 @@ else:
 
 Examples in ОБЫЧНОЕ: БАНДАНА displays Ryzhik wearing a bandana; РЮКЗАК
 displays Ryzhik wearing a backpack; ОБЫЧНЫЙ displays plain Ryzhik.
-A hungry Ryzhik has no selected accessory visible, but the selected look is
-retained and appears again on return to ОБЫЧНОЕ.
+A hungry Ryzhik briefly has no selected accessory visible, but the selected
+look is retained and reappears when the presentation reaction finishes.
+Hunger and its guards remain unchanged until a gameplay action resolves them.
+
+**Принято пользователем · ADVENTURE-D-011 · 2026-09-27:** the current pet's special
+pose lasts a few seconds and smoothly returns to the ordinary selected look.
+The implementation uses a single application-scoped 4-second reaction clock
+and a 600 ms crossfade in the shared artwork renderer; these durations are
+engineering choices. The display uses NORMAL after the deadline, while the
+saved `PetVisualState`, current needs, selected look, owned gear and history
+remain untouched. No game command or persistence write accompanies the timer.
+
+A new actual visual state replaces the current reaction and its deadline;
+NORMAL immediately selects the ordinary look. The first observed special state
+after process launch also gets a brief reaction because the clock is not persisted.
+Rotation and navigation retain the same clock. Redisplaying the same event and
+changing name, color, accessory, day or revision without a different visual
+state do not restart it. When the selected look changes during the reaction, its
+current value is used on return. This clock follows only the live game;
+historical and simulated learning snapshots neither advance nor replace it.
+The sleeping pet with its bed in the day recap has its own presentation and
+must not turn into a standing pet when the reaction expires. The shared
+crossfade includes each pose's shadows; it does not move the screen layout,
+invent missing artwork or change source canvases. Live menu, event, savings and
+budget scenes opt into the clock; historical learning artwork keeps its own mapper.
 
 ## 3. State catalog and lifecycle
 
@@ -296,25 +355,27 @@ its decision, need, and result states as in the source scenarios; each new state
 replaces the previous one rather than hiding it. See section 5 for the distinction
 between an explicit transition and the board's superseded fallback rule.
 
-**Принято пользователем · D-002 · 2026-09-17; уточнено ADVENTURE-D-003 · 2026-09-26:**
-the current pet state remains until an explicit gameplay transition updates it.
+**Принято пользователем · D-002 · 2026-09-17; уточнено ADVENTURE-D-003 · 2026-09-26
+и ADVENTURE-D-011 · 2026-09-27:**
+the saved pet state remains until an explicit gameplay transition updates it.
 HAPPY and UPSET last until the next newly opened event. A pending decision enters
 THINKING; the existing food/energy thresholds enter HUNGRY/TIRED, and feeding or
 rest clears the corresponding need. A neutral new event can return a reaction
-to NORMAL. Authored state effects remain explicit transitions. There is no reset
+to NORMAL. Authored state effects remain explicit transitions. There is no saved-state reset
 after a duration, animation, ordinary navigation, or merely redisplaying/resuming
 an already opened event. No previous reaction is retained underneath the current
-state. This replaces the source board's unspecified duration of brief reactions
-with concrete game transitions.
+state. These rules describe the domain state. The temporary live artwork and
+smooth return in section 2 supersede the previous event-only display lifetime;
+they do not resolve a need or rewrite a result.
 
-| Source state / English alias | Entry condition | Duration and exit |
+| Source state / English alias | Entry condition | Saved-state duration and exit; live artwork follows section 2 |
 | --- | --- | --- |
 | ОБЫЧНОЕ / NORMAL | No active special state | Display the saved cosmetic look until a relevant event activates another state. |
 | ЗАДУМАЛСЯ / THINKING | Before an important financial decision; for example, buy an item now or save money toward a goal | After the decision, an explicit outcome can replace it with another state or NORMAL. No hidden decision state remains. |
 | ГОЛОДЕН / HUNGRY | A story event says food is needed, or the existing day's food threshold is reached without a meal | Remains active until feeding resolves the need. An authored meal may specify HAPPY; ordinary feeding clears HUNGRY, while exhausted energy can enter TIRED. Controlled by game logic, never real elapsed time. |
 | УСТАЛ / TIRED | A consequence of a story decision, such as additional work for virtual money | Rest or an explicitly defined fatigue-clearing event → NORMAL. Exact events are deferred; do not make every next event clear fatigue. No continuous energy meter or real-time energy consumption. |
 | ОБЕСПОКОЕН / WORRIED | Before the child's choice, when an unexpected mandatory expense, insufficient funds for a need, or a financial story problem occurs | After the decision, follow its explicit result transition, such as a reaction followed by NORMAL or the source example leading to HUNGRY. WORRIED does not remain hidden afterward. |
-| РАДУЕТСЯ / HAPPY | Authored positive outcome, such as a desired item received | Remains until a new event or actual need updates the state under ADVENTURE-D-003. Ordinary navigation preserves it; NORMAL restores the selected look. |
+| РАДУЕТСЯ / HAPPY | Authored positive outcome, such as a desired item received | Remains saved until a new event or actual need updates it under ADVENTURE-D-003. Ordinary navigation preserves it; ADVENTURE-D-011 independently restores the selected look on screen. |
 | РАССТРОЕН / UPSET | Authored outcome of an adventure | Remains until a new event or actual need updates the state under ADVENTURE-D-003. Not punishment for spending or a moral judgment. |
 | НУЖНА ПОМОЩЬ / NEEDS_HELP | Only an external story event, such as a twisted paw | Event → financial need → child decides where to obtain money. After resolution or event completion → NORMAL. Never caused by “bad spending.” |
 
@@ -335,9 +396,9 @@ These are semantic event labels from the board, not API definitions.
 Game time and real-world clocks are unrelated. Do not use real-clock timers to
 drive these conditions, automatic hunger after real hours, or deterioration
 while the app is closed. Do not introduce a continuously depleting energy bar.
-All pet states, including HAPPY and UPSET, change only through explicit event
-updates. Animation completion, screen navigation, and elapsed time do not clear
-them by themselves.
+All saved pet states, including HAPPY and UPSET, change only through explicit
+event updates. Animation completion, screen navigation, and elapsed time do not
+clear them. The live artwork timer in section 2 changes only presentation.
 
 ## 5. Priority and routing
 
@@ -490,9 +551,11 @@ visual state is only one part of that aggregate.
 
 **Принято пользователем · D-004 · 2026-09-17:** closing and reopening the app must
 preserve the current game and pet state. Owned gear is also retained. Reopening
-does not reset the pet to NORMAL or advance the story merely because time passed.
+does not reset the saved pet to NORMAL or advance the story merely because time passed.
 This includes HAPPY and UPSET: reopening restores the saved state until an
-explicit event changes it. Room is the approved persistent-data technology in
+explicit event changes it. The presentation clock of ADVENTURE-D-011 is not part
+of the saved aggregate and must not alter restoration or historical snapshots.
+Room is the approved persistent-data technology in
 AGENTS.md; this requirement does not define cloud backup or restore.
 
 **Принято пользователем · D-007 · 2026-09-17 (initial menu scope):** the original
@@ -530,12 +593,13 @@ sections 1, 3, 5, and 6 when implementing them.
 3. HUNGRY: show hungry Ryzhik without the bandana.
 4. Child buys food and covers the need.
 5. An explicit food-result update changes the state to HAPPY.
-6. A later explicit update returns to NORMAL and shows Ryzhik wearing the saved
-   bandana, or the current selection if the player changed it in the meantime.
+6. The live presentation smoothly returns to the saved bandana after the brief
+   reaction, or the current selection if it changed in the meantime. A later
+   explicit update may change the saved state to NORMAL.
 
 The shorter cosmetic example omits the reaction step; the full hunger example
-explicitly includes it. Under the subsequent user decision, HAPPY remains until
-another explicit event update; there is no timed reset.
+explicitly includes it. HAPPY remains saved until another explicit event update;
+ADVENTURE-D-011 gives its live artwork a brief duration without a saved-state reset.
 
 ### 7.2 Financial problem
 
@@ -544,7 +608,8 @@ another explicit event update; there is no timed reset.
 3. WORRIED.
 4. Child chooses where to get the money.
 5. Show UPSET or HAPPY depending on the result.
-6. A later explicit event update returns to NORMAL.
+6. The live presentation returns to the selected look after its brief reaction;
+   a later explicit event update returns the saved state to NORMAL.
 
 The board does not define the calculation that classifies each financial result.
 
@@ -590,11 +655,13 @@ These cases translate the explicit requirements into checks; they do not add
 new state rules.
 
 - NORMAL renders each of the five documented saved looks.
-- Each of the seven special states replaces the selected cosmetic appearance.
+- Each available special-state artwork briefly replaces the selected cosmetic
+  appearance in the live game, then crossfades back to the current selected look.
 - Entering/exiting a special state does not erase the saved look.
 - Changing the selected look retains owned gear; NORMAL displays the current
   selection after the special state finishes.
-- Hunger persists while the food need is unmet; buying food follows scenario 7.1.
+- Hunger persists in the game while the food need is unmet, even after its
+  artwork returns to the selected look; buying food follows scenario 7.1.
 - Extra work grants virtual money and produces fatigue as in scenario 7.3.
 - Exactly one pet state is active; no hidden conditions or reaction queues exist.
 - Explicit quest transitions replace the current state, including the source
@@ -606,9 +673,16 @@ new state rules.
   THINKING > UPSET > HAPPY > NORMAL; it does not enable concurrent states.
 - Reopening preserves the current saved game and pet state, including owned gear,
   without advancing the story or clearing the active state due to elapsed time.
-- HAPPY and UPSET persist until an explicit event changes the state, including
+- Saved HAPPY and UPSET persist until an explicit event changes the state, including
   across reopening; no timer, animation completion, or generic Continue action
   clears them. UPSET does not represent punishment or moral blame.
+- The live reaction returns smoothly after 4 seconds (600 ms crossfade); a new
+  actual state replaces its deadline. Navigation and cosmetic changes do not
+  restart it. The timer writes no pet, needs, money, story, ownership or history.
+- Initial observation after process launch may briefly show the saved reaction;
+  rotation/navigation retain its deadline rather than replaying it.
+- Historical/simulated learning snapshots do not drive the live reaction clock;
+  the sleeping day recap keeps the bed when a reaction deadline passes.
 - Injury comes from an external story event, never a spending penalty.
 - Real elapsed time and time while the app is closed do not cause deterioration.
 - No combined accessory-and-emotion state or continuous energy depletion exists.
@@ -1582,8 +1656,8 @@ D-119 уточняет объём D-117/D-118 для текущего MR: тол
 
 Цикл работает только пока экран RESUMED; при уходе или сворачивании вычисление
 кадров прекращается. Имя в HUD остаётся неинтерактивным (D-094). Привязка карты,
-тень и навигационные кнопки не двигаются вместе с фигурой. Длительность
-переходов и оптимизация UI сохраняются.
+тень и навигационные кнопки не двигаются вместе с фигурой. По ADVENTURE-D-011
+добавлена плавная смена иллюстрации за 600 мс; дыхание и оптимизация UI сохраняются.
 [Объём движения и отложенный прототип](pet-motion.md).
 
 ## Первый запуск и выбор спутника — 2026-09-19
@@ -1838,7 +1912,8 @@ SelectSavingGoal(goalId, itemId, firstDay?) проверяет текущую г
 предмета комплекту и отсутствие покупки. При первом выборе активирует главу,
 открывает её план периода и при необходимости готовит день без открытия события.
 В активной главе меняет только selectedSavingItemId и revision. Денег/шага нет.
-BuyGoalItem требует этот предмет выбранным, списывает цену только из копилки,
+BuyGoalItem требует этот предмет выбранным; по ADVENTURE-D-018 списывает цену
+из копилки и недостающую часть из текущих статей,
 добавляет OwnedItem и шаг, очищает selectedSavingItemId атомарно. Все прежние
 ограничения еды, подтверждений и ревизии сохраняются. Повторный запрос через
 агрегатный репозиторий остаётся идемпотентным; новая покупка уже имеющегося

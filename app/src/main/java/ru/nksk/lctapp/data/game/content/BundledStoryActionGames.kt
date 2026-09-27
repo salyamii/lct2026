@@ -32,6 +32,7 @@ internal fun GameCatalog.withStoryActionGames(): GameCatalog {
         "figma-2320-338-v2:work" to DeedGameKind.PRECISION,
         "figma-2326-64-v2:work" to DeedGameKind.MEMORY,
         "figma-2326-112-v2:work" to DeedGameKind.PRECISION,
+        "$PLATE_CLEANING:work" to DeedGameKind.PRECISION,
         "figma-2326-256-v2:work" to DeedGameKind.PRECISION,
         "figma-2326-352-v2:work" to DeedGameKind.PRECISION,
         "figma-2326-448-v2:work" to DeedGameKind.PRECISION,

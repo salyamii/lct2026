@@ -1,5 +1,7 @@
 package ru.nksk.lctapp.feature.economy.ui
 
+import ru.nksk.lctapp.core.ui.game.BudgetHistoryUi
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi

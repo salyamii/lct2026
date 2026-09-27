@@ -1,5 +1,8 @@
 package ru.nksk.lctapp.feature.economy.ui
 
+import ru.nksk.lctapp.core.ui.game.BudgetHistoryUi
+import ru.nksk.lctapp.core.ui.game.budgetHistoryUi
+
 import org.junit.Assert.*
 import org.junit.Test
 import ru.nksk.lctapp.app.createInitialGameState

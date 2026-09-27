@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.core.ui.components.GameInk
 import ru.nksk.lctapp.core.ui.components.GamePaper
+import ru.nksk.lctapp.core.ui.game.BudgetHistoryDetails
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 
@@ -34,22 +35,7 @@ internal fun BudgetHistoryDialog(state: EconomyUiState, onClose: () -> Unit, onR
                         fontFamily = Nunito, fontSize = 16.sp, lineHeight = 23.sp)
                     else -> state.budgetHistory?.let { history ->
                         Text("После сохранения этого плана", fontFamily = Nunito, fontSize = 15.sp)
-                        HistoryHeading("Монеты под рукой")
-                        HistoryAmount("Было", history.startingAvailable)
-                        if (history.income > 0) HistoryAmount("Получили", history.income, "+")
-                        if (history.spentAvailable > 0) HistoryAmount("Потратили", history.spentAvailable, "−")
-                        if (history.deposited > 0) HistoryAmount("Положили в копилку", history.deposited, "−")
-                        if (history.withdrawn > 0) HistoryAmount("Взяли из копилки", history.withdrawn, "+")
-                        HorizontalDivider(color = GameInk.copy(alpha = .15f))
-                        HistoryAmount("Сейчас доступно", history.resultingAvailable, strong = true)
-                        Spacer(Modifier.height(4.dp))
-                        HistoryHeading("В копилке")
-                        HistoryAmount("Было", history.startingSavings)
-                        if (history.deposited > 0) HistoryAmount("Положили", history.deposited, "+")
-                        if (history.withdrawn > 0) HistoryAmount("Взяли обратно", history.withdrawn, "−")
-                        if (history.spentSavings > 0) HistoryAmount("Купили для цели", history.spentSavings, "−")
-                        HorizontalDivider(color = GameInk.copy(alpha = .15f))
-                        HistoryAmount("Сейчас в копилке", history.resultingSavings, strong = true)
+                        BudgetHistoryDetails(history)
                     }
                 }
             }
@@ -66,20 +52,4 @@ internal fun BudgetHistoryDialog(state: EconomyUiState, onClose: () -> Unit, onR
             }
         },
     )
-}
-
-@Composable
-private fun HistoryHeading(text: String) {
-    Text(text, color = GameInk, fontFamily = Rubik, fontWeight = FontWeight.Bold, fontSize = 17.sp)
-}
-
-@Composable
-private fun HistoryAmount(label: String, amount: Long, sign: String = "", strong: Boolean = false) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.Top) {
-        Text(label, Modifier.weight(1f), color = GameInk, fontFamily = Nunito,
-            fontWeight = if (strong) FontWeight.ExtraBold else FontWeight.Normal, fontSize = 16.sp, lineHeight = 22.sp)
-        Text("$sign$amount", color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold,
-            fontSize = 16.sp, lineHeight = 22.sp)
-    }
 }

@@ -101,7 +101,7 @@ class EconomyOperationsTest {
         assertEquals(BudgetPlan(0, 0, 0, 0), spent.plan)
     }
 
-    @Test fun goalUsesOnlyRealSavingsEvenWhenPlanOrWalletContainsEnough() {
+    @Test fun legacySavingsExpenseStillDebitsOnlyItsNamedAccount() {
         val original = state(available = 100, savings = 9)
         assertEquals(1L, EconomyOperations.quote(original, 10, SpendingKind.GOAL).missing)
         assertThrows(EconomyViolation::class.java) { EconomyOperations.spend(original, 10, SpendingKind.GOAL) }
@@ -109,6 +109,56 @@ class EconomyOperationsTest {
         assertEquals(100L, bought.availableBalance)
         assertEquals(0L, bought.savingsBalance)
         assertEquals(original.plan, bought.plan)
+    }
+
+    @Test fun goalPurchaseUsesSavingsThenEveryAvailableSourceWithNeedsLast() {
+        val original = state(savings = 9)
+        val quote = EconomyOperations.goalPurchaseQuote(original, 99)
+        assertEquals(9L, quote.fromSavings)
+        assertEquals(90L, quote.fromAvailableAmount)
+        assertEquals(listOf(SpendPart(BudgetSection.SAVINGS, 20), SpendPart(BudgetSection.RESERVE, 25),
+            SpendPart(BudgetSection.WANTS, 20), SpendPart(BudgetSection.NEEDS, 25)), quote.fromAvailable.parts)
+        assertTrue(quote.affordable)
+        assertEquals(0L, quote.missing)
+        val paid = EconomyOperations.purchaseGoal(original, 99)
+        assertEquals(0L, paid.savingsBalance)
+        assertEquals(10L, paid.availableBalance)
+        assertEquals(BudgetPlan(10, 0, 0, 0), paid.plan)
+        assertEquals(original.balance - 99, paid.balance)
+    }
+
+    @Test fun directGoalPurchaseNeedsNoDepositAndSavingsOnlyPurchaseLeavesAllocationsUntouched() {
+        val wallet = state(savings = 0)
+        val direct = EconomyOperations.purchaseGoal(wallet, 24)
+        assertEquals(76L, direct.availableBalance)
+        assertEquals(0L, direct.savingsBalance)
+        assertEquals(BudgetPlan(35, 20, 0, 21), direct.plan)
+        val saved = state(savings = 30)
+        val quote = EconomyOperations.goalPurchaseQuote(saved, 24)
+        assertEquals(24L, quote.fromSavings)
+        assertEquals(0L, quote.fromAvailableAmount)
+        assertTrue(quote.fromAvailable.parts.isEmpty())
+        assertEquals(saved.copy(savingsBalance = 6), EconomyOperations.purchaseGoal(saved, 24))
+    }
+
+    @Test fun combinedGoalShortfallAndUnfinishedBudgetDoNotProduceAPartialPayment() {
+        val original = EconomyState(BudgetPlan(4, 0, 0, 0), savingsBalance = 3)
+        val quote = EconomyOperations.goalPurchaseQuote(original, 10)
+        assertEquals(3L, quote.fromSavings)
+        assertEquals(4L, quote.fromAvailableAmount)
+        assertEquals(3L, quote.missing)
+        assertFalse(quote.affordable)
+        val insufficient = assertThrows(EconomyViolation::class.java) { EconomyOperations.purchaseGoal(original, 10) }
+        assertEquals(EconomyFailure.INSUFFICIENT_MONEY, insufficient.reason)
+        assertEquals(3L, insufficient.missing)
+        assertEquals(7L, original.balance)
+
+        val draft = EconomyOperations.beginManual(state(), "draft")
+        // Enough savings alone must not bypass an unfinished allocation.
+        assertFalse(EconomyOperations.goalPurchaseQuote(draft, 10).affordable)
+        val blocked = assertThrows(EconomyViolation::class.java) { EconomyOperations.purchaseGoal(draft, 10) }
+        assertEquals(EconomyFailure.PLANNING_REQUIRED, blocked.reason)
+        assertEquals(130L, draft.balance)
     }
 
     @Test fun depositAndConfirmedWithdrawalConserveMoneyAndUpdateCurrentAllocations() {

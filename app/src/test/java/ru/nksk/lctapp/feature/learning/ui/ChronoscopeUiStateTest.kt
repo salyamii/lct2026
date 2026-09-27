@@ -44,7 +44,7 @@ class ChronoscopeUiStateTest {
         val meal = AuditEntry("meal", 2, "run", AuditType.TECHNICAL_UPDATE, before = initial, after = spent,
             operations = listOf(LedgerEntry("meal", LedgerKind.AVAILABLE_EXPENSE, 5)))
         val result = TimeMachineResult(TimeMachineStatus.DIVERGED, request, reachedSequence = 1, requestedSequence = 2)
-        assertEquals("Сравниваем сразу после выбранного решения.", chronoscopeBoundary(result, listOf(target, meal), catalogue))
+        assertNull(chronoscopeBoundary(result, listOf(target, meal), catalogue))
         val reachedBoundary = chronoscopeBoundary(result.copy(reachedSequence = 2), listOf(target, meal), catalogue)!!
         assertTrue(reachedBoundary.startsWith("Последний общий момент:"))
         assertTrue(reachedBoundary.contains("5 монет"))
@@ -104,18 +104,23 @@ class ChronoscopeUiStateTest {
         assertEquals(2, different.alternative.size)
     }
 
-    @Test fun effortTradeoffIsVisibleOnlyWhenTheActualAmountOfEnergyDiffers() {
+    @Test fun paidCleaningAndManualCleaningShowBothTheMoneyAndEffortTradeoff() {
         val catalog = bundledGameCatalog()
         val rested = initial.copy(engine = EngineState(catalog.rules.id, 1, 1, DayPhase.RUNNING,
             0, 4, true, null, 100, emptyList(), emptyList()))
         val tired = rested.copy(engine = rested.engine!!.copy(energy = 2))
-        val first = chronoscopePath(TimeMachineBranch(rested, emptyList()), initial, catalog)
+        val paid = rested.copy(economy = EconomyOperations.spend(rested.economy, 3, SpendingKind.GENERAL))
+        val first = chronoscopePath(TimeMachineBranch(paid,
+            listOf(LedgerEntry("cleaning-pay", LedgerKind.AVAILABLE_EXPENSE, 3))), initial, catalog)
         val second = chronoscopePath(TimeMachineBranch(tired, emptyList()), initial, catalog)
         val compared = chronoscopeDifferences(first, second)
 
         assertEquals(listOf("Сохранили больше сил"), compared.original)
         assertEquals(listOf("Потратили больше сил"), compared.alternative)
-        assertTrue(compared.money.isEmpty())
+        assertEquals(3L, compared.money.single { it.label == "Осталось монет" }.alternative -
+            compared.money.single { it.label == "Осталось монет" }.original)
+        assertEquals(ChronoscopeAmountDifference("Потрачено", 3, 0), compared.money.single { it.label == "Потрачено" })
+        assertFalse(compared.money.any { it.label == "В копилке" })
     }
 
     @Test fun aLedgerQuestionStillShowsTheSpendingTotalItAsksAboutEvenWhenItIsEqual() {

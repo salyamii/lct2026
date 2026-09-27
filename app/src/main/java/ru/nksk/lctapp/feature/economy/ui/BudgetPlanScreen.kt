@@ -36,11 +36,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.components.*
-import ru.nksk.lctapp.core.ui.game.toAdventurePetPresentation
+import ru.nksk.lctapp.core.ui.game.toLiveAdventurePetPresentation
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
-import ru.nksk.lctapp.domain.economy.BudgetRevisionReason
 import ru.nksk.lctapp.domain.pet.PetState
 
 private val PlanMuted = Color(0xFF6B6394)
@@ -51,25 +50,18 @@ internal fun BudgetPlanScreen(state: BudgetUiState, onAmountChange: (BudgetArtic
     onConfirm: () -> Unit, onBack: () -> Unit,
     onAdjust: ((BudgetArticle, Boolean) -> Unit)? = null,
     onDeposit: (() -> Unit)? = null, onWithdraw: (() -> Unit)? = null,
-    revisionReason: BudgetRevisionReason? = null,
-    onReasonChange: ((BudgetRevisionReason) -> Unit)? = null,
-    onOpenHistory: (() -> Unit)? = null,
-    revisionDetails: (@Composable () -> Unit)? = null,
     contextId: String? = null,
     onContextPresented: ((String) -> Unit)? = null,
     onOpenSavings: (() -> Unit)? = null,
     pet: PetState? = null,
     interactionsBlocked: Boolean = false,
-    onOpenChanges: (() -> Unit)? = null,
 ) {
     var info by rememberSaveable { mutableStateOf<String?>(null) }
     var editing by rememberSaveable { mutableStateOf<String?>(null) }
-    var reasonsVisible by rememberSaveable { mutableStateOf(false) }
-    var menuVisible by remember { mutableStateOf(false) }
     var balancesVisible by remember { mutableStateOf(false) }
     var foodNeedVisible by remember { mutableStateOf(false) }
     val savingsAction = onOpenSavings ?: onDeposit ?: onWithdraw
-    val character = pet?.toAdventurePetPresentation()
+    val character = pet?.toLiveAdventurePetPresentation()
     val characterArt = character?.artworkRes
     LaunchedEffect(contextId, balancesVisible, foodNeedVisible) {
         if (balancesVisible && foodNeedVisible) contextId?.let { onContextPresented?.invoke(it) }
@@ -92,25 +84,7 @@ internal fun BudgetPlanScreen(state: BudgetUiState, onAmountChange: (BudgetArtic
                     Text(state.title, Modifier.padding(horizontal = 14.dp, vertical = 10.dp), color = Color.White,
                         fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
                 }
-                if (revisionReason != null && onReasonChange != null || onOpenHistory != null || onOpenChanges != null) {
-                    Box {
-                        IconButton(onClick = { menuVisible = true }, enabled = !interactionsBlocked, modifier = Modifier.size(48.dp)
-                            .clip(CircleShape).background(GameInk).semantics { contentDescription = "Действия плана" }) {
-                            Text("⋯", color = Color.White, fontSize = 28.sp)
-                        }
-                        DropdownMenu(expanded = menuVisible, onDismissRequest = { menuVisible = false }) {
-                            if (revisionReason != null && onReasonChange != null) DropdownMenuItem(
-                                text = { Text("Почему меняем план?") }, enabled = state.actionsEnabled && !state.busy && !interactionsBlocked,
-                                onClick = { menuVisible = false; reasonsVisible = true })
-                            if (onOpenHistory != null) DropdownMenuItem(text = { Text("История и практика") },
-                                enabled = state.actionsEnabled && !state.busy && !interactionsBlocked,
-                                onClick = { menuVisible = false; onOpenHistory() })
-                            if (onOpenChanges != null) DropdownMenuItem(text = { Text("Движение монет") },
-                                enabled = state.actionsEnabled && !state.busy && !interactionsBlocked,
-                                onClick = { menuVisible = false; onOpenChanges() })
-                        }
-                    }
-                }
+
             }
             Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp), horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -191,7 +165,7 @@ internal fun BudgetPlanScreen(state: BudgetUiState, onAmountChange: (BudgetArtic
                         else -> "Все ${state.total} монет распределены"
                     },
                         color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold)
-                    BudgetAllocationProgress(state)
+                    BudgetAllocationSummary(state)
                     val actionEnabled = state.canConfirm
                     Button(onClick = onConfirm,
                         enabled = actionEnabled && !interactionsBlocked,
@@ -210,18 +184,6 @@ internal fun BudgetPlanScreen(state: BudgetUiState, onAmountChange: (BudgetArtic
         }
         }
     }
-    if (reasonsVisible && revisionReason != null && onReasonChange != null) {
-        AlertDialog(onDismissRequest = { reasonsVisible = false }, containerColor = GamePaper,
-            title = { Text("Почему меняем план?", color = GameInk, fontFamily = Rubik) },
-            text = {
-                Column(Modifier.heightIn(max = 350.dp).verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    RevisionReason(revisionReason, onReasonChange, state.actionsEnabled)
-                    revisionDetails?.invoke()
-                }
-            },
-            confirmButton = { TextButton(onClick = { reasonsVisible = false }) { Text("Готово", color = GameInk) } })
-    }
     info?.let { name ->
         val article = BudgetArticle.valueOf(name)
         AlertDialog(onDismissRequest = { info = null }, containerColor = GamePaper,
@@ -237,42 +199,36 @@ internal fun BudgetPlanScreen(state: BudgetUiState, onAmountChange: (BudgetArtic
     }
 }
 
-/** One continuous bar divides available coins, including the still-unallocated amount. */
+/** The scale names each allocation; amounts remain in the editable cards above. */
 @Composable
-private fun BudgetAllocationProgress(state: BudgetUiState) {
+private fun BudgetAllocationSummary(state: BudgetUiState) {
     val unallocated = state.unallocated
     val total = state.total
     val assigned = (total - unallocated).coerceAtLeast(0)
-    Column(Modifier.fillMaxWidth().clearAndSetSemantics {
+    Box(Modifier.fillMaxWidth().clearAndSetSemantics {
         contentDescription = "Распределение монет"
         stateDescription = BudgetArticle.entries.joinToString(". ") { "${it.title}: ${state.amount(it)} монет" } +
             ". Не распределено: $unallocated монет"
         progressBarRangeInfo = ProgressBarRangeInfo(
             if (total > 0) (assigned.toDouble() / total).toFloat().coerceIn(0f, 1f) else 0f, 0f..1f)
-    }, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(Modifier.fillMaxWidth().height(12.dp).clip(RoundedCornerShape(6.dp)).background(Color(0xFFE5DFEF))) {
-            if (total > 0) {
-                BudgetArticle.entries.forEach { article ->
-                    val amount = state.amount(article)
-                    if (amount > 0) Box(Modifier.weight((amount.toDouble() / total).toFloat())
-                        .fillMaxHeight().background(article.allocationColor))
-                }
-                if (unallocated > 0) Spacer(Modifier.weight((unallocated.toDouble() / total).toFloat()))
-            }
-        }
-        val columns = if (LocalDensity.current.fontScale > 1.25f) 2 else 4
+    }) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            BudgetArticle.entries.chunked(columns).forEach { articles ->
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    articles.forEach { article ->
-                        Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Box(Modifier.width(4.dp).height(22.dp).clip(RoundedCornerShape(2.dp))
-                                .background(article.allocationColor))
-                            Text("${article.title} ${state.amount(article)}", color = GameInk,
-                                fontFamily = Nunito, fontSize = 13.sp, lineHeight = 17.sp)
-                        }
+            Row(Modifier.fillMaxWidth().height(7.dp).clip(RoundedCornerShape(4.dp))
+                .background(Color(0xFFE4DFD6))) {
+                if (total > 0) {
+                    BudgetArticle.entries.forEach { article ->
+                        val amount = state.amount(article)
+                        if (amount > 0) Box(Modifier.weight((amount.toDouble() / total).toFloat())
+                            .fillMaxHeight().background(article.allocationColor))
                     }
+                    if (unallocated > 0) Spacer(Modifier.weight((unallocated.toDouble() / total).toFloat()))
+                }
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                BudgetArticle.entries.forEach { article ->
+                    Text(article.title, Modifier.weight(1f), color = GameInk.copy(alpha = .72f),
+                        fontFamily = Nunito, fontWeight = FontWeight.SemiBold,
+                        fontSize = 11.sp, lineHeight = 14.sp, textAlign = TextAlign.Center)
                 }
             }
         }
@@ -280,10 +236,10 @@ private fun BudgetAllocationProgress(state: BudgetUiState) {
 }
 
 private val BudgetArticle.allocationColor: Color get() = when (this) {
-    BudgetArticle.NEEDS -> Color(0xFF70B7EA)
-    BudgetArticle.WANTS -> Color(0xFFF2A15F)
-    BudgetArticle.SAVINGS -> AdventureLime
-    BudgetArticle.RESERVE -> Color(0xFFAB95E6)
+    BudgetArticle.NEEDS -> Color(0xFF829BB3)
+    BudgetArticle.WANTS -> Color(0xFFC9A079)
+    BudgetArticle.SAVINGS -> Color(0xFF9CAA84)
+    BudgetArticle.RESERVE -> Color(0xFFA697BC)
 }
 
 @Composable
@@ -334,28 +290,6 @@ private fun PlanStep(label: String, description: String, enabled: Boolean, inter
             disabledContentColor = if (interactionsBlocked && enabled) GameInk else Color(0xFF8C82A6))) {
         Text(label, fontSize = 22.sp, fontWeight = FontWeight.Bold)
     }
-}
-
-@Composable
-private fun RevisionReason(reason: BudgetRevisionReason, onChange: (BudgetRevisionReason) -> Unit, enabled: Boolean) {
-    var expanded by remember { mutableStateOf(false) }
-    Box {
-        TextButton(onClick = { expanded = true }, enabled = enabled) { Text(reason.label(), color = GameInk) }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            BudgetRevisionReason.entries.filterNot { it == BudgetRevisionReason.INITIAL }.forEach { option ->
-                DropdownMenuItem(text = { Text(option.label()) }, onClick = { expanded = false; onChange(option) })
-            }
-        }
-    }
-}
-
-private fun BudgetRevisionReason.label(): String = when (this) {
-    BudgetRevisionReason.INITIAL -> "Первый план"
-    BudgetRevisionReason.KNOWN_NEED_OMITTED -> "Не учёл нужную трату"
-    BudgetRevisionReason.UNEXPECTED_EXPENSE -> "Появилась неожиданная трата"
-    BudgetRevisionReason.NEW_INCOME -> "Получил дополнительные монеты"
-    BudgetRevisionReason.CHANGED_PRIORITY -> "Изменились мои планы"
-    BudgetRevisionReason.UNSPECIFIED -> "Причина не указана"
 }
 
 private val BudgetArticle.planArt: Int @DrawableRes get() = when (this) {

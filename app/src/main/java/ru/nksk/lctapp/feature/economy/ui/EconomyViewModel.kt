@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import ru.nksk.lctapp.core.ui.game.BudgetHistoryUi
+import ru.nksk.lctapp.core.ui.game.budgetHistoryUi
 import ru.nksk.lctapp.core.ui.game.playerMessage
 import ru.nksk.lctapp.domain.analytics.DecisionContext
 import ru.nksk.lctapp.domain.analytics.FinancialPosition

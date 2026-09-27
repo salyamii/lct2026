@@ -36,7 +36,7 @@ data object Economy : NavKey
 data object Savings : NavKey
 
 fun EntryProviderScope<NavKey>.economyEntry(onBack: (Economy) -> Unit, onConfirmed: (Economy) -> Unit,
-    onOpenHistory: (Economy) -> Unit = {}, onOpenSavings: (Economy) -> Unit = {}) {
+    onOpenSavings: (Economy) -> Unit = {}) {
     entry<Economy> { source ->
         val model = hiltViewModel<EconomyViewModel>()
         val state by model.uiState.collectAsStateWithLifecycle()
@@ -82,7 +82,7 @@ fun EntryProviderScope<NavKey>.economyEntry(onBack: (Economy) -> Unit, onConfirm
         }
         EconomyScreen(state, onAction = {
             if (it is EconomyAction.ContextPresented || lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) model.onAction(it)
-        }, onBack = dropUnlessResumed { back() }, onOpenHistory = dropUnlessResumed { onOpenHistory(source) },
+        }, onBack = dropUnlessResumed { back() },
             onOpenSavings = dropUnlessResumed { onOpenSavings(source) })
     }
 }

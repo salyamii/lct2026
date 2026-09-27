@@ -8,6 +8,7 @@ import ru.nksk.lctapp.domain.content.StoryContent
 import ru.nksk.lctapp.domain.economy.BudgetSection
 import ru.nksk.lctapp.domain.economy.BudgetRevisionReason
 import ru.nksk.lctapp.domain.engine.DayJournalKind
+import ru.nksk.lctapp.domain.engine.EngineCommand
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.history.AuditEntry
 import ru.nksk.lctapp.domain.history.AuditType
@@ -23,10 +24,13 @@ data class BudgetActuals(
     val withdrawn: Long = 0,
     val goalPurchases: Long = 0,
     val income: Long = 0,
+    /** A known goal expense from the wallet; neither a transfer nor spending real savings. */
+    val goalPurchasesAvailable: Long = 0,
 ) {
-    init { require(listOf(needs, wants, reserve, unknownExpenses, deposited, withdrawn, goalPurchases, income).all { it >= 0 }) }
+    init { require(listOf(needs, wants, reserve, unknownExpenses, deposited, withdrawn, goalPurchases, income, goalPurchasesAvailable).all { it >= 0 }) }
     val netSaved: Long get() = Math.subtractExact(deposited, withdrawn)
-    val availableExpenses: Long get() = Math.addExact(Math.addExact(needs, wants), Math.addExact(reserve, unknownExpenses))
+    val availableExpenses: Long get() = Math.addExact(goalPurchasesAvailable,
+        Math.addExact(Math.addExact(needs, wants), Math.addExact(reserve, unknownExpenses)))
     fun amount(section: BudgetSection): Long = when (section) {
         BudgetSection.NEEDS -> needs
         BudgetSection.WANTS -> wants
@@ -136,7 +140,9 @@ object FinancialBudgetProjection {
                 LedgerKind.DEPOSIT -> result.copy(deposited = add(result.deposited))
                 LedgerKind.WITHDRAWAL -> result.copy(withdrawn = add(result.withdrawn))
                 LedgerKind.SAVINGS_EXPENSE -> result.copy(goalPurchases = add(result.goalPurchases))
-                LedgerKind.AVAILABLE_EXPENSE -> when (category(entry, operation, content)) {
+                LedgerKind.AVAILABLE_EXPENSE -> if (entry.request?.command is EngineCommand.BuyGoalItem)
+                    result.copy(goalPurchasesAvailable = add(result.goalPurchasesAvailable))
+                else when (category(entry, operation, content)) {
                     BudgetSection.NEEDS -> result.copy(needs = add(result.needs))
                     BudgetSection.WANTS -> result.copy(wants = add(result.wants))
                     BudgetSection.RESERVE -> result.copy(reserve = add(result.reserve))

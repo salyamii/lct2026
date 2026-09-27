@@ -42,6 +42,8 @@ data class GameCatalog(
     val oneTimeEventIds: Set<String> = emptySet(),
     val goals: List<GoalCampaign> = emptyList(),
     val storyCampaign: StoryCampaign? = null,
+    /** Direct old -> current IDs for compatible, unresolved scheduled occurrences only. */
+    val eventReplacements: Map<String, String> = emptyMap(),
 ) {
     fun storyProgress(state: GameState) = StoryProgress(content, policies, goals, storyCampaign, state)
 
@@ -61,6 +63,7 @@ class GameSession(
 ) {
     private val preparation = Mutex()
     private var prepared = false
+    private val eventReplacements = EventOccurrenceReplacements(catalog)
     val contentFingerprint = ru.nksk.lctapp.domain.timemachine.GameCatalogFingerprint.compute(catalog)
     val engine = GameEngine(games, EventFactory(catalog.content, catalog.policies, catalog.meals, catalog.goals, catalog.storyCampaign), catalog.rules,
         contentFingerprint)
@@ -73,6 +76,7 @@ class GameSession(
         guard: ru.nksk.lctapp.domain.history.RestoreGuard): GameState {
         content.install(catalog.content)
         games.restoreSnapshot(snapshot, guard)
+        eventReplacements.synchronize(games)
         games.synchronizeStarterAccessory()
         engine.synchronizeStoryAge()
         return checkNotNull(games.read())
@@ -117,6 +121,7 @@ class GameSession(
                     selectedGoalId = startingGoal, selectedSavingItemId = savingItemId ?: initial.selectedSavingItemId)
                     .withStarterAccessoryOwnership())
             }
+            eventReplacements.synchronize(games)
             games.synchronizeStarterAccessory()
             engine.synchronizeStoryAge()
             prepared = true

@@ -7,7 +7,7 @@ import ru.nksk.lctapp.domain.history.HistoryCodec
 /** Includes all catalog fields; field additions cannot silently escape the historical version check. */
 object GameCatalogFingerprint {
     /** Increment when transition semantics change, even if authored content stays identical. */
-    const val TRANSITION_VERSION = 8
+    const val TRANSITION_VERSION = 9
     fun compute(catalog: GameCatalog): String {
         val content = catalog.content
         val normalized = catalog.copy(content = content.copy(

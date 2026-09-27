@@ -229,11 +229,10 @@ private fun BudgetPopupSummary(budget: MenuBudgetUiState) {
         Text("В бюджете", color = GameInk.copy(alpha = .65f), fontFamily = Nunito,
             fontWeight = FontWeight.Bold, fontSize = 13.sp)
         Spacer(Modifier.height(6.dp))
-        // Match the allocation indicators on the budget screen.
-        BudgetArticleRow("Нужно", budget.needs, Color(0xFF70B7EA))
-        BudgetArticleRow("Хочу", budget.wants, Color(0xFFF2A15F))
-        BudgetArticleRow("В копилку", budget.savings, AdventureLime)
-        BudgetArticleRow("Запас", budget.reserve, Color(0xFFAB95E6))
+        BudgetArticleRow("Нужно", budget.needs)
+        BudgetArticleRow("Хочу", budget.wants)
+        BudgetArticleRow("В копилку", budget.savings)
+        BudgetArticleRow("Запас", budget.reserve)
         if (budget.unallocated > 0) {
             Spacer(Modifier.height(6.dp))
             Text("Ещё не распределили ${budget.unallocated} монет", color = GameInk.copy(alpha = .72f),
@@ -256,11 +255,10 @@ private fun BudgetBalance(title: String, amount: Long, artwork: Int, modifier: M
 }
 
 @Composable
-private fun BudgetArticleRow(title: String, amount: Long, color: Color) {
+private fun BudgetArticleRow(title: String, amount: Long) {
     Row(Modifier.fillMaxWidth().padding(vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Box(Modifier.width(4.dp).height(18.dp).clip(RoundedCornerShape(2.dp)).background(color))
         Text(title, Modifier.weight(1f), color = GameInk, fontFamily = Nunito,
             fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
         Text(amount.toString(), color = GameInk, fontFamily = Nunito,

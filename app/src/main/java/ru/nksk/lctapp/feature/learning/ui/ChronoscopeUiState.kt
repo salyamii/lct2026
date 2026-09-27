@@ -148,7 +148,6 @@ internal fun chronoscopeBoundary(result: TimeMachineResult, history: List<AuditE
     val afterTarget = history.filter { it.runId == target.runId && it.sequence > target.sequence && it.sequence <= reached }
     val action = learningHistoryRows(afterTarget, catalog, target.before?.pet?.name.orEmpty(), includeDay = false).firstOrNull()
     return action?.let { "Последний общий момент: $it" }
-        ?: "Сравниваем сразу после выбранного решения."
 }
 
 internal fun chronoscopeBack(step: ChronoscopeStep): ChronoscopeStep? = when (step) {

@@ -74,6 +74,37 @@ class LearningHistoryRowsTest {
         assertFalse(rows.any { "Потратили" in it || "{petName}" in it })
     }
 
+    @Test fun mixedGoalPurchaseNamesBothAccountsInOneRowAndKeepsUnrelatedReceipts() {
+        val item = "stargazing-star-map-v1"
+        val after = initial.copy(ownedItems = listOf(OwnedItem("map", item)),
+            engine = initial.engine!!.copy(journal = listOf(
+                DayJournalEntry("purchase", DayJournalKind.ITEM_PURCHASE, item, -24))))
+        val rows = learningHistoryRows(listOf(audit(1, initial, after, listOf(
+            LedgerEntry("purchase", LedgerKind.SAVINGS_EXPENSE, 21),
+            LedgerEntry("purchase:available", LedgerKind.AVAILABLE_EXPENSE, 3),
+            LedgerEntry("separate-deposit", LedgerKind.DEPOSIT, 2),
+        ))), catalog, "Тоша")
+        assertEquals(listOf(
+            "День 1: Купили: Карта звёзд. Потратили 21 монету из копилки и 3 монеты из текущих денег",
+            "День 1: Отложили в копилку 2 монеты",
+        ), rows)
+    }
+
+    @Test fun goalPurchaseWithOneAccountKeepsTheExistingNamedPayment() {
+        val item = "stargazing-star-map-v1"
+        val after = initial.copy(ownedItems = listOf(OwnedItem("map", item)),
+            engine = initial.engine!!.copy(journal = listOf(
+                DayJournalEntry("purchase", DayJournalKind.ITEM_PURCHASE, item, -24))))
+        listOf(
+            LedgerKind.SAVINGS_EXPENSE to "Потратили из копилки 24 монеты",
+            LedgerKind.AVAILABLE_EXPENSE to "Потратили 24 монеты",
+        ).forEach { (kind, payment) ->
+            val rows = learningHistoryRows(listOf(audit(1, initial, after,
+                listOf(LedgerEntry("purchase", kind, 24)))), catalog, "Тоша", includeDay = false)
+            assertEquals(listOf("Купили: Карта звёзд. $payment"), rows)
+        }
+    }
+
     @Test fun baselineDoesNotPretendOlderActionsHappenedNowAndNewest50AreKept() {
         val imported = AuditEntry("baseline", 1, "run", AuditType.IMPORTED_BASELINE, after = initial.copy(
             ownedItems = listOf(OwnedItem("map", "stargazing-star-map-v1"))))

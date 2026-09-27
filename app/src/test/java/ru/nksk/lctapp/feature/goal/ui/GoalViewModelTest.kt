@@ -16,6 +16,10 @@ import ru.nksk.lctapp.domain.content.StoryContent
 import ru.nksk.lctapp.domain.content.StoryContentRepository
 import ru.nksk.lctapp.domain.economy.BudgetPlan
 import ru.nksk.lctapp.domain.economy.EconomyState
+import ru.nksk.lctapp.domain.economy.BudgetSection
+import ru.nksk.lctapp.domain.economy.SpendPart
+import ru.nksk.lctapp.domain.analytics.AnalyticsFact
+import ru.nksk.lctapp.domain.analytics.DecisionContext
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.domain.game.GameState
@@ -131,14 +135,24 @@ class GoalViewModelTest {
         val before = fixture.state
         fixture.repository.failWrite = true
         model.onAction(GoalAction.Buy(fixture.goal.goalId, fixture.goal.itemIds.first()))
+        assertNotNull(model.uiState.value.confirmation)
+        assertEquals(before, fixture.state)
+        assertTrue(fixture.repository.purchases.isEmpty())
+        model.onAction(GoalAction.ConfirmPurchase)
         runCurrent()
         assertNotNull(model.uiState.value.message)
+        assertNotNull(model.uiState.value.confirmation)
         assertNull(model.uiState.value.purchaseResult)
         assertEquals(before, fixture.state)
 
         fixture.repository.failWrite = false
-        model.onAction(GoalAction.Buy(fixture.goal.goalId, fixture.goal.itemIds.first()))
+        // A late exposure callback must not improve evidence already submitted with the failed write.
+        model.onAction(GoalAction.ContextPresented(checkNotNull(model.uiState.value.confirmation).contextId))
+        model.onAction(GoalAction.ConfirmPurchase)
         runCurrent()
+        assertEquals(2, fixture.repository.purchases.size)
+        assertEquals(fixture.repository.purchases[0], fixture.repository.purchases[1])
+        assertFalse(checkNotNull(fixture.repository.purchases.last().context).informationPresented)
         val committed = fixture.state
         assertEquals(100L, committed.economy.availableBalance)
         assertEquals(16L, committed.economy.savingsBalance)
@@ -157,26 +171,115 @@ class GoalViewModelTest {
         assertTrue(recreated.uiState.value.parts.filterNot { it.owned }.all { it.canSelect })
     }
 
-    @Test fun insufficientPurchaseNeverUsesAvailableMoneyOrShowsSuccess() = runTest(dispatcher) {
+    @Test fun combinedBalancesShowTheActualSplitAndOnlyExplicitConfirmationPays() = runTest(dispatcher) {
+        val fixture = Fixture(savings = 20, plan = BudgetPlan(40, 20, 20, 20))
+        fixture.start()
+        val model = fixture.model()
+        runCurrent()
+        val before = fixture.state
+        val part = model.uiState.value.parts.single { it.savingTarget }
+        assertTrue(part.canBuy)
+        assertEquals(4L, part.availableContribution)
+        assertEquals(4L, part.remainingCoins)
+        model.onAction(GoalAction.Buy(fixture.goal.goalId, part.id))
+        val quote = checkNotNull(model.uiState.value.confirmation)
+        assertEquals(20L, quote.fromSavings)
+        assertEquals(listOf(SpendPart(BudgetSection.SAVINGS, 4L)), quote.availableParts)
+        assertEquals(96L, quote.remainingBalance)
+        assertEquals(0L, quote.remainingSavings)
+        assertEquals(before, fixture.state)
+        assertTrue(fixture.repository.purchases.isEmpty())
+
+        model.onAction(GoalAction.ContextPresented(quote.contextId))
+        model.onAction(GoalAction.ConfirmPurchase)
+        runCurrent()
+        assertEquals(96L, fixture.state.economy.availableBalance)
+        assertEquals(0L, fixture.state.economy.savingsBalance)
+        assertEquals(BudgetPlan(40, 20, 16, 20), fixture.state.economy.plan)
+        assertEquals(part.id, model.uiState.value.purchaseResult?.itemId)
+        assertTrue(checkNotNull(fixture.repository.purchases.single().context).complete)
+    }
+
+    @Test fun cancellingAPreviewPreservesAllGameStateWithoutDispatch() = runTest(dispatcher) {
         val fixture = Fixture(savings = 20)
+        fixture.start()
+        val model = fixture.model()
+        runCurrent()
+        val before = fixture.state
+        model.onAction(GoalAction.Buy(fixture.goal.goalId, fixture.goal.itemIds.first()))
+        assertNotNull(model.uiState.value.confirmation)
+        model.onAction(GoalAction.CancelPurchase)
+        runCurrent()
+        assertNull(model.uiState.value.confirmation)
+        assertEquals(before, fixture.state)
+        assertTrue(fixture.repository.purchases.isEmpty())
+    }
+
+    @Test fun buyingWithOnlyAvailableMoneyWarnsAboutTheRemainingWeekBeforePayment() = runTest(dispatcher) {
+        val fixture = Fixture()
+        fixture.start(item = 2)
+        val model = fixture.model()
+        runCurrent()
+        val before = fixture.state
+        model.onAction(GoalAction.Buy(fixture.goal.goalId, fixture.goal.itemIds[2]))
+        val quote = checkNotNull(model.uiState.value.confirmation)
+        assertEquals(0L, quote.fromSavings)
+        assertEquals(10L, quote.remainingBalance)
+        assertEquals(35L, quote.foodNeeded)
+        assertEquals(25L, quote.foodShortfall)
+        assertEquals(before, fixture.state)
+        assertTrue(fixture.repository.purchases.isEmpty())
+        model.onAction(GoalAction.ConfirmPurchase)
+        runCurrent()
+        assertEquals(10L, fixture.state.economy.availableBalance)
+        assertTrue((fixture.repository.purchases.single().command as EngineCommand.BuyGoalItem).acceptFoodRisk)
+        assertNotNull(model.uiState.value.purchaseResult)
+    }
+
+    @Test fun aChangedBalanceClosesTheOldQuoteWithoutBuying() = runTest(dispatcher) {
+        val fixture = Fixture(savings = 20)
+        fixture.start()
+        val model = fixture.model()
+        runCurrent()
+        model.onAction(GoalAction.Buy(fixture.goal.goalId, fixture.goal.itemIds.first()))
+        val oldQuote = checkNotNull(model.uiState.value.confirmation)
+        fixture.send(EngineCommand.DepositSavings(10))
+        val afterDeposit = fixture.state
+        runCurrent()
+        assertNull(model.uiState.value.confirmation)
+        model.onAction(GoalAction.ContextPresented(oldQuote.contextId))
+        model.onAction(GoalAction.ConfirmPurchase)
+        runCurrent()
+        assertEquals(afterDeposit, fixture.state)
+        assertTrue(fixture.repository.purchases.isEmpty())
+        model.onAction(GoalAction.Buy(fixture.goal.goalId, fixture.goal.itemIds.first()))
+        assertEquals(24L, model.uiState.value.confirmation?.fromSavings)
+        assertNotEquals(oldQuote.contextId, model.uiState.value.confirmation?.contextId)
+    }
+
+    @Test fun insufficientCombinedMoneyNeverShowsConfirmationOrWrites() = runTest(dispatcher) {
+        val fixture = Fixture(savings = 20, available = 3)
         fixture.start()
         val model = fixture.model()
         runCurrent()
         val before = fixture.state
         val part = model.uiState.value.parts.single { it.savingTarget }
         assertFalse(part.canBuy)
-        assertEquals(4L, part.missingCoins)
+        assertEquals(1L, part.missingCoins)
         model.onAction(GoalAction.Buy(fixture.goal.goalId, part.id))
         runCurrent()
         assertEquals(before, fixture.state)
+        assertNull(model.uiState.value.confirmation)
         assertNull(model.uiState.value.purchaseResult)
+        assertTrue(fixture.repository.purchases.isEmpty())
     }
 
-    private inner class Fixture(savings: Long = 0) {
+    private inner class Fixture(savings: Long = 0, available: Long = 100,
+        plan: BudgetPlan = BudgetPlan(available, 0, 0, 0)) {
         val catalog = bundledGameCatalog()
         val goal = catalog.goals.first()
         private val initial = createInitialGameState().copy(economy = EconomyState(
-            BudgetPlan(100, 0, 0, 0), availableBalance = 100, savingsBalance = savings))
+            plan, availableBalance = available, savingsBalance = savings))
         val repository = MemoryRepository(initial)
         val state get() = repository.state.value
         val session = GameSession(repository, object : StoryContentRepository {
@@ -202,9 +305,17 @@ class GoalViewModelTest {
     private class MemoryRepository(initial: GameState) : GameRepository {
         val state = MutableStateFlow(initial)
         var failWrite = false
+        private val requests = mutableListOf<EngineRequest>()
+        val purchases get() = requests.filter { it.command is EngineCommand.BuyGoalItem }
         override fun observe() = state
         override suspend fun read() = state.value
         override suspend fun initializeIfAbsent(initial: GameState) = state.value
+        override suspend fun commit(request: EngineRequest, context: DecisionContext?, contentFingerprint: String?,
+            facts: (GameState, GameState, String, Long) -> List<AnalyticsFact>,
+            transform: (GameState) -> GameState): GameState {
+            requests += request
+            return update(transform)
+        }
         override suspend fun update(transform: (GameState) -> GameState): GameState {
             val next = transform(state.value)
             if (failWrite) throw java.io.IOException("Write failed")

@@ -1,5 +1,14 @@
 # Project architecture
 
+> Pet reaction presentation, 2026-09-27 (ADVENTURE-D-011): a root-scoped
+> `app/presentation/PetReactionViewModel` observes the game without writing it.
+> `LctApp` supplies its four-second reaction window above navigation through
+> `core/ui/game/LocalLivePetReaction`. Menu, event, budget and savings renderers
+> then return to the latest equipped appearance. The shared character renderer
+> crossfades grounded artwork and shadows over 600 ms. Saved needs and emotions,
+> night-time sleep artwork and historical/alternative pets remain independent
+> of this presentation clock. See [pet motion](design/pet-motion.md).
+
 > Backend preparation, 2026-09-27: `feature/settings` is a release feature;
 > it consumes the pure `domain/parentlink` repository contract. `data/backend`
 > owns Retrofit/OkHttp transport and installation identity in encrypted

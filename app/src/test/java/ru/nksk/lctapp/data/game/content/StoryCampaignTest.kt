@@ -100,7 +100,10 @@ class StoryCampaignTest {
         for (order in orders) {
             val f = Fixture(offerOptionalScenes = false)
             f.finishCampaign(order + EXPEDITION_GOAL)
-            val expected = sourceLoreCards.filterNot { it.optional }.map { storyEventId(it.id) }
+            val expected = sourceLoreCards.filterNot { it.optional }.map { source ->
+                val originalId = storyEventId(source.id)
+                f.catalog.eventReplacements[originalId] ?: originalId
+            }
             val actual = f.state.story.decisions.map { decision -> f.catalog.content.choices.single { it.id == decision.choiceId }.eventId }
                 .filter { it in expected }
             assertEquals(order.toString(), expected, actual)

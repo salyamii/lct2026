@@ -6,6 +6,7 @@ import ru.nksk.lctapp.domain.analytics.*
 import ru.nksk.lctapp.domain.analytics.FactDetail.*
 import ru.nksk.lctapp.domain.economy.BudgetPlan
 import ru.nksk.lctapp.domain.economy.EconomyState
+import ru.nksk.lctapp.domain.economy.EconomyOperations
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.pet.PetState
@@ -144,6 +145,46 @@ class HistoryLearningProjectionTest {
         assertEquals(ObservationReason.RESERVE_USED, result.reason)
         assertEquals(1L, result.measures["attributedExpenses"])
         assertEquals(facts, HistoryLearningProjection.facts(history + history.single { it.id == "repair" }))
+    }
+
+    @Test fun directAndMixedGoalPaymentsKeepKnownReserveHistoryCompleteWithoutInventingAnEmergency() {
+        for (savings in listOf(0L, 7L)) {
+            val opening = initial.copy(economy = EconomyState(BudgetPlan(35, 15, 10, 10), savingsBalance = savings),
+                engine = EngineState("rules", 0, 1, DayPhase.RUNNING, 0, 5, true, null,
+                    70 + savings, emptyList(), emptyList()))
+            val purchased = opening.copy(economy = EconomyOperations.purchaseGoal(opening.economy, 20),
+                ownedItems = listOf(ru.nksk.lctapp.domain.game.OwnedItem("buy:purchase", "map")),
+                engine = opening.engine!!.copy(revision = 1, steps = 1,
+                    journal = listOf(DayJournalEntry("buy:journal:0", DayJournalKind.ITEM_PURCHASE, "map", -20))))
+            fun command(id: String, sequence: Long, before: GameState, after: GameState,
+                action: EngineCommand, detail: FactDetail, episode: String): AuditEntry {
+                val request = EngineRequest(id, before.engine?.revision, action)
+                val shown = context().copy(
+                    before = FinancialPosition(before.economy.availableBalance, before.economy.savingsBalance, 35),
+                    after = FinancialPosition(after.economy.availableBalance, after.economy.savingsBalance, 35))
+                return AuditEntry(id, sequence, "run", AuditType.COMMAND, request, before = before, after = after,
+                    facts = listOf(fact(id, sequence, episode, detail).copy(context = shown)),
+                    operations = CanonicalLedger.fromTransition(before, after, request))
+            }
+            val history = listOf(
+                command("plan", 1, opening, opening, EngineCommand.ConfirmBudget("draft", 0),
+                    ReserveDecision("plan", 10, 10, 0, false), "reserve:plan"),
+                command("buy", 2, opening, purchased, EngineCommand.BuyGoalItem("goal", "map"),
+                    Interaction("BuyGoalItem"), "purchase"),
+                command("replan", 3, purchased, purchased, EngineCommand.ConfirmBudget("next-draft", 0),
+                    ReserveDecision("next-plan", 0, 0, 0, false), "reserve:next"),
+            )
+            val facts = HistoryLearningProjection.facts(history)
+            val closed = facts.single { (it.detail as? ReserveDecision)?.let { decision ->
+                decision.intentionId == "plan" && decision.intervalClosed
+            } == true }
+            assertTrue("Known goal payment must not make reserve evidence incomplete", closed.context.complete)
+            val reserve = closed.detail as ReserveDecision
+            assertEquals(10L, reserve.remainingAmount)
+            assertEquals(0L, reserve.usedForUnexpectedExpense)
+            assertTrue(reserve.applications.isEmpty())
+            assertTrue(facts.none { it.detail is UnexpectedExpense })
+        }
     }
 
     @Test fun reserveCreatedAfterSeeingTheBillIsNotAnticipatoryReserveEvidence() {

@@ -57,8 +57,8 @@ object FinancialPeriods {
         newEntries.forEach { entry ->
             period = when {
                 entry.moneyDelta > 0 -> period.copy(income = Math.addExact(period.income, entry.moneyDelta))
-                entry.moneyDelta < 0 && request.command is EngineCommand.BuyGoalItem ->
-                    period.copy(spentSavings = Math.subtractExact(period.spentSavings, entry.moneyDelta))
+                // Goal purchases may use both accounts; record that split once below.
+                entry.moneyDelta < 0 && request.command is EngineCommand.BuyGoalItem -> period
                 entry.moneyDelta < 0 -> period.copy(spentAvailable = Math.subtractExact(period.spentAvailable, entry.moneyDelta))
                 else -> period
             }
@@ -82,8 +82,12 @@ object FinancialPeriods {
                 period.copy(withdrawn = Math.addExact(period.withdrawn, command.amount))
             }
             is EngineCommand.BuyGoalItem -> {
-                saving = FinancialProgressionPolicy.goalPurchase(saving, before.economy.savingsBalance - after.economy.savingsBalance)
-                period
+                val fromSavings = Math.subtractExact(before.economy.savingsBalance, after.economy.savingsBalance)
+                val fromAvailable = Math.subtractExact(before.economy.availableBalance, after.economy.availableBalance)
+                require(fromSavings >= 0 && fromAvailable >= 0)
+                saving = FinancialProgressionPolicy.goalPurchase(saving, fromSavings)
+                period.copy(spentSavings = Math.addExact(period.spentSavings, fromSavings),
+                    spentAvailable = Math.addExact(period.spentAvailable, fromAvailable))
             }
             is EngineCommand.AnswerFinancialQuestion -> {
                 val question = after.financial.practice?.takeIf { it.id == command.questionId && it.correct && period.id in it.sourceActionIds }
@@ -129,7 +133,7 @@ object FinancialPeriods {
         val options = listOf(expense, Math.addExact(expense, maxOf(1L, period.deposited)),
             Math.addExact(expense, maxOf(2L, Math.addExact(period.deposited, 1))))
         return FinancialQuestion(id, kind,
-            "В этой главе обычные покупки стоили ${period.spentAvailable} монет, а снаряжение для цели — ${period.spentSavings}. " +
+            "Из текущих денег потратили ${period.spentAvailable} монет, а из копилки — ${period.spentSavings}. " +
                 "В копилку положили ${period.deposited} монет, а обратно взяли ${period.withdrawn}. Сколько всего потратили на покупки?",
             // Rotate the position using a stable ID; the correct answer is not always the first button.
             options.map { FinancialAnswerOption(it.toString(), "$it монет") }.let { values ->

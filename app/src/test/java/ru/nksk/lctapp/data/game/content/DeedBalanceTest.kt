@@ -35,7 +35,7 @@ class DeedBalanceTest {
         val catalog = bundledGameCatalog()
         val mapped = catalog.policies.values.flatMap { it.choiceGameKinds.keys }.toSet()
         assertEquals(13, mapped.count { it.startsWith("campaign-choice-v1:") })
-        assertEquals(14, mapped.count { it.startsWith("figma-") }) // Includes one already-saved legacy resin card.
+        assertEquals(15, mapped.count { it.startsWith("figma-") }) // Includes the legacy resin card and manual plate cleaning.
         assertTrue("${storyEventId("N1.WHEEL")}:continue" in mapped)
         assertTrue("${storyEventId("G5.08")}:continue" in mapped)
         assertTrue("${storyEventId("G2.03")}:repair" in mapped)

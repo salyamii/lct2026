@@ -563,21 +563,25 @@ class DayViewModelTest {
 
     @Test fun cargoRecordHasNoSkipOrBudgetSummaryAndCompletesWithoutClaimingShownMoney() = runTest(dispatcher) {
         val id = "campaign-choice-v1:G1.04"
-        val (repository, model) = fixture(eventFirst = id, priorChoices = listOf(
-            "campaign-choice-v1:G1.01:continue", "figma-2270-2-v1:complete",
-            "campaign-choice-v1:G1.02:continue", "campaign-choice-v1:G1.03:continue"))
-        runCurrent()
-        assertEquals(listOf("Изучить запись"), model.uiState.value.options.map { it.label })
-        assertEquals("Вернуться позже", model.uiState.value.later)
-        assertNull(model.uiState.value.financialContext)
-        val before = repository.read()
-        model.onAction(DayAction.Choose("$id:skip"))
-        runCurrent()
-        assertEquals(before, repository.read())
-        model.onAction(DayAction.Choose("$id:continue"))
-        runCurrent()
-        assertNull(repository.requests.last().context)
-        assertEquals("$id:continue", repository.read().story.decisions.last().choiceId)
+        // Historical cleaning and both current alternatives unlock the same next clue.
+        for (plateChoice in listOf("campaign-choice-v1:G1.03:continue",
+            "campaign-choice-v2:G1.03:continue", "campaign-choice-v2:G1.03:pay")) {
+            val (repository, model) = fixture(eventFirst = id, priorChoices = listOf(
+                "campaign-choice-v1:G1.01:continue", "figma-2270-2-v1:complete",
+                "campaign-choice-v1:G1.02:continue", plateChoice))
+            runCurrent()
+            assertEquals(listOf("Изучить запись"), model.uiState.value.options.map { it.label })
+            assertEquals("Вернуться позже", model.uiState.value.later)
+            assertNull(model.uiState.value.financialContext)
+            val before = repository.read()
+            model.onAction(DayAction.Choose("$id:skip"))
+            runCurrent()
+            assertEquals(before, repository.read())
+            model.onAction(DayAction.Choose("$id:continue"))
+            runCurrent()
+            assertNull(repository.requests.last().context)
+            assertEquals("$id:continue", repository.read().story.decisions.last().choiceId)
+        }
     }
 
     @Test fun eventChoicesDoNotInventFinancialContextWhenTheSummaryIsNotShown() = runTest(dispatcher) {

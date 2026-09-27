@@ -215,6 +215,9 @@ object HistoryLearningProjection {
     }
 
     private fun reserveCategory(entry: AuditEntry, operationId: String, unexpected: Boolean, content: StoryContent?): Boolean? {
+        // A direct goal payment is known spending, including its split wallet receipt.
+        // It may reduce coverage but is never an unexpected expense paid from a reserve.
+        if (entry.request?.command is EngineCommand.BuyGoalItem) return false
         if (unexpected) return true
         if (entry.facts.any { it.detail is OptionalPurchase }) return false
         val journal = entry.after?.engine?.journal?.find { it.id == operationId } ?: return null

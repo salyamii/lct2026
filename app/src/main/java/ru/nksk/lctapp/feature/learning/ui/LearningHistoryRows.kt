@@ -40,6 +40,17 @@ private fun AuditEntry.activityRows(catalog: GameCatalog, petName: String, inclu
         usedJournal += entry.id
         return receipts[entry.id]?.takeIf { usedReceipts.add(it.operationId) }
     }
+    fun purchasePayment(entry: DayJournalEntry): String? {
+        val primary = receipt(entry) ?: return null
+        // A mixed goal purchase has one journal entry and two canonical account receipts.
+        val fromAvailable = receipts["${entry.id}:available"]?.takeIf {
+            primary.kind == LedgerKind.SAVINGS_EXPENSE && it.kind == LedgerKind.AVAILABLE_EXPENSE &&
+                usedReceipts.add(it.operationId)
+        }
+        return if (fromAvailable != null) {
+            "Потратили ${primary.amount.coinAmount()} из копилки и ${fromAvailable.amount.coinAmount()} из текущих денег"
+        } else primary.moneyText()
+    }
     val rows = mutableListOf<String>()
     fun add(label: String, receipt: LedgerEntry? = null, detail: String? = null) {
         rows += listOfNotNull(label, receipt?.moneyText(), detail).joinToString(". ")
@@ -72,7 +83,7 @@ private fun AuditEntry.activityRows(catalog: GameCatalog, petName: String, inclu
             DayJournalKind.EVENT_CHOICE, DayJournalKind.DEED -> completedChoice(entry.sourceId, entry)
             DayJournalKind.ITEM_PURCHASE -> {
                 takeItem(entry.sourceId)
-                add("Купили: ${itemName(entry.sourceId)}", receipt(entry))
+                add("Купили: ${itemName(entry.sourceId)}", detail = purchasePayment(entry))
             }
             // Inventory occurrences below also cover acquisitions without a journal entry.
             DayJournalKind.ITEM_RECEIVED -> Unit
@@ -98,12 +109,16 @@ private fun LedgerEntry.moneyText(): String {
         LedgerKind.DEPOSIT -> "Отложили в копилку"
         LedgerKind.WITHDRAWAL -> "Взяли из копилки"
     }
-    val lastHundred = amount % 100
+    return "$action ${amount.coinAmount()}"
+}
+
+private fun Long.coinAmount(): String {
+    val lastHundred = this % 100
     val unit = when {
         lastHundred in 11L..14L -> "монет"
-        amount % 10 == 1L -> "монету"
-        amount % 10 in 2L..4L -> "монеты"
+        this % 10 == 1L -> "монету"
+        this % 10 in 2L..4L -> "монеты"
         else -> "монет"
     }
-    return "$action $amount $unit"
+    return "$this $unit"
 }

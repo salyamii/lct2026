@@ -187,7 +187,6 @@ fun LctNavHost(
                     onOpenSavings = { source -> navigator.navigateToExisting(source, Savings) },
                     onReturnHome = navigator::returnToRoot)
                 economyEntry(onBack = navigator::returnToRoot, onConfirmed = navigator::returnToRoot,
-                    onOpenHistory = { source -> navigator.navigateToExisting(source, Learning) },
                     onOpenSavings = { source -> navigator.navigateToExisting(source, Savings) })
                 savingsEntry(onBack = navigator::goBack,
                     onOpenGoal = { source -> navigator.navigateToExisting(source, Goal) },
