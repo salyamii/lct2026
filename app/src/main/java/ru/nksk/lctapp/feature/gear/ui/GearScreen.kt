@@ -153,7 +153,10 @@ private fun LazyGridScope.gearSection(
             GearEmptySection(stringResource(emptyTitle), stringResource(emptyDescription))
         }
     } else {
-        items(items, key = { "owned-${it.occurrenceId}" }, contentType = { "item" }) { GearItemCard(it, enabled, onEquip, onOpenItem) }
+        val reserveEquipSlot = items.any { it.lookId != null }
+        items(items, key = { "owned-${it.occurrenceId}" }, contentType = { "item" }) {
+            GearItemCard(it, enabled, onEquip, onOpenItem, reserveEquipSlot = reserveEquipSlot)
+        }
     }
 }
 

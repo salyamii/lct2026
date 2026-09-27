@@ -36,7 +36,7 @@ class GearScreenTest {
         assertEquals(1, backs)
     }
 
-    @Test fun ownedCardsShowPriceAndImageDescription() {
+    @Test fun ownedCardsShowTheirContentWithoutPrices() {
         compose.setContent {
             LCTAppTheme {
                 GearScreen(GearLoadState.Ready(GearUiState(
@@ -47,9 +47,9 @@ class GearScreenTest {
         }
         compose.onNodeWithText("Карта").assertIsDisplayed()
         compose.onNodeWithText("Старинный пергамент").assertIsDisplayed()
-        compose.onNodeWithText("50 монет").assertIsDisplayed()
+        compose.onNodeWithText("50 монет").assertDoesNotExist()
         compose.onNodeWithText("Шляпа").performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText("Цена не указана").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Цена не указана").assertDoesNotExist()
     }
 
     @Test fun errorOffersRetryWithoutClaimingInventoryIsEmpty() {

@@ -182,6 +182,7 @@ internal fun GearItemDetails(
                         modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = AdventureLime, contentColor = GearColors.Ink,
+                            disabledContainerColor = AdventureLime, disabledContentColor = GearColors.Ink,
                         ),
                     ) {
                         Text(

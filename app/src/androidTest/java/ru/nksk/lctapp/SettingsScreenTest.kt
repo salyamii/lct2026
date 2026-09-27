@@ -37,6 +37,16 @@ class SettingsScreenTest {
             .performScrollTo().assertIsDisplayed()
     }
 
+    @Test fun qrCanBeSharedOfflineWithoutRetryingRegistration() {
+        var shares = 0
+        compose.setContent { LCTAppTheme {
+            SettingsScreen(readyState(), { error("Sharing must not request registration") }, {}, {},
+                onShareCode = { shares++ })
+        } }
+        compose.onNodeWithText("Поделиться QR-кодом").performScrollTo().assertIsEnabled().performClick()
+        compose.runOnIdle { assertEquals(1, shares) }
+    }
+
     @Test fun registrationFailureKeepsTheQrAndOffersOnlyRegistrationRetry() {
         var action: SettingsAction? = null
         compose.setContent { LCTAppTheme {

@@ -385,3 +385,11 @@ UUID, without wrapping it in a URL or JSON. The entry then registers the profile
 when a backend is configured; registration failure leaves the QR visible and offers
 a separate retry. Without a configured server, the QR remains available with a
 short connection note. The QR has no expiry and is never serialized into route keys.
+
+The QR's «Поделиться QR-кодом» button opens the Android Sharesheet with a PNG
+of the displayed matrix. The entry owns this external navigation, guards it by
+RESUMED lifecycle and an in-flight flag, and shows a retry message if preparation
+or opening fails. PNG creation runs off the main thread; the coroutine is scoped
+to the entry. A private FileProvider exposes only `cache/parent_qr/` with temporary
+read access. Sharing does not register a profile, regenerate its ID or upload the
+world; it remains available offline. The user chooses the recipient application.

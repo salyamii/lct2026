@@ -31,7 +31,8 @@ internal fun SettingsGearButton(onClick: () -> Unit) {
 
 @Composable
 internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -> Unit, onBack: () -> Unit,
-    onCopyProfile: (String) -> Unit, debugButton: (@Composable () -> Unit)? = null) {
+    onCopyProfile: (String) -> Unit, debugButton: (@Composable () -> Unit)? = null,
+    onShareCode: () -> Unit = {}, sharingCode: Boolean = false, shareError: Boolean = false) {
     Column(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding().background(GamePaper)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -52,7 +53,7 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
                     AdventureBody("Не удалось открыть профиль. Попробуйте ещё раз.")
                     AdventurePrimaryButton("Повторить", { onAction(SettingsAction.RetryProfile) })
                 } else {
-                    ParentCodeContent(state, onAction)
+                    ParentCodeContent(state, onAction, onShareCode, sharingCode, shareError)
                 }
             }
             state.profileId?.let { profileId ->
@@ -81,7 +82,8 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
 }
 
 @Composable
-private fun ParentCodeContent(state: SettingsUiState, onAction: (SettingsAction) -> Unit) {
+private fun ParentCodeContent(state: SettingsUiState, onAction: (SettingsAction) -> Unit,
+    onShareCode: () -> Unit, sharingCode: Boolean, shareError: Boolean) {
     when (state.codeStatus) {
         ParentCodeStatus.NONE -> AdventurePrimaryButton("Показать код для родителей", { onAction(SettingsAction.CreateParentCode) })
         ParentCodeStatus.LOADING -> {
@@ -92,6 +94,9 @@ private fun ParentCodeContent(state: SettingsUiState, onAction: (SettingsAction)
             AdventureBody("Отсканируйте этот код в приложении для родителей.")
             state.qr?.let { qr ->
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { ParentLinkQrCode(qr) }
+                AdventurePrimaryButton(if (sharingCode) "Готовим изображение…" else "Поделиться QR-кодом",
+                    onShareCode, enabled = !sharingCode)
+                if (shareError) AdventureBody("Не удалось открыть отправку. Попробуйте ещё раз.")
             }
             if (!state.backendConfigured) {
                 AdventureBody("Подключение родителей станет доступно после подключения сервера.")
