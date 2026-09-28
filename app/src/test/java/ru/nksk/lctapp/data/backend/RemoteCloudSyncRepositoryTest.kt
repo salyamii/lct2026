@@ -113,6 +113,154 @@ class RemoteCloudSyncRepositoryTest {
         assertTrue(fixture.store.pendingRequests.isEmpty())
     }
 
+    @Test fun staleRestoredAnalyticsResumesWithANewBatchAfterProgressAndProcessRecreation() = runTest {
+        val fixture = restoredBehindAcceptedAnalytics()
+        val restored = fixture.games.exportSnapshot()
+        assertEquals(11L, restored.historySequence)
+
+        assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.repository.synchronize())
+        val rejected = checkNotNull(fixture.store.pending(ProfileId, "analytics"))
+        val rejectedBody = BackendJson.decodeFromString<AnalyticsUploadRequest>(rejected.payload)
+        assertEquals(11L, rejectedBody.throughHistorySequence)
+        assertEquals(0L, fixture.store.read(ProfileId)?.lastAnalyticsSequence)
+        assertTrue(fixture.games.acknowledged.isEmpty())
+        assertEquals(restored, fixture.games.exportSnapshot())
+
+        // No new boundary means no new key and no acknowledgement of the rejected facts.
+        assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.newRepository().refreshSkills())
+        assertEquals(rejected, fixture.store.pending(ProfileId, "analytics"))
+        repeat(10) { fixture.games.rename("После восстановления $it") }
+        val current = fixture.games.exportSnapshot()
+        assertEquals(21L, current.historySequence)
+
+        assertEquals(CloudSyncResult.SUCCESS, fixture.newRepository().synchronize())
+
+        val replacement = fixture.api.analyticsUploads.last()
+        assertNotEquals(rejected.requestId, replacement.first)
+        assertEquals(21L, replacement.second.throughHistorySequence)
+        assertEquals(rejectedBody.gameRunId, replacement.second.gameRunId)
+        assertTrue(fixture.api.analyticsUploads.filter { it.first == rejected.requestId }
+            .all { it.second == rejectedBody })
+        assertEquals(21L, fixture.store.read(ProfileId)?.lastAnalyticsSequence)
+        assertEquals(current.history.map { it.id }.toSet(), fixture.games.acknowledged)
+        assertEquals(current, fixture.games.exportSnapshot())
+        assertNull(fixture.store.pending(ProfileId, "analytics"))
+    }
+
+    @Test fun anotherStaleResponseRetainsTheNewBatchWithoutLoopingOrInventingTheServerBoundary() = runTest {
+        val fixture = restoredBehindAcceptedAnalytics()
+        assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.repository.refreshSkills())
+        val rejected = checkNotNull(fixture.store.pending(ProfileId, "analytics"))
+        fixture.games.rename("Граница 12 всё ещё ниже серверной 20")
+        val before = fixture.api.analyticsUploads.size
+
+        assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.newRepository().refreshSkills())
+
+        assertEquals(2, fixture.api.analyticsUploads.size - before)
+        val replacement = checkNotNull(fixture.store.pending(ProfileId, "analytics"))
+        assertNotEquals(rejected.requestId, replacement.requestId)
+        assertEquals(12L, BackendJson.decodeFromString<AnalyticsUploadRequest>(replacement.payload).throughHistorySequence)
+        assertEquals(0L, fixture.store.read(ProfileId)?.lastAnalyticsSequence)
+        assertTrue(fixture.games.acknowledged.isEmpty())
+        val after = fixture.api.analyticsUploads.size
+        assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.newRepository().refreshSkills())
+        assertEquals(1, fixture.api.analyticsUploads.size - after)
+        assertEquals(replacement, fixture.store.pending(ProfileId, "analytics"))
+    }
+
+    @Test fun lostReplacementResponseKeepsItsNewKeyAndBodyForTheNextProcess() = runTest {
+        val fixture = restoredBehindAcceptedAnalytics()
+        assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.repository.refreshSkills())
+        val rejected = checkNotNull(fixture.store.pending(ProfileId, "analytics"))
+        repeat(10) { fixture.games.rename("После старого batch $it") }
+        fixture.api.loseNextAnalyticsResponse = true
+
+        assertEquals(CloudSyncResult.RETRY, fixture.newRepository().refreshSkills())
+
+        val uncertain = checkNotNull(fixture.store.pending(ProfileId, "analytics"))
+        assertNotEquals(rejected.requestId, uncertain.requestId)
+        assertEquals(21L, BackendJson.decodeFromString<AnalyticsUploadRequest>(uncertain.payload).throughHistorySequence)
+        assertEquals(0L, fixture.store.read(ProfileId)?.lastAnalyticsSequence)
+        assertTrue(fixture.games.acknowledged.isEmpty())
+        val sent = fixture.api.analyticsUploads.last()
+
+        assertEquals(CloudSyncResult.SUCCESS, fixture.newRepository().refreshSkills())
+
+        assertEquals(sent, fixture.api.analyticsUploads.last())
+        assertEquals(21L, fixture.store.read(ProfileId)?.lastAnalyticsSequence)
+        assertNull(fixture.store.pending(ProfileId, "analytics"))
+        assertTrue(fixture.games.acknowledged.isEmpty())
+    }
+
+    @Test fun analyticsConflictsWithoutAnExactStaleCodeNeverReplaceOrAcknowledgeThePendingBatch() = runTest {
+        val failures = listOf(
+            409 to "{\"code\":\"FACT_CONFLICT\"}",
+            409 to "{\"code\":\"IDEMPOTENCY_CONFLICT\"}",
+            409 to "{\"code\":\"GAME_RUN_CONFLICT\"}",
+            409 to "{}",
+            409 to "{\"message\":\"STALE_ANALYTICS\"}",
+            409 to "{\"code\":null}",
+            409 to "not json",
+            500 to "{\"code\":\"STALE_ANALYTICS\"}",
+        )
+        for ((status, body) in failures) {
+            val fixture = Fixture()
+            fixture.api.beforeAnalytics = { throw httpFailure(status, body) }
+            val expected = if (status == 500) CloudSyncResult.RETRY else CloudSyncResult.NEEDS_ATTENTION
+            assertEquals(expected, fixture.repository.refreshSkills())
+            val frozen = fixture.store.pending(ProfileId, "analytics")
+            fixture.games.rename("Новая граница не разрешает забыть конфликт")
+
+            assertEquals(expected, fixture.newRepository().refreshSkills())
+
+            assertEquals(frozen, fixture.store.pending(ProfileId, "analytics"))
+            assertEquals(2, fixture.api.analyticsUploads.size)
+            assertEquals(fixture.api.analyticsUploads.first(), fixture.api.analyticsUploads.last())
+            assertEquals(0L, fixture.store.read(ProfileId)?.lastAnalyticsSequence)
+            assertTrue(fixture.games.acknowledged.isEmpty())
+        }
+    }
+
+    @Test fun staleReplyCannotSupersedeAPendingBatchAfterAnotherRestoreGenerationAppears() = runTest {
+        val fixture = Fixture()
+        val original = fixture.games.exportSnapshot()
+        fixture.api.beforeAnalytics = { throw httpFailure(409, "{\"code\":\"STALE_ANALYTICS\"}") }
+        assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.repository.refreshSkills())
+        val frozen = fixture.store.pending(ProfileId, "analytics")
+        fixture.games.rename("Более новая история прежнего поколения")
+        fixture.api.beforeAnalytics = {
+            val current = fixture.games.exportSnapshot()
+            fixture.games.restoreSnapshot(original, RestoreGuard(current.state.engine?.revision,
+                current.historySequence, null))
+            throw httpFailure(409, "{\"code\":\"STALE_ANALYTICS\"}")
+        }
+
+        assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.repository.refreshSkills())
+
+        assertEquals(frozen, fixture.store.pending(ProfileId, "analytics"))
+        assertEquals(2, fixture.api.analyticsUploads.size)
+        assertEquals(0L, fixture.store.read(ProfileId)?.lastAnalyticsSequence)
+        assertTrue(fixture.games.acknowledged.isEmpty())
+    }
+
+    @Test fun aStaleArchivedBatchCanBeReplacedByItsPreservedTailBeforeSynchronizingTheNextRun() = runTest {
+        val fixture = restoredBehindAcceptedAnalytics()
+        assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.repository.refreshSkills())
+        val rejected = checkNotNull(fixture.store.pending(ProfileId, "analytics"))
+        repeat(10) { fixture.games.rename("Действие перед перемоткой $it") }
+        fixture.games.restart("next-run")
+        val current = fixture.games.exportSnapshot()
+
+        assertEquals(CloudSyncResult.SUCCESS, fixture.newRepository().synchronize())
+
+        val oldRunReplacement = fixture.api.analyticsUploads.last { it.second.gameRunId == "local-run" }
+        assertEquals(21L, oldRunReplacement.second.throughHistorySequence)
+        assertNotEquals(rejected.requestId, oldRunReplacement.first)
+        assertEquals("next-run", fixture.api.analyticsUploads.last().second.gameRunId)
+        assertEquals(current, fixture.games.exportSnapshot())
+        assertTrue(fixture.store.pendingRequests.isEmpty())
+    }
+
     @Test fun missingOrNotYetReadyAssessmentsRemainUnavailableWithoutErasingTheCache() = runTest {
         for (code in listOf(404, 409)) {
             val fixture = Fixture()
@@ -533,6 +681,23 @@ class RemoteCloudSyncRepositoryTest {
         assertEquals(fixture.games.exportSnapshot().localGeneration(), fixture.store.read(ProfileId)?.localGeneration)
     }
 
+    /** Skill-only refresh deliberately leaves snapshot 10 behind accepted evidence 20. */
+    private suspend fun restoredBehindAcceptedAnalytics(): Fixture {
+        val fixture = Fixture()
+        fixture.api.rejectRegressingAnalytics = true
+        repeat(9) { fixture.games.rename("До облачной копии $it") }
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.synchronize())
+        val cloud = checkNotNull(fixture.api.remote)
+        assertEquals(10L, HistoryCodec.decodeSnapshot(cloud.snapshotJson).historySequence)
+        repeat(10) { fixture.games.rename("Только аналитика $it") }
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.refreshSkills())
+        assertEquals(20L, fixture.api.analyticsUploads.last().second.throughHistorySequence)
+        assertEquals(cloud, fixture.api.remote)
+        val preview = fixture.repository.prepareRestore()
+        fixture.repository.restore(preview.id)
+        return fixture
+    }
+
     private class Fixture {
         val games = MemoryGames()
         val identities = MemoryIdentities()
@@ -663,6 +828,7 @@ class RemoteCloudSyncRepositoryTest {
             archives += snapshot.archivedRuns
             history.clear()
             history += snapshot.history
+            acknowledged.clear()
             restoredWorlds++
             history += AuditEntry("restore:$restoredWorlds", snapshot.historySequence + 1, runId, AuditType.RESTORED,
                 after = snapshot.state)
@@ -680,6 +846,8 @@ class RemoteCloudSyncRepositoryTest {
         var loseNextAnalyticsResponse = false
         var loseNextAckResponse = false
         var failSnapshotRequests = false
+        var rejectRegressingAnalytics = false
+        var beforeAnalytics: suspend () -> Unit = {}
         var beforeSkills: suspend () -> Unit = {}
         var assessments: SkillAssessmentsResponse? = null
         val snapshotUploads = mutableListOf<Pair<String, SnapshotUploadRequest>>()
@@ -688,7 +856,7 @@ class RemoteCloudSyncRepositoryTest {
         val rewardAckRequests = mutableListOf<Pair<String, AckParentRewardsRequest>>()
         private val snapshotReceipts = mutableMapOf<String, Pair<SnapshotUploadRequest, SnapshotUploadResponse>>()
         private val analyticsReceipts = mutableMapOf<String, Pair<AnalyticsUploadRequest, AnalyticsUploadResponse>>()
-        private var acceptedAnalyticsSequence = 0L
+        private val acceptedAnalyticsSequences = mutableMapOf<String, Long>()
         override suspend fun registerProfile(requestId: String, body: RegisterProfileRequest): RegisterProfileResponse {
             calls += "register"
             assertEquals(ProfileId, body.deviceId)
@@ -718,9 +886,13 @@ class RemoteCloudSyncRepositoryTest {
             calls += "post-analytics"
             assertEquals(ProfileId, body.deviceId)
             analyticsUploads += requestId to body
+            beforeAnalytics()
             analyticsReceipts[requestId]?.let { (original, response) -> check(original == body); return response }
+            if (rejectRegressingAnalytics && body.throughHistorySequence < (acceptedAnalyticsSequences[body.gameRunId] ?: 0)) {
+                throw httpFailure(409, "{\"code\":\"STALE_ANALYTICS\"}")
+            }
             val response = AnalyticsUploadResponse(body.batchId, body.gameRunId, body.throughHistorySequence, body.facts.map { it.eventId })
-            acceptedAnalyticsSequence = body.throughHistorySequence
+            acceptedAnalyticsSequences[body.gameRunId] = body.throughHistorySequence
             analyticsReceipts[requestId] = body to response
             if (loseNextAnalyticsResponse) { loseNextAnalyticsResponse = false; throw IOException("Lost committed analytics response") }
             return response
@@ -729,7 +901,7 @@ class RemoteCloudSyncRepositoryTest {
             calls += "get-skills"
             assertEquals(ProfileId, body.deviceId)
             beforeSkills()
-            return assessments ?: SkillAssessmentsResponse(body.gameRunId, acceptedAnalyticsSequence,
+            return assessments ?: SkillAssessmentsResponse(body.gameRunId, acceptedAnalyticsSequences[body.gameRunId] ?: 0,
                 SkillId.entries.map { SkillAssessmentDto(it, SkillStatus.NO_DATA, "test-policy") })
         }
         override suspend fun parentRewards(body: PullParentRewardsRequest): ParentRewardsResponse {
@@ -755,8 +927,8 @@ class RemoteCloudSyncRepositoryTest {
 
     private companion object {
         const val ProfileId = "a1a81f35-ae8b-44dd-925d-659d88c6cd45"
-        fun httpFailure(code: Int) = HttpException(Response.error<Any>(code,
-            "{}".toResponseBody("application/json".toMediaType())))
+        fun httpFailure(code: Int, body: String = "{}") = HttpException(Response.error<Any>(code,
+            body.toResponseBody("application/json".toMediaType())))
         fun GameSnapshot.downloadResponse() = SnapshotDownloadResponse(runId, 1, "test-content", HistoryCodec.encodeSnapshot(this))
     }
 }

@@ -1,6 +1,6 @@
 # Project architecture
 
-Current implementation: 2026-09-27. The approved cleanup scope is
+Current implementation: 2026-09-29. The approved cleanup scope is
 [ARCH-D-001–007](design/decisions.md). This guide describes the current code;
 historical decisions and migrations live in the design documents.
 
@@ -51,6 +51,16 @@ inventing mastery thresholds or presenting unknown assessments as zero mastered.
 Server MASTERED/PRACTICING/NO_DATA/HAS_PROBLEM remain distinct from local episode
 outcomes. [Calculation report](backend/skills-calculation-report.md).
 Source adaptation: lct26-parentsapp commit `89d644f74e40c4f3d6a44f99fad79cb7dca52de6`.
+
+## Screen orientation
+
+By ORIENTATION-D-001 in the [decision register](design/decisions.md), all app
+screens use portrait orientation. The shared `appScreenOrientation` manifest
+placeholder in `app/build.gradle.kts` is used by both production Activities and
+the debug hosts. Any new app-owned Activity must use the same placeholder;
+Compose screens inherit their host's orientation. The application declares
+`android:appCategory="game"`, retaining the Android 16+ large-screen game exception
+for orientation restrictions. System windowing and device overrides still apply.
 
 ## State and commands
 
@@ -228,10 +238,14 @@ job. Re-entry reads the latest committed state.
 
 ## Persistence and compatibility
 
-Room is version 21; snapshot is format 4 and history format 1. Schemas and earlier
+Room is version 22; snapshot is format 5 and history format 1. Schemas and earlier
 migrations remain in `app/schemas`. A full snapshot includes the aggregate and
 complete validated history. Restore does not mean merging multiple active devices.
 There is no destructive fallback or silent reset to the initial fixture.
+
+Format 5 also carries the flat archive of completed runs added by CAMPAIGN-D-002.
+Release optimization remains disabled by [BUILD-D-001](design/decisions.md):
+stability work takes priority over reducing the package size.
 
 Regular writes cannot change financial-period origins or confirmed plans. Legacy
 campaign adoption has a separate `reconcileCampaign` operation. Its typed patch
@@ -254,6 +268,12 @@ Runtime raster artwork is loaded through the existing Coil-backed shared artwork
 component at explicit bounds. Preserve full transparent character canvases and
 catalogued alignment. Do not decode a large bitmap on every composition or create
 new raster copies for ordinary UI variants.
+
+By BLUR-D-001, item-focused Day scenes soften only the `AdventureScreen` backdrop.
+`GameBackdrop` uses a small software transformation through the shared Coil loader
+on API 24+, with a separate transformation cache key and off-main processing.
+It participates in the initial artwork barrier; foreground artwork and controls
+stay sharp. No preblurred resources or gameplay state are added.
 
 Frame-by-frame animation values are read in the drawing/graphics layer, rather
 than recomposing a screen. Pet/NPC breathing avoids allocating a pose object on
@@ -288,6 +308,18 @@ The aggregate repository applies supported rewards against the latest local worl
 atomically with their audit receipt. Only committed receipts are acknowledged.
 Known new accessories apply now; coin allocation and duplicate accessory handling
 remain gated by the unresolved product policy in the reward contract.
+
+An explicit `409 STALE_ANALYTICS` can retire only the rejected analytics request
+when a newer validated history boundary of the same run/generation is available.
+Its replacement has a new batch ID; a lost response still retries the unchanged
+body and ID. No local facts are acknowledged without a successful matching ACK.
+
+All HTTP endpoints share a suspend rate-limit gate, including registration,
+manual synchronization and parent skill refresh. On 429 it persists Retry-After
+in a dedicated device DataStore under `noBackupFilesDir`, keyed by backend URL.
+Until that deadline, callers receive a retryable failure without an HTTP request;
+WorkManager keeps ownership of durable scheduling. This preference is outside
+the game snapshot and does not alter Room's game schema.
 
 App composition schedules connected WorkManager requests after history changes
 (five-second debounce), on foreground/network return, every minute in foreground,

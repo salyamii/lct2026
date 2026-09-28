@@ -1,6 +1,6 @@
 <resources>
     <string name="gear_title">Инвентарь</string>
-    <string name="gear_subtitle">Всё, что уже есть у тебя</string>
+    <string name="gear_subtitle">Всё, что у тебя уже есть</string>
     <string name="gear_story_title">Сюжетные предметы</string>
     <string name="gear_accessories_title">Аксессуары</string>
     <string name="gear_story_empty_title">Здесь будут твои находки</string>

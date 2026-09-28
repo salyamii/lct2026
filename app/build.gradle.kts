@@ -22,6 +22,9 @@ android {
         versionCode = 1
         versionName = "1.1"
 
+        // Shared by every app-owned Activity, including debug hosts.
+        manifestPlaceholders["appScreenOrientation"] = "portrait"
+
         // Team endpoint lives in gradle.properties; an explicit empty override keeps the app offline.
         val backendUrl = providers.gradleProperty("LCT_BACKEND_BASE_URL").orElse("").get().trim()
         require(backendUrl.isEmpty() || (backendUrl.startsWith("https://") && backendUrl.endsWith("/") &&

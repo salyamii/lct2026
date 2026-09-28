@@ -39,7 +39,6 @@ import ru.nksk.lctapp.core.ui.components.GameArtwork
 import ru.nksk.lctapp.core.ui.components.GameCardLayout
 import ru.nksk.lctapp.core.ui.components.GameInk
 import ru.nksk.lctapp.core.ui.components.GameTitle
-import ru.nksk.lctapp.core.ui.components.gameScene
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 
@@ -52,10 +51,9 @@ internal fun DaySummaryScreen(state: DayUiState, onAction: (DayAction) -> Unit, 
     val summary = state.summary ?: return
     GameCardLayout(
         category = "Итоги дня",
-        scene = gameScene(state.scene),
+        scene = R.drawable.location_bedroom_night,
         character = state.restingPetRes,
         onBack = onBack,
-        sceneDim = .78f,
         characterDescription = "${state.petName} спит",
     ) {
         GameTitle("День ${summary.day} завершён")

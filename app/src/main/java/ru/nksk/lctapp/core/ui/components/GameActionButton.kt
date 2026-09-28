@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
+import ru.nksk.lctapp.core.ui.theme.GameTextWrapping
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 
@@ -85,7 +86,7 @@ internal fun GameActionButton(
     val content: @Composable () -> Unit = {
         Box(contentAlignment = Alignment.Center) {
             Text(text, modifier = Modifier.alpha(if (loading) 0f else 1f),
-                style = textStyle, textAlign = TextAlign.Center)
+                style = GameTextWrapping.merge(textStyle), textAlign = TextAlign.Center)
             if (loading) GameLoadingIndicator(Modifier.size(24.dp).clearAndSetSemantics {}, size = 24.dp)
         }
     }

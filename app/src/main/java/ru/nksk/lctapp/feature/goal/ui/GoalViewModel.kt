@@ -1,5 +1,7 @@
 package ru.nksk.lctapp.feature.goal.ui
 
+import ru.nksk.lctapp.core.ui.game.asGameUiText
+
 import ru.nksk.lctapp.domain.pet.renderPetText
 
 import androidx.lifecycle.ViewModel
@@ -130,7 +132,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
         clearPurchase()
         val prepared = request(game, command.copy(acceptFoodRisk = remaining < food))
         pending = prepared
-        confirmation = PurchaseConfirmation(item.id, renderPetText(item.name, game.pet.name), price,
+        confirmation = PurchaseConfirmation(item.id, renderPetText(item.name, game.pet.name).asGameUiText(), price,
             quote.fromSavings, quote.fromAvailable.parts, game.economy.availableBalance, game.economy.savingsBalance,
             remaining, game.economy.savingsBalance - quote.fromSavings, food, "goal-purchase:${prepared.id}")
         message = null
@@ -294,7 +296,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
                     GoalProjectStatus.AVAILABLE -> if (activeGoal == null) "Выбери, на что будем копить" else "Текущая глава"
                     GoalProjectStatus.LOCKED -> "Откроется после предыдущей главы"
                 }, requirements = progress.items.map { item ->
-                    GoalRequirementUiState(item.id, renderPetText(item.name, game.pet.name),
+                    GoalRequirementUiState(item.id, renderPetText(item.name, game.pet.name).asGameUiText(),
                         checkNotNull(item.priceCoins), item.id in progress.ownedItemIds)
                 })
         }
@@ -313,7 +315,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
             message = message, confirmation = confirmation, celebration = celebration,
             purchaseResult = handle.get<String>("purchase_result_item")?.let { id ->
                 catalog.content.items.firstOrNull { it.id == id && game.ownedItems.any { owned -> owned.itemId == id } }
-                    ?.let { item -> GoalPurchaseResult(item.id, renderPetText(item.name, game.pet.name), checkNotNull(item.priceCoins)) }
+                    ?.let { item -> GoalPurchaseResult(item.id, renderPetText(item.name, game.pet.name).asGameUiText(), checkNotNull(item.priceCoins)) }
             })
         if (goal == null) { mutableState.value = common; return }
         val definition = catalog.content.goals.first { it.id == goal.goalId }
@@ -332,7 +334,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
                 val quote = EconomyOperations.goalPurchaseQuote(game.economy, checkNotNull(item.priceCoins))
                 val block = if (selected && target && !owned) session.engine.blockReason(game,
                     EngineCommand.BuyGoalItem(goal.goalId, item.id)) else null
-                GoalPartUiState(item.id, renderPetText(item.name, game.pet.name), renderPetText(item.description, game.pet.name), checkNotNull(item.priceCoins), owned,
+                GoalPartUiState(item.id, renderPetText(item.name, game.pet.name).asGameUiText(), renderPetText(item.description, game.pet.name), checkNotNull(item.priceCoins), owned,
                     selected && target && !owned && (block == null || block is BlockReason.FoodBudgetWarning),
                     block?.takeUnless { it is BlockReason.FoodBudgetWarning || it is BlockReason.InsufficientMoney }?.playerMessage(game.pet.name),
                     (block as? BlockReason.InsufficientMoney)?.missing,

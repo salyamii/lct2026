@@ -1,5 +1,7 @@
 package ru.nksk.lctapp.feature.gear.ui
 
+import ru.nksk.lctapp.core.ui.game.asGameUiText
+
 import ru.nksk.lctapp.domain.pet.renderPetText
 
 import ru.nksk.lctapp.domain.content.ItemCategory
@@ -46,7 +48,7 @@ internal fun gearUiState(owned: List<OwnedItem>, definitions: List<ItemDefinitio
         // The v1 cap is an immutable STORY definition. Its historical item ID is an explicit
         // cosmetic alias; moving its presentation does not rewrite its purchase or saved catalog.
         val cosmetic = PetCosmetics.forItem(item.id)
-        val name = renderPetText(item.name, petName)
+        val name = renderPetText(item.name, petName).asGameUiText()
         val description = renderPetText(item.description, petName)
         val content = gearItemContent(item.id, name, description)
         val card = GearItemUiState(occurrence.id, name,
