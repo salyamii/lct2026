@@ -17,17 +17,20 @@ data class RegisteredPetDto(
 
 fun PetState.registrationDto() = RegisteredPetDto(name, age, color, temperament, selectedLookId)
 
-/** The secret is sent only in Authorization, never in the body or QR. */
+/** The child's saved device identifier is sent in JSON and used directly in the parent's QR. */
 @Serializable
 data class RegisterProfileRequest(
-    val profileId: String,
-    val installationId: String,
+    val deviceId: String,
     val pet: RegisteredPetDto,
     val schemaVersion: Int = 1,
-)
+) {
+    init { require(deviceId.isNotBlank()) }
+}
 
 @Serializable
-data class RegisterProfileResponse(val profileId: String, val installationId: String)
+data class RegisterProfileResponse(val deviceId: String) {
+    init { require(deviceId.isNotBlank()) }
+}
 
 @Serializable
 data class BackendError(val code: String, val message: String? = null, val requestId: String? = null)

@@ -61,6 +61,12 @@ data class GameCatalog(
     fun plan(state: GameState): List<String> = EventScheduler.plan(this, state)
 }
 
+/** An explicit continuation resumes the current day or its summary, never skips planning. */
+sealed interface ContinueDayPlan {
+    data object NeedsBudget : ContinueDayPlan
+    data class Day(val command: EngineCommand?) : ContinueDayPlan
+}
+
 /** Installs immutable content once, then delegates every game write to the aggregate engine. */
 class GameSession(
     private val games: GameRepository,
@@ -82,8 +88,31 @@ class GameSession(
     val timeMachine = ru.nksk.lctapp.domain.timemachine.TimeMachine(games, engine, catalog, contentFingerprint)
 
     fun observeHistory() = games.observeHistory()
+    fun observeHistorySequence() = games.observeHistorySequence()
     suspend fun history() = games.readHistory()
     suspend fun exportSnapshot() = games.exportSnapshot()
+    suspend fun archivedRuns() = games.archivedRuns()
+    suspend fun archivedRun(runId: String) = games.archivedRun(runId)
+    fun canRestartCampaign(state: GameState): Boolean = catalog.storyProgress(state).campaignComplete
+
+    /** The final chronoscope starts the same authored journey, retaining identity but no gameplay gains. */
+    suspend fun restartCampaign(request: ru.nksk.lctapp.domain.history.CampaignRestartRequest): GameState {
+        content.install(catalog.content)
+        return games.restartCampaign(request) { current, original ->
+            check(canRestartCampaign(current)) { "The campaign is not complete" }
+            val firstGoal = original?.selectedGoalId?.takeIf { id -> onboardingGoals.any { it.goalId == id } }
+                ?: onboardingGoals.firstOrNull()?.goalId ?: initial.selectedGoalId
+            val firstItem = original?.selectedSavingItemId?.takeIf { it in onboardingSavingItemIds }
+                ?: initial.selectedSavingItemId
+            initial.copy(
+                pet = initial.pet.copy(name = current.pet.name, color = current.pet.color,
+                    temperament = current.pet.temperament,
+                    selectedLookId = original?.pet?.selectedLookId ?: initial.pet.selectedLookId),
+                selectedGoalId = firstGoal,
+                selectedSavingItemId = firstItem,
+            ).withStarterAccessoryOwnership()
+        }
+    }
     suspend fun restoreSnapshot(snapshot: ru.nksk.lctapp.domain.history.GameSnapshot,
         guard: ru.nksk.lctapp.domain.history.RestoreGuard): GameState {
         content.install(catalog.content)
@@ -164,6 +193,13 @@ class GameSession(
     } == true
 
     fun previewAdvanceSpending(state: GameState): EventSpendingPreview? = engine.advanceSpending(state, advanceCommand(state))
+
+    fun continueDayPlan(state: GameState): ContinueDayPlan = when {
+        state.economy.planning != null || state.economy.unallocated != 0L -> ContinueDayPlan.NeedsBudget
+        // Only the separate wake-up action on the summary may begin another day.
+        state.engine?.phase == DayPhase.FINISHED -> ContinueDayPlan.Day(null)
+        else -> ContinueDayPlan.Day(advanceCommand(state))
+    }
 
     fun advanceCommand(state: GameState): EngineCommand? = when {
         state.economy.planning != null || state.economy.unallocated != 0L -> null

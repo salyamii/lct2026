@@ -56,7 +56,6 @@ internal fun GoalScreen(
     onBack: () -> Unit,
     onAction: (GoalAction) -> Unit,
     onOpenSavings: () -> Unit = {},
-    onReturnHome: () -> Unit = onBack,
 ) {
     val target = state.parts.firstOrNull { it.savingTarget && !it.owned }
     val result = state.purchaseResult
@@ -114,14 +113,15 @@ internal fun GoalScreen(
                 state.loading -> Unit
                 state.failed -> AdventurePrimaryButton("Повторить", { onAction(GoalAction.Retry) })
                 result != null -> AdventurePrimaryButton(if (ready) "Продолжить историю" else "К целям", {
-                    onAction(GoalAction.DismissPurchaseResult)
-                    if (ready) onReturnHome()
+                    onAction(if (ready) GoalAction.ContinueStory else GoalAction.DismissPurchaseResult)
                 }, enabled = !state.busy)
                 state.showList -> Unit
                 state.canSelect -> AdventurePrimaryButton("Продолжить историю", {
-                    onAction(GoalAction.Select(checkNotNull(state.goalId)))
+                    onAction(GoalAction.ContinueStory)
                 }, enabled = !state.busy)
-                ready || state.completedProject -> AdventurePrimaryButton("Продолжить историю", onReturnHome, enabled = !state.busy)
+                ready || state.completedProject -> AdventurePrimaryButton("Продолжить историю", {
+                    onAction(GoalAction.ContinueStory)
+                }, enabled = !state.busy)
                 state.selected && target != null -> Unit
                 state.selected -> GoalSavingsLink(state.balance, onOpenSavings, !state.busy)
             }

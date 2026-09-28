@@ -16,6 +16,7 @@ internal class AssetMediaPlayerFactory @Inject constructor(
     private val runtime: MediaPlaybackRuntime,
 ) {
     fun audioFocus() = PlaybackAudioFocus(context)
+    suspend fun videoBackdrop(assetPath: String) = loadVideoBackdrop(context, assetPath)
     fun create(assetPath: String, video: Boolean = false, positionMs: Long = 0,
         repeat: Boolean = false, volume: Float = 1f, focus: PlaybackAudioFocus = audioFocus(),
         onCompleted: () -> Unit, onError: () -> Unit): AssetMediaPlayer =
@@ -176,6 +177,8 @@ internal class AssetMediaPlayer(
         if (!shouldKeepPlayer()) { releasePlayer(); return }
         try {
             prepared = true
+            // The surface keeps the source aspect ratio; the entire authored frame stays visible.
+            if (video) current.setVideoScalingMode(MediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT)
             current.isLooping = repeat
             if (position > 0) {
                 val target = position.coerceAtMost((current.duration - 1).coerceAtLeast(0).toLong())

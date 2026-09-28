@@ -299,6 +299,32 @@ class EventAudioControllerTest {
         assertEquals(1, driver.count("chapter-2"))
     }
 
+    @Test fun introSuspendsTheThemeAndReturningRespectsMuteAndStaleCallbacks() {
+        val driver = FakeDriver()
+        val controller = activeController(driver)
+        controller.setMusicCue("chapter-1")
+        val beforeIntro = driver.last("chapter-1")
+        controller.setMusicCue(null)
+        assertTrue(beforeIntro.closed)
+        controller.setForeground(false)
+        controller.setForeground(true)
+        controller.setSoundEnabled(false)
+        controller.setSoundEnabled(true)
+        assertEquals(1, driver.count("chapter-1"))
+
+        controller.setSoundEnabled(false)
+        controller.setMusicCue("chapter-1")
+        assertEquals(1, driver.count("chapter-1"))
+        controller.setSoundEnabled(true)
+        val afterIntro = driver.last("chapter-1")
+        assertEquals(2, driver.count("chapter-1"))
+        assertTrue(afterIntro.foregroundState)
+        assertTrue(afterIntro.repeat)
+        beforeIntro.complete()
+        beforeIntro.fail()
+        assertFalse(afterIntro.closed)
+    }
+
     @Test fun musicErrorInBackgroundStaysSilentUntilRealForegroundTransition() {
         val driver = FakeDriver()
         val controller = activeController(driver)

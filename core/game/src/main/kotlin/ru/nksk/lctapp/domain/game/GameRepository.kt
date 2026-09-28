@@ -1,6 +1,7 @@
 package ru.nksk.lctapp.domain.game
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.flowOf
 import ru.nksk.lctapp.domain.analytics.AnalyticsFact
 import ru.nksk.lctapp.domain.analytics.DecisionContext
@@ -10,7 +11,11 @@ import ru.nksk.lctapp.domain.history.AuditEntry
 import ru.nksk.lctapp.domain.history.GameSnapshot
 import ru.nksk.lctapp.domain.history.RestoreGuard
 import ru.nksk.lctapp.domain.history.HistorySourceGuard
+import ru.nksk.lctapp.domain.history.CampaignRestartRequest
+import ru.nksk.lctapp.domain.history.ArchivedGameRunSummary
 import ru.nksk.lctapp.domain.pet.withStarterAccessoryOwnership
+import ru.nksk.lctapp.domain.backend.ParentRewardDto
+import ru.nksk.lctapp.domain.backend.ParentRewardReceiptDto
 
 /** The only write boundary for the saved game. Storage errors propagate without resetting it. */
 interface GameRepository {
@@ -49,11 +54,22 @@ interface GameRepository {
     /** History is loaded explicitly; it never inflates observe() emissions. */
     suspend fun readHistory(): List<AuditEntry> = emptyList()
     fun observeHistory(): Flow<List<AuditEntry>> = flowOf(emptyList())
+    /** Lightweight wake-up signal; transport acknowledgements are not world changes. */
+    fun observeHistorySequence(): Flow<Long> = observeHistory().map { it.lastOrNull()?.sequence ?: 0L }
     /** A non-null sourceGuard is checked atomically with insertion, including retries after restore. */
     suspend fun recordFacts(facts: List<AnalyticsFact>, sourceGuard: HistorySourceGuard? = null) { error("History storage is unavailable") }
     suspend fun pendingOutbox(limit: Int = 100): List<AuditEntry> = emptyList()
     suspend fun acknowledgeOutbox(ids: Set<String>) { error("History storage is unavailable") }
+    /** Latest-world merge and its receipt are committed together; only returned receipts may be acknowledged. */
+    suspend fun applyParentRewards(profileId: String, gameRunId: String, rewards: List<ParentRewardDto>,
+        expectedRestoreGeneration: String): List<ParentRewardReceiptDto> = error("Parent reward storage is unavailable")
     suspend fun exportSnapshot(): GameSnapshot = error("Snapshot storage is unavailable")
+    suspend fun archivedRuns(): List<ArchivedGameRunSummary> = emptyList()
+    suspend fun archivedRun(runId: String): GameSnapshot? = null
+    /** Archive and new baseline commit atomically; transform validates the latest completed world. */
+    suspend fun restartCampaign(request: CampaignRestartRequest,
+        transform: (current: GameState, initial: GameState?) -> GameState): GameState =
+        error("Campaign restart storage is unavailable")
     suspend fun restoreSnapshot(snapshot: GameSnapshot, expected: RestoreGuard): GameState =
         error("Snapshot storage is unavailable")
 }

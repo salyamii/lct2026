@@ -22,14 +22,15 @@ import androidx.compose.ui.unit.dp
 
 /** Selecting an answer and submitting it are separate, explicit actions. */
 @Composable
-internal fun GameQuizOption(text: String, selected: Boolean, enabled: Boolean, onSelect: () -> Unit) {
+internal fun GameQuizOption(text: String, selected: Boolean, enabled: Boolean,
+    interactionBlocked: Boolean = false, onSelect: () -> Unit) {
     Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp),
         color = if (selected) Color(0xFFF0F5DF) else Color.White,
         contentColor = GameInk,
         border = BorderStroke(if (selected) 2.dp else 1.dp,
             if (selected) GameInk else Color(0xFFD9D3E7))) {
         Row(Modifier.fillMaxWidth().heightIn(min = 64.dp)
-            .selectable(selected, enabled = enabled, role = Role.RadioButton, onClick = onSelect)
+            .selectable(selected, enabled = enabled && !interactionBlocked, role = Role.RadioButton, onClick = onSelect)
             .padding(horizontal = 12.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             RadioButton(selected, onClick = null, enabled = enabled,

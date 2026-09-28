@@ -365,7 +365,7 @@ class DayViewModelTest {
             val before = repository.read()
             val offer = before.engine!!.deeds.single()
             assertEquals("Сделать позже", model.uiState.value.later)
-            assertEquals("Успеть до конца сегодня", model.uiState.value.deedDeadline)
+            assertEquals("Можно выполнить сегодня", model.uiState.value.deedDeadline)
             model.onAction(DayAction.Later)
             runCurrent()
             val after = repository.read()

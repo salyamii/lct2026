@@ -13,6 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.app.navigation.AppStartupState
 import ru.nksk.lctapp.app.navigation.AppStartupViewModel
@@ -37,6 +40,7 @@ import ru.nksk.lctapp.domain.pet.PetFur
 import ru.nksk.lctapp.domain.pet.PetTemperament
 import ru.nksk.lctapp.app.presentation.PetReactionViewModel
 import ru.nksk.lctapp.app.presentation.MediaPlaybackViewModel
+import ru.nksk.lctapp.app.presentation.BackendSyncViewModel
 import ru.nksk.lctapp.core.ui.game.LocalLivePetReaction
 import ru.nksk.lctapp.core.ui.media.MediaPlaybackHost
 import ru.nksk.lctapp.core.ui.media.LocalMediaPlayback
@@ -57,13 +61,21 @@ private fun LctAppContent(debugSettingsButton: (@Composable () -> Unit)?) {
         val media: MediaPlaybackViewModel = hiltViewModel()
         val mediaState by media.uiState.collectAsStateWithLifecycle()
         MediaPlaybackHost(soundEnabled = mediaState.soundEnabled, factory = media.playerFactory,
-            audio = media.audioController, musicCueKey = mediaState.musicCueKey) {
+            audio = media.audioController,
+            musicCueKey = mediaState.musicCueKey.takeUnless { state is AppStartupState.IntroVideo }) {
             val audio = LocalMediaPlayback.current
             LaunchedEffect(media, audio) {
                 media.actionCues.collect { audio?.playAction(it.id, it.cues) }
             }
             when (val current = state) {
                 AppStartupState.Ready -> {
+                    val sync: BackendSyncViewModel = hiltViewModel()
+                    val lifecycleOwner = LocalLifecycleOwner.current
+                    LaunchedEffect(sync, lifecycleOwner) {
+                        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                            sync.whileResumed()
+                        }
+                    }
                     val reactions: PetReactionViewModel = hiltViewModel()
                     val reaction by reactions.uiState.collectAsStateWithLifecycle()
                     CompositionLocalProvider(LocalLivePetReaction provides reaction) {

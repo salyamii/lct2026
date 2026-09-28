@@ -25,6 +25,7 @@ data object MainMenu : NavKey
 
 fun EntryProviderScope<NavKey>.mainMenuEntry(
     settingsButton: (@Composable () -> Unit)? = null,
+    onTraining: (MainMenu) -> Unit,
     onAction: (MainMenu, MainMenuAction) -> Unit,
 ) {
     entry<MainMenu> { source ->
@@ -43,9 +44,14 @@ fun EntryProviderScope<NavKey>.mainMenuEntry(
                 viewModel.openDay.collect { onAction(source, MainMenuAction.ContinueDay) }
             }
         }
-        LaunchedEffect(viewModel, lifecycle, "finance") {
+        LaunchedEffect(viewModel, lifecycle, "training") {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                viewModel.openFinance.collect { onAction(source, MainMenuAction.Finance) }
+                viewModel.openTraining.collect { onTraining(source) }
+            }
+        }
+        LaunchedEffect(viewModel, lifecycle, "budget") {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.openBudget.collect { onAction(source, MainMenuAction.Coins) }
             }
         }
         MainMenuContent(

@@ -17,7 +17,7 @@ class ParentRewardsContractTest {
     }
 
     @Test fun rewardUsesItsOwnWireDiscriminatorAndPreservesInt64() {
-        val request = CreateParentRewardRequest("run", ParentRewardPayload.Coins(9_007_199_254_740_993L))
+        val request = CreateParentRewardRequest("device", "run", ParentRewardPayload.Coins(9_007_199_254_740_993L))
         val encoded = json.encodeToString(CreateParentRewardRequest.serializer(), request)
         val reward = json.parseToJsonElement(encoded).jsonObject.getValue("reward").jsonObject
         assertEquals("COINS", reward.getValue("type").jsonPrimitive.content)
@@ -40,7 +40,7 @@ class ParentRewardsContractTest {
     @Test fun unknownGrantKindFailsClosedInsteadOfBecomingCoins() {
         try {
             json.decodeFromString<CreateParentRewardRequest>("""
-                {"gameRunId":"run","reward":{"type":"REPLACE_BALANCE","amount":100}}
+                {"deviceId":"device","gameRunId":"run","reward":{"type":"REPLACE_BALANCE","amount":100}}
             """.trimIndent())
             fail("Unsupported grant must not become an applicable reward")
         } catch (_: SerializationException) { }

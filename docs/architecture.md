@@ -87,6 +87,22 @@ outside the foreground; their positions and occurrence deduplication stay in the
 controller. Leaving a scene stops its narration. The intro owns a separate video
 player with its position retained in the startup ViewModel.
 
+Music, narration and intro pause directly in `ON_PAUSE`/`ON_STOP` lifecycle
+callbacks through `PlaybackLifecycleEffect`. This must not wait for a Compose
+SideEffect: a background window can stop scheduling frames before recomposition.
+Foreground return resumes the retained playback position and keeps sound preferences.
+
+Illustrated adventure screens and the menu use `GameArtworkScene` to reveal their
+initial image group together after asynchronous decode. Errors release the barrier;
+later pose or clothing updates do not hide a scene already on screen. Scene identity
+is an event/location key, never the changing world revision or animation phase.
+
+Before a world exists, the same music projection selects the first authored act's
+theme for onboarding. App composition suppresses the music cue only while the
+intro video is shown, independently of the shared sound preference. The video's
+own audio keeps that preference; leaving the intro restores the chapter theme.
+This selection does not initialize or mutate the game.
+
 Music loops on its own lane; short cues and voice use a sequential lane which
 ducks the music. Short location clips play twice (MEDIA-D-005); narration and
 action effects play once. Scene deduplication records each completed clip/pass,
@@ -141,6 +157,12 @@ Feature wrappers may select approved typography/shape; they do not reimplement
 click handling or disabled logic. Loading and unavailable are distinct states;
 short writes do not recolor the entire inventory.
 
+`AdaptiveActionPanel` measures bottom actions at their natural height before
+allocating a scrolling body. When both cannot fit, the panel scrolls as one column.
+Onboarding uses the same principle: a scrollable card must not receive only the
+leftover height via weight. Safe system/keyboard insets apply to controls; compact
+windows and large text retain accessible actions through scrolling (ARCH-D-008).
+
 Use `interactionBlocked` for a short write that must retain the button's label,
 color and size without a spinner. It disables pointer, keyboard and accessibility
 activation while keeping ordinary availability (`enabled`) separate. The menu's
@@ -180,7 +202,7 @@ job. Re-entry reads the latest committed state.
 
 ## Persistence and compatibility
 
-Room is version 20; snapshot is format 4 and history format 1. Schemas and earlier
+Room is version 21; snapshot is format 4 and history format 1. Schemas and earlier
 migrations remain in `app/schemas`. A full snapshot includes the aggregate and
 complete validated history. Restore does not mean merging multiple active devices.
 There is no destructive fallback or silent reset to the initial fixture.
@@ -220,18 +242,37 @@ long save on a permitted device; source inspection does not establish actual FPS
 
 ## Backend boundary
 
-Settings generates the parent's QR offline from a persisted profile UUID. Encrypted
-Preferences DataStore under `noBackupFilesDir` owns installation credentials.
-Retrofit/OkHttp transport is in `data/backend`; the base URL is empty by default.
-An explicit parent-code action may register when configured. QR display and sharing
+Settings generates the parent's QR offline from the persisted `deviceId`. Plain
+Preferences DataStore under `noBackupFilesDir` owns this identifier and registration
+metadata. New installations use Android ID; existing identifiers survive a one-time
+legacy migration. Legacy decryption only reads the old record; new credentials are
+not generated. By PARENT-LINK-D-005 requests identify the device in their JSON body,
+without authorization headers or tokens. Operation IDs still deduplicate retries.
+Retrofit/OkHttp transport is in `data/backend`; `gradle.properties` configures
+`https://fin-api.mortypython.ru/`, supplied by the team on 2026-09-27.
+`-PLCT_BACKEND_BASE_URL=` can explicitly disable requests. Live endpoint compatibility
+is not yet verified. Registration runs before synchronization and from the parent-code action. QR display and sharing
 do not upload the world. The private FileProvider shares a PNG with temporary read
 permission, without changing identity or game state.
 
-Snapshot, analytics and parent-reward DTOs/transport are prepared. Background backup,
-cloud restore UI and application of remote rewards are not wired. No observer uploads
-game data. Parent rewards are designed as durable authenticated pulls and atomic
-local application to the latest aggregate, with receipt-based deduplication and ack
-after commit; Firebase messaging is excluded. See [backend handoff](backend/README.md).
+`RemoteCloudSyncRepository` serializes registration, full snapshot upload, financial
+evidence upload, skill assessment retrieval and parent reward delivery. Room owns
+transport checkpoints and frozen pending requests; retry uses the same key and body.
+The aggregate repository applies supported rewards against the latest local world,
+atomically with their audit receipt. Only committed receipts are acknowledged.
+Known new accessories apply now; coin allocation and duplicate accessory handling
+remain gated by the unresolved product policy in the reward contract.
+
+App composition schedules connected WorkManager requests after history changes
+(five-second debounce), on foreground/network return, every minute in foreground,
+and periodically every fifteen minutes subject to Android scheduling. This observes
+only the history sequence; serialization and network work stay off the main thread.
+The local world remains available offline and cloud conflicts never overwrite it.
+Settings offers manual sync and a downloaded preview followed by explicit restore
+confirmation. Restore validates the archive and guards the local history; its
+durable intent recovers transport bookkeeping after a crash without restoring twice.
+Firebase messaging is excluded. See [backend handoff](backend/README.md) and
+[request triggers](backend/client-sync.md).
 
 ## Dependency injection
 

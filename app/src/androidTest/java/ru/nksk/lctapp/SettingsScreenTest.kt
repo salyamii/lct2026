@@ -12,6 +12,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
 import ru.nksk.lctapp.feature.settings.ui.*
+import ru.nksk.lctapp.domain.backend.CloudRestorePreview
 
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -76,6 +77,31 @@ class SettingsScreenTest {
         compose.setContent { LCTAppTheme { SettingsGearButton { opened++ } } }
         compose.onNodeWithContentDescription("Настройки").assertIsDisplayed().performClick()
         compose.runOnIdle { assertEquals(1, opened) }
+    }
+
+    @Test fun cloudRestoreRequiresAnExplicitChoiceAfterShowingWhatWillBeReplaced() {
+        var action: SettingsAction? = null
+        compose.setContent { LCTAppTheme {
+            SettingsScreen(readyState().copy(backendConfigured = true,
+                cloud = CloudSettingsUiState(restorePreview = CloudRestorePreview("copy-1", "Лис", 4, 21L, 8L))),
+                { action = it }, {}, {})
+        } }
+        compose.onNodeWithText("Сохранение из облака заменит текущий мир, его журнал и прогресс на этом устройстве.")
+            .assertIsDisplayed()
+        compose.runOnIdle { assertEquals(null, action) }
+        compose.onNodeWithText("Восстановить эту игру").assertIsEnabled().performClick()
+        compose.runOnIdle { assertEquals(SettingsAction.ConfirmCloudRestore("copy-1"), action) }
+    }
+
+    @Test fun restoringDisablesBothConfirmationActions() {
+        compose.setContent { LCTAppTheme {
+            SettingsScreen(readyState().copy(backendConfigured = true,
+                cloud = CloudSettingsUiState(operation = CloudSettingsOperation.RESTORE,
+                    restorePreview = CloudRestorePreview("copy-1", "Лис", 4, 21L, 8L))),
+                { error("Restore controls must be blocked") }, {}, {})
+        } }
+        compose.onNodeWithText("Восстановить эту игру").assertIsNotEnabled()
+        compose.onNodeWithText("Оставить текущую игру").assertIsNotEnabled()
     }
 
     private fun readyState() = SettingsUiState(loading = false, profileId = ProfileId,

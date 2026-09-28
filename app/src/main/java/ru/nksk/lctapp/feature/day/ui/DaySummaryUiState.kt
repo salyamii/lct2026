@@ -99,6 +99,9 @@ internal fun DaySummary.toUiState(catalog: GameCatalog, petName: String, economy
             DayJournalKind.ITEM_PURCHASE -> rows += DaySummaryRow("Купили: ${itemName(entry.sourceId)}", actionMoney(entry.moneyDelta), DaySummaryRowKind.PURCHASE)
             DayJournalKind.ITEM_RECEIVED -> rows += DaySummaryRow("Получили: ${itemName(entry.sourceId)}", kind = DaySummaryRowKind.FOUND)
             DayJournalKind.WEEKLY_INCOME -> rows += DaySummaryRow("Получили монеты на новую неделю", actionMoney(entry.moneyDelta), DaySummaryRowKind.COINS)
+            DayJournalKind.PARENT_REWARD -> rows += if (entry.moneyDelta > 0)
+                DaySummaryRow("Подарок от родителя", actionMoney(entry.moneyDelta), DaySummaryRowKind.COINS)
+                else DaySummaryRow("Подарок от родителя: ${itemName(entry.sourceId)}", kind = DaySummaryRowKind.FOUND)
             DayJournalKind.EVENT_START -> rows += DaySummaryRow(eventName(entry.sourceId), actionMoney(entry.moneyDelta))
         }
     }

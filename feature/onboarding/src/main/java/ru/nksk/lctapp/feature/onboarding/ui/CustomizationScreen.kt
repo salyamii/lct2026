@@ -94,7 +94,37 @@ fun CustomizationScreen(
     }
     BoxWithConstraints(modifier.fillMaxSize().background(Cream).imePadding()) {
         val compactHeight = maxHeight < 480.dp
-        if (maxWidth >= 720.dp) {
+        val density = LocalDensity.current
+        val keyboardHeight = with(density) { WindowInsets.ime.getBottom(density).toDp() }
+        // Keep the focused editor at the same composition position when IME opens.
+        // Only the stage shrinks; switching the entire form would discard focus.
+        if (needsOnboardingScroll(maxHeight + keyboardHeight)) {
+            val scroll = rememberScrollState()
+            val scope = rememberCoroutineScope()
+            Column(Modifier.fillMaxSize().verticalScroll(scroll)) {
+                Box(Modifier.fillMaxWidth()) {
+                    Image(painterResource(artwork.background), null,
+                        Modifier.matchParentSize().testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
+                    Column {
+                        CustomizationHeader(onBack, artwork, saving)
+                        CharacterStage(state, artwork, Modifier.fillMaxWidth().height(120.dp))
+                    }
+                }
+                Column(Modifier.fillMaxWidth().windowInsetsPadding(
+                    WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)),
+                    horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(Modifier.widthIn(max = 560.dp).fillMaxWidth().testTag("customization_editor")) {
+                        Spacer(Modifier.height(16.dp))
+                        CustomizationFields(state, artwork, editName, onTemperamentChange,
+                            onFurChange, saving, nameError)
+                        CustomizationContinue(artwork, saving, saveFailed, {
+                            continueWithName()
+                            if (state.name.isBlank()) scope.launch { scroll.animateScrollTo(0) }
+                        })
+                    }
+                }
+            }
+        } else if (maxWidth >= 720.dp) {
             Row(Modifier.fillMaxSize()) {
                 BoxWithConstraints(Modifier.weight(1f).fillMaxHeight()) {
                     Image(painterResource(artwork.background), null,
@@ -117,14 +147,14 @@ fun CustomizationScreen(
         } else {
             // Keep the scene outside the form's scroll container. Shrink it with available
             // height (including IME) so the editor retains space on compact windows.
-            val stageHeight = (maxHeight * .30f).coerceIn(100.dp, 300.dp)
+            val stageHeight = if (keyboardHeight > 0.dp) 0.dp else (maxHeight * .30f).coerceIn(100.dp, 300.dp)
             Column(Modifier.fillMaxSize()) {
                 Box(Modifier.fillMaxWidth()) {
                     Image(painterResource(artwork.background), null,
                         Modifier.matchParentSize().testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
                     Column {
                         CustomizationHeader(onBack, artwork, saving)
-                        CharacterStage(state, artwork, Modifier.fillMaxWidth().height(stageHeight))
+                        if (stageHeight > 0.dp) CharacterStage(state, artwork, Modifier.fillMaxWidth().height(stageHeight))
                         Box(Modifier.fillMaxWidth().height(28.dp)
                             .background(Cream, RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)))
                     }

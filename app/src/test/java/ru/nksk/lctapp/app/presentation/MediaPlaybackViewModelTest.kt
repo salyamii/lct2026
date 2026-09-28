@@ -64,13 +64,16 @@ class MediaPlaybackViewModelTest {
         assertEquals(0, world.initializations)
         assertEquals(0, world.reads)
         assertEquals(0, world.historyReads)
-        world.states.value = createInitialGameState()
-        runCurrent()
-        assertNull(model.uiState.value.musicCueKey)
         preferences.readGate!!.complete(Unit)
         runCurrent()
         assertTrue(model.uiState.value.loaded)
         assertTrue(model.uiState.value.soundEnabled)
+        assertEquals("story.chapter_1", model.uiState.value.musicCueKey)
+        assertEquals(0, world.initializations)
+        assertEquals(0, world.reads)
+        assertEquals(0, world.historyReads)
+        world.states.value = createInitialGameState()
+        runCurrent()
         assertEquals("story.chapter_1", model.uiState.value.musicCueKey)
         assertEquals(0, world.writes)
     }
@@ -92,7 +95,7 @@ class MediaPlaybackViewModelTest {
         assertEquals("story.chapter_5", model.uiState.value.musicCueKey)
         world.states.value = null
         runCurrent()
-        assertNull(model.uiState.value.musicCueKey)
+        assertEquals("story.chapter_1", model.uiState.value.musicCueKey)
         assertEquals(0, world.historyReads)
         assertEquals(0, world.writes)
     }

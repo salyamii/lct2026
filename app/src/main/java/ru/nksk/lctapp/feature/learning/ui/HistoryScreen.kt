@@ -13,9 +13,11 @@ import ru.nksk.lctapp.core.ui.game.BudgetHistoryUi
 import ru.nksk.lctapp.core.ui.game.asGameUiText
 
 @Composable
-internal fun HistoryScreen(state: HistoryUiState, onRetry: () -> Unit, onBack: () -> Unit) {
-    LearningPage("История приключения", onBack) {
+internal fun HistoryScreen(state: HistoryUiState, onRetry: () -> Unit, onBack: () -> Unit,
+    title: String = "История приключения", onArchives: (() -> Unit)? = null) {
+    LearningPage(title, onBack) {
         learningStatus(state.loading, false, state.error, onRetry = onRetry)
+        onArchives?.let { open -> item { PracticeButton("Прошлые приключения", true, primary = false, onClick = open) } }
         if (!state.loading && state.hasPlans) item {
             CoinMovementHistory(state.coinMovements)
         }

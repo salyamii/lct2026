@@ -18,6 +18,7 @@ enum class SkillStatus { MASTERED, PRACTICING, NO_DATA, HAS_PROBLEM }
 /** Versioned, complete evidence projection for one run at a committed history boundary. */
 @Serializable
 data class AnalyticsUploadRequest(
+    val deviceId: String,
     val batchId: String,
     val gameRunId: String,
     val throughHistorySequence: Long,
@@ -28,7 +29,7 @@ data class AnalyticsUploadRequest(
     val evaluatorVersion: Int = 1,
 ) {
     init {
-        require(batchId.isNotBlank() && gameRunId.isNotBlank())
+        require(deviceId.isNotBlank() && batchId.isNotBlank() && gameRunId.isNotBlank())
         require(throughHistorySequence >= 0)
         require(schemaVersion > 0 && projectionVersion > 0 && evaluatorVersion > 0)
         require(facts.all { it.gameRunId == gameRunId && it.sequence <= throughHistorySequence })
@@ -89,6 +90,11 @@ data class AnalyticsUploadResponse(
 }
 
 @Serializable
+data class SkillAssessmentsRequest(val deviceId: String, val gameRunId: String, val schemaVersion: Int = 1) {
+    init { require(deviceId.isNotBlank() && gameRunId.isNotBlank()) }
+}
+
+@Serializable
 data class SkillAssessmentsResponse(
     val gameRunId: String,
     val basedOnHistorySequence: Long,
@@ -103,17 +109,19 @@ data class SkillAssessmentsResponse(
 
 /** Reconstructs evidence from exactly the same validated snapshot used for world backup. */
 fun analyticsUploadRequest(
+    deviceId: String,
     batchId: String,
     snapshot: GameSnapshot,
     content: StoryContent,
 ): AnalyticsUploadRequest {
     HistoryCodec.validate(snapshot)
-    return analyticsUploadRequest(batchId, snapshot.runId, snapshot.historySequence,
+    return analyticsUploadRequest(deviceId, batchId, snapshot.runId, snapshot.historySequence,
         HistoryLearningProjection.facts(snapshot.history, content))
 }
 
 /** [facts] must be the full HistoryLearningProjection result through the supplied boundary. */
 fun analyticsUploadRequest(
+    deviceId: String,
     batchId: String,
     gameRunId: String,
     throughHistorySequence: Long,
@@ -125,6 +133,7 @@ fun analyticsUploadRequest(
         copies.first()
     }.sortedWith(compareBy<AnalyticsFact> { it.sequence }.thenBy { it.eventId })
     return AnalyticsUploadRequest(
+        deviceId = deviceId,
         batchId = batchId,
         gameRunId = gameRunId,
         throughHistorySequence = throughHistorySequence,

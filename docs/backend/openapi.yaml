@@ -1,37 +1,37 @@
 openapi: 3.1.0
 info:
-  title: LCT profile, parent link, world backup and financial analytics
+  title: LCT device profile, world backup, financial analytics and parent rewards
   version: 1.0.0-proposal
-  description: Backend handoff dated 2026-09-27. Android shows an offline QR containing only the saved profileId
-    UUID as plain text. Profile registration is a separate explicit settings action; no backend URL is configured
-    by default. Parent reward DTOs and authenticated ledger GET/ACK methods are prepared only. Local reward application,
-    periodic delivery, parent client, first-link authority policy, recovery UI and server behavior require implementation.
-    Delivery proposal uses authenticated HTTP pull on resume, active network return, manual refresh, bounded foreground
-    polling and best-effort WorkManager. No notification transport or persistent connection is included. Offline
-    and notification-free delivery are user requirements; concrete economy and scheduling policies remain proposals.
-    See README.md, parent-rewards.md, world-snapshot.md and analytics.md.
+  description: Backend handoff dated 2026-09-27. Every child request identifies the saved deviceId in its JSON body.
+    New Android identities use AndroidID; migrated clients preserve the previously saved UUID. The offline QR is exactly
+    that raw string, without a URL or expiry. All seven child operations are wired in Android; live server compatibility
+    remains unverified. The existing parent-only GET /api/parents/{petId} uses petId=deviceId and is not called by
+    the child. The parent reward creation operation is an implementation proposal for the parent client. No automatic
+    local archive restore or cross-device merge is performed. New known accessories are supported; coin rewards and
+    duplicate accessories remain pending product policy. See README.md, client-sync.md, parent-rewards.md, world-snapshot.md
+    and analytics.md.
 jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
 x-contract-date: '2026-09-27'
+servers:
+- url: https://fin-api.mortypython.ru/
+  description: Team-provided endpoint; API compatibility pending verification
 x-proposed-limits:
   status: Negotiable server policy; not enforced by Android DTOs
-  profileAndLinkBodyBytes: 16384
   decompressedSnapshotRequestBytes: 26214400
   decompressedAnalyticsRequestBytes: 10485760
-  claimAndRecoveryAttemptsPerParentPerHour: 30
   minimumIdempotencyRetentionSeconds: 604800
-  recoveryTtlSeconds: 600
+  registrationBodyBytes: 16384
 paths:
-  /v1/profiles:
+  /api/pets:
     post:
       operationId: registerProfile
       summary: Register a profile and pet
-      description: First registration atomically adopts a hash of the new 256-bit credential for a never-registered
-        profileId and installationId. Existing profile plus a different secret must be rejected. The Android client
-        freezes the request body until confirmation. No implicit pet update.
+      description: Register the supplied deviceId and pet, returning the same deviceId. The body stays frozen until
+        a matching response. Re-registration of an existing deviceId preserves its snapshots, analytics and rewards;
+        it is not an implicit pet edit or profile reset. Current pet state is delivered by snapshots. Idempotency-Key
+        protects retries of the same registration intent.
       tags:
       - Profiles
-      security:
-      - BootstrapCredential: []
       x-implementation-status: android-transport-contract; server-proposed
       responses:
         '200':
@@ -48,10 +48,6 @@ paths:
                 $ref: '#/components/schemas/RegisterProfileResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
         '413':
@@ -72,20 +68,19 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/RegisterProfileRequest'
-  /v1/profiles/{profileId}/snapshot:
+  /v1/profiles/snapshot:
     put:
       operationId: uploadSnapshot
       summary: Store the complete game archive
-      description: Idempotency-Key must equal uploadId. Compare expectedServerRevision atomically; null means no
-        existing save. Validate envelope metadata against snapshotJson. Persist the entire archive before publishing
-        a new serverRevision. Same upload does not increase the revision. Different gameRunId requires an explicitly
-        agreed reset policy; otherwise GAME_RUN_CONFLICT. Keep snapshotJson unchanged. After long offline periods
-        a 409 conflict preserves the current local world, reward receipts and outbox. Do not download-and-overwrite
-        automatically, bypass compare-and-swap with a guessed revision or merge balances using timestamps.
+      description: Idempotency-Key must equal uploadId. Compare expectedServerRevision atomically; null means no existing
+        save. Validate envelope metadata against snapshotJson. Persist the entire archive before publishing a new
+        serverRevision. Same upload does not increase the revision. A new gameRunId is allowed when snapshot format 5
+        contains the current server run in archivedRuns and its nextRunId chain ends at the uploaded run; the archived
+        history must preserve the server history prefix. Otherwise return GAME_RUN_CONFLICT. Keep snapshotJson unchanged. After long offline periods a 409 conflict
+        preserves the current local world, reward receipts and outbox. Do not download-and-overwrite automatically,
+        bypass compare-and-swap with a guessed revision or merge balances using timestamps.
       tags:
       - World snapshots
-      security:
-      - DeviceBearer: []
       x-implementation-status: android-transport-contract; server-proposed
       responses:
         '200':
@@ -102,10 +97,6 @@ paths:
                 $ref: '#/components/schemas/SnapshotUploadResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
         '413':
@@ -119,7 +110,6 @@ paths:
         '503':
           $ref: '#/components/responses/Unavailable'
       parameters:
-      - $ref: '#/components/parameters/ProfileId'
       - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
@@ -127,15 +117,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/SnapshotUploadRequest'
-    get:
+  /v1/profiles/snapshot/download:
+    post:
       operationId: downloadSnapshot
       summary: Download the latest accepted archive
       description: Returns an opaque full-world archive. Download alone never restores or overwrites the local game.
         Restore requires checksum/compatibility validation and an explicit local RestoreGuard.
       tags:
       - World snapshots
-      security:
-      - DeviceBearer: []
       x-implementation-status: android-transport-contract; server-proposed
       responses:
         '200':
@@ -146,10 +135,6 @@ paths:
                 $ref: '#/components/schemas/SnapshotDownloadResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '429':
@@ -158,9 +143,13 @@ paths:
           $ref: '#/components/responses/Unavailable'
         '503':
           $ref: '#/components/responses/Unavailable'
-      parameters:
-      - $ref: '#/components/parameters/ProfileId'
-  /v1/profiles/{profileId}/analytics:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SnapshotDownloadRequest'
+  /v1/profiles/analytics:
     post:
       operationId: uploadAnalytics
       summary: Upload full skill evidence at an audit boundary
@@ -169,8 +158,6 @@ paths:
         Accepted facts and mastery assessments are separate. See analytics.md for deduplication and projection rules.
       tags:
       - Analytics
-      security:
-      - DeviceBearer: []
       x-implementation-status: android-transport-contract; server-proposed
       responses:
         '200':
@@ -187,10 +174,6 @@ paths:
                 $ref: ./analytics.openapi.yaml#/components/schemas/AnalyticsUploadResponse
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
         '413':
@@ -204,7 +187,6 @@ paths:
         '503':
           $ref: '#/components/responses/Unavailable'
       parameters:
-      - $ref: '#/components/parameters/ProfileId'
       - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
@@ -212,17 +194,15 @@ paths:
           application/json:
             schema:
               $ref: ./analytics.openapi.yaml#/components/schemas/AnalyticsUploadRequest
-  /v1/profiles/{profileId}/skills:
-    get:
+  /v1/profiles/skills/query:
+    post:
       operationId: getSkillAssessments
       summary: Read server assessments of all 12 skills
       description: Exactly one FIN-01 through FIN-12 entry. Backend owns versioned mastery policy. A missing policy/assessment
-        returns 409 ASSESSMENT_NOT_READY, not fabricated NO_DATA. basedOnHistorySequence states how current the
-        result is.
+        returns 409 ASSESSMENT_NOT_READY, not fabricated NO_DATA. basedOnHistorySequence states how current the result
+        is.
       tags:
       - Analytics
-      security:
-      - DeviceBearer: []
       x-implementation-status: android-transport-contract; server-proposed
       responses:
         '200':
@@ -233,10 +213,6 @@ paths:
                 $ref: ./analytics.openapi.yaml#/components/schemas/SkillAssessmentsResponse
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
@@ -249,271 +225,27 @@ paths:
           $ref: '#/components/responses/Unavailable'
         '503':
           $ref: '#/components/responses/Unavailable'
-      parameters:
-      - $ref: '#/components/parameters/ProfileId'
-      - name: gameRunId
-        in: query
-        required: true
-        schema:
-          type: string
-          minLength: 1
-        description: The requested game run; never inferred from a public profile ID.
-  /v1/parent-links/claim:
-    post:
-      operationId: claimParentLink
-      summary: Parent requests a link to the scanned profile ID
-      description: Server-only proposal. Authenticate the parent, then accept only profileId as a locator. The method
-        of proving authority for the first link is not yet agreed. Until it is resolved, acknowledge a pending request
-        only; a UUID plus any ordinary parent login must not grant access to the child snapshot, analytics, skills
-        or recovery. Do not invent a mandatory child confirmation UI. Same-key replay returns the same pending request.
-        An unregistered profile returns PROFILE_NOT_FOUND.
-      tags:
-      - Parent client proposals
-      security:
-      - ParentBearer: []
-      x-implementation-status: server-only-proposal
-      responses:
-        '202':
-          description: Pending request recorded; no profile access granted.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ClaimParentLinkResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/TooLarge'
-        '422':
-          $ref: '#/components/responses/Unprocessable'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/Unavailable'
-        '503':
-          $ref: '#/components/responses/Unavailable'
-        '404':
-          $ref: '#/components/responses/NotFound'
-      parameters:
-      - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ClaimParentLinkRequest'
-  /v1/parent-profiles/{profileId}/recovery-grants:
+              $ref: '#/components/schemas/SkillAssessmentsRequest'
+  /v1/profiles/rewards/pull:
     post:
-      operationId: createRecoveryGrant
-      summary: Linked parent requests device recovery
-      description: Server-only recovery proposal, separate from the persistent profile QR. Only an authenticated
-        parent already authorized for this profile may create a short-lived one-use recovery grant; a PENDING link
-        is not sufficient. Proposed TTL 10 minutes. This does not transfer write access until exchange succeeds.
-        The Android recovery UI is not implemented.
-      tags:
-      - Parent client proposals
-      security:
-      - ParentBearer: []
-      x-implementation-status: server-only-proposal
-      responses:
-        '200':
-          description: Committed result; an identical idempotent replay returns the same result.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RecoveryGrantResponse'
-        '201':
-          description: Committed result; an identical idempotent replay returns the same result.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RecoveryGrantResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/TooLarge'
-        '422':
-          $ref: '#/components/responses/Unprocessable'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/Unavailable'
-        '503':
-          $ref: '#/components/responses/Unavailable'
-      parameters:
-      - $ref: '#/components/parameters/ProfileId'
-      - $ref: '#/components/parameters/IdempotencyKey'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateRecoveryGrantRequest'
-  /v1/profile-recoveries/exchange:
-    post:
-      operationId: exchangeRecoveryGrant
-      summary: Transfer access to a new installation
-      description: Server-only recovery proposal, separate from the persistent plain-ID QR. Authorization carries
-        a newly generated 256-bit installation credential. A valid grant from an already authorized linked parent
-        permits atomic adoption of its hash, transfer to the new installationId, consumption of the grant, and revocation
-        of the old device credential/write authority. Same-key replay does not transfer again. No automatic local
-        restore or multi-device merge. A pending parent link is insufficient authority.
-      tags:
-      - Parent client proposals
-      security:
-      - BootstrapCredential: []
-      x-implementation-status: server-only-proposal
-      responses:
-        '200':
-          description: Committed result; an identical idempotent replay returns the same result.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RegisterProfileResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '410':
-          $ref: '#/components/responses/Gone'
-        '413':
-          $ref: '#/components/responses/TooLarge'
-        '422':
-          $ref: '#/components/responses/Unprocessable'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/Unavailable'
-        '503':
-          $ref: '#/components/responses/Unavailable'
-      parameters:
-      - $ref: '#/components/parameters/IdempotencyKey'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ExchangeRecoveryRequest'
-  /v1/parent-profiles/{profileId}/rewards:
-    post:
-      operationId: createParentReward
-      summary: Parent grants coins or an accessory
-      description: 'Only an authenticated parent with confirmed authority for this profile can issue a grant. PENDING
-        is insufficient. The first validated snapshot registers gameRunId; reject GAME_RUN_NOT_REGISTERED before
-        then. Persist grant and contiguous per-run sequence atomically. Preserve business uniqueness of (parent,
-        profileId, Idempotency-Key) for the lifetime of the ledger even after HTTP replay-cache expiration: an old
-        retry never issues another grant. Changed body/run under the same key is IDEMPOTENCY_CONFLICT. Reward is
-        immutable. Grants have no delivery expiry. createdAt does not backdate their local application or alter
-        past-day analytics. Proposed effect policy is detailed in parent-rewards.md; it is not yet implemented or
-        an approved new economy rule.'
-      tags:
-      - Parent rewards
-      security:
-      - ParentBearer: []
-      x-implementation-status: parent-endpoint-proposal; shared Android DTO only
-      parameters:
-      - $ref: '#/components/parameters/ProfileId'
-      - $ref: '#/components/parameters/IdempotencyKey'
-      responses:
-        '200':
-          description: Result or identical idempotent replay.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ParentRewardDto'
-        '201':
-          description: Result or identical idempotent replay.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ParentRewardDto'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/TooLarge'
-        '422':
-          $ref: '#/components/responses/Unprocessable'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/Unavailable'
-        '503':
-          $ref: '#/components/responses/Unavailable'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateParentRewardRequest'
-  /v1/profiles/{profileId}/rewards:
-    get:
       operationId: listParentRewards
       summary: Read the replayable reward journal
-      description: 'Return every grant strictly after afterSequence, including acknowledged grants. Stream is contiguous
-        and append-only within the exact profile/run. Cursor beyond the stream returns INVALID_REWARD_CURSOR. Unknown
-        accessories and deferred coin grants do not block later known grants: process pages with a fetch cursor,
-        persist full grant receipts, and advance durable receipt watermark only across contiguous applied receipts.
-        Divide a logical scan into bounded chunks continued until hasMore=false. Proposed durable downloadHint contains
-        profileId, gameRunId, localRestoreGeneration and fetchCursor; it is a loading optimization, not proof of
-        application. Continue it across process restart only after generation validation. Recheck current run and
-        restore generation in each local application transaction; discard stale response/continuation on mismatch,
-        including same-run restore. Invalidate hint on restore/reset. After a full scan, clear hint; next scan starts
-        from current restored receipt watermark or zero to retry gaps. Neither request cursor nor nextAfterSequence
-        becomes a receipt watermark. Missing hint safely restarts but cannot guarantee progress to distant pages
-        under repeated process termination. No local loader/application is implemented yet; grants never expire
-        because of long offline periods.'
+      description: Read the immutable per-(deviceId, gameRunId) reward ledger, including grants already acknowledged.
+        Request fields are in JSON, not the URL. Return contiguous sequence values strictly after afterSequence; nextAfterSequence
+        is the last returned value or the request cursor when empty. Empty pages have hasMore=false. limit is 1..100,
+        default 50. Out-of-range cursor is INVALID_REWARD_CURSOR. The page cursor is not proof of local application.
+        Android persists a download hint bound to deviceId, gameRunId and the local restore generation; a restore
+        invalidates it. Reward effects and full receipts commit atomically against the latest local world, then ACK
+        may be sent. Unknown/deferred rewards do not block later supported rewards and are revisited on the next complete
+        scan.
       tags:
       - Parent rewards
-      security:
-      - DeviceBearer: []
-      x-implementation-status: android-transport-only; no delivery or local reward application
-      parameters:
-      - $ref: '#/components/parameters/ProfileId'
-      - name: gameRunId
-        in: query
-        required: true
-        schema:
-          type: string
-          minLength: 1
-      - name: afterSequence
-        in: query
-        required: false
-        schema:
-          type: integer
-          format: int64
-          minimum: 0
-          default: 0
-      - name: limit
-        in: query
-        required: false
-        schema:
-          type: integer
-          minimum: 1
-          maximum: 100
-          default: 50
+      x-implementation-status: android-client-wired; live-server-compatibility-unverified
       responses:
         '200':
           description: Result or identical idempotent replay.
@@ -523,10 +255,6 @@ paths:
                 $ref: '#/components/schemas/ParentRewardsResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
@@ -541,23 +269,26 @@ paths:
           $ref: '#/components/responses/Unavailable'
         '503':
           $ref: '#/components/responses/Unavailable'
-  /v1/profiles/{profileId}/rewards/ack:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PullParentRewardsRequest'
+  /v1/profiles/rewards/ack:
     post:
       operationId: acknowledgeParentRewards
       summary: Acknowledge committed local reward applications
       description: Send only after atomic local commit of latest-world change, full immutable grant receipt, audit
-        and outbox, with the current run checked in that same transaction. Receipt identity is applicationId and
-        its payload is immutable. Existing receipt reuses its applicationId. The same rewardId may have a different
-        application after old-snapshot restore; never impose global receipt uniqueness by rewardId. ACK loss causes
-        identical retry, not duplicate effect. ACK never deletes a grant, proves cloud backup or filters GET. Wrong-run
-        grants receive no ACK. Retry the same frozen body/key; changed receipt payload returns REWARD_RECEIPT_CONFLICT.
+        and outbox, with the current run checked in that same transaction. Receipt identity is applicationId and its
+        payload is immutable. Existing receipt reuses its applicationId. The same rewardId may have a different application
+        after old-snapshot restore; never impose global receipt uniqueness by rewardId. ACK loss causes identical
+        retry, not duplicate effect. ACK never deletes a grant, proves cloud backup or filters later pull responses. Wrong-run grants
+        receive no ACK. Retry the same frozen body/key; changed receipt payload returns REWARD_RECEIPT_CONFLICT.
       tags:
       - Parent rewards
-      security:
-      - DeviceBearer: []
-      x-implementation-status: android-transport-only; no delivery or local reward application
+      x-implementation-status: android-client-wired; live-server-compatibility-unverified
       parameters:
-      - $ref: '#/components/parameters/ProfileId'
       - $ref: '#/components/parameters/IdempotencyKey'
       responses:
         '200':
@@ -568,10 +299,6 @@ paths:
                 $ref: '#/components/schemas/AckParentRewardsResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
@@ -592,35 +319,59 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AckParentRewardsRequest'
+  /v1/parent-profiles/rewards:
+    post:
+      operationId: createParentReward
+      summary: Parent grants coins or an accessory
+      description: Parent-client proposal. Create one immutable grant for the deviceId and gameRunId in JSON. The
+        run must already exist from a verified snapshot, otherwise GAME_RUN_NOT_REGISTERED. Keep the business identity
+        (deviceId, Idempotency-Key) for the lifetime of the ledger, even after an HTTP replay cache expires. Same
+        key with different body or run is IDEMPOTENCY_CONFLICT. Generate rewardId and the next contiguous sequence
+        atomically. Issued rewards do not expire during offline periods. Allowed accessory IDs and coin/duplicate
+        policies remain to be agreed; current Android applies only new known accessories. The child client does not
+        call this operation.
+      tags:
+      - Parent rewards
+      x-implementation-status: parent-endpoint-proposal; shared Android DTO only
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Result or identical idempotent replay.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParentRewardDto'
+        '201':
+          description: Result or identical idempotent replay.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParentRewardDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/TooLarge'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/Unavailable'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateParentRewardRequest'
 components:
-  securitySchemes:
-    DeviceBearer:
-      type: http
-      scheme: bearer
-      bearerFormat: base64url-256-bit opaque credential
-      description: Secret generated by Android; registered hash is bound to profile and installation. HTTPS only.
-        Public profileId or installationId is not authorization.
-    BootstrapCredential:
-      type: http
-      scheme: bearer
-      bearerFormat: base64url-256-bit new opaque credential
-      description: 43 base64url characters encoding 32 SecureRandom bytes without padding. First registration may
-        adopt its hash only for a new profile. Recovery additionally requires a valid authenticated-parent-issued
-        grant. Never override an existing profile on the basis of its UUID alone.
-    ParentBearer:
-      type: http
-      scheme: bearer
-      description: Access token from independently authenticated parent account. Authentication service and token
-        format are outside this Android contract.
   parameters:
-    ProfileId:
-      name: profileId
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-      description: Public stable profile UUID; authorization still required.
     IdempotencyKey:
       name: Idempotency-Key
       in: header
@@ -628,9 +379,9 @@ components:
       schema:
         type: string
         minLength: 1
-      description: Stable key for one frozen request, preferably UUID. Bound to authenticated credential/principal,
-        method, path and body. Same key with changed body is 409. Equals uploadId or batchId where those fields
-        exist.
+      description: Stable replay key for one frozen request, preferably UUID. Bound to deviceId, method, path and
+        body. Same key with a changed body is 409. Equals uploadId or batchId when present. It is only duplicate-operation
+        protection.
   responses:
     BadRequest:
       description: Invalid request shape.
@@ -640,24 +391,6 @@ components:
             $ref: '#/components/schemas/BackendError'
           example:
             code: INVALID_REQUEST
-            requestId: req-123
-    Unauthorized:
-      description: Missing, invalid or revoked credential. Public profileId never authorizes access.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/BackendError'
-          example:
-            code: UNAUTHORIZED
-            requestId: req-123
-    Forbidden:
-      description: Authenticated principal lacks access to this profile or operation.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/BackendError'
-          example:
-            code: PROFILE_ACCESS_DENIED
             requestId: req-123
     NotFound:
       description: Requested profile or snapshot does not exist.
@@ -669,23 +402,14 @@ components:
             code: SNAPSHOT_NOT_FOUND
             requestId: req-123
     Conflict:
-      description: Idempotency, ownership, snapshot revision, unregistered/mismatched game run, reward receipt,
-        immutable fact, stale analytics or assessment readiness conflict. See code.
+      description: Idempotency, snapshot revision, unregistered/mismatched game run, reward receipt, immutable fact,
+        stale analytics or assessment readiness conflict. See code.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/BackendError'
           example:
             code: IDEMPOTENCY_CONFLICT
-            requestId: req-123
-    Gone:
-      description: Recovery grant expired or was revoked. The persistent profile ID QR never expires.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/BackendError'
-          example:
-            code: RECOVERY_EXPIRED
             requestId: req-123
     TooLarge:
       description: Request exceeds the negotiated decompressed body limit; do not truncate history.
@@ -697,8 +421,8 @@ components:
             code: PAYLOAD_TOO_LARGE
             requestId: req-123
     Unprocessable:
-      description: Unsupported schema, invalid snapshot integrity, malformed profile ID, invalid recovery proof,
-        reward amount/accessory, reward cursor or receipt.
+      description: Unsupported schema, invalid snapshot integrity, blank device ID, invalid reward amount/accessory,
+        cursor or receipt.
       content:
         application/json:
           schema:
@@ -771,12 +495,8 @@ components:
     RegisterProfileRequest:
       type: object
       properties:
-        profileId:
-          type: string
-          format: uuid
-        installationId:
-          type: string
-          format: uuid
+        deviceId:
+          $ref: '#/components/schemas/DeviceId'
         pet:
           $ref: '#/components/schemas/RegisteredPetDto'
         schemaVersion:
@@ -784,24 +504,20 @@ components:
           const: 1
           default: 1
       required:
-      - profileId
-      - installationId
+      - deviceId
       - pet
     RegisterProfileResponse:
       type: object
       properties:
-        profileId:
-          type: string
-          format: uuid
-        installationId:
-          type: string
-          format: uuid
+        deviceId:
+          $ref: '#/components/schemas/DeviceId'
       required:
-      - profileId
-      - installationId
+      - deviceId
     SnapshotUploadRequest:
       type: object
       properties:
+        deviceId:
+          $ref: '#/components/schemas/DeviceId'
         uploadId:
           type: string
           minLength: 1
@@ -825,7 +541,7 @@ components:
         snapshotFormatVersion:
           type: integer
           minimum: 1
-          maximum: 4
+          maximum: 5
         checksum:
           type: string
           pattern: ^[a-f0-9]{64}$
@@ -839,6 +555,7 @@ components:
           const: 1
           default: 1
       required:
+      - deviceId
       - uploadId
       - expectedServerRevision
       - gameRunId
@@ -910,86 +627,6 @@ components:
           - type: 'null'
       required:
       - code
-    ClaimParentLinkRequest:
-      type: object
-      properties:
-        profileId:
-          type: string
-          format: uuid
-      required:
-      - profileId
-      description: Parent-client proposal. The scanned profileId only locates a profile; it does not prove authority
-        to access it.
-    ClaimParentLinkResponse:
-      type: object
-      properties:
-        profileId:
-          type: string
-          format: uuid
-        requestId:
-          type: string
-          minLength: 1
-        status:
-          type: string
-          const: PENDING
-      required:
-      - profileId
-      - requestId
-      - status
-      description: Proposed pending acknowledgment only. Does not grant snapshot, analytics, skill or recovery access.
-        First-link authority verification and the subsequent completion flow are an unresolved backend contract
-        question.
-    CreateRecoveryGrantRequest:
-      type: object
-      additionalProperties: false
-      maxProperties: 0
-    RecoveryGrantResponse:
-      type: object
-      properties:
-        recoveryId:
-          type: string
-          minLength: 1
-        recoveryToken:
-          type: string
-          pattern: ^[A-Za-z0-9_-]{32,256}$
-          description: One-use recovery proof issued only to an authorized linked parent. Do not log.
-        expiresAtEpochSeconds:
-          type: integer
-          format: int64
-          minimum: 1
-      required:
-      - recoveryId
-      - recoveryToken
-      - expiresAtEpochSeconds
-    ExchangeRecoveryRequest:
-      type: object
-      properties:
-        profileId:
-          type: string
-          format: uuid
-        installationId:
-          type: string
-          format: uuid
-        recoveryId:
-          type: string
-          minLength: 1
-        recoveryToken:
-          type: string
-          pattern: ^[A-Za-z0-9_-]{32,256}$
-          writeOnly: true
-          description: Cryptographically random one-use secret; never log.
-      required:
-      - profileId
-      - installationId
-      - recoveryId
-      - recoveryToken
-      description: Proposed new-device DTO. New installation credential is in Authorization, not this body.
-    ProfileIdQrContent:
-      type: string
-      format: uuid
-      pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
-      description: 'Raw UTF-8 QR content: saved profileId UUID, exactly 36 characters, without quotes, JSON, URL,
-        token, expiry or trailing newline. Generated offline; not an HTTP request and not authorization.'
     ParentRewardCoins:
       type: object
       properties:
@@ -1032,6 +669,8 @@ components:
     CreateParentRewardRequest:
       type: object
       properties:
+        deviceId:
+          $ref: '#/components/schemas/DeviceId'
         gameRunId:
           type: string
           minLength: 1
@@ -1042,6 +681,7 @@ components:
           const: 1
           default: 1
       required:
+      - deviceId
       - gameRunId
       - reward
     ParentRewardDto:
@@ -1051,8 +691,8 @@ components:
           type: string
           minLength: 1
         profileId:
-          type: string
-          format: uuid
+          $ref: '#/components/schemas/DeviceId'
+          description: 'Compatibility field: exactly the request deviceId; not a separate account or identifier.'
         gameRunId:
           type: string
           minLength: 1
@@ -1066,9 +706,9 @@ components:
           type: string
           format: date-time
           pattern: Z$
-          description: UTC ISO 8601 issuance time ending in Z. Informational only, not expiry or an application
-            day. Apply in the current local day/phase at commit; do not reopen FINISHED or rewrite closed decisions.
-            Long offline periods do not invalidate the grant.
+          description: UTC ISO 8601 issuance time ending in Z. Informational only, not expiry or an application day.
+            Apply in the current local day/phase at commit; do not reopen FINISHED or rewrite closed decisions. Long
+            offline periods do not invalidate the grant.
       required:
       - rewardId
       - profileId
@@ -1080,8 +720,8 @@ components:
       type: object
       properties:
         profileId:
-          type: string
-          format: uuid
+          $ref: '#/components/schemas/DeviceId'
+          description: 'Compatibility field: exactly the request deviceId; not a separate account or identifier.'
         gameRunId:
           type: string
           minLength: 1
@@ -1139,13 +779,15 @@ components:
       - historyEntryId
       - historySequence
       - outcome
-      description: Transport ACK of a previously committed application. Durable local storage must additionally
-        contain the complete immutable grant (profileId, gameRunId, rewardId, server sequence, reward payload, createdAt)
-        in the same snapshot/audit transaction. Application ID differs from reward ID; old-snapshot restore may
-        produce a new application. Already-applied replay returns the existing application ID.
+      description: Transport ACK of a previously committed application. Durable local storage must additionally contain
+        the complete immutable grant (profileId, gameRunId, rewardId, server sequence, reward payload, createdAt)
+        in the same snapshot/audit transaction. Application ID differs from reward ID; old-snapshot restore may produce
+        a new application. Already-applied replay returns the existing application ID.
     AckParentRewardsRequest:
       type: object
       properties:
+        deviceId:
+          $ref: '#/components/schemas/DeviceId'
         gameRunId:
           type: string
           minLength: 1
@@ -1160,6 +802,7 @@ components:
           const: 1
           default: 1
       required:
+      - deviceId
       - gameRunId
       - receipts
     AckParentRewardsResponse:
@@ -1180,4 +823,69 @@ components:
       required:
       - gameRunId
       - acceptedApplicationIds
-      description: Delivery acknowledgement only. Never removes rewards or filters them out of replayable GET responses.
+      description: Delivery acknowledgement only. Never removes rewards or filters them out of replayable pull responses.
+    DeviceId:
+      type: string
+      minLength: 1
+      description: Saved AndroidID for new clients, or the unchanged UUID of a migrated legacy client. A nonblank
+        string; do not require UUID format.
+      examples:
+      - 9f1c2d3e4a5b6078
+      - 344b0765-7318-450f-9576-e3f50e393f38
+    DeviceIdQrContent:
+      type: string
+      minLength: 1
+      description: Exactly the saved deviceId as plain UTF-8 text. Generated offline, no JSON envelope, URL or expiry.
+      examples:
+      - 9f1c2d3e4a5b6078
+    SnapshotDownloadRequest:
+      type: object
+      properties:
+        deviceId:
+          $ref: '#/components/schemas/DeviceId'
+        schemaVersion:
+          type: integer
+          const: 1
+          default: 1
+      required:
+      - deviceId
+    SkillAssessmentsRequest:
+      type: object
+      properties:
+        deviceId:
+          $ref: '#/components/schemas/DeviceId'
+        gameRunId:
+          type: string
+          minLength: 1
+        schemaVersion:
+          type: integer
+          const: 1
+          default: 1
+      required:
+      - deviceId
+      - gameRunId
+    PullParentRewardsRequest:
+      type: object
+      properties:
+        deviceId:
+          $ref: '#/components/schemas/DeviceId'
+        gameRunId:
+          type: string
+          minLength: 1
+        afterSequence:
+          type: integer
+          format: int64
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+        schemaVersion:
+          type: integer
+          const: 1
+          default: 1
+      required:
+      - deviceId
+      - gameRunId
+      - afterSequence

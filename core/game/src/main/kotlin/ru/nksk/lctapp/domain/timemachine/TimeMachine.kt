@@ -212,6 +212,8 @@ class TimeMachine(
         for (entry in records) {
             if (entry.runId != target.runId || entry.formatVersion != HISTORY_FORMAT_VERSION) return result(TimeMachineStatus.INCOMPATIBLE_VERSION, "История относится к другой версии или игре.")
             if (entry.type == AuditType.FACTS || entry.type == AuditType.REJECTED) { reached = entry.sequence; continue }
+            if (entry.type == AuditType.PARENT_REWARD) return result(TimeMachineStatus.DIVERGED,
+                "После этого момента пришёл подарок от родителя. Здесь сравниваем пути до его получения.")
             val before = entry.before ?: return result(TimeMachineStatus.DIVERGED, "На этом месте начинается другая сохранённая история.")
             val after = entry.after ?: return result(TimeMachineStatus.UNAVAILABLE, "Не сохранён результат действия.")
             if (!sameState(baseline, before)) return result(TimeMachineStatus.UNAVAILABLE, "В истории не хватает промежуточного состояния.")

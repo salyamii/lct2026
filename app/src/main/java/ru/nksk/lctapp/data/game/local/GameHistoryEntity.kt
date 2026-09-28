@@ -57,6 +57,10 @@ internal interface GameHistoryDao {
     suspend fun find(id: String): GameAuditEntity?
     @Query("SELECT * FROM GAME_AUDIT WHERE run_id = :runId AND type = 'INITIALIZED' ORDER BY sequence LIMIT 1")
     suspend fun initialization(runId: String): GameAuditEntity?
+    @Query("SELECT id FROM GAME_AUDIT WHERE run_id = :runId AND type = 'RESTORED' ORDER BY sequence DESC LIMIT 1")
+    suspend fun latestRestoreId(runId: String): String?
+    @Query("SELECT * FROM GAME_AUDIT WHERE run_id = :runId AND type = 'PARENT_REWARD' ORDER BY sequence LIMIT 1")
+    suspend fun firstParentReward(runId: String): GameAuditEntity?
     @Query("SELECT COALESCE(MAX(sequence), 0) FROM GAME_AUDIT")
     suspend fun sequence(): Long
     @Insert suspend fun insert(row: GameAuditEntity)

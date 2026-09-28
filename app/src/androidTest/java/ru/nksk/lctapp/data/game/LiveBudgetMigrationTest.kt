@@ -66,7 +66,7 @@ class LiveBudgetMigrationTest {
             assertEquals(1, db.gameStateDao().readStates().single().budgetModelVersion)
             repository.read()
             assertEquals(history, repository.readHistory())
-            assertEquals(4, repository.exportSnapshot().formatVersion)
+            assertEquals(ru.nksk.lctapp.domain.history.SNAPSHOT_FORMAT_VERSION, repository.exportSnapshot().formatVersion)
             HistoryCodec.validate(repository.exportSnapshot())
             saved to history
         } finally { db.close() }
@@ -138,7 +138,7 @@ class LiveBudgetMigrationTest {
                 HistoryCodec.validate(repository.exportSnapshot())
             }
             val live = repository.exportSnapshot()
-            assertEquals(4, live.formatVersion)
+            assertEquals(ru.nksk.lctapp.domain.history.SNAPSHOT_FORMAT_VERSION, live.formatVersion)
             repository.update { it.copy(fatigue = it.fatigue + 1) }
             val restored = repository.restoreSnapshot(live, RestoreGuard(null, repository.readHistory().last().sequence))
             assertEquals(live.state, restored)

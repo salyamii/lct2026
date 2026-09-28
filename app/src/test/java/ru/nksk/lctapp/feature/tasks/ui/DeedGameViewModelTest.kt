@@ -53,6 +53,39 @@ class DeedGameViewModelTest {
             f.model.uiState.value.eventMedia)
     }
 
+    @Test fun restoredJournalAndCrateRepairsExplainTheirMemoryBoardsWithoutChangingTheSave() = runTest(dispatcher) {
+        val catalog = bundledGameCatalog()
+        for ((eventId, contextWord) in mapOf("figma-2326-112-v2" to "страницы", "figma-2326-352-v2" to "ящика")) {
+            val occurrence = EventOccurrence("saved-$eventId", eventId, EventOrigin.SCHEDULE, EventStatus.ACTIVE)
+            val initial = createInitialGameState().copy(
+                economy = EconomyState(BudgetPlan(35, 0, 0, 0)),
+                engine = EngineState(catalog.rules.id, 0, 1, DayPhase.RUNNING, 0, 5, true, null, 35,
+                    listOf(occurrence), emptyList()),
+            )
+            val repo = DeedRepository(initial)
+            val session = GameSession(repo, object : StoryContentRepository {
+                override suspend fun read() = catalog.content
+                override suspend fun install(content: StoryContent) = Unit
+            }, catalog, initial)
+            session.prepare()
+            val before = repo.read()
+            val model = DeedGameViewModel(session)
+            store.put(eventId, model)
+            model.load(occurrence.id, "$eventId:work")
+            runCurrent()
+
+            val state = model.uiState.value
+            val presentation = checkNotNull(state.presentation)
+            assertEquals(DeedGameType.MEMORY, state.type)
+            assertTrue(presentation.instructions!!.contains(contextWord))
+            assertTrue(presentation.instructions.contains("по две карточки"))
+            assertFalse(presentation.instructions.contains("маркер"))
+            assertEquals(8, presentation.pairArtwork.distinct().size)
+            assertEquals(before, repo.read())
+            assertTrue(repo.attempted.isEmpty())
+        }
+    }
+
     @Test fun completedGameWaitsForSavingAndCannotPayTwiceOrShowAnotherBoard() = runTest(dispatcher) {
         val f = fixture()
         runCurrent()
@@ -170,16 +203,22 @@ class DeedGameViewModelTest {
         assertTrue(f.repo.read().story.decisions.isEmpty())
     }
 
-    @Test fun zeroRewardStillConfirmsCompletedWork() = runTest(dispatcher) {
+    @Test fun noCorrectAnswersStillCreditAndConfirmOneCoin() = runTest(dispatcher) {
         val f = fixture()
         runCurrent()
+        val before = f.repo.read().economy
         val exits = mutableListOf<String?>()
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { f.model.exit.collect { exits += it } }
         f.model.finishComparison(completedQuiz().copy(correctAnswers = 0))
         runCurrent()
-        assertEquals(listOf("Дело выполнено! Награда: 0 монет"), exits)
+        assertEquals(listOf("Дело выполнено! Награда: 1 монета"), exits)
         assertTrue(f.repo.read().engine!!.deeds.single().completed)
-        assertEquals(100L, f.repo.read().economy.balance)
+        assertEquals(before.availableBalance + 1, f.repo.read().economy.availableBalance)
+        assertEquals(before.plan.reserve + 1, f.repo.read().economy.plan.reserve)
+        f.model.finishComparison(completedQuiz().copy(correctAnswers = 0))
+        runCurrent()
+        assertEquals(1, f.repo.writes)
+        assertEquals(before.availableBalance + 1, f.repo.read().economy.availableBalance)
     }
 
     @Test fun actualComparisonAnswersAreDurableBeforePayoutAndAreNotDuplicated() = runTest(dispatcher) {

@@ -68,7 +68,7 @@ private fun checkedBudgetHistoryUi(game: GameState, history: List<AuditEntry>): 
     // Only movements after confirmation belong to this explanation.
     for (entry in tail.drop(1)) {
         when (entry.type) {
-            AuditType.COMMAND -> {
+            AuditType.COMMAND, AuditType.PARENT_REWARD -> {
                 require(entry.before == checkpoint)
                 val after = checkNotNull(entry.after)
                 CanonicalLedger.validate(checkpoint, after, entry.operations)

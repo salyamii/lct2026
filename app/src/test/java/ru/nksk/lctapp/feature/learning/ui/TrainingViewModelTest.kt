@@ -47,6 +47,63 @@ class TrainingViewModelTest {
     @Before fun setup() { Dispatchers.setMain(dispatcher) }
     @After fun cleanup() { store.clear(); Dispatchers.resetMain() }
 
+    @Test fun chapterPracticeAnswersOnlyMissingTopicsAndNeverStartsTheEndlessTrainingLoop() = runTest(dispatcher) {
+        val (repository, model) = fixture()
+        model.setChapterPractice()
+        assertEquals(ChapterPracticeStep.SAVING, model.uiState.value.chapterStep)
+        assertFalse(model.uiState.value.practiceOpen)
+
+        model.onAction(TrainingAction.StartChapterPractice)
+        val saving = checkNotNull(model.uiState.first { !it.busy }.question)
+        assertEquals(FinancialQuestionKind.SAVING_PRACTICE, saving.kind)
+        model.onAction(TrainingAction.QuestionPresented(saving.id))
+        model.onAction(TrainingAction.Answer(saving.correctAnswerId))
+        val saved = model.uiState.first { !it.busy }
+        assertEquals(ChapterPracticeStep.REVIEW, saved.chapterStep)
+        assertNull(saved.automaticAdvance(resumed = true))
+        val attempts = repository.attempted.size
+        model.onAction(TrainingAction.NextQuestion(saving.id))
+        runCurrent()
+        assertEquals(attempts, repository.attempted.size)
+
+        model.onAction(TrainingAction.StartChapterPractice)
+        val review = checkNotNull(model.uiState.first { !it.busy }.question)
+        assertEquals(FinancialQuestionKind.PLAN_REVIEW, review.kind)
+        model.onAction(TrainingAction.QuestionPresented(review.id))
+        model.onAction(TrainingAction.Answer(review.correctAnswerId))
+        val reviewed = model.uiState.first { !it.busy }
+        assertEquals(ChapterPracticeStep.BUDGET, reviewed.chapterStep)
+        assertNull(reviewed.automaticAdvance(resumed = true))
+        assertEquals(2, repository.committed.values.count { it.command is EngineCommand.RequestFinancialPractice })
+        assertFalse(repository.committed.values.any { it.command is EngineCommand.AdvanceFinancialPractice })
+
+        val (restoredRepository, restoredModel) = fixture(savedGame = repository.state.value)
+        restoredModel.setChapterPractice()
+        assertEquals(ChapterPracticeStep.BUDGET, restoredModel.uiState.value.chapterStep)
+        restoredModel.onAction(TrainingAction.StartChapterPractice)
+        runCurrent()
+        assertTrue(restoredRepository.attempted.isEmpty())
+    }
+
+    @Test fun chapterPracticeAlreadySatisfiedStaysCompleteWhenReopened() = runTest(dispatcher) {
+        val (repository, _) = fixture()
+        val game = repository.state.value
+        val period = checkNotNull(game.financial.currentPeriod)
+        val completed = game.copy(financial = game.financial.copy(periods = listOf(period.copy(
+            needsProvided = true,
+            savingPractice = checkNotNull(period.savingPractice).copy(recoveryQuestionId = "saving-answer"),
+            reviewEvidence = ru.nksk.lctapp.domain.finance.PeriodReviewEvidence("review-answer", "plan", true,
+                true, managedPlan = true),
+        ))))
+        val (restored, model) = fixture(savedGame = completed)
+        model.setChapterPractice()
+        assertEquals(ChapterPracticeStep.COMPLETE, model.uiState.value.chapterStep)
+        model.onAction(TrainingAction.StartChapterPractice)
+        runCurrent()
+        assertTrue(restored.attempted.isEmpty())
+        assertNull(model.uiState.value.automaticAdvance(resumed = true))
+    }
+
     @Test fun everyTrainingTopicRunsFourQuestionsAndCanStartAnotherSeriesWithoutSpending() = runTest(dispatcher) {
         val topics = listOf(
             TrainingAction.Review to FinancialQuestionKind.PLAN_REVIEW,

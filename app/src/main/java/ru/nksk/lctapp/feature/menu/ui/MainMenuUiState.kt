@@ -20,6 +20,7 @@ data class MainMenuUiState(
     val goalTitle: String = "Выбрать большую цель",
     val budget: MenuBudgetUiState? = null,
     val spendingPreview: String? = null,
+    val canRestartCampaign: Boolean = false,
 )
 
 /** Last confirmed plan and the two real balances, projected from the same saved economy. */
@@ -44,5 +45,5 @@ internal val MainMenuPreviewState = MainMenuUiState(
 
 /** UI intents are handled by the app host; the menu stays independent of navigation. */
 enum class MainMenuAction {
-    Gear, Tasks, Goal, Coins, Village, ContinueDay, Feed, Finance, Savings,
+    Gear, Tasks, Goal, Coins, Village, ContinueDay, Feed, Finance, Savings, CampaignArchive,
 }

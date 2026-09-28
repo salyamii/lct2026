@@ -14,6 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -33,18 +35,32 @@ fun BudgetIntroductionScreen(
     saving: Boolean = false,
     saveFailed: Boolean = false,
 ) {
-    Box(Modifier.fillMaxSize().background(GoalCream)) {
-        Image(painterResource(artwork.background), null, Modifier.matchParentSize(), contentScale = ContentScale.Crop)
-        Column(Modifier.fillMaxSize()) {
-            CustomizationHeader(onBack, artwork, saving = saving, title = "Монеты для приключения",
-                backDescription = "Назад к выбору цели")
-            Spacer(Modifier.height(12.dp))
-            Surface(Modifier.weight(1f).fillMaxWidth(), color = GoalCream,
+    BoxWithConstraints(Modifier.fillMaxSize().background(GoalCream)) {
+        val scrollAll = needsOnboardingScroll(maxHeight)
+        Column(Modifier.fillMaxSize().then(if (scrollAll) Modifier.verticalScroll(rememberScrollState()) else Modifier)) {
+            // The illustration belongs to the header. The cream root fills unused space
+            // beneath a short panel, including when the whole page is scrollable.
+            Layout(modifier = Modifier.fillMaxWidth(), content = {
+                Column {
+                    CustomizationHeader(onBack, artwork, saving = saving, title = "Монеты для приключения",
+                        backDescription = "Назад к выбору цели")
+                    Spacer(Modifier.height(12.dp))
+                }
+                Image(painterResource(artwork.background), null, contentScale = ContentScale.Crop)
+            }) { measurables, constraints ->
+                val header = measurables[0].measure(constraints.copy(minHeight = 0))
+                val background = measurables[1].measure(Constraints.fixed(header.width, header.height + 28.dp.roundToPx()))
+                layout(header.width, header.height) {
+                    background.placeRelative(0, 0)
+                    header.placeRelative(0, 0)
+                }
+            }
+            Surface(Modifier.fillMaxWidth().then(if (scrollAll) Modifier else Modifier.weight(1f)), color = GoalCream,
                 shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)) {
-                Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing.only(
+                Box(Modifier.fillMaxWidth().then(if (scrollAll) Modifier else Modifier.fillMaxSize()).windowInsetsPadding(WindowInsets.safeDrawing.only(
                     WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)), contentAlignment = Alignment.TopCenter) {
-                    Column(Modifier.widthIn(max = 560.dp).fillMaxHeight()) {
-                        BudgetIntroductionContent(artwork, categoryArtwork, saveFailed)
+                    Column(Modifier.widthIn(max = 560.dp).fillMaxWidth().then(if (scrollAll) Modifier else Modifier.fillMaxHeight())) {
+                        BudgetIntroductionContent(artwork, categoryArtwork, saveFailed, scrollAll)
                         GoalFooter("Распределить монеты", artwork, !saving, onContinue)
                     }
                 }
@@ -58,9 +74,10 @@ private fun ColumnScope.BudgetIntroductionContent(
     artwork: CustomizationArtwork,
     categoryArtwork: @Composable (OnboardingBudgetCategory, Modifier) -> Unit,
     saveFailed: Boolean,
+    scrollAll: Boolean,
 ) {
     Column(
-        Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())
+        Modifier.fillMaxWidth().then(if (scrollAll) Modifier else Modifier.weight(1f).verticalScroll(rememberScrollState()))
             .padding(horizontal = 22.dp, vertical = 20.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {

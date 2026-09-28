@@ -30,7 +30,7 @@ private fun createBackendApi(url: String): BackendApi {
     val client = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS).readTimeout(30, TimeUnit.SECONDS)
         .callTimeout(45, TimeUnit.SECONDS)
-        // A configured host is the sole recipient of a device credential.
+        // Keep world uploads on the configured host; the client sends no authorization headers.
         .followRedirects(false).followSslRedirects(false)
         .build()
     return Retrofit.Builder().baseUrl(url).client(client)

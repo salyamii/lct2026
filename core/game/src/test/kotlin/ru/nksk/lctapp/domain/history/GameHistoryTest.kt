@@ -82,15 +82,43 @@ class GameHistoryTest {
         assertFalse(encoded.contains("savingPractice"))
         assertEquals(v1, HistoryCodec.decodeSnapshot(encoded))
         assertEquals(signature, HistoryCodec.decodeSnapshot(encoded).checksum)
+        val nested = HistoryCodec.snapshot("new", state, emptyList(), listOf(ArchivedGameRun("rewind-v1", "new", v1)))
+        val nestedJson = Json.parseToJsonElement(HistoryCodec.encodeSnapshot(nested)).jsonObject
+        assertEquals(Json.parseToJsonElement(encoded), nestedJson.getValue("archivedRuns").jsonArray.single().jsonObject.getValue("snapshot"))
+        assertEquals(nested, HistoryCodec.decodeSnapshot(HistoryCodec.encodeSnapshot(nested)))
         expectFailure { HistoryCodec.validate(v1.copy(state = legacyState.copy(
             eventHistory = listOf(EventExposure("event", 1, null, 1))))) }
     }
 
-    @Test fun v4RoundTripPreservesActualExposureOrderAndUnknownCompletion() {
+    @Test fun currentRoundTripPreservesActualExposureOrderAndUnknownCompletion() {
         val tracked = state.copy(eventHistory = listOf(EventExposure("second", 5, null, 2), EventExposure("first", 2, 3, 1, 1)))
         val snapshot = HistoryCodec.snapshot("run", tracked, emptyList())
-        assertEquals(4, snapshot.formatVersion)
+        assertEquals(5, snapshot.formatVersion)
         assertEquals(tracked.eventHistory, HistoryCodec.decodeSnapshot(HistoryCodec.encodeSnapshot(snapshot)).state.eventHistory)
+    }
+
+    @Test fun v4KeepsItsOriginalChecksumAndDoesNotInventAnArchive() {
+        val signature = HistoryCodec.sha256("4\nold-run\n0\n${HistoryCodec.encodeState(state)}\n[]")
+        val legacy = GameSnapshot(formatVersion = 4, runId = "old-run", state = state,
+            history = emptyList(), historySequence = 0, checksum = signature)
+        assertEquals(legacy, HistoryCodec.decodeSnapshot(HistoryCodec.encodeSnapshot(legacy)))
+        assertFalse(HistoryCodec.encodeSnapshot(legacy).contains("archivedRuns"))
+        val current = HistoryCodec.snapshot("new", state, emptyList(), listOf(ArchivedGameRun("rewind", "new", legacy)))
+        assertEquals(legacy, HistoryCodec.decodeSnapshot(HistoryCodec.encodeSnapshot(current)).archivedRuns.single().snapshot)
+    }
+
+    @Test fun archivedRunsKeepEveryHistoricalEntryAndAreCoveredByTheOuterChecksum() {
+        val oldHistory = listOf(AuditEntry("old-init", 1, "old", AuditType.INITIALIZED, after = state),
+            AuditEntry("old-facts", 2, "old", AuditType.FACTS))
+        val previous = HistoryCodec.snapshot("old", state, oldHistory)
+        val archive = ArchivedGameRun("rewind", "new", previous)
+        val current = HistoryCodec.snapshot("new", state, emptyList(), listOf(archive))
+        assertEquals(current, HistoryCodec.decodeSnapshot(HistoryCodec.encodeSnapshot(current)))
+        assertEquals(oldHistory, current.archivedRuns.single().snapshot.history)
+        expectFailure { HistoryCodec.validate(current.copy(archivedRuns = emptyList())) }
+        expectFailure { HistoryCodec.validate(current.copy(archivedRuns = listOf(archive.copy(restartRequestId = "changed")))) }
+        expectFailure { ArchivedGameRun("nested", "newest", current) }
+        expectFailure { HistoryCodec.snapshot("old", state, emptyList(), listOf(archive)) }
     }
 
     @Test fun originalV3ChecksumAndHistoricalIntentRemainUnchangedUntilExplicitImportUpgrade() {

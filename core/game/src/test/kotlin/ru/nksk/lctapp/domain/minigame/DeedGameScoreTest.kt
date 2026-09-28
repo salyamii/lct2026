@@ -27,12 +27,32 @@ class DeedGameScoreTest {
         assertEquals(8L, score.reward(10))
     }
 
-    @Test fun precisionCanPayZeroOrTheFullMaximum() {
+    @Test fun completedComparisonsHaveAMinimumEvenWithNoCorrectAnswers() {
+        for (correct in listOf(0, 1)) {
+            val board = PriceQuizState.create().copy(current = PriceQuizState.QUESTION_COUNT, correctAnswers = correct)
+            val score = checkNotNull(DeedGameScore.fromComparison(board))
+            assertEquals(1L, score.reward(4))
+            assertEquals(1L, score.reward(1))
+            assertEquals(0L, score.reward(0))
+        }
+    }
+
+    @Test fun findingAllPairsStillPaysOneCoinAfterManyMistakes() {
+        var board = MemoryState(List(MemoryState.PAIRS * 2) { it / 2 })
+        repeat(40) { board = board.tap(0).tap(2).resolvePending() }
+        repeat(MemoryState.PAIRS) { pair -> board = board.tap(pair * 2).tap(pair * 2 + 1).resolvePending() }
+        val score = checkNotNull(DeedGameScore.fromMemory(board))
+        assertEquals(1L, score.reward(4))
+        assertEquals(0L, score.reward(0))
+    }
+
+    @Test fun precisionPaysAtLeastOneCoinAndPreservesTheFullMaximum() {
         for (hit in listOf(false, true)) {
             var board = TargetStopState.create()
             repeat(TargetStopState.ROUNDS) { board = board.stop(if (hit) board.zoneStart else 0).next() }
             val score = checkNotNull(DeedGameScore.fromPrecision(board))
-            assertEquals(if (hit) 6L else 0L, score.reward(6))
+            assertEquals(if (hit) 6L else 1L, score.reward(6))
+            assertEquals(0L, score.reward(0))
         }
     }
 

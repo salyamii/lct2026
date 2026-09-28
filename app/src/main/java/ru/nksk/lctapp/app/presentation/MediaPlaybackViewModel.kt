@@ -151,11 +151,12 @@ internal class MediaPlaybackViewModel @Inject constructor(
     private companion object { const val ReadError = "Не удалось прочитать настройку звука." }
 }
 
-/** Same completed-campaign policy as story age: retain the final act after its finale. */
+/** Onboarding uses the first authored theme; a completed campaign retains its final act. */
 internal fun currentChapterMusicCue(game: GameState?, catalog: GameCatalog): String? {
-    if (game == null) return null
-    val progress = catalog.storyProgress(game)
-    val act = progress.currentAct ?: catalog.storyCampaign?.acts?.lastOrNull()?.takeIf { progress.campaignComplete }
+    val act = if (game == null) catalog.storyCampaign?.acts?.firstOrNull() else {
+        val progress = catalog.storyProgress(game)
+        progress.currentAct ?: catalog.storyCampaign?.acts?.lastOrNull()?.takeIf { progress.campaignComplete }
+    }
     return act?.eventIds?.firstNotNullOfOrNull { eventId -> catalog.cards[eventId]?.presentation?.media?.musicCueKey }
 }
 

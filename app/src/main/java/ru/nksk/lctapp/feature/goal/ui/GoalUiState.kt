@@ -76,12 +76,15 @@ internal data class PurchaseConfirmation(
 
 internal data class GoalPurchaseResult(val itemId: String, val itemTitle: String, val price: Long)
 
+internal enum class GoalContinuationDestination { DAY, BUDGET, TRAINING }
+
 internal sealed interface GoalAction {
     data class ContextPresented(val id: String) : GoalAction
     data object Retry : GoalAction
     data class View(val goalId: String) : GoalAction
     data object ShowList : GoalAction
     data object DismissPurchaseResult : GoalAction
+    data object ContinueStory : GoalAction
     data class Select(val goalId: String) : GoalAction
     data class SelectSavingGoal(val goalId: String, val itemId: String) : GoalAction
     data class Buy(val goalId: String, val itemId: String) : GoalAction

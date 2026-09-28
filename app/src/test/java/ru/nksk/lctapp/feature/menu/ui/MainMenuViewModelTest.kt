@@ -20,13 +20,12 @@ import org.junit.Test
 import ru.nksk.lctapp.app.createInitialGameState
 import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.domain.game.GameState
+import ru.nksk.lctapp.domain.game.OwnedItem
 import ru.nksk.lctapp.domain.pet.PetVisualState
-import ru.nksk.lctapp.domain.engine.GameSession
-import ru.nksk.lctapp.domain.engine.EngineCommand
-import ru.nksk.lctapp.domain.engine.EngineRequest
-import ru.nksk.lctapp.domain.engine.EngineResult
-import ru.nksk.lctapp.domain.content.StoryContent
-import ru.nksk.lctapp.domain.content.StoryContentRepository
+import ru.nksk.lctapp.domain.engine.*
+import ru.nksk.lctapp.domain.content.*
+import ru.nksk.lctapp.domain.finance.FinancialPeriod
+import ru.nksk.lctapp.domain.finance.FinancialProgress
 import ru.nksk.lctapp.data.game.content.bundledGameCatalog
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -94,11 +93,76 @@ class MainMenuViewModelTest {
         assertEquals("Продолжить день", menu.continueLabel)
     }
 
-    private fun session(repository: GameRepository, initial: GameState) = GameSession(repository, object : StoryContentRepository {
+    private fun session(repository: GameRepository, initial: GameState, catalog: GameCatalog = bundledGameCatalog()) = GameSession(repository, object : StoryContentRepository {
         private var content = StoryContent()
         override suspend fun read() = content
         override suspend fun install(content: StoryContent) { this.content = content }
-    }, bundledGameCatalog(), initial)
+    }, catalog, initial)
+
+    @Test fun unallocatedMoneyWithoutAnOpenPlanRoutesToBudgetWithoutAdvancingTheWorld() = runTest(dispatcher) {
+        val initial = createInitialGameState().copy(economy = EconomyState(BudgetPlan(35, 0, 0, 0), unallocated = 1))
+        val repository = MenuRepository(initial)
+        val model = MainMenuViewModel(session(repository, initial))
+        var openedBudget = 0
+        var openedDay = 0
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.openBudget.collect { openedBudget++ } }
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.openDay.collect { openedDay++ } }
+        advanceUntilIdle()
+        val before = repository.read()
+        assertNull(before!!.economy.planning)
+        assertEquals(1L, before.economy.unallocated)
+
+        model.continueDay()
+        advanceUntilIdle()
+
+        assertEquals(1, openedBudget)
+        assertEquals(0, openedDay)
+        assertEquals(before, repository.read())
+    }
+
+    @Test fun finaleBlockedByPracticeOpensTrainingWithoutAdvancingTheWorld() = runTest(dispatcher) {
+        val content = StoryContent(
+            chapters = listOf(ChapterDefinition("chapter", "Chapter", "goal")),
+            days = listOf(GameDayDefinition("day", "chapter", 1)),
+            events = listOf(EventDefinition("final", EventType.STORY, "Finale", "Finale",
+                null, null, null, 0, null, null)),
+            choices = listOf(EventChoiceDefinition("final:done", "final", 0, "Continue", 0,
+                null, null, GoalImpact.NEUTRAL)),
+            items = listOf(ItemDefinition("part", "Part", "", priceCoins = 20)),
+            goals = listOf(GoalDefinition("goal", "Goal", "")),
+            requiredItems = listOf(GoalRequiredItem("goal", "part")),
+        )
+        val catalog = GameCatalog(content,
+            policies = mapOf("final" to EventPolicy(energyCost = 0, storyActId = "act", finishesStoryAct = true)),
+            cards = emptyMap(), rules = EngineRules("menu-test", 5, 3, 1),
+            meals = listOf(MealDefinition("meal", 5, null)), storyDayId = "day", introductionId = "final",
+            deedPool = emptyList(), goals = listOf(GoalCampaign("goal", "final", listOf("part"))),
+            storyCampaign = StoryCampaign(listOf(StoryAct("act", "Act", "day", listOf("final"), "final", goalId = "goal"))))
+        val initial = createInitialGameState().copy(
+            economy = EconomyState(BudgetPlan(35, 0, 0, 0)), selectedGoalId = "goal",
+            ownedItems = listOf(OwnedItem("owned-part", "part")),
+            financial = FinancialProgress(currentPeriodId = "period", periods = listOf(
+                FinancialPeriod("period", "goal", 1, 1, 35, 0, needsProvided = true))),
+            engine = EngineState("menu-test", 0, 1, DayPhase.RUNNING, 0, 5, true, null, 35,
+                listOf(EventOccurrence("final-occurrence", "final", EventOrigin.SCHEDULE, EventStatus.PENDING)), emptyList()),
+        )
+        val repository = MenuRepository(initial)
+        val model = MainMenuViewModel(session(repository, initial, catalog))
+        var openedTraining = 0
+        var openedDay = 0
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.openTraining.collect { openedTraining++ } }
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.openDay.collect { openedDay++ } }
+        advanceUntilIdle()
+        val before = repository.read()
+
+        model.continueDay()
+        advanceUntilIdle()
+
+        assertEquals(1, openedTraining)
+        assertEquals(0, openedDay)
+        assertEquals(before, repository.read())
+        assertTrue((model.uiState.value as MainMenuLoadState.Ready).menu.notice!!.contains("практику"))
+    }
 
     @Test fun proactiveFeedingWithoutMoneyOffersTheFreeMealOnTheMenu() = runTest(dispatcher) {
         val initial = createInitialGameState().let { it.copy(economy = EconomyState(BudgetPlan(0, 0, 0, 0))) }

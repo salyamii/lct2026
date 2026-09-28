@@ -34,12 +34,18 @@ data object Learning : NavKey
 @SerialName("skill_training")
 data object SkillTraining : NavKey
 
+/** Finite catch-up for the current chapter; voluntary training keeps its own entry. */
+@Serializable
+@SerialName("chapter_practice")
+data object ChapterPractice : NavKey
+
 /** Only a viewing filter belongs to the route; no game snapshot or simulation is stored here. */
 @Serializable
 @SerialName("other_paths")
 data class OtherPaths(val day: Int) : NavKey { init { require(day > 0) } }
 
-fun EntryProviderScope<NavKey>.learningEntry(onBack: (NavKey) -> Unit, onOpenBudget: (NavKey) -> Unit = {}) {
+fun EntryProviderScope<NavKey>.learningEntry(onBack: (NavKey) -> Unit, onOpenBudget: (NavKey) -> Unit = {},
+    onContinueStory: (NavKey) -> Unit = onBack, onArchives: (NavKey) -> Unit = {}) {
     entry<Learning> { source ->
         val model = hiltViewModel<LearningHistoryViewModel>()
         val state by model.uiState.collectAsStateWithLifecycle()
@@ -51,18 +57,32 @@ fun EntryProviderScope<NavKey>.learningEntry(onBack: (NavKey) -> Unit, onOpenBud
             }
         }
         HistoryScreen(state, onRetry = dropUnlessResumed { model.retry() },
-            onBack = dropUnlessResumed { onBack(source) })
+            onBack = dropUnlessResumed { onBack(source) }, onArchives = dropUnlessResumed { onArchives(source) })
     }
     entry<SkillTraining> { source ->
-        val model = hiltViewModel<TrainingViewModel>()
-        val state by model.uiState.collectAsStateWithLifecycle()
-        val lifecycle = LocalLifecycleOwner.current.lifecycle
-        TrainingScreen(state, onAction = {
-            if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) model.onAction(it)
-        }, onBack = dropUnlessResumed { onBack(source) },
-            onOpenBudget = dropUnlessResumed { onOpenBudget(source) })
+        TrainingEntryContent(source, false, onBack, onOpenBudget, onContinueStory)
+    }
+    entry<ChapterPractice> { source ->
+        TrainingEntryContent(source, true, onBack, onOpenBudget, onContinueStory)
     }
     entry<OtherPaths> { source -> ReflectionEntryContent(source, onBack) }
+}
+
+@Composable
+private fun TrainingEntryContent(source: NavKey, chapterPractice: Boolean, onBack: (NavKey) -> Unit,
+    onOpenBudget: (NavKey) -> Unit, onContinueStory: (NavKey) -> Unit) {
+    val model = hiltViewModel<TrainingViewModel>()
+    val state by model.uiState.collectAsStateWithLifecycle()
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(model, chapterPractice) { if (chapterPractice) model.setChapterPractice() }
+    // Do not let a restored voluntary answer auto-advance before the entry configures its mode.
+    val visibleState = if (chapterPractice && !state.chapterPractice)
+        state.copy(loading = true, chapterPractice = true, practiceOpen = false) else state
+    TrainingScreen(visibleState, onAction = {
+        if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) model.onAction(it)
+    }, onBack = dropUnlessResumed { onBack(source) },
+        onOpenBudget = dropUnlessResumed { onOpenBudget(source) },
+        onContinueStory = dropUnlessResumed { onContinueStory(source) })
 }
 
 @Composable

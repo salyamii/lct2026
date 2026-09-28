@@ -23,6 +23,8 @@ internal data class TrainingUiState(
     val question: FinancialQuestion? = null, val practiceOpen: Boolean = true,
     val needsBudgetRevision: Boolean = false, val needsBudgetPlanning: Boolean = false,
     val practiceRetryRequired: Boolean = false,
+    val chapterPractice: Boolean = false,
+    val chapterStep: ChapterPracticeStep? = null,
 )
 
 internal sealed interface TrainingAction {
@@ -31,6 +33,7 @@ internal sealed interface TrainingAction {
     data object ReviewConsequences : TrainingAction
     data object ReviewTransactions : TrainingAction
     data object PracticeSaving : TrainingAction
+    data object StartChapterPractice : TrainingAction
     data class Answer(val id: String) : TrainingAction
     data class QuestionPresented(val id: String) : TrainingAction
     data object CloseQuestion : TrainingAction
@@ -49,6 +52,12 @@ internal class TrainingViewModel @Inject constructor(private val session: GameSe
     private val presentation = TrainingQuestionPresentation(session)
 
     init { observe() }
+
+    fun setChapterPractice() {
+        if (state.value.chapterPractice) return
+        state.value = state.value.copy(chapterPractice = true, practiceOpen = false,
+            chapterStep = saved?.chapterPracticeStep())
+    }
 
     private fun observe() {
         if (observing) return
@@ -78,6 +87,7 @@ internal class TrainingViewModel @Inject constructor(private val session: GameSe
         val question = presentation.display(game.financial.practice)
         if (saved != game) return
         state.value = state.value.copy(loading = false, hasGame = true, question = question,
+            chapterStep = game.chapterPracticeStep().takeIf { state.value.chapterPractice },
             canReview = game.economy.planning == null && game.economy.unallocated == 0L,
             needsBudgetPlanning = game.economy.planning != null || game.economy.unallocated != 0L,
             needsBudgetRevision = game.financial.currentPeriod?.reviewEvidence?.let {
@@ -106,14 +116,18 @@ internal class TrainingViewModel @Inject constructor(private val session: GameSe
             return
         }
         val game = saved ?: return
+        if (action == TrainingAction.StartChapterPractice &&
+            (!state.value.chapterPractice || game.chapterPracticeStep().questionKind == null)) return
         if (action is TrainingAction.NextQuestion &&
-            (!state.value.practiceOpen || game.financial.practice?.let {
+            (state.value.chapterPractice || !state.value.practiceOpen || game.financial.practice?.let {
                 it.id == action.questionId && it.correct && it.series != null
             } != true)) return
         state.value = state.value.copy(busy = true, error = null)
         viewModelScope.launch {
             try {
                 when (action) {
+                    TrainingAction.StartChapterPractice -> command(game, EngineCommand.RequestFinancialPractice(
+                        kind = checkNotNull(game.chapterPracticeStep().questionKind), series = true))
                     TrainingAction.Review -> command(game, EngineCommand.RequestFinancialPractice(series = true))
                     TrainingAction.ReviewConsequences -> command(game,
                         EngineCommand.RequestFinancialPractice(FinancialQuestionKind.CONSEQUENCE, series = true))

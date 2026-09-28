@@ -11,9 +11,12 @@ import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import ru.nksk.lctapp.core.ui.game.GameActionAttempt
 import ru.nksk.lctapp.core.ui.game.playerMessage
 import ru.nksk.lctapp.core.ui.game.adventurePetArtwork
 import ru.nksk.lctapp.domain.analytics.DecisionContext
@@ -26,6 +29,8 @@ import ru.nksk.lctapp.domain.game.GameState
 internal class GoalViewModel @Inject constructor(private val session: GameSession, private val handle: SavedStateHandle) : ViewModel() {
     private val mutableState = MutableStateFlow(GoalUiState())
     val uiState = mutableState.asStateFlow()
+    private val continuationNavigation = Channel<GoalContinuationDestination>(Channel.BUFFERED)
+    val continueNavigation = continuationNavigation.receiveAsFlow()
     private var saved: GameState? = null
     private var observation: Job? = null
     private var toast: Job? = null
@@ -36,6 +41,8 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
     private var confirmation: PurchaseConfirmation? = null
     private var presentedContext: String? = null
     private var purchaseSubmitted = false
+    // Observation may refresh the purchase quote, but must not discard an uncertain continuation.
+    private var pendingContinuation: GameActionAttempt? = null
 
     init { load() }
 
@@ -85,6 +92,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
                 clearPurchase(); message = null; render()
             }
             GoalAction.DismissPurchaseResult -> { handle.remove<String>("purchase_result_item"); render() }
+            GoalAction.ContinueStory -> continueStory(game)
             is GoalAction.Select -> execute(request(game, session.selectGoalCommand(game, action.goalId)))
             is GoalAction.SelectSavingGoal -> execute(request(game, session.selectSavingGoalCommand(game, action.goalId, action.itemId)))
             is GoalAction.Buy -> previewPurchase(game, action)
@@ -149,6 +157,81 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
     }
 
     private fun knownNeeds(game: GameState): Long = session.catalog.mealPolicy.foodRequirement(game)
+
+    private fun continueStory(game: GameState) {
+        val shown = mutableState.value
+        if (pendingContinuation == null && !shown.canSelect && !shown.completedProject &&
+            (shown.parts.isEmpty() || shown.parts.any { !it.owned })) return
+        busy = true
+        message = null
+        clearPurchase()
+        if (pendingContinuation == null && shown.canSelect) {
+            pendingContinuation = GameActionAttempt.prepare(game,
+                session.selectGoalCommand(game, checkNotNull(shown.goalId)))
+        }
+        render()
+        viewModelScope.launch {
+            try {
+                while (true) {
+                    val current = checkNotNull(saved)
+                    val attempt = pendingContinuation ?: when (val plan = session.continueDayPlan(current)) {
+                        ContinueDayPlan.NeedsBudget -> {
+                            openContinuation(GoalContinuationDestination.BUDGET)
+                            return@launch
+                        }
+                        is ContinueDayPlan.Day -> {
+                            val command = plan.command
+                            if (command == null) {
+                                openContinuation(GoalContinuationDestination.DAY)
+                                return@launch
+                            }
+                            GameActionAttempt.prepare(current, command).also { pendingContinuation = it }
+                        }
+                    }
+                    when (val result = attempt.submit(session)) {
+                        is EngineResult.Applied -> {
+                            pendingContinuation = null
+                            if ((saved?.engine?.revision ?: -1) <= (result.state.engine?.revision ?: -1)) saved = result.state
+                            val selected = attempt.request.command as? EngineCommand.SelectGoal
+                            if (selected != null) {
+                                handle["viewed_goal"] = selected.goalId
+                                handle["show_list"] = false
+                                // Selection and explicit continuation are separate guarded commands.
+                                continue
+                            }
+                            openContinuation(if (session.continueDayPlan(checkNotNull(saved)) == ContinueDayPlan.NeedsBudget)
+                                GoalContinuationDestination.BUDGET else GoalContinuationDestination.DAY)
+                            return@launch
+                        }
+                        is EngineResult.Blocked -> {
+                            pendingContinuation = null
+                            saved = checkNotNull(session.read())
+                            when (result.reason) {
+                                is BlockReason.FinancialPracticeRequired -> openContinuation(GoalContinuationDestination.TRAINING)
+                                BlockReason.BudgetPlanningRequired -> openContinuation(GoalContinuationDestination.BUDGET)
+                                BlockReason.MustEat, BlockReason.MustSleep, BlockReason.EventInProgress,
+                                BlockReason.DayFinished, BlockReason.NoNextEvent -> openContinuation(GoalContinuationDestination.DAY)
+                                else -> message = result.reason.playerMessage(checkNotNull(saved).pet.name)
+                            }
+                            return@launch
+                        }
+                    }
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                message = "Не удалось продолжить историю. Нажми «Продолжить историю» ещё раз."
+            } finally {
+                busy = false
+                render()
+            }
+        }
+    }
+
+    private suspend fun openContinuation(destination: GoalContinuationDestination) {
+        handle.remove<String>("purchase_result_item")
+        continuationNavigation.send(destination)
+    }
 
     private fun execute(request: EngineRequest) {
         val purchasing = request.command is EngineCommand.BuyGoalItem
@@ -262,8 +345,8 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
                 completed -> "Эта глава пройдена. Купленные вещи остаются у тебя."
                 !story.goalAvailable(goal) -> projects.first { it.id == goal.goalId }.hint
                 !selected && activeGoal != null -> "Сначала заверши текущую главу. Следующая большая цель откроется по сюжету."
-                !selected -> "Выбор не пропускает историю. После него нажми «Продолжить день» на главном экране."
-                progress.isCollected -> "Комплект собран! Финал главы откроется после нужных сюжетных событий. Продолжай день на главном экране."
+                !selected -> "Выбор цели сохраняет пройденную историю."
+                progress.isCollected -> "Комплект собран! Продолжим приключение и узнаем, что будет дальше."
                 else -> "Собери снаряжение для задания Смотрителей. Можно начать с любой части; остальные соберём позже."
             },
         )
