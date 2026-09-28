@@ -1,6 +1,7 @@
 package ru.nksk.lctapp.app
 
 import android.app.Application
+import android.util.Log
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
@@ -27,6 +28,8 @@ class LctApplication : Application(), ImageLoaderFactory, Configuration.Provider
         // Link telemetry to the persisted device identity as soon as DataStore provides it.
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             runCatching { Telemetry.attachDeviceId(identities.getOrCreate().deviceId) }
+                .onFailure { Log.w("Telemetry", "device.id attach failed", it) }
+                .onSuccess { Log.i("Telemetry", "device.id attached") }
         }
     }
 
