@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="deeds_subtitle">Три мини-игры с пробными наградами</string>
+    <string name="deeds_subtitle">Десять мини-игр с пробными наградами</string>
     <string name="deeds_demo_notice">Демо-монеты не меняют общий баланс</string>
     <string name="deeds_demo_max">До 10 демо-монет</string>
     <string name="deeds_star_title">Перепутанные находки</string>
@@ -9,6 +9,20 @@
     <string name="deeds_star_description">Смотритель свалил находки в кучу. Открывай пласты и собирай пары одинаковых предметов.</string>
     <string name="deeds_price_description">Гонец привёз счета из деревенской лавки. %1$s ищет самую дорогую покупку. Помоги сравнить суммы.</string>
     <string name="deeds_target_description">Ловящий сигнал уходит в сторону. Останови бегунок в зелёной зоне — и башня снова найдёт звезду.</string>
+    <string name="deeds_lights_title">Фонари обсерватории</string>
+    <string name="deeds_lights_description">Перед наблюдениями гаснут не все фонари. Нажатие гасит фонарь и его соседей — погаси все!</string>
+    <string name="deeds_sequence_title">Сигналы башни</string>
+    <string name="deeds_sequence_description">Башня мигает цветными сигналами. Запомни вспышки и повтори их по памяти.</string>
+    <string name="deeds_sliding_title">Карта маршрута</string>
+    <string name="deeds_sliding_description">Карта троп рассыпалась на плитки. Двигай их и собери карту по порядку номеров.</string>
+    <string name="deeds_pipes_title">Свяжи концы</string>
+    <string name="deeds_pipes_description">Канаты перепутались на полке. Соедини концы одного цвета линией, не задевая чужие.</string>
+    <string name="deeds_sorting_title">Разложи припасы</string>
+    <string name="deeds_sorting_description">Припасы свезли вразнобой. Перекладывай верхний запас так, чтобы в каждой банке был один вид.</string>
+    <string name="deeds_differences_title">Сверка находок</string>
+    <string name="deeds_differences_description">Две полки находок почти одинаковые. Найди все отличия на нижней полке!</string>
+    <string name="deeds_stacking_title">Ящики на причале</string>
+    <string name="deeds_stacking_description">Лодка ждёт груз. Опусти бегущий ящик на предыдущий — останется только пересечение.</string>
     <string name="deeds_start">Взяться за дело</string>
     <string name="deeds_again">Сделать ещё раз</string>
     <string name="deeds_back_to_list">К списку дел</string>
