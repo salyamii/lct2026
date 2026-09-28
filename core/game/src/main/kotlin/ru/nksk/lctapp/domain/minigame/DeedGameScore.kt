@@ -85,7 +85,10 @@ class DeedGameScore private constructor(
             ) DeedGameScore(DeedGameKind.STACKING, state.placed, StackingState.ROUNDS) else null
 
         private fun List<Int>.isValidPipePath(connection: PipeEndpoints): Boolean {
-            if (firstOrNull() != connection.first || lastOrNull() != connection.second) return false
+            // Тропинку можно вести с любого конца пары — важна непрерывность, не направление.
+            val straight = firstOrNull() == connection.first && lastOrNull() == connection.second
+            val reversed = firstOrNull() == connection.second && lastOrNull() == connection.first
+            if (!straight && !reversed) return false
             if (size != distinct().size) return false
             return zipWithNext().all { (a, b) ->
                 val distance = kotlin.math.abs(a / PipesState.SIZE - b / PipesState.SIZE) +
