@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.feature.day.ui
 
+import ru.nksk.lctapp.core.ui.components.GameLoadingIndicator
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -15,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ButtonDefaults
@@ -97,7 +97,7 @@ internal fun DaySummaryScreen(state: DayUiState, onAction: (DayAction) -> Unit, 
         }
         state.message?.let { AdventureBody(it) }
         state.actionNotice?.let { AdventureBody(it) }
-        if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
+        if (state.busy) GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
         state.primary?.let { label ->
             AdventurePrimaryButton(label, { onAction(DayAction.Primary) }, enabled = !state.busy)
         }

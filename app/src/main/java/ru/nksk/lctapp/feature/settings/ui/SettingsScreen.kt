@@ -51,7 +51,7 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
                 Text("Для родителей", color = GameInk, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 AdventureBody("Покажите код родителю, чтобы он мог видеть прогресс и присылать подарки.")
                 if (state.loading) {
-                    LinearProgressIndicator(Modifier.fillMaxWidth())
+                    GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
                     AdventureBody("Открываем настройки…")
                 } else if (state.profileError) {
                     AdventureBody("Не удалось открыть профиль. Попробуйте ещё раз.")
@@ -108,7 +108,7 @@ private fun SoundSettingsCard(state: SoundSettingsUiState, onAction: (SettingsAc
                     uncheckedBorderColor = GameInk.copy(alpha = .35f)))
         }
         if (state.loading || state.saving) {
-            LinearProgressIndicator(Modifier.fillMaxWidth())
+            GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
             AdventureBody(if (state.saving) "Сохраняем…" else "Открываем настройку звука…")
         }
         state.error?.let { error ->
@@ -127,7 +127,7 @@ private fun ParentCodeContent(state: SettingsUiState, onAction: (SettingsAction)
     when (state.codeStatus) {
         ParentCodeStatus.NONE -> AdventurePrimaryButton("Показать код для родителей", { onAction(SettingsAction.CreateParentCode) })
         ParentCodeStatus.LOADING -> {
-            LinearProgressIndicator(Modifier.fillMaxWidth())
+            GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
             AdventureBody("Готовим код…")
         }
         ParentCodeStatus.READY -> {
@@ -142,7 +142,7 @@ private fun ParentCodeContent(state: SettingsUiState, onAction: (SettingsAction)
                 AdventureBody("Подключение родителей станет доступно после подключения сервера.")
             } else when (state.registrationStatus) {
                 ProfileRegistrationStatus.LOADING -> {
-                    LinearProgressIndicator(Modifier.fillMaxWidth())
+                    GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
                     AdventureBody("Регистрируем профиль на сервере…")
                 }
                 ProfileRegistrationStatus.ERROR -> {

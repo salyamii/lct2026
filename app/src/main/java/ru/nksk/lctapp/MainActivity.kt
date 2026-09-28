@@ -7,12 +7,21 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
 import ru.nksk.lctapp.app.LctApp
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private var splashVisible by mutableStateOf(true)
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Configuration recreation has no starting window / exit callback to wait for.
+        splashVisible = savedInstanceState == null
+        val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
@@ -21,8 +30,13 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.isNavigationBarContrastEnforced = false
         }
+        // Swap the identical static frame for Compose without the default icon exit motion.
+        splash.setOnExitAnimationListener { provider ->
+            provider.remove()
+            splashVisible = false
+        }
         setContent {
-            LctApp()
+            LctApp(startupAnimationPlaying = !splashVisible)
         }
     }
 }

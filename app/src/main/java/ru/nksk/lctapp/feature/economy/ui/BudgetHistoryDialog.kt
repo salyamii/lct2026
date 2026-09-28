@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.feature.economy.ui
 
+import ru.nksk.lctapp.core.ui.components.GameLoadingIndicator
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -28,7 +29,7 @@ internal fun BudgetHistoryDialog(state: EconomyUiState, onClose: () -> Unit, onR
                 verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 when {
                     state.budgetHistoryLoading -> {
-                        CircularProgressIndicator(Modifier.size(28.dp).align(Alignment.CenterHorizontally), color = GameInk)
+                        GameLoadingIndicator(Modifier.align(Alignment.CenterHorizontally), size = 48.dp)
                         Text("Смотрим записи после сохранения плана…", fontFamily = Nunito, fontSize = 16.sp)
                     }
                     state.budgetHistoryError != null -> Text(state.budgetHistoryError,

@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.feature.tasks.ui
 
+import ru.nksk.lctapp.core.ui.components.GameLoadingIndicator
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -14,7 +15,7 @@ internal fun DeedGameHost(state: DeedGameUiState, onRetry: () -> Unit, onBack: (
         Surface(Modifier.fillMaxSize()) {
             Column(Modifier.safeDrawingPadding().padding(24.dp), verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally) {
-                if (state.loading) CircularProgressIndicator()
+                if (state.loading) GameLoadingIndicator()
                 state.message?.let { Text(it) }
                 if (state.canRetry) Button(onRetry, enabled = !state.busy) { Text("Повторить") }
                 TextButton(onBack) { Text("В главное меню") }
@@ -28,7 +29,7 @@ internal fun DeedGameHost(state: DeedGameUiState, onRetry: () -> Unit, onBack: (
                 color = DeedColors.Cream,
             ) {
                 Column(Modifier.navigationBarsPadding().padding(16.dp)) {
-                    if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
+                    if (state.busy) GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
                     state.message?.let { Text(it, color = DeedColors.Text) }
                     if (state.canRetry) Button(onRetry, enabled = !state.busy) { Text("Повторить") }
                 }

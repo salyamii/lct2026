@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
@@ -13,6 +14,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -48,6 +50,7 @@ fun DebugOverlay(
     }
     MaterialTheme(colorScheme = lightColorScheme()) {
         if (isOpen) {
+            var showResetConfirmation by rememberSaveable { mutableStateOf(false) }
             ModalBottomSheet(
                 onDismissRequest = { isOpen = false },
                 sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
@@ -61,12 +64,43 @@ fun DebugOverlay(
                     )
                     LazyColumn(Modifier.fillMaxWidth().weight(1f)) {
                         item {
-                            Button(onClick = onResetProgress, modifier = Modifier.fillMaxWidth()) {
+                            Button(
+                                onClick = { showResetConfirmation = true },
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
                                 Text(stringResource(R.string.debug_reset_progress))
                             }
                         }
                     }
                 }
+            }
+            if (showResetConfirmation) {
+                AlertDialog(
+                    onDismissRequest = { showResetConfirmation = false },
+                    title = { Text(stringResource(R.string.debug_reset_confirmation_title)) },
+                    text = { Text(stringResource(R.string.debug_reset_confirmation_message)) },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                if (showResetConfirmation) {
+                                    showResetConfirmation = false
+                                    isOpen = false
+                                    onResetProgress()
+                                }
+                            },
+                        ) {
+                            Text(
+                                text = stringResource(R.string.debug_reset_confirm),
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showResetConfirmation = false }) {
+                            Text(stringResource(R.string.debug_cancel))
+                        }
+                    },
+                )
             }
         }
     }

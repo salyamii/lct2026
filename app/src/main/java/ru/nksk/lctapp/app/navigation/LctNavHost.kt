@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.app.navigation
 
+import ru.nksk.lctapp.core.ui.components.GameLoadingScreen
 import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.togetherWith
@@ -19,7 +20,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -100,10 +100,13 @@ fun LctNavHost(
         }
     }
     val redirectingToBudget = shouldPresentBudget(pending, destination, presentedPlanningId)
-    if (gate.loading || gate.failed || redirectingToBudget) {
+    if (gate.loading || redirectingToBudget) {
+        GameLoadingScreen(modifier)
+        return
+    }
+    if (gate.failed) {
         Box(Modifier.fillMaxSize().background(AdventureNight), contentAlignment = Alignment.Center) {
-            if (gate.loading || redirectingToBudget) CircularProgressIndicator()
-            else Column {
+            Column {
                 Text("Не удалось прочитать бюджет")
                 Button(onClick = gateModel::retry) { Text("Повторить") }
             }

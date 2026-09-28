@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.feature.learning.ui
 
+import ru.nksk.lctapp.core.ui.components.GameLoadingIndicator
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -48,7 +49,7 @@ internal fun LazyListScope.learningStatus(loading: Boolean, busy: Boolean, error
     retryRequired: Boolean = false, showSaving: Boolean = true, onRetry: () -> Unit) {
     if (loading || busy && showSaving) item {
         LearningCard {
-            LinearProgressIndicator(Modifier.fillMaxWidth(), color = GameInk, trackColor = PracticeDisabled)
+            GameLoadingIndicator(Modifier.fillMaxWidth(), size = 48.dp)
             AdventureBody(if (loading) "Открываем страницы приключения…" else "Сохраняем…")
         }
     }

@@ -58,6 +58,8 @@ room3 {
 }
 
 dependencies {
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.lottie.compose)
     implementation(libs.qrcodegen)
     implementation(libs.retrofit)
     implementation(libs.retrofit.kotlinx.serialization)

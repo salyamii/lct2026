@@ -2,6 +2,10 @@
     <string name="debug_open">Открыть отладку</string>
     <string name="debug_title">Отладка</string>
     <string name="debug_reset_progress">Сбросить прогресс и перезапустить</string>
+    <string name="debug_reset_confirmation_title">Сбросить прогресс?</string>
+    <string name="debug_reset_confirmation_message">Весь текущий прогресс будет удалён, а приложение перезапустится. Отменить это действие нельзя.</string>
+    <string name="debug_reset_confirm">Сбросить и перезапустить</string>
+    <string name="debug_cancel">Отмена</string>
     <string name="debug_resetting">Сброс прогресса…</string>
     <string name="debug_reset_failed">Не удалось сбросить прогресс. Попробуйте ещё раз.</string>
     <string name="debug_retry">Повторить</string>

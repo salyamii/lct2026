@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.feature.map.ui
 
+import ru.nksk.lctapp.core.ui.components.GameLoadingIndicator
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -16,7 +17,7 @@ internal fun MapContent(state: MapUiState, onSelect: (String) -> Unit, onBack: (
         } else {
             Column(Modifier.fillMaxSize().safeDrawingPadding(), horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center) {
-                if (state.loading) CircularProgressIndicator()
+                if (state.loading) GameLoadingIndicator()
                 else {
                     Text(state.error ?: "Карта недоступна")
                     TextButton(onClick = onRetry) { Text("Повторить") }

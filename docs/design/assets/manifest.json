@@ -15325,7 +15325,267 @@
       "source_path": "docs/design/assets/debug_settings.svg",
       "source_sha256": "83dbfbeabe462e85a827f1c2ebd7181f6cb0307fabb74fa589ed277e86bc773b",
       "source_notes": "Exact copy of the existing debug_settings geometric gear in the app common source set. Both release and debug use this permanent settings button. A drawable alias to feature/debug is not possible because release does not depend on that module. Original SVG path, viewport and evenOdd fill are unchanged."
+    },
+    {
+      "resource": "loading_coin",
+      "category": "Loading animations",
+      "path": "app/src/main/res/raw/loading_coin.json",
+      "format": "lottie_json",
+      "width": 480,
+      "height": 480,
+      "bytes": 25642,
+      "sha256": "c33fb9ffd5f89d26792acee5ccf6dcc8bceeab1efe20201aa8cec33d2d221a05",
+      "source_path": "docs/design/assets/sources/loading-coin/coin.lottie",
+      "source_sha256": "ccf7421bf4e4f35e6e9a412462993a5f9268d6bf85c49f1e38776c6bd2c36bb8",
+      "source_bytes": 4194,
+      "source_url": "https://lottiefiles.com/free-animation/coin-MHXcO7DuOl",
+      "download_url": "https://assets-v2.lottiefiles.com/a/aa995c28-6adb-11ef-ba75-c35e73fa55e9/zzu0t6E7mY.lottie",
+      "author": "Daily Scoop",
+      "license_path": "app/src/main/assets/licenses/lottie-coin.txt",
+      "imported_on": "2026-09-28",
+      "frame_rate": 60,
+      "in_frame": 0,
+      "out_frame": 180,
+      "conversion": "Extract animations/b0d87fd3-b988-46b7-9986-bf540f062af5.json byte-for-byte; no modifications",
+      "figma": {
+        "file_key": null,
+        "node_id": null,
+        "collection_id": null
+      }
+    },
+    {
+      "resource": "loading_coin_frame",
+      "category": "Loading animations",
+      "path": "app/src/main/res/drawable/loading_coin_frame.xml",
+      "format": "vector_xml",
+      "width": 120,
+      "height": 120,
+      "viewport_width": 480,
+      "viewport_height": 480,
+      "bytes": 5239,
+      "sha256": "0e18ebd4facd428d2a3640072746fab609a843e7be0a80a8e08a952e868684c6",
+      "source_path": "docs/design/assets/sources/loading-coin/frame-zero.svg",
+      "source_sha256": "379583fc750e083aeb6624d365359ceeb1a435699efd44e2ee5fc45a5bfd3034",
+      "source_url": "https://lottiefiles.com/free-animation/coin-MHXcO7DuOl",
+      "license_path": "app/src/main/assets/licenses/lottie-coin.txt",
+      "imported_on": "2026-09-28",
+      "conversion": "Frame 0 cubic paths, solid fills and gradients exported by scripts/export_loading_coin_frame.py. Splash variant centers the 480-unit frame in a 1152 viewport to display its original canvas at 120dp.",
+      "figma": {
+        "file_key": null,
+        "node_id": null,
+        "collection_id": null
+      }
+    },
+    {
+      "resource": "loading_coin_splash",
+      "category": "Loading animations",
+      "path": "app/src/main/res/drawable/loading_coin_splash.xml",
+      "format": "vector_xml",
+      "width": 288,
+      "height": 288,
+      "viewport_width": 1152,
+      "viewport_height": 1152,
+      "bytes": 5400,
+      "sha256": "ab95a9be68e6a491543afce24e6038539781fb49fff8177e589985133ef3570a",
+      "source_path": "docs/design/assets/sources/loading-coin/frame-zero.svg",
+      "source_sha256": "379583fc750e083aeb6624d365359ceeb1a435699efd44e2ee5fc45a5bfd3034",
+      "source_url": "https://lottiefiles.com/free-animation/coin-MHXcO7DuOl",
+      "license_path": "app/src/main/assets/licenses/lottie-coin.txt",
+      "imported_on": "2026-09-28",
+      "conversion": "Frame 0 cubic paths, solid fills and gradients exported by scripts/export_loading_coin_frame.py. Splash variant centers the 480-unit frame in a 1152 viewport to display its original canvas at 120dp.",
+      "figma": {
+        "file_key": null,
+        "node_id": null,
+        "collection_id": null
+      }
     }
   ],
-  "missing": []
+  "missing": [],
+  "launcher_icons": {
+    "decision": "APP-ICON-D-002",
+    "approved_on": "2026-09-28",
+    "source_method": "built_in_imagegen_outpainting",
+    "source": {
+      "path": "docs/design/assets/sources/launcher-fox-jar/adaptive-source.png",
+      "bytes": 2786886,
+      "sha256": "ea3adee0e4743e919087f32a15a9c8898d4f8a6d12ab9f4941874265fd6086fa",
+      "width": 1254,
+      "height": 1254,
+      "rgba_sha256": "10f999a3b19354d9b382f677b96f761e0f94d71ee82f4fc2407e059197f91a61"
+    },
+    "reference_sources": [
+      {
+        "path": "docs/design/assets/sources/launcher-fox-jar/source.png",
+        "bytes": 2093721,
+        "sha256": "56fdf56041f217ea863044af5e7034c8e91b1910a613c0762e0fe19e111da73e",
+        "width": 1254,
+        "height": 1254,
+        "rgba_sha256": "75f8dd58c4d388abbea1c6d34dac790127bfec6219ce747b30e05e3b65d3692d"
+      },
+      {
+        "path": "docs/design/assets/sources/launcher-fox-jar/outpaint-step1.png",
+        "bytes": 2354359,
+        "sha256": "2b3c2cc105278ffeb5714fb2554578965baa65bb56c4ba27fffb55d3a9b2431e",
+        "width": 1254,
+        "height": 1254,
+        "rgba_sha256": "a2dbb64f667b86dd09e2a73e93d015ddb6cfde84d9925c0f02fdac970b74b793"
+      }
+    ],
+    "reference_resource": "ryzhik_mvp_idle_copper",
+    "reference_figma_url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-65",
+    "monochrome_source": {
+      "path": "docs/design/assets/sources/launcher-fox-jar/monochrome.svg",
+      "bytes": 610,
+      "sha256": "b4b5cb78aebe2024241bd406e76689dc423757ff180110d17d3d44421d9cdcb3"
+    },
+    "conversion": {
+      "pillow_version": "12.3.0",
+      "format": "lossless exact WebP",
+      "resampling": "Lanczos",
+      "adaptive_canvas_dp": 108,
+      "padding": "none; natural scenery outpainted into the source",
+      "resampling_passes_per_output": 1,
+      "legacy_icon_dp": 48,
+      "legacy_viewport_dp": 72,
+      "layers": "opaque composite background, transparent foreground",
+      "monochrome": "locally authored jar and paw coin; SVG paths copied to vector XML"
+    },
+    "outputs": [
+      {
+        "path": "app/src/main/res/mipmap-mdpi/ic_launcher_art.webp",
+        "bytes": 28480,
+        "sha256": "8ec18101e2fb01e99871b961b51d272b196774c4be3738b9ad472039a864d8b4",
+        "width": 108,
+        "height": 108,
+        "rgba_sha256": "d865c104f0cec0b3f2ece54ccc86f7d2f77595133532562be1de856e96d4c6e9"
+      },
+      {
+        "path": "app/src/main/res/mipmap-mdpi/ic_launcher.webp",
+        "bytes": 6472,
+        "sha256": "fd86d0671fd6b2a568fd7c03a08ef4f635cc41efa6540b124008011e29fadb17",
+        "width": 48,
+        "height": 48,
+        "rgba_sha256": "94f624d05bd6b7481a997eb024475db322067013537bf76b5d16576ebce3d99e"
+      },
+      {
+        "path": "app/src/main/res/mipmap-mdpi/ic_launcher_round.webp",
+        "bytes": 5988,
+        "sha256": "875f62028c1a4824578d88d8bad7b14932d54829b6eff84e1c734656935bb413",
+        "width": 48,
+        "height": 48,
+        "rgba_sha256": "d1cd26dd6bb1db18b6efe060a19a4b99e85c3da3afcd95f6a099d245fbf56018"
+      },
+      {
+        "path": "app/src/main/res/mipmap-hdpi/ic_launcher_art.webp",
+        "bytes": 61524,
+        "sha256": "6d80752ccabcbbf29b54ba472ffba075e48cb20f6c5c9e6ea4cd2e51d80fc741",
+        "width": 162,
+        "height": 162,
+        "rgba_sha256": "feaa04c66836baadf93e8d3ab7df2f097f8ead896cb35c008730d6c60b5c02f1"
+      },
+      {
+        "path": "app/src/main/res/mipmap-hdpi/ic_launcher.webp",
+        "bytes": 13544,
+        "sha256": "2f102f8373329f827862a8081ccb5a369a28e7ac01cd4ca3f7a6c2d0d9f22baa",
+        "width": 72,
+        "height": 72,
+        "rgba_sha256": "9c16270f64c94e37d904c5e3942eab13ebfc953accd2d06fa1d2bcf79280796b"
+      },
+      {
+        "path": "app/src/main/res/mipmap-hdpi/ic_launcher_round.webp",
+        "bytes": 12102,
+        "sha256": "b81cd0402ee9b8dde13e669ac9abd94f0839cec063b06876ac3451282dc54e46",
+        "width": 72,
+        "height": 72,
+        "rgba_sha256": "d65cea05111213cf232efba2a9d0c662ff405e822a5cb694434feb9fdf111070"
+      },
+      {
+        "path": "app/src/main/res/mipmap-xhdpi/ic_launcher_art.webp",
+        "bytes": 104558,
+        "sha256": "a50d544b24c4fe52e6c98bda893c53d872a627cfacb766a1beea857b59f5ee4c",
+        "width": 216,
+        "height": 216,
+        "rgba_sha256": "8afa7355371962b002de19f60655218784a27de871a2a9ca3ed26dcbb6b94ef7"
+      },
+      {
+        "path": "app/src/main/res/mipmap-xhdpi/ic_launcher.webp",
+        "bytes": 22778,
+        "sha256": "0f6c2574ebc32593e4a868d998984f1aac75e8ed48d840ecfadb4786fedf7235",
+        "width": 96,
+        "height": 96,
+        "rgba_sha256": "14496188daeffa517b70a535a62e4ee56832702e66d57d25177c2c4eecd686f3"
+      },
+      {
+        "path": "app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp",
+        "bytes": 20124,
+        "sha256": "21333ccde3fcc66ad82d010c7420a6b3ca3f8eb2e1bbb72329c5a94c828ea738",
+        "width": 96,
+        "height": 96,
+        "rgba_sha256": "ef0419f5e21117a82112b2f8f90f3e3ddcbf1c82829e2ebaaa5f1fb658ebd17a"
+      },
+      {
+        "path": "app/src/main/res/mipmap-xxhdpi/ic_launcher_art.webp",
+        "bytes": 218138,
+        "sha256": "b935e6b88d515db601546b4394c18802879bc10dfd59f2ae283bc541c10b270b",
+        "width": 324,
+        "height": 324,
+        "rgba_sha256": "a233e9cc00029913a090b51eb74a893f123d87bff9a8904d12f94d7fbe8dbd6d"
+      },
+      {
+        "path": "app/src/main/res/mipmap-xxhdpi/ic_launcher.webp",
+        "bytes": 46868,
+        "sha256": "b570f0028543ce8c7eb914aa41b056f908fc463af7820c9763aac8c70470f9f3",
+        "width": 144,
+        "height": 144,
+        "rgba_sha256": "41f50677d9256cf82795d6aa68a3ba156d71404d2c02485f00d2057385ff6e82"
+      },
+      {
+        "path": "app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp",
+        "bytes": 41038,
+        "sha256": "ae78d2b03891584089059072641191c8b995f998ab99d448d4a21b36c584dbb4",
+        "width": 144,
+        "height": 144,
+        "rgba_sha256": "6c1f898fb1c90d6586eac4f1e4396a7f9766390ad2001269f6c161c4d1fa5be1"
+      },
+      {
+        "path": "app/src/main/res/mipmap-xxxhdpi/ic_launcher_art.webp",
+        "bytes": 366864,
+        "sha256": "723fdd06a1c5382cfd99ac15fcbe1892ad57bb7b468956321b6d5ad872f230e2",
+        "width": 432,
+        "height": 432,
+        "rgba_sha256": "93b476b2504ee29805cec6ac08bc4f7db0c20ec24af39f23715a80d2d508ab86"
+      },
+      {
+        "path": "app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp",
+        "bytes": 78214,
+        "sha256": "92818e6ddaa7d4519c7e0b958e052dc1e1f0d090aac6855acd1c74292b9da833",
+        "width": 192,
+        "height": 192,
+        "rgba_sha256": "d6662f9c50ad92b7147f1b17839ded13aa5acc1d6c99b4c1c75aebfad6f81284"
+      },
+      {
+        "path": "app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp",
+        "bytes": 67522,
+        "sha256": "35bfed496e8962b550d013d4cfcbff2823caabe3d90bf0cb491cf14c53bd9a99",
+        "width": 192,
+        "height": 192,
+        "rgba_sha256": "1ea8ecf4f26049e5825b5c55df774140cab61a464db19d7ef71885e7b9a1ffea"
+      },
+      {
+        "path": "app/src/main/res/drawable/ic_launcher_monochrome.xml",
+        "bytes": 838,
+        "sha256": "cde1fc25b4d06a7cba7b108e1b9e3b01098c3cc9ba039d45b727d54865b0d2c8"
+      },
+      {
+        "path": "app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+        "bytes": 418,
+        "sha256": "1ea5a8f04130e9871fd701bdf348b4ddc1813bf87578acd9954bb49d60239388"
+      },
+      {
+        "path": "app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml",
+        "bytes": 418,
+        "sha256": "1ea5a8f04130e9871fd701bdf348b4ddc1813bf87578acd9954bb49d60239388"
+      }
+    ]
+  }
 }

@@ -41,6 +41,7 @@ fun OnboardingScreen(
     onAction: (OnboardingAction) -> Unit,
     onStart: () -> Unit,
     modifier: Modifier = Modifier,
+    loadingIndicator: @Composable (Modifier) -> Unit = { Text("Загрузка…", it) },
 ) {
     BoxWithConstraints(modifier.fillMaxSize().background(Night)) {
         Image(painterResource(artwork.background), null, Modifier.fillMaxSize().blur(1.7.dp),
@@ -52,7 +53,7 @@ fun OnboardingScreen(
                     horizontalAlignment = Alignment.CenterHorizontally) {
                     Column(Modifier.widthIn(max = 480.dp)) {
                         Brand(artwork)
-                        CharacterScene(artwork, state, actions)
+                        CharacterScene(artwork, state, actions, loadingIndicator = loadingIndicator)
                     }
                 }
                 Box(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp)) {
@@ -69,7 +70,7 @@ fun OnboardingScreen(
                         content = {
                             Column {
                                 Brand(artwork)
-                                CharacterScene(artwork, state, actions)
+                                CharacterScene(artwork, state, actions, loadingIndicator = loadingIndicator)
                             }
                             WelcomeCard(state, artwork, saving, saveFailed, onStart)
                         },

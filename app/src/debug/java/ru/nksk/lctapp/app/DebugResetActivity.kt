@@ -14,6 +14,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
+import ru.nksk.lctapp.core.ui.components.GameLoadingIndicator
 import ru.nksk.lctapp.MainActivity
 import ru.nksk.lctapp.feature.debug.ui.DebugResetScreen
 
@@ -26,7 +27,8 @@ class DebugResetActivity : ComponentActivity() {
             BackHandler { /* Do not restore a stale game task during reset. */ }
             val viewModel: DebugResetViewModel = hiltViewModel()
             val state by viewModel.uiState.collectAsStateWithLifecycle()
-            DebugResetScreen(failed = state == DebugResetState.Failed, onRetry = viewModel::reset)
+            DebugResetScreen(failed = state == DebugResetState.Failed, onRetry = viewModel::reset,
+                loadingIndicator = { GameLoadingIndicator() })
             LaunchedEffect(viewModel) {
                 lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                     viewModel.uiState.collect { current ->

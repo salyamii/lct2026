@@ -117,10 +117,35 @@ def main():
                 errors.append(f"Broken local link in {path.relative_to(ROOT)}: {target}")
     if manifest["missing"]:
         errors.append(f"{len(manifest['missing'])} Figma exports still unavailable")
+    launcher = manifest.get("launcher_icons")
+    if launcher:
+        # Launcher names repeat across densities and XML/bitmap configurations.
+        # Keep their provenance separate from the unique drawable-name catalog.
+        entries = [launcher["source"], launcher["monochrome_source"],
+                   *launcher.get("reference_sources", []), *launcher["outputs"]]
+        for entry in entries:
+            path = ROOT / entry["path"]
+            if not path.is_file():
+                errors.append(f"Missing launcher artwork: {entry['path']}")
+                continue
+            data = catalog_bytes(path)
+            if sha256(data) != entry["sha256"] or len(data) != entry["bytes"]:
+                errors.append(f"Launcher checksum/size mismatch: {entry['path']}")
+            if "rgba_sha256" in entry:
+                with Image.open(path) as image:
+                    rgba = image.convert("RGBA")
+                    if rgba.size != (entry["width"], entry["height"]) or sha256(rgba.tobytes()) != entry["rgba_sha256"]:
+                        errors.append(f"Launcher canvas/pixel mismatch: {entry['path']}")
+        actual = {str(path.relative_to(ROOT)) for path in (ROOT / "app/src/main/res").glob("mipmap*/ic_launcher*")}
+        expected = {e["path"] for e in launcher["outputs"] if "/mipmap" in e["path"]}
+        if actual != expected:
+            errors.append("Launcher resource files disagree with manifest")
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
     print(f"Verified {len(assets)} catalog entries, {len(checked)} files, {len(aliases)} aliases; no missing exports.")
+    if launcher:
+        print(f"Verified {len(launcher['outputs'])} launcher resources and their sources.")
     return 0
 
 

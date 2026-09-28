@@ -27,7 +27,7 @@ internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
                 while (true) awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() }
             }
         }) {
-            LinearProgressIndicator(Modifier.align(Alignment.TopCenter).safeDrawingPadding().fillMaxWidth())
+            GameLoadingIndicator(Modifier.align(Alignment.Center).safeDrawingPadding())
         }
         if (state.retryRequired && !state.busy) AlertDialog(
             onDismissRequest = onBack,
@@ -46,7 +46,7 @@ private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
         Surface(Modifier.fillMaxSize()) {
             Column(Modifier.safeDrawingPadding().padding(24.dp), verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally) {
-                if (state.loading) CircularProgressIndicator() else {
+                if (state.loading) GameLoadingIndicator() else {
                     Text("Не удалось загрузить игру. Сохранение не изменено.")
                     Button({ onAction(DayAction.Retry) }) { Text("Повторить") }
                 }

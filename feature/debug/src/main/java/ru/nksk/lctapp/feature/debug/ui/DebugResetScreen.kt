@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -19,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import ru.nksk.lctapp.feature.debug.R
 
 @Composable
-fun DebugResetScreen(failed: Boolean, onRetry: () -> Unit) {
+fun DebugResetScreen(failed: Boolean, onRetry: () -> Unit, loadingIndicator: @Composable () -> Unit) {
     MaterialTheme(colorScheme = lightColorScheme()) {
         Surface(Modifier.fillMaxSize()) {
             Column(
@@ -31,7 +30,7 @@ fun DebugResetScreen(failed: Boolean, onRetry: () -> Unit) {
                     Text(stringResource(R.string.debug_reset_failed))
                     Button(onClick = onRetry) { Text(stringResource(R.string.debug_retry)) }
                 } else {
-                    CircularProgressIndicator()
+                    loadingIndicator()
                     Text(stringResource(R.string.debug_resetting))
                 }
             }

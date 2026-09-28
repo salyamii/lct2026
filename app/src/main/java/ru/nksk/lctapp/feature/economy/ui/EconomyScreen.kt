@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.feature.economy.ui
 
+import ru.nksk.lctapp.core.ui.components.GameLoadingScreen
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,12 +20,20 @@ import ru.nksk.lctapp.domain.economy.BudgetPlanningStage
 internal fun EconomyScreen(state: EconomyUiState, onAction: (EconomyAction) -> Unit, onBack: () -> Unit,
     onOpenSavings: () -> Unit = {}) {
     val economy = state.economy
-    if (economy == null) {
+    if (economy == null && state.loading) {
+        // An unfinished budget can be the first destination after the startup gate.
+        Box(Modifier.fillMaxSize()) {
+            GameLoadingScreen()
+            TextButton(onClick = onBack,
+                modifier = Modifier.align(Alignment.BottomCenter).safeDrawingPadding().padding(24.dp)) {
+                Text("В меню")
+            }
+        }
+    } else if (economy == null) {
         Surface(Modifier.fillMaxSize(), color = GamePaper) {
             Column(Modifier.safeDrawingPadding().padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                if (state.loading) CircularProgressIndicator()
-                else Button(onClick = { onAction(EconomyAction.Retry) }) { Text("Повторить загрузку") }
+                Button(onClick = { onAction(EconomyAction.Retry) }) { Text("Повторить загрузку") }
                 TextButton(onClick = onBack) { Text("В меню") }
             }
         }
