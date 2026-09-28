@@ -709,3 +709,13 @@ Full canvas preserved; lossless exact WebP. Dedicated to the weekly receipt Prev
 | --- | --- | --- | --- |
 | `R.drawable.deed_game_lights_off` | 341 × 512 | [deed_game_lights_off.webp](../../../app/src/main/res/drawable-nodpi/deed_game_lights_off.webp) | [lantern_off.png](sources/mini-game-lanterns-2026-09-28/lantern_off.png) |
 | `R.drawable.deed_game_lights_on` | 341 × 512 | [deed_game_lights_on.webp](../../../app/src/main/res/drawable-nodpi/deed_game_lights_on.webp) | [lantern_on.png](sources/mini-game-lanterns-2026-09-28/lantern_on.png) |
+Тайлы канатов для «Свяжи концов» (та же партия, User-supplied images → WebP
+lossless 512×512; угол добит до квадрата прозрачными строками снизу).
+
+| Android resource | Canvas | Файл | Источник |
+| --- | --- | --- | --- |
+| `R.drawable.deed_game_pipes_straight` | 512 × 512 | [deed_game_pipes_straight.webp](../../../app/src/main/res/drawable-nodpi/deed_game_pipes_straight.webp) | [rope_straight.png](sources/mini-game-ropes-2026-09-28/rope_straight.png) |
+| `R.drawable.deed_game_pipes_corner` | 512 × 512 | [deed_game_pipes_corner.webp](../../../app/src/main/res/drawable-nodpi/deed_game_pipes_corner.webp) | [rope_corner.png](sources/mini-game-ropes-2026-09-28/rope_corner.png) |
+| `R.drawable.deed_game_pipes_end_red` | 512 × 512 | [deed_game_pipes_end_red.webp](../../../app/src/main/res/drawable-nodpi/deed_game_pipes_end_red.webp) | [rope_end_red.png](sources/mini-game-ropes-2026-09-28/rope_end_red.png) |
+| `R.drawable.deed_game_pipes_end_blue` | 512 × 512 | [deed_game_pipes_end_blue.webp](../../../app/src/main/res/drawable-nodpi/deed_game_pipes_end_blue.webp) | [rope_end_blue.png](sources/mini-game-ropes-2026-09-28/rope_end_blue.png) |
+| `R.drawable.deed_game_pipes_end_green` | 512 × 512 | [deed_game_pipes_end_green.webp](../../../app/src/main/res/drawable-nodpi/deed_game_pipes_end_green.webp) | [rope_end_green.png](sources/mini-game-ropes-2026-09-28/rope_end_green.png) |

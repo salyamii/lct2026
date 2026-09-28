@@ -1,7 +1,7 @@
 package ru.nksk.lctapp.feature.tasks.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,16 +15,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -35,11 +37,109 @@ import ru.nksk.lctapp.core.ui.components.GameArtwork
 import ru.nksk.lctapp.core.ui.theme.Rubik
 import ru.nksk.lctapp.domain.minigame.PipesState
 
-private val PIPE_COLORS = listOf(
-    Color(0xFFE0805A), // канатный терракот
-    Color(0xFF6FA8DC), // морской синий
-    Color(0xFF9BBF6B), // болотный зелёный
+/** Тайл каната: рисунок, поворот и зеркалирование под направление тропинки. */
+private data class RopeTile(val res: Int, val rotation: Float = 0f, val mirrored: Boolean = false)
+
+/** Фон плиток под цвет каната, как в макете. */
+private val TILE_COLORS = listOf(
+    Color(0xFFE0805A),
+    Color(0xFF6FA8DC),
+    Color(0xFF9BBF6B),
 )
+
+/** Поворот конца каната наружу, прочь от парного конца. */
+private fun outwardRotation(state: PipesState, cell: Int, color: Int): Float {
+    val pair = state.endpoints.first { it.color == color }
+    val other = if (cell == pair.first) pair.second else pair.first
+    val dr = cell / PipesState.SIZE - other / PipesState.SIZE
+    val dc = cell % PipesState.SIZE - other % PipesState.SIZE
+    val towards = if (kotlin.math.abs(dr) >= kotlin.math.abs(dc)) {
+        if (dr >= 0) 2 else 0
+    } else {
+        if (dc >= 0) 1 else 3
+    }
+    return towards * 90f
+}
+
+/** 0 — вверх, 1 — вправо, 2 — вниз, 3 — влево. */
+private fun direction(from: Int, to: Int): Int = when {
+    to == from - PipesState.SIZE -> 0
+    to == from + 1 && to / PipesState.SIZE == from / PipesState.SIZE -> 1
+    to == from + PipesState.SIZE -> 2
+    else -> 3
+}
+
+/** Угол по паре «откуда пришёл → куда идёт»: канат входит сверху и уходит вправо — 0°. */
+private fun cornerRotation(from: Int, outTo: Int): Int = when {
+    from == 0 && outTo == 1 -> 0
+    from == 1 && outTo == 2 -> 90
+    from == 2 && outTo == 3 -> 180
+    else -> 270
+}
+
+/**
+ * Раскладывает канатные тайлы по ячейкам: концы пары — цветной канат,
+ * повороты — уголок (при необходимости зеркальный), прямоходы — прямой канат.
+ */
+private fun ropeTiles(state: PipesState, activeColor: Int?): Map<Int, RopeTile> {
+    val endRes = listOf(
+        R.drawable.deed_game_pipes_end_red,
+        R.drawable.deed_game_pipes_end_blue,
+        R.drawable.deed_game_pipes_end_green,
+    )
+    val tiles = mutableMapOf<Int, RopeTile>()
+    // Непроложенные концы смотрят наружу, прочь от своей пары, и не крутятся при нажатии.
+    state.endpoints.forEach { endpoint ->
+        if (endpoint.color !in state.paths) {
+            val art = endRes[endpoint.color % endRes.size]
+            tiles[endpoint.first] = RopeTile(art, outwardRotation(state, endpoint.first, endpoint.color))
+            tiles[endpoint.second] = RopeTile(art, outwardRotation(state, endpoint.second, endpoint.color))
+        }
+    }
+    fun addPath(path: List<Int>, color: Int, locked: Boolean) {
+        if (path.isEmpty()) return
+        path.forEachIndexed { index, cell ->
+            val inFrom = when {
+                index > 0 -> direction(cell, path[index - 1])
+                path.size > 1 -> direction(cell, path[1])
+                else -> null
+            }
+            val tile = when {
+                // Начало тропинки — конец каната: до первого шага смотрит наружу,
+                // после — поворачивается по направлению, выбранному игроком.
+                index == 0 && !locked && path.size == 1 ->
+                    RopeTile(endRes[color % endRes.size], outwardRotation(state, cell, color))
+                index == 0 -> RopeTile(endRes[color % endRes.size], (inFrom ?: 0) * 90f)
+                index == path.lastIndex && locked -> RopeTile(endRes[color % endRes.size], (inFrom ?: 0) * 90f)
+                index == path.lastIndex -> {
+                    // Голова недоведённой тропинки: прямой канат по последнему сегменту.
+                    RopeTile(R.drawable.deed_game_pipes_straight, if ((inFrom ?: 0) % 2 == 1) 90f else 0f)
+                }
+                else -> {
+                    val from = direction(cell, path[index - 1])
+                    val outTo = direction(cell, path[index + 1])
+                    if (from % 2 == outTo % 2) {
+                        RopeTile(R.drawable.deed_game_pipes_straight, if (outTo % 2 == 1) 90f else 0f)
+                    } else {
+                        val mirrored = (from to outTo) in setOf(0 to 3, 3 to 2, 2 to 1, 1 to 0)
+                        val angle = if (!mirrored) cornerRotation(from, outTo)
+                        else when {
+                            from == 0 && outTo == 3 -> 0
+                            from == 3 && outTo == 2 -> 270
+                            from == 2 && outTo == 1 -> 180
+                            else -> 90
+                        }
+                        RopeTile(R.drawable.deed_game_pipes_corner, angle.toFloat(), mirrored)
+                    }
+                }
+            }
+            tiles[cell] = tile
+        }
+    }
+    state.endpoints.forEach { endpoint -> state.paths[endpoint.color]?.let { addPath(it, endpoint.color, locked = true) } }
+    state.activePath.takeIf { it.isNotEmpty() }?.let { addPath(it, activeColor ?: 0, locked = false) }
+    return tiles
+}
 
 /** Shared connect-the-ends board for offered deeds. */
 @Composable
@@ -51,6 +151,7 @@ fun PipesGameScreen(
 ) {
     val state = uiState.game
     val activeColor = state.activeColor
+    val tiles = remember(state, activeColor) { ropeTiles(state, activeColor) }
     Column(
         modifier = Modifier.fillMaxSize().background(DeedColors.Scene),
     ) {
@@ -74,7 +175,11 @@ fun PipesGameScreen(
             )
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                DeedChip(if (activeColor == null) "Выбери конец" else "Цвет ${activeColor + 1}")
+                DeedChip(when {
+                    state.paths.isNotEmpty() -> "Пары: ${state.paths.size} / ${state.endpoints.size}"
+                    activeColor != null -> "Цвет ${activeColor + 1}"
+                    else -> "Выбери конец"
+                })
                 if (deed?.storyAction != true) {
                     CoinChip(deed?.let { "Награда до ${it.maximumReward} монет" } ?: "Награда: 10")
                 }
@@ -90,10 +195,10 @@ fun PipesGameScreen(
                                 state.paths[endpoint.color]?.contains(cell) == true
                             }
                             val activeCell = cell in state.activePath
-                            val color = when {
-                                endpoint != null -> PIPE_COLORS[endpoint.color]
-                                activeCell -> PIPE_COLORS[activeColor ?: 0]
-                                pathColor != null -> PIPE_COLORS[pathColor.color].copy(alpha = 0.55f)
+                            val tileColor = when {
+                                pathColor != null -> TILE_COLORS[pathColor.color]
+                                activeCell -> TILE_COLORS[activeColor ?: 0].copy(alpha = 0.45f)
+                                endpoint != null -> TILE_COLORS[endpoint.color]
                                 else -> DeedColors.CreamSoft
                             }
                             val shape = RoundedCornerShape(10.dp)
@@ -109,19 +214,26 @@ fun PipesGameScreen(
                                     .aspectRatio(1f)
                                     .semantics { contentDescription = description }
                                     .clip(shape)
-                                    .background(color)
-                                    .then(
-                                        if (endpoint != null) {
-                                            Modifier.border(3.dp, DeedColors.Text.copy(alpha = 0.5f), CircleShape)
-                                        } else Modifier
-                                    )
+                                    .background(tileColor)
                                     .clickable(enabled = !state.won && deed?.canPlay != false) {
                                         onAction(PipesGameAction.Press(cell))
                                     },
                                 contentAlignment = Alignment.Center,
                             ) {
-                                if (endpoint != null) {
-                                    Box(Modifier.size(10.dp).clip(CircleShape).background(DeedColors.White))
+                                tiles[cell]?.let { tile ->
+                                    Image(
+                                        painter = painterResource(tile.res),
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .graphicsLayer {
+                                                alpha = if (activeCell) 0.6f else 1f
+                                                rotationZ = tile.rotation
+                                                scaleX = if (tile.mirrored) -1f else 1f
+                                            },
+                                        alignment = Alignment.Center,
+                                        contentScale = ContentScale.Fit,
+                                    )
                                 }
                             }
                         }
