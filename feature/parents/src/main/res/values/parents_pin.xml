@@ -1,0 +1,16 @@
+<resources>
+    <string name="parents_pin_setup_title">Родительский PIN-код</string>
+    <string name="parents_pin_setup_hint_enter">Придумайте 4-значный PIN-код</string>
+    <string name="parents_pin_setup_hint_confirm">Повторите PIN-код</string>
+    <string name="parents_pin_setup_mismatch">PIN-коды не совпадают. Придумайте новый</string>
+    <string name="parents_pin_lock_title">Введите PIN-код</string>
+    <string name="parents_pin_lock_hint">Введите родительский PIN-код</string>
+    <string name="parents_pin_lock_wrong">Неверный PIN-код</string>
+    <string name="parents_pin_delete">Удалить цифру</string>
+    <string name="parents_pin_close">Вернуться в игру</string>
+    <string name="parents_pin_retry">Попробовать снова</string>
+    <string name="parents_pin_loading">Проверяем защиту родительского режима</string>
+    <string name="parents_pin_storage_error">Не удалось прочитать или сохранить PIN-код. Попробуйте снова.</string>
+    <string name="parents_pin_wait">Слишком много попыток. Повторите через %1$d сек.</string>
+    <string name="parents_pin_entered">Введено цифр: %1$d из 4</string>
+</resources>

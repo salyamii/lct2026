@@ -67,6 +67,7 @@ import ru.nksk.lctapp.feature.learning.navigation.campaignArchiveEntry
 import ru.nksk.lctapp.feature.settings.navigation.Settings
 import ru.nksk.lctapp.feature.settings.navigation.settingsEntry
 import ru.nksk.lctapp.feature.settings.ui.SettingsGearButton
+import ru.nksk.lctapp.app.parents.rememberParentsLauncher
 
 private const val NavigationTransitionMillis = 160
 
@@ -154,7 +155,11 @@ fun LctNavHost(
             ),
             entryProvider = entryProvider {
                 mainMenuEntry(settingsButton = {
-                    SettingsGearButton(dropUnlessResumed { navigator.navigate(MainMenu, Settings) })
+                    val openParents = rememberParentsLauncher()
+                    SettingsGearButton(
+                        onClick = dropUnlessResumed { navigator.navigate(MainMenu, Settings) },
+                        onLongClick = { if (backStack.lastOrNull() == MainMenu) openParents() },
+                    )
                 }, onTraining = { source -> navigator.navigate(source, ChapterPractice) }) { source, action ->
                     navigator.navigate(
                         source = source,

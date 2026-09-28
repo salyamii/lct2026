@@ -1,6 +1,6 @@
 # App navigation
 
-The activity hosts `app/LctApp`, which applies the theme and composes `LctNavHost`.
+MainActivity hosts `app/LctApp`, which applies the theme and composes `LctNavHost`.
 The host owns a Navigation 3 `rememberNavBackStack` configured with
 `AppNavigationSavedStateConfiguration` and starting at `MainMenu`. The menu is a
 launch screen, so actions push onto one stack and Back returns to the menu. It
@@ -41,6 +41,7 @@ is not a persistent tab bar requiring independent stacks.
 | Village | `GameMap` (`village`) |
 | Continue day | `Day` |
 | Settings gear | `Settings` (`settings`) |
+| Settings gear, long press | Internal `ParentsActivity` → PIN → local parent report |
 
 The registered features render their working screens. Gear displays the inventory
 with two sections, owned items only, and an entry-scoped Hilt ViewModel. Its saved
@@ -457,3 +458,33 @@ or opening fails. PNG creation runs off the main thread; the coroutine is scoped
 to the entry. A private FileProvider exposes only `cache/parent_qr/` with temporary
 read access. Sharing does not register a profile, regenerate its ID or upload the
 world; it remains available offline. The user chooses the recipient application.
+
+## Встроенный родительский режим — 2026-09-28
+
+По PARENT-MODE-D-001/002 короткое нажатие шестерёнки сохраняет `Settings`,
+долгое вызывает app-owned launcher внутренней `ParentsActivity`. Callback
+проверяет RESUMED и текущий MainMenu; in-flight флаг исключает несколько
+одновременных запусков. Родительский режим находится в том же Android task
+и процессе, использует общий `LctApplication`, без собственного launcher.
+
+Activity держит PIN-gate перед всем `ParentsNavHost`: чтение/создание/проверка
+кода не являются восстанавливаемыми маршрутами с флагом доступа. Только
+разблокированная in-memory ViewModel позволяет показать родительские ключи:
+`parent_report`, `parent_topic(skillId)`, `parent_quests`. Ключи не содержат
+PIN, deviceId или игрового снимка. Сериализаторы принадлежат отдельному
+родительскому host; игровой список сериализаторов не меняется.
+
+Выход из корня завершает Activity и возвращает игровое меню. После фона и
+смерти процесса снова требуется PIN; смена конфигурации сохраняет ViewModel.
+Ошибка чтения PIN не открывает настройку нового кода. Поздние результаты
+проверки после ухода в фон игнорируются. Первоначальная установка четырёх
+цифр с повтором сохраняет поведение исходника как выбор реализации;
+сброс забытого PIN отдельно не определён. Отчёт читает текущее локальное
+прохождение; сканер и ввод/выбор чужого ID не перенесены.
+По PARENT-MODE-D-003 (2026-09-29) внутри разблокированного host действует
+`ParentReportRefreshEffect`: при RESUMED он обновляет серверные оценки текущего
+устройства, при уходе отменяет запрос. Обычная рекомпозиция и переход между
+родительскими маршрутами не запускают его заново; новый вход или возврат в
+RESUMED обновляет оценки. Ручное обновление есть в отчёте и карточке навыка.
+Локальные данные и подходящий кеш остаются видны при сетевой ошибке.
+Вопросы и квесты остаются заглушками. PIN/отчёт не выполняют игровые команды.
