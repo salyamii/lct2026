@@ -6,7 +6,6 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
     </style>
 
     <style name="Theme.LCTApp.Starting" parent="Theme.LCTApp.StartingBase" />
@@ -16,6 +15,5 @@
         <item name="windowSplashScreenAnimatedIcon">@drawable/loading_coin_splash</item>
         <item name="postSplashScreenTheme">@style/Theme.LCTApp</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
     </style>
 </resources>

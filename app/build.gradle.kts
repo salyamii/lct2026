@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.coil.compose)
     implementation(project(":feature:onboarding"))
+    implementation(project(":feature:parents"))
     debugImplementation(project(":feature:debug"))
     implementation(project(":core:game"))
     implementation(libs.androidx.room.runtime)
@@ -122,4 +123,7 @@ tasks.withType<Test>().configureEach {
     val onboardingSources = rootProject.layout.projectDirectory.dir("feature/onboarding/src/main/java")
     inputs.dir(onboardingSources).withPathSensitivity(PathSensitivity.RELATIVE)
     systemProperty("lctapp.onboardingSourceDir", onboardingSources.asFile.absolutePath)
+    val parentsSources = rootProject.layout.projectDirectory.dir("feature/parents/src/main/java")
+    inputs.dir(parentsSources).withPathSensitivity(PathSensitivity.RELATIVE)
+    systemProperty("lctapp.parentsSourceDir", parentsSources.asFile.absolutePath)
 }
