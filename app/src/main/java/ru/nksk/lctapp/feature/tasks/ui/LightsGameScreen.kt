@@ -28,8 +28,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material3.Icon
-import androidx.compose.ui.res.painterResource
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.components.GameArtwork
 import ru.nksk.lctapp.core.ui.theme.Rubik
@@ -94,11 +92,11 @@ fun LightsGameScreen(
                                     },
                                 contentAlignment = Alignment.Center,
                             ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.deed_goods_lantern),
+                                GameArtwork(
+                                    if (lit) R.drawable.deed_game_lights_on else R.drawable.deed_game_lights_off,
                                     contentDescription = null,
-                                    modifier = Modifier.size(30.dp),
-                                    tint = if (lit) DeedColors.Text else DeedColors.TextSoft,
+                                    modifier = Modifier.fillMaxSize().padding(6.dp),
+                                    contentScale = ContentScale.Fit,
                                 )
                             }
                         }

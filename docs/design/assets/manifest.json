@@ -15324,6 +15324,54 @@
       "source_path": "docs/design/assets/debug_settings.svg",
       "source_sha256": "83dbfbeabe462e85a827f1c2ebd7181f6cb0307fabb74fa589ed277e86bc773b",
       "source_notes": "Exact copy of the existing debug_settings geometric gear in the app common source set. Both release and debug use this permanent settings button. A drawable alias to feature/debug is not possible because release does not depend on that module. Original SVG path, viewport and evenOdd fill are unchanged."
+    },
+    {
+      "resource": "deed_game_lights_off",
+      "category": "Mini-game icons — 2026-09-28",
+      "source_method": "user_provided_image",
+      "source_note": "Lantern pair for the observatory lights mini-game; background is natively transparent.",
+      "source_file": "docs/design/assets/sources/mini-game-lanterns-2026-09-28/lantern_off.png",
+      "format": "webp",
+      "width": 341,
+      "height": 512,
+      "bytes": 160480,
+      "sha256": "6bb8a3fe478d2b1ad135e79763791da1c6530a9eedd2e4cd513121787260ff33",
+      "rgba_sha256": "e0b39ff4ae0b003824c478dd39fe7caa8dc0f30e567defd139512fd18bf1c07c",
+      "alpha_bounds": [
+        57,
+        11,
+        292,
+        485
+      ],
+      "source_sha256": "3f1a7c813e42eeae6a7b8a42f4604b84c23292e629aa447181e9e8dd1fa54b40",
+      "source_bytes": 1099909,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/deed_game_lights_off.webp"
+    },
+    {
+      "resource": "deed_game_lights_on",
+      "category": "Mini-game icons — 2026-09-28",
+      "source_method": "user_provided_image",
+      "source_note": "Lantern pair for the observatory lights mini-game; background is natively transparent.",
+      "source_file": "docs/design/assets/sources/mini-game-lanterns-2026-09-28/lantern_on.png",
+      "format": "webp",
+      "width": 341,
+      "height": 512,
+      "bytes": 157748,
+      "sha256": "8d54e334d676c7a68c70628fa4c9301a07e3d93a7be724ded8dda18f13753e01",
+      "rgba_sha256": "a1f558589adca2fe50bec337eb0cc3c8627520c63032df17e9953f3e8a4b2cc9",
+      "alpha_bounds": [
+        0,
+        10,
+        293,
+        485
+      ],
+      "source_sha256": "fc97597a40f8a22c4dba4669a1fe9bf0fcf886d07619a227ff6fa5416d480447",
+      "source_bytes": 1079022,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/deed_game_lights_on.webp"
     }
   ],
   "missing": []

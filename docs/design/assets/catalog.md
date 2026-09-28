@@ -698,3 +698,14 @@ Full canvas preserved; lossless exact WebP. Dedicated to the weekly receipt Prev
 | Resource | Size | Android | Provenance |
 | --- | --- | --- | --- |
 | `settings_gear` | 24 × 24 | [Vector XML](../../../app/src/main/res/drawable/settings_gear.xml) | Точная копия геометрии [debug_settings.svg](debug_settings.svg) для общего source set приложения. Одинаковые path, viewport и evenOdd; release не зависит от debug-модуля, поэтому межмодульный alias недоступен. |
+
+## Mini-game icons — 2026-09-28
+
+Иконки мини-игр раздела «Дела». User-supplied images (PNG source → WebP lossless,
+высота приведена к 512 px, фон прозрачен изначально). Фонари используются в игре
+«Фонари обсерватории» как состояния горящего и погасшего фонаря.
+
+| Android resource | Canvas | Файл | Источник |
+| --- | --- | --- | --- |
+| `R.drawable.deed_game_lights_off` | 341 × 512 | [deed_game_lights_off.webp](../../../app/src/main/res/drawable-nodpi/deed_game_lights_off.webp) | [lantern_off.png](sources/mini-game-lanterns-2026-09-28/lantern_off.png) |
+| `R.drawable.deed_game_lights_on` | 341 × 512 | [deed_game_lights_on.webp](../../../app/src/main/res/drawable-nodpi/deed_game_lights_on.webp) | [lantern_on.png](sources/mini-game-lanterns-2026-09-28/lantern_on.png) |
