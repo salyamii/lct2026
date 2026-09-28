@@ -1,0 +1,10 @@
+<resources>
+    <string name="parents_open_mode">Открыть родительский режим</string>
+    <string name="parents_activity_title">Родительский режим</string>
+    <style name="Theme.LCTApp.Parents" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">#EFEDE5</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>

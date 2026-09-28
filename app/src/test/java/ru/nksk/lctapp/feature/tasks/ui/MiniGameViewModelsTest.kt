@@ -125,6 +125,21 @@ class MiniGameViewModelsTest {
         assertFalse(restored.uiState.value.rightIsAnswer)
     }
 
+    @Test fun quizKeepsIncorrectFeedbackUntilNextAndCannotSkipAnUnansweredQuestion() = runTest(dispatcher) {
+        val model = PriceQuizViewModel(SavedStateHandle(mapOf("questions" to intArrayOf(80, 20, 15, 60))))
+        model.onAction(PriceQuizAction.Next(0))
+        assertEquals(0, model.uiState.value.game.current)
+        model.onAction(PriceQuizAction.Answer(false, 0))
+        advanceUntilIdle()
+        assertEquals(false, model.uiState.value.game.lastCorrect)
+        assertTrue(model.uiState.value.leftIsAnswer)
+        model.onAction(PriceQuizAction.Answer(true, 0))
+        assertEquals(0, model.uiState.value.game.correctAnswers)
+        model.onAction(PriceQuizAction.Next(0))
+        assertEquals(1, model.uiState.value.game.current)
+        assertNull(model.uiState.value.game.lastCorrect)
+    }
+
     @Test fun quizRestartClearsFeedbackAndCannotSkipTheNewQuestion() = runTest(dispatcher) {
         val model = PriceQuizViewModel(SavedStateHandle())
         model.onAction(PriceQuizAction.Answer(true))

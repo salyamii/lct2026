@@ -74,9 +74,27 @@ class SettingsScreenTest {
 
     @Test fun settingsGearIsAvailableWithoutADebugSlot() {
         var opened = 0
-        compose.setContent { LCTAppTheme { SettingsGearButton { opened++ } } }
+        compose.setContent { LCTAppTheme { SettingsGearButton(onClick = { opened++ }) } }
         compose.onNodeWithContentDescription("Настройки").assertIsDisplayed().performClick()
         compose.runOnIdle { assertEquals(1, opened) }
+    }
+
+    @Test fun longPressOpensParentsWithoutAlsoOpeningSettings() {
+        var settings = 0
+        var parents = 0
+        compose.setContent { LCTAppTheme {
+            SettingsGearButton(onClick = { settings++ }, onLongClick = { parents++ })
+        } }
+        compose.onNodeWithContentDescription("Настройки").performTouchInput { longClick() }
+        compose.runOnIdle {
+            assertEquals(0, settings)
+            assertEquals(1, parents)
+        }
+        compose.onNodeWithContentDescription("Настройки").performClick()
+        compose.runOnIdle {
+            assertEquals(1, settings)
+            assertEquals(1, parents)
+        }
     }
 
     @Test fun cloudRestoreRequiresAnExplicitChoiceAfterShowingWhatWillBeReplaced() {

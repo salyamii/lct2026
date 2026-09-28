@@ -6,7 +6,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -22,7 +21,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -45,9 +43,9 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.*
-import kotlinx.coroutines.launch
 
 /** Presentation only: coordinates and artwork do not define unlock or travel rules. */
 @Immutable
@@ -68,67 +66,54 @@ fun LocationMapScreen(
     interactionEnabled: Boolean = true,
 ) {
     Box(modifier.fillMaxSize().background(AdventureNight), contentAlignment = Alignment.TopCenter) {
-        Column(Modifier.widthIn(max = 600.dp).fillMaxSize().safeDrawingPadding()) {
-            Row(
-                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
+        Box(Modifier.widthIn(max = 600.dp).fillMaxSize().safeDrawingPadding()) {
+            BoxWithConstraints(Modifier.fillMaxSize()) {
+                val size = mapCanvasSize(maxWidth.value, maxHeight.value, LocalDensity.current.fontScale)
+                val canvasHeight = size.height.dp
+                val canvasWidth = size.width.dp
+                val scroll = rememberScrollState()
+                val canScrollUp by remember(size.scrollable, scroll) {
+                    derivedStateOf { size.scrollable && scroll.canScrollBackward }
+                }
+                val canScrollDown by remember(size.scrollable, scroll) {
+                    derivedStateOf {
+                        size.scrollable && scroll.maxValue != Int.MAX_VALUE && scroll.canScrollForward
+                    }
+                }
                 Box(
-                    Modifier.size(48.dp).clip(CircleShape)
-                        .background(AdventurePanel)
-                        .border(1.dp, Color.White.copy(alpha = .18f), CircleShape)
-                        .clickable(enabled = interactionEnabled, role = Role.Button, onClick = onBack)
-                        .semantics { contentDescription = "Назад" },
+                    Modifier.fillMaxSize().then(if (size.scrollable) Modifier.verticalScroll(scroll) else Modifier),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Image(androidx.compose.ui.res.painterResource(R.drawable.menu_chevron),
-                        contentDescription = null, modifier = Modifier.size(18.dp).rotate(180f))
-                }
-                Text("Карта приключений", color = AdventureLabel, fontFamily = Rubik,
-                    fontSize = 21.sp, lineHeight = 25.sp, modifier = Modifier.weight(1f))
-                MapInformationButton()
-            }
-            BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
-                val scroll = rememberScrollState()
-                val scrollScope = rememberCoroutineScope()
-                val scrollPage = with(LocalDensity.current) { maxHeight.toPx() * .75f }
-                val canScrollUp by remember { derivedStateOf { scroll.canScrollBackward } }
-                val canScrollDown by remember { derivedStateOf {
-                    scroll.maxValue != Int.MAX_VALUE && scroll.canScrollForward
-                } }
-                val canvasHeight = maxWidth * (1844f / 853f)
-                val canvasWidth = maxWidth
-                Box(Modifier.fillMaxSize().verticalScroll(scroll)) {
-                    Box(Modifier.fillMaxWidth().height(canvasHeight)) {
+                    Box(Modifier.size(canvasWidth, canvasHeight)) {
                         MapLandscape(Modifier.matchParentSize())
                         locations.forEach { location ->
                             val bounds = location.bounds
                             val targetWidth = (canvasWidth * bounds.width)
                                 .coerceAtLeast((canvasWidth * .43f).coerceAtMost(170.dp))
                             key(location.id) {
-                            LocationTarget(
-                                location, location.id == currentLocationId,
-                                artworkHeight = canvasHeight * bounds.height,
-                                enabled = interactionEnabled,
-                                onClick = { onLocationClick(location.id) },
-                                modifier = Modifier.offset(
-                                    x = (canvasWidth * bounds.center.x - targetWidth / 2)
-                                        .coerceIn(0.dp, canvasWidth - targetWidth),
-                                    y = canvasHeight * bounds.top,
-                                ).width(targetWidth),
-                            )
+                                LocationTarget(
+                                    location, location.id == currentLocationId,
+                                    artworkHeight = canvasHeight * bounds.height,
+                                    enabled = interactionEnabled,
+                                    onClick = { onLocationClick(location.id) },
+                                    modifier = Modifier.offset(
+                                        x = (canvasWidth * bounds.center.x - targetWidth / 2)
+                                            .coerceIn(0.dp, canvasWidth - targetWidth),
+                                        y = canvasHeight * bounds.top,
+                                    ).width(targetWidth),
+                                )
                             }
                         }
                     }
                 }
-                if (canScrollUp) MapScrollArrow(up = true, enabled = interactionEnabled,
-                    modifier = Modifier.align(Alignment.TopCenter).padding(12.dp)) {
-                    scrollScope.launch { scroll.animateScrollBy(-scrollPage) }
-                }
-                if (canScrollDown) MapScrollArrow(up = false, enabled = interactionEnabled,
-                    modifier = Modifier.align(Alignment.BottomCenter).padding(12.dp)) {
-                    scrollScope.launch { scroll.animateScrollBy(scrollPage) }
+                if (canScrollDown) MapScrollHint(up = false,
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp))
+                // Overlay the actual image bounds, including letterboxing on tall/wide windows.
+                val headerTop = if (size.scrollable) 0.dp else ((maxHeight - canvasHeight) / 2).coerceAtLeast(0.dp)
+                Column(Modifier.align(Alignment.TopCenter).offset(y = headerTop).width(canvasWidth)) {
+                    MapHeader(onBack, interactionEnabled)
+                    if (canScrollUp) MapScrollHint(up = true,
+                        modifier = Modifier.align(Alignment.End).padding(horizontal = 16.dp, vertical = 8.dp))
                 }
             }
         }
@@ -136,16 +121,53 @@ fun LocationMapScreen(
 }
 
 @Composable
-private fun MapScrollArrow(up: Boolean, enabled: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
+private fun MapScrollHint(up: Boolean, modifier: Modifier = Modifier) {
     Box(modifier.size(48.dp).shadow(6.dp, CircleShape).clip(CircleShape)
         .background(AdventurePanel)
         .border(1.dp, AdventureLabel.copy(alpha = .45f), CircleShape)
-        .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-        .semantics { contentDescription = if (up) "Прокрутить карту вверх" else "Прокрутить карту вниз" },
+        .semantics {
+            contentDescription = if (up) "Выше есть ещё локации. Прокрути карту вверх."
+                else "Ниже есть ещё локации. Прокрути карту вниз."
+        },
         contentAlignment = Alignment.Center) {
         Icon(androidx.compose.ui.res.painterResource(R.drawable.menu_chevron), null,
             Modifier.size(22.dp).rotate(if (up) -90f else 90f), tint = AdventureLabel)
     }
+}
+
+@Composable
+private fun MapHeader(onBack: () -> Unit, interactionEnabled: Boolean, modifier: Modifier = Modifier) {
+    Row(
+        modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Box(
+            Modifier.size(48.dp).clip(CircleShape)
+                .background(AdventureNight)
+                .border(1.dp, Color.White.copy(alpha = .18f), CircleShape)
+                .clickable(enabled = interactionEnabled, role = Role.Button, onClick = onBack)
+                .semantics { contentDescription = "Назад" },
+            contentAlignment = Alignment.Center,
+        ) {
+            Image(androidx.compose.ui.res.painterResource(R.drawable.menu_chevron),
+                contentDescription = null, modifier = Modifier.size(18.dp).rotate(180f))
+        }
+        Text("Карта приключений", color = AdventureLabel, fontFamily = Nunito,
+            fontSize = 16.sp, lineHeight = 22.sp,
+            modifier = Modifier.weight(1f).clip(RoundedCornerShape(24.dp))
+                .background(AdventureNight).padding(horizontal = 12.dp, vertical = 10.dp))
+        MapInformationButton()
+    }
+}
+
+@Preview(name = "Карта целиком", widthDp = 390, heightDp = 844)
+@Preview(name = "Невысокий экран", widthDp = 360, heightDp = 640)
+@Preview(name = "Альбомный экран", widthDp = 844, heightDp = 390)
+@Preview(name = "Крупный текст", widthDp = 390, heightDp = 844, fontScale = 1.5f)
+@Composable
+private fun LocationMapPreview() {
+    LCTAppTheme { LocationMapScreen(mapLocations, "city", {}, {}) }
 }
 
 @Composable

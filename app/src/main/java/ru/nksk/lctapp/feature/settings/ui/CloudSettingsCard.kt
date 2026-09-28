@@ -1,12 +1,12 @@
 package ru.nksk.lctapp.feature.settings.ui
 
+import ru.nksk.lctapp.core.ui.components.GameLoadingIndicator
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,7 +30,7 @@ internal fun CloudSettingsCard(state: CloudSettingsUiState, configured: Boolean,
         if (!configured) AdventureBody("Облако станет доступно после подключения профиля к серверу.")
         state.lastSyncedLabel?.let { AdventureBody("Последняя синхронизация: $it") }
         if (state.busy) {
-            LinearProgressIndicator(Modifier.fillMaxWidth())
+            GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
             AdventureBody(when (state.operation) {
                 CloudSettingsOperation.DOWNLOAD -> "Загружаем копию из облака…"
                 CloudSettingsOperation.RESTORE -> "Восстанавливаем игру…"
@@ -69,7 +69,7 @@ internal fun CloudRestoreDialog(preview: CloudRestorePreview, busy: Boolean,
                 AdventureBody("Монеты с собой: ${preview.availableCoins}. В копилке: ${preview.savingsCoins}.")
                 AdventureBody("Сохранение из облака заменит текущий мир, его журнал и прогресс на этом устройстве.")
                 if (busy) {
-                    LinearProgressIndicator(Modifier.fillMaxWidth())
+                    GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
                     AdventureBody("Восстанавливаем игру…")
                 }
             }

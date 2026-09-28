@@ -128,7 +128,7 @@ internal fun GoalScreen(
         },
     ) {
         when {
-            state.loading -> CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally), color = GameInk)
+            state.loading -> GameLoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
             state.failed -> {
                 AdventureHeading("Не удалось открыть цели")
                 AdventureBody("Попробуй загрузить их ещё раз.")

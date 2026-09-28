@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -30,6 +28,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
+import ru.nksk.lctapp.core.ui.theme.GameTextWrapping
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 
@@ -87,9 +86,8 @@ internal fun GameActionButton(
     val content: @Composable () -> Unit = {
         Box(contentAlignment = Alignment.Center) {
             Text(text, modifier = Modifier.alpha(if (loading) 0f else 1f),
-                style = textStyle, textAlign = TextAlign.Center)
-            if (loading) CircularProgressIndicator(Modifier.size(20.dp).clearAndSetSemantics {},
-                color = LocalContentColor.current, strokeWidth = 2.dp)
+                style = GameTextWrapping.merge(textStyle), textAlign = TextAlign.Center)
+            if (loading) GameLoadingIndicator(Modifier.size(24.dp).clearAndSetSemantics {}, size = 24.dp)
         }
     }
     when (style) {

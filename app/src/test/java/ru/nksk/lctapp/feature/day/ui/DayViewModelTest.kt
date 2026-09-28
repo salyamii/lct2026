@@ -606,6 +606,7 @@ class DayViewModelTest {
             assertEquals(event, artwork, shown.purchaseArtworkRes)
             assertEquals("Ярмарка", shown.locationTitle)
             assertEquals(EventLayout.PURCHASE, shown.layout)
+            assertTrue(shown.focusesItem)
             assertNull(shown.financialContext)
             assertTrue(shown.impact.isEmpty())
             assertFalse(shown.title.any(Char::isDigit))
@@ -616,6 +617,15 @@ class DayViewModelTest {
             assertEquals(2, shown.options.size)
             assertNull(shown.message)
         }
+    }
+
+    @Test fun itemSceneSoftensItsBackdropWhileNpcSceneKeepsItSharp() = runTest(dispatcher) {
+        val (_, tornStrap) = fixture(eventFirst = "figma-2297-2-v2")
+        runCurrent()
+        assertTrue(tornStrap.uiState.value.focusesItem)
+        val (_, caretaker) = fixture(eventFirst = "figma-2163-2-v1")
+        runCurrent()
+        assertFalse(caretaker.uiState.value.focusesItem)
     }
 
     @Test fun missingIllustrationDoesNotChangeThePurchaseLayoutOrItsActions() = runTest(dispatcher) {

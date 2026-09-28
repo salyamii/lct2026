@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.LCTApp" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.LCTApp" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/startup_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <style name="Theme.LCTApp.Starting" parent="Theme.LCTApp.StartingBase" />
+
+    <style name="Theme.LCTApp.StartingBase" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/startup_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/loading_coin_splash</item>
+        <item name="postSplashScreenTheme">@style/Theme.LCTApp</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
 </resources>

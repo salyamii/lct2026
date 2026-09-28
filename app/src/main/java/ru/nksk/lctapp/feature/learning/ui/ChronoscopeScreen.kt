@@ -126,7 +126,7 @@ internal fun ChronoscopeScreen(state: ReflectionUiState, onAction: (ReflectionAc
             else -> null
         },
     ) {
-        if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth(), color = AdventureLime)
+        if (state.busy) GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
         state.error?.let {
             GameBody(it)
             SecondaryAction("Повторить", { onAction(ReflectionAction.Retry) }, enabled = !state.busy)

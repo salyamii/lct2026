@@ -58,6 +58,8 @@ import ru.nksk.lctapp.core.ui.components.GameInk
 import ru.nksk.lctapp.core.ui.components.GamePaper
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
 
+private val MenuBadgeMinHeight = 56.dp
+
 @Composable
 internal fun MenuHud(
     petName: String,
@@ -122,20 +124,25 @@ internal fun MenuHud(
                 onClick = { onAction(MainMenuAction.Coins) }, onFinance = { onAction(MainMenuAction.Finance) },
                 onSavings = { onAction(MainMenuAction.Savings) })
             Spacer(Modifier.width(8.dp))
-            Box(Modifier.weight(1f).align(if (budget == null) Alignment.CenterVertically else Alignment.Top), contentAlignment = Alignment.CenterEnd) {
-                Text(
-                    text = petName,
-                    modifier = Modifier.clip(RoundedCornerShape(20.dp))
+            Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+                Box(
+                    modifier = Modifier.heightIn(min = MenuBadgeMinHeight)
+                        .clip(RoundedCornerShape(20.dp))
                         .background(AdventurePanel.copy(alpha = 0.85f))
                         .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(20.dp))
                         .padding(horizontal = 16.dp, vertical = 8.dp),
-                    color = AdventureLabel,
-                    fontFamily = Rubik,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = petName,
+                        color = AdventureLabel,
+                        fontFamily = Rubik,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
         }
     }
@@ -160,7 +167,7 @@ private fun BudgetBadge(
     // so expanding it cannot resize the pet scene or reposition the map/actions.
     Box {
         Row(
-            Modifier.width(154.dp)
+            Modifier.width(154.dp).heightIn(min = MenuBadgeMinHeight)
                 .clip(RoundedCornerShape(20.dp))
                 .background(AdventurePanel.copy(alpha = 0.9f))
                 .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(20.dp))
@@ -279,7 +286,7 @@ private fun BudgetPopupAction(title: String, onClick: () -> Unit) {
 private fun CoinsBadge(coins: Long, onClick: () -> Unit) {
     val description = stringResource(R.string.menu_coins_accessibility, coins)
     Row(
-        Modifier.clip(RoundedCornerShape(20.dp))
+        Modifier.heightIn(min = MenuBadgeMinHeight).clip(RoundedCornerShape(20.dp))
             .background(AdventurePanel.copy(alpha = 0.63f))
             .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(20.dp))
             .clickable(role = Role.Button, onClick = onClick)

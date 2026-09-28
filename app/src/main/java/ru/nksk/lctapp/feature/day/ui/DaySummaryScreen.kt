@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.feature.day.ui
 
+import ru.nksk.lctapp.core.ui.components.GameLoadingIndicator
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -15,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ButtonDefaults
@@ -39,7 +39,6 @@ import ru.nksk.lctapp.core.ui.components.GameArtwork
 import ru.nksk.lctapp.core.ui.components.GameCardLayout
 import ru.nksk.lctapp.core.ui.components.GameInk
 import ru.nksk.lctapp.core.ui.components.GameTitle
-import ru.nksk.lctapp.core.ui.components.gameScene
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 
@@ -52,10 +51,9 @@ internal fun DaySummaryScreen(state: DayUiState, onAction: (DayAction) -> Unit, 
     val summary = state.summary ?: return
     GameCardLayout(
         category = "Итоги дня",
-        scene = gameScene(state.scene),
+        scene = R.drawable.location_bedroom_night,
         character = state.restingPetRes,
         onBack = onBack,
-        sceneDim = .78f,
         characterDescription = "${state.petName} спит",
     ) {
         GameTitle("День ${summary.day} завершён")
@@ -97,7 +95,7 @@ internal fun DaySummaryScreen(state: DayUiState, onAction: (DayAction) -> Unit, 
         }
         state.message?.let { AdventureBody(it) }
         state.actionNotice?.let { AdventureBody(it) }
-        if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
+        if (state.busy) GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
         state.primary?.let { label ->
             AdventurePrimaryButton(label, { onAction(DayAction.Primary) }, enabled = !state.busy)
         }

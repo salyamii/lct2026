@@ -1,0 +1,5 @@
+<resources>
+    <string name="loading_in_progress">Загрузка…</string>
+    <color name="startup_background">#120F30</color>
+    <dimen name="startup_coin_size">120dp</dimen>
+</resources>

@@ -29,7 +29,7 @@ internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
                 while (true) awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() }
             }
         }) {
-            LinearProgressIndicator(Modifier.align(Alignment.TopCenter).safeDrawingPadding().fillMaxWidth())
+            GameLoadingIndicator(Modifier.align(Alignment.Center).safeDrawingPadding())
         }
         if (state.retryRequired && !state.busy) AlertDialog(
             onDismissRequest = onBack,
@@ -45,19 +45,23 @@ internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
 @Composable
 private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit,
     onLoadingContinue: () -> Unit) {
-    if (state.loading || state.failed) {
+    if (state.loading) {
+        Box(Modifier.fillMaxSize()) {
+            GameLoadingScreen()
+            // Keep the shared coin centered while the existing exit remains reachable.
+            Box(Modifier.align(Alignment.BottomCenter).safeDrawingPadding().padding(24.dp)) {
+                AdventurePrimaryButton("Вперёд", onLoadingContinue)
+            }
+        }
+        return
+    }
+    if (state.failed) {
         Surface(Modifier.fillMaxSize()) {
             Column(Modifier.safeDrawingPadding().padding(24.dp), verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally) {
-                if (state.loading) {
-                    CircularProgressIndicator()
-                    Spacer(Modifier.height(16.dp))
-                    Button(onLoadingContinue) { Text("Вперёд") }
-                } else {
-                    Text("Не удалось загрузить игру. Сохранение не изменено.")
-                    Button({ onAction(DayAction.Retry) }) { Text("Повторить") }
-                    TextButton(onBack) { Text("Назад") }
-                }
+                Text("Не удалось загрузить игру. Сохранение не изменено.")
+                Button({ onAction(DayAction.Retry) }) { Text("Повторить") }
+                TextButton(onBack) { Text("Назад") }
             }
         }
         return
@@ -70,6 +74,7 @@ private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
         PurchaseCard(state, onAction, onBack)
     } else AdventureScreen(
         title = state.category, onBack = onBack, backgroundRes = state.eventBackgroundRes,
+        blurBackground = state.focusesItem,
         artworkSceneKey = state.audioOccurrenceId ?: state.title,
         sceneAspectRatio = 1.12f, pinFooter = false,
         scene = { DayEventScene(state, Modifier.fillMaxSize()) },
@@ -133,6 +138,7 @@ private fun PurchaseCard(state: DayUiState, onAction: (DayAction) -> Unit, onBac
     AdventureScreen(
         title = state.locationTitle, onBack = onBack,
         backgroundRes = state.eventBackgroundRes,
+        blurBackground = state.focusesItem,
         artworkSceneKey = state.audioOccurrenceId ?: state.title,
         sceneAspectRatio = 1.12f, pinFooter = false,
         scene = {

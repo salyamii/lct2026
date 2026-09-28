@@ -46,5 +46,38 @@ class DeedRewardPreview private constructor(
             val mistakes = state.round - state.hits
             return DeedRewardPreview(mistakes, TargetStopState.ROUNDS - mistakes, TargetStopState.ROUNDS)
         }
+
+        fun fromLights(state: LightsState): DeedRewardPreview {
+            require(state.moves >= 0)
+            // Solving this puzzle earns the full reward; exploring a switch is not a mistake.
+            return DeedRewardPreview(0, 1, 1)
+        }
+
+        fun fromSequence(state: SequenceState): DeedRewardPreview {
+            require(state.round in 0..SequenceState.ROUNDS)
+            require(state.correct in 0..state.round)
+            val mistakes = state.round - state.correct
+            return DeedRewardPreview(mistakes, SequenceState.ROUNDS - mistakes, SequenceState.ROUNDS)
+        }
+
+        fun fromPipes(state: PipesState): DeedRewardPreview {
+            require(PipesState.isLayoutValid(state.endpoints))
+            // Revising a route is part of solving the puzzle, which has no error penalty.
+            return DeedRewardPreview(0, 1, 1)
+        }
+
+        fun fromDifferences(state: DifferencesState): DeedRewardPreview {
+            require(state.found.size in 0..DifferencesState.DIFF_COUNT)
+            val mistakes = state.taps - state.found.size
+            return DeedRewardPreview(mistakes, DifferencesState.DIFF_COUNT,
+                DifferencesState.DIFF_COUNT + mistakes)
+        }
+
+        fun fromStacking(state: StackingState): DeedRewardPreview {
+            require(state.placed in 0..StackingState.ROUNDS)
+            // A miss ends this game; until then all remaining crates can still be placed.
+            val missed = if (state.finished) StackingState.ROUNDS - state.placed else 0
+            return DeedRewardPreview(missed, StackingState.ROUNDS - missed, StackingState.ROUNDS)
+        }
     }
 }

@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.feature.onboarding.navigation
 
+import androidx.compose.ui.Modifier
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,6 +20,7 @@ fun OnboardingEntry(
     saving: Boolean,
     saveFailed: Boolean,
     onStartAdventure: () -> Unit,
+    loadingIndicator: @Composable (Modifier) -> Unit,
 ) {
     val viewModel: OnboardingViewModel = hiltViewModel()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -29,7 +31,7 @@ fun OnboardingEntry(
             viewModel.onAction(OnboardingAction.DismissNotice(state.noticeId))
         }
     }
-    OnboardingScreen(state, artwork, saving, saveFailed, viewModel::onAction, onStart = {
+    OnboardingScreen(state, artwork, saving, saveFailed, viewModel::onAction, loadingIndicator = loadingIndicator, onStart = {
         if (!saving) {
             if (viewModel.uiState.value.foxSelected) onStartAdventure()
             else viewModel.onAction(OnboardingAction.RequireSelection)

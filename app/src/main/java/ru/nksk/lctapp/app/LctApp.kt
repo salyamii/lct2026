@@ -1,5 +1,7 @@
 package ru.nksk.lctapp.app
 
+import ru.nksk.lctapp.core.ui.components.GameLoadingIndicator
+import ru.nksk.lctapp.core.ui.components.GameLoadingScreen
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,14 +51,14 @@ import ru.nksk.lctapp.core.ui.media.LocalMediaPlayback
 
 /** Composition root for shared presentation and app-owned navigation. */
 @Composable
-fun LctApp() {
+fun LctApp(startupAnimationPlaying: Boolean = true) {
     AppDebugOverlay { debugSettingsButton ->
-        LctAppContent(debugSettingsButton)
+        LctAppContent(debugSettingsButton, startupAnimationPlaying)
     }
 }
 
 @Composable
-private fun LctAppContent(debugSettingsButton: (@Composable () -> Unit)?) {
+private fun LctAppContent(debugSettingsButton: (@Composable () -> Unit)?, startupAnimationPlaying: Boolean) {
     LCTAppTheme {
         val startup: AppStartupViewModel = hiltViewModel()
         val state by startup.uiState.collectAsStateWithLifecycle()
@@ -101,6 +103,7 @@ private fun LctAppContent(debugSettingsButton: (@Composable () -> Unit)?) {
                     }
                 }
                 is AppStartupState.Choose -> OnboardingEntry(
+                    loadingIndicator = { GameLoadingIndicator(it) },
                     artwork = OnboardingArtwork(
                         background = R.drawable.onboarding_castle,
                         fox = R.drawable.onboarding_ryzhik,
@@ -192,10 +195,10 @@ private fun LctAppContent(debugSettingsButton: (@Composable () -> Unit)?) {
                         saveFailed = current.failed,
                     )
                 }
+                AppStartupState.Loading -> GameLoadingScreen(isPlaying = startupAnimationPlaying)
                 else -> Box(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding(),
                     contentAlignment = Alignment.Center) {
-                    if (current == AppStartupState.Loading) CircularProgressIndicator()
-                    else Column(Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text("Не удалось прочитать сохранение", color = androidx.compose.ui.graphics.Color.White)
                         Button(onClick = startup::retry) { Text("Повторить") }
                     }

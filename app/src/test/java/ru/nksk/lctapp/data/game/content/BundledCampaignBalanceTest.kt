@@ -134,7 +134,8 @@ class BundledCampaignBalanceTest {
             val event = catalog.content.events.single { it.id == active.eventId }
             if (active.origin == EventOrigin.DEED) {
                 val score = score(catalog.policies.getValue(active.eventId).deedGameKind!!, scoreCap)
-                assertTrue(score.correct * 100 <= score.attempts * scoreCap)
+                // Цельные партии (лампы, карта, концы, банки, отличия) завершаются только полностью.
+                assertTrue(score.correct == score.attempts || score.correct * 100 <= score.attempts * scoreCap)
                 val maximum = catalog.content.choices.single { it.eventId == active.eventId }.moneyDelta
                 val before = state.economy.availableBalance
                 send(EngineCommand.CompleteDeed(active.id, score))
@@ -299,6 +300,34 @@ class BundledCampaignBalanceTest {
                     it.copy(matched = it.faces.indices.toSet(), moves = attempts,
                         recallMistakes = attempts - MemoryState.PAIRS)
                 })
+            // Лампы и концы не делятся на доли: партия либо решена, либо нет.
+            DeedGameKind.LIGHTS -> DeedGameScore.fromLights(LightsState(
+                List(LightsState.SIZE * LightsState.SIZE) { false }, moves = 1))
+            DeedGameKind.SEQUENCE -> DeedGameScore.fromSequence(SequenceState(
+                sequence = List(SequenceState.FIRST_ROUND_LENGTH) { 0 },
+                round = SequenceState.ROUNDS,
+                correct = SequenceState.ROUNDS * cap / 100,
+                lastCorrect = true,
+            ))
+            DeedGameKind.PIPES -> DeedGameScore.fromPipes(PipesState(PipesState.PUZZLE, paths = solvedPipePaths()))
+            // All differences are found, but missed cells lower the completed score.
+            DeedGameKind.DIFFERENCES -> DeedGameScore.fromDifferences(DifferencesState.create().let { board ->
+                board.differences.fold(board) { state, cell -> state.tap(cell) }
+                    .copy(taps = (DifferencesState.DIFF_COUNT * 100 + cap - 1) / cap)
+            })
+            // Ограниченное число ящиков округляет долю вниз, как PRECISION выше.
+            DeedGameKind.STACKING -> DeedGameScore.fromStacking(StackingState(
+                locked = List(StackingState.ROUNDS * cap / 100) { StackedBlock(0, StackingState.START_WIDTH) },
+                blockWidth = StackingState.START_WIDTH,
+                placed = StackingState.ROUNDS * cap / 100,
+                finished = true,
+            ))
         })
+
+        private fun solvedPipePaths(): Map<Int, List<Int>> = mapOf(
+            0 to listOf(0, 5, 10, 15, 20),
+            1 to listOf(4, 9, 14, 19, 24),
+            2 to listOf(11, 6, 7, 8, 13),
+        )
     }
 }

@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.feature.tasks.ui
 
+import ru.nksk.lctapp.core.ui.components.GameLoadingIndicator
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,9 +22,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.LinearProgressIndicator
 import ru.nksk.lctapp.core.ui.components.gameScene
 import ru.nksk.lctapp.core.ui.components.GameArtwork
 import androidx.compose.runtime.Composable
@@ -62,7 +61,7 @@ fun DeedsScreen(onTraining: () -> Unit, onExit: () -> Unit,
                 while (true) awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() }
             }
         }) {
-            LinearProgressIndicator(Modifier.align(Alignment.TopCenter).safeDrawingPadding().fillMaxWidth())
+            GameLoadingIndicator(Modifier.align(Alignment.Center).safeDrawingPadding())
         }
     }
 }
@@ -100,7 +99,7 @@ private fun DeedsContent(onTraining: () -> Unit, onExit: () -> Unit,
                             color = DeedColors.Text,
                         )
                         Spacer(Modifier.height(2.dp))
-                        if (state.loading) CircularProgressIndicator()
+                        if (state.loading) GameLoadingIndicator()
                         if (state.failed) {
                             Text("Не удалось загрузить дела.", color = DeedColors.Text)
                             Button(onRetry) { Text("Повторить") }

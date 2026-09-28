@@ -68,6 +68,11 @@ class DeedGameScoreTest {
         assertNull(DeedGameScore.fromComparison(PriceQuizState(emptyList(), current = 5, correctAnswers = 5)))
         assertNull(DeedGameScore.fromPrecision(TargetStopState.create()))
         assertNull(DeedGameScore.fromPrecision(TargetStopState(10, round = 5, hits = 6, lastHit = true)))
+        assertNull(DeedGameScore.fromLights(LightsState.create()))
+        assertNull(DeedGameScore.fromSequence(SequenceState.create()))
+        assertNull(DeedGameScore.fromPipes(PipesState.create()))
+        assertNull(DeedGameScore.fromDifferences(DifferencesState.create()))
+        assertNull(DeedGameScore.fromStacking(StackingState.create()))
     }
 
     @Test fun exploratoryMemoryMovesDoNotReduceTheCompletedReward() {
@@ -97,4 +102,37 @@ class DeedGameScoreTest {
         val encoded = Json.parseToJsonElement(Json.encodeToString(recorded)).jsonObject
         assertEquals(setOf("kind", "correct", "attempts"), encoded.keys)
     }
+
+    @Test fun oneShotPuzzlesPayTheFullMaximumOnlyWhenSolved() {
+        // Хоть один ход должен быть сделан, иначе результат не считается партией.
+        val lights = LightsState(List(LightsState.SIZE * LightsState.SIZE) { false }, moves = 3)
+        assertEquals(9L, checkNotNull(DeedGameScore.fromLights(lights)).reward(9))
+    }
+
+    @Test fun layeredGamesPayForTheirExactProgress() {
+        var sequence = SequenceState.create()
+        repeat(SequenceState.ROUNDS) { round ->
+            sequence = sequence.playRound(win = round != 3).next()
+        }
+        val sequenceScore = checkNotNull(DeedGameScore.fromSequence(sequence))
+        assertEquals(SequenceState.ROUNDS - 1, sequenceScore.correct)
+        assertEquals(3L, sequenceScore.reward(4))
+
+        var stack = StackingState.create().dropAt(20)
+        repeat(1) { stack = stack.dropAt(stack.locked.last().x) }
+        val stackScore = checkNotNull(DeedGameScore.fromStacking(stack.copy(finished = true)))
+        assertEquals(2, stackScore.correct)
+        assertEquals(1L, stackScore.reward(3))
+
+        var differences = DifferencesState.create(0)
+        differences.differences.forEach { cell -> differences = differences.tap(cell) }
+        val differencesScore = checkNotNull(DeedGameScore.fromDifferences(differences))
+        assertEquals(DifferencesState.DIFF_COUNT, differencesScore.correct)
+        // Все отличия найдены без промахов — награда полная.
+        assertEquals(8L, differencesScore.reward(8))
+    }
+
+    private fun SequenceState.playRound(win: Boolean): SequenceState =
+        if (win) sequence.fold(this) { state, signal -> state.tap(signal) }
+        else tap((sequence.first() + 1) % SequenceState.SIGNAL_COUNT)
 }

@@ -69,6 +69,42 @@ fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> 
                     TargetStopScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
                         leave, state.presentation)
                 }
+                DeedGameType.LIGHTS -> {
+                    val game = hiltViewModel<LightsGameViewModel>()
+                    val board by game.uiState.collectAsStateWithLifecycle()
+                    LaunchedEffect(board.game) { model.finishLights(board.game) }
+                    LightsGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
+                        leave, state.presentation)
+                }
+                DeedGameType.SEQUENCE -> {
+                    val game = hiltViewModel<SequenceGameViewModel>()
+                    val board by game.uiState.collectAsStateWithLifecycle()
+                    LaunchedEffect(board.game) { model.finishSequence(board.game) }
+                    SequenceGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
+                        leave, state.presentation)
+                }
+                DeedGameType.PIPES -> {
+                    val game = hiltViewModel<PipesGameViewModel>()
+                    val board by game.uiState.collectAsStateWithLifecycle()
+                    LaunchedEffect(board.game) { model.finishPipes(board.game) }
+                    PipesGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
+                        leave, state.presentation)
+                }
+                DeedGameType.DIFFERENCES -> {
+                    val game = hiltViewModel<DifferencesGameViewModel>()
+                    val board by game.uiState.collectAsStateWithLifecycle()
+                    LaunchedEffect(board.game) { model.finishDifferences(board.game) }
+                    DifferencesGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
+                        leave, state.presentation)
+                }
+                DeedGameType.STACKING -> {
+                    val game = hiltViewModel<StackingGameViewModel>()
+                    val board by game.uiState.collectAsStateWithLifecycle()
+                    val position = game.position.collectAsStateWithLifecycle()
+                    LaunchedEffect(board.game) { model.finishStacking(board.game) }
+                    StackingGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
+                        leave, state.presentation, position = { position.value })
+                }
                 null -> Unit
             }
         }

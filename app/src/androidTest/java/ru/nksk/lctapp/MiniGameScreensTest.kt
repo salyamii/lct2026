@@ -1,6 +1,7 @@
 package ru.nksk.lctapp
 
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.DeviceConfigurationOverride
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.FontScale
@@ -19,6 +20,8 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,16 +38,20 @@ class MiniGameScreensTest {
     @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
 
     @Test fun quizMarksTheMoreExpensiveCardAfterAnAnswer() {
+        val actions = mutableListOf<PriceQuizAction>()
         compose.setContent {
             LCTAppTheme {
                 PriceQuizScreen(
                     PriceQuizUiState(PriceQuizState(listOf(QuizQuestion(80, 20))).answer(true)),
-                    onAction = {}, onBack = {},
+                    onAction = actions::add, onBack = {},
                 )
             }
         }
         compose.onNodeWithText("80 монет").assertIsSelected()
         compose.onNodeWithText("20 монет").assertIsNotSelected()
+        compose.onNodeWithText("Правильно").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Завершить").performScrollTo().assertIsDisplayed().performClick()
+        compose.runOnIdle { assertEquals(listOf(PriceQuizAction.Next(0)), actions) }
     }
 
     @Test fun compactLandscapeKeepsTheLastMemoryCardReachable() {
@@ -68,6 +75,39 @@ class MiniGameScreensTest {
         compose.runOnIdle { assertEquals(listOf(MemoryGameAction.Tap(15)), actions) }
     }
 
+    @Test fun openAndMatchedMemoryCardsAnnounceTheirItemNames() {
+        compose.setContent {
+            LCTAppTheme {
+                MemoryGameScreen(
+                    MemoryGameUiState(MemoryState(faces = (0..7).toList() + (0..7).toList(),
+                        faceUp = setOf(0), matched = setOf(1, 9))),
+                    onAction = {}, onBack = {},
+                )
+            }
+        }
+        compose.onNodeWithContentDescription("Карта 1, ключ").assertExists()
+        compose.onNodeWithContentDescription("Карта 2, армиллярная сфера, пара найдена").assertExists()
+        compose.onNodeWithContentDescription("Карта 3, закрыта").assertExists()
+    }
+
+    @Test fun themedMemoryKeepsOriginalDistinctArtworkAndItsAccessibleNames() {
+        compose.setContent {
+            LCTAppTheme {
+                MemoryGameScreen(
+                    MemoryGameUiState(MemoryState(faces = (0..7).toList() + (0..7).toList(),
+                        faceUp = setOf(0), matched = setOf(1, 9))),
+                    onAction = {}, onBack = {},
+                    deed = DeedGamePresentation("Архив", 0, true, storyAction = true,
+                        sceneRes = R.drawable.location_workshop,
+                        activityArtworkRes = R.drawable.story_cargo_journal),
+                )
+            }
+        }
+        compose.onNodeWithContentDescription("Карта 1, ключ").assertExists()
+        compose.onNodeWithContentDescription("Карта 2, армиллярная сфера, пара найдена").assertExists()
+        compose.onNodeWithContentDescription("Карта 3, закрыта").assertExists()
+    }
+
     @Test fun compactLandscapeKeepsTelescopeStopReachable() {
         val actions = mutableListOf<TargetStopAction>()
         compose.setContent {
@@ -86,5 +126,26 @@ class MiniGameScreensTest {
         compose.onNodeWithTag("telescope_track").assertIsDisplayed()
         compose.onNodeWithText("Стоп!").performClick()
         compose.runOnIdle { assertEquals(1, actions.size) }
+    }
+
+    @Test fun telescopeZoneAgreesWithTheStoppedMarkerAtTheAuditedPositions() {
+        val shown = mutableStateOf(TargetStopUiState(
+            TargetStopState(zoneStart = 5, round = 1, lastHit = false), stoppedPosition = .04f))
+        compose.setContent {
+            DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(DpSize(360.dp, 720.dp))) {
+                LCTAppTheme { TargetStopScreen(shown.value, {}, {}) }
+            }
+        }
+        fun centerIsInsideZone(): Boolean {
+            val marker = compose.onNodeWithTag("telescope_marker").fetchSemanticsNode().boundsInRoot
+            val zone = compose.onNodeWithTag("telescope_zone").fetchSemanticsNode().boundsInRoot
+            return marker.center.x >= zone.left && marker.center.x < zone.right
+        }
+        assertFalse("A scored miss must visibly miss the zone", centerIsInsideZone())
+        compose.runOnIdle {
+            shown.value = TargetStopUiState(
+                TargetStopState(zoneStart = 5, round = 1, hits = 1, lastHit = true), stoppedPosition = .24f)
+        }
+        assertTrue("A scored hit must visibly hit the zone", centerIsInsideZone())
     }
 }

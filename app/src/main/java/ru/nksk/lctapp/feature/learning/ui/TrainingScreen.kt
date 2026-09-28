@@ -149,7 +149,10 @@ private fun PracticeQuestionScreen(state: TrainingUiState, question: FinancialQu
             }
         }
         if (showExplanation) {
-            item { LearningCard(if (question.correct) "Верно!" else "Давай разберёмся") {
+            item { LearningCard(if (question.correct) "Верно!" else "Ответ неверный 😔") {
+                if (!question.correct) {
+                    Text("Давай разберёмся! 🙂", color = GameInk, style = MaterialTheme.typography.titleMedium)
+                }
                 AdventureBody(question.explanation.asGameUiText())
             } }
             item {

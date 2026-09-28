@@ -2,6 +2,7 @@ package ru.nksk.lctapp.feature.settings.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -14,8 +15,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
@@ -29,8 +32,13 @@ import ru.nksk.lctapp.core.ui.theme.AdventureNight
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
 
 @Composable
-internal fun SettingsGearButton(onClick: () -> Unit) {
-    IconButton(onClick, Modifier.size(48.dp)) {
+internal fun SettingsGearButton(onClick: () -> Unit, onLongClick: (() -> Unit)? = null) {
+    Box(Modifier.size(48.dp).clip(CircleShape).combinedClickable(
+        role = Role.Button,
+        onClick = onClick,
+        onLongClick = onLongClick,
+        onLongClickLabel = stringResource(R.string.parents_open_mode),
+    ), contentAlignment = Alignment.Center) {
         Icon(painterResource(R.drawable.settings_gear), "Настройки", Modifier.size(20.dp), tint = Color.White)
     }
 }
@@ -56,7 +64,7 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
                 Text("Для родителей", color = GameInk, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 AdventureBody("Покажите код родителю, чтобы он мог видеть прогресс и присылать подарки.")
                 if (state.loading) {
-                    LinearProgressIndicator(Modifier.fillMaxWidth())
+                    GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
                     AdventureBody("Открываем настройки…")
                 } else if (state.profileError) {
                     AdventureBody("Не удалось открыть профиль. Попробуйте ещё раз.")
@@ -134,7 +142,7 @@ private fun SoundSettingsCard(state: SoundSettingsUiState, onAction: (SettingsAc
                     uncheckedBorderColor = GameInk.copy(alpha = .35f)))
         }
         if (state.loading || state.saving) {
-            LinearProgressIndicator(Modifier.fillMaxWidth())
+            GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
             AdventureBody(if (state.saving) "Сохраняем…" else "Открываем настройку звука…")
         }
         state.error?.let { error ->
@@ -153,7 +161,7 @@ private fun ParentCodeContent(state: SettingsUiState, onAction: (SettingsAction)
     when (state.codeStatus) {
         ParentCodeStatus.NONE -> AdventurePrimaryButton("Показать код для родителей", { onAction(SettingsAction.CreateParentCode) })
         ParentCodeStatus.LOADING -> {
-            LinearProgressIndicator(Modifier.fillMaxWidth())
+            GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
             AdventureBody("Готовим код…")
         }
         ParentCodeStatus.READY -> {
@@ -168,7 +176,7 @@ private fun ParentCodeContent(state: SettingsUiState, onAction: (SettingsAction)
                 AdventureBody("Родитель сможет подключиться, когда заработает сервер.")
             } else when (state.registrationStatus) {
                 ProfileRegistrationStatus.LOADING -> {
-                    LinearProgressIndicator(Modifier.fillMaxWidth())
+                    GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
                     AdventureBody("Регистрируем профиль на сервере…")
                 }
                 ProfileRegistrationStatus.ERROR -> {

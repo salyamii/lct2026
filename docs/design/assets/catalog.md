@@ -559,6 +559,26 @@ memory board, including story work and repairs. Event media cannot replace it.
 | `R.drawable.deed_pair_tag` | 920 × 1120 | [deed_pair_tag.webp](../../../app/src/main/res/drawable-nodpi/deed_pair_tag.webp) |
 | `R.drawable.deed_pair_telescope` | 920 × 1120 | [deed_pair_telescope.webp](../../../app/src/main/res/drawable-nodpi/deed_pair_telescope.webp) |
 
+## Launcher icon — 2026-09-28
+
+Approved by APP-ICON-D-001, outpainting correction APP-ICON-D-002: Ryzhik holding a glass jar of coins, generated with
+built-in imagegen from the [teen fox design](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-65).
+This is generated artwork, not a Figma export. The adaptive master contains
+naturally outpainted garden scenery, with no edge extrusion. Each density is
+resampled directly from the master once.
+[Source PNG, prompt and export details](sources/launcher-fox-jar/README.md).
+
+| Resource | Canvas / variants | Purpose |
+| --- | --- | --- |
+| `R.mipmap.ic_launcher_art` | 108, 162, 216, 324, 432 px | Opaque adaptive background, mdpi–xxxhdpi |
+| `R.mipmap.ic_launcher` | 48, 72, 96, 144, 192 px; adaptive XML v26 | Legacy rounded square / system-masked adaptive icon |
+| `R.mipmap.ic_launcher_round` | 48, 72, 96, 144, 192 px; adaptive XML v26 | Legacy circle / system-masked adaptive icon |
+| `R.drawable.ic_launcher_monochrome` | 108 × 108 dp vector | Themed jar-and-paw-coin symbol |
+
+All paths, byte sizes, dimensions and checksums are in the `launcher_icons`
+section of [manifest.json](manifest.json), grouped separately because launcher
+resource names repeat across density and API configurations.
+
 ## Onboarding
 
 | Android resource | Canvas | File | Figma source |
@@ -733,3 +753,73 @@ manifest содержит новые размеры и контрольные с
 границам полного холста. `EventArtworkBounds` хранит измерения на этапе разработки;
 после обновления фигур границы и опора ног перемерены. Для раскладки изображения
 на UI-потоке не декодируются.
+
+## Анимация загрузки — 2026-09-28
+
+| Resource | Canvas / timing | File | Source |
+| --- | --- | --- | --- |
+| `R.raw.loading_coin` | 480 × 480, 60 fps, 3 s | [Lottie JSON](../../../app/src/main/res/raw/loading_coin.json) | [Coin — Daily Scoop](https://lottiefiles.com/free-animation/coin-MHXcO7DuOl) |
+
+LOADING-D-001: общий индикатор старта и загрузки. Полный холст, исходные цвета и
+тайминг сохранены. JSON извлечён без изменений; работает офлайн.
+[Оригинал, лицензия и параметры интеграции](sources/loading-coin/README.md).
+
+| Splash resource | Размер / viewport | Источник |
+| --- | --- | --- |
+| `loading_coin_frame` | 120 dp / 480 × 480 | [SVG первого кадра](sources/loading-coin/frame-zero.svg), [Android XML](../../../app/src/main/res/drawable/loading_coin_frame.xml) |
+| `loading_coin_splash` | 288 dp / 1152 × 1152 | Тот же кадр с техническими полями для системной маски: [Android XML](../../../app/src/main/res/drawable/loading_coin_splash.xml) |
+
+LOADING-D-002: системная заставка и Compose используют единый фон `#120F30`,
+центр окна и исходный холст монеты размером 120 dp. Подготовка Lottie показывает
+тот же статичный кадр. [Воспроизводимый экспорт](../../../scripts/export_loading_coin_frame.py).
+
+## Иллюстрации мини-игр — импорт из main, сверка 2026-09-29
+
+Фирменный ящик для «Ящиков на причале» предоставлен пользователем.
+Сохранён пришедший из main WebP 512 × 512 с прозрачным фоном; исходный PNG
+имеет размер 960 × 794. В штабеле сторона подстраивается под ширину ящика.
+
+| Android resource | Canvas | Файл | Источник |
+| --- | --- | --- | --- |
+| `R.drawable.deed_game_crate` | 512 × 512 | [deed_game_crate.webp](../../../app/src/main/res/drawable-nodpi/deed_game_crate.webp) | [crate.png](sources/mini-game-crate-2026-09-28/crate.png) |
+
+| Android resource | Canvas | Файл | Исходный PNG |
+| --- | --- | --- | --- |
+| `deed_game_lights_off` | 341 × 512 | [WebP](../../../app/src/main/res/drawable-nodpi/deed_game_lights_off.webp) | [800 × 1200](sources/mini-game-lanterns-2026-09-28/lantern_off.png) |
+| `deed_game_lights_on` | 341 × 512 | [WebP](../../../app/src/main/res/drawable-nodpi/deed_game_lights_on.webp) | [800 × 1200](sources/mini-game-lanterns-2026-09-28/lantern_on.png) |
+| `deed_game_pipes_corner` | 512 × 512 | [WebP](../../../app/src/main/res/drawable-nodpi/deed_game_pipes_corner.webp) | [1024 × 1024](sources/mini-game-ropes-2026-09-28/rope_corner.png) |
+| `deed_game_pipes_straight` | 512 × 512 | [WebP](../../../app/src/main/res/drawable-nodpi/deed_game_pipes_straight.webp) | [1024 × 1024](sources/mini-game-ropes-2026-09-28/rope_straight.png) |
+| `deed_game_pipes_end_blue` | 512 × 512 | [WebP](../../../app/src/main/res/drawable-nodpi/deed_game_pipes_end_blue.webp) | [1024 × 1024](sources/mini-game-ropes-2026-09-28/rope_end_blue.png) |
+| `deed_game_pipes_end_green` | 512 × 512 | [WebP](../../../app/src/main/res/drawable-nodpi/deed_game_pipes_end_green.webp) | [1024 × 1024](sources/mini-game-ropes-2026-09-28/rope_end_green.png) |
+| `deed_game_pipes_end_red` | 512 × 512 | [WebP](../../../app/src/main/res/drawable-nodpi/deed_game_pipes_end_red.webp) | [1024 × 1024](sources/mini-game-ropes-2026-09-28/rope_end_red.png) |
+| `deed_game_signal_amber_off` | 512 × 512 | [WebP](../../../app/src/main/res/drawable-nodpi/deed_game_signal_amber_off.webp) | [480 × 480](sources/mini-game-signals-2026-09-28/signal_amber_off.png) |
+| `deed_game_signal_amber_on` | 512 × 512 | [WebP](../../../app/src/main/res/drawable-nodpi/deed_game_signal_amber_on.webp) | [480 × 480](sources/mini-game-signals-2026-09-28/signal_amber_on.png) |
+| `deed_game_signal_blue_off` | 512 × 512 | [WebP](../../../app/src/main/res/drawable-nodpi/deed_game_signal_blue_off.webp) | [480 × 480](sources/mini-game-signals-2026-09-28/signal_blue_off.png) |
+| `deed_game_signal_blue_on` | 512 × 512 | [WebP](../../../app/src/main/res/drawable-nodpi/deed_game_signal_blue_on.webp) | [480 × 480](sources/mini-game-signals-2026-09-28/signal_blue_on.png) |
+| `deed_game_signal_green_off` | 512 × 512 | [WebP](../../../app/src/main/res/drawable-nodpi/deed_game_signal_green_off.webp) | [480 × 480](sources/mini-game-signals-2026-09-28/signal_green_off.png) |
+| `deed_game_signal_green_on` | 512 × 512 | [WebP](../../../app/src/main/res/drawable-nodpi/deed_game_signal_green_on.webp) | [480 × 480](sources/mini-game-signals-2026-09-28/signal_green_on.png) |
+| `deed_game_signal_red_off` | 512 × 512 | [WebP](../../../app/src/main/res/drawable-nodpi/deed_game_signal_red_off.webp) | [480 × 480](sources/mini-game-signals-2026-09-28/signal_red_off.png) |
+| `deed_game_signal_red_on` | 512 × 512 | [WebP](../../../app/src/main/res/drawable-nodpi/deed_game_signal_red_on.webp) | [480 × 480](sources/mini-game-signals-2026-09-28/signal_red_on.png) |
+
+Эти 16 WebP и исходные PNG перенесены без изменения байтов. Поток VP8L подтверждает
+сжатие WebP без потерь, но изображения уже имели изменённые размеры в main:
+они не являются точными RGBA-копиями PNG. Исходный алгоритм преобразования
+не задокументирован; повторный ресайз или обрезка при слиянии не выполнялись.
+Manifest содержит исходные и фактические размеры, SHA-256 обоих файлов,
+RGBA-хеш с префиксом размеров, границы прозрачности и commit происхождения.
+Для фонарей, канатов и сигналов отдельный автор/поставщик источника в каталоге
+не указан. Совместные координаты возрастных персонажей этими импортами не затронуты.
+
+## Night bedroom — 2026-09-29
+
+SLEEP-D-001: фон в момент засыпания на итогах дня. Исходная иллюстрация без
+персонажа из [карточки 3785:705](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3785-705);
+подпись и рамка каталога в приложение не импортируются.
+
+| Android resource | Canvas | File | Figma node |
+| --- | --- | --- | --- |
+| `R.drawable.location_bedroom_night` | 1378 × 1142 | [location_bedroom_night.webp](../../../app/src/main/res/drawable-nodpi/location_bedroom_night.webp) | [3785:706](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3785-706) |
+
+[Исходный PNG](sources/location_bedroom_night.png) сохранён целиком. Конвертация:
+Pillow 12.3.0, WebP `lossless=True`, `exact=True`, `method=6`; размеры и все RGBA
+пиксели проверены на точное совпадение. Хеши и параметры — в [manifest.json](manifest.json).

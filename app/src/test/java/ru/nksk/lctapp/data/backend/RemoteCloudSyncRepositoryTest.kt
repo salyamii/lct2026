@@ -1,14 +1,18 @@
 package ru.nksk.lctapp.data.backend
 
-import java.io.IOException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.ResponseBody.Companion.toResponseBody
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Test
 import retrofit2.HttpException
 import retrofit2.Response
@@ -16,7 +20,31 @@ import ru.nksk.lctapp.app.createInitialGameState
 import ru.nksk.lctapp.data.game.local.BackendSyncStateEntity
 import ru.nksk.lctapp.data.game.local.PendingBackendRequestEntity
 import ru.nksk.lctapp.domain.analytics.SkillId
-import ru.nksk.lctapp.domain.backend.*
+import ru.nksk.lctapp.domain.backend.AckParentRewardsRequest
+import ru.nksk.lctapp.domain.backend.AckParentRewardsResponse
+import ru.nksk.lctapp.domain.backend.AnalyticsUploadRequest
+import ru.nksk.lctapp.domain.backend.AnalyticsUploadResponse
+import ru.nksk.lctapp.domain.backend.CloudSyncPhase
+import ru.nksk.lctapp.domain.backend.CloudSyncResult
+import ru.nksk.lctapp.domain.backend.ParentCoinAllocation
+import ru.nksk.lctapp.domain.backend.ParentRewardApplication
+import ru.nksk.lctapp.domain.backend.ParentRewardDto
+import ru.nksk.lctapp.domain.backend.ParentRewardPayload
+import ru.nksk.lctapp.domain.backend.ParentRewardPolicy
+import ru.nksk.lctapp.domain.backend.ParentRewardReceiptDto
+import ru.nksk.lctapp.domain.backend.ParentRewardsResponse
+import ru.nksk.lctapp.domain.backend.PullParentRewardsRequest
+import ru.nksk.lctapp.domain.backend.RegisterProfileRequest
+import ru.nksk.lctapp.domain.backend.RegisterProfileResponse
+import ru.nksk.lctapp.domain.backend.SkillAssessmentDto
+import ru.nksk.lctapp.domain.backend.SkillAssessmentsRequest
+import ru.nksk.lctapp.domain.backend.SkillAssessmentsResponse
+import ru.nksk.lctapp.domain.backend.SkillStatus
+import ru.nksk.lctapp.domain.backend.SkillSyncPhase
+import ru.nksk.lctapp.domain.backend.SnapshotDownloadRequest
+import ru.nksk.lctapp.domain.backend.SnapshotDownloadResponse
+import ru.nksk.lctapp.domain.backend.SnapshotUploadRequest
+import ru.nksk.lctapp.domain.backend.SnapshotUploadResponse
 import ru.nksk.lctapp.domain.content.StoryContent
 import ru.nksk.lctapp.domain.content.StoryContentRepository
 import ru.nksk.lctapp.domain.economy.BudgetPlan
@@ -26,7 +54,14 @@ import ru.nksk.lctapp.domain.engine.GameCatalog
 import ru.nksk.lctapp.domain.engine.GameSession
 import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.domain.game.GameState
-import ru.nksk.lctapp.domain.history.*
+import ru.nksk.lctapp.domain.history.ArchivedGameRun
+import ru.nksk.lctapp.domain.history.AuditEntry
+import ru.nksk.lctapp.domain.history.AuditType
+import ru.nksk.lctapp.domain.history.GameSnapshot
+import ru.nksk.lctapp.domain.history.HistoryCodec
+import ru.nksk.lctapp.domain.history.RestoreGuard
+import ru.nksk.lctapp.domain.history.localGeneration
+import java.io.IOException
 
 class RemoteCloudSyncRepositoryTest {
     @Test fun unchangedPollingExportsOnceAndChecksOnlyTheHistoryHead() = runTest {
@@ -40,6 +75,373 @@ class RemoteCloudSyncRepositoryTest {
         assertEquals(1, fixture.games.snapshotExports)
         assertEquals(0, fixture.games.historyReads)
         assertEquals(1, fixture.api.snapshotUploads.size)
+    }
+
+    @Test fun unchangedParentRefreshExportsOnceWithoutReadingTheWholeHistoryAgain() = runTest {
+        val fixture = Fixture()
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.refreshSkills())
+        fixture.games.snapshotExports = 0
+        fixture.games.historyReads = 0
+
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.refreshSkills())
+
+        assertEquals(1, fixture.games.snapshotExports)
+        assertEquals(0, fixture.games.historyReads)
+        assertEquals(SkillSyncPhase.IDLE, fixture.repository.state.value.skillsPhase)
+    }
+
+    @Test fun progressDuringRegistrationRefreshesTheSnapshotBeforeUploading() = runTest {
+        val fixture = Fixture()
+        fixture.api.beforeRegister = { fixture.games.rename("Имя после регистрации") }
+
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.synchronize())
+
+        val uploaded = HistoryCodec.decodeSnapshot(fixture.api.snapshotUploads.single().second.snapshotJson)
+        assertEquals(fixture.games.read(), uploaded.state)
+        assertEquals(2L, uploaded.historySequence)
+        assertEquals(uploaded.historySequence, fixture.api.analyticsUploads.single().second.throughHistorySequence)
+        assertEquals(2, fixture.games.snapshotExports)
+        assertEquals(0, fixture.games.historyReads)
+    }
+
+    @Test fun parentRefreshRegistersUploadsEvidenceAndQueriesSkillsWithoutTouchingWorldOrRewards() = runTest {
+        val fixture = Fixture()
+        val before = fixture.games.exportSnapshot()
+
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.refreshSkills())
+
+        assertEquals(listOf("register", "post-analytics", "get-skills"), fixture.api.calls)
+        assertEquals(before, fixture.games.exportSnapshot())
+        assertTrue(fixture.games.acknowledged.isEmpty())
+        assertEquals(SkillSyncPhase.IDLE, fixture.repository.state.value.skillsPhase)
+        assertEquals(before.historySequence, fixture.repository.state.value.skills?.basedOnHistorySequence)
+        assertEquals(before.localGeneration(), fixture.repository.state.value.skillsGeneration)
+        assertNotNull(fixture.store.read(ProfileId)?.skillsPayload)
+    }
+
+    @Test fun parentRefreshLoadsCurrentPersistedAssessmentsBeforeAnOfflineRequestInANewProcess() = runTest {
+        val fixture = Fixture()
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.refreshSkills())
+        val cached = fixture.repository.state.value.skills
+        val recreated = fixture.newRepository()
+        fixture.api.beforeSkills = {
+            assertEquals(cached, recreated.state.value.skills)
+            throw IOException("Offline")
+        }
+
+        assertEquals(CloudSyncResult.RETRY, recreated.refreshSkills())
+
+        assertEquals(cached, recreated.state.value.skills)
+        assertEquals(fixture.games.exportSnapshot().localGeneration(), recreated.state.value.skillsGeneration)
+        assertEquals(SkillSyncPhase.OFFLINE, recreated.state.value.skillsPhase)
+    }
+
+    @Test fun parentRefreshReplaysFrozenEvidenceThenUploadsItsNewTailBeforeQueryingSkills() = runTest {
+        val fixture = Fixture()
+        fixture.api.loseNextAnalyticsResponse = true
+        assertEquals(CloudSyncResult.RETRY, fixture.repository.refreshSkills())
+        val frozen = fixture.api.analyticsUploads.single()
+        fixture.games.rename("Более свежая история")
+        fixture.api.calls.clear()
+
+        assertEquals(CloudSyncResult.SUCCESS, fixture.newRepository().refreshSkills())
+
+        assertEquals(listOf("post-analytics", "post-analytics", "get-skills"), fixture.api.calls)
+        assertEquals(frozen, fixture.api.analyticsUploads[1])
+        assertEquals(fixture.games.exportSnapshot().historySequence,
+            fixture.api.analyticsUploads.last().second.throughHistorySequence)
+        assertTrue(fixture.store.pendingRequests.isEmpty())
+    }
+
+    @Test fun staleRestoredAnalyticsResumesWithANewBatchAfterProgressAndProcessRecreation() = runTest {
+        val fixture = restoredBehindAcceptedAnalytics()
+        val restored = fixture.games.exportSnapshot()
+        assertEquals(11L, restored.historySequence)
+
+        assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.repository.synchronize())
+        val rejected = checkNotNull(fixture.store.pending(ProfileId, "analytics"))
+        val rejectedBody = BackendJson.decodeFromString<AnalyticsUploadRequest>(rejected.payload)
+        assertEquals(11L, rejectedBody.throughHistorySequence)
+        assertEquals(0L, fixture.store.read(ProfileId)?.lastAnalyticsSequence)
+        assertTrue(fixture.games.acknowledged.isEmpty())
+        assertEquals(restored, fixture.games.exportSnapshot())
+
+        // No new boundary means no new key and no acknowledgement of the rejected facts.
+        assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.newRepository().refreshSkills())
+        assertEquals(rejected, fixture.store.pending(ProfileId, "analytics"))
+        repeat(10) { fixture.games.rename("После восстановления $it") }
+        val current = fixture.games.exportSnapshot()
+        assertEquals(21L, current.historySequence)
+
+        assertEquals(CloudSyncResult.SUCCESS, fixture.newRepository().synchronize())
+
+        val replacement = fixture.api.analyticsUploads.last()
+        assertNotEquals(rejected.requestId, replacement.first)
+        assertEquals(21L, replacement.second.throughHistorySequence)
+        assertEquals(rejectedBody.gameRunId, replacement.second.gameRunId)
+        assertTrue(fixture.api.analyticsUploads.filter { it.first == rejected.requestId }
+            .all { it.second == rejectedBody })
+        assertEquals(21L, fixture.store.read(ProfileId)?.lastAnalyticsSequence)
+        assertEquals(current.history.map { it.id }.toSet(), fixture.games.acknowledged)
+        assertEquals(current, fixture.games.exportSnapshot())
+        assertNull(fixture.store.pending(ProfileId, "analytics"))
+    }
+
+    @Test fun anotherStaleResponseRetainsTheNewBatchWithoutLoopingOrInventingTheServerBoundary() = runTest {
+        val fixture = restoredBehindAcceptedAnalytics()
+        assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.repository.refreshSkills())
+        val rejected = checkNotNull(fixture.store.pending(ProfileId, "analytics"))
+        fixture.games.rename("Граница 12 всё ещё ниже серверной 20")
+        val before = fixture.api.analyticsUploads.size
+
+        assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.newRepository().refreshSkills())
+
+        assertEquals(2, fixture.api.analyticsUploads.size - before)
+        val replacement = checkNotNull(fixture.store.pending(ProfileId, "analytics"))
+        assertNotEquals(rejected.requestId, replacement.requestId)
+        assertEquals(12L, BackendJson.decodeFromString<AnalyticsUploadRequest>(replacement.payload).throughHistorySequence)
+        assertEquals(0L, fixture.store.read(ProfileId)?.lastAnalyticsSequence)
+        assertTrue(fixture.games.acknowledged.isEmpty())
+        val after = fixture.api.analyticsUploads.size
+        assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.newRepository().refreshSkills())
+        assertEquals(1, fixture.api.analyticsUploads.size - after)
+        assertEquals(replacement, fixture.store.pending(ProfileId, "analytics"))
+    }
+
+    @Test fun lostReplacementResponseKeepsItsNewKeyAndBodyForTheNextProcess() = runTest {
+        val fixture = restoredBehindAcceptedAnalytics()
+        assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.repository.refreshSkills())
+        val rejected = checkNotNull(fixture.store.pending(ProfileId, "analytics"))
+        repeat(10) { fixture.games.rename("После старого batch $it") }
+        fixture.api.loseNextAnalyticsResponse = true
+
+        assertEquals(CloudSyncResult.RETRY, fixture.newRepository().refreshSkills())
+
+        val uncertain = checkNotNull(fixture.store.pending(ProfileId, "analytics"))
+        assertNotEquals(rejected.requestId, uncertain.requestId)
+        assertEquals(21L, BackendJson.decodeFromString<AnalyticsUploadRequest>(uncertain.payload).throughHistorySequence)
+        assertEquals(0L, fixture.store.read(ProfileId)?.lastAnalyticsSequence)
+        assertTrue(fixture.games.acknowledged.isEmpty())
+        val sent = fixture.api.analyticsUploads.last()
+
+        assertEquals(CloudSyncResult.SUCCESS, fixture.newRepository().refreshSkills())
+
+        assertEquals(sent, fixture.api.analyticsUploads.last())
+        assertEquals(21L, fixture.store.read(ProfileId)?.lastAnalyticsSequence)
+        assertNull(fixture.store.pending(ProfileId, "analytics"))
+        assertTrue(fixture.games.acknowledged.isEmpty())
+    }
+
+    @Test fun analyticsConflictsWithoutAnExactStaleCodeNeverReplaceOrAcknowledgeThePendingBatch() = runTest {
+        val failures = listOf(
+            409 to "{\"code\":\"FACT_CONFLICT\"}",
+            409 to "{\"code\":\"IDEMPOTENCY_CONFLICT\"}",
+            409 to "{\"code\":\"GAME_RUN_CONFLICT\"}",
+            409 to "{}",
+            409 to "{\"message\":\"STALE_ANALYTICS\"}",
+            409 to "{\"code\":null}",
+            409 to "not json",
+            500 to "{\"code\":\"STALE_ANALYTICS\"}",
+        )
+        for ((status, body) in failures) {
+            val fixture = Fixture()
+            fixture.api.beforeAnalytics = { throw httpFailure(status, body) }
+            val expected = if (status == 500) CloudSyncResult.RETRY else CloudSyncResult.NEEDS_ATTENTION
+            assertEquals(expected, fixture.repository.refreshSkills())
+            val frozen = fixture.store.pending(ProfileId, "analytics")
+            fixture.games.rename("Новая граница не разрешает забыть конфликт")
+
+            assertEquals(expected, fixture.newRepository().refreshSkills())
+
+            assertEquals(frozen, fixture.store.pending(ProfileId, "analytics"))
+            assertEquals(2, fixture.api.analyticsUploads.size)
+            assertEquals(fixture.api.analyticsUploads.first(), fixture.api.analyticsUploads.last())
+            assertEquals(0L, fixture.store.read(ProfileId)?.lastAnalyticsSequence)
+            assertTrue(fixture.games.acknowledged.isEmpty())
+        }
+    }
+
+    @Test fun staleReplyCannotSupersedeAPendingBatchAfterAnotherRestoreGenerationAppears() = runTest {
+        val fixture = Fixture()
+        val original = fixture.games.exportSnapshot()
+        fixture.api.beforeAnalytics = { throw httpFailure(409, "{\"code\":\"STALE_ANALYTICS\"}") }
+        assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.repository.refreshSkills())
+        val frozen = fixture.store.pending(ProfileId, "analytics")
+        fixture.games.rename("Более новая история прежнего поколения")
+        fixture.api.beforeAnalytics = {
+            val current = fixture.games.exportSnapshot()
+            fixture.games.restoreSnapshot(original, RestoreGuard(current.state.engine?.revision,
+                current.historySequence, null))
+            throw httpFailure(409, "{\"code\":\"STALE_ANALYTICS\"}")
+        }
+
+        assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.repository.refreshSkills())
+
+        assertEquals(frozen, fixture.store.pending(ProfileId, "analytics"))
+        assertEquals(2, fixture.api.analyticsUploads.size)
+        assertEquals(0L, fixture.store.read(ProfileId)?.lastAnalyticsSequence)
+        assertTrue(fixture.games.acknowledged.isEmpty())
+    }
+
+    @Test fun aStaleArchivedBatchCanBeReplacedByItsPreservedTailBeforeSynchronizingTheNextRun() = runTest {
+        val fixture = restoredBehindAcceptedAnalytics()
+        assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.repository.refreshSkills())
+        val rejected = checkNotNull(fixture.store.pending(ProfileId, "analytics"))
+        repeat(10) { fixture.games.rename("Действие перед перемоткой $it") }
+        fixture.games.restart("next-run")
+        val current = fixture.games.exportSnapshot()
+
+        assertEquals(CloudSyncResult.SUCCESS, fixture.newRepository().synchronize())
+
+        val oldRunReplacement = fixture.api.analyticsUploads.last { it.second.gameRunId == "local-run" }
+        assertEquals(21L, oldRunReplacement.second.throughHistorySequence)
+        assertNotEquals(rejected.requestId, oldRunReplacement.first)
+        assertEquals("next-run", fixture.api.analyticsUploads.last().second.gameRunId)
+        assertEquals(current, fixture.games.exportSnapshot())
+        assertTrue(fixture.store.pendingRequests.isEmpty())
+    }
+
+    @Test fun missingOrNotYetReadyAssessmentsRemainUnavailableWithoutErasingTheCache() = runTest {
+        for (code in listOf(404, 409)) {
+            val fixture = Fixture()
+            assertEquals(CloudSyncResult.SUCCESS, fixture.repository.refreshSkills())
+            val cached = fixture.repository.state.value.skills
+            fixture.api.beforeSkills = { throw httpFailure(code) }
+
+            assertEquals(CloudSyncResult.RETRY, fixture.repository.refreshSkills())
+
+            assertEquals(SkillSyncPhase.UNAVAILABLE, fixture.repository.state.value.skillsPhase)
+            assertEquals(cached, fixture.repository.state.value.skills)
+            assertEquals(cached, BackendJson.decodeFromString<SkillAssessmentsResponse>(
+                checkNotNull(fixture.store.read(ProfileId)?.skillsPayload)))
+        }
+    }
+
+    @Test fun foreignFutureAndRegressingAssessmentsAreRejectedWithoutReplacingValidCache() = runTest {
+        val fixture = Fixture()
+        fixture.games.rename("Граница 2")
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.refreshSkills())
+        val cached = checkNotNull(fixture.repository.state.value.skills)
+        for (invalid in listOf(cached.copy(gameRunId = "foreign-run"),
+            cached.copy(basedOnHistorySequence = cached.basedOnHistorySequence + 1),
+            cached.copy(basedOnHistorySequence = cached.basedOnHistorySequence - 1),
+            cached.copy(schemaVersion = 2))) {
+            fixture.api.assessments = invalid
+
+            assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.repository.refreshSkills())
+
+            assertEquals(SkillSyncPhase.ERROR, fixture.repository.state.value.skillsPhase)
+            assertEquals(cached, fixture.repository.state.value.skills)
+            assertEquals(cached, BackendJson.decodeFromString<SkillAssessmentsResponse>(
+                checkNotNull(fixture.store.read(ProfileId)?.skillsPayload)))
+        }
+    }
+
+    @Test fun aFailedCacheCommitDoesNotPublishTheNewServerResponse() = runTest {
+        val fixture = Fixture()
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.refreshSkills())
+        val cached = checkNotNull(fixture.repository.state.value.skills)
+        val newer = cached.copy(skills = cached.skills.map { it.copy(status = SkillStatus.MASTERED) })
+        fixture.api.assessments = newer
+        fixture.api.beforeSkills = { fixture.store.failNextSave = true }
+
+        assertEquals(CloudSyncResult.RETRY, fixture.repository.refreshSkills())
+
+        assertEquals(cached, fixture.repository.state.value.skills)
+        assertEquals(cached, BackendJson.decodeFromString<SkillAssessmentsResponse>(
+            checkNotNull(fixture.store.read(ProfileId)?.skillsPayload)))
+    }
+
+    @Test fun previousRunCacheAndRepliesAreHiddenWhenTheWorldRestarts() = runTest {
+        val fixture = Fixture()
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.refreshSkills())
+        fixture.api.beforeSkills = { fixture.games.restart("new-run") }
+
+        assertEquals(CloudSyncResult.RETRY, fixture.repository.refreshSkills())
+
+        assertNull(fixture.repository.state.value.skills)
+        assertNull(fixture.repository.state.value.skillsGeneration)
+        assertEquals(SkillSyncPhase.UNAVAILABLE, fixture.repository.state.value.skillsPhase)
+    }
+
+    @Test fun parentRefreshPreservesPreviousRunWorldAndRewardRetriesWithoutReplayingThem() = runTest {
+        val fixture = Fixture()
+        fixture.api.loseNextSnapshotResponse = true
+        fixture.api.loseNextAnalyticsResponse = true
+        assertEquals(CloudSyncResult.RETRY, fixture.repository.synchronize())
+        val snapshotRetry = fixture.store.pending(ProfileId, "snapshot")
+        val analyticsRetry = fixture.api.analyticsUploads.single()
+        fixture.games.restart("new-run")
+        val before = fixture.games.exportSnapshot()
+        fixture.api.calls.clear()
+
+        assertEquals(CloudSyncResult.RETRY, fixture.repository.refreshSkills())
+
+        assertEquals(listOf("post-analytics"), fixture.api.calls)
+        assertEquals(analyticsRetry, fixture.api.analyticsUploads.last())
+        assertEquals(snapshotRetry, fixture.store.pending(ProfileId, "snapshot"))
+        assertEquals(before, fixture.games.exportSnapshot())
+        assertNull(fixture.repository.state.value.skills)
+        assertEquals(SkillSyncPhase.UNAVAILABLE, fixture.repository.state.value.skillsPhase)
+    }
+
+    @Test fun persistedAssessmentsFromAnotherServerAreNeverDisplayedOrSentElsewhere() = runTest {
+        val fixture = Fixture()
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.refreshSkills())
+        fixture.store.save(checkNotNull(fixture.store.read(ProfileId)).copy(backendUrl = "https://other.example.test/"))
+        fixture.api.calls.clear()
+        val recreated = fixture.newRepository()
+
+        assertEquals(CloudSyncResult.NEEDS_ATTENTION, recreated.refreshSkills())
+
+        assertNull(recreated.state.value.skills)
+        assertTrue(fixture.api.calls.isEmpty())
+    }
+
+    @Test fun sameRunRestoreInvalidatesPreviousGenerationCacheEvenWhenItsSequenceStillFits() = runTest {
+        val fixture = Fixture()
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.refreshSkills())
+        val saved = fixture.games.exportSnapshot()
+        fixture.games.restoreSnapshot(saved, RestoreGuard(saved.state.engine?.revision,
+            saved.historySequence, "sync-test-rules"))
+        fixture.api.beforeSkills = { throw IOException("Offline") }
+        val recreated = fixture.newRepository()
+
+        assertEquals(CloudSyncResult.RETRY, recreated.refreshSkills())
+
+        assertNull(recreated.state.value.skills)
+        assertNull(recreated.state.value.skillsGeneration)
+        assertNotEquals(saved.localGeneration(), fixture.games.exportSnapshot().localGeneration())
+        assertEquals(saved.runId, fixture.games.exportSnapshot().runId)
+    }
+
+    @Test fun cancellationReleasesSkillLoadingWithoutLosingCachedDataOrPendingRequests() = runTest {
+        val fixture = Fixture()
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.refreshSkills())
+        val cached = fixture.repository.state.value.skills
+        fixture.api.beforeSkills = { throw CancellationException("Parent screen closed") }
+        try {
+            fixture.repository.refreshSkills()
+            fail("Cancellation must propagate")
+        } catch (_: CancellationException) { }
+
+        assertEquals(cached, fixture.repository.state.value.skills)
+        assertEquals(SkillSyncPhase.IDLE, fixture.repository.state.value.skillsPhase)
+        fixture.api.beforeSkills = {}
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.refreshSkills())
+    }
+
+    @Test fun fullSyncUsesTheSameAssessmentUnavailableStateAndKeepsTheCurrentCache() = runTest {
+        val fixture = Fixture()
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.synchronize())
+        val cached = fixture.repository.state.value.skills
+        fixture.api.beforeSkills = { throw httpFailure(409) }
+
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.synchronize())
+
+        assertEquals(SkillSyncPhase.UNAVAILABLE, fixture.repository.state.value.skillsPhase)
+        assertEquals(cached, fixture.repository.state.value.skills)
+        assertEquals(CloudSyncPhase.IDLE, fixture.repository.state.value.phase)
     }
 
     @Test fun firstSyncRegistersAndBacksUpTheWorldBeforeUploadingEvidenceAndAcknowledgingOutbox() = runTest {
@@ -319,6 +721,23 @@ class RemoteCloudSyncRepositoryTest {
         assertEquals(fixture.games.exportSnapshot().localGeneration(), fixture.store.read(ProfileId)?.localGeneration)
     }
 
+    /** Skill-only refresh deliberately leaves snapshot 10 behind accepted evidence 20. */
+    private suspend fun restoredBehindAcceptedAnalytics(): Fixture {
+        val fixture = Fixture()
+        fixture.api.rejectRegressingAnalytics = true
+        repeat(9) { fixture.games.rename("До облачной копии $it") }
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.synchronize())
+        val cloud = checkNotNull(fixture.api.remote)
+        assertEquals(10L, HistoryCodec.decodeSnapshot(cloud.snapshotJson).historySequence)
+        repeat(10) { fixture.games.rename("Только аналитика $it") }
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.refreshSkills())
+        assertEquals(20L, fixture.api.analyticsUploads.last().second.throughHistorySequence)
+        assertEquals(cloud, fixture.api.remote)
+        val preview = fixture.repository.prepareRestore()
+        fixture.repository.restore(preview.id)
+        return fixture
+    }
+
     private class Fixture {
         val games = MemoryGames()
         val identities = MemoryIdentities()
@@ -348,9 +767,13 @@ class RemoteCloudSyncRepositoryTest {
     private class MemorySyncStore : BackendSyncStore {
         private var metadata: BackendSyncStateEntity? = null
         var failNextRestoreReplacement = false
+        var failNextSave = false
         val pendingRequests = mutableMapOf<Pair<String, String>, PendingBackendRequestEntity>()
         override suspend fun read(profileId: String) = metadata?.takeIf { it.profileId == profileId }
-        override suspend fun save(state: BackendSyncStateEntity) { metadata = state }
+        override suspend fun save(state: BackendSyncStateEntity) {
+            if (failNextSave) { failNextSave = false; throw IOException("Cache write failed") }
+            metadata = state
+        }
         override suspend fun pending(profileId: String, kind: String) = pendingRequests[profileId to kind]
         override suspend fun stage(request: PendingBackendRequestEntity) {
             val key = request.profileId to request.kind
@@ -418,12 +841,13 @@ class RemoteCloudSyncRepositoryTest {
         override suspend fun latestHistoryId() = history.lastOrNull()?.id
         override suspend fun exportSnapshot(): GameSnapshot {
             snapshotExports++
-            return HistoryCodec.snapshot(runId, value.value, history.toList(), archives.toList())
+            return currentSnapshot()
         }
+        private fun currentSnapshot() = HistoryCodec.snapshot(runId, value.value, history.toList(), archives.toList())
         override suspend fun acknowledgeOutbox(ids: Set<String>) { acknowledged += ids }
         override suspend fun applyParentRewards(profileId: String, gameRunId: String, rewards: List<ParentRewardDto>,
             expectedRestoreGeneration: String): List<ParentRewardReceiptDto> {
-            check(gameRunId == runId && exportSnapshot().localGeneration() == expectedRestoreGeneration)
+            check(gameRunId == runId && currentSnapshot().localGeneration() == expectedRestoreGeneration)
             return rewards.map { reward ->
                 history.firstOrNull { it.parentReward?.reward?.rewardId == reward.rewardId }?.parentReward?.receipt
                     ?: run {
@@ -454,6 +878,7 @@ class RemoteCloudSyncRepositoryTest {
             archives += snapshot.archivedRuns
             history.clear()
             history += snapshot.history
+            acknowledged.clear()
             restoredWorlds++
             history += AuditEntry("restore:$restoredWorlds", snapshot.historySequence + 1, runId, AuditType.RESTORED,
                 after = snapshot.state)
@@ -465,22 +890,28 @@ class RemoteCloudSyncRepositoryTest {
         val calls = mutableListOf<String>()
         var remote: SnapshotDownloadResponse? = null
         var rewards: List<ParentRewardDto> = emptyList()
+        var beforeRegister: suspend () -> Unit = {}
         var beforeRewards: suspend () -> Unit = {}
         var beforeRewardAck: suspend (AckParentRewardsRequest) -> Unit = {}
         var loseNextSnapshotResponse = false
         var loseNextAnalyticsResponse = false
         var loseNextAckResponse = false
         var failSnapshotRequests = false
+        var rejectRegressingAnalytics = false
+        var beforeAnalytics: suspend () -> Unit = {}
+        var beforeSkills: suspend () -> Unit = {}
+        var assessments: SkillAssessmentsResponse? = null
         val snapshotUploads = mutableListOf<Pair<String, SnapshotUploadRequest>>()
         val analyticsUploads = mutableListOf<Pair<String, AnalyticsUploadRequest>>()
         val rewardAcks = mutableListOf<AckParentRewardsRequest>()
         val rewardAckRequests = mutableListOf<Pair<String, AckParentRewardsRequest>>()
         private val snapshotReceipts = mutableMapOf<String, Pair<SnapshotUploadRequest, SnapshotUploadResponse>>()
         private val analyticsReceipts = mutableMapOf<String, Pair<AnalyticsUploadRequest, AnalyticsUploadResponse>>()
-        private var acceptedAnalyticsSequence = 0L
+        private val acceptedAnalyticsSequences = mutableMapOf<String, Long>()
         override suspend fun registerProfile(requestId: String, body: RegisterProfileRequest): RegisterProfileResponse {
             calls += "register"
             assertEquals(ProfileId, body.deviceId)
+            beforeRegister()
             return RegisterProfileResponse(body.deviceId)
         }
         override suspend fun downloadSnapshot(body: SnapshotDownloadRequest): SnapshotDownloadResponse {
@@ -507,9 +938,13 @@ class RemoteCloudSyncRepositoryTest {
             calls += "post-analytics"
             assertEquals(ProfileId, body.deviceId)
             analyticsUploads += requestId to body
+            beforeAnalytics()
             analyticsReceipts[requestId]?.let { (original, response) -> check(original == body); return response }
+            if (rejectRegressingAnalytics && body.throughHistorySequence < (acceptedAnalyticsSequences[body.gameRunId] ?: 0)) {
+                throw httpFailure(409, "{\"code\":\"STALE_ANALYTICS\"}")
+            }
             val response = AnalyticsUploadResponse(body.batchId, body.gameRunId, body.throughHistorySequence, body.facts.map { it.eventId })
-            acceptedAnalyticsSequence = body.throughHistorySequence
+            acceptedAnalyticsSequences[body.gameRunId] = body.throughHistorySequence
             analyticsReceipts[requestId] = body to response
             if (loseNextAnalyticsResponse) { loseNextAnalyticsResponse = false; throw IOException("Lost committed analytics response") }
             return response
@@ -517,7 +952,8 @@ class RemoteCloudSyncRepositoryTest {
         override suspend fun skills(body: SkillAssessmentsRequest): SkillAssessmentsResponse {
             calls += "get-skills"
             assertEquals(ProfileId, body.deviceId)
-            return SkillAssessmentsResponse(body.gameRunId, acceptedAnalyticsSequence,
+            beforeSkills()
+            return assessments ?: SkillAssessmentsResponse(body.gameRunId, acceptedAnalyticsSequences[body.gameRunId] ?: 0,
                 SkillId.entries.map { SkillAssessmentDto(it, SkillStatus.NO_DATA, "test-policy") })
         }
         override suspend fun parentRewards(body: PullParentRewardsRequest): ParentRewardsResponse {
@@ -543,6 +979,8 @@ class RemoteCloudSyncRepositoryTest {
 
     private companion object {
         const val ProfileId = "a1a81f35-ae8b-44dd-925d-659d88c6cd45"
+        fun httpFailure(code: Int, body: String = "{}") = HttpException(Response.error<Any>(code,
+            body.toResponseBody("application/json".toMediaType())))
         fun GameSnapshot.downloadResponse() = SnapshotDownloadResponse(runId, 1, "test-content", HistoryCodec.encodeSnapshot(this))
     }
 }

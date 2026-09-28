@@ -84,7 +84,7 @@ internal fun SavingsScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
         },
     ) {
         if (economy == null) {
-            if (state.loading) CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
+            if (state.loading) GameLoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
             AdventureBody(if (state.loading) "Открываем копилку…" else "Не удалось открыть копилку.")
             if (!state.loading) AdventurePrimaryButton("Повторить", { onAction(EconomyAction.Retry) })
         } else {

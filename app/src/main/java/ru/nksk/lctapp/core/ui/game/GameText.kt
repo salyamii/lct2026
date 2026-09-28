@@ -9,6 +9,7 @@ internal fun deedDeadline(currentDay: Int, expiresDay: Int): String = when (expi
 }
 
 private val decorativeSeparator = Regex("\\s*\u00b7\\s*")
+private val legacyRouteMapName = Regex("\\b([Кк]арт(?:а|у|ы|е|ой|ою)) подходов\\b")
 private val pricedAction = Regex("^(.+?)\\s*\u00b7\\s*(\\+?)(\\d+)(?:\\s+монет[аы]?)?$")
 private val unnamedEffort = Regex("(^|[,;:.!?]\\s*)((?:немного |средне |заметно |сильно )?устанет|не тратит силы)(?=[.!?,;:]|$)",
     RegexOption.IGNORE_CASE)
@@ -26,7 +27,7 @@ internal fun String.asPetEffortText(petName: String): String {
 
 /** Adapt immutable catalog copy for display without rewriting content or historical facts. */
 internal fun String.asGameUiText(separator: String = ", "): String =
-    replace(decorativeSeparator, separator)
+    replace(decorativeSeparator, separator).replace(legacyRouteMapName, "$1 походов")
 
 internal fun String.asGameActionLabel(): String {
     val match = pricedAction.matchEntire(trim()) ?: return asGameUiText()

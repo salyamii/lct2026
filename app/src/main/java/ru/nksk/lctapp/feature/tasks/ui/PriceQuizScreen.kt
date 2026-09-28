@@ -15,9 +15,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,6 +60,10 @@ fun PriceQuizScreen(
     deed: DeedGamePresentation? = null,
 ) {
     val state = uiState.game
+    val feedback = remember { BringIntoViewRequester() }
+    LaunchedEffect(state.current, state.lastCorrect) {
+        if (state.lastCorrect != null) feedback.bringIntoView()
+    }
 
     Column(
         modifier = Modifier
@@ -116,27 +124,30 @@ fun PriceQuizScreen(
                     )
                 }
                 Spacer(Modifier.height(14.dp))
-                Text(
-                    when (state.lastCorrect) {
-                        true -> "Правильно"
-                        false -> "Неправильно"
-                        null -> if (state.finished) stringResource(R.string.deeds_ready) else "Выбери большую сумму"
-                    },
-                    modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
-                    minLines = 2,
-                    fontSize = 18.sp,
-                    lineHeight = 24.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontFamily = Nunito,
-                    color = DeedColors.Text,
-                )
-                Spacer(Modifier.height(8.dp))
-                DeedButton(
-                    text = if (displayedIndex == state.questions.lastIndex) "Завершить" else "Дальше",
-                    onClick = { onAction(PriceQuizAction.Next(state.current)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !state.finished && state.lastCorrect != null && deed?.canPlay != false,
-                )
+                Column(Modifier.fillMaxWidth().bringIntoViewRequester(feedback)) {
+                    Text(
+                        when (state.lastCorrect) {
+                            true -> stringResource(R.string.deeds_correct)
+                            false -> stringResource(R.string.deeds_incorrect)
+                            null -> if (state.finished) stringResource(R.string.deeds_ready) else "Выбери большую сумму"
+                        },
+                        modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
+                        minLines = 2,
+                        fontSize = 18.sp,
+                        lineHeight = 24.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontFamily = Nunito,
+                        color = DeedColors.Text,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    DeedButton(
+                        text = stringResource(if (displayedIndex == state.questions.lastIndex)
+                            R.string.deeds_price_finish else R.string.deeds_price_next),
+                        onClick = { onAction(PriceQuizAction.Next(state.current)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !state.finished && state.lastCorrect != null && deed?.canPlay != false,
+                    )
+                }
             }
         }
     }

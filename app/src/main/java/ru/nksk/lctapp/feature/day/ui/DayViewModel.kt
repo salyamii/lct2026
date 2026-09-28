@@ -69,7 +69,14 @@ internal data class DayUiState(
     val deedDeadline: String? = null,
     val audioOccurrenceId: String? = null,
     val eventMedia: EventMedia = EventMedia(),
-)
+) {
+    /** Presentation only; NPC conversations and introductions retain their clear scenery. */
+    val focusesItem: Boolean get() = summary == null && when (layout) {
+        EventLayout.PURCHASE -> true
+        EventLayout.SCENE -> eventArtwork?.isCharacter == false
+        EventLayout.INTRODUCTION -> false
+    }
+}
 
 internal sealed interface DayAction {
     data object Retry : DayAction

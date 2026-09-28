@@ -426,6 +426,7 @@ class SettingsViewModelTest {
             if (syncFailure) error("Network unavailable")
             return CloudSyncResult.SUCCESS
         }
+        override suspend fun refreshSkills() = CloudSyncResult.SUCCESS
         override suspend fun prepareRestore(): CloudRestorePreview {
             prepareCalls++
             return preview

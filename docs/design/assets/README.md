@@ -54,6 +54,7 @@ resources in `res`; files in `assets` are accessed differently. Follow the
 | --- | --- | --- |
 | Characters, equipment, locations, NPCs and raster effects | `app/src/main/res/drawable-nodpi/*.webp` | Lossless WebP, preserving the exported canvas and alpha |
 | Simple vector icons | `app/src/main/res/drawable/*.xml` | Android vector drawables; keep `menu_chevron` and `menu_star` |
+| Lottie animations | `app/src/main/res/raw/*.json` | Preserve source canvas/timing; use `loading_*` for loading indicators and retain source archive and license |
 | Aliases for identical artwork | `app/src/main/res/values/*.xml` | One stored drawable, additional semantic resource names |
 | Font files | `app/src/main/res/font/` | Bundled fonts, referenced through `R.font` |
 | Font license notices | `app/src/main/assets/licenses/` | Retain the complete notices with the app |
