@@ -15398,6 +15398,30 @@
         "node_id": null,
         "collection_id": null
       }
+    },
+    {
+      "resource": "deed_game_crate",
+      "category": "Mini-game icons — 2026-09-28",
+      "source_method": "user_provided_image",
+      "source_note": "Branded crate for the pier stacking mini-game; drawn as a cube whose side follows its width.",
+      "source_file": "docs/design/assets/sources/mini-game-crate-2026-09-28/crate.png",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 300522,
+      "sha256": "89c8604f2e5e40d720f0bd0566759fb530c34ac2dff0342cac901fad734418ee",
+      "rgba_sha256": "d568add1a635c4c1d46c89788f99a46cef4f6a7dd0e69bf6c01321200349e951",
+      "alpha_bounds": [
+        20,
+        16,
+        468,
+        494
+      ],
+      "source_sha256": "501277af03c802e729591cb82012d80649e19704f947e40ed787723a22f7d14a",
+      "source_bytes": 1292002,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/deed_game_crate.webp"
     }
   ],
   "missing": [],

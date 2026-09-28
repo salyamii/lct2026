@@ -740,3 +740,11 @@ LOADING-D-001: общий индикатор старта и загрузки. �
 LOADING-D-002: системная заставка и Compose используют единый фон `#120F30`,
 центр окна и исходный холст монеты размером 120 dp. Подготовка Lottie показывает
 тот же статичный кадр. [Воспроизводимый экспорт](../../../scripts/export_loading_coin_frame.py).
+
+Фирменный ящик для «Ящиков на причале» (User-supplied image → WebP
+lossless 512×512, прозрачный фон). В штабеле рисуется кубом: сторона
+подстраивается под ширину уложенного ящика.
+
+| Android resource | Canvas | Файл | Источник |
+| --- | --- | --- | --- |
+| `R.drawable.deed_game_crate` | 512 × 512 | [deed_game_crate.webp](../../../app/src/main/res/drawable-nodpi/deed_game_crate.webp) | [crate.png](sources/mini-game-crate-2026-09-28/crate.png) |

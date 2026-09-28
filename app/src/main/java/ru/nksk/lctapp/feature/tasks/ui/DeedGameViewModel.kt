@@ -25,7 +25,7 @@ import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.minigame.*
 
-enum class DeedGameType { MEMORY, COMPARISON, PRECISION }
+enum class DeedGameType { MEMORY, COMPARISON, PRECISION, LIGHTS, SEQUENCE, PIPES, DIFFERENCES, STACKING }
 data class DeedGamePresentation(val title: String, val maximumReward: Long, val canPlay: Boolean,
     val storyAction: Boolean = false, val sceneRes: Int? = null, val instructions: String? = null,
     val activityArtworkRes: Int? = null, val pairArtwork: List<Int> = emptyList())
@@ -87,6 +87,11 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
         DeedGameScore.fromComparison(state)?.let(::finish)
     }
     fun finishPrecision(state: TargetStopState) { DeedGameScore.fromPrecision(state)?.let(::finish) }
+    fun finishLights(state: LightsState) { DeedGameScore.fromLights(state)?.let(::finish) }
+    fun finishSequence(state: SequenceState) { DeedGameScore.fromSequence(state)?.let(::finish) }
+    fun finishPipes(state: PipesState) { DeedGameScore.fromPipes(state)?.let(::finish) }
+    fun finishDifferences(state: DifferencesState) { DeedGameScore.fromDifferences(state)?.let(::finish) }
+    fun finishStacking(state: StackingState) { DeedGameScore.fromStacking(state)?.let(::finish) }
 
     private fun finish(score: DeedGameScore) {
         if (busy || pending != null || rejectedAction != null) return
@@ -268,6 +273,11 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
                 DeedGameKind.MEMORY -> DeedGameType.MEMORY
                 DeedGameKind.COMPARISON -> DeedGameType.COMPARISON
                 DeedGameKind.PRECISION -> DeedGameType.PRECISION
+                DeedGameKind.LIGHTS -> DeedGameType.LIGHTS
+                DeedGameKind.SEQUENCE -> DeedGameType.SEQUENCE
+                DeedGameKind.PIPES -> DeedGameType.PIPES
+                DeedGameKind.DIFFERENCES -> DeedGameType.DIFFERENCES
+                DeedGameKind.STACKING -> DeedGameType.STACKING
             },
             presentation = DeedGamePresentation(renderPetText(event.title, game.pet.name), reward, pending == null && message == null,
                 storyAction = storyGame,
