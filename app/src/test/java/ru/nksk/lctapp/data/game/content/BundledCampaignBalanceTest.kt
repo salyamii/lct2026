@@ -134,7 +134,8 @@ class BundledCampaignBalanceTest {
             val event = catalog.content.events.single { it.id == active.eventId }
             if (active.origin == EventOrigin.DEED) {
                 val score = score(catalog.policies.getValue(active.eventId).deedGameKind!!, scoreCap)
-                assertTrue(score.correct * 100 <= score.attempts * scoreCap)
+                // Цельные партии (лампы, карта, концы, банки, отличия) завершаются только полностью.
+                assertTrue(score.correct == score.attempts || score.correct * 100 <= score.attempts * scoreCap)
                 val maximum = catalog.content.choices.single { it.eventId == active.eventId }.moneyDelta
                 val before = state.economy.availableBalance
                 send(EngineCommand.CompleteDeed(active.id, score))
@@ -295,6 +296,37 @@ class BundledCampaignBalanceTest {
                 current = PriceQuizState.QUESTION_COUNT, correctAnswers = PriceQuizState.QUESTION_COUNT * cap / 100))
             DeedGameKind.MEMORY -> DeedGameScore.fromMemory(MemoryState((0 until MemoryState.PAIRS).flatMap { listOf(it, it) })
                 .let { it.copy(matched = it.faces.indices.toSet(), moves = (MemoryState.PAIRS * 100 + cap - 1) / cap) })
+            // Лампы, карта, концы и банки не делятся на доли: партия либо решена, либо нет.
+            DeedGameKind.LIGHTS -> DeedGameScore.fromLights(LightsState(
+                List(LightsState.SIZE * LightsState.SIZE) { false }, moves = 1))
+            DeedGameKind.SLIDING -> DeedGameScore.fromSliding(SlidingState((1..15).toList() + 0, moves = 1))
+            DeedGameKind.PIPES -> DeedGameScore.fromPipes(PipesState(PipesState.PUZZLE, paths = solvedPipePaths()))
+            DeedGameKind.SORTING -> DeedGameScore.fromSorting(SortingState(
+                tubes = listOf(List(SortingState.CAPACITY) { 0 }, List(SortingState.CAPACITY) { 1 },
+                    List(SortingState.CAPACITY) { 2 }, emptyList()), moves = 1))
+            // Отличия всегда ищутся до конца, поэтому их доля всегда полная.
+            DeedGameKind.DIFFERENCES -> DeedGameScore.fromDifferences(DifferencesState.create().let { board ->
+                board.differences.fold(board) { state, cell -> state.tap(cell) }
+            })
+            // Пяти- и шестираундовые партии округляют долю вниз, как PRECISION выше.
+            DeedGameKind.SEQUENCE -> DeedGameScore.fromSequence(SequenceState(
+                sequence = List(SequenceState.FIRST_ROUND_LENGTH) { 0 },
+                round = SequenceState.ROUNDS,
+                correct = SequenceState.ROUNDS * cap / 100,
+                lastCorrect = true,
+            ))
+            DeedGameKind.STACKING -> DeedGameScore.fromStacking(StackingState(
+                locked = List(StackingState.ROUNDS * cap / 100) { StackedBlock(0, StackingState.START_WIDTH) },
+                blockWidth = StackingState.START_WIDTH,
+                placed = StackingState.ROUNDS * cap / 100,
+                finished = true,
+            ))
         })
+
+        private fun solvedPipePaths(): Map<Int, List<Int>> = mapOf(
+            0 to listOf(0, 5, 10, 15, 20),
+            1 to listOf(4, 9, 14, 19, 24),
+            2 to listOf(11, 6, 7, 8, 13),
+        )
     }
 }

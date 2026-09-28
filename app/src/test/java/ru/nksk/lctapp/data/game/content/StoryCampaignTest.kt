@@ -353,6 +353,32 @@ class StoryCampaignTest {
             DeedGameKind.COMPARISON -> DeedGameScore.fromComparison(PriceQuizState.create().copy(current = 5, correctAnswers = 5))
             DeedGameKind.MEMORY -> DeedGameScore.fromMemory(MemoryState((0 until MemoryState.PAIRS).flatMap { listOf(it, it) })
                 .let { it.copy(matched = it.faces.indices.toSet(), moves = MemoryState.PAIRS) })
+            DeedGameKind.LIGHTS -> DeedGameScore.fromLights(LightsState(
+                List(LightsState.SIZE * LightsState.SIZE) { false }, moves = 1))
+            DeedGameKind.SEQUENCE -> DeedGameScore.fromSequence(SequenceState(
+                sequence = List(SequenceState.FIRST_ROUND_LENGTH) { 0 },
+                round = SequenceState.ROUNDS,
+                correct = SequenceState.ROUNDS,
+                lastCorrect = true,
+            ))
+            DeedGameKind.SLIDING -> DeedGameScore.fromSliding(SlidingState((1..15).toList() + 0, moves = 1))
+            DeedGameKind.PIPES -> DeedGameScore.fromPipes(PipesState(PipesState.PUZZLE, paths = mapOf(
+                0 to listOf(0, 5, 10, 15, 20),
+                1 to listOf(4, 9, 14, 19, 24),
+                2 to listOf(11, 6, 7, 8, 13),
+            )))
+            DeedGameKind.SORTING -> DeedGameScore.fromSorting(SortingState(
+                tubes = listOf(List(SortingState.CAPACITY) { 0 }, List(SortingState.CAPACITY) { 1 },
+                    List(SortingState.CAPACITY) { 2 }, emptyList()), moves = 1))
+            DeedGameKind.DIFFERENCES -> DeedGameScore.fromDifferences(DifferencesState.create().let { board ->
+                board.differences.fold(board) { state, cell -> state.tap(cell) }
+            })
+            DeedGameKind.STACKING -> DeedGameScore.fromStacking(StackingState(
+                locked = List(StackingState.ROUNDS) { StackedBlock(0, StackingState.START_WIDTH) },
+                blockWidth = StackingState.START_WIDTH,
+                placed = StackingState.ROUNDS,
+                finished = true,
+            ))
         })
     }
 }
