@@ -1,5 +1,7 @@
 package ru.nksk.lctapp.domain.minigame
 
+import kotlin.random.Random
+
 /**
  * Чистое состояние игры «Сверка находок»: две одинаковые на вид полки
  * ([CELLS] предметов, id рисунков), на нижней спрятано [DIFF_COUNT] отличий.
@@ -73,5 +75,9 @@ data class DifferencesState(
             require(board.differences.size == DIFF_COUNT) { "Scene must hide exactly $DIFF_COUNT differences" }
             return board
         }
+
+        /** Новая партия на случайно выбранной сцене. */
+        fun createRandom(random: Random = Random.Default): DifferencesState =
+            create(scene = random.nextInt(SCENES.size))
     }
 }

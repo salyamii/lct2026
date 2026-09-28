@@ -25,7 +25,7 @@ class DifferencesGameViewModel @Inject constructor(private val savedState: Saved
     fun onAction(action: DifferencesGameAction) {
         when (action) {
             is DifferencesGameAction.Tap -> publish(uiState.value.game.tap(action.cell))
-            DifferencesGameAction.Restart -> publish(DifferencesState.create())
+            DifferencesGameAction.Restart -> publish(DifferencesState.createRandom())
         }
     }
 
@@ -39,7 +39,7 @@ class DifferencesGameViewModel @Inject constructor(private val savedState: Saved
     }
 
     private fun restore(): DifferencesState {
-        val top = savedState.get<IntArray>("top") ?: return DifferencesState.create()
+        val top = savedState.get<IntArray>("top") ?: return DifferencesState.createRandom()
         return DifferencesState(
             top = top.toList(),
             bottom = requireNotNull(savedState.get<IntArray>("bottom")).toList(),

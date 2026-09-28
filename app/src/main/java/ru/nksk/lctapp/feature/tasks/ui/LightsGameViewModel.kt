@@ -25,7 +25,7 @@ class LightsGameViewModel @Inject constructor(private val savedState: SavedState
     fun onAction(action: LightsGameAction) {
         when (action) {
             is LightsGameAction.Tap -> publish(uiState.value.game.tap(action.index))
-            LightsGameAction.Restart -> publish(LightsState.create())
+            LightsGameAction.Restart -> publish(LightsState.createRandom())
         }
     }
 
@@ -37,7 +37,7 @@ class LightsGameViewModel @Inject constructor(private val savedState: SavedState
     }
 
     private fun restore(): LightsState {
-        val grid = savedState.get<BooleanArray>("grid") ?: return LightsState.create()
+        val grid = savedState.get<BooleanArray>("grid") ?: return LightsState.createRandom()
         return LightsState(grid = grid.toList(), moves = savedState["moves"] ?: 0)
     }
 }

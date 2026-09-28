@@ -1,5 +1,7 @@
 package ru.nksk.lctapp.domain.minigame
 
+import kotlin.random.Random
+
 /**
  * Чистое состояние игры «Погаси фонари»: сетка [SIZE]×[SIZE], нажатие переключает
  * сам фонарь и четырёх соседей. Цель — погасить все фонари. Все переходы
@@ -63,6 +65,10 @@ data class LightsState(
             require(puzzle in PUZZLES.indices) { "Unknown lights puzzle" }
             return LightsState(grid = PUZZLES[puzzle])
         }
+
+        /** Новая партия на случайно выбранной раскладке. */
+        fun createRandom(random: Random = Random.Default): LightsState =
+            create(puzzle = random.nextInt(PUZZLES.size))
 
         /** Демонстрационная награда за собранную партию вне дел. */
         const val REWARD = 10

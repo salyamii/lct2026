@@ -1,5 +1,7 @@
 package ru.nksk.lctapp.domain.minigame
 
+import kotlin.random.Random
+
 /**
  * Пара концов одного цвета на поле «Свяжи концы».
  * [first] и [second] — индексы ячеек строки-мажорной сетки [PipesState.SIZE]×[PipesState.SIZE].
@@ -57,6 +59,8 @@ data class PipesState(
         val pair = endpoints.first { it.color == active }
         val otherEnd = if (activePath.first() == pair.first) pair.second else pair.first
         if (cell == otherEnd) {
+            // Замыкание допустимо только с соседней ячейки, иначе тропинка разорвана.
+            if (!adjacent(activePath.last(), cell)) return this
             return copy(
                 paths = paths + (active to activePath + cell),
                 activeColor = null,
@@ -78,12 +82,50 @@ data class PipesState(
 
         private fun cell(row: Int, col: Int): Int = row * SIZE + col
 
-        /** Готовая раскладка из трёх цветов, решаемая без пересечений. */
-        val PUZZLE: List<PipeEndpoints> = listOf(
-            PipeEndpoints(0, cell(0, 0), cell(4, 0)),
-            PipeEndpoints(1, cell(0, 4), cell(4, 4)),
-            PipeEndpoints(2, cell(2, 1), cell(2, 3)),
+        /**
+         * Готовые раскладки, заданные готовыми тропинками: концы пары — первый
+         * и последний путь. Каждая раскладка решаема по построению, а тест
+         * дополнительно сверяет каждую тропинку с правилами партии.
+         */
+        private val LAYOUT_PATHS: List<List<List<Int>>> = listOf(
+            // Столбцы по краям и дуга среднего цвета через верх.
+            listOf(
+                listOf(0, 5, 10, 15, 20),
+                listOf(4, 9, 14, 19, 24),
+                listOf(11, 6, 7, 8, 13),
+            ),
+            // Горизонтальные ряды и дуга через центр.
+            listOf(
+                listOf(0, 1, 2, 3, 4),
+                listOf(20, 21, 22, 23, 24),
+                listOf(10, 5, 6, 7, 8, 13),
+            ),
+            // Левый столбец, зигзаг через центр, короткая правая тропинка.
+            listOf(
+                listOf(0, 5, 10, 15, 20),
+                listOf(4, 3, 8, 13, 18, 23),
+                listOf(24, 19, 14, 9),
+            ),
+            // Средний столбец, левый зигзаг и левая тропинка.
+            listOf(
+                listOf(2, 7, 12, 17, 22),
+                listOf(6, 11, 16, 21, 20),
+                listOf(0, 5, 10, 15),
+            ),
         )
+
+        /** Раскладка первой партии; совместима с прежними проверками. */
+        val PUZZLE: List<PipeEndpoints> = layout(0)
+
+        fun layout(index: Int): List<PipeEndpoints> {
+            require(index in LAYOUT_PATHS.indices) { "Unknown pipes layout" }
+            return LAYOUT_PATHS[index].mapIndexed { color, path ->
+                require(path.size >= 2) { "Pipe path needs two ends" }
+                PipeEndpoints(color, path.first(), path.last())
+            }
+        }
+
+        val LAYOUT_COUNT: Int get() = LAYOUT_PATHS.size
 
         /** Проверяет раскладку: пары концов не пересекаются и принадлежат разным цветам. */
         fun isLayoutValid(layout: List<PipeEndpoints>): Boolean {
@@ -97,5 +139,9 @@ data class PipesState(
             require(isLayoutValid(layout)) { "Invalid pipes layout" }
             return PipesState(endpoints = layout)
         }
+
+        /** Новая партия на случайно выбранной раскладке. */
+        fun createRandom(random: Random = Random.Default): PipesState =
+            create(layout(random.nextInt(LAYOUT_COUNT)))
     }
 }

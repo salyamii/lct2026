@@ -28,7 +28,7 @@ class PipesGameViewModel @Inject constructor(private val savedState: SavedStateH
         when (action) {
             is PipesGameAction.Press -> publish(uiState.value.game.press(action.cell))
             PipesGameAction.Release -> publish(uiState.value.game.release())
-            PipesGameAction.Restart -> publish(PipesState.create())
+            PipesGameAction.Restart -> publish(PipesState.createRandom())
         }
     }
 
@@ -46,7 +46,7 @@ class PipesGameViewModel @Inject constructor(private val savedState: SavedStateH
 
     private fun restore(): PipesState {
         val colors = savedState.get<IntArray>("endpoint_colors")
-            ?: return PipesState.create()
+            ?: return PipesState.createRandom()
         val endpoints = colors.indices.map { i ->
             PipeEndpoints(
                 color = colors[i],

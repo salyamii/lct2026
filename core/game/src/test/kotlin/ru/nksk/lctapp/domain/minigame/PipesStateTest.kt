@@ -67,4 +67,54 @@ class PipesStateTest {
             fail("Expected IllegalArgumentException")
         } catch (_: IllegalArgumentException) { }
     }
+
+    @Test fun everyRandomLayoutIsSolvableAndPayable() {
+        // Раскладки заданы готовыми тропинками: прокладываем их и проверяем,
+        // что партия доходит до победы и зачётного результата по всем правилам.
+        repeat(PipesState.LAYOUT_COUNT) { index ->
+            val paths = layoutPaths.getValue(index)
+            var board = PipesState.create(PipesState.layout(index))
+            paths.forEach { path ->
+                board = board.release()
+                board = board.press(path.first())
+                path.drop(1).forEach { cell -> board = board.press(cell) }
+            }
+            assertTrue("Layout $index must be won", board.won)
+            val score = DeedGameScore.fromPipes(board)
+            assertTrue("Layout $index must be payable", score != null)
+        }
+    }
+
+    @Test fun createRandomReturnsAValidBoard() {
+        val fixed = kotlin.random.Random(11)
+        repeat(10) { board ->
+            val state = PipesState.createRandom(fixed)
+            assertTrue(PipesState.isLayoutValid(state.endpoints))
+            assertTrue(state.paths.isEmpty())
+        }
+    }
+
+    /** Готовые тропинки каждой раскладки, в том же порядке, что и в домене. */
+    private val layoutPaths = mapOf(
+        0 to listOf(
+            listOf(0, 5, 10, 15, 20),
+            listOf(4, 9, 14, 19, 24),
+            listOf(11, 6, 7, 8, 13),
+        ),
+        1 to listOf(
+            listOf(0, 1, 2, 3, 4),
+            listOf(20, 21, 22, 23, 24),
+            listOf(10, 5, 6, 7, 8, 13),
+        ),
+        2 to listOf(
+            listOf(0, 5, 10, 15, 20),
+            listOf(4, 3, 8, 13, 18, 23),
+            listOf(24, 19, 14, 9),
+        ),
+        3 to listOf(
+            listOf(2, 7, 12, 17, 22),
+            listOf(6, 11, 16, 21, 20),
+            listOf(0, 5, 10, 15),
+        ),
+    )
 }
