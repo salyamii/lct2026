@@ -296,25 +296,15 @@ class BundledCampaignBalanceTest {
                 current = PriceQuizState.QUESTION_COUNT, correctAnswers = PriceQuizState.QUESTION_COUNT * cap / 100))
             DeedGameKind.MEMORY -> DeedGameScore.fromMemory(MemoryState((0 until MemoryState.PAIRS).flatMap { listOf(it, it) })
                 .let { it.copy(matched = it.faces.indices.toSet(), moves = (MemoryState.PAIRS * 100 + cap - 1) / cap) })
-            // Лампы, карта, концы и банки не делятся на доли: партия либо решена, либо нет.
+            // Лампы и концы не делятся на доли: партия либо решена, либо нет.
             DeedGameKind.LIGHTS -> DeedGameScore.fromLights(LightsState(
                 List(LightsState.SIZE * LightsState.SIZE) { false }, moves = 1))
-            DeedGameKind.SLIDING -> DeedGameScore.fromSliding(SlidingState((1..15).toList() + 0, moves = 1))
             DeedGameKind.PIPES -> DeedGameScore.fromPipes(PipesState(PipesState.PUZZLE, paths = solvedPipePaths()))
-            DeedGameKind.SORTING -> DeedGameScore.fromSorting(SortingState(
-                tubes = listOf(List(SortingState.CAPACITY) { 0 }, List(SortingState.CAPACITY) { 1 },
-                    List(SortingState.CAPACITY) { 2 }, emptyList()), moves = 1))
             // Отличия всегда ищутся до конца, поэтому их доля всегда полная.
             DeedGameKind.DIFFERENCES -> DeedGameScore.fromDifferences(DifferencesState.create().let { board ->
                 board.differences.fold(board) { state, cell -> state.tap(cell) }
             })
-            // Пяти- и шестираундовые партии округляют долю вниз, как PRECISION выше.
-            DeedGameKind.SEQUENCE -> DeedGameScore.fromSequence(SequenceState(
-                sequence = List(SequenceState.FIRST_ROUND_LENGTH) { 0 },
-                round = SequenceState.ROUNDS,
-                correct = SequenceState.ROUNDS * cap / 100,
-                lastCorrect = true,
-            ))
+            // Шестираундовая партия округляет долю вниз, как PRECISION выше.
             DeedGameKind.STACKING -> DeedGameScore.fromStacking(StackingState(
                 locked = List(StackingState.ROUNDS * cap / 100) { StackedBlock(0, StackingState.START_WIDTH) },
                 blockWidth = StackingState.START_WIDTH,

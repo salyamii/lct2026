@@ -1,7 +1,7 @@
 package ru.nksk.lctapp.domain.minigame
 
 /** Supported mechanics, not a closed list of authored deeds or content IDs. */
-enum class DeedGameKind { MEMORY, COMPARISON, PRECISION, LIGHTS, SEQUENCE, SLIDING, PIPES, SORTING, DIFFERENCES, STACKING }
+enum class DeedGameKind { MEMORY, COMPARISON, PRECISION, LIGHTS, PIPES, DIFFERENCES, STACKING }
 
 /** A completed round set; incomplete boards cannot be submitted for payment. */
 @kotlinx.serialization.Serializable
@@ -17,10 +17,7 @@ class DeedGameScore private constructor(
             DeedGameKind.COMPARISON -> attempts == PriceQuizState.QUESTION_COUNT
             DeedGameKind.PRECISION -> attempts == TargetStopState.ROUNDS
             DeedGameKind.LIGHTS -> attempts == 1 && correct == 1
-            DeedGameKind.SEQUENCE -> attempts == SequenceState.ROUNDS
-            DeedGameKind.SLIDING -> attempts == 1 && correct == 1
             DeedGameKind.PIPES -> attempts == 1 && correct == 1
-            DeedGameKind.SORTING -> attempts == 1 && correct == 1
             DeedGameKind.DIFFERENCES -> correct == DifferencesState.DIFF_COUNT && attempts >= DifferencesState.DIFF_COUNT
             DeedGameKind.STACKING -> attempts == StackingState.ROUNDS
         }) { "Invalid completed mini-game result" }
@@ -55,19 +52,6 @@ class DeedGameScore private constructor(
                 state.grid.toSet() == setOf(false) && state.moves >= 1
             ) DeedGameScore(DeedGameKind.LIGHTS, 1, 1) else null
 
-        fun fromSequence(state: SequenceState): DeedGameScore? =
-            if (state.finished && state.round == SequenceState.ROUNDS && state.lastCorrect != null &&
-                state.correct in 0..SequenceState.ROUNDS &&
-                state.sequence.size in SequenceState.FIRST_ROUND_LENGTH..SequenceState.MAX_ROUND_LENGTH &&
-                state.sequence.all { it in SequenceState.SIGNALS.indices }
-            ) DeedGameScore(DeedGameKind.SEQUENCE, state.correct, SequenceState.ROUNDS) else null
-
-        fun fromSliding(state: SlidingState): DeedGameScore? =
-            if (state.won && state.tiles.size == SlidingState.SIZE * SlidingState.SIZE &&
-                state.tiles.sorted() == (0..SlidingState.SIZE * SlidingState.SIZE - 1).toList() &&
-                state.moves >= 1
-            ) DeedGameScore(DeedGameKind.SLIDING, 1, 1) else null
-
         fun fromPipes(state: PipesState): DeedGameScore? =
             if (state.won && PipesState.isLayoutValid(state.endpoints) &&
                 state.activeColor == null && state.activePath.isEmpty() &&
@@ -76,13 +60,6 @@ class DeedGameScore private constructor(
                     path != null && path.isValidPipePath(connection)
                 }
             ) DeedGameScore(DeedGameKind.PIPES, 1, 1) else null
-
-        fun fromSorting(state: SortingState): DeedGameScore? =
-            if (state.won && state.tubes.size == SortingState.TUBE_COUNT &&
-                state.tubes.all { it.size <= SortingState.CAPACITY } &&
-                state.tubes.sumOf { it.size } == SortingState.BALL_COUNT &&
-                state.selected == null && state.moves >= 1
-            ) DeedGameScore(DeedGameKind.SORTING, 1, 1) else null
 
         fun fromDifferences(state: DifferencesState): DeedGameScore? =
             if (state.won && state.top.size == DifferencesState.CELLS && state.bottom.size == DifferencesState.CELLS &&

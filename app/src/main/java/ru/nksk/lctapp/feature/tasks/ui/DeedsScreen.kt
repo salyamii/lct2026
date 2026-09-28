@@ -43,7 +43,7 @@ import ru.nksk.lctapp.core.ui.theme.Rubik
 
 enum class DeedsAction {
     StarPlates, PriceCheck, Telescope, SkillTraining,
-    Lights, Sequence, Sliding, Pipes, Sorting, Differences, Stacking,
+    Lights, Pipes, Differences, Stacking,
 }
 
 @Composable
@@ -205,26 +205,6 @@ private fun DeedsContent(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit,
                     )
                     Spacer(Modifier.height(14.dp))
                 }
-                item(key = "training-sequence", contentType = "deed") {
-                    DeedCard(
-                        title = stringResource(R.string.deeds_sequence_title),
-                        description = stringResource(R.string.deeds_sequence_description),
-                        rewardLabel = stringResource(R.string.deeds_demo_max),
-                        scene = R.drawable.location_observatory,
-                        onOpen = { onOpen(DeedsAction.Sequence) },
-                    )
-                    Spacer(Modifier.height(14.dp))
-                }
-                item(key = "training-sliding", contentType = "deed") {
-                    DeedCard(
-                        title = stringResource(R.string.deeds_sliding_title),
-                        description = stringResource(R.string.deeds_sliding_description),
-                        rewardLabel = stringResource(R.string.deeds_demo_max),
-                        scene = R.drawable.location_trail,
-                        onOpen = { onOpen(DeedsAction.Sliding) },
-                    )
-                    Spacer(Modifier.height(14.dp))
-                }
                 item(key = "training-pipes", contentType = "deed") {
                     DeedCard(
                         title = stringResource(R.string.deeds_pipes_title),
@@ -232,16 +212,6 @@ private fun DeedsContent(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit,
                         rewardLabel = stringResource(R.string.deeds_demo_max),
                         scene = R.drawable.location_workshop,
                         onOpen = { onOpen(DeedsAction.Pipes) },
-                    )
-                    Spacer(Modifier.height(14.dp))
-                }
-                item(key = "training-sorting", contentType = "deed") {
-                    DeedCard(
-                        title = stringResource(R.string.deeds_sorting_title),
-                        description = stringResource(R.string.deeds_sorting_description),
-                        rewardLabel = stringResource(R.string.deeds_demo_max),
-                        scene = R.drawable.location_pier,
-                        onOpen = { onOpen(DeedsAction.Sorting) },
                     )
                     Spacer(Modifier.height(14.dp))
                 }

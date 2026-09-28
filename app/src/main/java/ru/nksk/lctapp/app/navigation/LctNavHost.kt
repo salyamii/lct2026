@@ -56,9 +56,6 @@ import ru.nksk.lctapp.feature.tasks.navigation.LightsGame
 import ru.nksk.lctapp.feature.tasks.navigation.PipesGame
 import ru.nksk.lctapp.feature.tasks.navigation.StarPlates
 import ru.nksk.lctapp.feature.tasks.navigation.PriceCheck
-import ru.nksk.lctapp.feature.tasks.navigation.SequenceGame
-import ru.nksk.lctapp.feature.tasks.navigation.SlidingGame
-import ru.nksk.lctapp.feature.tasks.navigation.SortingGame
 import ru.nksk.lctapp.feature.tasks.navigation.StackingGame
 import ru.nksk.lctapp.feature.tasks.navigation.Telescope
 import ru.nksk.lctapp.feature.tasks.navigation.Tasks
@@ -187,10 +184,7 @@ fun LctNavHost(
                             DeedsAction.Telescope -> Telescope
                             DeedsAction.SkillTraining -> SkillTraining
                             DeedsAction.Lights -> LightsGame
-                            DeedsAction.Sequence -> SequenceGame
-                            DeedsAction.Sliding -> SlidingGame
                             DeedsAction.Pipes -> PipesGame
-                            DeedsAction.Sorting -> SortingGame
                             DeedsAction.Differences -> DifferencesGame
                             DeedsAction.Stacking -> StackingGame
                         })

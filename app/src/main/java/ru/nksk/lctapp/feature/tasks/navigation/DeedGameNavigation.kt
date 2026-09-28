@@ -73,32 +73,11 @@ fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> 
                     LightsGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
                         leave, state.presentation)
                 }
-                DeedGameType.SEQUENCE -> {
-                    val game = hiltViewModel<SequenceGameViewModel>()
-                    val board by game.uiState.collectAsStateWithLifecycle()
-                    LaunchedEffect(board.game) { model.finishSequence(board.game) }
-                    SequenceGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
-                        leave, state.presentation)
-                }
-                DeedGameType.SLIDING -> {
-                    val game = hiltViewModel<SlidingGameViewModel>()
-                    val board by game.uiState.collectAsStateWithLifecycle()
-                    LaunchedEffect(board.game) { model.finishSliding(board.game) }
-                    SlidingGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
-                        leave, state.presentation)
-                }
                 DeedGameType.PIPES -> {
                     val game = hiltViewModel<PipesGameViewModel>()
                     val board by game.uiState.collectAsStateWithLifecycle()
                     LaunchedEffect(board.game) { model.finishPipes(board.game) }
                     PipesGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
-                        leave, state.presentation)
-                }
-                DeedGameType.SORTING -> {
-                    val game = hiltViewModel<SortingGameViewModel>()
-                    val board by game.uiState.collectAsStateWithLifecycle()
-                    LaunchedEffect(board.game) { model.finishSorting(board.game) }
-                    SortingGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
                         leave, state.presentation)
                 }
                 DeedGameType.DIFFERENCES -> {

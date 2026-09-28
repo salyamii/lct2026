@@ -44,10 +44,7 @@ class DeedGameScoreTest {
         assertNull(DeedGameScore.fromPrecision(TargetStopState.create()))
         assertNull(DeedGameScore.fromPrecision(TargetStopState(10, round = 5, hits = 6, lastHit = true)))
         assertNull(DeedGameScore.fromLights(LightsState.create()))
-        assertNull(DeedGameScore.fromSequence(SequenceState.create()))
-        assertNull(DeedGameScore.fromSliding(SlidingState.shuffled()))
         assertNull(DeedGameScore.fromPipes(PipesState.create()))
-        assertNull(DeedGameScore.fromSorting(SortingState.create()))
         assertNull(DeedGameScore.fromDifferences(DifferencesState.create()))
         assertNull(DeedGameScore.fromStacking(StackingState.create()))
     }
@@ -56,26 +53,10 @@ class DeedGameScoreTest {
         // Хоть один ход должен быть сделан, иначе результат не считается партией.
         val lights = LightsState(List(LightsState.SIZE * LightsState.SIZE) { false }, moves = 3)
         assertEquals(9L, checkNotNull(DeedGameScore.fromLights(lights)).reward(9))
-        // Один ход от собранной доски: сдвиг и возврат дают решённую партию с ходами.
-        val sliding = SlidingState((1..14).toList() + 0 + 15).tap(15)
-        assertEquals(7L, checkNotNull(DeedGameScore.fromSliding(sliding)).reward(7))
-        val sorting = SortingState(
-            tubes = listOf(List(4) { 0 }, List(4) { 1 }, List(4) { 2 }, emptyList()),
-            moves = 3,
-        )
-        assertEquals(5L, checkNotNull(DeedGameScore.fromSorting(sorting)).reward(5))
     }
 
     @Test fun layeredGamesPayForTheirExactProgress() {
-        var sequence = SequenceState.create()
-        repeat(SequenceState.ROUNDS) { round ->
-            sequence = sequence.playRound(win = round != 3).next()
-        }
-        val sequenceScore = checkNotNull(DeedGameScore.fromSequence(sequence))
-        assertEquals(SequenceState.ROUNDS - 1, sequenceScore.correct)
-        assertEquals(3L, sequenceScore.reward(4))
-
-        var stack = StackingState.create().dropAt(50)
+        var stack = StackingState.create().dropAt(20)
         repeat(3) { stack = stack.dropAt(stack.locked.last().x) }
         val stackScore = checkNotNull(DeedGameScore.fromStacking(stack.copy(finished = true)))
         assertEquals(4, stackScore.correct)
@@ -88,8 +69,4 @@ class DeedGameScoreTest {
         // Все отличия найдены без промахов — награда полная.
         assertEquals(8L, differencesScore.reward(8))
     }
-
-    private fun SequenceState.playRound(win: Boolean): SequenceState =
-        if (win) sequence.fold(this) { state, signal -> state.tap(signal) }
-        else tap((sequence.first() + 1) % SequenceState.SIGNAL_COUNT)
 }

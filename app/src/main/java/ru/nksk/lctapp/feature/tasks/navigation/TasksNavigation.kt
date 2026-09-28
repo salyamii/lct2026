@@ -25,12 +25,6 @@ import ru.nksk.lctapp.feature.tasks.ui.PipesGameScreen
 import ru.nksk.lctapp.feature.tasks.ui.PipesGameViewModel
 import ru.nksk.lctapp.feature.tasks.ui.PriceQuizScreen
 import ru.nksk.lctapp.feature.tasks.ui.PriceQuizViewModel
-import ru.nksk.lctapp.feature.tasks.ui.SequenceGameScreen
-import ru.nksk.lctapp.feature.tasks.ui.SequenceGameViewModel
-import ru.nksk.lctapp.feature.tasks.ui.SlidingGameScreen
-import ru.nksk.lctapp.feature.tasks.ui.SlidingGameViewModel
-import ru.nksk.lctapp.feature.tasks.ui.SortingGameScreen
-import ru.nksk.lctapp.feature.tasks.ui.SortingGameViewModel
 import ru.nksk.lctapp.feature.tasks.ui.StackingGameScreen
 import ru.nksk.lctapp.feature.tasks.ui.StackingGameViewModel
 import ru.nksk.lctapp.feature.tasks.ui.TargetStopScreen
@@ -57,20 +51,8 @@ data object Telescope : NavKey
 data object LightsGame : NavKey
 
 @Serializable
-@SerialName("tasks_sequence")
-data object SequenceGame : NavKey
-
-@Serializable
-@SerialName("tasks_sliding")
-data object SlidingGame : NavKey
-
-@Serializable
 @SerialName("tasks_pipes")
 data object PipesGame : NavKey
-
-@Serializable
-@SerialName("tasks_sorting")
-data object SortingGame : NavKey
 
 @Serializable
 @SerialName("tasks_differences")
@@ -132,25 +114,10 @@ fun EntryProviderScope<NavKey>.tasksEntry(
         val state by viewModel.uiState.collectAsStateWithLifecycle()
         LightsGameScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) })
     }
-    entry<SequenceGame> { source ->
-        val viewModel = hiltViewModel<SequenceGameViewModel>()
-        val state by viewModel.uiState.collectAsStateWithLifecycle()
-        SequenceGameScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) })
-    }
-    entry<SlidingGame> { source ->
-        val viewModel = hiltViewModel<SlidingGameViewModel>()
-        val state by viewModel.uiState.collectAsStateWithLifecycle()
-        SlidingGameScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) })
-    }
     entry<PipesGame> { source ->
         val viewModel = hiltViewModel<PipesGameViewModel>()
         val state by viewModel.uiState.collectAsStateWithLifecycle()
         PipesGameScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) })
-    }
-    entry<SortingGame> { source ->
-        val viewModel = hiltViewModel<SortingGameViewModel>()
-        val state by viewModel.uiState.collectAsStateWithLifecycle()
-        SortingGameScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) })
     }
     entry<DifferencesGame> { source ->
         val viewModel = hiltViewModel<DifferencesGameViewModel>()
