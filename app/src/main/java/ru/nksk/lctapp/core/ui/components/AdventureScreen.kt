@@ -23,7 +23,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -45,6 +44,7 @@ internal fun AdventureScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     @DrawableRes backgroundRes: Int = R.drawable.location_observatory_stage,
+    blurBackground: Boolean = false,
     artworkSceneKey: Any? = backgroundRes,
     available: Long? = null,
     savings: Long? = null,
@@ -136,7 +136,7 @@ internal fun AdventureScreen(
             // Continue the same scene beneath the rounded panel instead of exposing a
             // rectangular dark seam. The layer follows whichever content owns the scroll.
             Box(Modifier.fillMaxWidth().height(backgroundHeight + 28.dp)) {
-                GameArtwork(backgroundRes, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                GameBackdrop(backgroundRes, blurBackground, Modifier.fillMaxSize())
                 Box(Modifier.fillMaxSize().background(Brush.verticalGradient(
                     0f to AdventureNight.copy(alpha = .48f), .28f to Color.Transparent,
                     1f to AdventureNight.copy(alpha = .10f),

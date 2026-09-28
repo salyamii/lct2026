@@ -70,6 +70,11 @@
       "id": null,
       "name": "Transparent story objects — 2026-09-26",
       "expected_assets": 42
+    },
+    {
+      "id": "3785:705",
+      "name": "Night bedroom — 2026-09-29",
+      "expected_assets": 1
     }
   ],
   "scope": "Five character/equipment packs (252 layers including 12 sleeping foxes), all 14 locations, additional NPC/event art, and existing menu/font assets, onboarding artwork and the debug settings vector. Design mockup screens and hidden RAW work areas are excluded. Includes five generated chapter preview illustrations for the goal screen.",
@@ -15398,6 +15403,38 @@
         "node_id": null,
         "collection_id": null
       }
+    },
+    {
+      "resource": "location_bedroom_night",
+      "category": "Night bedroom — 2026-09-29",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3785:706",
+        "node_name": "Фон · Спальня Рыжика · ночь · без персонажа",
+        "collection_id": "3785:705",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3785-706"
+      },
+      "source_method": "figma_download_assets_raw_image",
+      "source_notes": "Original PNG image fill from node 3785:706; full canvas preserved without resizing, cropping, dimming or labels. Parent 3785:705 is a catalog card, not a runtime screen.",
+      "source_path": "docs/design/assets/sources/location_bedroom_night.png",
+      "source_sha256": "7b8a92794b8b6373ab427843a8c78562174204329b45208237fc8b7c8420c350",
+      "source_bytes": 1973582,
+      "source_format": "png",
+      "format": "webp",
+      "width": 1378,
+      "height": 1142,
+      "bytes": 1472990,
+      "sha256": "4bbb7d2083ac8c2f8c523ec8b6f1a101aeff75637055ca7358c3769e03adb9a5",
+      "rgba_sha256": "ff14b9544999a11df64485d130fcfcf91da4d5c22c9b1f473526eff057800814",
+      "alpha_bounds": [
+        0,
+        0,
+        1378,
+        1142
+      ],
+      "lossless_rgba_verified": true,
+      "conversion": "Pillow 12.3.0 WebP lossless=True, exact=True, method=6. Decoded RGBA bytes and dimensions verified identical to source.",
+      "path": "app/src/main/res/drawable-nodpi/location_bedroom_night.webp"
     }
   ],
   "missing": [],

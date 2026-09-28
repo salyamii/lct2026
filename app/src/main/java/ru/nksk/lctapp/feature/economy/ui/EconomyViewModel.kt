@@ -1,5 +1,7 @@
 package ru.nksk.lctapp.feature.economy.ui
 
+import ru.nksk.lctapp.core.ui.game.asGameUiText
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -357,7 +359,7 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
             state.value = state.value.copy(depositWarning = null)
         }
         val target = game.selectedSavingItemId?.let { id -> session.catalog.content.items.firstOrNull { it.id == id } }
-            ?.let { item -> item.priceCoins?.let { SavingsTargetUi(item.id, renderPetText(item.name, game.pet.name), it) } }
+            ?.let { item -> item.priceCoins?.let { SavingsTargetUi(item.id, renderPetText(item.name, game.pet.name).asGameUiText(), it) } }
         val confirmationChanged = state.value.withdrawal?.let {
             it.revision != game.engine?.revision || it.available != game.economy.availableBalance ||
                 it.savings != game.economy.savingsBalance || it.target != target

@@ -33,6 +33,7 @@ internal data class LoreScene(
     val presentation: StoryPresentation? = null,
     val narrationCueKey: String? = null,
     val destination: GameLocation? = null,
+    val displayBody: String? = null,
 )
 
 private data class LoreChapter(val scenes: List<LoreScene>, val presentation: StoryChapterPresentation)
@@ -94,6 +95,7 @@ internal fun GameCatalog.withStoryCampaign(): GameCatalog {
                 when (options.maxOf { it.energy }) { 0 -> "Без траты сил"; 1 -> "Немного устанет"; 2 -> "Устанет"; else -> "Сильно устанет" },
                 "Вернуться позже", "Глава ${index + 1} · ${titles[index]}", source?.sourceUrl.orEmpty(), scene.scene,
                 null, scene.variants, presentation = presentation.copy(
+                    body = scene.displayBody ?: presentation.body,
                     media = presentation.media.copy(game = gameMedia ?: presentation.media.game,
                         musicCueKey = chapter.presentation.musicCueKey,
                         narrationCueKey = scene.narrationCueKey ?: presentation.media.narrationCueKey,
@@ -172,7 +174,8 @@ private fun secondStoryAct() = listOf(
     LoreScene("G2.06", setOf("tower_inner_hall_open"), all(fact("tower_access_reached"), fact("clue_light_order"),
         any(fact("shared_light_prepared"), StoryCondition.OwnsItem("$TOWER_GOAL:lantern"))), "Применить код и войти", scene = "", recap = "Применили код и вошли во внутренний зал башни", narrationCueKey = "narration.story.three_lights"),
     LoreScene("G2.07", setOf("tower_closed_deliberately", "last_keeper_hint"), fact("tower_inner_hall_open"), "Изучить журнал", scene = "", recap = "Изучили журнал и узнали, что башню закрыли намеренно", narrationCueKey = "narration.story.duty_room"),
-    LoreScene("G2.08", setOf("second_path_device_hint"), fact("watchers_of_paths_known"), "Осмотреть оборудование", scene = "", recap = "Осмотрели старое оборудование Смотрителей", narrationCueKey = "narration.story.fork_symbol"),
+    LoreScene("G2.08", setOf("second_path_device_hint"), fact("watchers_of_paths_known"), "Осмотреть оборудование", scene = "", recap = "Осмотрели старое оборудование Смотрителей", narrationCueKey = "narration.story.fork_symbol",
+        displayBody = "На приборе повторяется символ двух дорог. Похоже, «второй путь» был не поэтичной фразой, а режимом старого оборудования."),
     LoreScene("G2.09", setOf("second_path_scroll", "chronoscope_term_unlocked", "chronoscope_key_part"), fact("tower_inner_hall_open"), "Открыть найденный тайник", scene = "", recap = "Открыли тайник и нашли Свиток второго пути и часть ключа", narrationCueKey = "narration.story.second_path_scroll"),
     LoreScene("G2.10", setOf("lower_observatory_hint", "tower_receiver_active"), all(fact("second_path_scroll"), fact("chronoscope_key_part")), "Проверить приёмник", scene = "", recap = "Запустили приёмник и нашли подсказку о нижнем зале", narrationCueKey = "narration.story.observatory_receiver"),
     LoreScene("G2.11", setOf("two_way_signal_confirmed"), all(fact("tower_receiver_active"), StoryCondition.DayStepsAtLeast(2)), "Отправить обратный код", scene = "", recap = "Отправили обратный код и подтвердили связь с башней", narrationCueKey = "narration.story.return_code"),

@@ -60,7 +60,7 @@ class MiniGameViewModelsTest {
         assertFalse(fresh.game.won)
     }
 
-    @Test fun quizRestoresAnswerAndAdvancesWithoutCountingRepeatedTaps() = runTest(dispatcher) {
+    @Test fun quizRestoresAnswerAndWaitsForExplicitNextWithoutCountingRepeatedTaps() = runTest(dispatcher) {
         val saved = SavedStateHandle(mapOf("questions" to intArrayOf(80, 20, 15, 60)))
         val model = PriceQuizViewModel(saved)
         model.onAction(PriceQuizAction.Answer(true))
@@ -69,13 +69,37 @@ class MiniGameViewModelsTest {
         assertTrue(restored.uiState.value.leftIsAnswer)
         assertEquals(2, restored.uiState.value.game.reward)
         advanceUntilIdle()
+        assertEquals(0, restored.uiState.value.game.current)
+        assertTrue(restored.uiState.value.leftIsAnswer)
+        restored.onAction(PriceQuizAction.Next(0))
+        restored.onAction(PriceQuizAction.Next(0))
         assertEquals(1, restored.uiState.value.game.current)
         assertNull(restored.uiState.value.game.lastCorrect)
         restored.onAction(PriceQuizAction.Answer(false))
         advanceUntilIdle()
+        assertFalse(restored.uiState.value.game.finished)
+        assertTrue(restored.uiState.value.rightIsAnswer)
+        restored.onAction(PriceQuizAction.Next(0)) // Stale button from the previous question.
+        assertFalse(restored.uiState.value.game.finished)
+        restored.onAction(PriceQuizAction.Next(1))
         assertTrue(restored.uiState.value.game.finished)
         assertEquals(4, restored.uiState.value.game.reward)
         assertFalse(restored.uiState.value.rightIsAnswer)
+    }
+
+    @Test fun quizKeepsIncorrectFeedbackUntilNextAndCannotSkipAnUnansweredQuestion() = runTest(dispatcher) {
+        val model = PriceQuizViewModel(SavedStateHandle(mapOf("questions" to intArrayOf(80, 20, 15, 60))))
+        model.onAction(PriceQuizAction.Next(0))
+        assertEquals(0, model.uiState.value.game.current)
+        model.onAction(PriceQuizAction.Answer(false, 0))
+        advanceUntilIdle()
+        assertEquals(false, model.uiState.value.game.lastCorrect)
+        assertTrue(model.uiState.value.leftIsAnswer)
+        model.onAction(PriceQuizAction.Answer(true, 0))
+        assertEquals(0, model.uiState.value.game.correctAnswers)
+        model.onAction(PriceQuizAction.Next(0))
+        assertEquals(1, model.uiState.value.game.current)
+        assertNull(model.uiState.value.game.lastCorrect)
     }
 
     @Test fun quizRestartCancelsThePreviousQuestionsFeedback() = runTest(dispatcher) {

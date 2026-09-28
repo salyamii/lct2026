@@ -16,10 +16,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +31,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,6 +60,10 @@ fun PriceQuizScreen(
     deed: DeedGamePresentation? = null,
 ) {
     val state = uiState.game
+    val feedback = remember { BringIntoViewRequester() }
+    LaunchedEffect(state.current, state.lastCorrect) {
+        if (state.lastCorrect != null) feedback.bringIntoView()
+    }
 
     Column(
         modifier = Modifier
@@ -115,16 +125,28 @@ fun PriceQuizScreen(
                     )
                 }
                 Spacer(Modifier.height(14.dp))
-                Text(
-                    when (state.lastCorrect) {
-                        true -> stringResource(R.string.deeds_correct)
-                        false -> stringResource(R.string.deeds_incorrect)
-                        null -> stringResource(if (state.finished) R.string.deeds_ready else R.string.deeds_price_hint)
-                    },
-                    fontSize = 14.sp,
-                    fontFamily = Nunito,
-                    color = if (state.lastCorrect == true) DeedColors.Text else DeedColors.TextSoft,
-                )
+                Column(Modifier.fillMaxWidth().bringIntoViewRequester(feedback)) {
+                    Text(
+                        when (state.lastCorrect) {
+                            true -> stringResource(R.string.deeds_correct)
+                            false -> stringResource(R.string.deeds_incorrect)
+                            null -> stringResource(if (state.finished) R.string.deeds_ready else R.string.deeds_price_hint)
+                        },
+                        fontSize = 14.sp,
+                        fontFamily = Nunito,
+                        color = if (state.lastCorrect == true) DeedColors.Text else DeedColors.TextSoft,
+                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                    )
+                    if (!state.finished && state.lastCorrect != null) {
+                        Spacer(Modifier.height(12.dp))
+                        DeedButton(
+                            text = stringResource(if (state.current == state.questions.lastIndex)
+                                R.string.deeds_price_finish else R.string.deeds_price_next),
+                            onClick = { onAction(PriceQuizAction.Next(state.current)) },
+                            enabled = deed?.canPlay != false,
+                        )
+                    }
+                }
             }
         }
     }

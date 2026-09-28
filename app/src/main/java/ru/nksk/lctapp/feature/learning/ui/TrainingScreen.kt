@@ -149,7 +149,10 @@ private fun PracticeQuestionScreen(state: TrainingUiState, question: FinancialQu
             }
         }
         if (showExplanation) {
-            item { LearningCard(if (question.correct) "Верно!" else "Давай разберёмся") {
+            item { LearningCard(if (question.correct) "Верно!" else "Ответ неверный 😔") {
+                if (!question.correct) {
+                    Text("Давай разберёмся! 🙂", color = GameInk, style = MaterialTheme.typography.titleMedium)
+                }
                 AdventureBody(question.explanation.asGameUiText())
             } }
             item {
@@ -192,7 +195,7 @@ private fun ChapterPracticeNext(state: TrainingUiState, onAction: (TrainingActio
         when (state.chapterStep) {
             ChapterPracticeStep.SAVING, ChapterPracticeStep.REVIEW -> {
                 AdventureBody(if (state.chapterStep == ChapterPracticeStep.SAVING)
-                    "Вспомним, как мы копили на снаряжение. Ответим на вопрос и продолжим разбор."
+                    "Вспомним, как мы копили на снаряжение. Ответим на вопросы и сделаем разбор."
                 else "Посмотрим, что планировали и сколько потратили. После разбора вернёмся к истории.")
                 PracticeButton(if (state.question?.correct == true) "Следующий вопрос" else "Начать разбор",
                     enabled, interactionBlocked = state.busy) { onAction(TrainingAction.StartChapterPractice) }

@@ -740,3 +740,17 @@ LOADING-D-001: общий индикатор старта и загрузки. �
 LOADING-D-002: системная заставка и Compose используют единый фон `#120F30`,
 центр окна и исходный холст монеты размером 120 dp. Подготовка Lottie показывает
 тот же статичный кадр. [Воспроизводимый экспорт](../../../scripts/export_loading_coin_frame.py).
+
+## Night bedroom — 2026-09-29
+
+SLEEP-D-001: фон в момент засыпания на итогах дня. Исходная иллюстрация без
+персонажа из [карточки 3785:705](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3785-705);
+подпись и рамка каталога в приложение не импортируются.
+
+| Android resource | Canvas | File | Figma node |
+| --- | --- | --- | --- |
+| `R.drawable.location_bedroom_night` | 1378 × 1142 | [location_bedroom_night.webp](../../../app/src/main/res/drawable-nodpi/location_bedroom_night.webp) | [3785:706](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3785-706) |
+
+[Исходный PNG](sources/location_bedroom_night.png) сохранён целиком. Конвертация:
+Pillow 12.3.0, WebP `lossless=True`, `exact=True`, `method=6`; размеры и все RGBA
+пиксели проверены на точное совпадение. Хеши и параметры — в [manifest.json](manifest.json).

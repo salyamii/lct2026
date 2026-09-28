@@ -42,14 +42,16 @@ internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
 
 @Composable
 private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit) {
-    if (state.loading || state.failed) {
+    if (state.loading) {
+        GameLoadingScreen()
+        return
+    }
+    if (state.failed) {
         Surface(Modifier.fillMaxSize()) {
             Column(Modifier.safeDrawingPadding().padding(24.dp), verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally) {
-                if (state.loading) GameLoadingIndicator() else {
-                    Text("Не удалось загрузить игру. Сохранение не изменено.")
-                    Button({ onAction(DayAction.Retry) }) { Text("Повторить") }
-                }
+                Text("Не удалось загрузить игру. Сохранение не изменено.")
+                Button({ onAction(DayAction.Retry) }) { Text("Повторить") }
                 TextButton(onBack) { Text("Назад") }
             }
         }
@@ -63,6 +65,7 @@ private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
         PurchaseCard(state, onAction, onBack)
     } else AdventureScreen(
         title = state.category, onBack = onBack, backgroundRes = state.eventBackgroundRes,
+        blurBackground = state.focusesItem,
         artworkSceneKey = state.audioOccurrenceId ?: state.title,
         sceneAspectRatio = 1.12f, pinFooter = false,
         scene = { DayEventScene(state, Modifier.fillMaxSize()) },
@@ -126,6 +129,7 @@ private fun PurchaseCard(state: DayUiState, onAction: (DayAction) -> Unit, onBac
     AdventureScreen(
         title = state.locationTitle, onBack = onBack,
         backgroundRes = state.eventBackgroundRes,
+        blurBackground = state.focusesItem,
         artworkSceneKey = state.audioOccurrenceId ?: state.title,
         sceneAspectRatio = 1.12f, pinFooter = false,
         scene = {
