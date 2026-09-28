@@ -7,6 +7,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,9 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.unit.DpSize
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.currentStateAsState
@@ -54,18 +57,36 @@ internal fun MovingPetArtwork(
     BoxWithConstraints(modifier, contentAlignment = Alignment.BottomCenter) {
         val canvasSize = minOf(maxWidth, maxHeight)
         val floor = .935f
-        Crossfade(targetState = artwork, modifier = Modifier.size(canvasSize),
+        val incomingPet = rememberGameArtworkLoad(artwork, DpSize(canvasSize, canvasSize))
+        val incomingGrounding = petArtworkGrounding(artwork)
+        // Decode the wider shadow once and reuse it for the smaller contact shadow too.
+        val incomingShadow = incomingGrounding?.let { contact ->
+            rememberGameArtworkLoad(R.drawable.menu_ground_shadow,
+                DpSize(canvasSize * contact.shadowWidth, canvasSize * contact.shadowHeight))
+        }
+        var displayedFrame by remember { mutableStateOf<ReadyPetFrame?>(null) }
+        SideEffect {
+            if (incomingPet.painter != null && incomingShadow?.settled != false) {
+                displayedFrame = ReadyPetFrame(artwork, incomingPet.painter, incomingShadow?.painter,
+                    PetFrameMetadata(description, intensity))
+            }
+        }
+        // The first frame starts already visible when its enclosing scene is revealed. Later
+        // frames retain the old character until both painters are ready, then crossfade together.
+        val target = displayedFrame ?: return@BoxWithConstraints
+        Crossfade(targetState = target.artwork, modifier = Modifier.size(canvasSize),
             animationSpec = tween(600), label = "pet-artwork") { frameArtwork ->
-            val currentFrame = frameArtwork == artwork
-            var retainedMetadata by remember(frameArtwork) { mutableStateOf(PetFrameMetadata(description, intensity)) }
-            val metadata = if (currentFrame) PetFrameMetadata(description, intensity) else retainedMetadata
-            SideEffect { if (currentFrame) retainedMetadata = metadata }
+            val currentFrame = frameArtwork == target.artwork
+            var retainedFrame by remember(frameArtwork) { mutableStateOf(target) }
+            val frame = if (currentFrame) target else retainedFrame
+            SideEffect { if (currentFrame) retainedFrame = frame }
+            val metadata = frame.metadata
             val grounding = petArtworkGrounding(frameArtwork)
             // Crossfade the full grounded frame: its character and both shadows stay together.
             // Only the incoming frame is exposed to accessibility during the overlap.
             Box(Modifier.fillMaxSize().then(if (currentFrame) Modifier else Modifier.clearAndSetSemantics {})) {
-                grounding?.let { contact ->
-                    GameArtwork(R.drawable.menu_ground_shadow, null,
+                grounding?.let { contact -> frame.shadow?.let { shadow ->
+                    Image(shadow, null,
                         Modifier.offset(
                             x = canvasSize * (contact.centerX - contact.shadowWidth / 2f),
                             y = canvasSize * (floor - contact.shadowHeight / 2f),
@@ -73,14 +94,14 @@ internal fun MovingPetArtwork(
                         contentScale = ContentScale.FillBounds)
                     // A tighter contact shadow sits beneath the soles. The wider layer
                     // stays soft, while feet remain readable on both dark and light floors.
-                    GameArtwork(R.drawable.menu_ground_shadow, null,
+                    Image(shadow, null,
                         Modifier.offset(
                             x = canvasSize * (contact.centerX - contact.shadowWidth * .32f),
                             y = canvasSize * (floor - contact.shadowHeight * .15f),
                         ).size(canvasSize * contact.shadowWidth * .64f, canvasSize * contact.shadowHeight * .30f),
                         contentScale = ContentScale.FillBounds)
-                }
-                GameArtwork(frameArtwork, if (currentFrame) metadata.description else null, Modifier.fillMaxSize().graphicsLayer {
+                } }
+                Image(frame.pet, if (currentFrame) metadata.description else null, Modifier.fillMaxSize().graphicsLayer {
                     transformOrigin = TransformOrigin(grounding?.centerX ?: .5f, grounding?.contactY ?: .91f)
                     translationY = grounding?.let { size.height * (floor - it.contactY) } ?: 0f
                     // Read animation state in the layer, with no per-frame pose object.
@@ -97,6 +118,13 @@ internal fun MovingPetArtwork(
 }
 
 private data class PetFrameMetadata(val description: String?, val intensity: Float)
+
+private data class ReadyPetFrame(
+    @param:DrawableRes val artwork: Int,
+    val pet: Painter,
+    val shadow: Painter?,
+    val metadata: PetFrameMetadata,
+)
 
 /** Horizontal motion is a fraction of the full canvas; the feet remain on the ground. */
 internal data class PetMotionPose(

@@ -1,0 +1,16 @@
+# Outpainting prompts — 2026-09-28
+
+Built-in imagegen, authorized by APP-ICON-D-002.
+
+## Step 1
+
+Input: source.png. Output: outpaint-step1.png.
+
+Precise outpainting/reframing of the attached APPROVED mobile game icon artwork, not a redesign. Preserve the recognizable orange fox's exact face, proportions, expression, amber eyes, ear shapes, cream muzzle, dark paws, and the clear glass jar full of gold paw coins. Preserve their relative pose and warm lighting. Zoom the ENTIRE existing square image out so that the ORIGINAL square occupies the central approximately 61% of the NEW square canvas (about 19.5% newly painted area on EACH side). The fox's ear tips should be around y=20%, jar base around y=75%, fox-and-jar group centered, main face and jar comfortably within the central circle. This expanded image is the full overscan layer of an Android adaptive icon; the launcher will display primarily the central two-thirds. DO NOT fill the extra canvas by stretched edge pixels, repeating stripes, mirroring, a flat border or blur smearing. Naturally OUTPAINT a continuous magical medieval garden environment on ALL sides: green tree foliage above and at sides, blue sky, softly lit medieval cottage and stone garden walls, plants and a little stone parapet in the lower area to naturally occlude the fox's lower body. The extended environment should have believable complete leaves, branches, stonework and coherent perspective, the same soft depth of field as the original garden, no artificial strips. Do not create a long abdomen or kangaroo hips below the jar. Original face, paws, jar and coins must remain crisp with fine fur and glass details, no global softening, no motion blur, no heavy bloom. Do not add characters, accessories, floating coins, writing, frames, or rounded corners. Highest quality available, square opaque full-bleed output with detailed natural scenery all the way to every edge. This is one image with expanded scene, not a contact sheet.
+
+## Step 2
+
+Input: outpaint-step1.png. Output: adaptive-source.png (final packaged master).
+
+Outpaint this exact image ONE MORE STEP to create a wider framing. The input is the edit target. Uniformly shrink the ENTIRE current image to 78% of the new square canvas width and height, place it exactly centered, then naturally paint new garden scenery in the added 11% border on all four sides. This must visibly ZOOM OUT: the topmost fox ear must be at approximately 22% down from the top of the final square, NOT 14%; both hands and the jar base should be above approximately 75% down. Keep face and jar absolutely identical, sharp, same expression, pose, detailed fur, glass and coins. Do not enlarge the fox again. The central 2/3 will be cropped by Android so all ears, face, hands and jar must be in that middle area. Fill new borders with natural continuous trees, foliage, blue sky, medieval garden stonework and plants, same warm cheerful light. Maintain real environmental details through all corners, no stretched pixels, no mirrored strips, no artificial blur, no frame. Do not change characters or jar or perspective, do not add new characters. Single square opaque full-bleed output.
+

@@ -1,5 +1,8 @@
 # Asset catalog
 
+Аудио и видео учитываются отдельно: [музыка глав, озвучка и вступительный ролик](media-catalog.md),
+[media manifest](media-manifest.json). Счётчики и manifest изображений ниже относятся только к artwork.
+
 ## Коллекция покупок и звёздный атлас — 2026-09-26
 
 26 новых иллюстраций встроенного imagegen: 23 части пяти целей и три звёздные страницы.
@@ -554,6 +557,26 @@ Already tracked mini-game artwork, indexed without changing its bytes. Original 
 | `R.drawable.deed_pair_tag` | 920 × 1120 | [deed_pair_tag.webp](../../../app/src/main/res/drawable-nodpi/deed_pair_tag.webp) |
 | `R.drawable.deed_pair_telescope` | 920 × 1120 | [deed_pair_telescope.webp](../../../app/src/main/res/drawable-nodpi/deed_pair_telescope.webp) |
 
+## Launcher icon — 2026-09-28
+
+Approved by APP-ICON-D-001, outpainting correction APP-ICON-D-002: Ryzhik holding a glass jar of coins, generated with
+built-in imagegen from the [teen fox design](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-65).
+This is generated artwork, not a Figma export. The adaptive master contains
+naturally outpainted garden scenery, with no edge extrusion. Each density is
+resampled directly from the master once.
+[Source PNG, prompt and export details](sources/launcher-fox-jar/README.md).
+
+| Resource | Canvas / variants | Purpose |
+| --- | --- | --- |
+| `R.mipmap.ic_launcher_art` | 108, 162, 216, 324, 432 px | Opaque adaptive background, mdpi–xxxhdpi |
+| `R.mipmap.ic_launcher` | 48, 72, 96, 144, 192 px; adaptive XML v26 | Legacy rounded square / system-masked adaptive icon |
+| `R.mipmap.ic_launcher_round` | 48, 72, 96, 144, 192 px; adaptive XML v26 | Legacy circle / system-masked adaptive icon |
+| `R.drawable.ic_launcher_monochrome` | 108 × 108 dp vector | Themed jar-and-paw-coin symbol |
+
+All paths, byte sizes, dimensions and checksums are in the `launcher_icons`
+section of [manifest.json](manifest.json), grouped separately because launcher
+resource names repeat across density and API configurations.
+
 ## Onboarding
 
 | Android resource | Canvas | File | Figma source |
@@ -699,37 +722,21 @@ Full canvas preserved; lossless exact WebP. Dedicated to the weekly receipt Prev
 | --- | --- | --- | --- |
 | `settings_gear` | 24 × 24 | [Vector XML](../../../app/src/main/res/drawable/settings_gear.xml) | Точная копия геометрии [debug_settings.svg](debug_settings.svg) для общего source set приложения. Одинаковые path, viewport и evenOdd; release не зависит от debug-модуля, поэтому межмодульный alias недоступен. |
 
-## Mini-game icons — 2026-09-28
+## Анимация загрузки — 2026-09-28
 
-Иконки мини-игр раздела «Дела». User-supplied images (PNG source → WebP lossless,
-высота приведена к 512 px, фон прозрачен изначально). Фонари используются в игре
-«Фонари обсерватории» как состояния горящего и погасшего фонаря.
-
-| Android resource | Canvas | Файл | Источник |
+| Resource | Canvas / timing | File | Source |
 | --- | --- | --- | --- |
-| `R.drawable.deed_game_lights_off` | 341 × 512 | [deed_game_lights_off.webp](../../../app/src/main/res/drawable-nodpi/deed_game_lights_off.webp) | [lantern_off.png](sources/mini-game-lanterns-2026-09-28/lantern_off.png) |
-| `R.drawable.deed_game_lights_on` | 341 × 512 | [deed_game_lights_on.webp](../../../app/src/main/res/drawable-nodpi/deed_game_lights_on.webp) | [lantern_on.png](sources/mini-game-lanterns-2026-09-28/lantern_on.png) |
-Тайлы канатов для «Свяжи концов» (та же партия, User-supplied images → WebP
-lossless 512×512; угол добит до квадрата прозрачными строками снизу).
+| `R.raw.loading_coin` | 480 × 480, 60 fps, 3 s | [Lottie JSON](../../../app/src/main/res/raw/loading_coin.json) | [Coin — Daily Scoop](https://lottiefiles.com/free-animation/coin-MHXcO7DuOl) |
 
-| Android resource | Canvas | Файл | Источник |
-| --- | --- | --- | --- |
-| `R.drawable.deed_game_pipes_straight` | 512 × 512 | [deed_game_pipes_straight.webp](../../../app/src/main/res/drawable-nodpi/deed_game_pipes_straight.webp) | [rope_straight.png](sources/mini-game-ropes-2026-09-28/rope_straight.png) |
-| `R.drawable.deed_game_pipes_corner` | 512 × 512 | [deed_game_pipes_corner.webp](../../../app/src/main/res/drawable-nodpi/deed_game_pipes_corner.webp) | [rope_corner.png](sources/mini-game-ropes-2026-09-28/rope_corner.png) |
-| `R.drawable.deed_game_pipes_end_red` | 512 × 512 | [deed_game_pipes_end_red.webp](../../../app/src/main/res/drawable-nodpi/deed_game_pipes_end_red.webp) | [rope_end_red.png](sources/mini-game-ropes-2026-09-28/rope_end_red.png) |
-| `R.drawable.deed_game_pipes_end_blue` | 512 × 512 | [deed_game_pipes_end_blue.webp](../../../app/src/main/res/drawable-nodpi/deed_game_pipes_end_blue.webp) | [rope_end_blue.png](sources/mini-game-ropes-2026-09-28/rope_end_blue.png) |
-| `R.drawable.deed_game_pipes_end_green` | 512 × 512 | [deed_game_pipes_end_green.webp](../../../app/src/main/res/drawable-nodpi/deed_game_pipes_end_green.webp) | [rope_end_green.png](sources/mini-game-ropes-2026-09-28/rope_end_green.png) |
-Сигнальные иллюминаторы башни для «Сигналов башни» (та же партия,
-User-supplied images → WebP lossless 512×512, четыре цвета в тёмном
-и светящемся состояниях).
+LOADING-D-001: общий индикатор старта и загрузки. Полный холст, исходные цвета и
+тайминг сохранены. JSON извлечён без изменений; работает офлайн.
+[Оригинал, лицензия и параметры интеграции](sources/loading-coin/README.md).
 
-| Android resource | Canvas | Файл | Источник |
-| --- | --- | --- | --- |
-| `R.drawable.deed_game_signal_amber_off` | 512 × 512 | [webp](../../../app/src/main/res/drawable-nodpi/deed_game_signal_amber_off.webp) | [png](sources/mini-game-signals-2026-09-28/signal_amber_off.png) |
-| `R.drawable.deed_game_signal_amber_on` | 512 × 512 | [webp](../../../app/src/main/res/drawable-nodpi/deed_game_signal_amber_on.webp) | [png](sources/mini-game-signals-2026-09-28/signal_amber_on.png) |
-| `R.drawable.deed_game_signal_green_off` | 512 × 512 | [webp](../../../app/src/main/res/drawable-nodpi/deed_game_signal_green_off.webp) | [png](sources/mini-game-signals-2026-09-28/signal_green_off.png) |
-| `R.drawable.deed_game_signal_green_on` | 512 × 512 | [webp](../../../app/src/main/res/drawable-nodpi/deed_game_signal_green_on.webp) | [png](sources/mini-game-signals-2026-09-28/signal_green_on.png) |
-| `R.drawable.deed_game_signal_blue_off` | 512 × 512 | [webp](../../../app/src/main/res/drawable-nodpi/deed_game_signal_blue_off.webp) | [png](sources/mini-game-signals-2026-09-28/signal_blue_off.png) |
-| `R.drawable.deed_game_signal_blue_on` | 512 × 512 | [webp](../../../app/src/main/res/drawable-nodpi/deed_game_signal_blue_on.webp) | [png](sources/mini-game-signals-2026-09-28/signal_blue_on.png) |
-| `R.drawable.deed_game_signal_red_off` | 512 × 512 | [webp](../../../app/src/main/res/drawable-nodpi/deed_game_signal_red_off.webp) | [png](sources/mini-game-signals-2026-09-28/signal_red_off.png) |
-| `R.drawable.deed_game_signal_red_on` | 512 × 512 | [webp](../../../app/src/main/res/drawable-nodpi/deed_game_signal_red_on.webp) | [png](sources/mini-game-signals-2026-09-28/signal_red_on.png) |
+| Splash resource | Размер / viewport | Источник |
+| --- | --- | --- |
+| `loading_coin_frame` | 120 dp / 480 × 480 | [SVG первого кадра](sources/loading-coin/frame-zero.svg), [Android XML](../../../app/src/main/res/drawable/loading_coin_frame.xml) |
+| `loading_coin_splash` | 288 dp / 1152 × 1152 | Тот же кадр с техническими полями для системной маски: [Android XML](../../../app/src/main/res/drawable/loading_coin_splash.xml) |
+
+LOADING-D-002: системная заставка и Compose используют единый фон `#120F30`,
+центр окна и исходный холст монеты размером 120 dp. Подготовка Lottie показывает
+тот же статичный кадр. [Воспроизводимый экспорт](../../../scripts/export_loading_coin_frame.py).

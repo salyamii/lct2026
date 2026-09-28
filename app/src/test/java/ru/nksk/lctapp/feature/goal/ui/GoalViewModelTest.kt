@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Assert.*
@@ -23,6 +24,7 @@ import ru.nksk.lctapp.domain.analytics.DecisionContext
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.domain.game.GameState
+import ru.nksk.lctapp.domain.game.OwnedItem
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GoalViewModelTest {
@@ -274,6 +276,116 @@ class GoalViewModelTest {
         assertTrue(fixture.repository.purchases.isEmpty())
     }
 
+    @Test fun continuingACollectedGoalOpensTheNextEventWithoutFinishingTheChapter() = runTest(dispatcher) {
+        val fixture = Fixture()
+        fixture.start()
+        fixture.collectParts()
+        val model = fixture.model()
+        val destinations = mutableListOf<GoalContinuationDestination>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.continueNavigation.collect(destinations::add) }
+        runCurrent()
+        val before = fixture.state
+
+        model.onAction(GoalAction.ContinueStory)
+        model.onAction(GoalAction.ContinueStory)
+        runCurrent()
+
+        assertEquals(listOf(GoalContinuationDestination.DAY), destinations)
+        assertEquals(fixture.goal.introductionEventId, fixture.state.engine!!.currentEvent!!.eventId)
+        assertEquals(before.engine!!.revision + 1, fixture.state.engine!!.revision)
+        assertEquals(before.economy, fixture.state.economy)
+        assertEquals(before.ownedItems, fixture.state.ownedItems)
+        assertEquals(before.story.decisions, fixture.state.story.decisions)
+        assertEquals(before.completedGoalProjects, fixture.state.completedGoalProjects)
+
+        val active = fixture.state
+        model.onAction(GoalAction.ContinueStory)
+        runCurrent()
+        assertEquals(active, fixture.state)
+        assertEquals(listOf(GoalContinuationDestination.DAY, GoalContinuationDestination.DAY), destinations)
+    }
+
+    @Test fun continuingAfterTheDayFinishedReopensItsSummaryWithoutStartingTomorrow() = runTest(dispatcher) {
+        val fixture = Fixture()
+        fixture.start()
+        fixture.collectParts()
+        fixture.repository.update { it.copy(engine = it.engine!!.copy(phase = DayPhase.FINISHED, ateToday = true)) }
+        val model = fixture.model()
+        val destinations = mutableListOf<GoalContinuationDestination>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.continueNavigation.collect(destinations::add) }
+        runCurrent()
+        val before = fixture.state
+
+        model.onAction(GoalAction.ContinueStory)
+        runCurrent()
+
+        assertEquals(listOf(GoalContinuationDestination.DAY), destinations)
+        assertEquals(before, fixture.state)
+    }
+
+    @Test fun continuingWithUnallocatedMoneyOpensTheBudgetWithoutAnEvent() = runTest(dispatcher) {
+        val fixture = Fixture()
+        fixture.start()
+        fixture.collectParts()
+        fixture.repository.update { it.copy(economy = it.economy.copy(plan = BudgetPlan(99, 0, 0, 0), unallocated = 1L)) }
+        val model = fixture.model()
+        val destinations = mutableListOf<GoalContinuationDestination>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.continueNavigation.collect(destinations::add) }
+        runCurrent()
+        val before = fixture.state
+
+        model.onAction(GoalAction.ContinueStory)
+        runCurrent()
+
+        assertEquals(listOf(GoalContinuationDestination.BUDGET), destinations)
+        assertEquals(before, fixture.state)
+    }
+
+    @Test fun hungryContinuationOpensTheDayGuardWithoutFeedingOrOpeningAnEvent() = runTest(dispatcher) {
+        val fixture = Fixture()
+        fixture.start()
+        fixture.collectParts()
+        fixture.repository.update { it.copy(engine = it.engine!!.copy(steps = 3, ateToday = false)) }
+        val model = fixture.model()
+        val destinations = mutableListOf<GoalContinuationDestination>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.continueNavigation.collect(destinations::add) }
+        runCurrent()
+        val before = fixture.state
+
+        model.onAction(GoalAction.ContinueStory)
+        runCurrent()
+
+        assertEquals(listOf(GoalContinuationDestination.DAY), destinations)
+        assertEquals(before, fixture.state)
+    }
+
+    @Test fun retryAfterLostCommitReplyKeepsTheRequestAndDoesNotAdvanceAgain() = runTest(dispatcher) {
+        val fixture = Fixture()
+        fixture.start()
+        fixture.collectParts()
+        val model = fixture.model()
+        val destinations = mutableListOf<GoalContinuationDestination>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.continueNavigation.collect(destinations::add) }
+        runCurrent()
+        fixture.repository.failAfterCommit = true
+
+        model.onAction(GoalAction.ContinueStory)
+        runCurrent()
+        val committed = fixture.state
+        val attempt = fixture.repository.requests.last()
+        assertNotNull(committed.engine!!.currentEvent)
+        assertNotNull(model.uiState.value.message)
+        assertTrue(destinations.isEmpty())
+
+        fixture.repository.failAfterCommit = false
+        model.onAction(GoalAction.ContinueStory)
+        runCurrent()
+
+        assertEquals(attempt, fixture.repository.requests.last())
+        assertEquals(committed, fixture.state)
+        assertEquals(listOf(GoalContinuationDestination.DAY), destinations)
+    }
+
     private inner class Fixture(savings: Long = 0, available: Long = 100,
         plan: BudgetPlan = BudgetPlan(available, 0, 0, 0)) {
         val catalog = bundledGameCatalog()
@@ -297,6 +409,10 @@ class GoalViewModelTest {
             val plan = checkNotNull(state.economy.planning)
             send(EngineCommand.ConfirmBudget(plan.id, plan.revision))
         }
+        suspend fun collectParts() {
+            repository.update { it.copy(ownedItems = it.ownedItems + goal.itemIds.map { id -> OwnedItem("owned-$id", id) },
+                selectedSavingItemId = null) }
+        }
         fun model(handle: SavedStateHandle = SavedStateHandle()) = GoalViewModel(session, handle).also {
             store.put("goal-${sequence++}", it)
         }
@@ -305,7 +421,9 @@ class GoalViewModelTest {
     private class MemoryRepository(initial: GameState) : GameRepository {
         val state = MutableStateFlow(initial)
         var failWrite = false
-        private val requests = mutableListOf<EngineRequest>()
+        var failAfterCommit = false
+        val requests = mutableListOf<EngineRequest>()
+        private val committed = mutableMapOf<String, EngineRequest>()
         val purchases get() = requests.filter { it.command is EngineCommand.BuyGoalItem }
         override fun observe() = state
         override suspend fun read() = state.value
@@ -314,7 +432,14 @@ class GoalViewModelTest {
             facts: (GameState, GameState, String, Long) -> List<AnalyticsFact>,
             transform: (GameState) -> GameState): GameState {
             requests += request
-            return update(transform)
+            committed[request.id]?.let {
+                check(it == request)
+                return state.value
+            }
+            val next = update(transform)
+            committed[request.id] = request
+            if (failAfterCommit) throw java.io.IOException("Commit reply lost")
+            return next
         }
         override suspend fun update(transform: (GameState) -> GameState): GameState {
             val next = transform(state.value)

@@ -36,6 +36,8 @@ internal data class DeedGameUiState(
     val busy: Boolean = false,
     val message: String? = null,
     val canRetry: Boolean = false,
+    val audioOccurrenceId: String? = null,
+    val eventMedia: EventMedia = EventMedia(),
 )
 
 /** Connects an actual offered deed to a transient board and one atomic engine outcome. */
@@ -264,7 +266,7 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
         val reward = if (choiceId == null) session.catalog.content.choices.single { it.eventId == event.id }.moneyDelta else 0L
         val storyGame = choiceId != null
         val card = session.catalog.cards[event.id]
-        val theme = if (storyGame) card?.presentation?.media?.let(::storyGameTheme) else null
+        val theme = if (storyGame) card?.presentation?.media?.let { storyGameTheme(it, kind) } else null
         mutableState.value = DeedGameUiState(
             loading = false,
             type = when (kind) {
@@ -280,20 +282,13 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
             presentation = DeedGamePresentation(renderPetText(event.title, game.pet.name), reward, pending == null && message == null,
                 storyAction = storyGame,
                 sceneRes = eventSceneBackground(event.id, card?.scene),
-                instructions = theme?.instructions ?: if (storyGame) when (kind) {
-                    DeedGameKind.MEMORY -> "Найди одинаковые пары, чтобы закончить работу."
-                    DeedGameKind.PRECISION -> "Останови маркер в зелёной зоне. Выполни пять точных движений, чтобы закончить работу."
-                    DeedGameKind.COMPARISON -> "Сравни числа и выбери верный ответ."
-                    DeedGameKind.LIGHTS -> "Погаси все фонари, чтобы закончить работу."
-                    DeedGameKind.SEQUENCE -> "Повтори вспышки башни в каждом раунде, чтобы закончить работу."
-                    DeedGameKind.PIPES -> "Соедини концы одного цвета, чтобы закончить работу."
-                    DeedGameKind.DIFFERENCES -> "Найди все отличия, чтобы закончить работу."
-                    DeedGameKind.STACKING -> "Уложи все ящики, чтобы закончить работу."
-                } else null,
+                instructions = theme?.instructions ?: if (storyGame) storyGameInstructions(kind) else null,
                 activityArtworkRes = theme?.objectRes ?: eventSceneArtwork(event.id, card?.character)?.resource,
                 pairArtwork = theme?.pairs.orEmpty()),
             message = message,
             canRetry = pending != null || rejectedAction != null || comparisonSaveFailed,
+            audioOccurrenceId = occurrence.id,
+            eventMedia = card?.presentation?.media ?: EventMedia(),
         )
     }
 

@@ -5,6 +5,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import ru.nksk.lctapp.core.ui.components.GameQuizOption
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -32,7 +33,7 @@ import ru.nksk.lctapp.domain.finance.FinancialQuestionKind
 
 @Composable
 internal fun TrainingScreen(state: TrainingUiState, onAction: (TrainingAction) -> Unit, onBack: () -> Unit,
-    onOpenBudget: () -> Unit = {}) {
+    onOpenBudget: () -> Unit = {}, onContinueStory: () -> Unit = onBack) {
     val question = state.question.takeIf { state.practiceOpen }
     val closeQuestion = {
         if (!state.busy) {
@@ -42,7 +43,17 @@ internal fun TrainingScreen(state: TrainingUiState, onAction: (TrainingAction) -
     }
     BackHandler(enabled = question != null) { closeQuestion() }
     if (question != null) {
-        key(question.id) { PracticeQuestionScreen(state, question, onAction, closeQuestion, onOpenBudget) }
+        PracticeQuestionScreen(state, question, onAction, closeQuestion, onOpenBudget, onContinueStory)
+    } else if (state.chapterPractice) {
+        LearningPage("Перед продолжением истории", onBack) {
+            learningStatus(state.loading, state.busy, state.error, state.practiceRetryRequired, showSaving = false) {
+                onAction(TrainingAction.Retry)
+            }
+            if (!state.loading && state.hasGame) item {
+                if (state.needsBudgetPlanning) BudgetReminder(true, !state.busy, onOpenBudget)
+                else ChapterPracticeNext(state, onAction, onOpenBudget, onContinueStory)
+            }
+        }
     } else LearningPage("Тренировка навыков", onBack) {
         learningStatus(state.loading, state.busy, state.error, state.practiceRetryRequired) { onAction(TrainingAction.Retry) }
         if (!state.loading && state.hasGame) {
@@ -96,13 +107,15 @@ private fun TrainingTopic(kind: FinancialQuestionKind, resumeAt: Int?, enabled: 
 
 @Composable
 private fun PracticeQuestionScreen(state: TrainingUiState, question: FinancialQuestion,
-    onAction: (TrainingAction) -> Unit, onBack: () -> Unit, onOpenBudget: () -> Unit) {
+    onAction: (TrainingAction) -> Unit, onBack: () -> Unit, onOpenBudget: () -> Unit,
+    onContinueStory: () -> Unit) {
     var retrying by rememberSaveable(question.id, question.attempts) { mutableStateOf(false) }
     val series = question.series
-    val advancing = question.correct && series != null
+    val advancing = !state.chapterPractice && question.correct && series != null
     var selectedAnswer by rememberSaveable(question.id, question.attempts) { mutableStateOf<String?>(null) }
-    val showExplanation = question.answeredOptionId != null && !retrying
-    val enabled = !state.busy && !state.needsBudgetPlanning && !state.practiceRetryRequired
+    val showExplanation = question.answeredOptionId != null && !retrying && !advancing
+    val enabled = !state.needsBudgetPlanning && !state.practiceRetryRequired
+    val interactionBlocked = state.busy || advancing
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val lifecycleState by lifecycle.currentStateAsState()
     val questionExposure = remember(question.id, question.prompt, question.options) {
@@ -124,46 +137,76 @@ private fun PracticeQuestionScreen(state: TrainingUiState, question: FinancialQu
     }
     val automaticAdvance = state.automaticAdvance(lifecycleState.isAtLeast(Lifecycle.State.RESUMED))
     LaunchedEffect(automaticAdvance) { automaticAdvance?.let(onAction) }
-    LearningPage(question.kind.trainingTitle(), onBack, backEnabled = !state.busy) {
-        learningStatus(state.loading, state.busy, state.error, state.practiceRetryRequired) { onAction(TrainingAction.Retry) }
+    // Only a new question gets a fresh scroll position; saving an answer keeps the same page footprint.
+    val questionScroll = key(question.id) { rememberLazyListState() }
+    LearningPage(question.kind.trainingTitle(), onBack, backEnabled = !state.busy, listState = questionScroll) {
+        learningStatus(state.loading, state.busy, state.error, state.practiceRetryRequired, showSaving = false) { onAction(TrainingAction.Retry) }
         if (state.needsBudgetPlanning) item { BudgetReminder(true, !state.busy && !state.practiceRetryRequired, onOpenBudget) }
-        if (advancing) {
-            item { AdventureHeading("Верно!") }
+        item {
+            LearningCard {
+                Text(question.prompt.asGameUiText(), color = GameInk, style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.onGloballyPositioned { recordQuestionPart(QuestionExposure.PROMPT, it) })
+            }
+        }
+        if (showExplanation) {
+            item { LearningCard(if (question.correct) "Верно!" else "Давай разберёмся") {
+                AdventureBody(question.explanation.asGameUiText())
+            } }
+            item {
+                if (!question.correct) PracticeButton("Попробовать ещё раз", enabled,
+                    interactionBlocked = interactionBlocked) { retrying = true }
+                else if (state.chapterPractice) ChapterPracticeNext(state, onAction, onOpenBudget, onContinueStory)
+                else PracticeButton("Выбрать тему", enabled, interactionBlocked = interactionBlocked, onClick = onBack)
+            }
         } else {
             item {
-                LearningCard {
-                    Text(question.prompt.asGameUiText(), color = GameInk, style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.onGloballyPositioned { recordQuestionPart(QuestionExposure.PROMPT, it) })
-                }
-            }
-            if (showExplanation) {
-                item { LearningCard(if (question.correct) "Верно!" else "Давай разберёмся") {
-                    AdventureBody(question.explanation.asGameUiText())
-                } }
-                item {
-                    if (!question.correct) PracticeButton("Попробовать ещё раз", enabled) { retrying = true }
-                    else PracticeButton("Выбрать тему", enabled, onClick = onBack)
-                }
-            } else {
-                item {
-                    Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        question.options.forEach { option ->
-                            Box(Modifier.fillMaxWidth().onGloballyPositioned {
-                                recordQuestionPart(QuestionExposure.optionPart(option.id), it)
-                            }) {
-                                GameQuizOption(option.text.asGameUiText(), selectedAnswer == option.id, enabled) {
-                                    selectedAnswer = option.id
-                                }
+                Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    question.options.forEach { option ->
+                        Box(Modifier.fillMaxWidth().onGloballyPositioned {
+                            recordQuestionPart(QuestionExposure.optionPart(option.id), it)
+                        }) {
+                            GameQuizOption(option.text.asGameUiText(),
+                                (selectedAnswer ?: question.answeredOptionId.takeIf { advancing }) == option.id,
+                                enabled, interactionBlocked = interactionBlocked) {
+                                selectedAnswer = option.id
                             }
                         }
                     }
                 }
-                item {
-                    PracticeButton("Ответить", enabled && selectedAnswer != null) {
-                        selectedAnswer?.let { onAction(TrainingAction.Answer(it)) }
-                    }
+            }
+            item {
+                PracticeButton("Ответить", enabled && (selectedAnswer != null || advancing),
+                    interactionBlocked = interactionBlocked) {
+                    selectedAnswer?.let { onAction(TrainingAction.Answer(it)) }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ChapterPracticeNext(state: TrainingUiState, onAction: (TrainingAction) -> Unit,
+    onOpenBudget: () -> Unit, onContinueStory: () -> Unit) {
+    val enabled = !state.needsBudgetPlanning && !state.practiceRetryRequired && state.error == null
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        when (state.chapterStep) {
+            ChapterPracticeStep.SAVING, ChapterPracticeStep.REVIEW -> {
+                AdventureBody(if (state.chapterStep == ChapterPracticeStep.SAVING)
+                    "Вспомним, как мы копили на снаряжение. Ответим на вопрос и продолжим разбор."
+                else "Посмотрим, что планировали и сколько потратили. После разбора вернёмся к истории.")
+                PracticeButton(if (state.question?.correct == true) "Следующий вопрос" else "Начать разбор",
+                    enabled, interactionBlocked = state.busy) { onAction(TrainingAction.StartChapterPractice) }
+            }
+            ChapterPracticeStep.BUDGET -> BudgetReminder(false, enabled && !state.busy, onOpenBudget)
+            ChapterPracticeStep.FOOD -> {
+                AdventureBody("С вопросами закончили. Осталось позаботиться о еде для спутника.")
+                PracticeButton("К приключению", enabled, interactionBlocked = state.busy, onClick = onContinueStory)
+            }
+            ChapterPracticeStep.COMPLETE -> {
+                AdventureBody("С разбором закончили. Всё готово, чтобы продолжить историю!")
+                PracticeButton("Продолжить историю", enabled, interactionBlocked = state.busy, onClick = onContinueStory)
+            }
+            null -> Unit
         }
     }
 }

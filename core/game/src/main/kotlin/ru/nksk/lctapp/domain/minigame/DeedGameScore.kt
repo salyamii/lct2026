@@ -23,10 +23,12 @@ class DeedGameScore private constructor(
             DeedGameKind.STACKING -> attempts == StackingState.ROUNDS
         }) { "Invalid completed mini-game result" }
     }
-    /** Whole coins rounded down, without overflowing when the configured maximum is large. */
+    /** Completed paid work earns at least one coin; a zero authored reward stays zero. */
     fun reward(maximum: Long): Long {
         require(maximum >= 0)
-        return maximum / attempts * correct + maximum % attempts * correct / attempts
+        if (maximum == 0L) return 0
+        // Split the multiplication to preserve exact rounding without overflowing a large maximum.
+        return (maximum / attempts * correct + maximum % attempts * correct / attempts).coerceAtLeast(1)
     }
 
     companion object {

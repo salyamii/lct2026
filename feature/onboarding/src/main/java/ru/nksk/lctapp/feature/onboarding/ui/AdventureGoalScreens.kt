@@ -49,9 +49,9 @@ fun AdventureGoalBriefingScreen(
     chapterPreviewRes: Int? = null,
 ) {
     AdventureGoalLayout(artwork, chapterPreviewRes ?: artwork.background, "Задание Смотрителей",
-        "Назад к аксессуарам", onBack, largeStage = true, saving = saving, stage = {}) {
+        "Назад к аксессуарам", onBack, largeStage = true, saving = saving, stage = {}) { scrollAll ->
         Column(
-            Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())
+            Modifier.fillMaxWidth().then(if (scrollAll) Modifier else Modifier.weight(1f).verticalScroll(rememberScrollState()))
                 .padding(horizontal = 22.dp, vertical = 20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -82,8 +82,8 @@ fun AdventureGoalSelectionScreen(
     saveFailed: Boolean = false,
 ) {
     AdventureGoalLayout(artwork, artwork.background, "Выбери цель накопления",
-        "Назад к началу приключения", onBack, saving = saving, stage = {}) {
-        Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())
+        "Назад к началу приключения", onBack, saving = saving, stage = {}) { scrollAll ->
+        Column(Modifier.fillMaxWidth().then(if (scrollAll) Modifier else Modifier.weight(1f).verticalScroll(rememberScrollState()))
             .padding(horizontal = 22.dp, vertical = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             GoalHeading("На что будем копить сначала?", artwork)
             Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -137,8 +137,8 @@ fun AdventureStartedScreen(
                 Image(painterResource(portrait), "Твой спутник готов к приключению",
                     Modifier.size(minOf(maxWidth * .82f, maxHeight, 380.dp)), contentScale = ContentScale.Fit)
             }
-        }) {
-        Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())
+        }) { scrollAll ->
+        Column(Modifier.fillMaxWidth().then(if (scrollAll) Modifier else Modifier.weight(1f).verticalScroll(rememberScrollState()))
             .padding(horizontal = 24.dp, vertical = 22.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("НОВОЕ ПРИКЛЮЧЕНИЕ НАЧАЛОСЬ", color = GoalPurple, fontFamily = artwork.bodyFont,
                 fontWeight = FontWeight.ExtraBold, fontSize = 12.sp, letterSpacing = 1.sp)
@@ -161,10 +161,11 @@ internal fun AdventureGoalLayout(
     largeStage: Boolean = false,
     saving: Boolean = false,
     stage: @Composable () -> Unit,
-    content: @Composable ColumnScope.() -> Unit,
+    content: @Composable ColumnScope.(scrollAll: Boolean) -> Unit,
 ) {
     BoxWithConstraints(Modifier.fillMaxSize().background(GoalCream)) {
-        val wide = maxWidth >= 720.dp
+        val scrollAll = needsOnboardingScroll(maxHeight)
+        val wide = maxWidth >= 720.dp && !scrollAll
         val scene: @Composable (Modifier) -> Unit = { modifier ->
             Box(modifier) {
                 Image(painterResource(background), null, Modifier.matchParentSize(), contentScale = ContentScale.Crop)
@@ -182,10 +183,17 @@ internal fun AdventureGoalLayout(
                     if (wide) WindowInsetsSides.Horizontal + WindowInsetsSides.Vertical
                     else WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)),
                 horizontalAlignment = Alignment.CenterHorizontally) {
-                Column(Modifier.widthIn(max = 600.dp).fillMaxHeight()) { content() }
+                Column(Modifier.widthIn(max = 600.dp).fillMaxWidth()
+                    .then(if (scrollAll) Modifier else Modifier.fillMaxHeight())) { content(scrollAll) }
             }
         }
-        if (wide) {
+        if (scrollAll) {
+            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy((-24).dp)) {
+                scene(Modifier.fillMaxWidth().height(if (largeStage) 220.dp else 156.dp))
+                panel(Modifier.fillMaxWidth())
+            }
+        } else if (wide) {
             Row(Modifier.fillMaxSize()) {
                 scene(Modifier.weight(1f).fillMaxHeight())
                 panel(Modifier.weight(1f).fillMaxHeight())

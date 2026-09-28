@@ -18,6 +18,8 @@ import ru.nksk.lctapp.feature.economy.navigation.Economy as Coins
 import ru.nksk.lctapp.feature.economy.navigation.Savings
 import ru.nksk.lctapp.feature.learning.navigation.Learning
 import ru.nksk.lctapp.feature.learning.navigation.SkillTraining
+import ru.nksk.lctapp.feature.learning.navigation.ChapterPractice
+import ru.nksk.lctapp.feature.learning.navigation.CampaignArchive
 import ru.nksk.lctapp.feature.learning.navigation.OtherPaths
 import ru.nksk.lctapp.feature.day.navigation.Day
 import ru.nksk.lctapp.feature.gear.navigation.Gear
@@ -72,6 +74,8 @@ class NavigationKeyCompatibilityTest {
             "savings" to Savings,
             "financial_learning" to Learning,
             "skill_training" to SkillTraining,
+            "chapter_practice" to ChapterPractice,
+            "campaign_archive" to CampaignArchive,
             "other_paths" to OtherPaths(9),
             "day" to Day,
             "gear" to Gear,

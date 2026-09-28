@@ -23,6 +23,7 @@ import ru.nksk.lctapp.domain.pet.PetVisualState
 internal sealed interface AppStartupState {
     data object Loading : AppStartupState
     data class Choose(val saving: Boolean = false, val failed: Boolean = false) : AppStartupState
+    data class IntroVideo(val draft: PetCustomization, val positionMs: Long = 0, val failed: Boolean = false) : AppStartupState
     data class Customize(val draft: PetCustomization, val saving: Boolean = false, val failed: Boolean = false) : AppStartupState
     data class Accessories(val draft: OnboardingDraft, val saving: Boolean = false, val failed: Boolean = false) : AppStartupState
     data class GoalBriefing(val draft: OnboardingDraft, val saving: Boolean = false, val failed: Boolean = false) : AppStartupState
@@ -88,13 +89,30 @@ internal class AppStartupViewModel @Inject constructor(
                 selectedSavingItemId = null
                 val draft = PetCustomization(name = "")
                 writes.withLock { drafts.save(OnboardingDraft(draft, accessoryId = selectedAccessory, savingItemId = selectedSavingItemId)) }
-                state.value = AppStartupState.Customize(draft)
+                state.value = AppStartupState.IntroVideo(draft)
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
                 state.value = AppStartupState.Choose(failed = true)
             }
         }
+    }
+
+    /** Playback is transient UI; the already saved Profile draft remains the cold-start fallback. */
+    fun updateIntroVideoPosition(positionMs: Long) {
+        val current = state.value as? AppStartupState.IntroVideo ?: return
+        state.value = current.copy(positionMs = maxOf(current.positionMs, positionMs))
+    }
+
+    fun introVideoFailed() {
+        val current = state.value as? AppStartupState.IntroVideo ?: return
+        state.value = current.copy(failed = true)
+    }
+
+    /** Completion, Skip and Back all continue to naming; none can initialize the game. */
+    fun finishIntroVideo() {
+        val current = state.value as? AppStartupState.IntroVideo ?: return
+        state.value = AppStartupState.Customize(current.draft)
     }
 
     fun editName(name: String) = editCurrent { it.copy(name = name) }

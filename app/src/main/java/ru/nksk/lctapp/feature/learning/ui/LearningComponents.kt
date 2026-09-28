@@ -1,10 +1,13 @@
 package ru.nksk.lctapp.feature.learning.ui
 
+import ru.nksk.lctapp.core.ui.components.GameLoadingIndicator
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,10 +28,11 @@ internal val PracticeBorder = Color(0xFFDBD7E9)
 internal val PracticeDisabled = Color(0xFFEAE6F0)
 
 @Composable
-internal fun LearningPage(title: String, onBack: () -> Unit, backEnabled: Boolean = true, content: LazyListScope.() -> Unit) {
+internal fun LearningPage(title: String, onBack: () -> Unit, backEnabled: Boolean = true,
+    listState: LazyListState = rememberLazyListState(), content: LazyListScope.() -> Unit) {
     Box(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding().background(GamePaper),
         contentAlignment = Alignment.TopCenter) {
-        LazyColumn(Modifier.widthIn(max = 680.dp).fillMaxSize(), contentPadding = PaddingValues(20.dp),
+        LazyColumn(Modifier.widthIn(max = 680.dp).fillMaxSize(), state = listState, contentPadding = PaddingValues(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
             item {
                 TextButton(onClick = onBack, enabled = backEnabled,
@@ -42,10 +46,10 @@ internal fun LearningPage(title: String, onBack: () -> Unit, backEnabled: Boolea
 }
 
 internal fun LazyListScope.learningStatus(loading: Boolean, busy: Boolean, error: String?,
-    retryRequired: Boolean = false, onRetry: () -> Unit) {
-    if (loading || busy) item {
+    retryRequired: Boolean = false, showSaving: Boolean = true, onRetry: () -> Unit) {
+    if (loading || busy && showSaving) item {
         LearningCard {
-            LinearProgressIndicator(Modifier.fillMaxWidth(), color = GameInk, trackColor = PracticeDisabled)
+            GameLoadingIndicator(Modifier.fillMaxWidth(), size = 48.dp)
             AdventureBody(if (loading) "Открываем страницы приключения…" else "Сохраняем…")
         }
     }
@@ -80,8 +84,9 @@ internal fun LearningCard(title: String? = null, content: @Composable ColumnScop
 }
 
 @Composable
-internal fun PracticeButton(text: String, enabled: Boolean, primary: Boolean = true, onClick: () -> Unit) {
-    GameActionButton(text, onClick, enabled = enabled,
+internal fun PracticeButton(text: String, enabled: Boolean, primary: Boolean = true,
+    interactionBlocked: Boolean = false, onClick: () -> Unit) {
+    GameActionButton(text, onClick, enabled = enabled, interactionBlocked = interactionBlocked,
         style = if (primary) GameActionStyle.PRIMARY else GameActionStyle.SECONDARY,
         shape = RoundedCornerShape(20.dp), borderColor = PracticeBorder,
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),

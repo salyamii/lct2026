@@ -16,6 +16,20 @@ import ru.nksk.lctapp.domain.economy.EconomyState
 class DaySummaryUiStateTest {
     private val catalog = bundledGameCatalog()
 
+    @Test fun parentGiftsHaveTheirOwnSourceAndAreNeverPresentedAsWork() {
+        val recap = DaySummary(2, 30, 50, emptyList(), 0, journal = listOf(
+            DayJournalEntry("gift-coins", DayJournalKind.PARENT_REWARD, "reward", 20),
+            DayJournalEntry("gift-hat", DayJournalKind.PARENT_REWARD, "cosmetic-explorer-hat-v2", 0),
+        )).toUiState(catalog, "Тоша")
+        assertEquals(listOf(
+            DaySummaryRow("Подарок от родителя", "Получили 20 монет", DaySummaryRowKind.COINS),
+            DaySummaryRow("Подарок от родителя: Кепка исследователя", kind = DaySummaryRowKind.FOUND),
+        ), recap.activities)
+        assertEquals(listOf("Получено за день: 20 монет"), recap.moneyLines)
+        assertNull(recap.detailsNote)
+        assertFalse(recap.activities.any { it.kind == DaySummaryRowKind.WORK })
+    }
+
     @Test fun recapDescribesWorkFindingsAndPurchasesWithGrossSpendingAndActualReward() {
         val deed = "figma-2163-43-v1:complete"
         val finding = "campaign-choice-v1:G3.05:continue"

@@ -20,6 +20,7 @@ import ru.nksk.lctapp.core.ui.game.eventCompletionMessage
 import ru.nksk.lctapp.core.ui.game.restingPetArtwork
 import ru.nksk.lctapp.core.ui.game.asGameActionLabel
 import ru.nksk.lctapp.core.ui.game.asGameUiText
+import ru.nksk.lctapp.core.ui.game.deedDeadline
 import ru.nksk.lctapp.core.ui.game.eventMediaArtwork
 import ru.nksk.lctapp.core.ui.game.sceneArtwork
 import ru.nksk.lctapp.core.ui.game.AdventurePetPresentation
@@ -65,6 +66,8 @@ internal data class DayUiState(
     val eventArtwork: EventSceneArtwork? = null,
     val eventBackgroundRes: Int = R.drawable.menu_village,
     val deedDeadline: String? = null,
+    val audioOccurrenceId: String? = null,
+    val eventMedia: EventMedia = EventMedia(),
 )
 
 internal sealed interface DayAction {
@@ -420,6 +423,8 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
         if (resourcePriority?.offerId != selectedResourcePriority) selectedResourcePriority = null
         mutableState.value = DayUiState(
             loading = false, busy = busy, petName = saved.pet.name,
+            audioOccurrenceId = occurrence?.id.takeIf { !result && summary == null },
+            eventMedia = presentation.media,
             summary = summary?.toUiState(catalog, saved.pet.name, saved.economy),
             reflectionAvailable = summary != null && summary.day == reflectionDay,
             restingPetRes = summary?.let { restingPetArtwork(saved.pet) },
@@ -427,11 +432,7 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
             layout = layout,
             locationTitle = renderPetText(presentation.locationTitle ?: card?.category.orEmpty(), saved.pet.name),
             purchaseArtworkRes = purchaseArtworkRes,
-            deedDeadline = offeredDeed?.let { offer -> when (offer.expiresDay - checkNotNull(day).day) {
-                0 -> "Успеть до конца сегодня"
-                1 -> "Можно выполнить сегодня или завтра"
-                else -> "Можно выполнить до конца дня ${offer.expiresDay}"
-            } },
+            deedDeadline = offeredDeed?.let { deedDeadline(checkNotNull(day).day, it.expiresDay) },
             pet = PetEventCondition.forPresentation(saved, session.catalog.policies).toAdventurePetPresentation(),
             eventArtwork = presentation.media.sceneArtwork(event?.let(catalog::displayTitle).orEmpty())
                 ?: eventSceneArtwork(event?.id, variant?.character ?: card?.character),

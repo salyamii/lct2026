@@ -14,7 +14,7 @@ data class DayJournalEntry(
     init { require(id.isNotBlank() && sourceId.isNotBlank()) }
 }
 
-enum class DayJournalKind { WEEKLY_INCOME, MEAL, ITEM_PURCHASE, ITEM_RECEIVED, EVENT_START, EVENT_CHOICE, DEED }
+enum class DayJournalKind { WEEKLY_INCOME, MEAL, ITEM_PURCHASE, ITEM_RECEIVED, EVENT_START, EVENT_CHOICE, DEED, PARENT_REWARD }
 
 /** Called only after a successful transition, inside the same aggregate write transaction. */
 internal fun recordDayChanges(before: GameState, after: GameState, request: EngineRequest, factory: EventFactory): GameState {

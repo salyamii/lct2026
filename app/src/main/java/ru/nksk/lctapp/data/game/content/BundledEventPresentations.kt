@@ -4,6 +4,15 @@ import ru.nksk.lctapp.domain.engine.EventLayout
 import ru.nksk.lctapp.domain.engine.EventMedia
 import ru.nksk.lctapp.domain.engine.EventPresentation
 
+/** Soundtrack is authored with lore groups; the app uses the current story act across screens. */
+internal enum class StoryChapterPresentation(val musicCueKey: String) {
+    OBSERVATORY("story.chapter_1"),
+    TOWER("story.chapter_2"),
+    WORKSHOP("story.chapter_3"),
+    MAP("story.chapter_4"),
+    EXPEDITION("story.chapter_5"),
+}
+
 /** Current display metadata is authored beside a typed offer, not selected by UI event IDs. */
 internal enum class PurchasePresentation(private val template: EventPresentation) {
     BUN(purchase("Ароматная булочка",
@@ -34,14 +43,15 @@ internal enum class PurchasePresentation(private val template: EventPresentation
 
     fun forEvent(eventId: String): EventPresentation = template.copy(
         actionLabels = template.actionLabels.mapKeys { (suffix, _) -> "$eventId:$suffix" },
-        outcomeLabels = mapOf("$eventId:pass" to "Отказались от покупки: ${template.title}"))
+        outcomeLabels = mapOf("$eventId:pass" to "Отказались от покупки: ${template.title}"),
+        media = template.media.copy(actionAudio = paymentActionAudio(eventId, listOf("buy"))))
 }
 
 private fun purchase(title: String, body: String, artwork: String, action: String = "Купить",
     location: String = "Ярмарка", showEffort: Boolean = true) = EventPresentation(
     layout = EventLayout.PURCHASE, title = title, body = body, locationTitle = location,
     actionLabels = mapOf("buy" to action, "pass" to "Пройти мимо"), showEffort = showEffort,
-    media = EventMedia(artworkKey = artwork),
+    media = EventMedia(artworkKey = artwork, appearanceCueKey = "sound.purchase_appears"),
 )
 
 /** Current story copy is selected in its LoreScene without rewriting historical definitions. */

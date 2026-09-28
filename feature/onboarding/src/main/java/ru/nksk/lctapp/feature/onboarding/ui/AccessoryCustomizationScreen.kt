@@ -92,8 +92,29 @@ fun AccessoryCustomizationScreen(
 ) {
     BoxWithConstraints(Modifier.fillMaxSize().background(AccessoryCream)) {
         val compactHeight = maxHeight < 480.dp
-        // Reflow one screen based on available window space, including tablet split-screen.
-        if (maxWidth >= 720.dp) {
+        // In short windows the whole page scrolls, including its action. A scene
+        // cannot consume the controls' height while the keyboard/window is small.
+        if (needsOnboardingScroll(maxHeight)) {
+            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+                Box(Modifier.fillMaxWidth()) {
+                    Image(painterResource(artwork.background), null,
+                        Modifier.matchParentSize().testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
+                    Column {
+                        CustomizationHeader(onBack, artwork, saving = saving, title = "Выбор аксессуара",
+                            backDescription = "Назад к образу спутника")
+                        Image(painterResource(accessories.portraits.getValue(state.accessory).getValue(state.fur)),
+                            "${state.name}: ${state.accessory.label}",
+                            Modifier.fillMaxWidth().height(140.dp), contentScale = ContentScale.Fit)
+                    }
+                }
+                Box(Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.safeDrawing.only(
+                    WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)), contentAlignment = Alignment.TopCenter) {
+                    AccessoryControls(state, artwork, accessories, onSelect, onApply,
+                        Modifier.widthIn(max = 600.dp).fillMaxWidth().padding(top = 16.dp),
+                        compactHeight, saving, saveFailed, scrollAll = true)
+                }
+            }
+        } else if (maxWidth >= 720.dp) {
             Row(Modifier.fillMaxSize()) {
                 BoxWithConstraints(Modifier.weight(1f).fillMaxHeight()) {
                     Image(painterResource(artwork.background), null,
@@ -152,15 +173,19 @@ private fun AccessoryControls(
     compactHeight: Boolean,
     saving: Boolean,
     saveFailed: Boolean,
+    scrollAll: Boolean = false,
 ) {
     val density = LocalDensity.current
     var actionHeight by remember { mutableStateOf(84.dp) }
     BoxWithConstraints(modifier) {
         // A short window can scroll the controls instead of crushing the artwork.
-        val carouselHeight = (maxHeight - actionHeight - if (compactHeight) 31.dp else 89.dp)
-            .coerceAtLeast(220.dp)
-        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp).padding(bottom = actionHeight)) {
+        val minimumCarouselHeight = 220.dp * density.fontScale.coerceAtLeast(1f)
+        val carouselHeight = if (scrollAll) minimumCarouselHeight else
+            (maxHeight - actionHeight - if (compactHeight) 31.dp else 89.dp).coerceAtLeast(minimumCarouselHeight)
+        val controls: @Composable () -> Unit = {
+            Column(Modifier.fillMaxWidth().then(if (scrollAll) Modifier else
+                Modifier.fillMaxSize().verticalScroll(rememberScrollState()))
+                .padding(horizontal = 16.dp).padding(bottom = if (scrollAll) 0.dp else actionHeight)) {
             Text("Добавь деталь к образу", color = AccessoryInk,
                 fontFamily = artwork.titleFont, fontWeight = FontWeight.ExtraBold,
                 fontSize = 20.sp, lineHeight = 25.sp)
@@ -172,8 +197,10 @@ private fun AccessoryControls(
             }
             AccessoryCarousel(state, artwork, accessories, onSelect,
                 Modifier.fillMaxWidth().height(carouselHeight), saving)
+            }
         }
-        Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth().onSizeChanged {
+        val action: @Composable (Modifier) -> Unit = { actionModifier ->
+        Column(actionModifier.fillMaxWidth().onSizeChanged {
             actionHeight = with(density) { it.height.toDp() }
         }.padding(start = 22.dp, end = 22.dp, top = 12.dp, bottom = if (compactHeight) 8.dp else 16.dp)) {
             if (saveFailed) Text("Не удалось сохранить настройки. Попробуй ещё раз.",
@@ -190,6 +217,9 @@ private fun AccessoryControls(
                     fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
             }
         }
+        }
+        if (scrollAll) Column { controls(); action(Modifier) }
+        else { controls(); action(Modifier.align(Alignment.BottomCenter)) }
     }
 }
 

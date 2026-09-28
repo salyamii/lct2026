@@ -27,13 +27,13 @@ Android отправляет **факты и вычисленные основа
 
 ## Передача
 
-`POST /v1/profiles/{profileId}/analytics`
+`POST /v1/profiles/analytics`
 
-- `Authorization: Bearer <deviceCredential>`; идентификатор сам по себе не даёт доступа.
+- Сохранённый `deviceId` передаётся в JSON-теле каждого запроса.
 - `Idempotency-Key: <batchId>`; значение совпадает с телом запроса.
 - `Content-Type: application/json`.
 - JSON использует camelCase, точный регистр enum и `_type` для полиморфных фактов.
-- `profileId` относится к облачному профилю; `gameRunId` — к прохождению.
+- `deviceId` определяет профиль устройства; `gameRunId` — прохождение.
   В локальном `GameSnapshot` тот же идентификатор называется `runId`.
 
 `AnalyticsUploadRequest` — **полная проекция** фактов одного прохождения до
@@ -45,6 +45,7 @@ Android отправляет **факты и вычисленные основа
 
 | Поле | Тип | Значение |
 | --- | --- | --- |
+| `deviceId` | string | Непустой сохранённый идентификатор устройства |
 | `schemaVersion` | integer | Версия внешнего контракта, сейчас `1` |
 | `batchId` | string | Уникальная идентичность отправки, повтор использует тот же ID и тело |
 | `gameRunId` | string | Идентификатор прохождения из сохранения |
@@ -81,7 +82,7 @@ Android отправляет **факты и вычисленные основа
 ```json
 {
   "schemaVersion": 1,
-  "batchId": "5e06cb94-48c8-4a14-9c9c-c0f7c0a40720",
+  "batchId": "347d06d2-0181-4764-8c6c-ab493a8c4fea",
   "gameRunId": "73d831fd-cf83-4a8c-9e99-973fe16fef4e",
   "acceptedThroughHistorySequence": 0,
   "acceptedEventIds": []
@@ -98,12 +99,12 @@ Android отправляет **факты и вычисленные основа
 
 1. Повтор одного ключа и того же тела возвращает тот же ack. Тот же ключ с другим
    телом — `409 IDEMPOTENCY_CONFLICT`.
-2. Уникальность исходного факта — `(profileId, gameRunId, eventId)`. Повтор
+2. Уникальность исходного факта — `(deviceId, gameRunId, eventId)`. Повтор
    одинакового факта не увеличивает счётчики; конфликт содержимого исходной
    audit-записи — `409 FACT_CONFLICT`.
 3. Несколько фактов могут иметь один `sequence`, а некоторые audit-записи не
    имеют фактов. Разрыв между sequence фактов сам по себе не ошибка.
-4. Проекция хранится отдельно для `(gameRunId, projectionVersion,
+4. Проекция хранится отдельно для `(deviceId, gameRunId, projectionVersion,
    evaluatorVersion, throughHistorySequence)`. Производные факты имеют ID
    `derived:<projectionVersion>:<gameRunId>:<identity>` и могут уточняться при
    увеличении границы истории. Их новое содержимое нельзя считать изменением
@@ -120,7 +121,17 @@ Android отправляет **факты и вычисленные основа
 
 ## Итоговые статусы
 
-`GET /v1/profiles/{profileId}/skills?gameRunId=<runId>` с тем же Bearer-доступом.
+`POST /v1/profiles/skills/query` с JSON-телом `SkillAssessmentsRequest`:
+
+```json
+{
+  "deviceId": "9f1c2d3e4a5b6078",
+  "gameRunId": "73d831fd-cf83-4a8c-9e99-973fe16fef4e",
+  "schemaVersion": 1
+}
+```
+
+Файл запроса: [skill-assessments-request.json](examples/skill-assessments-request.json).
 Ответ `SkillAssessmentsResponse` содержит границу `basedOnHistorySequence`
 и ровно один результат для каждого навыка. Оценка может отставать от последнего
 upload; граница позволяет честно показать это. Одна только регистрация профиля
@@ -161,4 +172,5 @@ upload; граница позволяет честно показать это. 
 AVAILABLE_EXPENSE. Сумма обеих квитанций — цена предмета; каждая сверяется
 со своим счётом. Реальных DEPOSIT/WITHDRAWAL при этом нет. Прямая оплата
 текущими деньгами не служит свидетельством фактического накопления.
-Формат команды и snapshot не меняется; текущая версия переходов — 9.
+Формат команды и snapshot не меняется; текущая версия переходов — 11
+(включает минимальную выплату 1 монеты за завершённое оплачиваемое дело).

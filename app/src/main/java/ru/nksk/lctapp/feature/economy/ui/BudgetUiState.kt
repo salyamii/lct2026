@@ -4,6 +4,7 @@ import ru.nksk.lctapp.domain.economy.BudgetPlanningReason
 import ru.nksk.lctapp.domain.economy.BudgetRevisionReason
 import ru.nksk.lctapp.domain.economy.EconomyOperations
 import ru.nksk.lctapp.domain.pet.PetState
+import ru.nksk.lctapp.core.ui.game.missingCoinAmount
 
 internal const val BUDGET_STEP = 5L
 
@@ -38,6 +39,11 @@ internal data class BudgetUiState(
 ) {
     val canConfirm: Boolean get() = actionsEnabled && !busy && unallocated == 0L && (!isEditing || needs >= minimumNeeds)
     val total: Long get() = needs + wants + savings + reserve + unallocated
+    /** `needs` is the displayed draft allocation; `knownNeeds` remains the full food requirement. */
+    val foodShortfall: Long get() = (knownNeeds - needs).coerceAtLeast(0)
+    val foodAdvice: String get() = if (foodShortfall > 0)
+        "На еду до следующей недели не хватает ещё ${missingCoinAmount(foodShortfall)}."
+    else "На еду до следующей недели хватает."
     fun amount(article: BudgetArticle): Long = when (article) {
         BudgetArticle.NEEDS -> needs
         BudgetArticle.WANTS -> wants

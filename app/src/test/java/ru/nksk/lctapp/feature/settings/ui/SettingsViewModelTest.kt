@@ -5,12 +5,22 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import ru.nksk.lctapp.domain.parentlink.*
+import ru.nksk.lctapp.domain.media.MediaPreferences
+import ru.nksk.lctapp.domain.media.MediaPreferencesRepository
+import ru.nksk.lctapp.domain.backend.CloudRestorePreview
+import ru.nksk.lctapp.domain.backend.CloudSyncPhase
+import ru.nksk.lctapp.domain.backend.CloudSyncRepository
+import ru.nksk.lctapp.domain.backend.CloudSyncResult
+import ru.nksk.lctapp.domain.backend.CloudSyncState
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModelTest {
@@ -122,8 +132,247 @@ class SettingsViewModelTest {
         assertEquals(1, repository.registrationCalls)
     }
 
-    private fun model(repository: ParentLinkRepository) = SettingsViewModel(repository)
+    @Test fun soundReadFailureDoesNotInventAValueAndDoesNotBlockParentCode() = runTest(dispatcher) {
+        val sound = FakeMediaRepository().apply { readFailure = true }
+        val model = model(FakeRepository(configured = false), sound)
+        runCurrent()
+        assertNull(model.uiState.value.sound.enabled)
+        assertFalse(model.uiState.value.sound.canChange)
+        assertEquals(SoundSettingsError.READ, model.uiState.value.sound.error)
+        model.onAction(SettingsAction.SetSoundEnabled(false))
+        model.onAction(SettingsAction.CreateParentCode)
+        runCurrent()
+        assertEquals(0, sound.writeCalls)
+        assertEquals(ParentCodeStatus.READY, model.uiState.value.codeStatus)
+        sound.readFailure = false
+        sound.saved.value = MediaPreferences(soundEnabled = false)
+        model.onAction(SettingsAction.RetrySound)
+        runCurrent()
+        assertEquals(false, model.uiState.value.sound.enabled)
+        assertTrue(model.uiState.value.sound.canChange)
+        assertNull(model.uiState.value.sound.error)
+    }
+
+    @Test fun failedSoundWriteKeepsConfirmedValueAndRetrySavesTheSameChoice() = runTest(dispatcher) {
+        val sound = FakeMediaRepository().apply { writeFailure = true }
+        val model = model(FakeRepository(), sound)
+        runCurrent()
+        model.onAction(SettingsAction.SetSoundEnabled(false))
+        runCurrent()
+        assertEquals(true, model.uiState.value.sound.enabled)
+        assertEquals(SoundSettingsError.WRITE, model.uiState.value.sound.error)
+        assertFalse(model.uiState.value.sound.saving)
+        sound.writeFailure = false
+        model.onAction(SettingsAction.RetrySound)
+        runCurrent()
+        assertEquals(false, model.uiState.value.sound.enabled)
+        assertEquals(listOf(false, false), sound.writes)
+        assertNull(model.uiState.value.sound.error)
+    }
+
+    @Test fun soundWriteBlocksDuplicateTapsAndScreenRecreationReadsSavedValue() = runTest(dispatcher) {
+        val sound = FakeMediaRepository().apply { pendingWrite = CompletableDeferred() }
+        val model = model(FakeRepository(), sound)
+        runCurrent()
+        model.onAction(SettingsAction.SetSoundEnabled(false))
+        model.onAction(SettingsAction.SetSoundEnabled(true))
+        model.onAction(SettingsAction.RetrySound)
+        runCurrent()
+        assertTrue(model.uiState.value.sound.saving)
+        assertEquals(true, model.uiState.value.sound.enabled)
+        assertEquals(1, sound.writeCalls)
+        sound.pendingWrite!!.complete(Unit)
+        runCurrent()
+        assertFalse(model.uiState.value.sound.saving)
+        val reopened = this@SettingsViewModelTest.model(FakeRepository(), sound)
+        runCurrent()
+        assertEquals(false, reopened.uiState.value.sound.enabled)
+        assertEquals(1, sound.writeCalls)
+    }
+
+    @Test fun successfulExternalSoundChangeConfirmsAnEarlierFailedToggle() = runTest(dispatcher) {
+        val sound = FakeMediaRepository().apply { writeFailure = true }
+        val model = model(FakeRepository(), sound)
+        runCurrent()
+        model.onAction(SettingsAction.SetSoundEnabled(false))
+        runCurrent()
+        assertEquals(SoundSettingsError.WRITE, model.uiState.value.sound.error)
+        sound.saved.value = MediaPreferences(false)
+        runCurrent()
+        assertFalse(checkNotNull(model.uiState.value.sound.enabled))
+        assertNull(model.uiState.value.sound.error)
+        model.onAction(SettingsAction.RetrySound)
+        runCurrent()
+        assertEquals(1, sound.writeCalls)
+    }
+
+    @Test fun downloadingACopyNeverRestoresWithoutExplicitConfirmation() = runTest(dispatcher) {
+        val cloud = FakeCloudRepository()
+        val model = model(FakeRepository(), cloud = cloud)
+        runCurrent()
+        assertEquals(0, cloud.prepareCalls)
+        model.onAction(SettingsAction.ConfirmCloudRestore(cloud.preview.id))
+        model.onAction(SettingsAction.PrepareCloudRestore)
+        model.onAction(SettingsAction.PrepareCloudRestore)
+        runCurrent()
+        assertEquals(1, cloud.prepareCalls)
+        assertEquals(cloud.preview, model.uiState.value.cloud.restorePreview)
+        assertTrue(cloud.restores.isEmpty())
+        model.onAction(SettingsAction.ConfirmCloudRestore("stale-preview"))
+        model.onAction(SettingsAction.DismissCloudRestore("stale-preview"))
+        model.onAction(SettingsAction.SyncCloud)
+        model.onAction(SettingsAction.PrepareCloudRestore)
+        runCurrent()
+        assertEquals(0, cloud.syncCalls)
+        assertEquals(1, cloud.prepareCalls)
+        model.onAction(SettingsAction.DismissCloudRestore(cloud.preview.id))
+        runCurrent()
+        assertEquals(listOf(cloud.preview.id), cloud.dismissals)
+        assertNull(model.uiState.value.cloud.restorePreview)
+        assertTrue(cloud.restores.isEmpty())
+    }
+
+    @Test fun confirmedRestoreUsesPreparedIdAndBlocksDuplicatesWhileSaving() = runTest(dispatcher) {
+        val cloud = FakeCloudRepository().apply { pendingRestore = CompletableDeferred() }
+        val model = model(FakeRepository(), cloud = cloud)
+        runCurrent()
+        model.onAction(SettingsAction.PrepareCloudRestore)
+        runCurrent()
+        model.onAction(SettingsAction.ConfirmCloudRestore(cloud.preview.id))
+        model.onAction(SettingsAction.ConfirmCloudRestore(cloud.preview.id))
+        model.onAction(SettingsAction.DismissCloudRestore(cloud.preview.id))
+        model.onAction(SettingsAction.SyncCloud)
+        runCurrent()
+        assertEquals(listOf(cloud.preview.id), cloud.restores)
+        assertTrue(cloud.dismissals.isEmpty())
+        assertEquals(0, cloud.syncCalls)
+        assertTrue(model.uiState.value.cloud.busy)
+        cloud.pendingRestore!!.complete(Unit)
+        runCurrent()
+        assertFalse(model.uiState.value.cloud.busy)
+        assertNull(model.uiState.value.cloud.restorePreview)
+    }
+
+    @Test fun failedCloudOperationsKeepTheExistingQrAndReleaseTheirControls() = runTest(dispatcher) {
+        val cloud = FakeCloudRepository().apply { syncFailure = true; restoreFailure = true }
+        val model = model(FakeRepository(), cloud = cloud)
+        runCurrent()
+        model.onAction(SettingsAction.CreateParentCode)
+        runCurrent()
+        val qr = checkNotNull(model.uiState.value.qr)
+        model.onAction(SettingsAction.SyncCloud)
+        runCurrent()
+        assertFalse(model.uiState.value.cloud.busy)
+        assertNotNull(model.uiState.value.cloud.feedback)
+        model.onAction(SettingsAction.PrepareCloudRestore)
+        runCurrent()
+        model.onAction(SettingsAction.ConfirmCloudRestore(cloud.preview.id))
+        runCurrent()
+        assertSame(qr, model.uiState.value.qr)
+        assertEquals(ParentCodeStatus.READY, model.uiState.value.codeStatus)
+        assertFalse(model.uiState.value.cloud.busy)
+        assertNull(model.uiState.value.cloud.restorePreview)
+        assertEquals(listOf(cloud.preview.id), cloud.dismissals)
+        assertNotNull(model.uiState.value.cloud.feedback)
+    }
+
+    @Test fun cloudObservationPreventsOverlappingWorkAndShowsTheLatestState() = runTest(dispatcher) {
+        val cloud = FakeCloudRepository()
+        val model = model(FakeRepository(), cloud = cloud)
+        runCurrent()
+        cloud.state.value = CloudSyncState(phase = CloudSyncPhase.SYNCING)
+        runCurrent()
+        model.onAction(SettingsAction.SyncCloud)
+        model.onAction(SettingsAction.PrepareCloudRestore)
+        runCurrent()
+        assertEquals(0, cloud.syncCalls)
+        assertEquals(0, cloud.prepareCalls)
+        assertTrue(model.uiState.value.cloud.busy)
+        cloud.state.value = CloudSyncState(lastSyncedAt = "2026-09-27T13:45:00Z")
+        runCurrent()
+        assertFalse(model.uiState.value.cloud.busy)
+        assertNotNull(model.uiState.value.cloud.lastSyncedLabel)
+        assertEquals(cloud.state.value, model.uiState.value.cloud.sync)
+        model.onAction(SettingsAction.SyncCloud)
+        model.onAction(SettingsAction.SyncCloud)
+        runCurrent()
+        assertEquals(1, cloud.syncCalls)
+    }
+
+    @Test fun missingBackendCannotStartCloudRequestsButKeepsLocalParentCode() = runTest(dispatcher) {
+        val cloud = FakeCloudRepository()
+        val model = model(FakeRepository(configured = false), cloud = cloud)
+        runCurrent()
+        model.onAction(SettingsAction.SyncCloud)
+        model.onAction(SettingsAction.PrepareCloudRestore)
+        model.onAction(SettingsAction.CreateParentCode)
+        runCurrent()
+        assertEquals(0, cloud.syncCalls)
+        assertEquals(0, cloud.prepareCalls)
+        assertEquals(ParentCodeStatus.READY, model.uiState.value.codeStatus)
+    }
+
+    @Test fun leavingSettingsDiscardsAnUnconfirmedRestorePreview() = runTest(dispatcher) {
+        val cloud = FakeCloudRepository()
+        val model = model(FakeRepository(), cloud = cloud)
+        runCurrent()
+        model.onAction(SettingsAction.PrepareCloudRestore)
+        runCurrent()
+        store.clear()
+        assertEquals(listOf(cloud.preview.id), cloud.dismissals)
+        assertTrue(cloud.restores.isEmpty())
+    }
+
+    private fun model(repository: ParentLinkRepository, sound: MediaPreferencesRepository = FakeMediaRepository(),
+        cloud: CloudSyncRepository = FakeCloudRepository()) = SettingsViewModel(repository, sound, cloud)
         .also { store.put("settings", it) }
+
+    private class FakeCloudRepository : CloudSyncRepository {
+        override val state = MutableStateFlow(CloudSyncState())
+        val preview = CloudRestorePreview("preview-id", "Лис", 4, 21L, 8L)
+        var syncCalls = 0
+        var prepareCalls = 0
+        var syncFailure = false
+        var restoreFailure = false
+        var pendingRestore: CompletableDeferred<Unit>? = null
+        val restores = mutableListOf<String>()
+        val dismissals = mutableListOf<String>()
+        override suspend fun synchronize(): CloudSyncResult {
+            syncCalls++
+            if (syncFailure) error("Network unavailable")
+            return CloudSyncResult.SUCCESS
+        }
+        override suspend fun prepareRestore(): CloudRestorePreview {
+            prepareCalls++
+            return preview
+        }
+        override suspend fun restore(previewId: String) {
+            restores += previewId
+            pendingRestore?.await()
+            if (restoreFailure) error("Revision changed")
+        }
+        override fun dismissRestore(previewId: String) { dismissals += previewId }
+    }
+
+    private class FakeMediaRepository : MediaPreferencesRepository {
+        val saved = MutableStateFlow(MediaPreferences())
+        var readFailure = false
+        var writeFailure = false
+        var pendingWrite: CompletableDeferred<Unit>? = null
+        val writes = mutableListOf<Boolean>()
+        val writeCalls get() = writes.size
+        override fun observe() = flow {
+            if (readFailure) error("Preference read failed")
+            emitAll(saved)
+        }
+        override suspend fun read() = observe().first()
+        override suspend fun setSoundEnabled(enabled: Boolean) {
+            writes += enabled
+            pendingWrite?.await()
+            if (writeFailure) error("Preference write failed")
+            saved.value = MediaPreferences(enabled)
+        }
+    }
 
     private class FakeRepository(private val configured: Boolean = true) : ParentLinkRepository {
         var profileFailure = false

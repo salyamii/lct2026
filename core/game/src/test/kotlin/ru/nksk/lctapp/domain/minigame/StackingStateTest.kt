@@ -14,10 +14,10 @@ class StackingStateTest {
 
     @Test fun overlapShrinksTheNextBlock() {
         val base = StackingState.create().dropAt(20)
-        // Следующий блок сдвинут вправо на 10: пересечение 80 - 30 = 50.
+        // Следующий блок сдвинут вправо на 10: пересечение 70 - 30 = 40.
         val second = base.dropAt(base.locked.single().x + 10)
         assertEquals(2, second.placed)
-        assertEquals(50, second.currentWidth)
+        assertEquals(40, second.currentWidth)
         assertEquals(30, second.locked.last().x)
     }
 

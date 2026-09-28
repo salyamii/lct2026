@@ -129,7 +129,7 @@ internal fun BudgetPlanScreen(state: BudgetUiState, onAmountChange: (BudgetArtic
                     }, verticalAlignment = Alignment.CenterVertically) {
                     Surface(Modifier.weight(1f), color = GamePaper, shape = RoundedCornerShape(18.dp)) {
                         Text(buildString {
-                            append("На еду до следующей недели ещё нужно ${state.knownNeeds} монет.")
+                            append(state.foodAdvice)
                             if (state.isEditing) {
                                 if (state.minimumNeeds > state.knownNeeds) append(" На необходимое оставим хотя бы ${state.minimumNeeds} монет.")
                                 if (state.total < state.knownNeeds && state.total > 0) append(" Пока есть только ${state.total} — сохраним их на еду.")

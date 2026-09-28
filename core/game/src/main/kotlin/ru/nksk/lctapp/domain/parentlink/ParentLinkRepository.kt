@@ -1,9 +1,9 @@
 package ru.nksk.lctapp.domain.parentlink
 
-/** Public identity is a locator, never a credential or permission to read a child's data. */
+/** Compatibility name: profileId is the saved deviceId sent by the backend transport. */
 data class ParentLinkProfile(val profileId: String, val backendConfigured: Boolean)
 
-/** The QR text is exactly the persisted profile UUID, with no URL, token or expiry. */
+/** The QR text is exactly the persisted device identifier, with no URL or expiry. */
 data class ParentLinkCode(val qrPayload: String)
 
 class ParentLinkUnavailableException : IllegalStateException("Parent linking backend is not configured")

@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.app.navigation
 
+import ru.nksk.lctapp.core.ui.components.GameLoadingScreen
 import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.togetherWith
@@ -19,7 +20,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -51,25 +51,19 @@ import ru.nksk.lctapp.feature.goal.navigation.goalEntry
 import ru.nksk.lctapp.feature.menu.navigation.MainMenu
 import ru.nksk.lctapp.feature.menu.navigation.mainMenuEntry
 import ru.nksk.lctapp.feature.menu.ui.MainMenuAction
-import ru.nksk.lctapp.feature.tasks.navigation.DifferencesGame
-import ru.nksk.lctapp.feature.tasks.navigation.LightsGame
-import ru.nksk.lctapp.feature.tasks.navigation.PipesGame
-import ru.nksk.lctapp.feature.tasks.navigation.StarPlates
-import ru.nksk.lctapp.feature.tasks.navigation.PriceCheck
-import ru.nksk.lctapp.feature.tasks.navigation.SequenceGame
-import ru.nksk.lctapp.feature.tasks.navigation.StackingGame
-import ru.nksk.lctapp.feature.tasks.navigation.Telescope
 import ru.nksk.lctapp.feature.tasks.navigation.Tasks
 import ru.nksk.lctapp.feature.tasks.navigation.DeedGame
 import ru.nksk.lctapp.feature.tasks.navigation.deedGameEntry
 import ru.nksk.lctapp.feature.tasks.navigation.tasksEntry
-import ru.nksk.lctapp.feature.tasks.ui.DeedsAction
 import ru.nksk.lctapp.feature.map.navigation.GameMap
 import ru.nksk.lctapp.feature.map.navigation.mapEntry
 import ru.nksk.lctapp.feature.learning.navigation.Learning
 import ru.nksk.lctapp.feature.learning.navigation.SkillTraining
+import ru.nksk.lctapp.feature.learning.navigation.ChapterPractice
 import ru.nksk.lctapp.feature.learning.navigation.OtherPaths
 import ru.nksk.lctapp.feature.learning.navigation.learningEntry
+import ru.nksk.lctapp.feature.learning.navigation.CampaignArchive
+import ru.nksk.lctapp.feature.learning.navigation.campaignArchiveEntry
 import ru.nksk.lctapp.feature.settings.navigation.Settings
 import ru.nksk.lctapp.feature.settings.navigation.settingsEntry
 import ru.nksk.lctapp.feature.settings.ui.SettingsGearButton
@@ -106,10 +100,13 @@ fun LctNavHost(
         }
     }
     val redirectingToBudget = shouldPresentBudget(pending, destination, presentedPlanningId)
-    if (gate.loading || gate.failed || redirectingToBudget) {
+    if (gate.loading || redirectingToBudget) {
+        GameLoadingScreen(modifier)
+        return
+    }
+    if (gate.failed) {
         Box(Modifier.fillMaxSize().background(AdventureNight), contentAlignment = Alignment.Center) {
-            if (gate.loading || redirectingToBudget) CircularProgressIndicator()
-            else Column {
+            Column {
                 Text("Не удалось прочитать бюджет")
                 Button(onClick = gateModel::retry) { Text("Повторить") }
             }
@@ -158,7 +155,7 @@ fun LctNavHost(
             entryProvider = entryProvider {
                 mainMenuEntry(settingsButton = {
                     SettingsGearButton(dropUnlessResumed { navigator.navigate(MainMenu, Settings) })
-                }) { source, action ->
+                }, onTraining = { source -> navigator.navigate(source, ChapterPractice) }) { source, action ->
                     navigator.navigate(
                         source = source,
                         destination = when (action) {
@@ -168,6 +165,7 @@ fun LctNavHost(
                             MainMenuAction.Coins -> Economy
                             MainMenuAction.Finance -> Learning
                             MainMenuAction.Savings -> Savings
+                            MainMenuAction.CampaignArchive -> CampaignArchive
                             MainMenuAction.Village -> GameMap
                             MainMenuAction.ContinueDay, MainMenuAction.Feed -> if (pending != null) Economy else Day
                         },
@@ -178,38 +176,32 @@ fun LctNavHost(
                 tasksEntry(
                     onEvent = { source -> navigator.navigate(source, Day) },
                     onGame = { source, id -> navigator.navigate(source, DeedGame(id)) },
-                    onOpen = { source, action ->
-                        navigator.navigate(source, when (action) {
-                            DeedsAction.StarPlates -> StarPlates
-                            DeedsAction.PriceCheck -> PriceCheck
-                            DeedsAction.Telescope -> Telescope
-                            DeedsAction.SkillTraining -> SkillTraining
-                            DeedsAction.Lights -> LightsGame
-                            DeedsAction.Sequence -> SequenceGame
-                            DeedsAction.Pipes -> PipesGame
-                            DeedsAction.Differences -> DifferencesGame
-                            DeedsAction.Stacking -> StackingGame
-                        })
-                    },
+                    onTraining = { source -> navigator.navigate(source, SkillTraining) },
                     onBack = navigator::goBack,
                 )
                 goalEntry(onBack = navigator::goBack,
                     onOpenSavings = { source -> navigator.navigateToExisting(source, Savings) },
-                    onReturnHome = navigator::returnToRoot)
+                    onContinueDay = { source -> navigator.replace(source, Day) },
+                    onBudget = { source -> navigator.navigateToExisting(source, Economy) },
+                    onTraining = { source -> navigator.navigateToExisting(source, ChapterPractice) })
                 economyEntry(onBack = navigator::returnToRoot, onConfirmed = navigator::returnToRoot,
                     onOpenSavings = { source -> navigator.navigateToExisting(source, Savings) })
                 savingsEntry(onBack = navigator::goBack,
                     onOpenGoal = { source -> navigator.navigateToExisting(source, Goal) },
                     onOpenBudget = { source -> navigator.navigateToExisting(source, Economy) })
                 learningEntry(onBack = navigator::goBack,
-                    onOpenBudget = { source -> navigator.navigateToExisting(source, Economy) })
+                    onOpenBudget = { source -> navigator.navigateToExisting(source, Economy) },
+                    onContinueStory = { source -> navigator.navigateToExisting(source, Day) },
+                    onArchives = { source -> navigator.navigate(source, CampaignArchive) })
+                campaignArchiveEntry(onBack = navigator::goBack, onRestarted = navigator::returnToRoot)
                 mapEntry(onBack = navigator::goBack, onSelected = navigator::returnToRoot)
                 dayEntry(onBack = navigator::goBack, onFinished = finish,
+                    isCurrentEntry = { destination == it },
                     onGame = { source, id -> navigator.replace(source, DeedGame(id)) },
                     onStoryGame = { source, id, choice -> navigator.replace(source, DeedGame(id, choice)) },
-                    onLearning = { source -> navigator.navigate(source, SkillTraining) },
+                    onLearning = { source -> navigator.navigate(source, ChapterPractice) },
                     onReflection = { source, day -> navigator.navigate(source, OtherPaths(day)) })
-                deedGameEntry(onFinished = finish)
+                deedGameEntry(onFinished = finish, isCurrentEntry = { destination == it })
             },
         )
         if (destination == MainMenu) {

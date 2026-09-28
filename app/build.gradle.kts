@@ -20,9 +20,9 @@ android {
         minSdk = 24
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.1"
 
-        // Intentionally empty until a backend is available; never send data to a demo host.
+        // Team endpoint lives in gradle.properties; an explicit empty override keeps the app offline.
         val backendUrl = providers.gradleProperty("LCT_BACKEND_BASE_URL").orElse("").get().trim()
         require(backendUrl.isEmpty() || (backendUrl.startsWith("https://") && backendUrl.endsWith("/") &&
             backendUrl.none { it == '"' || it == '\\' || it.isWhitespace() })) {
@@ -48,6 +48,9 @@ android {
         compose = true
         buildConfig = true
     }
+    androidResources {
+        noCompress += listOf("mp3", "mp4")
+    }
 }
 
 room3 {
@@ -55,11 +58,16 @@ room3 {
 }
 
 dependencies {
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.lottie.compose)
     implementation(libs.qrcodegen)
     implementation(libs.retrofit)
     implementation(libs.retrofit.kotlinx.serialization)
     implementation(libs.okhttp)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.coil.compose)
     implementation(project(":feature:onboarding"))
@@ -105,6 +113,9 @@ tasks.withType<Test>().configureEach {
     val mainSources = layout.projectDirectory.dir("src/main/java")
     inputs.dir(mainSources).withPathSensitivity(PathSensitivity.RELATIVE)
     systemProperty("lctapp.mainSourceDir", mainSources.asFile.absolutePath)
+    inputs.dir(layout.projectDirectory.dir("src/main/assets/media")).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/design/assets/media-manifest.json"))
+        .withPathSensitivity(PathSensitivity.RELATIVE)
     val domainSources = rootProject.layout.projectDirectory.dir("core/game/src/main/kotlin")
     inputs.dir(domainSources).withPathSensitivity(PathSensitivity.RELATIVE)
     systemProperty("lctapp.domainSourceDir", domainSources.asFile.absolutePath)

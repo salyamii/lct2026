@@ -42,13 +42,22 @@ is not a persistent tab bar requiring independent stacks.
 | Continue day | `Day` |
 | Settings gear | `Settings` (`settings`) |
 
-Four feature entries display a shared placeholder with Back. Gear displays the inventory
+The registered features render their working screens. Gear displays the inventory
 with two sections, owned items only, and an entry-scoped Hilt ViewModel. Its saved
-route ID remains `gear`; Back returns to the menu without changing game state. Tasks displays the
-mini-game hub and registers `StarPlates`, `PriceCheck` and `Telescope` with stable
-IDs `tasks_star_plates`, `tasks_price_check` and `tasks_telescope`. The app host
-maps `DeedsAction` to those keys. Each game entry obtains its Hilt ViewModel and
-collects its state with lifecycle awareness. Back pops the game entry to Tasks;
+route ID remains `gear`; Back returns to the menu without changing game state.
+Tasks displays current offered deeds and a Skill Training entry. The app host
+maps its training callback to `SkillTraining`.
+`ChapterPractice` (`chapter_practice`) is the separate finite catch-up route used
+by blocked chapter continuations from MainMenu, Goal and Day (LEARNING-D-005).
+It uses its own entry-scoped TrainingViewModel and the current saved milestones;
+the route stores no question or world snapshot. Its Continue story callback opens
+the existing Day entry when present. Voluntary Tasks training remains continuous.
+Accepted gameplay work uses
+`DeedGame` with the event occurrence ID. By ADVENTURE-D-020, Tasks has no demo
+mini-game entry points. `StarPlates`, `PriceCheck` and `Telescope` retain the stable
+IDs `tasks_star_plates`, `tasks_price_check` and `tasks_telescope` and their entries
+only to restore older saved back stacks. Each legacy entry obtains its Hilt
+ViewModel and collects state with lifecycle awareness. Back returns to Tasks;
 leaving that entry discards its demo session. Navigation keys contain no scores
 or domain snapshots. The menu
 artwork and UI state remain owned by the menu. The entry obtains its ViewModel
@@ -192,16 +201,34 @@ with feeding. Feeding never automatically executes the original action.
 The `goal` key is unchanged. Its entry obtains GoalViewModel and collects state
 with lifecycle awareness. Selecting a goal and buying parts stay on that screen;
 Back returns to the existing menu without executing a new event. The next explicit
-Continue dispatches the goal introduction through GameSession. Purchase feedback
+Continue dispatches the next allowed event through GameSession. Purchase feedback
 is transient local presentation state, never a saved route or domain event.
 
-Both the goal header and lower Goal shortcut dispatch MainMenuAction.Goal through
-the menu entry to LctNavHost, which pushes Goal and renders GoalScreen. The
-GoalNavigationTest covers both paths, Back, recreation, and opening without
-selecting a goal or advancing the day. It is compiled only under the user's
-current verification preference; this does not claim an on-device result.
+Under ADVENTURE-D-021, «Продолжить историю» explicitly continues from Goal.
+Menu and Goal share `GameSession.continueDayPlan`: unallocated money opens Economy;
+an active card resumes in Day; a finished day opens its summary; otherwise the
+guarded command advances the day. The Goal entry replaces itself with Day only
+after a successful command or a read-only resume. Missing financial practice
+opens SkillTraining, from both Menu and Goal. Stale state stays on Goal with a
+message; an uncertain write retries the same request. Buying itself never advances.
+
+The lower Goal shortcut dispatches MainMenuAction.Goal; the header only informs
+under ADVENTURE-D-008. Regression sources cover continuation, guards and retries.
+They are compiled only under the user's verification preference; this does not
+claim an on-device result.
 
 ## Pet name and floating village action — 2026-09-19
+
+### Финальный Хроноскоп и архив прохождений — 2026-09-28
+
+После завершения пятой главы главное действие меню открывает `CampaignArchive`
+(`campaign_archive`), где ребёнок явно выбирает «Вернуться в начало». Только
+успешный атомарный restart возвращает стек к меню; новый начальный бюджет открывает
+существующий budget gate. При неопределённой записи повторяется исходный запрос.
+В истории текущего приключения есть вход «Прошлые приключения» в тот же экран.
+Выбор архива читает его полную историю для просмотра, без restore и игровых команд.
+Back из архивной детализации возвращает к списку. Ни snapshot, ни mutable state
+не записываются в route key; идентичность устройства остаётся прежней.
 
 Under D-093/D-094 the name badge is read-only, below the goal and to the right
 of the coins. It has no click action, age label or menu editor. The saved name
@@ -241,9 +268,10 @@ not substitute a new game. See [onboarding](design/onboarding.md).
 
 ### Customization step — 2026-09-20
 
-The startup gate now has Choose, Customize, Accessories, GoalBriefing, GoalSelection and Introduction steps (CUST-D-019/CUST-D-020). Start from the character
-screen persists a Room draft and opens CustomizationScreen in the onboarding
-module. AppStartupViewModel owns the step and persisted draft; UI receives values
+The startup gate has Choose, IntroVideo, Customize, Accessories, GoalBriefing,
+GoalSelection and Introduction steps. Start from the character screen persists a
+Room profile draft, then presents the intro video before CustomizationScreen.
+AppStartupViewModel owns the step and persisted draft; UI receives values
 and callbacks. Back from Customize clears the draft before returning to Choose.
 Successful introduction confirmation commits the new aggregate and only then exposes the
 normal Navigation 3 host. Existing saves bypass all onboarding steps; no route key contains
@@ -267,6 +295,23 @@ INITIAL/RECEIPT does not automatically redirect MainMenu to Economy; ContinueDay
 and Coins open it explicitly. Allocation, weekly receipts and restored gameplay
 routes retain the mandatory budget gate.
 Existing saves skip onboarding. No Navigation 3 key or day/event transition is added.
+
+### Intro video after character selection — 2026-09-27
+
+Only a successful `startAdventure` draft save enters transient `IntroVideo`.
+Completion, Skip and system Back all continue to `Customize` with that same
+draft; they do not create a game, accept an empty name or skip later onboarding
+steps. Playback position belongs to AppStartupViewModel and survives activity
+configuration changes. A cold process start restores the persisted Profile
+draft directly into Customize, so the interrupted video does not replay.
+Existing complete games bypass the video with all other onboarding screens.
+
+`IntroVideoScreen` in `:feature:onboarding` receives player, sound-toggle and
+action slots from app composition. `IntroVideoEntry` connects the shared media
+runtime and sound preference; it owns Back and the return to profile editing.
+The video has no Navigation 3 key, Room step or world flag. Its mute button uses
+the same persistent sound setting as Settings; a media/preference error leaves
+an explicit way to continue. [Intro contract](design/intro-video.md).
 
 ## Карта — 2026-09-20
 
@@ -399,8 +444,8 @@ day or change the budget. The pending-budget redirect allows this read-only rout
 `AppDebugOverlay` stays at the app composition root. Its optional launcher is passed
 to a developer-tools section inside Settings, so release builds retain real
 settings without developer controls. Parent linking uses a repository outside the
-game aggregate. An explicit button generates the QR offline from the saved profile
-UUID, without wrapping it in a URL or JSON. The entry then registers the profile
+game aggregate. An explicit button generates the QR offline from the saved
+deviceId, without wrapping it in a URL or JSON. The entry then registers the profile
 when a backend is configured; registration failure leaves the QR visible and offers
 a separate retry. Without a configured server, the QR remains available with a
 short connection note. The QR has no expiry and is never serialized into route keys.

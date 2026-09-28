@@ -38,8 +38,10 @@ internal class MainMenuViewModel @Inject constructor(
     private var freeMealRequested = false
     private val dayNavigation = Channel<Unit>(Channel.BUFFERED)
     val openDay = dayNavigation.receiveAsFlow()
-    private val financeNavigation = Channel<Unit>(Channel.BUFFERED)
-    val openFinance = financeNavigation.receiveAsFlow()
+    private val budgetNavigation = Channel<Unit>(Channel.BUFFERED)
+    val openBudget = budgetNavigation.receiveAsFlow()
+    private val trainingNavigation = Channel<Unit>(Channel.BUFFERED)
+    val openTraining = trainingNavigation.receiveAsFlow()
 
     init { retry() }
 
@@ -71,19 +73,16 @@ internal class MainMenuViewModel @Inject constructor(
 
     fun continueDay() {
         val game = saved ?: return
-        if (game.economy.planning != null) {
-            viewModelScope.launch { dayNavigation.send(Unit) }
-            return
+        when (val plan = session.continueDayPlan(game)) {
+            ContinueDayPlan.NeedsBudget -> viewModelScope.launch { budgetNavigation.send(Unit) }
+            is ContinueDayPlan.Day -> act(game, plan.command, open = true)
         }
-        // Reopening the completed day's summary is a read, not the next day's income.
-        val command = if (game.engine?.phase == DayPhase.FINISHED) null else session.advanceCommand(game)
-        act(game, command, open = true)
     }
 
     fun feed() {
         val game = saved ?: return
         if (game.economy.planning != null) {
-            viewModelScope.launch { dayNavigation.send(Unit) }
+            viewModelScope.launch { budgetNavigation.send(Unit) }
             return
         }
         act(game, EngineCommand.Feed(session.catalog.mealPolicy.basicMeal.id), open = false)
@@ -93,7 +92,7 @@ internal class MainMenuViewModel @Inject constructor(
         val game = saved ?: return
         if (!offersFreeMeal(game)) return
         if (game.economy.planning != null) {
-            viewModelScope.launch { dayNavigation.send(Unit) }
+            viewModelScope.launch { budgetNavigation.send(Unit) }
             return
         }
         act(game, EngineCommand.Feed(checkNotNull(session.catalog.mealPolicy.freeMeal).id), open = false)
@@ -128,7 +127,9 @@ internal class MainMenuViewModel @Inject constructor(
                     null -> Unit
                 }
                 if (result is EngineResult.Blocked && result.reason is BlockReason.FinancialPracticeRequired)
-                    financeNavigation.send(Unit)
+                    trainingNavigation.send(Unit)
+                else if (result is EngineResult.Blocked && result.reason == BlockReason.BudgetPlanningRequired)
+                    budgetNavigation.send(Unit)
                 else if (open) dayNavigation.send(Unit)
             } catch (cancelled: CancellationException) { throw cancelled
             } catch (_: Exception) {

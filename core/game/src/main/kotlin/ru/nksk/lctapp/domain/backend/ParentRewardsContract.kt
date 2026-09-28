@@ -23,13 +23,30 @@ sealed interface ParentRewardPayload {
     }
 }
 
-/** Sent by an authenticated linked parent; the child transport cannot issue rewards. */
+/** Sent by the parent client; the child transport cannot issue rewards. */
 @Serializable
 data class CreateParentRewardRequest(
+    val deviceId: String,
     val gameRunId: String,
     val reward: ParentRewardPayload,
     val schemaVersion: Int = 1,
-)
+) {
+    init { require(deviceId.isNotBlank()) }
+}
+
+@Serializable
+data class PullParentRewardsRequest(
+    val deviceId: String,
+    val gameRunId: String,
+    val afterSequence: Long,
+    val limit: Int = 50,
+    val schemaVersion: Int = 1,
+) {
+    init {
+        require(deviceId.isNotBlank() && gameRunId.isNotBlank())
+        require(afterSequence >= 0 && limit in 1..100)
+    }
+}
 
 @Serializable
 data class ParentRewardDto(
@@ -40,7 +57,10 @@ data class ParentRewardDto(
     val reward: ParentRewardPayload,
     val createdAt: String,
 ) {
-    init { require(sequence > 0) }
+    init {
+        require(sequence > 0)
+        require(listOf(rewardId, profileId, gameRunId, createdAt).all(String::isNotBlank))
+    }
 }
 
 /** Includes acknowledged grants. A cursor outside the restored world is not proof of application. */
@@ -68,16 +88,23 @@ data class ParentRewardReceiptDto(
     val historySequence: Long,
     val outcome: ParentRewardOutcome,
 ) {
-    init { require(historySequence > 0) }
+    init {
+        require(historySequence > 0)
+        require(listOf(rewardId, applicationId, historyEntryId).all(String::isNotBlank))
+    }
 }
 
 @Serializable
 data class AckParentRewardsRequest(
+    val deviceId: String,
     val gameRunId: String,
     val receipts: List<ParentRewardReceiptDto>,
     val schemaVersion: Int = 1,
 ) {
-    init { require(receipts.isNotEmpty() && receipts.size <= 100) }
+    init {
+        require(deviceId.isNotBlank())
+        require(receipts.isNotEmpty() && receipts.size <= 100)
+    }
 }
 
 /** Delivery telemetry only: acknowledgement never removes a grant from the server ledger. */

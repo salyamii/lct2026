@@ -10,7 +10,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.shape.RoundedCornerShape
 import ru.nksk.lctapp.domain.engine.EventLayout
 import ru.nksk.lctapp.core.ui.components.*
 
@@ -28,7 +27,7 @@ internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
                 while (true) awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() }
             }
         }) {
-            LinearProgressIndicator(Modifier.align(Alignment.TopCenter).safeDrawingPadding().fillMaxWidth())
+            GameLoadingIndicator(Modifier.align(Alignment.Center).safeDrawingPadding())
         }
         if (state.retryRequired && !state.busy) AlertDialog(
             onDismissRequest = onBack,
@@ -47,7 +46,7 @@ private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
         Surface(Modifier.fillMaxSize()) {
             Column(Modifier.safeDrawingPadding().padding(24.dp), verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally) {
-                if (state.loading) CircularProgressIndicator() else {
+                if (state.loading) GameLoadingIndicator() else {
                     Text("Не удалось загрузить игру. Сохранение не изменено.")
                     Button({ onAction(DayAction.Retry) }) { Text("Повторить") }
                 }
@@ -64,6 +63,7 @@ private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
         PurchaseCard(state, onAction, onBack)
     } else AdventureScreen(
         title = state.category, onBack = onBack, backgroundRes = state.eventBackgroundRes,
+        artworkSceneKey = state.audioOccurrenceId ?: state.title,
         sceneAspectRatio = 1.12f, pinFooter = false,
         scene = { DayEventScene(state, Modifier.fillMaxSize()) },
     ) {
@@ -74,19 +74,6 @@ private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
         state.deedDeadline?.let { GameBody(it) }
         state.message?.let { GameBody(it) }
         state.actionNotice?.let { GameBody(it) }
-        state.resourcePriority?.let { priority ->
-            Surface(color = GameInk.copy(alpha = 0.06f), shape = RoundedCornerShape(16.dp)) {
-                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    priority.comparisons.forEach { GameBody(it) }
-                    GameBody("Ещё доступно «${priority.title}»: ${priority.effort.lowercase()}, награда до ${priority.reward} монет. Срок — до конца сегодня.")
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(checked = priority.selected, enabled = !state.busy,
-                            onCheckedChange = { onAction(DayAction.SetResourcePriority(priority.offerId, it)) })
-                        Text("Хочу оставить силы на «${priority.title}»", color = GameInk)
-                    }
-                }
-            }
-        }
         if (state.practiceRequired) GameButton("К практике", !state.busy) { onAction(DayAction.OpenLearning) }
         if (state.options.any { it.needsFood }) {
             GameButton("Покормить", !state.busy) { onAction(DayAction.ShowMeals) }
@@ -139,6 +126,7 @@ private fun PurchaseCard(state: DayUiState, onAction: (DayAction) -> Unit, onBac
     AdventureScreen(
         title = state.locationTitle, onBack = onBack,
         backgroundRes = state.eventBackgroundRes,
+        artworkSceneKey = state.audioOccurrenceId ?: state.title,
         sceneAspectRatio = 1.12f, pinFooter = false,
         scene = {
             Box(
@@ -186,6 +174,7 @@ private fun StoryIntroduction(state: DayUiState, onAction: (DayAction) -> Unit, 
     AdventureScreen(
         title = state.locationTitle, onBack = onBack,
         backgroundRes = state.eventBackgroundRes,
+        artworkSceneKey = state.audioOccurrenceId ?: state.title,
         sceneAspectRatio = 1.5f, scene = {}, pinFooter = false,
         footer = {
             if (state.practiceRequired) AdventurePrimaryButton("К практике", { onAction(DayAction.OpenLearning) }, enabled = !state.busy)

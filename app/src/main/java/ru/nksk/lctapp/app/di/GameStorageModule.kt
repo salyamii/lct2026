@@ -15,6 +15,7 @@ import ru.nksk.lctapp.data.game.local.GameDatabase
 import ru.nksk.lctapp.domain.content.StoryContentRepository
 import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.domain.onboarding.OnboardingDraftRepository
+import ru.nksk.lctapp.domain.backend.ParentRewardPolicy
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -22,6 +23,11 @@ internal object GameDatabaseModule {
     @Provides
     @Singleton
     fun database(@ApplicationContext context: Context): GameDatabase = GameDatabase.open(context)
+
+    /** Coin allocation and duplicate handling remain deferred until their product rules are confirmed. */
+    @Provides
+    @Singleton
+    fun parentRewardPolicy(): ParentRewardPolicy = ParentRewardPolicy()
 }
 
 @Module

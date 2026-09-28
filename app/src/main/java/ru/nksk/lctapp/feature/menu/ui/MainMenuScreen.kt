@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.dp
 import ru.nksk.lctapp.core.ui.theme.AdventureNight
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
 import ru.nksk.lctapp.core.ui.components.rememberScenePainter
+import ru.nksk.lctapp.core.ui.components.GameArtworkScene
+import ru.nksk.lctapp.core.ui.components.GameLoadingScreen
 
 private val MapButtonWidth = 176.dp
 private val MapButtonOverflow = 56.dp
@@ -54,7 +56,9 @@ fun MainMenuScreen(
     var hudBottom by remember { mutableStateOf(0f) }
     var characterTop by remember { mutableStateOf<Float?>(null) }
     val characterPosition = Modifier.onGloballyPositioned { characterTop = it.positionInRoot().y }
-    BoxWithConstraints(modifier = modifier.fillMaxSize().clipToBounds().background(AdventureNight)
+    GameArtworkScene(state.backgroundRes, modifier.fillMaxSize().background(AdventureNight),
+        loadingContent = { GameLoadingScreen() }) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize().clipToBounds().background(AdventureNight)
         .onGloballyPositioned { screenTop = it.positionInRoot().y }) {
         val viewport = DpSize(maxWidth, maxHeight)
         val sceneScale = maxOf(maxWidth / 390.dp, maxHeight / 844.dp)
@@ -106,6 +110,7 @@ fun MainMenuScreen(
                     .size(MapButtonWidth, MapButtonHeight),
             )
         }
+    }
     }
 }
 

@@ -113,8 +113,8 @@ internal fun MenuActions(onAction: (MainMenuAction) -> Unit, viewport: DpSize, s
         }
         state.spendingPreview?.let { Text(it, Modifier.padding(horizontal = 20.dp), color = AdventureLabel, fontFamily = Rubik) }
         GameActionButton(
-            text = state.continueLabel ?: stringResource(R.string.menu_continue),
-            onClick = { onAction(MainMenuAction.ContinueDay) },
+            text = if (state.canRestartCampaign) "Вернуться к началу истории" else state.continueLabel ?: stringResource(R.string.menu_continue),
+            onClick = { onAction(if (state.canRestartCampaign) MainMenuAction.CampaignArchive else MainMenuAction.ContinueDay) },
             interactionBlocked = state.busy,
             modifier = Modifier.padding(horizontal = 18.dp)
                 .shadow(12.dp, RoundedCornerShape(30.dp)),

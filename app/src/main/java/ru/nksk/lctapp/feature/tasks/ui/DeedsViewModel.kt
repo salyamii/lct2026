@@ -17,6 +17,7 @@ import ru.nksk.lctapp.domain.economy.EconomyOperations
 import ru.nksk.lctapp.domain.economy.SpendingKind
 import ru.nksk.lctapp.core.ui.game.playerMessage
 import ru.nksk.lctapp.core.ui.game.asGameUiText
+import ru.nksk.lctapp.core.ui.game.deedDeadline
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
 
@@ -125,11 +126,4 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
             },
         )
     }
-}
-
-internal fun deedDeadline(currentDay: Int, expiresDay: Int): String = when (expiresDay - currentDay + 1) {
-    1 -> "Сегодня — последний день"
-    2 -> "Осталось 2 дня: сегодня и завтра"
-    3 -> "Осталось 3 дня, включая сегодня"
-    else -> "До конца дня $expiresDay"
 }

@@ -2,6 +2,7 @@ package ru.nksk.lctapp.domain.engine
 
 import ru.nksk.lctapp.domain.pet.PetVisualState
 import ru.nksk.lctapp.domain.minigame.DeedGameKind
+import ru.nksk.lctapp.domain.location.GameLocation
 
 /** Required authored parameters: there is deliberately no production default for unresolved values. */
 data class EngineRules(
@@ -43,6 +44,8 @@ data class EventPolicy(
     val disabledChoiceIds: Set<String> = emptySet(),
     /** This opened event needs care until its choice resolves it; it adds no financial or energy effect. */
     val requiresPetHelp: Boolean = false,
+    /** Confirmed travel changes the saved menu location, never inferred from presentation. */
+    val choiceDestinations: Map<String, GameLocation> = emptyMap(),
 ) {
     init {
         require(energyCost in 0..3)

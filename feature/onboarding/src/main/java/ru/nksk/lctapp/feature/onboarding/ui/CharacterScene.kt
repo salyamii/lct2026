@@ -14,7 +14,6 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
@@ -55,6 +54,7 @@ internal fun CharacterScene(
     state: OnboardingUiState,
     onAction: (OnboardingAction) -> Unit,
     modifier: Modifier = Modifier,
+    loadingIndicator: @Composable (Modifier) -> Unit,
 ) {
     val resources = LocalContext.current.resources
     var attempt by remember { mutableIntStateOf(0) }
@@ -76,7 +76,7 @@ internal fun CharacterScene(
             Modifier.offset(scale * 12f, scale * 419f).size(scale * 390f, scale * 27f),
             contentScale = ContentScale.FillBounds)
         when (val result = loaded) {
-            ArtworkLoad.Loading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
+            ArtworkLoad.Loading -> loadingIndicator(Modifier.align(Alignment.Center))
             ArtworkLoad.Failed -> TextButton(onClick = { attempt++ }, Modifier.align(Alignment.Center)) {
                 Text(stringResource(R.string.onboarding_art_retry))
             }

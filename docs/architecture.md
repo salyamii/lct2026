@@ -13,6 +13,7 @@ historical decisions and migrations live in the design documents.
 | `:app` / `feature/<name>` | Feature UI, immutable screen state, ViewModels, actions and navigation entries |
 | `:app` / `core/ui/components` | Domain-independent reusable Compose components and interaction states |
 | `:app` / `core/ui/game` | Shared read-only domain-to-presentation adapters and game-action presentation helpers |
+| `:app` / `core/ui/media` | Local asset playback, shared audio focus and lifecycle-aware media effects |
 | `:app` / `core/ui/theme` | Colors, typography and visual tokens |
 | `:app` / `data` | Room, content installation, backend transport and device identity |
 | `:feature:onboarding` | Onboarding UI; app supplies artwork and persistence callbacks |
@@ -68,11 +69,76 @@ whether an image exists. Screens, history and reflection use the same presentati
 lookup. Android resolves semantic artwork keys to bundled resources; the domain
 never receives resource integers.
 
-Media metadata has places for music, ambience, narration and action sound/voice
-cues. These keys do not play audio, perform I/O or advance the game. Current audio
-keys are absent until actual assets are supplied. A future lifecycle-owned player
-can consume this metadata without adding per-screen event-ID conditions. It must
-pause on leaving the foreground and never replay purchases or rewards.
+Media metadata supplies chapter music, appearance, ambience, narration and action
+sound/voice cues. `BundledMediaCatalog` resolves these semantic keys to the
+bundled MP3 assets; metadata itself never performs I/O or advances the game.
+`StoryChapterPresentation` assigns one music key to the authored lore group. The app
+reads the current story act's presentation to select its global background track:
+the same chapter continues across screens, a new chapter changes the track, and
+music is quieter under voice. Narration and short appearance/action cues belong to
+the active scene or confirmed action. Playback is lifecycle-owned, pauses when the
+app leaves the foreground, shares the global sound preference, and never replays a
+purchase or reward. See [media provenance](design/assets/media-catalog.md).
+
+`MediaPlaybackViewModel` observes the current world only to select a chapter theme;
+it does not initialize a game or read/replay its journal. It retains the playback
+controller across activity recreation. The Compose host releases native players
+outside the foreground; their positions and occurrence deduplication stay in the
+controller. Leaving a scene stops its narration. The intro owns a separate video
+player with its position retained in the startup ViewModel.
+
+Music, narration and intro pause directly in `ON_PAUSE`/`ON_STOP` lifecycle
+callbacks through `PlaybackLifecycleEffect`. This must not wait for a Compose
+SideEffect: a background window can stop scheduling frames before recomposition.
+Foreground return resumes the retained playback position and keeps sound preferences.
+
+Illustrated adventure screens and the menu use `GameArtworkScene` to reveal their
+initial image group together after asynchronous decode. Errors release the barrier;
+later pose or clothing updates do not hide a scene already on screen. Scene identity
+is an event/location key, never the changing world revision or animation phase.
+
+Before a world exists, the same music projection selects the first authored act's
+theme for onboarding. App composition suppresses the music cue only while the
+intro video is shown, independently of the shared sound preference. The video's
+own audio keeps that preference; leaving the intro restores the chapter theme.
+This selection does not initialize or mutate the game.
+
+Music loops on its own lane; short cues and voice use a sequential lane which
+ducks the music. Short location clips play twice (MEDIA-D-005); narration and
+action effects play once. Scene deduplication records each completed clip/pass,
+not an attempted async preparation. A cancelled or failed clip can play again
+on reopening/unmuting; ordinary recomposition does not restart it, and decoder
+failure cannot create an automatic retry loop. Both lanes share one audio-focus lease. Permanent focus loss
+pauses playback until a new interaction or a foreground restart; transient loss
+waits for focus gain. Muting releases audio playback, while the intro continues
+silently. The preference lives in device DataStore, outside the world snapshot.
+
+Payment audio listens only to fresh, successfully committed commands, with request
+ID deduplication. Rejected commands, previews, history, restores and idempotent
+retries produce no payment sound. An uncertain write whose commit reply failed
+stays silent, even if a later retry discovers the commit; feedback must never cause
+another game command. Background/muted action cues are dropped rather than replayed
+on return. Screens contain no MediaPlayer or filesystem calls.
+
+Native player construction, asset access, preparation, playback controls and release
+run on one media worker, outside the Compose/main thread. Main-thread scene state and
+audio focus communicate with it asynchronously; player callbacks return to main and
+discard stale completions. Reading video position uses a cached value instead of a
+synchronous native call. The active, unmuted session prepares only the five short
+location/action clips in advance; idle prepared clips are released on mute/background.
+A newly opened event cancels any leftover action queue from the previous event.
+The navigation host identifies the current entry explicitly, so its event audio
+can start while the incoming card is already visible in STARTED, without waiting
+for the slide to finish. Outgoing entries and predictive Back previews cannot
+replace the current scene. Playback, focus and release work take priority over
+speculative preparation; a cancelled focus request clears its pending state.
+Music and long narration are not loaded into that short-clip cache.
+Actual music decoder errors release the failed player. A new event/action, unmute
+or foreground return can retry the same chapter; ordinary recomposition cannot
+start a retry loop, and stale callbacks cannot close a replacement track.
+Chapter selection first deduplicates story decisions and runs its projection on a
+computation dispatcher; unrelated wallet, clothing and UI updates do not recompute
+the chapter on main. Repository observation keeps its existing error/retry contract.
 
 Historical content IDs and installed definitions remain readable. Compatibility
 aliases/replacements belong to explicit compatibility data, not the rendering
@@ -90,6 +156,12 @@ disabled treatment, loading footprint, multiline text and minimum touch height.
 Feature wrappers may select approved typography/shape; they do not reimplement
 click handling or disabled logic. Loading and unavailable are distinct states;
 short writes do not recolor the entire inventory.
+
+`AdaptiveActionPanel` measures bottom actions at their natural height before
+allocating a scrolling body. When both cannot fit, the panel scrolls as one column.
+Onboarding uses the same principle: a scrollable card must not receive only the
+leftover height via weight. Safe system/keyboard insets apply to controls; compact
+windows and large text retain accessible actions through scrolling (ARCH-D-008).
 
 Use `interactionBlocked` for a short write that must retain the button's label,
 color and size without a spinner. It disables pointer, keyboard and accessibility
@@ -130,7 +202,7 @@ job. Re-entry reads the latest committed state.
 
 ## Persistence and compatibility
 
-Room is version 20; snapshot is format 4 and history format 1. Schemas and earlier
+Room is version 21; snapshot is format 4 and history format 1. Schemas and earlier
 migrations remain in `app/schemas`. A full snapshot includes the aggregate and
 complete validated history. Restore does not mean merging multiple active devices.
 There is no destructive fallback or silent reset to the initial fixture.
@@ -170,18 +242,37 @@ long save on a permitted device; source inspection does not establish actual FPS
 
 ## Backend boundary
 
-Settings generates the parent's QR offline from a persisted profile UUID. Encrypted
-Preferences DataStore under `noBackupFilesDir` owns installation credentials.
-Retrofit/OkHttp transport is in `data/backend`; the base URL is empty by default.
-An explicit parent-code action may register when configured. QR display and sharing
+Settings generates the parent's QR offline from the persisted `deviceId`. Plain
+Preferences DataStore under `noBackupFilesDir` owns this identifier and registration
+metadata. New installations use Android ID; existing identifiers survive a one-time
+legacy migration. Legacy decryption only reads the old record; new credentials are
+not generated. By PARENT-LINK-D-005 requests identify the device in their JSON body,
+without authorization headers or tokens. Operation IDs still deduplicate retries.
+Retrofit/OkHttp transport is in `data/backend`; `gradle.properties` configures
+`https://fin-api.mortypython.ru/`, supplied by the team on 2026-09-27.
+`-PLCT_BACKEND_BASE_URL=` can explicitly disable requests. Live endpoint compatibility
+is not yet verified. Registration runs before synchronization and from the parent-code action. QR display and sharing
 do not upload the world. The private FileProvider shares a PNG with temporary read
 permission, without changing identity or game state.
 
-Snapshot, analytics and parent-reward DTOs/transport are prepared. Background backup,
-cloud restore UI and application of remote rewards are not wired. No observer uploads
-game data. Parent rewards are designed as durable authenticated pulls and atomic
-local application to the latest aggregate, with receipt-based deduplication and ack
-after commit; Firebase messaging is excluded. See [backend handoff](backend/README.md).
+`RemoteCloudSyncRepository` serializes registration, full snapshot upload, financial
+evidence upload, skill assessment retrieval and parent reward delivery. Room owns
+transport checkpoints and frozen pending requests; retry uses the same key and body.
+The aggregate repository applies supported rewards against the latest local world,
+atomically with their audit receipt. Only committed receipts are acknowledged.
+Known new accessories apply now; coin allocation and duplicate accessory handling
+remain gated by the unresolved product policy in the reward contract.
+
+App composition schedules connected WorkManager requests after history changes
+(five-second debounce), on foreground/network return, every minute in foreground,
+and periodically every fifteen minutes subject to Android scheduling. This observes
+only the history sequence; serialization and network work stay off the main thread.
+The local world remains available offline and cloud conflicts never overwrite it.
+Settings offers manual sync and a downloaded preview followed by explicit restore
+confirmation. Restore validates the archive and guards the local history; its
+durable intent recovers transport bookkeeping after a crash without restoring twice.
+Firebase messaging is excluded. See [backend handoff](backend/README.md) and
+[request triggers](backend/client-sync.md).
 
 ## Dependency injection
 

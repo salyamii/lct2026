@@ -13,22 +13,11 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import ru.nksk.lctapp.feature.tasks.ui.DeedsAction
 import ru.nksk.lctapp.feature.tasks.ui.DeedsScreen
-import ru.nksk.lctapp.feature.tasks.ui.DifferencesGameScreen
-import ru.nksk.lctapp.feature.tasks.ui.DifferencesGameViewModel
-import ru.nksk.lctapp.feature.tasks.ui.LightsGameScreen
-import ru.nksk.lctapp.feature.tasks.ui.LightsGameViewModel
 import ru.nksk.lctapp.feature.tasks.ui.MemoryGameScreen
 import ru.nksk.lctapp.feature.tasks.ui.MemoryGameViewModel
-import ru.nksk.lctapp.feature.tasks.ui.PipesGameScreen
-import ru.nksk.lctapp.feature.tasks.ui.PipesGameViewModel
 import ru.nksk.lctapp.feature.tasks.ui.PriceQuizScreen
-import ru.nksk.lctapp.feature.tasks.ui.SequenceGameScreen
-import ru.nksk.lctapp.feature.tasks.ui.SequenceGameViewModel
 import ru.nksk.lctapp.feature.tasks.ui.PriceQuizViewModel
-import ru.nksk.lctapp.feature.tasks.ui.StackingGameScreen
-import ru.nksk.lctapp.feature.tasks.ui.StackingGameViewModel
 import ru.nksk.lctapp.feature.tasks.ui.TargetStopScreen
 import ru.nksk.lctapp.feature.tasks.ui.TargetStopViewModel
 
@@ -48,28 +37,8 @@ data object PriceCheck : NavKey
 @SerialName("tasks_telescope")
 data object Telescope : NavKey
 
-@Serializable
-@SerialName("tasks_lights")
-data object LightsGame : NavKey
-
-@Serializable
-@SerialName("tasks_sequence")
-data object SequenceGame : NavKey
-
-@Serializable
-@SerialName("tasks_pipes")
-data object PipesGame : NavKey
-
-@Serializable
-@SerialName("tasks_differences")
-data object DifferencesGame : NavKey
-
-@Serializable
-@SerialName("tasks_stacking")
-data object StackingGame : NavKey
-
 fun EntryProviderScope<NavKey>.tasksEntry(
-    onOpen: (Tasks, DeedsAction) -> Unit,
+    onTraining: (Tasks) -> Unit,
     onBack: (NavKey) -> Unit,
     onEvent: (Tasks) -> Unit,
     onGame: (Tasks, String) -> Unit,
@@ -94,12 +63,11 @@ fun EntryProviderScope<NavKey>.tasksEntry(
             onFeed = { if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) viewModel.feed(it) },
             onRetry = viewModel::retry,
             onCurrentEvent = dropUnlessResumed { onEvent(source) },
-            onOpen = { action ->
-                if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) onOpen(source, action)
-            },
+            onTraining = dropUnlessResumed { onTraining(source) },
             onExit = dropUnlessResumed { onBack(source) },
         )
     }
+    // Kept only for back stacks saved before demo entry points were removed from Tasks.
     entry<StarPlates> { source ->
         val viewModel = hiltViewModel<MemoryGameViewModel>()
         val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -114,31 +82,5 @@ fun EntryProviderScope<NavKey>.tasksEntry(
         val viewModel = hiltViewModel<TargetStopViewModel>()
         val state by viewModel.uiState.collectAsStateWithLifecycle()
         TargetStopScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) })
-    }
-    entry<LightsGame> { source ->
-        val viewModel = hiltViewModel<LightsGameViewModel>()
-        val state by viewModel.uiState.collectAsStateWithLifecycle()
-        LightsGameScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) })
-    }
-    entry<SequenceGame> { source ->
-        val viewModel = hiltViewModel<SequenceGameViewModel>()
-        val state by viewModel.uiState.collectAsStateWithLifecycle()
-        SequenceGameScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) })
-    }
-    entry<PipesGame> { source ->
-        val viewModel = hiltViewModel<PipesGameViewModel>()
-        val state by viewModel.uiState.collectAsStateWithLifecycle()
-        PipesGameScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) })
-    }
-    entry<DifferencesGame> { source ->
-        val viewModel = hiltViewModel<DifferencesGameViewModel>()
-        val state by viewModel.uiState.collectAsStateWithLifecycle()
-        DifferencesGameScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) })
-    }
-    entry<StackingGame> { source ->
-        val viewModel = hiltViewModel<StackingGameViewModel>()
-        val state by viewModel.uiState.collectAsStateWithLifecycle()
-        val cratePosition by viewModel.position.collectAsStateWithLifecycle()
-        StackingGameScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) }, position = cratePosition)
     }
 }

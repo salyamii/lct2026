@@ -4,6 +4,8 @@ import ru.nksk.lctapp.core.ui.game.asGameActionLabel
 import ru.nksk.lctapp.core.ui.game.asGameUiText
 import ru.nksk.lctapp.domain.analytics.LedgerEntry
 import ru.nksk.lctapp.domain.analytics.LedgerKind
+import ru.nksk.lctapp.domain.backend.ParentRewardOutcome
+import ru.nksk.lctapp.domain.backend.ParentRewardPayload
 import ru.nksk.lctapp.domain.content.EventType
 import ru.nksk.lctapp.domain.content.ItemOperation
 import ru.nksk.lctapp.domain.engine.DayJournalEntry
@@ -17,8 +19,8 @@ import ru.nksk.lctapp.domain.pet.renderPetText
 
 /** Names come from content; amounts come only from committed receipts, never catalog prices. */
 internal fun learningHistoryRows(history: List<AuditEntry>, catalog: GameCatalog, petName: String,
-    includeDay: Boolean = true): List<String> =
-    history.asReversed().asSequence().flatMap { it.activityRows(catalog, petName, includeDay).asSequence() }.take(50).toList()
+    includeDay: Boolean = true, limit: Int = 50): List<String> =
+    history.asReversed().asSequence().flatMap { it.activityRows(catalog, petName, includeDay).asSequence() }.take(limit).toList()
 
 private fun AuditEntry.activityRows(catalog: GameCatalog, petName: String, includeDay: Boolean): List<String> {
     // A baseline is a checkpoint, not evidence that all its older choices happened now.
@@ -27,6 +29,15 @@ private fun AuditEntry.activityRows(catalog: GameCatalog, petName: String, inclu
     fun text(value: String) = renderPetText(value, petName).asGameUiText()
     fun itemName(id: String) = text(catalog.content.items.find { it.id == id }?.name ?: "Предмет")
     fun eventName(id: String) = text(catalog.content.events.find { it.id == id }?.let(catalog::displayTitle) ?: "Событие")
+    parentReward?.let { application ->
+        if (application.receipt.outcome == ParentRewardOutcome.ALREADY_OWNED) return emptyList()
+        val label = when (val gift = application.reward.reward) {
+            is ParentRewardPayload.Coins -> listOfNotNull("Подарок от родителя",
+                operations.singleOrNull { it.kind == LedgerKind.INCOME }?.moneyText()).joinToString(". ")
+            is ParentRewardPayload.Accessory -> "Подарок от родителя: ${itemName(gift.itemId)}"
+        }
+        return listOf(if (includeDay) "День ${after.engine?.day ?: 1}: $label" else label)
+    }
     val oldJournalIds = before.engine?.journal.orEmpty().map { it.id }.toSet()
     val journal = after.engine?.journal.orEmpty().filter { it.id !in oldJournalIds }
     val receipts = operations.associateBy { it.operationId }
@@ -95,6 +106,7 @@ private fun AuditEntry.activityRows(catalog: GameCatalog, petName: String, inclu
                 add(if (meal?.price == 0L) "Поели в бесплатной столовой" else "Пообедали", receipt(entry))
             }
             DayJournalKind.WEEKLY_INCOME -> add("Получили монеты на новую неделю", receipt(entry))
+            DayJournalKind.PARENT_REWARD -> add("Подарок от родителя", receipt(entry))
             DayJournalKind.EVENT_START -> add(eventName(entry.sourceId), receipt(entry))
         }
     }

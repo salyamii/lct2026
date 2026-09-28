@@ -83,6 +83,9 @@ class EventFactory(
             validate(policy.condition)
             require(policy.factsByChoiceId.keys.all { choice -> eventChoices.any { it.id == choice } })
             require(policy.factsByChoiceId.values.flatten().all { it.isNotBlank() })
+            require(policy.choiceDestinations.keys.all { choice -> eventChoices.any { it.id == choice } }) {
+                "A destination must belong to a choice of this event: $id"
+            }
             require(policy.storyActId == null || campaign?.acts?.any { it.id == policy.storyActId && id in it.eventIds } == true)
             require(!policy.finishesStoryAct || campaign?.acts?.any { it.finaleId == id } == true)
             require(policy.choiceEnergyCosts.keys.all { choice -> eventChoices.any { it.id == choice } }) {

@@ -2,6 +2,7 @@ package ru.nksk.lctapp.feature.settings.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -15,12 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.components.*
 import ru.nksk.lctapp.core.ui.theme.AdventureNight
+import ru.nksk.lctapp.core.ui.theme.AdventureLime
 
 @Composable
 internal fun SettingsGearButton(onClick: () -> Unit) {
@@ -43,11 +46,12 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
         }
         Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            SoundSettingsCard(state.sound, onAction)
             SettingsCard {
                 Text("Для родителей", color = GameInk, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                AdventureBody("Подключите родительский профиль, чтобы видеть, чему учится ребёнок.")
+                AdventureBody("Покажите код родителю, чтобы он мог видеть прогресс и присылать подарки.")
                 if (state.loading) {
-                    LinearProgressIndicator(Modifier.fillMaxWidth())
+                    GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
                     AdventureBody("Открываем настройки…")
                 } else if (state.profileError) {
                     AdventureBody("Не удалось открыть профиль. Попробуйте ещё раз.")
@@ -59,7 +63,7 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
             state.profileId?.let { profileId ->
                 var copied by rememberSaveable(profileId) { mutableStateOf(false) }
                 SettingsCard {
-                    Text("Номер профиля", color = GameInk, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text("Номер устройства", color = GameInk, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Text(profileId, color = GameInk, style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Monospace)
                     OutlinedButton(onClick = { onCopyProfile(profileId); copied = true }, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = GameInk)) {
@@ -67,6 +71,9 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
                     }
                 }
             }
+            CloudSettingsCard(state.cloud,
+                configured = state.backendConfigured && !state.loading && !state.profileError,
+                onAction = onAction)
             debugButton?.let {
                 SettingsCard {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
@@ -79,6 +86,39 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
             }
         }
     }
+    state.cloud.restorePreview?.let { preview ->
+        CloudRestoreDialog(preview, busy = state.cloud.busy, onAction = onAction)
+    }
+}
+
+@Composable
+private fun SoundSettingsCard(state: SoundSettingsUiState, onAction: (SettingsAction) -> Unit) {
+    SettingsCard {
+        Row(Modifier.fillMaxWidth().heightIn(min = 56.dp)
+            .toggleable(value = state.enabled == true, enabled = state.canChange, role = Role.Switch,
+                onValueChange = { onAction(SettingsAction.SetSoundEnabled(it)) }),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text("Звук", color = GameInk, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                AdventureBody("Музыка, голоса, звуки событий и видео")
+            }
+            Switch(checked = state.enabled == true, onCheckedChange = null, enabled = state.canChange,
+                colors = SwitchDefaults.colors(checkedTrackColor = AdventureLime, checkedThumbColor = GameInk,
+                    uncheckedTrackColor = GamePaper, uncheckedThumbColor = GameInk,
+                    uncheckedBorderColor = GameInk.copy(alpha = .35f)))
+        }
+        if (state.loading || state.saving) {
+            GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
+            AdventureBody(if (state.saving) "Сохраняем…" else "Открываем настройку звука…")
+        }
+        state.error?.let { error ->
+            AdventureBody(if (error == SoundSettingsError.READ)
+                "Не удалось прочитать настройку звука. Попробуйте ещё раз."
+            else "Не удалось сохранить настройку звука. Попробуйте ещё раз.")
+            GameActionButton("Повторить", { onAction(SettingsAction.RetrySound) }, enabled = !state.saving,
+                style = GameActionStyle.SECONDARY)
+        }
+    }
 }
 
 @Composable
@@ -87,7 +127,7 @@ private fun ParentCodeContent(state: SettingsUiState, onAction: (SettingsAction)
     when (state.codeStatus) {
         ParentCodeStatus.NONE -> AdventurePrimaryButton("Показать код для родителей", { onAction(SettingsAction.CreateParentCode) })
         ParentCodeStatus.LOADING -> {
-            LinearProgressIndicator(Modifier.fillMaxWidth())
+            GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
             AdventureBody("Готовим код…")
         }
         ParentCodeStatus.READY -> {
@@ -102,7 +142,7 @@ private fun ParentCodeContent(state: SettingsUiState, onAction: (SettingsAction)
                 AdventureBody("Подключение родителей станет доступно после подключения сервера.")
             } else when (state.registrationStatus) {
                 ProfileRegistrationStatus.LOADING -> {
-                    LinearProgressIndicator(Modifier.fillMaxWidth())
+                    GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
                     AdventureBody("Регистрируем профиль на сервере…")
                 }
                 ProfileRegistrationStatus.ERROR -> {
@@ -124,7 +164,7 @@ private fun ParentCodeContent(state: SettingsUiState, onAction: (SettingsAction)
 }
 
 @Composable
-private fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
+internal fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
     Surface(Modifier.fillMaxWidth(), color = Color.White, shape = RoundedCornerShape(24.dp),
         border = BorderStroke(1.dp, GameInk.copy(alpha = .12f))) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp), content = content)

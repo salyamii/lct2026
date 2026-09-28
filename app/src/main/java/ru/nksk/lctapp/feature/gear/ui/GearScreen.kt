@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.feature.gear.ui
 
+import ru.nksk.lctapp.core.ui.components.GameLoadingIndicator
 import ru.nksk.lctapp.core.ui.components.GameArtwork
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +22,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -93,7 +93,7 @@ internal fun GearScreen(state: GearLoadState, onBack: () -> Unit, onRetry: () ->
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(16.dp),
                             ) {
-                                CircularProgressIndicator(color = GearColors.Ink)
+                                GameLoadingIndicator()
                                 Text(stringResource(R.string.gear_loading), color = GearColors.Ink, fontFamily = Nunito)
                             }
                         }

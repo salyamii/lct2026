@@ -1,363 +1,178 @@
-# Android ↔ backend: профиль, родители, сохранение и аналитика
+# Android ↔ backend: профиль устройства, сохранение и награды
 
-Контракт v1 для передачи команде backend, **2026-09-27**.
-Машиночитаемое описание: [openapi.yaml](openapi.yaml).
-Полный мир: [world-snapshot.md](world-snapshot.md).
-Факты и навыки: [analytics.md](analytics.md).
-Родительские награды и доставка: [parent-rewards.md](parent-rewards.md).
+Контракт v1, **2026-09-27**. Сервер команды: `https://fin-api.mortypython.ru/`.
+Backend реализует JSON из этого пакета. Наличие клиентского кода не подтверждает
+совместимость текущего развёртывания: успешный обмен с живым сервером ещё не проверен.
 
-## Готовность сторон
+- [OpenAPI](openapi.yaml) и [схемы аналитики](analytics.openapi.yaml).
+- [Готовые запросы и ответы](implementation-handoff.md).
+- [Места вызова и расписание Android](client-sync.md).
+- [Полный архив мира](world-snapshot.md), [аналитика](analytics.md),
+  [доставка родительских наград](parent-rewards.md).
+- [Генератор проверенных snapshot/analytics примеров](tools/README.md).
 
-В Android добавлены DTO, Retrofit-интерфейс, защищённая локальная идентичность
-и показ QR из сохранённого `profileId` в настройках. QR создаётся локально,
-без сети. Отправка профиля с питомцем на backend — отдельное явное действие.
-Локальный полный snapshot с историей и проверяемое восстановление уже существуют.
-Подготовлены чистые mapper для snapshot и аналитики.
-Для наград добавлены DTO и транспортные методы чтения журнала/ACK;
-их загрузчик и применение к миру пока не реализованы.
+## Идентификатор в JSON
 
-**Действующий backend URL пока не задан.** Сеть выключена по умолчанию; QR
-с сохранённым ID доступен и в этом состоянии. Регистрация на сервере требует
-настроенного URL и успешного ответа. Автоматическая загрузка snapshot/аналитики,
-WorkManager, родительское приложение и экран восстановления на новом телефоне
-этой интеграцией ещё не реализованы. Наличие методов Retrofit не означает,
-что данные уже отправляются автоматически.
-
-По уточнению пользователя QR содержит только сохранённый ID: без JSON, ссылки,
-временного токена и срока действия. HTTP-пути, серверная регистрация, проверка
-права родительской привязки, ограничения и восстановление ниже — предлагаемый
-серверный контракт для согласования.
-Enum навыков и статусов переданы пользователем; пороги освоения не задавались.
-
-## Идентичность и авторизация
-
-Идентичность не привязана к аппаратному ID телефона:
+Во всех семи запросах Android передаёт `deviceId` **в теле JSON**.
+Профиль определяется этой сохранённой строкой. В путях и заголовках детских
+методов идентификатора нет; отдельного аккаунта контракт не вводит.
 
 | Значение | Назначение |
 | --- | --- |
-| `profileId` | Случайный UUID облачного профиля ребёнка; сохраняется при переносе мира. Публичный ID не даёт доступа. |
-| `installationId` | Случайный UUID данной установки; после восстановления на другом устройстве новый. |
-| `deviceCredential` | Случайные 32 байта (`SecureRandom`), base64url без `=`: 43 символа. Секрет клиента, передаётся только как Bearer по HTTPS. |
-| `gameRunId` | ID конкретного прохождения из локального snapshot; не идентификатор пользователя и не авторизация. |
+| `deviceId` | Сохранённая строка AndroidID новой установки; у обновлённого старого клиента — прежний UUID профиля без изменения значения. Backend принимает непустую строку, а не только UUID. |
+| `gameRunId` | Отдельный ID игрового прохождения; в snapshot называется `runId`. |
+| `profileId` в ответах наград | Сохранённое имя поля совместимости. Значение **равно deviceId**, отдельного аккаунта нет. |
+| `requestId`, `uploadId`, `batchId`, `Idempotency-Key` | Идентификаторы запроса/повтора и диагностики. Не обозначают доступ к профилю. |
 
-Android хранит профиль/credential в Preferences DataStore внутри `noBackupFilesDir`,
-зашифрованными AES-GCM с ключом Android Keystore. Повреждение записи/потеря ключа
-возвращает ошибку, а не незаметно создаёт другой профиль. Удаление приложения
-может уничтожить этот локальный доступ; повторно вычислить такой секрет по
-характеристикам телефона нельзя. Восстановление доступа предлагается через
-заранее привязанного и авторизованного родителя.
+Android читает `Settings.Secure.ANDROID_ID` при создании новой локальной
+идентичности и сохраняет его. Пустое значение даёт явную ошибку, случайный
+запасной ID не создаётся. Существующая запись мигрирует с прежним UUID;
+повторная регистрация **того же deviceId** сохраняет облачный профиль,
+архивы, аналитику и журнал подарков. Backend не создаёт новый профиль и
+не стирает старый при таком повторе. Замороженные данные питомца сохраняются;
+из-за нового JSON клиент один раз меняет регистрационный ключ повтора.
 
-Для Android-запросов:
+QR создаётся локально, до регистрации и без сети. Его содержимое — ровно
+UTF-8 строка сохранённого deviceId, например [profile-id-qr.txt](examples/profile-id-qr.txt):
 
-```http
-Authorization: Bearer <deviceCredential>
-Content-Type: application/json
+```text
+9f1c2d3e4a5b6078
 ```
 
-При первом `POST /v1/profiles` credential ещё не зарегистрирован: сервер
-проверяет новый случайный `profileId`/`installationId` и атомарно привязывает
-к ним **хеш секрета**, а не хранит plaintext. Это bootstrap, а не доступ к
-произвольному существующему профилю. У существующего profileId иной credential
-получает отказ; знать UUID недостаточно для регистрации поверх чужого профиля,
-чтения snapshot или смены установки. Сервер должен проверять
-принадлежность credential этому profileId и право активного устройства на запись.
+Это не URL и не JSON; срока действия нет. Другой родитель использует ту же
+строку для того же профиля. Android не хранит список родителей и не требует
+дополнительного подтверждения сканирования. Родительский клиент и его интерфейс
+в этом репозитории не реализованы.
 
-Родительские ручки используют отдельный `Authorization: Bearer <parentAccessToken>`
-от системы аутентификации родителя. Этот токен не является deviceCredential.
-Процедура входа родителя не определена данным Android-контрактом.
+Предоставленная сервером родительская ручка `GET /api/parents/{petId}`
+использует `petId=deviceId`; детский Android её не вызывает. Схема этого
+родительского отчёта должна быть реализована на стороне родительского клиента.
+Предложенная выдача подарка — `POST /v1/parent-profiles/rewards`, deviceId в JSON.
 
-Только HTTPS. Клиент не пересылает запросы по redirect и связывает созданный
-профиль с настроенным backend URL. Нельзя логировать Authorization или recovery
-token. QR содержит публичный идентификатор, но не секрет доступа. Checksum
-архива не заменяет авторизацию.
+## Готовность Android и границы переноса
+
+Подключены регистрация, выгрузка snapshot/аналитики, загрузка серверных оценок,
+чтение подарков, локальное применение поддержанных наград и ACK. Room остаётся
+источником текущей игры. Запросы повторяются из сохранённых неизменных тел;
+ручные и фоновые проходы сериализованы. В настройках есть предпросмотр
+облачного архива и явное восстановление с проверкой актуальности локального мира.
+
+Новые известные аксессуары применяются без автоматического надевания.
+Денежные подарки и новые дубликаты аксессуаров пока ожидают продуктового решения:
+они не применяются и не получают ACK. Неизвестные аксессуары также откладываются.
+
+Восстановление мира не меняет deviceId. Автоматическая привязка нового телефона
+к чужому сохранённому deviceId и интерфейс ввода прежнего ID сейчас отсутствуют.
+После удаления приложения новый клиент читает текущий AndroidID; автоматически
+вернуть утраченный legacy UUID он не умеет. Для восстановления нужен уже
+загруженный архив под используемым ID. Дополнительных сетевых процедур доступа
+этот контракт не вводит; перенос прежнего ID на другой телефон остаётся
+не реализованным клиентским сценарием.
 
 ## Общие правила HTTP
 
-- JSON: camelCase, точный регистр enum; `_type` для полиморфных фактов.
-- Суммы и номера истории — целые `int64`; нельзя округлять их через JS Number.
-- На каждую изменяющую ручку обязателен `Idempotency-Key`. Сервер связывает его
-  с аутентифицированным субъектом/credential, методом, путём и неизменным телом.
-  Один ключ с другим телом — `409 IDEMPOTENCY_CONFLICT`.
-- Повтор после timeout использует прежние ключ и тело. Сервер возвращает тот же
-  успешный результат; отзыв credential по-прежнему блокирует доступ к результату.
-  Новое действие получает новый ключ. Для snapshot ключ равен `uploadId`, для
-  аналитики — `batchId`. Для регистрации отдельный UUID хранится Android
-  до надёжного ответа. Локальному построению QR сетевой ключ не нужен.
-- При регистрации тело с питомцем замораживается до ответа, даже если игрок
-  успел изменить профиль. Регистрация не является ручкой редактирования питомца;
-  его актуальное состояние затем принадлежит snapshot.
-- Предлагается хранить идемпотентные результаты минимум 7 суток. Более поздний
-  повтор подтверждённого profile/upload/batch не должен повторять результат
-  игры. Срок и лимиты хранения требуется согласовать перед запуском.
-  Исключение с более сильным требованием: бизнес-ключ родительской выдачи
-  награды сохраняет уникальность весь срок жизни журнала, даже после TTL
-  кеша ответов; старый повтор не выдаёт новый подарок.
-- `429` и временные `5xx` допускают повтор с задержкой и тем же ключом.
-  Для `429` сервер возвращает `Retry-After`. Не повторять `4xx` вслепую.
+- Только HTTPS; `Content-Type: application/json`. JSON — camelCase и точный
+  регистр enum; `_type` у аналитических фактов, `type` у payload награды.
+- Суммы и позиции истории — целые int64, без округления через JS Number.
+- Изменяющие операции используют `Idempotency-Key`: регистрация, upload
+  snapshot/аналитики, ACK и выдача родительской награды. Читающие POST
+  download/query/pull не изменяют мир и не требуют такого ключа.
+- Сервер связывает ключ с `deviceId + method + path + неизменное тело`.
+  Другой body под тем же ключом — `409 IDEMPOTENCY_CONFLICT`.
+- Повтор после timeout использует исходные ключ и body и возвращает прежний
+  результат. Snapshot: ключ равен `uploadId`; аналитика: `batchId`.
+  Регистрационный request ID сохраняется до подтверждённого ответа.
+- Тело регистрации с питомцем заморожено до ответа. Повторная регистрация
+  не редактирует питомца; его текущее состояние находится в snapshot.
+- Предлагаемый срок кеша HTTP-ответов — минимум 7 суток. Бизнес-уникальность
+  выдачи подарка по `(deviceId, Idempotency-Key)` сохраняется весь срок
+  журнала: после очистки кеша старый повтор не создаёт второй подарок.
+- `429` содержит `Retry-After`; временные 5xx допускают повтор с задержкой.
+  Ошибки формы/версии/конфликта не исправляются удалением локальной игры.
 
-## Ручки, объявленные в Android
+## Семь методов детского клиента
 
-| Метод и путь | Назначение | Успех |
+| Метод | Request DTO | Основные поля ответа |
 | --- | --- | --- |
-| `POST /v1/profiles` | Первичная регистрация профиля и питомца. | `201`, идентичный повтор `200` или сохранённый `201` |
-| `PUT /v1/profiles/{profileId}/snapshot` | Загрузить полный архив с проверкой серверной ревизии. | `200` или `201` |
-| `GET /v1/profiles/{profileId}/snapshot` | Скачать последний подтверждённый архив. | `200` |
-| `POST /v1/profiles/{profileId}/analytics` | Передать полную проекцию фактов и оснований навыков до границы истории. | `200` или `201` |
-| `GET /v1/profiles/{profileId}/skills?gameRunId={gameRunId}` | Получить серверные статусы 12 навыков выбранного прохождения. | `200` |
-| `GET /v1/profiles/{profileId}/rewards?gameRunId=…&afterSequence=0&limit=50` | Прочитать полный журнал наград, включая уже подтверждённые. | `200` |
-| `POST /v1/profiles/{profileId}/rewards/ack` | Подтвердить локальные применения, не удаляя награды. | `200` |
+| `POST /api/pets` | `RegisterProfileRequest(deviceId, pet, schemaVersion)` | `deviceId` |
+| `PUT /v1/profiles/snapshot` | `SnapshotUploadRequest`, включая deviceId | uploadId, gameRunId, serverRevision, checksum |
+| `POST /v1/profiles/snapshot/download` | deviceId, schemaVersion | gameRunId, serverRevision, currentContentFingerprint, snapshotJson, schemaVersion |
+| `POST /v1/profiles/analytics` | `AnalyticsUploadRequest`, включая deviceId | batchId, gameRunId, acceptedThroughHistorySequence, acceptedEventIds, schemaVersion |
+| `POST /v1/profiles/skills/query` | deviceId, gameRunId, schemaVersion | gameRunId, basedOnHistorySequence, skills (policyVersion внутри каждой оценки), schemaVersion |
+| `POST /v1/profiles/rewards/pull` | deviceId, gameRunId, afterSequence, limit, schemaVersion | profileId (= deviceId), gameRunId, rewards, nextAfterSequence, hasMore, schemaVersion |
+| `POST /v1/profiles/rewards/ack` | deviceId, gameRunId, receipts, schemaVersion | gameRunId, acceptedApplicationIds, schemaVersion |
 
-Источник точных моделей:
-[ProfileContract](../../core/game/src/main/kotlin/ru/nksk/lctapp/domain/backend/ProfileContract.kt),
+`schemaVersion=1`; размер страницы наград по умолчанию 50, допустимо 1…100.
+`afterSequence` обязателен; новый полный обход начинается с 0. Успешные
+изменяющие запросы возвращают 200/201, ACK — 200; читающие запросы — 200.
+Регистрация отвечает **только deviceId**. Точные поля и ограничения — в OpenAPI.
+
+Источники DTO: [ProfileContract](../../core/game/src/main/kotlin/ru/nksk/lctapp/domain/backend/ProfileContract.kt),
 [SnapshotContract](../../core/game/src/main/kotlin/ru/nksk/lctapp/domain/backend/SnapshotContract.kt),
 [AnalyticsContract](../../core/game/src/main/kotlin/ru/nksk/lctapp/domain/backend/AnalyticsContract.kt),
-[ParentRewardsContract](../../core/game/src/main/kotlin/ru/nksk/lctapp/domain/backend/ParentRewardsContract.kt),
-[BackendApi](../../app/src/main/java/ru/nksk/lctapp/data/backend/BackendApi.kt).
+[ParentRewardsContract](../../core/game/src/main/kotlin/ru/nksk/lctapp/domain/backend/ParentRewardsContract.kt).
 
-### Регистрация питомца
+## Гарантии сохранения, аналитики и подарков
 
-```json
-{
-  "schemaVersion": 1,
-  "profileId": "344b0765-7318-450f-9576-e3f50e393f38",
-  "installationId": "4a1b29b1-d72a-4029-a2da-6b65b0901d35",
-  "pet": {
-    "name": "Рыжик",
-    "age": "CUB",
-    "color": "COPPER",
-    "temperament": "Curious",
-    "selectedLookId": "PLAIN"
-  }
-}
-```
+Snapshot — полная непрозрачная строка `HistoryCodec.encodeSnapshot`.
+Backend хранит и возвращает её без пересборки. `expectedServerRevision=null`
+допустим только при отсутствии архива; иначе требуется совпадение ревизии.
+Весь архив и новая серверная ревизия публикуются атомарно. Идемпотентный
+повтор не увеличивает ревизию. При 409 локальный мир, history, receipts и
+ожидающие запросы сохраняются. Автоматического слияния или перезаписи по
+времени нет. Сам download не восстанавливает игру.
 
-`age`: `CUB | TEEN | ADULT | SENIOR`. `color`: `COPPER | SAND | DARK_RUSSET`.
-`temperament`: `Curious | Confident | Joyful | null` — регистр намеренно отличается.
-`selectedLookId` — открытый строковый ID, не закрытый список аксессуаров.
-Ответ содержит ровно `profileId` и `installationId` подтверждённой регистрации.
+Аналитика — полная проекция одного run до `throughHistorySequence`, а не
+приращение счётчиков. Исходные факты неизменны; производные версии проекции
+могут уточняться. Полученные факты и итоговая оценка навыка различаются:
+если политика ещё не рассчитана, ответ — `ASSESSMENT_NOT_READY`, не выдуманный
+`NO_DATA`. Численных порогов освоения контракт не назначает.
 
-### QR для родителей
+Награды — добавляемый неизменяемый журнал для пары deviceId/gameRunId.
+Первый проверенный snapshot регистрирует run; ранее выдача возвращает
+`GAME_RUN_NOT_REGISTERED`. ACK не удаляет подарок. Эффект, полный grant,
+receipt и audit коммитятся вместе над последним локальным миром, затем
+можно отправить ACK. После восстановления старого snapshot журнал снова
+доступен целиком, включая ACK-нутые записи; receipt в восстановленном мире
+предотвращает повторный эффект. Cursor страницы не является receipt.
+Полные правила курсоров, поколений restore и ветвей — в [parent-rewards.md](parent-rewards.md).
 
-Содержимое QR — **обычная UTF-8 строка с сохранённым `profileId`**:
+## Ошибки и согласуемые лимиты
 
-```text
-344b0765-7318-450f-9576-e3f50e393f38
-```
+`BackendError`: `code` обязателен, `message` и `requestId` необязательны.
+Клиент принимает решение по HTTP/code, не по тексту message.
 
-Ровно UUID, без кавычек, JSON-оболочки, URL, префикса или переноса строки.
-Пример исходных байтов: [profile-id-qr.txt](examples/profile-id-qr.txt).
-Повторное открытие настроек показывает тот же ID. Код не истекает и не
-обновляется по таймеру. Его построение не регистрирует профиль на сервере,
-не меняет credential и не отправляет сетевой запрос. Ручки генерации
-`parent-link-codes` в текущем контракте нет.
+| HTTP | Примеры code |
+| --- | --- |
+| 400 | INVALID_REQUEST |
+| 404 | PROFILE_NOT_FOUND, SNAPSHOT_NOT_FOUND |
+| 409 | IDEMPOTENCY_CONFLICT, SNAPSHOT_REVISION_CONFLICT, GAME_RUN_CONFLICT, GAME_RUN_NOT_REGISTERED, FACT_CONFLICT, STALE_ANALYTICS, ASSESSMENT_NOT_READY, REWARD_RECEIPT_CONFLICT |
+| 413 | PAYLOAD_TOO_LARGE |
+| 422 | UNSUPPORTED_SCHEMA, SNAPSHOT_INVALID, INVALID_REWARD, UNKNOWN_ACCESSORY, INVALID_REWARD_CURSOR, INVALID_REWARD_RECEIPT |
+| 429 | RATE_LIMITED |
+| 5xx | TEMPORARILY_UNAVAILABLE |
 
-Родительский клиент считывает UUID и использует его как **указатель на профиль**.
-Возможность показать QR не означает, что профиль уже зарегистрирован на backend.
-Сам UUID не доказывает право родителя читать мир или аналитику. Как сервер
-проверит право первой привязки — открытый вопрос backend-контракта, описанный ниже.
+Предлагаемые, ещё согласуемые ограничения: 16 KiB для регистрации,
+25 MiB распакованного snapshot request, 10 MiB analytics request.
+Превышение даёт 413/429; нельзя молча обрезать историю. Серверные retention,
+сжатие и пределы подарков согласуются отдельно. Текущий клиентский timeout —
+45 секунд; более долгая операция потребует иной версии протокола.
 
-### Сохранение мира
+## Пример вызова
 
-`SnapshotUploadRequest` передаёт `uploadId`, `expectedServerRevision`,
-`gameRunId`, `throughHistorySequence`, `currentContentFingerprint`,
-`snapshotFormatVersion`, `checksum`, `snapshotJson`, `schemaVersion=1`.
-`snapshotJson` — непреобразованная строка полного `HistoryCodec`-архива.
-
-`expectedServerRevision=null` означает «на сервере ещё нет сохранения».
-Если оно уже есть, сервер отвечает `409 SNAPSHOT_REVISION_CONFLICT`.
-При обновлении клиент передаёт полученную ранее положительную ревизию.
-Новая подтверждённая версия увеличивает `serverRevision` на один; повтор
-того же upload не увеличивает её. Запоздалый запрос не заменяет новую версию.
-Совпадение serverRevision само по себе не разрешает молча заменить `gameRunId`:
-сброс/другое прохождение требуют отдельной согласованной политики; сейчас
-предлагается `409 GAME_RUN_CONFLICT`.
-Первый проверенный snapshot также регистрирует целевой `gameRunId` для
-родительских наград. До этого выдача отвечает `409 GAME_RUN_NOT_REGISTERED`;
-обычная регистрация профиля не подменяет регистрацию прохождения.
-
-Ответ загрузки: `uploadId`, `gameRunId`, `serverRevision`, `checksum`.
-Ответ скачивания: `schemaVersion`, `gameRunId`, `serverRevision`,
-`currentContentFingerprint`, `snapshotJson`. Архива ещё нет — `404 SNAPSHOT_NOT_FOUND`.
-Сервер сохраняет архив целиком перед публикацией новой ревизии. Расхождение
-метаданных и архива, плохой checksum или разрыв истории — `422 SNAPSHOT_INVALID`.
-Подробные правила и ограничения — в [world-snapshot.md](world-snapshot.md).
-
-### Аналитика
-
-Отправляется полный набор фактов и `SkillEvidenceDto` для всех **FIN-01–FIN-12**,
-полученный из того же проверенного snapshot. `batchId` и граница истории делают
-отчёт воспроизводимым. Счётчики нового отчёта не прибавляются к прежним; это
-проекция. Производные факты могут уточняться в следующей версии отчёта.
-
-Backend возвращает ACK загрузки отдельно от результата оценки. Статусы:
-`MASTERED | PRACTICING | NO_DATA | HAS_PROBLEM`, с `policyVersion` у каждого
-навыка и общей границей `basedOnHistorySequence`. Один неверный ответ не
-назначает `HAS_PROBLEM`, один успех — `MASTERED`. Если серверная политика ещё
-не готова, возвращается `409 ASSESSMENT_NOT_READY`, а не выдуманный `NO_DATA`.
-Точные поля, примеры и дедупликация: [analytics.md](analytics.md).
-
-### Родительские награды
-
-`POST /v1/parent-profiles/{profileId}/rewards` — предлагаемая ручка
-**авторизованного подтверждённого родителя**, не метод детского `BackendApi`.
-DTO выдачи подготовлен; он передаёт `gameRunId` и ровно один вариант
-`reward`: `{"type":"COINS","amount":20}` или
-`{"type":"ACCESSORY","itemId":"cosmetic-explorer-hat-v2"}`.
-Ответ — неизменяемая награда с rewardId и номером в журнале этого run.
-
-Будущий клиент читает журнал через GET, применяет награду к актуальному миру
-в одной транзакции вместе с receipt/audit, затем отправляет ACK. ACK не удаляет
-награду: после старого snapshot она должна доставиться снова, а receipt внутри
-архива предотвращает повторное начисление, если награда там уже есть.
-Сетевые курсоры вне архива не являются доказательством применения.
-
-Доставка предлагается только через авторизованный pull: при возвращении в
-приложение/сети, ручном обновлении, ограниченном foreground polling и по
-приблизительному расписанию WorkManager. Долгий офлайн не отменяет подарок.
-Применение использует текущий локальный остаток, а не старый серверный snapshot:
-40 − 15 + 5 = 30 локально, затем подарок 20 даёт 50.
-Неизвестный аксессуар откладывается, но не блокирует следующие известные награды;
-fetch-курсор отделён от сохранённой непрерывной границы receipts. Сейчас это
-**контракт**, без фоновых задач и начислений.
-DTO, псевдокод атомарного применения, восстановление после ACK, ошибки и
-примеры: [parent-rewards.md](parent-rewards.md).
-
-## Предлагаемые родительские ручки
-
-Следующие ручки привязки и recovery нужны серверу и будущему родительскому клиенту. Они **не объявлены
-в текущем Android BackendApi**, их DTO и UI на детском устройстве не реализованы.
-
-### Запросить привязку по ID
-
-`POST /v1/parent-links/claim`, родительский Bearer и `Idempotency-Key`.
-
-```json
-{
-  "profileId": "344b0765-7318-450f-9576-e3f50e393f38"
-}
-```
-
-Сервер определяет родителя по его аутентификации; parentId не задаётся телом.
-**Проверка права первой привязки ещё не согласована.** До её определения этот
-запрос может только зафиксировать обращение с ответом `202`, например:
-
-```json
-{
-  "profileId": "344b0765-7318-450f-9576-e3f50e393f38",
-  "requestId": "parent-link-request-123",
-  "status": "PENDING"
-}
-```
-
-`PENDING` не создаёт разрешение на snapshot, аналитику, навыки или recovery.
-Один известный profileId вместе с обычной сессией любого родителя недостаточен
-для выдачи этих прав. Идемпотентный повтор возвращает то же обращение. У ещё
-не зарегистрированного профиля сервер возвращает `404 PROFILE_NOT_FOUND`.
-Следующий шаг проверки и окончательный ответ о привязке должны быть отдельно
-согласованы с backend; обязательное подтверждение на детском экране или иной
-неутверждённый UI данным контрактом не вводятся.
-
-### Вернуть доступ на новой установке
-
-1. Уже привязанный родитель вызывает
-   `POST /v1/parent-profiles/{profileId}/recovery-grants` с parent Bearer,
-   `Idempotency-Key` и пустым объектом `{}`. Сервер проверяет право родителя
-   восстанавливать этот профиль и возвращает `recoveryId`, `recoveryToken`,
-   `expiresAtEpochSeconds`. Предлагаемые 10 минут и одно использование. Это
-   отдельное восстановление доступа, не формат постоянного QR профиля.
-2. На новом устройстве создаются **новые** installationId и deviceCredential.
-   Будущий UI принимает grant и явно предупреждает о переносе права записи.
-   `POST /v1/profile-recoveries/exchange` отправляет новый credential в Bearer,
-   новый ключ идемпотентности и тело
-   `{profileId, installationId, recoveryId, recoveryToken}`.
-3. Сервер атомарно погашает grant, привязывает хеш нового credential, отзывает
-   старое право записи/credential. Ответ содержит
-   `profileId`, `installationId`. Повтор exchange с тем же ключом возвращает
-   тот же результат, а не отзывает повторно новую установку.
-4. Новый авторизованный клиент скачивает snapshot. Только явное локальное
-   восстановление с `RestoreGuard` заменяет текущую игру. Parent recovery
-   возвращает доступ, но не восстанавливает никогда не загруженные данные.
-
-Мир имеет одного активного пишущего клиента. Старые офлайн-загрузки после
-переноса не принимаются; истории двух устройств автоматически не сливаются.
-Если родитель не был привязан и credential потерян, публичного UUID недостаточно
-для восстановления. Дополнительный recovery key/login — отдельное продуктовое
-решение; этот контракт не обещает восстановление в таком случае.
-
-## Ошибки и пределы
-
-Общее тело (`BackendError`):
-
-```json
-{"code":"SNAPSHOT_REVISION_CONFLICT","message":"Сохранение уже обновилось","requestId":"req-123"}
-```
-
-`message` и `requestId` необязательны/nullable. Логи и UI не должны зависеть
-от текста message; поведение определяется HTTP-статусом и code.
-
-| HTTP | Примеры code | Действие |
-| --- | --- | --- |
-| `400` | `INVALID_REQUEST` | Исправить форму запроса. |
-| `401` | `UNAUTHORIZED`, `DEVICE_REVOKED` | Credential отсутствует, неверен или отозван. Не регистрировать профиль поверх существующего. |
-| `403` | `PROFILE_ACCESS_DENIED`, `PARENT_ACCESS_DENIED` | Нет прав на профиль/операцию. |
-| `404` | `SNAPSHOT_NOT_FOUND`, `PROFILE_NOT_FOUND` | Нужного ресурса нет; не подменять локальную игру пустой. |
-| `409` | `PROFILE_CONFLICT`, `IDEMPOTENCY_CONFLICT`, `SNAPSHOT_REVISION_CONFLICT`, `GAME_RUN_CONFLICT`, `GAME_RUN_NOT_REGISTERED`, `RECOVERY_USED`, `FACT_CONFLICT`, `STALE_ANALYTICS`, `ASSESSMENT_NOT_READY`, `REWARD_RECEIPT_CONFLICT` | Явно разрешить конфликт; не менять body под прежним ключом. |
-| `410` | `RECOVERY_EXPIRED` | Запросить новый recovery grant отдельным действием. Постоянный QR профиля не истекает. |
-| `413` | `PAYLOAD_TOO_LARGE` | Не обрезать snapshot/историю ради лимита. |
-| `422` | `UNSUPPORTED_SCHEMA`, `SNAPSHOT_INVALID`, `INVALID_RECOVERY`, `INVALID_REWARD`, `UNKNOWN_ACCESSORY`, `INVALID_REWARD_CURSOR`, `INVALID_REWARD_RECEIPT` | Ошибка версии/целостности/токена/награды; не применять частично. |
-| `429` | `RATE_LIMITED` | Повтор после Retry-After с тем же неизменным запросом. |
-| `5xx` | `TEMPORARILY_UNAVAILABLE` | Повтор с задержкой; результат предыдущего запроса мог уже сохраниться. |
-
-Предлагаемые стартовые серверные пределы, **не жёсткие клиентские значения**:
-16 KiB для registration/link/claim/recovery JSON, 25 MiB распакованного snapshot
-запроса, 10 MiB распакованного analytics запроса и не более 30 запросов
-claim/recovery в час на родителя с дополнительным
-ограничением по IP. Сервер должен ограничивать размер до парсинга/распаковки
-и темп обращений. Значения, поддержка HTTP-сжатия, retention и масштабирование
-длинной истории подлежат согласованию. При превышении — явный `413/429`,
-никогда не молчаливое удаление части истории. Запросы с долгой обработкой должны
-укладываться в текущий клиентский call timeout 45 секунд или потребуют новой
-асинхронной версии протокола.
-
-## Примеры вызовов
-
-Примеры для shell; `BASE_URL` — реальный согласованный HTTPS-хост с завершающим
-`/`, без выдуманного endpoint. JSON хранится в UTF-8 файлах. Секретные переменные
-задаются отдельно и не попадают в репозиторий/логи. `curl.exe` подходит также
-для PowerShell при адаптации синтаксиса переменных и переноса строк.
-
-Готовые образцы: [регистрация](examples/register-profile.json),
-[содержимое QR](examples/profile-id-qr.txt),
-[запрос привязки родителем](examples/claim-parent-link.json).
-В них стоят тестовые ID; это не доступ к реальному профилю. Команды ниже
-выполняются из каталога `docs/backend`. Файлы `snapshot-upload.json` и
-`analytics-upload.json` должны быть сформированы mapper из одного реального
-снимка; для формы аналитики есть [отдельный пример](examples/analytics-empty-request.json).
+Из каталога `docs/backend`; ID в файлах синтетические.
 
 ```sh
-curl --fail-with-body "${BASE_URL}v1/profiles" \
-  -H "Authorization: Bearer ${DEVICE_CREDENTIAL}" \
-  -H "Idempotency-Key: ${REGISTRATION_REQUEST_ID}" \
+BASE_URL='https://fin-api.mortypython.ru/'
+
+curl --fail-with-body "${BASE_URL}api/pets" \
+  -H 'Idempotency-Key: 0bcab230-62c7-4e57-90b3-bd393f9bf3a5' \
   -H 'Content-Type: application/json' --data-binary @examples/register-profile.json
 
-curl --fail-with-body "${BASE_URL}v1/parent-links/claim" \
-  -H "Authorization: Bearer ${PARENT_ACCESS_TOKEN}" \
-  -H "Idempotency-Key: ${LINK_REQUEST_ID}" \
-  -H 'Content-Type: application/json' --data-binary @examples/claim-parent-link.json
+curl --fail-with-body -X PUT "${BASE_URL}v1/profiles/snapshot" \
+  -H 'Idempotency-Key: 851818aa-f937-4a24-b588-00a36b6085a0' \
+  -H 'Content-Type: application/json' --data-binary @examples/snapshot-upload.json
 
-curl --fail-with-body -X PUT "${BASE_URL}v1/profiles/${PROFILE_ID}/snapshot" \
-  -H "Authorization: Bearer ${DEVICE_CREDENTIAL}" \
-  -H "Idempotency-Key: ${UPLOAD_ID}" \
-  -H 'Content-Type: application/json' --data-binary @snapshot-upload.json
-
-curl --fail-with-body "${BASE_URL}v1/profiles/${PROFILE_ID}/analytics" \
-  -H "Authorization: Bearer ${DEVICE_CREDENTIAL}" \
-  -H "Idempotency-Key: ${BATCH_ID}" \
-  -H 'Content-Type: application/json' --data-binary @analytics-upload.json
+curl --fail-with-body "${BASE_URL}v1/profiles/snapshot/download" \
+  -H 'Content-Type: application/json' --data-binary @examples/snapshot-download-request.json
 ```
-
-Для включения Android требуется согласованный `LCT_BACKEND_BASE_URL` в Gradle
-properties либо аргументе сборки. Он должен быть HTTPS и оканчиваться `/`.
-Пока значение пустое, сеть не вызывается. После внедрения server-стороны отдельно
-нужно подключить доставку backup/аналитики, стратегию повторов и UI восстановления,
-затем проверить реальный end-to-end перенос на разрешённом тестовом окружении.

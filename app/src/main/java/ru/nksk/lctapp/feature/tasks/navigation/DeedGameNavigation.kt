@@ -13,19 +13,22 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import ru.nksk.lctapp.core.ui.game.EventAudioEffect
 import ru.nksk.lctapp.feature.tasks.ui.*
 
 @Serializable
 @SerialName("deed_game")
 data class DeedGame(val occurrenceId: String, val choiceId: String? = null) : NavKey
 
-fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> Unit) {
+fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> Unit,
+    isCurrentEntry: (DeedGame) -> Boolean = { true }) {
     entry<DeedGame> { source ->
         val model = hiltViewModel<DeedGameViewModel>()
         val state by model.uiState.collectAsStateWithLifecycle()
         val lifecycle = LocalLifecycleOwner.current.lifecycle
         val lifecycleState by lifecycle.currentStateAsState()
         val resumed = lifecycleState.isAtLeast(Lifecycle.State.RESUMED)
+        EventAudioEffect(state.audioOccurrenceId, state.eventMedia, isCurrentEntry(source))
         LaunchedEffect(model, source.occurrenceId, source.choiceId) { model.load(source.occurrenceId, source.choiceId) }
         LaunchedEffect(model, lifecycle) {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {

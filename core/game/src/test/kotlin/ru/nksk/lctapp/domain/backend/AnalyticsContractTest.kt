@@ -25,7 +25,7 @@ class AnalyticsContractTest {
     }
 
     @Test fun emptyHistoryExportsEverySkillWithNoInventedAssessment() {
-        val request = analyticsUploadRequest("batch", "run", 0, emptyList())
+        val request = analyticsUploadRequest("device", "batch", "run", 0, emptyList())
         assertEquals(SkillId.entries.toList(), request.skills.map { it.skillId })
         assertTrue(request.skills.all { it.observations.isEmpty() && it.completedEpisodes == 0 })
         val encoded = json.encodeToString(request)
@@ -36,7 +36,7 @@ class AnalyticsContractTest {
     @Test fun duplicateDeliveryDoesNotMultiplyEvidenceAndIncompleteContextStaysIncomplete() {
         val fact = AnalyticsFact("event", "run", "episode", "action", 2,
             FactDetail.OptionalPurchase("boat", 5, true))
-        val request = analyticsUploadRequest("batch", "run", 2, listOf(fact, fact))
+        val request = analyticsUploadRequest("device", "batch", "run", 2, listOf(fact, fact))
         assertEquals(1, request.facts.size)
         val skill = request.skills.single { it.skillId == SkillId.PRIORITIZE_NEEDS }
         assertEquals(0, skill.completedEpisodes)
@@ -51,13 +51,13 @@ class AnalyticsContractTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun evidenceFromAnotherRunCannotBeAttributedToThisChild() {
-        analyticsUploadRequest("batch", "run", 2, listOf(
+        analyticsUploadRequest("device", "batch", "run", 2, listOf(
             AnalyticsFact("event", "other-run", "episode", "action", 2, FactDetail.Interaction("open"))))
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun evidenceAfterSnapshotBoundaryCannotBeUploadedWithAnOlderRevision() {
-        analyticsUploadRequest("batch", "run", 2, listOf(
+        analyticsUploadRequest("device", "batch", "run", 2, listOf(
             AnalyticsFact("event", "run", "episode", "action", 3, FactDetail.Interaction("open"))))
     }
 
