@@ -100,9 +100,10 @@ fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> 
                 DeedGameType.STACKING -> {
                     val game = hiltViewModel<StackingGameViewModel>()
                     val board by game.uiState.collectAsStateWithLifecycle()
+                    val position by game.position.collectAsStateWithLifecycle()
                     LaunchedEffect(board.game) { model.finishStacking(board.game) }
                     StackingGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
-                        leave, state.presentation)
+                        leave, state.presentation, position)
                 }
                 null -> Unit
             }

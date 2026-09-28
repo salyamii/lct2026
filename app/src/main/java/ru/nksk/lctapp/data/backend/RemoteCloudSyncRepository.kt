@@ -16,6 +16,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import retrofit2.HttpException
 import ru.nksk.lctapp.data.game.local.BackendSyncStateEntity
 import ru.nksk.lctapp.data.game.local.PendingBackendRequestEntity
+import ru.nksk.lctapp.data.telemetry.Telemetry
 import ru.nksk.lctapp.domain.backend.AckParentRewardsRequest
 import ru.nksk.lctapp.domain.backend.AnalyticsUploadRequest
 import ru.nksk.lctapp.domain.backend.BackendError
@@ -67,116 +68,124 @@ internal class RemoteCloudSyncRepository @Inject constructor(
 
     override suspend fun synchronize(): CloudSyncResult = mutex.withLock {
         withContext(Dispatchers.IO) {
-            if (!connection.configured) return@withContext CloudSyncResult.NO_GAME
-            if (games.read() == null) return@withContext CloudSyncResult.NO_GAME
-            mutableState.value = mutableState.value.copy(phase = CloudSyncPhase.SYNCING,
-                skillsPhase = SkillSyncPhase.SYNCING, message = null)
-            try {
-                // Previously downloaded feedback remains visible even when registration/network fails.
-                loadCachedSkills(identities.getOrCreate(), session.exportSnapshot())
-                // Never initialize a fixture in a background worker before onboarding has saved a game.
-                session.prepare()
-                parents.registerProfile()
-                val identity = identity()
-                var snapshot = session.exportSnapshot()
-                var metadata = metadata(identity, snapshot)
-                metadata = recoverRestore(identity, metadata, snapshot)
-                if (metadata.localGeneration != snapshot.localGeneration()) {
-                    val previousRun = snapshot.predecessorSnapshots().firstOrNull {
-                        it.runId == metadata.gameRunId && it.localGeneration() == metadata.localGeneration
-                    }
-                    if (previousRun != null) metadata = finishArchivedRequests(identity, metadata, previousRun)
-                    metadata = metadata.copy(gameRunId = snapshot.runId, localGeneration = snapshot.localGeneration(),
-                        lastSnapshotChecksum = null, lastAnalyticsSequence = 0, rewardFetchCursor = null, skillsPayload = null)
-                    if (previousRun != null) store.replaceAfterRestart(metadata) else store.replaceAfterRestore(metadata)
-                }
-                publishCachedSkills(identity, metadata, snapshot)
-
-                // Independent lanes: a snapshot conflict must not prevent delivery of a parent's gift.
-                val failures = mutableListOf<Exception>()
-                suspend fun attempt(block: suspend () -> Unit) {
-                    try { block() } catch (cancelled: CancellationException) { throw cancelled }
-                    catch (failure: Exception) { failures += failure }
-                }
-                attempt { metadata = uploadWorld(identity, metadata, snapshot) }
-                var moreRewards = false
-                attempt { moreRewards = receiveRewards(identity, snapshot.runId, snapshot.localGeneration()) }
-                metadata = checkNotNull(store.read(identity.profileId))
-                snapshot = session.exportSnapshot()
-                check(snapshot.localGeneration() == metadata.localGeneration) { "World was restored during synchronization" }
-                if (failures.isEmpty()) attempt { metadata = uploadWorld(identity, metadata, snapshot) }
-                attempt {
-                    try { metadata = refreshSkillLane(identity, metadata, snapshot) }
-                    catch (cancelled: CancellationException) { throw cancelled }
-                    catch (failure: Exception) { skillFailure(failure); throw failure }
-                }
-                if (failures.isNotEmpty()) return@withContext failed(failures.first())
-
-                metadata = metadata.copy(lastSyncedAtEpochMs = System.currentTimeMillis())
-                store.save(metadata)
-                // Acknowledging delivery is local bookkeeping, never an additional gameplay event.
-                if (metadata.lastSnapshotChecksum == snapshot.checksum && metadata.lastAnalyticsSequence >= snapshot.historySequence) {
-                    games.acknowledgeOutbox(snapshot.history.map { it.id }.toSet())
-                }
-                mutableState.value = mutableState.value.copy(phase = CloudSyncPhase.IDLE,
-                    lastSyncedAt = metadata.lastSyncedAtEpochMs?.let(::displayTime), message = null)
-                val changedDuringUpload = games.readHistory().lastOrNull()?.id != snapshot.history.lastOrNull()?.id
-                if (moreRewards || changedDuringUpload || metadata.lastSnapshotChecksum != snapshot.checksum ||
-                    metadata.lastAnalyticsSequence < snapshot.historySequence) CloudSyncResult.RETRY else CloudSyncResult.SUCCESS
-            } catch (cancelled: CancellationException) {
-                mutableState.value = mutableState.value.copy(phase = CloudSyncPhase.IDLE,
-                    skillsPhase = SkillSyncPhase.IDLE)
-                throw cancelled
-            } catch (failure: Exception) { failed(failure) }
+            Telemetry.traced("sync.synchronize") { synchronizeLocked() }
         }
+    }
+
+    private suspend fun synchronizeLocked(): CloudSyncResult {
+        if (!connection.configured) return CloudSyncResult.NO_GAME
+        if (games.read() == null) return CloudSyncResult.NO_GAME
+        mutableState.value = mutableState.value.copy(phase = CloudSyncPhase.SYNCING,
+            skillsPhase = SkillSyncPhase.SYNCING, message = null)
+        return try {
+            // Previously downloaded feedback remains visible even when registration/network fails.
+            loadCachedSkills(identities.getOrCreate(), session.exportSnapshot())
+            // Never initialize a fixture in a background worker before onboarding has saved a game.
+            session.prepare()
+            parents.registerProfile()
+            val identity = identity()
+            var snapshot = session.exportSnapshot()
+            var metadata = metadata(identity, snapshot)
+            metadata = recoverRestore(identity, metadata, snapshot)
+            if (metadata.localGeneration != snapshot.localGeneration()) {
+                val previousRun = snapshot.predecessorSnapshots().firstOrNull {
+                    it.runId == metadata.gameRunId && it.localGeneration() == metadata.localGeneration
+                }
+                if (previousRun != null) metadata = finishArchivedRequests(identity, metadata, previousRun)
+                metadata = metadata.copy(gameRunId = snapshot.runId, localGeneration = snapshot.localGeneration(),
+                    lastSnapshotChecksum = null, lastAnalyticsSequence = 0, rewardFetchCursor = null, skillsPayload = null)
+                if (previousRun != null) store.replaceAfterRestart(metadata) else store.replaceAfterRestore(metadata)
+            }
+            publishCachedSkills(identity, metadata, snapshot)
+
+            // Independent lanes: a snapshot conflict must not prevent delivery of a parent's gift.
+            val failures = mutableListOf<Exception>()
+            suspend fun attempt(block: suspend () -> Unit) {
+                try { block() } catch (cancelled: CancellationException) { throw cancelled }
+                catch (failure: Exception) { failures += failure }
+            }
+            attempt { metadata = uploadWorld(identity, metadata, snapshot) }
+            var moreRewards = false
+            attempt { moreRewards = receiveRewards(identity, snapshot.runId, snapshot.localGeneration()) }
+            metadata = checkNotNull(store.read(identity.profileId))
+            snapshot = session.exportSnapshot()
+            check(snapshot.localGeneration() == metadata.localGeneration) { "World was restored during synchronization" }
+            if (failures.isEmpty()) attempt { metadata = uploadWorld(identity, metadata, snapshot) }
+            attempt {
+                try { metadata = refreshSkillLane(identity, metadata, snapshot) }
+                catch (cancelled: CancellationException) { throw cancelled }
+                catch (failure: Exception) { skillFailure(failure); throw failure }
+            }
+            if (failures.isNotEmpty()) return failed(failures.first())
+
+            metadata = metadata.copy(lastSyncedAtEpochMs = System.currentTimeMillis())
+            store.save(metadata)
+            // Acknowledging delivery is local bookkeeping, never an additional gameplay event.
+            if (metadata.lastSnapshotChecksum == snapshot.checksum && metadata.lastAnalyticsSequence >= snapshot.historySequence) {
+                games.acknowledgeOutbox(snapshot.history.map { it.id }.toSet())
+            }
+            mutableState.value = mutableState.value.copy(phase = CloudSyncPhase.IDLE,
+                lastSyncedAt = metadata.lastSyncedAtEpochMs?.let(::displayTime), message = null)
+            val changedDuringUpload = games.readHistory().lastOrNull()?.id != snapshot.history.lastOrNull()?.id
+            if (moreRewards || changedDuringUpload || metadata.lastSnapshotChecksum != snapshot.checksum ||
+                metadata.lastAnalyticsSequence < snapshot.historySequence) CloudSyncResult.RETRY else CloudSyncResult.SUCCESS
+        } catch (cancelled: CancellationException) {
+            mutableState.value = mutableState.value.copy(phase = CloudSyncPhase.IDLE,
+                skillsPhase = SkillSyncPhase.IDLE)
+            throw cancelled
+        } catch (failure: Exception) { failed(failure) }
     }
 
     override suspend fun refreshSkills(): CloudSyncResult = mutex.withLock {
         withContext(Dispatchers.IO) {
-            mutableState.value = mutableState.value.copy(skillsPhase = SkillSyncPhase.SYNCING)
-            try {
-                if (games.read() == null) {
-                    mutableState.value = mutableState.value.copy(skills = null, skillsGeneration = null,
-                        skillsPhase = SkillSyncPhase.IDLE)
-                    return@withContext CloudSyncResult.NO_GAME
-                }
-                val snapshot = session.exportSnapshot()
-                val savedIdentity = identities.getOrCreate()
-                loadCachedSkills(savedIdentity, snapshot)
-                if (!connection.configured) {
-                    mutableState.value = mutableState.value.copy(skillsPhase = SkillSyncPhase.UNAVAILABLE)
-                    return@withContext CloudSyncResult.NO_GAME
-                }
-                // Validate the saved server before attempting any HTTP request.
-                var metadata = metadata(savedIdentity, snapshot)
-                metadata = recoverRestore(savedIdentity, metadata, snapshot)
-                parents.registerProfile()
-                val identity = identity()
-                if (metadata.localGeneration != snapshot.localGeneration() || metadata.gameRunId != snapshot.runId) {
-                    val previous = snapshot.predecessorSnapshots().firstOrNull {
-                        it.runId == metadata.gameRunId && it.localGeneration() == metadata.localGeneration
-                    }
-                    // Only this lane may run on parent entry. Snapshot/ACK retries are left for full sync.
-                    if (previous != null && store.pending(identity.profileId, ANALYTICS) != null) {
-                        metadata = uploadSkills(identity, metadata, previous)
-                    }
-                    if (listOf(SNAPSHOT, ANALYTICS, ACK, RESTORE).any { store.pending(identity.profileId, it) != null }) {
-                        throw SkillsAwaitingWorldTransition()
-                    }
-                    metadata = metadata.copy(gameRunId = snapshot.runId, localGeneration = snapshot.localGeneration(),
-                        lastSnapshotChecksum = null, lastAnalyticsSequence = 0, rewardFetchCursor = null,
-                        skillsPayload = null)
-                    store.replaceAfterRestart(metadata)
-                }
-                publishCachedSkills(identity, metadata, snapshot)
-                refreshSkillLane(identity, metadata, snapshot)
-                if (mutableState.value.skillsPhase == SkillSyncPhase.UNAVAILABLE) CloudSyncResult.RETRY
-                else CloudSyncResult.SUCCESS
-            } catch (cancelled: CancellationException) {
-                mutableState.value = mutableState.value.copy(skillsPhase = SkillSyncPhase.IDLE)
-                throw cancelled
-            } catch (failure: Exception) { skillFailure(failure) }
+            Telemetry.traced("sync.refresh_skills") { refreshSkillsLocked() }
         }
+    }
+
+    private suspend fun refreshSkillsLocked(): CloudSyncResult {
+        mutableState.value = mutableState.value.copy(skillsPhase = SkillSyncPhase.SYNCING)
+        return try {
+            if (games.read() == null) {
+                mutableState.value = mutableState.value.copy(skills = null, skillsGeneration = null,
+                    skillsPhase = SkillSyncPhase.IDLE)
+                return CloudSyncResult.NO_GAME
+            }
+            val snapshot = session.exportSnapshot()
+            val savedIdentity = identities.getOrCreate()
+            loadCachedSkills(savedIdentity, snapshot)
+            if (!connection.configured) {
+                mutableState.value = mutableState.value.copy(skillsPhase = SkillSyncPhase.UNAVAILABLE)
+                return CloudSyncResult.NO_GAME
+            }
+            // Validate the saved server before attempting any HTTP request.
+            var metadata = metadata(savedIdentity, snapshot)
+            metadata = recoverRestore(savedIdentity, metadata, snapshot)
+            parents.registerProfile()
+            val identity = identity()
+            if (metadata.localGeneration != snapshot.localGeneration() || metadata.gameRunId != snapshot.runId) {
+                val previous = snapshot.predecessorSnapshots().firstOrNull {
+                    it.runId == metadata.gameRunId && it.localGeneration() == metadata.localGeneration
+                }
+                // Only this lane may run on parent entry. Snapshot/ACK retries are left for full sync.
+                if (previous != null && store.pending(identity.profileId, ANALYTICS) != null) {
+                    metadata = uploadSkills(identity, metadata, previous)
+                }
+                if (listOf(SNAPSHOT, ANALYTICS, ACK, RESTORE).any { store.pending(identity.profileId, it) != null }) {
+                    throw SkillsAwaitingWorldTransition()
+                }
+                metadata = metadata.copy(gameRunId = snapshot.runId, localGeneration = snapshot.localGeneration(),
+                    lastSnapshotChecksum = null, lastAnalyticsSequence = 0, rewardFetchCursor = null,
+                    skillsPayload = null)
+                store.replaceAfterRestart(metadata)
+            }
+            publishCachedSkills(identity, metadata, snapshot)
+            refreshSkillLane(identity, metadata, snapshot)
+            if (mutableState.value.skillsPhase == SkillSyncPhase.UNAVAILABLE) CloudSyncResult.RETRY
+            else CloudSyncResult.SUCCESS
+        } catch (cancelled: CancellationException) {
+            mutableState.value = mutableState.value.copy(skillsPhase = SkillSyncPhase.IDLE)
+            throw cancelled
+        } catch (failure: Exception) { skillFailure(failure) }
     }
 
     private suspend fun loadCachedSkills(identity: ParentIdentity, snapshot: GameSnapshot) {
@@ -228,7 +237,8 @@ internal class RemoteCloudSyncRepository @Inject constructor(
             gameRunId = snapshot.runId, localGeneration = snapshot.localGeneration()).also { store.save(it) }
 
     private suspend fun uploadWorld(identity: ParentIdentity, saved: BackendSyncStateEntity,
-        snapshot: GameSnapshot): BackendSyncStateEntity {
+        snapshot: GameSnapshot): BackendSyncStateEntity = Telemetry.traced("sync.upload_world",
+        "sync.run_id" to snapshot.runId, "sync.generation" to snapshot.localGeneration()) {
         var metadata = saved
         var pending = store.pending(identity.profileId, SNAPSHOT)
         if (pending == null && metadata.lastSnapshotChecksum == snapshot.checksum) return metadata
@@ -270,7 +280,8 @@ internal class RemoteCloudSyncRepository @Inject constructor(
 
     /** A late reply belongs to the archived run; it never applies that run's state to the live game. */
     private suspend fun finishArchivedRequests(identity: ParentIdentity, saved: BackendSyncStateEntity,
-        archived: GameSnapshot): BackendSyncStateEntity {
+        archived: GameSnapshot): BackendSyncStateEntity =
+        Telemetry.traced("sync.finish_archived", "sync.run_id" to archived.runId) {
         var metadata = saved
         if (store.pending(identity.profileId, SNAPSHOT) != null) metadata = uploadWorld(identity, metadata, archived)
         if (store.pending(identity.profileId, ANALYTICS) != null) metadata = uploadSkills(identity, metadata, archived)
@@ -297,7 +308,9 @@ internal class RemoteCloudSyncRepository @Inject constructor(
         }
 
     private suspend fun uploadSkills(identity: ParentIdentity, metadata: BackendSyncStateEntity,
-        snapshot: GameSnapshot, mayReplaceRejectedBatch: Boolean = true): BackendSyncStateEntity {
+        snapshot: GameSnapshot, mayReplaceRejectedBatch: Boolean = true): BackendSyncStateEntity =
+        Telemetry.traced("sync.upload_skills",
+            "sync.through_sequence" to snapshot.historySequence.toString()) {
         var pending = store.pending(identity.profileId, ANALYTICS)
         if (pending == null && metadata.lastAnalyticsSequence >= snapshot.historySequence && snapshot.historySequence > 0) return metadata
         if (pending == null) {
@@ -348,7 +361,9 @@ internal class RemoteCloudSyncRepository @Inject constructor(
     }
 
     private suspend fun readSkills(identity: ParentIdentity, metadata: BackendSyncStateEntity,
-        snapshot: GameSnapshot): BackendSyncStateEntity {
+        snapshot: GameSnapshot): BackendSyncStateEntity =
+        Telemetry.traced("sync.read_skills",
+            "sync.through_sequence" to snapshot.historySequence.toString()) {
         val response = try { connection.api.skills(SkillAssessmentsRequest(identity.profileId, snapshot.runId)) }
             catch (failure: HttpException) {
                 if (failure.code() != 404 && failure.code() != 409) throw failure
@@ -378,7 +393,8 @@ internal class RemoteCloudSyncRepository @Inject constructor(
         }
     }
 
-    private suspend fun receiveRewards(identity: ParentIdentity, runId: String, generation: String): Boolean {
+    private suspend fun receiveRewards(identity: ParentIdentity, runId: String, generation: String): Boolean =
+        Telemetry.traced("sync.receive_rewards", "sync.run_id" to runId, "sync.generation" to generation) {
         sendPendingAck(identity, runId)
         var metadata = checkNotNull(store.read(identity.profileId))
         var cursor = metadata.rewardFetchCursor ?: 0L
@@ -405,7 +421,8 @@ internal class RemoteCloudSyncRepository @Inject constructor(
         return true
     }
 
-    private suspend fun sendPendingAck(identity: ParentIdentity, runId: String) {
+    private suspend fun sendPendingAck(identity: ParentIdentity, runId: String) = Telemetry.traced(
+        "sync.send_ack", "sync.run_id" to runId) {
         val pending = store.pending(identity.profileId, ACK) ?: return
         val request = pending.forDevice<AckParentRewardsRequest>(identity.profileId)
         check(request.gameRunId == runId)
@@ -417,7 +434,8 @@ internal class RemoteCloudSyncRepository @Inject constructor(
 
     override suspend fun prepareRestore(): CloudRestorePreview = mutex.withLock {
         withContext(Dispatchers.IO) {
-            restoreCandidate = null
+            Telemetry.traced("restore.prepare") {
+                restoreCandidate = null
             parents.registerProfile()
             val identity = identity()
             val before = session.exportSnapshot()
@@ -427,8 +445,9 @@ internal class RemoteCloudSyncRepository @Inject constructor(
             val id = newId()
             restoreCandidate = RestoreCandidate(id, remote, archive,
                 RestoreGuard(before.state.engine?.revision, before.historySequence, session.catalog.rules.id), before.localGeneration())
-            CloudRestorePreview(id, archive.state.pet.name, archive.state.engine?.day,
-                archive.state.economy.availableBalance, archive.state.economy.savingsBalance)
+                CloudRestorePreview(id, archive.state.pet.name, archive.state.engine?.day,
+                    archive.state.economy.availableBalance, archive.state.economy.savingsBalance)
+            }
         }
     }
 
@@ -438,7 +457,8 @@ internal class RemoteCloudSyncRepository @Inject constructor(
 
     override suspend fun restore(previewId: String) = mutex.withLock {
         withContext(Dispatchers.IO) {
-            val candidate = checkNotNull(restoreCandidate?.takeIf { it.id == previewId }) { "Reload the cloud preview" }
+            Telemetry.traced("restore.apply") {
+                val candidate = checkNotNull(restoreCandidate?.takeIf { it.id == previewId }) { "Reload the cloud preview" }
             val identity = identity()
             val current = session.exportSnapshot()
             check(current.localGeneration() == candidate.generation) { "World changed since the preview" }
@@ -453,12 +473,14 @@ internal class RemoteCloudSyncRepository @Inject constructor(
                 mutableState.value = CloudSyncState(message = "Облачная копия восстановлена.")
             } catch (cancelled: CancellationException) { throw cancelled }
             catch (failure: Exception) { failed(failure); throw failure }
+            }
         }
     }
 
     /** Recover a crash after world replacement but before transport bookkeeping, without restoring twice. */
     private suspend fun recoverRestore(identity: ParentIdentity, metadata: BackendSyncStateEntity,
-        local: GameSnapshot): BackendSyncStateEntity {
+        local: GameSnapshot): BackendSyncStateEntity =
+        Telemetry.traced("sync.recover_restore") {
         val pending = store.pending(identity.profileId, RESTORE) ?: return metadata
         val intent = BackendJson.decodeFromString<RestoreIntent>(pending.payload)
         if (local.localGeneration() == intent.previousGeneration) {

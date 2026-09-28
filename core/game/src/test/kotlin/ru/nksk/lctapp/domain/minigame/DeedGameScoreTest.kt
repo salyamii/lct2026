@@ -56,6 +56,19 @@ class DeedGameScoreTest {
         }
     }
 
+    @Test fun pipesPayWhenThePathWasDrawnFromTheSecondEnd() {
+        val layout = PipesState.layout(1)
+        var board = PipesState.create(layout)
+        // Первую пару игрок ведёт со второго конца к первому — платформа это разрешает.
+        for (cell in listOf(4, 3, 2, 1, 0)) board = board.press(cell)
+        // Остальные пары ведутся в прямом направлении.
+        for (cell in listOf(20, 21, 22, 23, 24)) board = board.press(cell)
+        for (cell in listOf(10, 5, 6, 7, 8, 13)) board = board.press(cell)
+        assertEquals(true, board.won)
+        val score = checkNotNull(DeedGameScore.fromPipes(board))
+        assertEquals(1, score.correct)
+    }
+
     @Test fun incompleteOrMalformedBoardsDoNotProducePayableResults() {
         assertNull(DeedGameScore.fromMemory(MemoryState.deal()))
         assertNull(DeedGameScore.fromMemory(MemoryState(emptyList())))
