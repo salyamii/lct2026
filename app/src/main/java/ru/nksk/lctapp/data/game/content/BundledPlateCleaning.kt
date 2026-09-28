@@ -25,7 +25,10 @@ internal fun GameCatalog.withPlateCleaningChoice(): GameCatalog {
         ),
         policy = policy.copy(scheduling = policy.scheduling.copy(previousEventIds = policy.scheduling.previousEventIds + original.id)),
         card = card.copy(impact = "", effort = "", summaryByChoiceId = emptyMap(),
-            presentation = card.presentation.copy(media = card.presentation.media.copy(game = StoryGamePresentation.CLEAN_TARNISHED_PLATE.media))),
+            presentation = card.presentation.copy(
+                actionLabels = card.presentation.actionLabels + ("$PLATE_CLEANING:work" to "Почистить самим · средне устанет"),
+                media = card.presentation.media.copy(game = StoryGamePresentation.CLEAN_TARNISHED_PLATE.media,
+                    actionAudio = paymentActionAudio(PLATE_CLEANING, listOf("pay"))))),
     )
     return withEventSpecs(listOf(spec)).copy(
         dailyEventPool = dailyEventPool.map { if (it == original.id) PLATE_CLEANING else it },

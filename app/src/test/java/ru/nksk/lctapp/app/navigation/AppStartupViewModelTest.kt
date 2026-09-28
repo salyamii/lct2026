@@ -37,6 +37,10 @@ class AppStartupViewModelTest {
         model.startAdventure()
         model.startAdventure()
         advanceUntilIdle()
+        assertTrue(model.uiState.value is AppStartupState.IntroVideo)
+        assertNull(repository.read())
+        model.finishIntroVideo()
+        model.finishIntroVideo()
         assertTrue(model.uiState.value is AppStartupState.Customize)
         assertNull(repository.read())
         assertEquals("", (model.uiState.value as AppStartupState.Customize).draft.name)
@@ -92,6 +96,84 @@ class AppStartupViewModelTest {
         assertEquals(1, repository.initializations)
     }
 
+    @Test fun introWaitsForPersistedProfileAndCannotBypassNamingOrCreateGame() = runTest(dispatcher) {
+        val repository = StartupRepository()
+        val drafts = MemoryDrafts()
+        val model = model(repository, drafts)
+        advanceUntilIdle()
+        drafts.failWrites = true
+        model.startAdventure()
+        advanceUntilIdle()
+        assertEquals(AppStartupState.Choose(failed = true), model.uiState.value)
+        assertNull(drafts.read())
+        assertNull(repository.read())
+
+        drafts.failWrites = false
+        model.startAdventure()
+        advanceUntilIdle()
+        val intro = model.uiState.value as AppStartupState.IntroVideo
+        assertEquals(OnboardingStep.Profile, drafts.read()!!.step)
+        assertEquals(intro.draft, drafts.read()!!.profile)
+        assertEquals("", intro.draft.name)
+        model.finishCustomization()
+        model.finishOnboarding()
+        assertEquals(intro, model.uiState.value)
+        assertNull(repository.read())
+
+        model.finishIntroVideo()
+        model.finishCustomization()
+        advanceUntilIdle()
+        assertEquals(AppStartupState.Customize(intro.draft), model.uiState.value)
+        assertNull(repository.read())
+        assertEquals(0, repository.initializations)
+    }
+
+    @Test fun introPositionSurvivesReobservationAndLateCallbacksCannotReopenOrResetCustomization() = runTest(dispatcher) {
+        val repository = StartupRepository()
+        val drafts = MemoryDrafts()
+        val model = model(repository, drafts)
+        advanceUntilIdle()
+        model.startAdventure()
+        advanceUntilIdle()
+        val persistedDraft = drafts.read()
+        model.updateIntroVideoPosition(4_200)
+        model.updateIntroVideoPosition(0) // A retiring surface cannot rewind the next surface.
+        model.startAdventure()
+        val resumedState = model.uiState.value as AppStartupState.IntroVideo
+        assertEquals(4_200L, resumedState.positionMs)
+        assertEquals(persistedDraft, drafts.read())
+        model.introVideoFailed()
+        assertEquals(resumedState.copy(failed = true), model.uiState.value)
+
+        model.finishIntroVideo() // The same action handles completion, Skip, Back and error fallback.
+        model.editName("Искорка")
+        advanceUntilIdle()
+        val customization = model.uiState.value
+        model.finishIntroVideo()
+        model.introVideoFailed()
+        model.updateIntroVideoPosition(10_000)
+        assertEquals(customization, model.uiState.value)
+        assertEquals("Искорка", drafts.read()!!.profile.name)
+        assertNull(repository.read())
+    }
+
+    @Test fun coldRestartDuringIntroContinuesFromSavedProfileWithoutReplayingVideo() = runTest(dispatcher) {
+        val repository = StartupRepository()
+        val drafts = MemoryDrafts()
+        val first = model(repository, drafts)
+        advanceUntilIdle()
+        first.startAdventure()
+        advanceUntilIdle()
+        first.updateIntroVideoPosition(7_000)
+        assertTrue(first.uiState.value is AppStartupState.IntroVideo)
+
+        val restored = model(repository, drafts)
+        advanceUntilIdle()
+        assertEquals(AppStartupState.Customize(drafts.read()!!.profile), restored.uiState.value)
+        assertNull(repository.read())
+        assertEquals(0, repository.initializations)
+    }
+
     @Test fun existingSaveSkipsOnboardingWithoutChangingProgress() = runTest(dispatcher) {
         val initial = createInitialGameState()
         val saved = initial.copy(economy = EconomyState(BudgetPlan(0, 0, 0, 37)))
@@ -143,6 +225,7 @@ class AppStartupViewModelTest {
         advanceUntilIdle()
         model.startAdventure()
         advanceUntilIdle()
+        model.finishIntroVideo()
         model.editName("Искорка")
         model.finishCustomization()
         advanceUntilIdle()
@@ -175,6 +258,7 @@ class AppStartupViewModelTest {
         advanceUntilIdle()
         model.startAdventure()
         advanceUntilIdle()
+        model.finishIntroVideo()
         model.editCustomization(PetCustomization(name = "Другой", fur = PetFur.Russet))
         model.backToCharacters()
         advanceUntilIdle()
@@ -183,6 +267,7 @@ class AppStartupViewModelTest {
         assertNull(repository.read())
         model.startAdventure()
         advanceUntilIdle()
+        model.finishIntroVideo()
         assertEquals(PetCustomization(name = ""), (model.uiState.value as AppStartupState.Customize).draft)
     }
 
@@ -193,6 +278,7 @@ class AppStartupViewModelTest {
         advanceUntilIdle()
         model.startAdventure()
         advanceUntilIdle()
+        model.finishIntroVideo()
         val edited = PetCustomization(name = "", fur = PetFur.Russet)
         model.editCustomization(edited)
         advanceUntilIdle()
@@ -211,6 +297,7 @@ class AppStartupViewModelTest {
         advanceUntilIdle()
         model.startAdventure()
         advanceUntilIdle()
+        model.finishIntroVideo()
         model.editName("Искорка")
         model.editFur(PetFur.Sand)
         model.finishCustomization()

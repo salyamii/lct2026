@@ -13,8 +13,37 @@ import ru.nksk.lctapp.domain.minigame.*
 import ru.nksk.lctapp.domain.story.StoryDecision
 import ru.nksk.lctapp.domain.pet.PetAge
 import ru.nksk.lctapp.domain.pet.PetColor
+import ru.nksk.lctapp.domain.location.GameLocation
 
 class StoryCampaignTest {
+    @Test fun travelChoicesHaveExplicitDestinationsWhileReadingAndUnmappedStationsDoNot() {
+        val catalog = bundledGameCatalog()
+        val destinations = mapOf(
+            "G1.01" to GameLocation.OBSERVATORY,
+            "G1.09" to GameLocation.TRAIL,
+            "G2.04" to GameLocation.TRAIL,
+            "N2.RETURN" to GameLocation.OBSERVATORY,
+            "G3.01" to GameLocation.WORKSHOP,
+            "G4.03" to GameLocation.PIER,
+            "G4.05" to GameLocation.TRAIL,
+            "G4.06" to GameLocation.TRAIL,
+            "N4.TRAVEL" to GameLocation.TRAIL,
+        )
+        for ((source, destination) in destinations) {
+            val id = storyEventId(source)
+            assertEquals(source, mapOf("$id:continue" to destination), catalog.policies.getValue(id).choiceDestinations)
+        }
+        val bridge = storyEventId("G2.03")
+        assertEquals(mapOf("$bridge:repair" to GameLocation.TRAIL, "$bridge:detour" to GameLocation.TRAIL),
+            catalog.policies.getValue(bridge).choiceDestinations)
+        val returnId = storyEventId("N2.RETURN")
+        assertEquals("trail", catalog.cards.getValue(returnId).scene)
+        assertEquals(CampaignBalance.TRAVEL, catalog.policies.getValue(returnId).energyFor("$returnId:continue"))
+        for (source in listOf("G1.04", "G2.06", "G5.02", "N5.TRAVEL", "N5.HUB", "N5.LAST")) {
+            assertTrue(source, catalog.policies.getValue(storyEventId(source)).choiceDestinations.isEmpty())
+        }
+    }
+
     @Test fun genericLoreSkipsAreRetiredWithoutRemovingHistoricalDefinitionsOrRealBranches() {
         val catalog = bundledGameCatalog()
         val genericSkips = sourceLoreCards.filter { it.optional && it.id != "G5.02" }.map { "${storyEventId(it.id)}:skip" }.toSet()

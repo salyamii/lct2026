@@ -685,6 +685,8 @@ class DayViewModelTest {
             assertEquals("Вернуться позже", model.uiState.value.later)
             assertNull(model.uiState.value.financialContext)
             val before = repository.read()
+            assertEquals(before.engine!!.currentEvent!!.id, model.uiState.value.audioOccurrenceId)
+            assertEquals("narration.story.cargo_journal", model.uiState.value.eventMedia.narrationCueKey)
             model.onAction(DayAction.Choose("$id:skip"))
             runCurrent()
             assertEquals(before, repository.read())

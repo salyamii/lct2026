@@ -195,11 +195,12 @@ fun LctNavHost(
                     onOpenBudget = { source -> navigator.navigateToExisting(source, Economy) })
                 mapEntry(onBack = navigator::goBack, onSelected = navigator::returnToRoot)
                 dayEntry(onBack = navigator::goBack, onFinished = finish,
+                    isCurrentEntry = { destination == it },
                     onGame = { source, id -> navigator.replace(source, DeedGame(id)) },
                     onStoryGame = { source, id, choice -> navigator.replace(source, DeedGame(id, choice)) },
                     onLearning = { source -> navigator.navigate(source, SkillTraining) },
                     onReflection = { source, day -> navigator.navigate(source, OtherPaths(day)) })
-                deedGameEntry(onFinished = finish)
+                deedGameEntry(onFinished = finish, isCurrentEntry = { destination == it })
             },
         )
         if (destination == MainMenu) {

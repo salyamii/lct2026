@@ -54,6 +54,7 @@ internal fun AdventureScreen(
     speech: String? = null,
     sceneFraction: Float = .60f,
     sceneAspectRatio: Float? = null,
+    sceneBottomColor: Color = Color.Transparent,
     contentSpacing: Dp = 12.dp,
     pinFooter: Boolean = true,
     scrollWholePage: Boolean = false,
@@ -103,7 +104,7 @@ internal fun AdventureScreen(
             }
         }
         @Composable fun Panel(panelModifier: Modifier, scrollContent: Boolean, includeFooter: Boolean = true) {
-            Surface(panelModifier.fillMaxWidth(), color = GamePaper,
+            Surface(panelModifier.fillMaxWidth().background(sceneBottomColor), color = GamePaper,
                 shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)) {
                 Box(contentAlignment = Alignment.TopCenter) {
                     Column(Modifier.widthIn(max = 640.dp).fillMaxWidth().let {
@@ -152,7 +153,8 @@ internal fun AdventureScreen(
                 }
             }
         } else {
-            Box(if (compact) Modifier.fillMaxSize().verticalScroll(pageScroll) else Modifier.fillMaxSize()) {
+            Box(Modifier.fillMaxSize().background(GamePaper)
+                .then(if (compact) Modifier.verticalScroll(pageScroll) else Modifier)) {
                 SceneBackground()
                 Column(if (compact) Modifier.fillMaxWidth() else Modifier.fillMaxSize()) {
                     Stage()

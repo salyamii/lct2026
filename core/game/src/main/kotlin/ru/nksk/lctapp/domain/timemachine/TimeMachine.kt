@@ -11,6 +11,7 @@ import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.history.*
+import ru.nksk.lctapp.domain.pet.renderPetText
 
 /**
  * Other paths are available from the start, once a compatible decision exists in history.
@@ -397,13 +398,24 @@ class TimeMachine(
         wrong += if (expected == 0L) 1 else 0
         if (expected < Long.MAX_VALUE) wrong += expected + 1
         else wrong += expected - 1
-        val options = (listOf(expected) + wrong.filter { it != expected }).distinct().map { TimeMachineQuizOption("coins:$it", "$it монет") }
+        val options = (listOf(expected) + wrong.filter { it != expected }).distinct().map { TimeMachineQuizOption("coins:$it", reflectionCoins(it, singular = "монета")) }
             .sortedBy { HistoryCodec.sha256("${result.resultHash}:${it.id}") }
         val id = "time-quiz:${HistoryCodec.sha256("${result.resultHash}:ledger:1") }"
+        val action = alternativeAction(simulation, initial.pet.name)
+        val event = if (simulation.target.request?.command?.eventChoiceId() != null)
+            catalog.content.events.firstOrNull { it.id == initial.engine?.currentEvent?.eventId } else null
+        val context = event?.let { "В истории «${renderPetText(catalog.displayTitle(it), initial.pet.name)}» выбираем «$action»." }
+            ?: "Представим, что выбрали «$action»."
         val public = TimeMachineQuiz(id, requireNotNull(result.simulationId), requireNotNull(result.resultHash), TimeMachineQuizKind.LEDGER,
-            "Сколько монет всего потрачено в другом варианте на показанном отрезке? Перевод в накопления не является покупкой.", options, answerAlreadyShown = true)
+            "$context Сколько монет потратим всего? Считай и покупки, которые случились дальше в сравнении.",
+            options, answerAlreadyShown = true)
+        val explanation = buildString {
+            append("В этом варианте на все покупки и услуги потратили ${reflectionCoins(expected)}.")
+            if (branch.deposited > 0) append(" В копилку положили ещё ${reflectionCoins(branch.deposited)}, но эти монеты всё ещё наши. Их не считаем потраченными.")
+            if (branch.withdrawn > 0) append(" Из копилки достали ${reflectionCoins(branch.withdrawn)}. Просто достать монеты — ещё не значит потратить их.")
+        }
         return VerifiedQuiz(public, requireNotNull(result.runId), "time-machine:${simulation.target.id}:ledger", null,
-            "Потрачено $expected монет. Переводы меняют место хранения денег и не добавляют расход.") { option ->
+            explanation) { option ->
             task.copy(answer = option.removePrefix("coins:").toLong())
         }
     }
@@ -440,26 +452,36 @@ class TimeMachine(
         val work = event.type != EventType.WANT
         if (work && spentEnergy <= 0) return null
         val amount = reflectionCoins(saved)
-        val energy = "$spentEnergy ${if (spentEnergy == 1) "силу" else "силы"}"
+        val action = alternativeAction(simulation, before.pet.name)
+        val item = if (work) null else purchasedItemName(before, after, alternateOutcome)
+        val effort = if (spentEnergy == 1) "немного устанем" else "устанем"
         val correctId = "spent_less"
         val options = if (work) listOf(
-            TimeMachineQuizOption(correctId, "Справились бы сами: сохранили $amount, но потратили $energy"),
-            TimeMachineQuizOption("paid_for_help", "Всё равно заплатили бы $amount за помощь"),
-            TimeMachineQuizOption("no_work_needed", "Сохранили бы и монеты, и силы: ничего делать не пришлось бы"),
+            TimeMachineQuizOption(correctId, "Сделаем сами: сохраним $amount, но $effort"),
+            TimeMachineQuizOption("paid_for_help", "Сделаем сами и всё равно заплатим $amount"),
+            TimeMachineQuizOption("no_work_needed", "Сохраним $amount и совсем не устанем"),
+        ) else if (item != null) listOf(
+            TimeMachineQuizOption(correctId, "Сохраним $amount, но «$item» не получим"),
+            TimeMachineQuizOption("paid_anyway", "Потратим $amount и получим «$item»"),
+            TimeMachineQuizOption("paid_for_refusal", "Потратим $amount, но «$item» не получим"),
         ) else listOf(
-            TimeMachineQuizOption(correctId, "Отказались бы от оплаты и сохранили $amount"),
-            TimeMachineQuizOption("paid_anyway", "Всё равно заплатили бы $amount за то же самое"),
-            TimeMachineQuizOption("paid_for_refusal", "Потратили бы монеты на сам отказ"),
+            TimeMachineQuizOption(correctId, "Не будем платить и сохраним $amount"),
+            TimeMachineQuizOption("paid_anyway", "Заплатим $amount, как в нашей истории"),
+            TimeMachineQuizOption("paid_for_refusal", "Откажемся, но всё равно потратим $amount"),
         )
         val orderedOptions = options.sortedBy { HistoryCodec.sha256("${result.resultHash}:${it.id}") }
         val id = "time-quiz:${HistoryCodec.sha256("${result.resultHash}:cause:2") }"
+        val actual = if (item != null) "Мы купили «$item» за $amount."
+            else "«${renderPetText(catalog.displayTitle(event), before.pet.name)}»: мы потратили $amount."
         val public = TimeMachineQuiz(id, requireNotNull(result.simulationId), requireNotNull(result.resultHash), TimeMachineQuizKind.CAUSE,
-            "Вспомним «${catalog.displayTitle(event)}». Почему после выбора «${simulation.alternative.title}» осталось бы на $amount больше?",
+            "$actual А если выбрать «$action», что изменится?",
             orderedOptions, answerAlreadyShown = true)
         val explanation = if (work) {
-            "В этой ситуации мы заплатили $amount за помощь. При выборе «${simulation.alternative.title}» выполнили бы работу сами и потратили $energy. Монеты остались бы у нас."
+            "При выборе «$action» сделаем работу сами и $effort. Платить за это действие не нужно: сохраним $amount."
+        } else if (item != null) {
+            "В нашей истории мы потратили $amount на «$item». При выборе «$action» не покупаем этот предмет, поэтому сохраняем $amount."
         } else {
-            "В этой ситуации мы заплатили $amount. Выбор «${simulation.alternative.title}» не требует оплаты, поэтому эти монеты остались бы у нас."
+            "В нашей истории мы заплатили $amount. При выборе «$action» платить не нужно, поэтому сохраняем $amount."
         }
         val comparisonFamily = simulation.target.facts.firstOrNull {
             it.detail is FactDetail.OptionalPurchase || it.detail is FactDetail.ResourceChoice || it.detail is FactDetail.SavingMovement
@@ -469,9 +491,27 @@ class TimeMachine(
         }
     }
 
-    private fun reflectionCoins(amount: Long): String = "$amount ${when {
+    private fun alternativeAction(simulation: VerifiedSimulation, petName: String): String {
+        val choiceId = simulation.alternative.command?.eventChoiceId()
+        val template = catalog.content.choices.firstOrNull { it.id == choiceId }?.let { catalog.displayAction(it) }
+            ?.substringBefore(" · ") ?: simulation.alternative.title
+        return renderPetText(template, petName)
+    }
+
+    /** Name only a verified purchase; experiences and shared rewards must not become invented items. */
+    private fun purchasedItemName(before: GameState, after: GameState, alternative: GameState): String? {
+        val original = before.ownedItems.groupingBy { it.itemId }.eachCount()
+        val other = alternative.ownedItems.groupingBy { it.itemId }.eachCount()
+        val added = after.ownedItems.groupingBy { it.itemId }.eachCount().filter { (id, count) ->
+            count > original.getOrDefault(id, 0) && count > other.getOrDefault(id, 0)
+        }
+        val itemId = added.keys.singleOrNull() ?: return null
+        return catalog.content.items.firstOrNull { it.id == itemId }?.name?.let { renderPetText(it, before.pet.name) }
+    }
+
+    private fun reflectionCoins(amount: Long, singular: String = "монету"): String = "$amount ${when {
         amount % 100 in 11L..14L -> "монет"
-        amount % 10 == 1L -> "монету"
+        amount % 10 == 1L -> singular
         amount % 10 in 2L..4L -> "монеты"
         else -> "монет"
     }}"

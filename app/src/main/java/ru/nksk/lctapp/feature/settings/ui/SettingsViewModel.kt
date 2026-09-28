@@ -8,11 +8,22 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import ru.nksk.lctapp.domain.media.MediaPreferencesRepository
 import ru.nksk.lctapp.domain.parentlink.ParentLinkRepository
 
 internal enum class ParentCodeStatus { NONE, LOADING, READY, ERROR }
 internal enum class ProfileRegistrationStatus { NONE, LOADING, REGISTERED, ERROR }
+internal enum class SoundSettingsError { READ, WRITE }
+internal data class SoundSettingsUiState(
+    val enabled: Boolean? = null,
+    val loading: Boolean = true,
+    val saving: Boolean = false,
+    val error: SoundSettingsError? = null,
+) {
+    val canChange: Boolean get() = enabled != null && !loading && !saving && error != SoundSettingsError.READ
+}
 internal data class SettingsUiState(
     val loading: Boolean = true,
     val profileId: String? = null,
@@ -21,30 +32,90 @@ internal data class SettingsUiState(
     val codeStatus: ParentCodeStatus = ParentCodeStatus.NONE,
     val qr: ParentLinkQrMatrix? = null,
     val registrationStatus: ProfileRegistrationStatus = ProfileRegistrationStatus.NONE,
+    val sound: SoundSettingsUiState = SoundSettingsUiState(),
 )
 
 internal sealed interface SettingsAction {
     data object RetryProfile : SettingsAction
     data object CreateParentCode : SettingsAction
     data object RetryRegistration : SettingsAction
+    data class SetSoundEnabled(val enabled: Boolean) : SettingsAction
+    data object RetrySound : SettingsAction
 }
 
 @HiltViewModel
 internal class SettingsViewModel @Inject constructor(
     private val repository: ParentLinkRepository,
+    private val mediaPreferences: MediaPreferencesRepository,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(SettingsUiState())
     val uiState = mutableState.asStateFlow()
     private var request: Job? = null
     private var registration: Job? = null
+    private var soundObserver: Job? = null
+    private var pendingSoundEnabled: Boolean? = null
 
-    init { loadProfile() }
+    init { loadProfile(); observeSound() }
 
     fun onAction(action: SettingsAction) {
         when (action) {
             SettingsAction.RetryProfile -> loadProfile()
             SettingsAction.CreateParentCode -> createCode()
             SettingsAction.RetryRegistration -> registerProfile()
+            is SettingsAction.SetSoundEnabled -> setSoundEnabled(action.enabled)
+            SettingsAction.RetrySound -> {
+                if (!mutableState.value.sound.saving) {
+                    if (mutableState.value.sound.error == SoundSettingsError.READ) observeSound()
+                    else pendingSoundEnabled?.let(::setSoundEnabled)
+                }
+            }
+        }
+    }
+
+    private fun observeSound() {
+        if (soundObserver?.isActive == true) return
+        mutableState.value = mutableState.value.copy(sound = mutableState.value.sound.copy(loading = true, error = null))
+        soundObserver = viewModelScope.launch {
+            try {
+                mediaPreferences.observe().collect { preferences ->
+                    val current = mutableState.value
+                    val confirmed = !current.sound.saving && pendingSoundEnabled == preferences.soundEnabled
+                    if (confirmed) pendingSoundEnabled = null
+                    mutableState.value = current.copy(sound = current.sound.copy(enabled = preferences.soundEnabled,
+                        loading = false, error = current.sound.error.takeUnless { confirmed || it == SoundSettingsError.READ }))
+                }
+            } catch (cancelled: CancellationException) { throw cancelled
+            } catch (_: Exception) {
+                val current = mutableState.value
+                mutableState.value = current.copy(sound = current.sound.copy(loading = false, error = SoundSettingsError.READ))
+            }
+        }
+    }
+
+    private fun setSoundEnabled(enabled: Boolean) {
+        val current = mutableState.value
+        if (!current.sound.canChange) return
+        if (current.sound.enabled == enabled && pendingSoundEnabled == null) return
+        pendingSoundEnabled = enabled
+        mutableState.value = current.copy(sound = current.sound.copy(saving = true, error = null))
+        viewModelScope.launch {
+            try {
+                mediaPreferences.setSoundEnabled(enabled)
+                pendingSoundEnabled = null
+                val saved = mutableState.value
+                mutableState.value = saved.copy(sound = saved.sound.copy(enabled = enabled, saving = false))
+            } catch (cancelled: CancellationException) { throw cancelled
+            } catch (_: Exception) {
+                val saved = mutableState.value
+                val confirmed = saved.sound.error != SoundSettingsError.READ && saved.sound.enabled == enabled
+                if (confirmed) pendingSoundEnabled = null
+                mutableState.value = saved.copy(sound = saved.sound.copy(saving = false,
+                    error = when {
+                        saved.sound.error == SoundSettingsError.READ -> SoundSettingsError.READ
+                        confirmed -> null
+                        else -> SoundSettingsError.WRITE
+                    }))
+            }
         }
     }
 

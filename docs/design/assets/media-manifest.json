@@ -1,0 +1,2794 @@
+{
+  "schema_version": 2,
+  "imported_on": "2026-09-27",
+  "source": {
+    "kind": "user_provided_archive",
+    "filename": "drive-download-20260927T131348Z-1-001.zip",
+    "bytes": 46621147,
+    "sha256": "693be7c43972f1dd9ccbdcd2f71a8c9379d3542c9b1fe998306c9fb9585f0ea9"
+  },
+  "policy": "MP3/MP4 originals are unchanged except ambient.port, normalized +10 dB from its archive source. Processed entries have explicit source_bytes/source_sha256 and runtime_bytes/runtime_sha256; bytes/sha256 on unchanged entries identify both source and runtime. Exact SHA-256 duplicates share one asset. Five chapter themes are the global application background selected by current story chapter and continue across screens. Filename matching supplies presentation only, never game rules. Generated entries are separate original procedural effects, explicitly marked status=generated with their own source provenance; they are not members of the 95-entry archive.",
+  "entries": [
+    {
+      "cue_key": "narration.story.tower_reply",
+      "role": "narration",
+      "authored_target": "G1.11",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 1/Башня отвечает.mp3",
+      "asset_path": "media/audio/narration_story_tower_reply.mp3",
+      "bytes": 117490,
+      "sha256": "7a47c9137f9c48c646900c560ec53b1d10050d71faf91134a37eb2b51cb380f0",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "7.280000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.cargo_journal",
+      "role": "narration",
+      "authored_target": "G1.04",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 1/Запись в журнале грузов.mp3",
+      "asset_path": "media/audio/narration_story_cargo_journal.mp3",
+      "bytes": 171407,
+      "sha256": "ca6ca1f61342f7949da89deca2914d2fd1c3c7aad86e9207c78b7e0c77b61584",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "10.640000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.stone_post",
+      "role": "narration",
+      "authored_target": "G1.09",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 1/Каменный пост.mp3",
+      "asset_path": "media/audio/narration_story_stone_post.mp3",
+      "bytes": 126685,
+      "sha256": "035bcdaabf5bd01f29302c197dac732839da323837e11be5f57a9dce86c93d7d",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "7.840000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.telescope_journal",
+      "role": "narration",
+      "authored_target": "G1.10",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 1/Малый телескоп и старый журнал.mp3",
+      "asset_path": "media/audio/narration_story_telescope_journal.mp3",
+      "bytes": 155942,
+      "sha256": "379cf83eb53919956e438b17b3c6c7db8be7e4935e9080aada950b59932772fd",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "9.680000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.crate_mark",
+      "role": "narration",
+      "authored_target": "G1.02",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 1/На ящике странная метка.mp3",
+      "asset_path": "media/audio/narration_story_crate_mark.mp3",
+      "bytes": 142986,
+      "sha256": "0d61c715e9e56c41b7f3d4dc82ef00039e70f4c31cca78cfef87f0f628c53370",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "8.880000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.observation_network",
+      "role": "narration",
+      "authored_target": "G1.12",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 1/Ночь наблюдений раскрывает сеть.mp3",
+      "asset_path": "media/audio/narration_story_observation_network.mp3",
+      "bytes": 285092,
+      "sha256": "7049f2058d02c8d22b8a8ffd4aec3202eb0a4c50903051544db3a37cf4dce378",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "17.760000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.night_observation",
+      "role": "narration",
+      "authored_target": "G1.01",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 1/Ночь наблюдений.mp3",
+      "asset_path": "media/audio/narration_story_night_observation.mp3",
+      "bytes": 150927,
+      "sha256": "078f0a4153253c0e6e814a182938154c71e5fc6e90764ffb02d48a072541bffd",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "9.360000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.marked_plate",
+      "role": "narration",
+      "authored_target": "G1.03",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 1/Пластина с тем же знаком.mp3",
+      "asset_path": "media/audio/narration_story_marked_plate.mp3",
+      "bytes": 162212,
+      "sha256": "36dca22d86c78893db5ae22bff9c8e670a088bdddf966a006156f26be5f1628a",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "10.080000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.old_map",
+      "role": "narration",
+      "authored_target": "G1.06",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 1/Старая карта.mp3",
+      "asset_path": "media/audio/narration_story_old_map.mp3",
+      "bytes": 140478,
+      "sha256": "725f93a76bd96e22f88a3b570f05d14253be367651ece3b1b097935d5d24d928",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "8.720000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.service_emblem",
+      "role": "narration",
+      "authored_target": "G1.07",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 1/Старая эмблема службы.mp3",
+      "asset_path": "media/audio/narration_story_service_emblem.mp3",
+      "bytes": 195648,
+      "sha256": "fc1ad17fd7e54736508b099aebf276f51eadf8bd5d4a9377e3e83b28fb91f52e",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "12.160000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.three_lenses",
+      "role": "narration",
+      "authored_target": "G1.08",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 1/Схема трёх линз.mp3",
+      "asset_path": "media/audio/narration_story_three_lenses.mp3",
+      "bytes": 140478,
+      "sha256": "7dd79974c2472d9f8ff77cf5b9b04f8739fcbbe485bf521fc36ab2219cad9f58",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "8.720000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.three_answers",
+      "role": "narration",
+      "authored_target": "G1.05",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 1/Три ответа — в одном свете.mp3",
+      "asset_path": "media/audio/narration_story_three_answers.mp3",
+      "bytes": 195648,
+      "sha256": "fad312dd1a0f5c22f0ba4e98141c4e4d07d993f3509be9e0077dc9863d30f59d",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "12.160000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.return_code",
+      "role": "narration",
+      "authored_target": "G2.11",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 2/Башня посылает обратный код.mp3",
+      "asset_path": "media/audio/narration_story_return_code.mp3",
+      "bytes": 203172,
+      "sha256": "0a5abe1b75c40952cb7118b38a9fe069437c9e390b0c7774a2aaa7bfd1d0d55a",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "12.640000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.closed_bridge",
+      "role": "narration",
+      "authored_target": "G2.03",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 2/Закрытый мост.mp3",
+      "asset_path": "media/audio/narration_story_closed_bridge.mp3",
+      "bytes": 177676,
+      "sha256": "bb1e07b537b603a63a8ad6ec271cb89434530ffda061d3040ae56ee9bb474ea7",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "11.040000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.fork_symbol",
+      "role": "narration",
+      "authored_target": "G2.08",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 2/Знак двойной развилки.mp3",
+      "asset_path": "media/audio/narration_story_fork_symbol.mp3",
+      "bytes": 158450,
+      "sha256": "32cba5c6339ef64140034c6238d8717541e24b075d7ab4b87b2a8fa4e1fc69d9",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "9.840000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.duty_room",
+      "role": "narration",
+      "authored_target": "G2.07",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 2/Комната дежурного.mp3",
+      "asset_path": "media/audio/narration_story_duty_room.mp3",
+      "bytes": 278822,
+      "sha256": "603e133581fc86c668349552072c3aeaeb5cd709d6a820adb9541c4dcaed320e",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "17.360000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.three_lights",
+      "role": "narration",
+      "authored_target": "G2.06",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 2/Механизм трёх огней.mp3",
+      "asset_path": "media/audio/narration_story_three_lights.mp3",
+      "bytes": 175168,
+      "sha256": "08d1b1752f004edcb49ffbaf93d33314fc05c96633ffca332adc8221547652ac",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "10.880000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.last_tower_cargo",
+      "role": "narration",
+      "authored_target": "G2.02",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 2/Последний груз к башне.mp3",
+      "asset_path": "media/audio/narration_story_last_tower_cargo.mp3",
+      "bytes": 277568,
+      "sha256": "c8e356e5c521850dabce6abd087ac2028895a4ab678be87dccafba254c9b80d9",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "17.280000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.observatory_receiver",
+      "role": "narration",
+      "authored_target": "G2.10",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 2/Приёмник указывает на Обсерваторию.mp3",
+      "asset_path": "media/audio/narration_story_observatory_receiver.mp3",
+      "bytes": 217382,
+      "sha256": "d7db1f3ec075bb160af98af1e99a2d32deb6f485bf9a84b021ae267748fb12b3",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "13.520000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.second_path_scroll",
+      "role": "narration",
+      "authored_target": "G2.09",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 2/Свиток второго пути.mp3",
+      "asset_path": "media/audio/narration_story_second_path_scroll.mp3",
+      "bytes": 262104,
+      "sha256": "1321d3505243499700e6fefa1f4b4271f1261380a0a0ceec7a8b7612ab92bf2f",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "16.320000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.signal_post",
+      "role": "narration",
+      "authored_target": "G2.04",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 2/Сигнальный пост за мостом.mp3",
+      "asset_path": "media/audio/narration_story_signal_post.mp3",
+      "bytes": 227831,
+      "sha256": "24a1d6b233790cf8407feb435fa74877af3ca4c2031cbf85b1c602e6a16b4051",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "14.160000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.recent_repairs",
+      "role": "narration",
+      "authored_target": "G2.05",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 2/Следы недавнего ремонта.mp3",
+      "asset_path": "media/audio/narration_story_recent_repairs.mp3",
+      "bytes": 253327,
+      "sha256": "209a934c85b647d091cb68a13707424a2b33c9cdef5a437659deec255c707660",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "15.760000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.hall_of_paths",
+      "role": "narration",
+      "authored_target": "G2.12",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 2/Хроноскоп.mp3",
+      "asset_path": "media/audio/narration_story_hall_of_paths.mp3",
+      "bytes": 242878,
+      "sha256": "9c741419d010d49ad184865628e8bdbcdd721822e58c4960142abd1974d4274c",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "15.120000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.quiet_tower_expedition",
+      "role": "narration",
+      "authored_target": "G2.01",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 2/Экспедиция к погасшей башне.mp3",
+      "asset_path": "media/audio/narration_story_quiet_tower_expedition.mp3",
+      "bytes": 235355,
+      "sha256": "85157e68d3799e713a9156c539ff283d10ac702e4dcfb62396f927ad67e45e72",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "14.640000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.chronoscope_part",
+      "role": "narration",
+      "authored_target": "G3.05",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 3/Деталь Хроноскопа.mp3",
+      "asset_path": "media/audio/narration_story_chronoscope_part.mp3",
+      "bytes": 204426,
+      "sha256": "d24484cc0585fe1c52941684bd00d03f52c362b23ac6e7fc57db2d289a2d996b",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "12.720000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.researcher_house",
+      "role": "narration",
+      "authored_target": "G3.01",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 3/Дом исследователя.mp3",
+      "asset_path": "media/audio/narration_story_researcher_house.mp3",
+      "bytes": 246639,
+      "sha256": "8e09c28f87a47b93b641b87d6b51559efbba1560ef3e6e1b603dd6c7f35d0476",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "15.360000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.house_base",
+      "role": "narration",
+      "authored_target": "G3.12",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 3/Дом становится базой.mp3",
+      "asset_path": "media/audio/narration_story_house_base.mp3",
+      "bytes": 287599,
+      "sha256": "c826ec88efea47f3c27abeb0d5a3ace33c9173b82d41e9ae14f2715049660078",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "17.920000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.change_one",
+      "role": "narration",
+      "authored_target": "G3.07",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 3/Меняй только одно.mp3",
+      "asset_path": "media/audio/narration_story_change_one.mp3",
+      "bytes": 198156,
+      "sha256": "f81d1f341b519e8d49ad1e6189eedf81109aaffbc1c8421479c88e55b6cd71a8",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "12.320000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.keeper_seal",
+      "role": "narration",
+      "authored_target": "G3.02",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 3/Печать Смотрителей на двери.mp3",
+      "asset_path": "media/audio/narration_story_keeper_seal.mp3",
+      "bytes": 226159,
+      "sha256": "d14b8dde078fb760315161405d8a2b65ce552698381ad1d35a25496f0f37e355",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "14.080000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.unsigned_letter",
+      "role": "narration",
+      "authored_target": "G3.03",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 3/Письмо без отправителя.mp3",
+      "asset_path": "media/audio/narration_story_unsigned_letter.mp3",
+      "bytes": 207351,
+      "sha256": "4d25af668b1144455bb6b15379a5bab2d06b69bfe2714693ec23bb1619412bcf",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "12.880000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.calibration_station",
+      "role": "narration",
+      "authored_target": "G3.08",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 3/Станция калибровки.mp3",
+      "asset_path": "media/audio/narration_story_calibration_station.mp3",
+      "bytes": 168899,
+      "sha256": "40c2e25c7c9b8f2cabf8020c14cdfca4b7ee0624753956b435b4c77d8e7ffb16",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "10.480000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.workshop_photo",
+      "role": "narration",
+      "authored_target": "G3.06",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 3/Старая фотография.mp3",
+      "asset_path": "media/audio/narration_story_workshop_photo.mp3",
+      "bytes": 224906,
+      "sha256": "02416c307c7e0711f3917412a3a0085225731762c0c21b8cb15d6149d8e8c8b7",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "14.000000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.tester",
+      "role": "narration",
+      "authored_target": "G3.11",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 3/Тико запускает тестер.mp3",
+      "asset_path": "media/audio/narration_story_tester.mp3",
+      "bytes": 260850,
+      "sha256": "2452435b3db42c692586bf715c5434f1907b0de9288af4c7569708295ff1e5fc",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "16.240000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.tiko_arrives",
+      "role": "narration",
+      "authored_target": "G3.04",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 3/Тико приходит помочь.mp3",
+      "asset_path": "media/audio/narration_story_tiko_arrives.mp3",
+      "bytes": 250819,
+      "sha256": "880bf5ef4785d44d6008b779c54327f23966b60f454e26c9b927cef5c18b11c5",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "15.600000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.cellar_crate",
+      "role": "narration",
+      "authored_target": "G3.09",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 3/Ящик из подвала.mp3",
+      "asset_path": "media/audio/narration_story_cellar_crate.mp3",
+      "bytes": 258342,
+      "sha256": "b0d9ea1e2814a6673ae009467b05c715a5deb42f6aad07ab6c2c3e6af8fe6830",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "16.080000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.route_archive",
+      "role": "narration",
+      "authored_target": "G3.10",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 3/Ящики маршрутов.mp3",
+      "asset_path": "media/audio/narration_story_route_archive.mp3",
+      "bytes": 229085,
+      "sha256": "7b9fd542648b5df90d3f8936a8901fda8aa57f4a0b6cffde01f6c4f27f4b5ea6",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "14.240000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.missing_road",
+      "role": "narration",
+      "authored_target": "G4.04",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 4/Архивная копия без одной дороги.mp3",
+      "asset_path": "media/audio/narration_story_missing_road.mp3",
+      "bytes": 285092,
+      "sha256": "23b0bb95d65c9ec231907eb551bd1fd03d3d9743b15edd58511ae73238ab848d",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "17.760000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.coastal_fragment",
+      "role": "narration",
+      "authored_target": "G4.03",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 4/Береговой фрагмент.mp3",
+      "asset_path": "media/audio/narration_story_coastal_fragment.mp3",
+      "bytes": 218636,
+      "sha256": "caa4b94d172c17a5758e8a79e06e9b7fa9daac8031251e37dbf88c9a44ba8971",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "13.600000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.mountain_sign",
+      "role": "narration",
+      "authored_target": "G4.05",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 4/Горный указатель двух путей.mp3",
+      "asset_path": "media/audio/narration_story_mountain_sign.mp3",
+      "bytes": 260850,
+      "sha256": "b342d6f8d6e022eabfe76e5a766cbe275b050589419b1e8b85da8d46f3005cf1",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "16.240000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.kingdom_map",
+      "role": "narration",
+      "authored_target": "G4.12",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 4/Карта королевства собрана.mp3",
+      "asset_path": "media/audio/narration_story_kingdom_map.mp3",
+      "bytes": 249565,
+      "sha256": "fe5af9d3d61edf54fa151d3903158d71210325d7c4f81196e46c422db778112e",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "15.520000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.map_table",
+      "role": "narration",
+      "authored_target": "G4.02",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 4/Картографический стол.mp3",
+      "asset_path": "media/audio/narration_story_map_table.mp3",
+      "bytes": 252073,
+      "sha256": "ad820d28a66fa7dea0aeccd5e3d7b7491cc5e282b6ffe7b2c2e8decd07c26374",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "15.680000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.forest_stone",
+      "role": "narration",
+      "authored_target": "G4.06",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 4/Лесной путевой камень.mp3",
+      "asset_path": "media/audio/narration_story_forest_stone.mp3",
+      "bytes": 263358,
+      "sha256": "f9eab11f29d816fd533a7bfef0425bfae3ad7b959a9dad75800b80154313f132",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "16.400000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.luna_damaged_map",
+      "role": "narration",
+      "authored_target": "G4.01",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 4/Луна приносит повреждённую карту.mp3",
+      "asset_path": "media/audio/narration_story_luna_damaged_map.mp3",
+      "bytes": 265866,
+      "sha256": "91018966188bdc45957c6a82f055c5cef774c0ab5b1565b11174751be01f078c",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "16.560000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.luna_note",
+      "role": "narration",
+      "authored_target": "G4.09",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 4/Лунина старая заметка.mp3",
+      "asset_path": "media/audio/narration_story_luna_note.mp3",
+      "bytes": 257088,
+      "sha256": "27fa7db930edda4505e0c84efcc8347cd5c3b8ececa46a4c0f84f34c612ebf6a",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "16.000000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.blank_region",
+      "role": "narration",
+      "authored_target": "G4.08",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 4/На карте появляется пустая область.mp3",
+      "asset_path": "media/audio/narration_story_blank_region.mp3",
+      "bytes": 275061,
+      "sha256": "a3196d63f4a228a47b3b769d8d5fdf913f492399db5699081d8acd519c038f92",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "17.120000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.route_token",
+      "role": "narration",
+      "authored_target": "G4.11",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 4/Обратная сторона маршрутного жетона.mp3",
+      "asset_path": "media/audio/narration_story_route_token.mp3",
+      "bytes": 291779,
+      "sha256": "a70d55777c984f1088d9b6ca212f5e205f7f9496b4ed8e8f8cbf594fd093e16b",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "18.160000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.border_beacon",
+      "role": "narration",
+      "authored_target": "G4.10",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 4/Пограничный маяк.mp3",
+      "asset_path": "media/audio/narration_story_border_beacon.mp3",
+      "bytes": 260850,
+      "sha256": "a53e04fa3a32c50663898c70fe6aa0c350216a342e7e3eb6e7a233a0d8ff9281",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "16.240000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.route_comparison",
+      "role": "narration",
+      "authored_target": "G4.07",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 4/Хроноскоп сравнивает маршруты.mp3",
+      "asset_path": "media/audio/narration_story_route_comparison.mp3",
+      "bytes": 290525,
+      "sha256": "570e28c6f6f76f74d79fbc851a7bc502f26e055307bfe948539cf9bef6cb1922",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "18.080000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.great_expedition",
+      "role": "narration",
+      "authored_target": "G5.01",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 5/Большая экспедиция.mp3",
+      "asset_path": "media/audio/narration_story_great_expedition.mp3",
+      "bytes": 241624,
+      "sha256": "07b370890cb2cf5ffa09c206e1675b6045d1e64d9f8d88e8510931c134042158",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "15.040000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.relay_station",
+      "role": "narration",
+      "authored_target": "G5.03",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 5/Заброшенная релейная станция.mp3",
+      "asset_path": "media/audio/narration_story_relay_station.mp3",
+      "bytes": 281330,
+      "sha256": "7acd06884aa84f2e7d65d960603dc8a5944929d349a1f0ff4b475ded8a28e3c1",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "17.520000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.storm_shelter",
+      "role": "narration",
+      "authored_target": "G5.05",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 5/Запись в штормовом убежище.mp3",
+      "asset_path": "media/audio/narration_story_storm_shelter.mp3",
+      "bytes": 186871,
+      "sha256": "5bef9b7598ab9eba1081b5c152da94f93ff344087e50c152d13cc8bc76de777c",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "11.600000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.last_station",
+      "role": "narration",
+      "authored_target": "G5.09",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 5/Луна находит последнюю станцию.mp3",
+      "asset_path": "media/audio/narration_story_last_station.mp3",
+      "bytes": 229085,
+      "sha256": "d6c463ea478e322d84462de332bab048569555a93b7827166a94b43f3f9eafd8",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "14.240000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.new_map",
+      "role": "narration",
+      "authored_target": "G5.12",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 5/Новая карта начинается за краем старой.mp3",
+      "asset_path": "media/audio/narration_story_new_map.mp3",
+      "bytes": 200664,
+      "sha256": "99c300fa761dd1d32e2cc025556f4cb3db3b926fbfc78c314b19fedbbb1cf499",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "12.480000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.network_lights",
+      "role": "narration",
+      "authored_target": "G5.11",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 5/Огни сети возвращаются.mp3",
+      "asset_path": "media/audio/narration_story_network_lights.mp3",
+      "bytes": 213621,
+      "sha256": "1079337cd59c2a1ea97a4bc82fb5fd5503a45d44c6ae8283fb8559e30194fbc9",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "13.280000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.first_route",
+      "role": "narration",
+      "authored_target": "G5.02",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 5/Первый маршрут.mp3",
+      "asset_path": "media/audio/narration_story_first_route.mp3",
+      "bytes": 216128,
+      "sha256": "aa8910be16a4a6334b25fb36e756ecfad840cc24da6404f5cadfcf1f1c98ca10",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "13.440000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.last_keeper_message",
+      "role": "narration",
+      "authored_target": "G5.10",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 5/Послание последнего Смотрителя.mp3",
+      "asset_path": "media/audio/narration_story_last_keeper_message.mp3",
+      "bytes": 224906,
+      "sha256": "2e6748346b6af56f3652984a9f0d2f4ffa69ccc589b4397e42aafea92ca4d93a",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "14.000000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.network_shutdown",
+      "role": "narration",
+      "authored_target": "G5.07",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 5/Почему сеть закрыли.mp3",
+      "asset_path": "media/audio/narration_story_network_shutdown.mp3",
+      "bytes": 257088,
+      "sha256": "3a3ef152e36e73deb4410c4cf3c7f7c3ad488b076bcbb6fa4d4106a1f248f7dc",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "16.000000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.last_relay",
+      "role": "narration",
+      "authored_target": "G5.08",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 5/Тико восстанавливает последнее реле.mp3",
+      "asset_path": "media/audio/narration_story_last_relay.mp3",
+      "bytes": 200664,
+      "sha256": "f3d60ba3fa5d4d6a3470139248355c567ed83d873784f5af15a86b13a4398b37",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "12.480000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.not_prediction",
+      "role": "narration",
+      "authored_target": "G5.04",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 5/Хроноскоп не предсказывал будущее.mp3",
+      "asset_path": "media/audio/narration_story_not_prediction.mp3",
+      "bytes": 194395,
+      "sha256": "a643348fe7e4e5e9dc463a8b4f62983e222917beb078606f7a2fc33e7eddf2e6",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "12.080000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.story.central_hub",
+      "role": "narration",
+      "authored_target": "G5.06",
+      "binding": "LoreScene.narrationCueKey",
+      "archive_entry": "Глава 5/Центральный узел маршрутов.mp3",
+      "asset_path": "media/audio/narration_story_central_hub.mp3",
+      "bytes": 265866,
+      "sha256": "1c6493f6e2d3331c0e227d9565c81fb3c7985caaa62444f5780c4a7a85a4e119",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "16.560000"
+        }
+      }
+    },
+    {
+      "cue_key": "video.intro_fox",
+      "role": "intro_video",
+      "binding": "INTRO_VIDEO_ASSET",
+      "archive_entry": "Заставка Лисенка.mp4",
+      "asset_path": "media/video/intro_fox.mp4",
+      "bytes": 9104300,
+      "sha256": "77d84ff71d306573c201fd2ce916f5edcec213cdee3e397553a9e0d33984eef5",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "profile": "High",
+            "codec_type": "video",
+            "width": 540,
+            "height": 960,
+            "pix_fmt": "yuv420p"
+          },
+          {
+            "codec_name": "aac",
+            "profile": "LC",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "79.969002"
+        }
+      }
+    },
+    {
+      "cue_key": "ambient.butcher_shop",
+      "role": "ambient",
+      "binding": "authored butcher shop earning cards only",
+      "archive_entry": "Мясная лавка.mp3",
+      "asset_path": "media/audio/ambient_butcher_shop.mp3",
+      "bytes": 13164,
+      "sha256": "988a4e8566b9cc5a18e3286a1ce7f289eecd2bf91f022cc397eab13e281c0422",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1,
+            "side_data_list": [
+              {}
+            ]
+          }
+        ],
+        "format": {
+          "duration": "1.552426"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.frayed_rope",
+      "role": "narration",
+      "authored_target": "2320:2",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Веревка перетерлась.mp3",
+      "asset_path": "media/audio/narration_unexpected_frayed_rope.mp3",
+      "bytes": 9821,
+      "sha256": "c8cf94596ad32d1665f51e0ef63eee079678d7170a13d46fbfb7c4014db2fe4a",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1,
+            "side_data_list": [
+              {}
+            ]
+          }
+        ],
+        "format": {
+          "duration": "1.157642"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.workbench_support",
+      "role": "narration",
+      "authored_target": "2320:194",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Верстак просел.mp3",
+      "asset_path": "media/audio/narration_unexpected_workbench_support.mp3",
+      "bytes": 9194,
+      "sha256": "d955758c729ee1fc4dab6bb9582f313bf3854dc21f8b6baa991dac531b575998",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1,
+            "side_data_list": [
+              {}
+            ]
+          }
+        ],
+        "format": {
+          "duration": "1.082993"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.unbound_journal",
+      "role": "narration",
+      "authored_target": "2326:112",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Журнал потерял переплет.mp3",
+      "asset_path": "media/audio/narration_unexpected_unbound_journal.mp3",
+      "bytes": 37135,
+      "sha256": "6ce23a18ba0a9d1adde98aa7ab27bd20ae994253a07029913383bd9c955e76f8",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "1.110204"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.stuck_lever",
+      "role": "narration",
+      "authored_target": "2326:256",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Заело рычаг.mp3",
+      "asset_path": "media/audio/narration_unexpected_stuck_lever.mp3",
+      "bytes": 20513,
+      "sha256": "b1b6ecc07ac9019bc917e80f112a52bf3e9bd2ddaf135c7f6d8c13ef24cac79c",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "1.280000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.wet_map",
+      "role": "narration",
+      "authored_target": "2308:2",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Карта намокла.mp3",
+      "asset_path": "media/audio/narration_unexpected_unbound_journal.mp3",
+      "bytes": 37135,
+      "sha256": "6ce23a18ba0a9d1adde98aa7ab27bd20ae994253a07029913383bd9c955e76f8",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "alias_of": "narration.unexpected.unbound_journal",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "1.110204"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.bent_key",
+      "role": "narration",
+      "authored_target": "2326:16",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Ключ погнулся.mp3",
+      "asset_path": "media/audio/narration_unexpected_bent_key.mp3",
+      "bytes": 8776,
+      "sha256": "b85c682b281bdb611ec2bd931008fd07e4af75c0e36c60cda5092e94d80452ac",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1,
+            "side_data_list": [
+              {}
+            ]
+          }
+        ],
+        "format": {
+          "duration": "1.016463"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.stuck_ring",
+      "role": "narration",
+      "authored_target": "2326:400",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Колесо не вращается.mp3",
+      "asset_path": "media/audio/narration_unexpected_stuck_ring.mp3",
+      "bytes": 26760,
+      "sha256": "a7d560032477a7ff299c93a6268623c3837aad5611d6d7500646b799373186db",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "48000",
+            "channels": 2,
+            "side_data_list": [
+              {}
+            ]
+          }
+        ],
+        "format": {
+          "duration": "1.655979"
+        }
+      },
+      "note": "Archive label Колесо не вращается is matched to the sole corresponding authored card Кольцо не вращается (2326:400); original bytes are an exact duplicate of Стрелка застряла. No gameplay or source title changed."
+    },
+    {
+      "cue_key": "narration.unexpected.wheel_cracked",
+      "role": "narration",
+      "authored_target": "2164:46",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Колесо треснуло.mp3",
+      "asset_path": "media/audio/narration_unexpected_workbench_support.mp3",
+      "bytes": 9194,
+      "sha256": "d955758c729ee1fc4dab6bb9582f313bf3854dc21f8b6baa991dac531b575998",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "alias_of": "narration.unexpected.workbench_support",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1,
+            "side_data_list": [
+              {}
+            ]
+          }
+        ],
+        "format": {
+          "duration": "1.082993"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.leaking_roof",
+      "role": "narration",
+      "authored_target": "2326:304",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Крыша пропускает воду.mp3",
+      "asset_path": "media/audio/narration_unexpected_leaking_roof.mp3",
+      "bytes": 4596,
+      "sha256": "b857f40e02c400391ec3077a2e24088b5a56c129f8b210a41f8af885ca2725a8",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1,
+            "side_data_list": [
+              {}
+            ]
+          }
+        ],
+        "format": {
+          "duration": "0.483855"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.tilted_roof_lens",
+      "role": "narration",
+      "authored_target": "2320:242",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Линза на крыше переколилась.mp3",
+      "asset_path": "media/audio/narration_unexpected_tilted_roof_lens.mp3",
+      "bytes": 72802,
+      "sha256": "d555d01d8fb6750a694bbbd117359f9c645bbc874ceac5502c05717d15b2f30f",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "5.357750"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.cloudy_lens",
+      "role": "narration",
+      "authored_target": "2326:208",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Линза помутнела.mp3",
+      "asset_path": "media/audio/narration_unexpected_cloudy_lens.mp3",
+      "bytes": 10030,
+      "sha256": "13f2c3230a6b0a1f9a14233822b9ef757a54997d0bc8f091f059abf97a263298",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1,
+            "side_data_list": [
+              {}
+            ]
+          }
+        ],
+        "format": {
+          "duration": "1.162925"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.backpack_strap",
+      "role": "narration",
+      "authored_target": "2297:2",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Лямка не выдержала.mp3",
+      "asset_path": "media/audio/narration_unexpected_frayed_rope.mp3",
+      "bytes": 9821,
+      "sha256": "c8cf94596ad32d1665f51e0ef63eee079678d7170a13d46fbfb7c4014db2fe4a",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "alias_of": "narration.unexpected.frayed_rope",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1,
+            "side_data_list": [
+              {}
+            ]
+          }
+        ],
+        "format": {
+          "duration": "1.157642"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.broken_window",
+      "role": "narration",
+      "authored_target": "2326:448",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Окно станции разбито.mp3",
+      "asset_path": "media/audio/narration_unexpected_broken_window.mp3",
+      "bytes": 28319,
+      "sha256": "c0ebe0b9d3e4ace493876cdde6e6529b7c892731c59727f038d005c5370e756c",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "1.705938"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.bent_frame",
+      "role": "narration",
+      "authored_target": "2320:98",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Оправа погнулась.mp3",
+      "asset_path": "media/audio/narration_unexpected_bent_key.mp3",
+      "bytes": 8776,
+      "sha256": "b85c682b281bdb611ec2bd931008fd07e4af75c0e36c60cda5092e94d80452ac",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "alias_of": "narration.unexpected.bent_key",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1,
+            "side_data_list": [
+              {}
+            ]
+          }
+        ],
+        "format": {
+          "duration": "1.016463"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.tarnished_plate",
+      "role": "narration",
+      "authored_target": "2326:160",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Пластина покрылась налетом.mp3",
+      "asset_path": "media/audio/narration_unexpected_tarnished_plate.mp3",
+      "bytes": 19643,
+      "sha256": "0a8d7f580afe44736d67f9a21e4f38aa3ce3bd3a49b73ede3ed78c08ccd5a705",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1,
+            "side_data_list": [
+              {}
+            ]
+          }
+        ],
+        "format": {
+          "duration": "2.390975"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.scratched_plate",
+      "role": "narration",
+      "authored_target": "2320:290",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Пластина поцарапана.mp3",
+      "asset_path": "media/audio/narration_unexpected_cloudy_lens.mp3",
+      "bytes": 10030,
+      "sha256": "13f2c3230a6b0a1f9a14233822b9ef757a54997d0bc8f091f059abf97a263298",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "alias_of": "narration.unexpected.cloudy_lens",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1,
+            "side_data_list": [
+              {}
+            ]
+          }
+        ],
+        "format": {
+          "duration": "1.162925"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.resin_backpack",
+      "role": "narration",
+      "authored_target": "2313:2",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Рюкзак испачканный смолой.mp3",
+      "asset_path": "media/audio/narration_unexpected_resin_backpack.mp3",
+      "bytes": 16213,
+      "sha256": "ddd151331666487a53f032a1a6e5d8a1f3e14713c776b7556bc4ad19be0a0725",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "0.558417"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.fragile_scroll",
+      "role": "narration",
+      "authored_target": "2326:64",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Свиток рассыпается.mp3",
+      "asset_path": "media/audio/narration_unexpected_unbound_journal.mp3",
+      "bytes": 37135,
+      "sha256": "6ce23a18ba0a9d1adde98aa7ab27bd20ae994253a07029913383bd9c955e76f8",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "alias_of": "narration.unexpected.unbound_journal",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "1.110204"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.stuck_compass",
+      "role": "narration",
+      "authored_target": "2320:338",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Стрелка застряла.mp3",
+      "asset_path": "media/audio/narration_unexpected_stuck_ring.mp3",
+      "bytes": 26760,
+      "sha256": "a7d560032477a7ff299c93a6268623c3837aad5611d6d7500646b799373186db",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "alias_of": "narration.unexpected.stuck_ring",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "48000",
+            "channels": 2,
+            "side_data_list": [
+              {}
+            ]
+          }
+        ],
+        "format": {
+          "duration": "1.655979"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.stomach_ache",
+      "role": "narration",
+      "authored_target": "2164:139",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/У Рыжика заболел живот.mp3",
+      "asset_path": "media/audio/narration_unexpected_stomach_ache.mp3",
+      "bytes": 58780,
+      "sha256": "ada18626139f0bba3a42c08247f3fd55a76a2596dff6800466dfcd6f2e0cdc20",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "1.400000"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.smoky_lantern",
+      "role": "narration",
+      "authored_target": "2320:146",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Фонарь коптит.mp3",
+      "asset_path": "media/audio/narration_unexpected_tilted_roof_lens.mp3",
+      "bytes": 72802,
+      "sha256": "d555d01d8fb6750a694bbbd117359f9c645bbc874ceac5502c05717d15b2f30f",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "alias_of": "narration.unexpected.tilted_roof_lens",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "5.357750"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.lantern_broken",
+      "role": "narration",
+      "authored_target": "2164:92",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Фонарь разбился.mp3",
+      "asset_path": "media/audio/narration_unexpected_lantern_broken.mp3",
+      "bytes": 6268,
+      "sha256": "18c0e2a4e87801a709422f815c4f8b46ba19296832b8a3ea2e0e522582dd9583",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1,
+            "side_data_list": [
+              {}
+            ]
+          }
+        ],
+        "format": {
+          "duration": "0.715193"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.missing_gear_tooth",
+      "role": "narration",
+      "authored_target": "2320:386",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Шестерня без зубца.mp3",
+      "asset_path": "media/audio/narration_unexpected_missing_gear_tooth.mp3",
+      "bytes": 40542,
+      "sha256": "e26609a5d51735b5837e4fc17c38e8d2452781619b250101e67f1303af62afec",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "2.533875"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.loose_tripod",
+      "role": "narration",
+      "authored_target": "2320:50",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Штатив шатается.mp3",
+      "asset_path": "media/audio/narration_unexpected_workbench_support.mp3",
+      "bytes": 9194,
+      "sha256": "d955758c729ee1fc4dab6bb9582f313bf3854dc21f8b6baa991dac531b575998",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "alias_of": "narration.unexpected.workbench_support",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1,
+            "side_data_list": [
+              {}
+            ]
+          }
+        ],
+        "format": {
+          "duration": "1.082993"
+        }
+      }
+    },
+    {
+      "cue_key": "narration.unexpected.jammed_crate",
+      "role": "narration",
+      "authored_target": "2326:352",
+      "binding": "UnexpectedCard.narrationCueKey",
+      "archive_entry": "Непредвиденные траты/Ящик заклинило.mp3",
+      "asset_path": "media/audio/narration_unexpected_jammed_crate.mp3",
+      "bytes": 8149,
+      "sha256": "1a14630e00fc110622859bf1142fc9d92fbde35499212e913266b9e6a4581dc3",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1,
+            "side_data_list": [
+              {}
+            ]
+          }
+        ],
+        "format": {
+          "duration": "0.929320"
+        }
+      }
+    },
+    {
+      "cue_key": "sound.payment",
+      "role": "action_sound",
+      "binding": "negative-cost event choices only",
+      "archive_entry": "Оплата чего-либо.mp3",
+      "asset_path": "media/audio/sound_payment.mp3",
+      "bytes": 56646,
+      "sha256": "dbd82f3152d7bf4f59b246f000cc14663ff08a560f8ea2568f5aec057d1ebdc2",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "3.524375"
+        }
+      }
+    },
+    {
+      "cue_key": "ambient.port",
+      "role": "ambient",
+      "binding": "six authored port/pier earning cards, including caretaker boat preparation",
+      "archive_entry": "Порт.mp3",
+      "asset_path": "media/audio/ambient_port.mp3",
+      "conversion": "Gain normalization +10 dB from original archive MP3; FFmpeg volume=10dB; libmp3lame 192 kbit/s, compression_level=0; original 44100 Hz stereo retained; no clipping.",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "2.600000"
+        }
+      },
+      "source_bytes": 106715,
+      "source_sha256": "f318b07d05e22c0b31a75a1fea67a2b01c4a6fb9300582850b927226969c9c57",
+      "runtime_bytes": 63991,
+      "runtime_sha256": "b4e3a1908430f0f12d6c9a421923e977d4dd32160bc60b82df7f473dea541f55",
+      "source_probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "2.600000"
+        }
+      },
+      "source_volume_db": {
+        "mean_volume": -29.3,
+        "max_volume": -17.4
+      },
+      "runtime_volume_db": {
+        "mean_volume": -19.6,
+        "max_volume": -7.6
+      }
+    },
+    {
+      "cue_key": "sound.purchase_appears",
+      "role": "appearance",
+      "binding": "PurchasePresentation.media.appearanceCueKey",
+      "archive_entry": "Появление необязательных покупок.mp3",
+      "asset_path": "media/audio/sound_purchase_appears.mp3",
+      "bytes": 32808,
+      "sha256": "e4fac75b983fe098de5bc28d2d37b827d4ab0232349d83bbb055548ca007c2d7",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1,
+            "side_data_list": [
+              {}
+            ]
+          }
+        ],
+        "format": {
+          "duration": "4.029025"
+        }
+      }
+    },
+    {
+      "cue_key": "story.chapter_1",
+      "role": "chapter_background_music",
+      "authored_target": "chapter_1",
+      "binding": "LoreChapter.presentation.musicCueKey → current story act → global application background",
+      "archive_entry": "Глава 1/Главная Тема.mp3",
+      "asset_path": "media/audio/story_chapter_1.mp3",
+      "bytes": 4903133,
+      "sha256": "120d5d2b5528eb4df91d265e6111ff376876dfb9e6bd92584d4f4cc27eba0fa4",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "48000",
+            "channels": 2,
+            "disposition": {
+              "attached_pic": 0
+            }
+          },
+          {
+            "codec_name": "mjpeg",
+            "profile": "Baseline",
+            "codec_type": "video",
+            "disposition": {
+              "attached_pic": 1
+            }
+          }
+        ],
+        "format": {
+          "duration": "212.453500"
+        }
+      }
+    },
+    {
+      "cue_key": "story.chapter_2",
+      "role": "chapter_background_music",
+      "authored_target": "chapter_2",
+      "binding": "LoreChapter.presentation.musicCueKey → current story act → global application background",
+      "archive_entry": "Глава 2/Главная Тема.mp3",
+      "asset_path": "media/audio/story_chapter_2.mp3",
+      "bytes": 4436260,
+      "sha256": "fc52f934e4767b6ea8795af35d5cc3350641955afd82e5ea3870a379a59cd39a",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "48000",
+            "channels": 2,
+            "disposition": {
+              "attached_pic": 0
+            }
+          },
+          {
+            "codec_name": "mjpeg",
+            "profile": "Baseline",
+            "codec_type": "video",
+            "disposition": {
+              "attached_pic": 1
+            }
+          }
+        ],
+        "format": {
+          "duration": "194.973500"
+        }
+      }
+    },
+    {
+      "cue_key": "story.chapter_3",
+      "role": "chapter_background_music",
+      "authored_target": "chapter_3",
+      "binding": "LoreChapter.presentation.musicCueKey → current story act → global application background",
+      "archive_entry": "Глава 3/Главная Тема.mp3",
+      "asset_path": "media/audio/story_chapter_3.mp3",
+      "bytes": 4786953,
+      "sha256": "fdfb3fcb582f79591e1e798fa3ad5a544b3f23234c1f7bb5d29391149fed11c4",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "48000",
+            "channels": 2,
+            "disposition": {
+              "attached_pic": 0
+            }
+          },
+          {
+            "codec_name": "mjpeg",
+            "profile": "Baseline",
+            "codec_type": "video",
+            "disposition": {
+              "attached_pic": 1
+            }
+          }
+        ],
+        "format": {
+          "duration": "207.293500"
+        }
+      }
+    },
+    {
+      "cue_key": "story.chapter_4",
+      "role": "chapter_background_music",
+      "authored_target": "chapter_4",
+      "binding": "LoreChapter.presentation.musicCueKey → current story act → global application background",
+      "archive_entry": "Глава 4/Главная Тема.mp3",
+      "asset_path": "media/audio/story_chapter_4.mp3",
+      "bytes": 4900043,
+      "sha256": "f283e71bb2a09aafaabc24ea1cd4333cf30fd5329c3f903862761e25b5420668",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "48000",
+            "channels": 2,
+            "disposition": {
+              "attached_pic": 0
+            }
+          },
+          {
+            "codec_name": "mjpeg",
+            "profile": "Baseline",
+            "codec_type": "video",
+            "disposition": {
+              "attached_pic": 1
+            }
+          }
+        ],
+        "format": {
+          "duration": "212.773500"
+        }
+      }
+    },
+    {
+      "cue_key": "story.chapter_5",
+      "role": "chapter_background_music",
+      "authored_target": "chapter_5",
+      "binding": "LoreChapter.presentation.musicCueKey → current story act → global application background",
+      "archive_entry": "Глава 5/Главная Тема.mp3",
+      "asset_path": "media/audio/story_chapter_5.mp3",
+      "bytes": 4300982,
+      "sha256": "7b22a3d29e96c697971df4656da07cab00544f45ce1436889f04d32f421b92ce",
+      "conversion": "none; original bytes",
+      "status": "imported",
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "48000",
+            "channels": 2,
+            "disposition": {
+              "attached_pic": 0
+            }
+          },
+          {
+            "codec_name": "mjpeg",
+            "profile": "Baseline",
+            "codec_type": "video",
+            "disposition": {
+              "attached_pic": 1
+            }
+          }
+        ],
+        "format": {
+          "duration": "188.453500"
+        }
+      }
+    },
+    {
+      "cue_key": "sound.telescope_adjustment",
+      "role": "effect",
+      "status": "generated",
+      "generated_on": "2026-09-27",
+      "authored_target": "figma-2163-43-v1; inherited by figma-2163-43-v1:balance-v2",
+      "binding": "EventCardCopy.presentation.media.appearanceCueKey; once per event occurrence",
+      "asset_path": "media/audio/sound_telescope_adjustment.mp3",
+      "source": {
+        "kind": "procedural_synthesis",
+        "decision": "MEDIA-D-006",
+        "generator_path": "docs/design/assets/sources/telescope-adjustment-2026-09-27/generate.py",
+        "generator_sha256": "66ce60f9b56639f4614a4c800b19848ae2bb47bd9e0c361138b2c83699fd305c",
+        "seed": 20260927,
+        "external_samples": false,
+        "description": "Five softly attacked, damped, irregular mechanical detents with low-level friction; no speech or music."
+      },
+      "source_path": "docs/design/assets/sources/telescope-adjustment-2026-09-27/telescope_adjustment.wav",
+      "source_bytes": 110294,
+      "source_sha256": "a3a1e4a8a3ccedd433c947bf2054241fb614fa81f82ac0193bf5465d8f75273e",
+      "runtime_bytes": 31391,
+      "runtime_sha256": "1386719da4ed41b9836bc08a2e4ebfca80a0636c5d1fa4dcb6f03faca89a8c54",
+      "conversion": "Python standard-library deterministic synthesis, PCM16 mono 44100 Hz; FFmpeg libmp3lame 192 kbit/s compression_level 0, unchanged sample rate/channels; no source archive member.",
+      "encoder_version": "ffmpeg version 8.1.1-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+      "source_probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "pcm_s16le",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "1.250000"
+        }
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio",
+            "sample_rate": "44100",
+            "channels": 1
+          }
+        ],
+        "format": {
+          "duration": "1.250000"
+        }
+      },
+      "runtime_volume_db": {
+        "mean": -26.8,
+        "peak": -9.3
+      },
+      "quality_checks": {
+        "decoder_errors": 0,
+        "clipping": false,
+        "leading_silence_seconds_at_minus_50_db": 0,
+        "soft_attack_ms": 4
+      }
+    }
+  ],
+  "excluded": [],
+  "notes": [
+    "Archive label Колесо не вращается is treated as a source filename typo for the sole corresponding authored card Кольцо не вращается (2326:400); the mapping is recorded on the entry.",
+    "Source filenames can reflect historical wording and the fixed name Рыжик; audio is not synthesized from current pet names or display copy.",
+    "Final user clarification 2026-09-27: all five Главная Тема clips are the global application background for their respective chapters. A chapter change selects its next theme; opening another screen does not restart the same track. Music is quieter under voice and shares the global mute setting."
+  ]
+}

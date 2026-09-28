@@ -36,6 +36,8 @@ internal data class DeedGameUiState(
     val busy: Boolean = false,
     val message: String? = null,
     val canRetry: Boolean = false,
+    val audioOccurrenceId: String? = null,
+    val eventMedia: EventMedia = EventMedia(),
 )
 
 /** Connects an actual offered deed to a transient board and one atomic engine outcome. */
@@ -279,6 +281,8 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
                 pairArtwork = theme?.pairs.orEmpty()),
             message = message,
             canRetry = pending != null || rejectedAction != null || comparisonSaveFailed,
+            audioOccurrenceId = occurrence.id,
+            eventMedia = card?.presentation?.media ?: EventMedia(),
         )
     }
 

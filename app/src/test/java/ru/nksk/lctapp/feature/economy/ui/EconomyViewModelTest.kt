@@ -105,6 +105,36 @@ class EconomyViewModelTest {
         assertFalse(model.uiState.value.saving)
     }
 
+    @Test fun foodAdviceCountsTheLiveDraftAllocationInsteadOfRepeatingTheWholeFoodRequirement() = runTest(dispatcher) {
+        val repo = BudgetRepository(allocating())
+        val model = model(repo)
+        advanceUntilIdle()
+        fun shown() = model.uiState.value.budgetScreenState().budget
+        assertEquals(35L, shown().knownNeeds)
+        assertEquals("На еду до следующей недели не хватает ещё 35 монет.", shown().foodAdvice)
+
+        model.onAction(EconomyAction.Adjust(BudgetArticle.NEEDS, true))
+        advanceUntilIdle()
+        assertEquals(35L, shown().knownNeeds)
+        assertEquals(30L, shown().foodShortfall)
+        assertEquals("На еду до следующей недели не хватает ещё 30 монет.", shown().foodAdvice)
+        // The saved plan still contains zero: the visible warning must use planning.draft.
+        assertEquals(0L, repo.state.value!!.economy.plan.needs)
+
+        repeat(6) { model.onAction(EconomyAction.Adjust(BudgetArticle.NEEDS, true)) }
+        advanceUntilIdle()
+        assertEquals(0L, shown().foodShortfall)
+        assertEquals("На еду до следующей недели хватает.", shown().foodAdvice)
+
+        model.onAction(EconomyAction.Adjust(BudgetArticle.NEEDS, true))
+        advanceUntilIdle()
+        assertEquals(40L, shown().needs)
+        assertEquals(0L, shown().foodShortfall)
+        assertEquals("На еду до следующей недели хватает.", shown().foodAdvice)
+        assertEquals(100L, repo.state.value!!.economy.availableBalance)
+        assertEquals(0L, shown().copy(needs = 0, knownNeeds = 0).foodShortfall)
+    }
+
     @Test fun finalConfirmationWaitsForQueuedEditsAndCannotUseAnUnseenDraft() = runTest(dispatcher) {
         val repo = BudgetRepository(allocating())
         val model = model(repo)

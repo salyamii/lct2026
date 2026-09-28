@@ -5,9 +5,22 @@ import org.junit.Test
 import ru.nksk.lctapp.domain.engine.EventCardCopy
 import ru.nksk.lctapp.domain.engine.EventPolicy
 import ru.nksk.lctapp.domain.minigame.DeedGameKind
+import ru.nksk.lctapp.domain.location.GameLocation
 import ru.nksk.lctapp.domain.pet.PetVisualState
 
 class EventSpecTest {
+    @Test fun destinationBelongsToTheChosenActionAndDoesNotComeFromTheCardScene() {
+        val result = spec(listOf(
+            EventChoiceSpec("return", "Вернуться", destination = GameLocation.OBSERVATORY),
+            EventChoiceSpec("stay", "Остаться"),
+        )).copy(card = spec(emptyList()).card.copy(scene = "trail")).compile()
+        assertEquals(mapOf("event:return" to GameLocation.OBSERVATORY), result.policy.choiceDestinations)
+        assertEquals("trail", result.card.scene)
+        assertTrue(runCatching { spec(listOf(EventChoiceSpec("return", "Вернуться")))
+            .copy(policy = EventPolicy(0, choiceDestinations = mapOf("event:return" to GameLocation.OBSERVATORY)))
+            .compile() }.isFailure)
+    }
+
     @Test fun choiceIdentityOrderAndEffectsCompileTogetherWithoutInferringMissingOverrides() {
         val result = spec(listOf(
             EventChoiceSpec("pay", "Очистить составом", moneyDelta = -3, energyCost = 0,

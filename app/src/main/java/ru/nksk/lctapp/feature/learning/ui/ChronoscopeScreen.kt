@@ -22,7 +22,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -111,6 +110,7 @@ internal fun ChronoscopeScreen(state: ReflectionUiState, onAction: (ReflectionAc
         savings = shown?.economy?.savingsBalance?.takeIf { showHistoricalBalance },
         sceneFraction = .38f,
         sceneAspectRatio = if (step == ChronoscopeStep.QUIZ) 2.1f else null,
+        sceneBottomColor = if (step == ChronoscopeStep.QUIZ) GamePaper else Color.Transparent,
         scene = stagedScene,
         contentScrollState = contentScroll,
         footer = { ChronoscopeActions(state, selectedOptionId, onAction, onExit) },
@@ -182,12 +182,13 @@ internal fun ChronoscopeScreen(state: ReflectionUiState, onAction: (ReflectionAc
                 }
             }
             ChronoscopeStep.CONSEQUENCES, ChronoscopeStep.COMPARISON -> {
-                GameTitle("Что получилось бы?")
+                GameTitle(memory?.decision?.title?.let { renderPetText(it, name).asGameUiText() } ?: "А если поступить иначе?")
                 Horizon(state)
-                if (state.simulation?.status == TimeMachineStatus.DIVERGED) {
-                    state.simulation.reason?.let { StoryNote("Дальше пути расходятся", it) }
-                }
                 PathsComparison(state)
+                if (state.simulation?.status == TimeMachineStatus.DIVERGED) {
+                    StoryNote("Что дальше?", "Дальше этот вариант пока не можем показать. " +
+                        "Здесь только те события, которые получилось сравнить.")
+                }
             }
             ChronoscopeStep.QUIZ -> state.quiz?.let { quiz ->
                 AdventureHeading(quiz.prompt.asGameUiText(), Modifier.onGloballyPositioned {
@@ -238,7 +239,7 @@ private fun SecondaryAction(text: String, onClick: () -> Unit, enabled: Boolean 
 @Composable
 private fun QuizScene(state: ReflectionUiState) {
     Box(Modifier.fillMaxSize().background(Brush.verticalGradient(
-        listOf(Color(0xFFDAD9E9), Color(0xFFF5F1E7)),
+        listOf(Color(0xFFDAD9E9), GamePaper),
     )), contentAlignment = Alignment.BottomCenter) {
         val pet = state.memory?.before?.pet ?: state.realGame?.pet
         pet?.let { adventurePetArtwork(it)?.let { art ->
@@ -316,7 +317,7 @@ private fun ChronoscopeActions(state: ReflectionUiState, selectedOptionId: Strin
 @Composable
 private fun Horizon(state: ReflectionUiState) {
     state.simulation?.let { GameBody(chronoscopeHorizon(it, state.memory?.decision?.day)) }
-    state.comparisonBoundary?.let {
+    state.comparisonBoundary?.takeIf { state.simulation?.status == TimeMachineStatus.DIVERGED }?.let {
         Text(it, color = GameInk.copy(alpha = .7f), style = MaterialTheme.typography.bodyMedium)
     }
 }
@@ -327,61 +328,27 @@ private fun PathsComparison(state: ReflectionUiState) {
     val alternative = state.alternativePath ?: return
     val differences = chronoscopeDifferences(original, alternative,
         showLedgerTotal = state.quiz?.kind == TimeMachineQuizKind.LEDGER)
-    if (differences.original.isNotEmpty()) PathConsequences("В нашей истории", differences.original)
-    if (differences.alternative.isNotEmpty()) PathConsequences("При другом выборе", differences.alternative)
-    if (differences.money.isNotEmpty()) Surface(shape = RoundedCornerShape(20.dp), color = GamePaper,
-        border = BorderStroke(1.dp, PathRule)) {
-        BoxWithConstraints(Modifier.fillMaxWidth().padding(14.dp)) {
-            val stacked = maxWidth < 280.dp || LocalDensity.current.fontScale >= 1.4f
-            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                if (!stacked) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Spacer(Modifier.weight(1.25f))
-                    PathLabel("Было", Modifier.weight(1f))
-                    PathLabel("Могло быть", Modifier.weight(1f))
-                }
-                differences.money.forEachIndexed { index, row ->
-                    if (!stacked || index > 0) HorizontalDivider(color = PathRule)
-                    ComparisonAmount(row.label, row.original, row.alternative, stacked)
-                }
-            }
-        }
+    val selectedAlternative = state.memory?.decision?.alternatives?.find {
+        it.id == state.simulation?.request?.alternativeId
     }
+    PathConsequences("Как было", "Выбрали «${state.memory?.originalChoice ?: "Прежний поступок"}»",
+        differences.original + chronoscopeMoneyLines(differences, alternative = false))
+    val otherChoice = selectedAlternative?.title?.let {
+        renderPetText(it, original.state.pet.name).asGameActionLabel()
+    } ?: "Другой поступок"
+    PathConsequences("А если выбрать", "«$otherChoice»",
+        differences.alternative + chronoscopeMoneyLines(differences, alternative = true))
 }
 
 @Composable
-private fun ComparisonAmount(label: String, original: Long, alternative: Long, stacked: Boolean) {
-    if (stacked) {
-        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(label, color = GameInk, style = MaterialTheme.typography.bodyMedium)
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                PathLabel("Было\n$original", Modifier.weight(1f))
-                PathLabel("Могло быть\n$alternative", Modifier.weight(1f))
-            }
-        }
-    } else {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(label, Modifier.weight(1.25f), color = GameInk, style = MaterialTheme.typography.bodyMedium)
-            Text(original.toString(), Modifier.weight(1f), color = GameInk,
-                style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-            Text(alternative.toString(), Modifier.weight(1f), color = GameInk,
-                style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-        }
-    }
-}
-
-@Composable
-private fun PathLabel(text: String, modifier: Modifier) {
-    Text(text, modifier.padding(horizontal = 5.dp, vertical = 4.dp), color = GameInk,
-        style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
-}
-
-@Composable
-private fun PathConsequences(title: String, consequences: List<String>) {
+private fun PathConsequences(title: String, choice: String, consequences: List<String>) {
     Surface(shape = RoundedCornerShape(18.dp), color = GamePaper, border = BorderStroke(1.dp, PathRule)) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(title, color = GameInk.copy(alpha = .72f), style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.SemiBold)
+            Text(choice, color = GameInk, style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold)
+            if (consequences.isNotEmpty()) HorizontalDivider(color = PathRule)
             consequences.forEach { Text(it, color = GameInk, style = MaterialTheme.typography.bodyLarge) }
         }
     }
@@ -400,8 +367,8 @@ private fun ComparisonScene(state: ReflectionUiState) {
                         style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold,
                         textAlign = TextAlign.Center)
                     Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
-                        path?.state?.pet?.let { pet -> adventurePetArtwork(pet)?.let { art ->
-                            MovingPetArtwork(art, pet.name, pet.toAdventurePetPresentation().motionIntensity,
+                        path?.petPresentation?.let { pet -> pet.artworkRes?.let { art ->
+                            MovingPetArtwork(art, pet.name, pet.motionIntensity,
                                 Modifier.fillMaxSize())
                         } }
                     }

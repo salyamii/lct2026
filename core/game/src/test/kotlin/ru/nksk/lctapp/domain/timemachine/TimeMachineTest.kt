@@ -67,13 +67,14 @@ class TimeMachineTest {
         val quiz = requireNotNull(f.machine.quiz(requireNotNull(result.simulationId), TimeMachineQuizKind.CAUSE))
         assertTrue(quiz.prompt.contains("Заклинило компас"))
         assertTrue(quiz.prompt.contains("Починить самому"))
-        assertEquals("Справились бы сами: сохранили 25 монет, но потратили 2 силы",
+        assertEquals("Сделаем сами: сохраним 25 монет, но устанем",
             quiz.options.single { it.id == "spent_less" }.text)
         assertFalse(f.machine.submitQuiz(quiz.id, "paid_for_help", "repair-wrong").correct)
         val answer = f.machine.submitQuiz(quiz.id, "spent_less", "repair-correct")
         assertTrue(answer.correct)
-        assertTrue(answer.explanation.contains("25 монет за помощь"))
-        assertTrue(answer.explanation.contains("потратили 2 силы"))
+        assertEquals("При выборе «Починить самому» сделаем работу сами и устанем. Платить за это действие не нужно: сохраним 25 монет.",
+            answer.explanation)
+        assertFalse(quiz.options.any { "силы" in it.text || "помощь" in it.text })
         assertEquals(live, HistoryCodec.encodeState(f.repo.state))
     }
 
@@ -84,12 +85,74 @@ class TimeMachineTest {
         val quiz = requireNotNull(f.machine.quiz(requireNotNull(result.simulationId), TimeMachineQuizKind.CAUSE))
         assertTrue(quiz.prompt.contains("Игра с кольцами"))
         assertTrue(quiz.prompt.contains("Пройти мимо"))
-        assertEquals("Отказались бы от оплаты и сохранили 7 монет", quiz.options.single { it.id == "spent_less" }.text)
+        assertEquals("Не будем платить и сохраним 7 монет", quiz.options.single { it.id == "spent_less" }.text)
         assertFalse(quiz.options.any { it.id == "different_income" || it.id == "different_transfer" })
         val answer = f.machine.submitQuiz(quiz.id, "spent_less", "ring-answer")
         assertTrue(answer.correct)
-        assertEquals("В этой ситуации мы заплатили 7 монет. Выбор «Пройти мимо» не требует оплаты, поэтому эти монеты остались бы у нас.",
+        assertEquals("В нашей истории мы заплатили 7 монет. При выборе «Пройти мимо» платить не нужно, поэтому сохраняем 7 монет.",
             answer.explanation)
+    }
+
+    @Test fun purchaseQuestionConnectsTheCoinsToTheItemActuallyBought() = runTest {
+        val f = Fixture(shopTitle = "Лавка у причала", alternativeTitle = "Пройти мимо", price = 5,
+            purchasedItemName = "Игрушечный кораблик")
+        val purchase = f.record(EngineCommand.CompleteEvent("shop-occurrence", "buy"))
+        val result = f.machine.simulate(TimeMachineRequest(purchase.id, "choice:pass"))
+        val quiz = requireNotNull(f.machine.quiz(requireNotNull(result.simulationId), TimeMachineQuizKind.CAUSE))
+        assertEquals("Мы купили «Игрушечный кораблик» за 5 монет. А если выбрать «Пройти мимо», что изменится?", quiz.prompt)
+        assertEquals("Сохраним 5 монет, но «Игрушечный кораблик» не получим",
+            quiz.options.single { it.id == "spent_less" }.text)
+        assertFalse(f.machine.submitQuiz(quiz.id, "paid_anyway", "item-wrong").correct)
+        val answer = f.machine.submitQuiz(quiz.id, "spent_less", "item-correct")
+        assertTrue(answer.correct)
+        assertEquals("В нашей истории мы потратили 5 монет на «Игрушечный кораблик». При выборе «Пройти мимо» не покупаем этот предмет, поэтому сохраняем 5 монет.",
+            answer.explanation)
+    }
+
+    @Test fun questionDoesNotClaimLosingAnItemGrantedInBothChoices() = runTest {
+        val f = Fixture(shopTitle = "Праздник у причала", alternativeTitle = "Пройти мимо", price = 5,
+            purchasedItemName = "Подарок на память", itemInBothChoices = true)
+        val purchase = f.record(EngineCommand.CompleteEvent("shop-occurrence", "buy"))
+        val result = f.machine.simulate(TimeMachineRequest(purchase.id, "choice:pass"))
+        assertEquals(result.baseline!!.state.ownedItems.map { it.itemId }, result.alternative!!.state.ownedItems.map { it.itemId })
+        val quiz = requireNotNull(f.machine.quiz(requireNotNull(result.simulationId), TimeMachineQuizKind.CAUSE))
+        assertFalse("Подарок на память" in quiz.prompt)
+        assertEquals("Не будем платить и сохраним 5 монет", quiz.options.single { it.id == "spent_less" }.text)
+    }
+
+    @Test fun quizRendersAuthoredTitleItemAndActionWithThePetsNameAtTheDecision() = runTest {
+        val f = Fixture(shopTitle = "Выбор для {petName}", alternativeTitle = "Пройти мимо вместе с {petName}",
+            purchasedItemName = "Кораблик для {petName}", petName = "Киви")
+        val purchase = f.record(EngineCommand.CompleteEvent("shop-occurrence", "buy"))
+        f.technical { it.copy(pet = it.pet.copy(name = "Луна")) }
+        val result = f.machine.simulate(TimeMachineRequest(purchase.id, "choice:pass"))
+        val simulationId = requireNotNull(result.simulationId)
+        val cause = requireNotNull(f.machine.quiz(simulationId, TimeMachineQuizKind.CAUSE))
+        val ledger = requireNotNull(f.machine.quiz(simulationId, TimeMachineQuizKind.LEDGER))
+        assertTrue(cause.prompt.contains("Кораблик для Киви"))
+        assertTrue(cause.prompt.contains("Пройти мимо вместе с Киви"))
+        assertTrue(ledger.prompt.contains("Выбор для Киви"))
+        assertTrue(ledger.prompt.contains("Пройти мимо вместе с Киви"))
+        val answer = f.machine.submitQuiz(cause.id, "spent_less", "named-answer")
+        val copy = listOf(cause.prompt, ledger.prompt, answer.explanation) + cause.options.map { it.text }
+        assertTrue(copy.none { "{petName}" in it })
+        assertTrue(copy.none { "Луна" in it })
+        assertTrue(answer.explanation.contains("Кораблик для Киви"))
+    }
+
+    @Test fun materialPurchaseDoesNotBecomePaymentForHelpAndManualWorkUsesPlainEffortCopy() = runTest {
+        val f = Fixture(manualRepair = true, shopTitle = "Пластина покрылась налётом",
+            alternativeTitle = "Почистить самим · немного устанет", price = 3, manualEnergy = 1)
+        val purchase = f.record(EngineCommand.CompleteEvent("shop-occurrence", "buy"))
+        val result = f.machine.simulate(TimeMachineRequest(purchase.id, "choice:pass"))
+        val quiz = requireNotNull(f.machine.quiz(requireNotNull(result.simulationId), TimeMachineQuizKind.CAUSE))
+        assertEquals("«Пластина покрылась налётом»: мы потратили 3 монеты. А если выбрать «Почистить самим», что изменится?", quiz.prompt)
+        assertEquals("Сделаем сами: сохраним 3 монеты, но немного устанем", quiz.options.single { it.id == "spent_less" }.text)
+        val answer = f.machine.submitQuiz(quiz.id, "spent_less", "cleaning-answer")
+        assertTrue(answer.correct)
+        assertFalse("помощ" in answer.explanation)
+        assertFalse("сил" in answer.explanation)
+        assertEquals(1, result.baseline!!.state.engine!!.energy - result.alternative!!.state.engine!!.energy)
     }
 
     @Test fun reflectionsIncludePaidOptionalPurchaseButNotFoodOrSavingsMovements() = runTest {
@@ -388,15 +451,19 @@ class TimeMachineTest {
     }
 
     @Test fun quizUsesComputedLedgerAndOnlyPersistsCounterfactualLearning() = runTest {
-        val f = Fixture()
+        val f = Fixture(shopTitle = "Лавка у причала", alternativeTitle = "Пройти мимо")
         val choice = f.record(EngineCommand.CompleteEvent("shop-occurrence", "buy"))
         val last = f.record(EngineCommand.Feed("basic"))
         val live = HistoryCodec.encodeState(f.repo.state)
         val result = f.machine.simulate(TimeMachineRequest(choice.id, "choice:pass", last.sequence))
         val quiz = requireNotNull(f.machine.quiz(result.simulationId!!, TimeMachineQuizKind.LEDGER))
         assertTrue(quiz.options.any { it.id == "coins:5" })
+        assertTrue(quiz.prompt.contains("Лавка у причала"))
+        assertTrue(quiz.prompt.contains("Пройти мимо"))
+        assertTrue(quiz.prompt.contains("покупки, которые случились дальше"))
         val answer = f.machine.submitQuiz(quiz.id, "coins:5", "submission-1", questionPresented = true)
         assertTrue(answer.correct)
+        assertEquals("В этом варианте на все покупки и услуги потратили 5 монет.", answer.explanation)
         assertEquals(1, answer.attempt)
         val retry = f.machine.submitQuiz(quiz.id, "coins:5", "submission-1", questionPresented = true)
         assertTrue(retry.alreadyRecorded)
@@ -408,6 +475,22 @@ class TimeMachineTest {
         assertFalse(SkillEvaluator().evaluate(listOf(fact)).single().independentOfGameHints)
         assertEquals(live, HistoryCodec.encodeState(f.repo.state))
         assertEquals(0, f.repo.updateCalls)
+    }
+
+    @Test fun ledgerExplanationNamesOnlyTheSavingsMovementsThatActuallyHappened() = runTest {
+        val f = Fixture(alternativeTitle = "Пройти мимо")
+        val choice = f.record(EngineCommand.CompleteEvent("shop-occurrence", "buy"))
+        f.record(EngineCommand.DepositSavings(10))
+        f.record(EngineCommand.WithdrawSavings(3, confirmed = true))
+        val last = f.record(EngineCommand.Feed("basic"))
+        val result = f.machine.simulate(TimeMachineRequest(choice.id, "choice:pass", last.sequence))
+        val quiz = requireNotNull(f.machine.quiz(requireNotNull(result.simulationId), TimeMachineQuizKind.LEDGER))
+        val answer = f.machine.submitQuiz(quiz.id, "coins:5", "ledger-savings")
+        assertTrue(answer.correct)
+        assertTrue(answer.explanation.startsWith("В этом варианте на все покупки и услуги потратили 5 монет."))
+        assertTrue(answer.explanation.contains("В копилку положили ещё 10 монет"))
+        assertTrue(answer.explanation.contains("Из копилки достали 3 монеты"))
+        assertFalse(answer.explanation.contains("перевод", ignoreCase = true))
     }
 
     @Test fun causeQuizDoesNotPretendSimulationIsApplicationInRealLife() = runTest {
@@ -510,6 +593,10 @@ class TimeMachineTest {
         val reordered = f.catalog.copy(policies = f.catalog.policies.entries.reversed().associate { it.key to it.value })
         assertEquals(original, GameCatalogFingerprint.compute(reordered))
         assertNotEquals(original, GameCatalogFingerprint.compute(f.catalog.copy(meals = f.catalog.meals.map { it.copy(price = it.price + 1) })))
+        val choice = f.catalog.content.choices.first()
+        assertNotEquals(original, GameCatalogFingerprint.compute(f.catalog.copy(policies = f.catalog.policies +
+            (choice.eventId to f.catalog.policies.getValue(choice.eventId).copy(choiceDestinations =
+                mapOf(choice.id to ru.nksk.lctapp.domain.location.GameLocation.OBSERVATORY))))))
     }
 
     private class Fixture(
@@ -523,6 +610,10 @@ class TimeMachineTest {
         private val shopTitle: String = "shop",
         private val alternativeTitle: String = "pass",
         price: Long = 25,
+        purchasedItemName: String? = null,
+        itemInBothChoices: Boolean = false,
+        manualEnergy: Int = 2,
+        petName: String = PetDefaults.FOX_NAME,
     ) {
         private fun event(id: String, type: EventType) = EventDefinition(id, type,
             if (id == "shop") shopTitle else id, id, null, null, null, 0, null, null)
@@ -535,16 +626,21 @@ class TimeMachineTest {
                 days = listOf(GameDayDefinition("day", "chapter", 1)),
                 events = listOf(event("unlock", EventType.STORY), event("shop", shopType), event("deed", EventType.EARNING)),
                 choices = listOf(choice("unlocked", "unlock", 0, 0), choice("buy", "shop", 0, -price), choice("pass", "shop", 1, 0), choice("earn", "deed", 0, 10)),
-                goals = listOf(GoalDefinition("goal", "Goal", "Goal"))),
+                goals = listOf(GoalDefinition("goal", "Goal", "Goal")),
+                items = purchasedItemName?.let { listOf(ItemDefinition("purchase", it, it)) }.orEmpty(),
+                choiceItemEffects = if (purchasedItemName == null) emptyList() else buildList {
+                    add(ChoiceItemEffect("bought", "buy", 0, "purchase", ItemOperation.ADD))
+                    if (itemInBothChoices) add(ChoiceItemEffect("gift", "pass", 0, "purchase", ItemOperation.ADD))
+                }),
             policies = linkedMapOf("unlock" to EventPolicy(0, factsByChoiceId = mapOf("unlocked" to setOf("chronoscope_unlocked"))),
-                "shop" to if (manualRepair) EventPolicy(0, choiceEnergyCosts = mapOf("pass" to 2),
+                "shop" to if (manualRepair) EventPolicy(0, choiceEnergyCosts = mapOf("pass" to manualEnergy),
                     choiceGameKinds = if (gameWork) mapOf("pass" to ru.nksk.lctapp.domain.minigame.DeedGameKind.PRECISION) else emptyMap())
                     else EventPolicy(0, feedsPetChoiceIds = if (foodPurchase) setOf("buy") else emptySet()),
                 "deed" to EventPolicy(1)),
             cards = emptyMap(), rules = EngineRules("rules", 5, 3, 1, 100),
             meals = listOf(MealDefinition("basic", 5, null), MealDefinition("large", 30, null)),
             storyDayId = "day", introductionId = "unlock", deedPool = listOf("deed"))
-        val repo = RecordingRepository(GameState(PetState("plain", PetVisualState.NORMAL),
+        val repo = RecordingRepository(GameState(PetState("plain", PetVisualState.NORMAL, name = petName),
             EconomyState(BudgetPlan(balance, 0, 0, 0)),
             StoryState("day", null, "shop", if (unlocked) listOf(StoryDecision("unlock-action", "unlocked")) else emptyList()),
             0, 0, emptyList(),

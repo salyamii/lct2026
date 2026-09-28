@@ -241,9 +241,10 @@ not substitute a new game. See [onboarding](design/onboarding.md).
 
 ### Customization step — 2026-09-20
 
-The startup gate now has Choose, Customize, Accessories, GoalBriefing, GoalSelection and Introduction steps (CUST-D-019/CUST-D-020). Start from the character
-screen persists a Room draft and opens CustomizationScreen in the onboarding
-module. AppStartupViewModel owns the step and persisted draft; UI receives values
+The startup gate has Choose, IntroVideo, Customize, Accessories, GoalBriefing,
+GoalSelection and Introduction steps. Start from the character screen persists a
+Room profile draft, then presents the intro video before CustomizationScreen.
+AppStartupViewModel owns the step and persisted draft; UI receives values
 and callbacks. Back from Customize clears the draft before returning to Choose.
 Successful introduction confirmation commits the new aggregate and only then exposes the
 normal Navigation 3 host. Existing saves bypass all onboarding steps; no route key contains
@@ -267,6 +268,23 @@ INITIAL/RECEIPT does not automatically redirect MainMenu to Economy; ContinueDay
 and Coins open it explicitly. Allocation, weekly receipts and restored gameplay
 routes retain the mandatory budget gate.
 Existing saves skip onboarding. No Navigation 3 key or day/event transition is added.
+
+### Intro video after character selection — 2026-09-27
+
+Only a successful `startAdventure` draft save enters transient `IntroVideo`.
+Completion, Skip and system Back all continue to `Customize` with that same
+draft; they do not create a game, accept an empty name or skip later onboarding
+steps. Playback position belongs to AppStartupViewModel and survives activity
+configuration changes. A cold process start restores the persisted Profile
+draft directly into Customize, so the interrupted video does not replay.
+Existing complete games bypass the video with all other onboarding screens.
+
+`IntroVideoScreen` in `:feature:onboarding` receives player, sound-toggle and
+action slots from app composition. `IntroVideoEntry` connects the shared media
+runtime and sound preference; it owns Back and the return to profile editing.
+The video has no Navigation 3 key, Room step or world flag. Its mute button uses
+the same persistent sound setting as Settings; a media/preference error leaves
+an explicit way to continue. [Intro contract](design/intro-video.md).
 
 ## Карта — 2026-09-20
 
