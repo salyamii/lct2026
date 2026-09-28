@@ -6,6 +6,8 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import ru.nksk.lctapp.data.telemetry.Telemetry
+import ru.nksk.lctapp.data.telemetry.TelemetryHttpInterceptor
 import ru.nksk.lctapp.domain.parentlink.ParentLinkUnavailableException
 import java.util.concurrent.TimeUnit
 
@@ -32,6 +34,9 @@ private fun createBackendApi(url: String): BackendApi {
         .callTimeout(45, TimeUnit.SECONDS)
         // Keep world uploads on the configured host; the client sends no authorization headers.
         .followRedirects(false).followSslRedirects(false)
+        .apply {
+            if (Telemetry.enabled) addInterceptor(TelemetryHttpInterceptor(Telemetry.openTelemetry))
+        }
         .build()
     return Retrofit.Builder().baseUrl(url).client(client)
         .addConverterFactory(BackendJson.asConverterFactory("application/json".toMediaType()))

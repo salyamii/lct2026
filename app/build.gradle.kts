@@ -30,6 +30,14 @@ android {
         }
         buildConfigField("String", "BACKEND_BASE_URL", "\"$backendUrl\"")
 
+        // Jaeger OTLP/HTTP base URL (the agent appends /v1/traces); empty disables telemetry.
+        val otelEndpoint = providers.gradleProperty("LCT_OTEL_ENDPOINT").orElse("").get().trim()
+        require(otelEndpoint.isEmpty() || (otelEndpoint.startsWith("https://") && !otelEndpoint.endsWith("/") &&
+            otelEndpoint.none { it == '"' || it == '\\' || it.isWhitespace() })) {
+            "LCT_OTEL_ENDPOINT must be an HTTPS base URL without a trailing slash"
+        }
+        buildConfigField("String", "OTEL_EXPORTER_ENDPOINT", "\"$otelEndpoint\"")
+
         testInstrumentationRunner = "ru.nksk.lctapp.HiltTestRunner"
     }
 
@@ -43,6 +51,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // OpenTelemetry android-agent requires desugaring below minSdk 26.
+        isCoreLibraryDesugaringEnabled = true
     }
     buildFeatures {
         compose = true
@@ -57,7 +67,16 @@ room3 {
     schemaDirectory("$projectDir/schemas")
 }
 
+// The OpenTelemetry android-agent pulls a newer stdlib than the project compiler can read.
+configurations.configureEach {
+    resolutionStrategy.force("org.jetbrains.kotlin:kotlin-stdlib:${libs.versions.kotlin.get()}")
+}
+
 dependencies {
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+    implementation(platform(libs.opentelemetry.bom))
+    implementation(libs.opentelemetry.api)
+    implementation(libs.android.agent)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.lottie.compose)
     implementation(libs.qrcodegen)
@@ -102,6 +121,9 @@ dependencies {
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.kotlinx.coroutines.core)
     testImplementation(libs.junit)
+    testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(platform(libs.opentelemetry.bom))
+    testImplementation(libs.opentelemetry.sdk.testing)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
