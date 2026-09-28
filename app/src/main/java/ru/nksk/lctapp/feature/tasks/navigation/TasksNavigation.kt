@@ -138,6 +138,7 @@ fun EntryProviderScope<NavKey>.tasksEntry(
     entry<StackingGame> { source ->
         val viewModel = hiltViewModel<StackingGameViewModel>()
         val state by viewModel.uiState.collectAsStateWithLifecycle()
-        StackingGameScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) })
+        val cratePosition by viewModel.position.collectAsStateWithLifecycle()
+        StackingGameScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) }, position = cratePosition)
     }
 }

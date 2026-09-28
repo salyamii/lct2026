@@ -7,8 +7,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -17,7 +17,6 @@ import ru.nksk.lctapp.domain.minigame.StackingState
 
 data class StackingGameUiState(
     val game: StackingState,
-    val blockPosition: Float = 0.5f,
     val missed: Boolean = false,
 )
 
@@ -30,11 +29,15 @@ sealed interface StackingGameAction {
 class StackingGameViewModel @Inject constructor(private val savedState: SavedStateHandle) : ViewModel() {
     private val mutableUiState = MutableStateFlow(restore())
     val uiState = mutableUiState.asStateFlow()
+
+    /** Позиция бегущего ящика живёт отдельно: кадры не трогаютUiState и не пишут сейв. */
+    private val mutablePosition = MutableStateFlow(0.5f)
+    val position = mutablePosition.asStateFlow()
+
     private var moveJob: Job? = null
     private var direction = 1f
 
     init {
-        publish(uiState.value)
         runMovement()
     }
 
@@ -43,32 +46,34 @@ class StackingGameViewModel @Inject constructor(private val savedState: SavedSta
             StackingGameAction.Drop -> {
                 val before = uiState.value
                 if (before.game.finished) return
-                val after = before.game.dropAt((before.blockPosition * StackingState.SPACE).toInt())
-                if (after.finished && !after.won) {
-                    publish(StackingGameUiState(after, before.blockPosition, missed = true))
-                } else {
-                    publish(StackingGameUiState(after, before.blockPosition))
-                }
+                val after = before.game.dropAt((mutablePosition.value * StackingState.SPACE).toInt())
+                mutableUiState.value = StackingGameUiState(after, missed = !after.won && after.finished)
             }
             StackingGameAction.Restart -> {
                 moveJob?.cancel()
                 direction = 1f
-                publish(StackingGameUiState(StackingState.create()))
+                mutableUiState.value = StackingGameUiState(StackingState.create())
+                mutablePosition.value = 0.5f
                 runMovement()
             }
         }
     }
 
-    /** Ведёт переносимый ящик туда-обратно; пауза вне RESUMED не нужна: цикл живёт в.viewModelScope. */
+    /** Ведёт переносимый ящик туда-обратно покадрово; движение не пишет сейв и не пересобирает доску. */
     private fun runMovement() {
-        val state = uiState.value
         moveJob?.cancel()
+        val state = uiState.value
         if (state.game.finished || state.missed) return
         moveJob = viewModelScope.launch {
             try {
+                var lastFrame = System.nanoTime()
                 while (!uiState.value.game.finished && !uiState.value.missed) {
+                    delay(FRAME_MS)
+                    val now = System.nanoTime()
+                    val seconds = (now - lastFrame) / 1_000_000_000f
+                    lastFrame = now
                     val width = uiState.value.game.currentWidth.toFloat() / StackingState.SPACE
-                    var position = uiState.value.blockPosition + direction * STEP
+                    var position = mutablePosition.value + direction * SPEED_PER_SECOND * seconds
                     if (position > 1f - width) {
                         position = 1f - width
                         direction = -1f
@@ -76,8 +81,7 @@ class StackingGameViewModel @Inject constructor(private val savedState: SavedSta
                         position = 0f
                         direction = 1f
                     }
-                    publish(uiState.value.copy(blockPosition = position))
-                    delay(FRAME_MS)
+                    mutablePosition.value = position
                 }
             } catch (cancelled: CancellationException) {
                 throw cancelled
@@ -109,7 +113,7 @@ class StackingGameViewModel @Inject constructor(private val savedState: SavedSta
     }
 
     private companion object {
-        const val STEP = 0.02f
-        const val FRAME_MS = 32L
+        const val SPEED_PER_SECOND = 0.45f
+        const val FRAME_MS = 16L
     }
 }

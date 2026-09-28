@@ -1,14 +1,18 @@
 package ru.nksk.lctapp.feature.tasks.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -20,26 +24,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.components.GameArtwork
 import ru.nksk.lctapp.core.ui.theme.Rubik
+import kotlin.math.roundToInt
 import ru.nksk.lctapp.domain.minigame.StackingState
-
-private val CRATE_COLORS = listOf(
-    Color(0xFFC89B6C),
-    Color(0xFFB08A5E),
-    Color(0xFFD8B284),
-    Color(0xFFA67B4F),
-    Color(0xFFC4A47C),
-    Color(0xFF9A7B55),
-)
 
 /** Shared crate-stacking board for offered deeds. */
 @Composable
@@ -48,6 +46,7 @@ fun StackingGameScreen(
     onAction: (StackingGameAction) -> Unit,
     onBack: () -> Unit,
     deed: DeedGamePresentation? = null,
+    position: Float = 0.5f,
 ) {
     val state = uiState.game
     Column(
@@ -65,67 +64,83 @@ fun StackingGameScreen(
         }
         DeedSheet(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             Text(
-                deed?.instructions ?: "Опусти бегущий ящик на предыдущий. Останется только пересечение!",
+                deed?.instructions ?: "Опусти бегущий ящик на предыдущий.",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = Rubik,
                 color = DeedColors.Text,
             )
+            Text(
+                text = "Останется только пересечение!",
+                fontSize = 15.sp,
+                fontFamily = Rubik,
+                color = DeedColors.TextSoft,
+            )
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 DeedChip("Уложено: ${state.placed} из ${StackingState.ROUNDS}")
                 if (deed?.storyAction != true) {
-                    CoinChip(deed?.let { "Награда до ${it.maximumReward} монет" } ?: "Награда: 12")
+                    CoinChip(deed?.let { "Награда до ${it.maximumReward} монет" } ?: "Награда: 8")
                 }
             }
             Spacer(Modifier.height(12.dp))
             val boardDescription = "Штабель: уложено ${state.placed} из ${StackingState.ROUNDS}"
-            Column(
+            BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
                     .semantics { contentDescription = boardDescription }
                     .clip(RoundedCornerShape(16.dp))
                     .background(DeedColors.Board)
-                    .padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                    .padding(12.dp),
             ) {
-                val fraction = state.currentWidth.toFloat() / StackingState.SPACE
-                // Переносимый ящик над штабелем.
-                if (!state.finished && !uiState.missed) {
-                    MovingCrate(uiState.blockPosition, fraction)
-                }
-                if (uiState.missed) {
+                val boardWidth = maxWidth
+                // 8 клеток в ряду; клетка ограничена, чтобы доска не вытолкнула кнопку за экран.
+                val cell = (maxWidth / 8).coerceAtMost(40.dp)
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    if (!state.finished && !uiState.missed) {
+                        val headCells = cellsFor(state.currentWidth)
+                        MovingCrateRow(position, headCells, cell, boardWidth)
+                    }
+                    if (uiState.missed) {
+                        Text(
+                            text = "Ящик ушёл в воду!",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = Rubik,
+                            color = DeedColors.Chip,
+                        )
+                    }
+                    state.locked.asReversed().forEach { block ->
+                        val cells = cellsFor(block.width)
+                        val left = (block.x * CELLS_ACROSS / 100f).roundToInt()
+                            .coerceIn(0, CELLS_ACROSS - cells)
+                        CrateRow(left, cells, cell, highlighted = false)
+                    }
+                    Spacer(Modifier.height(2.dp))
                     Text(
-                        text = "Ящик ушёл в воду!",
-                        fontSize = 16.sp,
+                        text = "Причал",
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = Rubik,
-                        color = DeedColors.Chip,
+                        color = DeedColors.TextSoft,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
                     )
                 }
-                state.locked.asReversed().forEachIndexed { reverseIndex, block ->
-                    val level = state.locked.size - reverseIndex
-                    CrateBar(
-                        x = block.x.toFloat() / StackingState.SPACE,
-                        width = block.width.toFloat() / StackingState.SPACE,
-                        color = CRATE_COLORS[(level - 1) % CRATE_COLORS.size],
-                    )
-                }
-                Text(
-                    text = "Причал",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = Rubik,
-                    color = DeedColors.TextSoft,
-                )
             }
-            Spacer(Modifier.height(12.dp))
-            if (!state.finished && !uiState.missed) {
-                DeedButton("Опустить ящик", { if (deed?.canPlay != false) onAction(StackingGameAction.Drop) })
-            }
-            Spacer(Modifier.height(10.dp))
         }
+        Spacer(Modifier.height(12.dp))
+        if (!state.finished && !uiState.missed) {
+            DeedButton(
+                "Опустить ящик",
+                { if (deed?.canPlay != false) onAction(StackingGameAction.Drop) },
+                Modifier.navigationBarsPadding(),
+            )
+        }
+        Spacer(Modifier.height(10.dp))
     }
     if (state.finished && deed == null) {
         DeedResultSheet(
@@ -138,36 +153,63 @@ fun StackingGameScreen(
     }
 }
 
+/** Бегущий ящик: плавная дробная позиция над штабелем, рамка подсветки. */
 @Composable
-private fun MovingCrate(position: Float, width: Float) {
-    val left = position.coerceIn(0.01f, 0.98f)
-    val crateWidth = width.coerceIn(0.05f, 1f)
-    Row(Modifier.fillMaxWidth().height(30.dp)) {
-        Spacer(Modifier.weight(left))
-        Box(
+private fun MovingCrateRow(position: Float, crateCells: Int, cell: Dp, boardWidth: Dp) {
+    val headWidth = cell * crateCells
+    Row(Modifier.fillMaxWidth()) {
+        Spacer(Modifier.width((boardWidth * position).coerceIn(0.dp, boardWidth - headWidth)))
+        Row(
             modifier = Modifier
-                .weight(crateWidth)
-                .fillMaxSize()
-                .clip(RoundedCornerShape(6.dp))
-                .background(DeedColors.Chip),
-        ) {}
-        Spacer(Modifier.weight((1f - left - crateWidth).coerceAtLeast(0.01f)))
+                .border(2.dp, DeedColors.White.copy(alpha = 0.85f), RoundedCornerShape(10.dp))
+                .padding(3.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            repeat(crateCells) {
+                Image(
+                    painter = painterResource(R.drawable.deed_game_crate),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .width(cell)
+                        .height(cell)
+                        .clip(RoundedCornerShape(6.dp)),
+                    alignment = Alignment.Center,
+                    contentScale = ContentScale.Crop,
+                )
+            }
+        }
     }
 }
 
+/** Клеток в ряду доски. */
+private const val CELLS_ACROSS = 8
+
+/** Число клеток под ящик шириной [width] из 100 долей полосы. */
+private fun cellsFor(width: Int): Int = (width * CELLS_ACROSS / 100f).roundToInt().coerceIn(1, CELLS_ACROSS)
+
+/** Ряд маленьких ящиков-клеток; голова тропинки подсвечивается рамкой. */
 @Composable
-private fun CrateBar(x: Float, width: Float, color: Color) {
-    val left = x.coerceIn(0.01f, 0.98f)
-    val crateWidth = width.coerceIn(0.05f, 1f)
-    Row(Modifier.fillMaxWidth().height(30.dp)) {
-        Spacer(Modifier.weight(left))
-        Box(
+private fun CrateRow(leftCells: Int, crateCells: Int, cell: Dp, highlighted: Boolean) {
+    Row(Modifier.fillMaxWidth()) {
+        Spacer(Modifier.width(cell * leftCells))
+        Row(
             modifier = Modifier
-                .weight(crateWidth)
-                .fillMaxSize()
-                .clip(RoundedCornerShape(6.dp))
-                .background(color),
-        ) {}
-        Spacer(Modifier.weight((1f - left - crateWidth).coerceAtLeast(0.01f)))
+                .then(if (highlighted) Modifier.border(2.dp, DeedColors.White.copy(alpha = 0.85f), RoundedCornerShape(10.dp)) else Modifier)
+                .padding(if (highlighted) 3.dp else 0.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            repeat(crateCells) {
+                Image(
+                    painter = painterResource(R.drawable.deed_game_crate),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .width(cell)
+                        .height(cell)
+                        .clip(RoundedCornerShape(6.dp)),
+                    alignment = Alignment.Center,
+                    contentScale = ContentScale.Crop,
+                )
+            }
+        }
     }
 }

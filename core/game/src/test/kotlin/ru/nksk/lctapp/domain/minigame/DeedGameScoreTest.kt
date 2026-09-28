@@ -66,10 +66,10 @@ class DeedGameScoreTest {
         assertEquals(3L, sequenceScore.reward(4))
 
         var stack = StackingState.create().dropAt(20)
-        repeat(3) { stack = stack.dropAt(stack.locked.last().x) }
+        repeat(1) { stack = stack.dropAt(stack.locked.last().x) }
         val stackScore = checkNotNull(DeedGameScore.fromStacking(stack.copy(finished = true)))
-        assertEquals(4, stackScore.correct)
-        assertEquals(2L, stackScore.reward(3))
+        assertEquals(2, stackScore.correct)
+        assertEquals(1L, stackScore.reward(3))
 
         var differences = DifferencesState.create(0)
         differences.differences.forEach { cell -> differences = differences.tap(cell) }

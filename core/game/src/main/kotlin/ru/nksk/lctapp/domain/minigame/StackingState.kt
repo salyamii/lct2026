@@ -45,9 +45,9 @@ data class StackingState(
     }
 
     companion object {
-        const val ROUNDS = 6
+        const val ROUNDS = 4
         const val SPACE = 100
-        const val START_WIDTH = 60
+        const val START_WIDTH = 50
 
         fun create(): StackingState = StackingState()
     }
