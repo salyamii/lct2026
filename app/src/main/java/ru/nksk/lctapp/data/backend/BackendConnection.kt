@@ -26,7 +26,7 @@ internal class BackendConnection(baseUrl: String, private val createApi: (String
     }
 }
 
-private fun createBackendApi(url: String): BackendApi {
+internal fun createBackendApi(url: String): BackendApi {
     val client = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS).readTimeout(30, TimeUnit.SECONDS)
         .callTimeout(45, TimeUnit.SECONDS)

@@ -13,6 +13,9 @@ import ru.nksk.lctapp.data.backend.RemoteParentLinkRepository
 import ru.nksk.lctapp.data.backend.BackendSyncStore
 import ru.nksk.lctapp.data.backend.RoomBackendSyncStore
 import ru.nksk.lctapp.data.backend.RemoteCloudSyncRepository
+import ru.nksk.lctapp.data.backend.BackendRateLimit
+import ru.nksk.lctapp.data.backend.RateLimitedBackendApi
+import ru.nksk.lctapp.data.backend.createBackendApi
 import ru.nksk.lctapp.domain.backend.CloudSyncRepository
 import ru.nksk.lctapp.domain.parentlink.ParentLinkRepository
 import javax.inject.Singleton
@@ -26,6 +29,9 @@ internal abstract class ParentLinkModule {
     @Binds @Singleton abstract fun syncStore(value: RoomBackendSyncStore): BackendSyncStore
 
     companion object {
-        @Provides @Singleton fun backend(): BackendConnection = BackendConnection(BuildConfig.BACKEND_BASE_URL)
+        @Provides @Singleton fun backend(rateLimit: BackendRateLimit): BackendConnection =
+            BackendConnection(BuildConfig.BACKEND_BASE_URL) { url ->
+                RateLimitedBackendApi(createBackendApi(url), rateLimit, url)
+            }
     }
 }

@@ -748,3 +748,17 @@ lossless 512×512, прозрачный фон). В штабеле рисует�
 | Android resource | Canvas | Файл | Источник |
 | --- | --- | --- | --- |
 | `R.drawable.deed_game_crate` | 512 × 512 | [deed_game_crate.webp](../../../app/src/main/res/drawable-nodpi/deed_game_crate.webp) | [crate.png](sources/mini-game-crate-2026-09-28/crate.png) |
+
+## Night bedroom — 2026-09-29
+
+SLEEP-D-001: фон в момент засыпания на итогах дня. Исходная иллюстрация без
+персонажа из [карточки 3785:705](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3785-705);
+подпись и рамка каталога в приложение не импортируются.
+
+| Android resource | Canvas | File | Figma node |
+| --- | --- | --- | --- |
+| `R.drawable.location_bedroom_night` | 1378 × 1142 | [location_bedroom_night.webp](../../../app/src/main/res/drawable-nodpi/location_bedroom_night.webp) | [3785:706](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3785-706) |
+
+[Исходный PNG](sources/location_bedroom_night.png) сохранён целиком. Конвертация:
+Pillow 12.3.0, WebP `lossless=True`, `exact=True`, `method=6`; размеры и все RGBA
+пиксели проверены на точное совпадение. Хеши и параметры — в [manifest.json](manifest.json).

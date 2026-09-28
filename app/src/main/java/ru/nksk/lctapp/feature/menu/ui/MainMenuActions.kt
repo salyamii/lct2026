@@ -2,7 +2,6 @@ package ru.nksk.lctapp.feature.menu.ui
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
@@ -33,7 +31,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
@@ -145,10 +142,6 @@ private fun QuickAction(
             .padding(top = topPadding.dp),
         contentAlignment = Alignment.TopCenter,
     ) {
-        Image(
-            painterResource(R.drawable.menu_star), null,
-            Modifier.align(Alignment.TopEnd).padding(top = 4.dp, end = 8.dp).size(7.dp),
-        )
         // Keep label and artwork overlapping as in the exported component.
         MenuText(
             title, 11, color = AdventureNight,

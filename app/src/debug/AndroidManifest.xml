@@ -4,10 +4,12 @@
             android:name=".app.DebugResetActivity"
             android:exported="false"
             android:process=":debug_reset"
+            android:screenOrientation="${appScreenOrientation}"
             android:taskAffinity="${applicationId}.debugReset"
             android:excludeFromRecents="true"
             android:theme="@style/Theme.LCTApp" />
         <activity android:name=".HiltTestActivity" android:exported="false"
+            android:screenOrientation="${appScreenOrientation}"
             android:theme="@style/Theme.LCTApp" />
     </application>
 </manifest>

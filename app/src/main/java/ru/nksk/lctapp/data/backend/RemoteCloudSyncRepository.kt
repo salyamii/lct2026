@@ -19,6 +19,7 @@ import ru.nksk.lctapp.data.game.local.PendingBackendRequestEntity
 import ru.nksk.lctapp.data.telemetry.Telemetry
 import ru.nksk.lctapp.domain.backend.AckParentRewardsRequest
 import ru.nksk.lctapp.domain.backend.AnalyticsUploadRequest
+import ru.nksk.lctapp.domain.backend.BackendError
 import ru.nksk.lctapp.domain.backend.CloudRestorePreview
 import ru.nksk.lctapp.domain.backend.CloudSyncPhase
 import ru.nksk.lctapp.domain.backend.CloudSyncRepository
@@ -307,7 +308,7 @@ internal class RemoteCloudSyncRepository @Inject constructor(
         }
 
     private suspend fun uploadSkills(identity: ParentIdentity, metadata: BackendSyncStateEntity,
-        snapshot: GameSnapshot): BackendSyncStateEntity =
+        snapshot: GameSnapshot, mayReplaceRejectedBatch: Boolean = true): BackendSyncStateEntity =
         Telemetry.traced("sync.upload_skills",
             "sync.through_sequence" to snapshot.historySequence.toString()) {
         var pending = store.pending(identity.profileId, ANALYTICS)
@@ -319,13 +320,44 @@ internal class RemoteCloudSyncRepository @Inject constructor(
         }
         val request = pending.forDevice<AnalyticsUploadRequest>(identity.profileId)
         check(request.gameRunId == snapshot.runId && request.batchId == pending.requestId)
-        val response = connection.api.uploadAnalytics(pending.requestId, request)
+        val response = try { connection.api.uploadAnalytics(pending.requestId, request) }
+        catch (failure: HttpException) {
+            if (!mayReplaceRejectedBatch || request.throughHistorySequence >= snapshot.historySequence ||
+                !failure.isStaleAnalyticsRejection() || !canReplaceRejectedAnalytics(identity, metadata, snapshot)) {
+                throw failure
+            }
+            // This batch was definitely rejected, not delivered. Never acknowledge its facts or
+            // mutate its body under the old ID. A new boundary gets one new durable attempt.
+            store.clear(identity.profileId, ANALYTICS, pending.requestId)
+            return uploadSkills(identity, metadata, snapshot, mayReplaceRejectedBatch = false)
+        }
         check(response.schemaVersion == 1 && response.batchId == request.batchId && response.gameRunId == request.gameRunId &&
             response.acceptedThroughHistorySequence == request.throughHistorySequence &&
             response.acceptedEventIds.toSet() == request.facts.map { it.eventId }.toSet()) { "Invalid analytics acknowledgement" }
         return metadata.copy(lastAnalyticsSequence = request.throughHistorySequence).also {
             store.complete(it, ANALYTICS, pending.requestId)
         }
+    }
+
+    private fun HttpException.isStaleAnalyticsRejection(): Boolean {
+        if (code() != 409) return false
+        return try {
+            response()?.errorBody()?.string()?.let { BackendJson.decodeFromString<BackendError>(it).code } == "STALE_ANALYTICS"
+        } catch (_: IllegalArgumentException) { false }
+        catch (_: IOException) { false }
+    }
+
+    private suspend fun canReplaceRejectedAnalytics(identity: ParentIdentity, metadata: BackendSyncStateEntity,
+        snapshot: GameSnapshot): Boolean {
+        if (metadata.profileId != identity.profileId || metadata.backendUrl != connection.baseUrl ||
+            metadata.gameRunId != snapshot.runId || metadata.localGeneration != snapshot.localGeneration()) return false
+        val current = session.exportSnapshot()
+        // An explicit campaign restart preserves the same generation in its immutable archive.
+        // A restore to another branch must never authorize replacement of the old pending body.
+        val owner = (listOf(current) + current.predecessorSnapshots()).firstOrNull {
+            it.runId == snapshot.runId && it.localGeneration() == snapshot.localGeneration()
+        } ?: return false
+        return snapshot.isHistoryPrefixOf(owner)
     }
 
     private suspend fun readSkills(identity: ParentIdentity, metadata: BackendSyncStateEntity,

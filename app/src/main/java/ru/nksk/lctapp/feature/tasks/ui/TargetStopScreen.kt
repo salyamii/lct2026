@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -171,27 +170,26 @@ private fun Track(zoneStart: Int, markerPosition: Float, modifier: Modifier = Mo
             .border(1.5.dp, Color.White.copy(alpha = 0.14f), RoundedCornerShape(24.dp)),
         contentAlignment = Alignment.CenterStart,
     ) {
+        val geometry = TargetStopTrackGeometry(maxWidth.value, MARKER_SIZE_DP.toFloat())
+        val zoneLeft = geometry.centerAt(zoneStart / 100f).dp
+        val zoneRight = geometry.centerAt((zoneStart + TargetStopState.ZONE_WIDTH) / 100f).dp
         // Линейка: деления каждые 10%
-        Row(
-            modifier = Modifier.fillMaxWidth().height(48.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            repeat(9) { tick ->
-                Box(
-                    modifier = Modifier
-                        .width(1.5.dp)
-                        .height(if (tick == 4) 22.dp else 12.dp)
-                        .background(Color.White.copy(alpha = if (tick == 4) 0.30f else 0.16f)),
-                )
-            }
+        repeat(9) { tick ->
+            Box(
+                modifier = Modifier
+                    .offset(x = geometry.centerAt((tick + 1) / 10f).dp - .75.dp)
+                    .width(1.5.dp)
+                    .height(if (tick == 4) 22.dp else 12.dp)
+                    .background(Color.White.copy(alpha = if (tick == 4) 0.30f else 0.16f)),
+            )
         }
         // Зона-ловушка: свечение, скобы-кронштейны, лёгкая пульсация
         Box(
             modifier = Modifier
-                .width(maxWidth * (TargetStopState.ZONE_WIDTH / 100f))
+                .width(zoneRight - zoneLeft)
                 .height(48.dp)
-                .offset(x = maxWidth * (zoneStart / 100f)),
+                .offset(x = zoneLeft)
+                .testTag("telescope_zone"),
         ) {
             Box(
                 modifier = Modifier
@@ -217,7 +215,8 @@ private fun Track(zoneStart: Int, markerPosition: Float, modifier: Modifier = Mo
             contentDescription = null,
             modifier = Modifier
                 .size(MARKER_SIZE_DP.dp)
-                .offset(x = (maxWidth - MARKER_SIZE_DP.dp) * markerPosition)
+                .offset(x = geometry.centerAt(markerPosition).dp - MARKER_SIZE_DP.dp / 2)
+                .testTag("telescope_marker")
                 .graphicsLayer { rotationZ = markerPosition * 720f },
         )
     }

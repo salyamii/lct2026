@@ -35,18 +35,6 @@ import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.Rubik
 import ru.nksk.lctapp.domain.minigame.MemoryState
 
-// Порядок не важен: лица — предметы находок, пары ищутся по одинаковым картинкам.
-private val PAIR_ART = listOf(
-    R.drawable.deed_pair_key,
-    R.drawable.deed_pair_armillary,
-    R.drawable.deed_pair_star_plate,
-    R.drawable.deed_pair_astrolabe,
-    R.drawable.deed_pair_tag,
-    R.drawable.deed_pair_telescope,
-    R.drawable.deed_pair_loupe,
-    R.drawable.deed_pair_backpack,
-)
-
 /** Shared pair-finding board for training and offered deeds. */
 @Composable
 fun MemoryGameScreen(
@@ -101,9 +89,14 @@ fun MemoryGameScreen(
                     ) {
                         rowFaces.forEachIndexed { columnIndex, face ->
                             val index = rowIndex * 4 + columnIndex
+                            val artwork = deed?.pairArtwork?.takeIf { it.size == MemoryState.PAIRS }?.get(face)
+                                ?: defaultMemoryPairArtwork[face]
+                            val label = memoryPairNameResource(artwork)?.let { stringResource(it) }
+                                ?: stringResource(R.string.deeds_pair_unknown, face + 1)
                             StarPlateView(
                                 index = index,
-                                face = deed?.pairArtwork?.takeIf { it.size == MemoryState.PAIRS }?.get(face) ?: PAIR_ART[face],
+                                face = artwork,
+                                label = label,
                                 revealed = index in state.faceUp || index in state.matched,
                                 matched = index in state.matched,
                                 enabled = state.pending == null && !state.won && deed?.canPlay != false,
@@ -135,6 +128,7 @@ fun MemoryGameScreen(
 private fun StarPlateView(
     index: Int,
     face: Int,
+    label: String,
     revealed: Boolean,
     matched: Boolean,
     enabled: Boolean,
@@ -142,8 +136,8 @@ private fun StarPlateView(
     modifier: Modifier = Modifier,
 ) {
     val description = when {
-        matched -> stringResource(R.string.deeds_card_matched, index + 1, face)
-        revealed -> stringResource(R.string.deeds_card_open, index + 1, face)
+        matched -> stringResource(R.string.deeds_card_matched, index + 1, label)
+        revealed -> stringResource(R.string.deeds_card_open, index + 1, label)
         else -> stringResource(R.string.deeds_card_hidden, index + 1)
     }
     val shape = RoundedCornerShape(14.dp)
@@ -169,7 +163,7 @@ private fun StarPlateView(
             )
         } else {
             GameArtwork(R.drawable.deed_star_plate_back,
-                contentDescription = "Рубашка пласта",
+                contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
             )
