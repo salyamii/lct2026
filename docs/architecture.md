@@ -1,6 +1,6 @@
 # Project architecture
 
-Current implementation: 2026-09-27. The approved cleanup scope is
+Current implementation: 2026-09-29. The approved cleanup scope is
 [ARCH-D-001–007](design/decisions.md). This guide describes the current code;
 historical decisions and migrations live in the design documents.
 
@@ -68,6 +68,11 @@ copy, location and semantic media keys. Purchase composition does not depend on
 whether an image exists. Screens, history and reflection use the same presentation
 lookup. Android resolves semantic artwork keys to bundled resources; the domain
 never receives resource integers.
+
+Editorial conditional lore copy belongs to `EventPresentation.bodyVariants`, which
+the day screen checks before legacy `EventCardCopy.variants`. Presentation is excluded
+from the replay fingerprint; legacy variants and immutable definitions retain their
+original values so a wording correction cannot invalidate saved history.
 
 Media metadata supplies chapter music, appearance, ambience, narration and action
 sound/voice cues. `BundledMediaCatalog` resolves these semantic keys to the
@@ -202,9 +207,9 @@ job. Re-entry reads the latest committed state.
 
 ## Persistence and compatibility
 
-Room is version 21; snapshot is format 4 and history format 1. Schemas and earlier
+Room is version 22; snapshot is format 5 and history format 1. Schemas and earlier
 migrations remain in `app/schemas`. A full snapshot includes the aggregate and
-complete validated history. Restore does not mean merging multiple active devices.
+complete validated history, plus the flat archive of completed runs. Restore does not mean merging multiple active devices.
 There is no destructive fallback or silent reset to the initial fixture.
 
 Regular writes cannot change financial-period origins or confirmed plans. Legacy
@@ -240,6 +245,16 @@ Pure report/replay work belongs off the main thread and only to the scenario
 that needs it. Before larger caching or incremental-storage changes, measure a
 long save on a permitted device; source inspection does not establish actual FPS.
 
+History reads follow the required scope. The day summary renders the committed
+world first, then checks `TimeMachine.hasReflection(day)` through `readDayHistory`.
+Room selects that day's commands before decoding and verifies the latest checkpoint;
+an answer arriving after the displayed save changes cannot update the new summary.
+`readFacts(eventIds)` resolves requested analytics facts through the existing fact-ID
+index and decodes each matching audit entry once. The “Что больше?” quiz uses this
+lookup for its recorded answers instead of materializing every historical world.
+These are read-path optimizations, not a schema/snapshot change or a confirmed
+diagnosis of the reported device crash.
+
 ## Backend boundary
 
 Settings generates the parent's QR offline from the persisted `deviceId`. Plain
@@ -258,6 +273,10 @@ permission, without changing identity or game state.
 `RemoteCloudSyncRepository` serializes registration, full snapshot upload, financial
 evidence upload, skill assessment retrieval and parent reward delivery. Room owns
 transport checkpoints and frozen pending requests; retry uses the same key and body.
+Within one synchronization pass, the already exported immutable snapshot is reused
+while `latestHistoryId()` is unchanged. A new history head triggers a fresh export;
+the final change check reads only that ID, not the full audit. Full backup and restore
+still carry the complete world, journal and completed-run archives.
 The aggregate repository applies supported rewards against the latest local world,
 atomically with their audit receipt. Only committed receipts are acknowledged.
 Known new accessories apply now; coin allocation and duplicate accessory handling
@@ -273,6 +292,20 @@ confirmation. Restore validates the archive and guards the local history; its
 durable intent recovers transport bookkeeping after a crash without restoring twice.
 Firebase messaging is excluded. See [backend handoff](backend/README.md) and
 [request triggers](backend/client-sync.md).
+
+## Local diagnostics
+
+The application installs its crash handler after Hilt application initialization.
+`AppDiagnostics` retains a small, precomputed context; the handler writes an independent
+bounded text file and always delegates to Android's original handler. It never reads
+Room, exports a snapshot, waits for coroutines or sends an HTTP request while crashing.
+App-level hooks record only screen types, lifecycle and structural game context.
+
+Settings depends on the pure `DiagnosticLogRepository` contract. Its Android adapter
+writes the local crash reports and available Android process exit summaries to the
+document explicitly chosen through `CreateDocument`. Export runs on `Dispatchers.IO`;
+no storage permission or external logging SDK is needed. Diagnostic files are separate
+from gameplay history and cloud backup. See [diagnostics](design/diagnostics.md).
 
 ## Dependency injection
 

@@ -161,7 +161,7 @@ internal fun GoalScreen(
                 GoalRequirementChoices(state.parts.filterNot { state.selected && it.id == target?.id }, state.selected, !state.busy) { item ->
                     onAction(GoalAction.SelectSavingGoal(checkNotNull(state.goalId), item.id))
                 }
-                if (state.selected && !state.transfersEnabled && !ready) GoalCaption("Сначала заверши план монет.")
+                if (state.selected && !state.transfersEnabled && !ready) GoalCaption("Сначала распредели бюджет.")
             }
         }
         if (state.confirmation == null) state.message?.let { AdventureBody(it) }
@@ -202,7 +202,7 @@ private fun GoalRequirementChoice(item: GoalPartUiState, currentChapter: Boolean
             item.owned -> "Уже есть"
             target -> "Выбранная цель"
             canChoose -> "Выбрать цель"
-            currentChapter -> "Сначала заверши план монет"
+            currentChapter -> "Сначала распредели бюджет"
             else -> "Пока недоступно"
         }
     }, color = if (target) Color(0xFFF0F7DE) else Color.White, shape = shape,
@@ -224,8 +224,8 @@ private fun GoalRequirementChoice(item: GoalPartUiState, currentChapter: Boolean
                     item.owned -> "✓ Уже есть"
                     target -> "✓ Выбрано"
                     canChoose -> "Выбрать цель"
-                    currentChapter -> "Сначала план монет"
-                    else -> "Позже по истории"
+                    currentChapter -> "Сначала распредели бюджет"
+                    else -> "Откроется по ходу истории"
                 }, Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp), color = GameInk,
                     fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
             }
@@ -256,8 +256,8 @@ private fun GoalSavingProgress(part: GoalPartUiState, savings: Long, anchor: Mod
             },
             color = AdventureLime, trackColor = Color(0xFFE3E3CE), drawStopIndicator = {})
         Text(when {
-            part.missingCoins != null -> "Для покупки не хватает ${goalMissingCoins(part.missingCoins)}."
-            part.availableContribution > 0 -> "Для покупки добавим ${goalPaymentCoins(part.availableContribution)} из бюджета."
+            part.missingCoins != null -> "Не хватает ${goalMissingCoins(part.missingCoins)}."
+            part.availableContribution > 0 -> "Добавим ${goalPaymentCoins(part.availableContribution)} из бюджета."
             part.remainingCoins > 0 -> "Можно оплатить накоплениями и текущими деньгами."
             else -> "На покупку уже хватает"
         },
@@ -306,13 +306,13 @@ private fun GoalPurchaseDialog(confirmation: PurchaseConfirmation, busy: Boolean
                     "В копилке: ${confirmation.savingsBefore} → ${confirmation.remainingSavings}.", exposure("savings"),
                     color = GoalMuted, fontFamily = Nunito, fontSize = 14.sp, lineHeight = 20.sp)
                 Text(if (confirmation.availableBefore != confirmation.remainingBalance)
-                    "С собой: ${confirmation.availableBefore} → ${goalCoins(confirmation.remainingBalance)}."
-                    else "С собой останется ${goalCoins(confirmation.remainingBalance)}.", exposure("available"),
+                    "С собой: ${confirmation.availableBefore} → ${confirmation.remainingBalance}."
+                    else "С собой останется: ${confirmation.remainingBalance}.", exposure("available"),
                     color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 15.sp, lineHeight = 21.sp)
-                Text("На еду до следующей недели нужно ${goalPaymentCoins(confirmation.foodNeeded)}.", exposure("food"),
+                Text("На еду до следующей недели нужно: ${confirmation.foodNeeded}.", exposure("food"),
                     color = GameInk, fontFamily = Nunito, fontSize = 15.sp, lineHeight = 21.sp)
                 if (confirmation.foodShortfall > 0) Text(
-                    "После покупки на еду не хватит ${goalMissingCoins(confirmation.foodShortfall)}. Всё равно купить?",
+                    "После покупки на еду не хватит ещё ${confirmation.foodShortfall}. Всё равно купить?",
                     color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, lineHeight = 22.sp)
                 message?.let { AdventureBody(it) }
             }

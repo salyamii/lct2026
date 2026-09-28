@@ -16,6 +16,8 @@ data class EventPresentation(
     val outcomeLabels: Map<String, String> = emptyMap(),
     val showEffort: Boolean = true,
     val media: EventMedia = EventMedia(),
+    /** Revised conditional wording; legacy card copy remains stable for catalog replay. */
+    val bodyVariants: List<EventCardVariant> = emptyList(),
 )
 
 /** Semantic asset/cue keys. Platforms resolve resources; null means no authored media. */

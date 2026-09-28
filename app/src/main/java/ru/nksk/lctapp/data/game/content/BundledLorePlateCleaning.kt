@@ -30,6 +30,7 @@ internal fun GameCatalog.withLorePlateCleaningChoice(): GameCatalog {
         card = oldCard.copy(
             impact = "", effort = "", summaryByChoiceId = emptyMap(),
             presentation = oldCard.presentation.copy(
+                body = "Под налётом виден знакомый знак. Очистим пластину, чтобы рассмотреть его полностью.",
                 actionLabels = oldCard.presentation.actionLabels + (manualId to "Почистить самим · немного устанет"),
                 media = oldCard.presentation.media.copy(game = null,
                     actionAudio = paymentActionAudio(LORE_PLATE_CLEANING, listOf("pay")))),

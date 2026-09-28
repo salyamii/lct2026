@@ -28,7 +28,7 @@ import ru.nksk.lctapp.domain.minigame.*
 enum class DeedGameType { MEMORY, COMPARISON, PRECISION }
 data class DeedGamePresentation(val title: String, val maximumReward: Long, val canPlay: Boolean,
     val storyAction: Boolean = false, val sceneRes: Int? = null, val instructions: String? = null,
-    val activityArtworkRes: Int? = null, val pairArtwork: List<Int> = emptyList())
+    val activityArtworkRes: Int? = null)
 internal data class DeedGameUiState(
     val loading: Boolean = true,
     val type: DeedGameType? = null,
@@ -146,20 +146,24 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
             val game = checkNotNull(session.read())
             val occurrence = checkNotNull(game.engine?.events?.find { it.id == id }) { "This comparison belongs to an unavailable deed" }
             check(gameKind(occurrence) == DeedGameKind.COMPARISON)
-            val history = session.history()
-            val runId = checkNotNull(history.lastOrNull()?.runId) { "History is not available" }
-            val existing = history.flatMap { it.facts }.associateBy { it.eventId }
+            val eventIds = batches.flatMap { PriceQuizEvidenceMapper.eventIds(it, id) }.toSet()
+            val recorded = checkNotNull(session.recordedFacts(eventIds)) { "History is not available" }
+            val existing = recorded.facts.associateBy { it.eventId }
             val version = session.contentFingerprint
             val candidates = batches.flatMap { evidence ->
-                PriceQuizEvidenceMapper.facts(evidence, id, runId,
-                    Math.addExact(history.last().sequence, 1), game.engine?.day,
+                PriceQuizEvidenceMapper.facts(evidence, id, recorded.runId,
+                    Math.addExact(recorded.sequence, 1), game.engine?.day,
                     game.financial.currentPeriod?.id, version, session.catalog.rules.id)
             }
             for (fact in candidates) existing[fact.eventId]?.let { stored ->
                 check(stored.episodeId == fact.episodeId && stored.detail == fact.detail) { "Conflicting comparison answer" }
             }
             val missing = candidates.filter { it.eventId !in existing }
-            if (missing.isEmpty()) return@withLock
+            if (missing.isEmpty()) {
+                // The indexed read may have suspended while another answer arrived.
+                if (batches == comparisonEvidence.values.toList()) return@withLock
+                continue
+            }
             session.recordFacts(missing)
             // An answer may have arrived during the write; loop before allowing completion or exit.
         }
@@ -273,8 +277,7 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
                 storyAction = storyGame,
                 sceneRes = eventSceneBackground(event.id, card?.scene),
                 instructions = theme?.instructions ?: if (storyGame) storyGameInstructions(kind) else null,
-                activityArtworkRes = theme?.objectRes ?: eventSceneArtwork(event.id, card?.character)?.resource,
-                pairArtwork = theme?.pairs.orEmpty()),
+                activityArtworkRes = theme?.objectRes ?: eventSceneArtwork(event.id, card?.character)?.resource),
             message = message,
             canRetry = pending != null || rejectedAction != null || comparisonSaveFailed,
             audioOccurrenceId = occurrence.id,

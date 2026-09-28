@@ -58,6 +58,15 @@ data class AuditEntry(
 @Serializable
 enum class AuditType { INITIALIZED, IMPORTED_BASELINE, COMMAND, TECHNICAL_UPDATE, FACTS, RESTORED, REJECTED, PARENT_REWARD }
 
+/** A transactional lookup of selected facts and their current run/sequence, without world checkpoints. */
+data class HistoryFactLookup(val runId: String, val sequence: Long, val facts: List<AnalyticsFact>) {
+    init {
+        require(runId.isNotBlank() && sequence >= 0)
+        require(facts.map { it.eventId }.distinct().size == facts.size)
+        require(facts.all { it.gameRunId == runId && it.sequence <= sequence })
+    }
+}
+
 const val HISTORY_FORMAT_VERSION = 1
 /** Format 5 adds a flat list of complete archived runs; formats 1–4 retain their original signatures. */
 const val SNAPSHOT_FORMAT_VERSION = 5

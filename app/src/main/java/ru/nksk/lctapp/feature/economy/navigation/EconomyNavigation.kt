@@ -26,6 +26,7 @@ import ru.nksk.lctapp.feature.economy.ui.EconomyScreen
 import ru.nksk.lctapp.feature.economy.ui.EconomyViewModel
 import ru.nksk.lctapp.feature.economy.ui.SavingsScreen
 import ru.nksk.lctapp.feature.economy.ui.savingsBackAction
+import ru.nksk.lctapp.core.ui.game.paymentCoinAmount
 
 @Serializable
 @SerialName("coins") // Preserve the saved route ID of the former placeholder.
@@ -49,9 +50,9 @@ fun EntryProviderScope<NavKey>.economyEntry(onBack: (Economy) -> Unit, onConfirm
                 state.error != null -> Unit
                 economy == null || economy.planning?.stage == BudgetPlanningStage.RECEIPT -> onBack(source)
                 economy.planning == null -> onBack(source)
-                EconomyOperations.allocationRemaining(economy) > 0 -> exitMessage = "Распредели оставшиеся ${EconomyOperations.allocationRemaining(economy)} монет, чтобы продолжить."
+                EconomyOperations.allocationRemaining(economy) > 0 -> exitMessage = "Распредели ещё ${paymentCoinAmount(EconomyOperations.allocationRemaining(economy))}, чтобы продолжить."
                 economy.displayPlan.needs < EconomyOperations.minimumNeeds(economy, state.knownNeeds) ->
-                    exitMessage = "Оставь ещё ${EconomyOperations.minimumNeeds(economy, state.knownNeeds) - economy.displayPlan.needs} монет на необходимое, чтобы на всё хватило."
+                    exitMessage = "Оставь ещё ${paymentCoinAmount(EconomyOperations.minimumNeeds(economy, state.knownNeeds) - economy.displayPlan.needs)} на необходимое."
                 else -> model.onAction(EconomyAction.Confirm)
             }
         }

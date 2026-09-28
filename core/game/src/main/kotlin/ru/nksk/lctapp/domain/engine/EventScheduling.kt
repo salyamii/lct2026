@@ -87,8 +87,8 @@ internal object EventScheduler {
         if (selected.size < 5 && loreCount < 2 && story != null) selected += story
         val target = maxOf(4, selected.size)
         val nextDay = (state.engine?.day ?: 0) + 1
-        val exposures = state.eventHistory.associateBy { it.eventId }
-        fun family(id: String) = catalog.policies[id]?.scheduling?.family ?: id
+        val variety = EventVariety(catalog, state.eventHistory)
+        fun family(id: String) = variety.family(id)
         val lastMandatory = state.eventHistory.filter {
             catalog.policies[it.eventId]?.scheduling?.mandatoryUnexpected == true
         }.mapNotNull { it.lastOfferedDay }.maxOrNull()
@@ -105,41 +105,87 @@ internal object EventScheduler {
             val cooldown = maxOf(1, catalog.policies.getValue(id).scheduling.cooldownDays)
             return last == null || nextDay - last >= cooldown
         }
-        fun ranked(ids: List<String>): List<String> = ids.distinct().sortedWith(
-            compareBy<String> { exposures[it]?.offerCount ?: 0 }
-                .thenBy { exposures[it]?.lastOfferedDay ?: 0 }
-                .thenBy { ids.indexOf(it) })
+        fun ranked(ids: List<String>): List<String> = variety.ranked(ids, selected)
         fun deedAllowed(id: String): Boolean = allowed(id) && state.engine?.deeds.orEmpty().none {
             family(it.eventId) == family(id) && !it.completed && it.expiresDay >= nextDay
         }
         val hinted = catalog.storyCampaign?.deedHints?.firstOrNull {
-            catalog.goals.selectedGoal(state) != null && progress.meets(it.condition) && deedAllowed(it.eventId)
+            catalog.goals.selectedGoal(state) != null && progress.meets(it.condition) && deedAllowed(it.eventId) &&
+                !variety.wasShown(it.eventId)
         }?.eventId
         val alreadyHasDeed = selected.any { id -> catalog.content.events.any { it.id == id && it.type == EventType.EARNING } }
         if (selected.size < target && !alreadyHasDeed)
             (hinted ?: ranked(catalog.deedPool).firstOrNull(::deedAllowed))?.let(selected::add)
 
         while (selected.size < target) {
-            val families = selected.mapNotNull { catalog.policies[it]?.scheduling?.family }.toSet()
-            val kinds = selected.mapNotNull { catalog.policies[it]?.scheduling?.kind }.toSet()
             val hasMandatory = selected.any { catalog.policies[it]?.scheduling?.mandatoryUnexpected == true }
             val hasUnexpected = selected.any { catalog.policies[it]?.scheduling?.kind == EverydayEventKind.UNEXPECTED }
             val candidates = ranked(catalog.dailyEventPool).filter { id -> allowed(id) &&
                 !(hasMandatory && catalog.policies.getValue(id).scheduling.mandatoryUnexpected) &&
                 !(hasUnexpected && catalog.policies.getValue(id).scheduling.kind == EverydayEventKind.UNEXPECTED) }
-            val distinctFamily = candidates.filter { catalog.policies.getValue(it).scheduling.family !in families }
-            val chosen = distinctFamily.firstOrNull { catalog.policies.getValue(it).scheduling.kind !in kinds }
-                ?: distinctFamily.firstOrNull() ?: candidates.firstOrNull()
+            val chosen = candidates.firstOrNull()
             if (chosen == null) break
             selected += chosen
         }
         // Compatibility with small/legacy catalogs: fill missing slots with distinct available jobs,
         // preserving all guards and cooldowns. Rich everyday catalogs normally need only one job.
-        for (id in ranked(catalog.deedPool)) {
-            if (selected.size >= target) break
-            if (deedAllowed(id)) selected += id
+        while (selected.size < target) {
+            val next = ranked(catalog.deedPool).firstOrNull(::deedAllowed) ?: break
+            selected += next
         }
         require(selected.size in 4..5) { "Not enough eligible content for day $nextDay; add everyday cards, do not bypass guards" }
         return selected
     }
+}
+
+/** Read-only variety preferences. Eligibility, authored lore, carried work and cooldowns remain separate. */
+private class EventVariety(private val catalog: GameCatalog, history: List<EventExposure>) {
+    private val families = catalog.policies.mapValuesTo(mutableMapOf()) { (id, policy) ->
+        policy.scheduling.family ?: id
+    }.apply {
+        catalog.policies.forEach { (id, policy) ->
+            policy.scheduling.previousEventIds.forEach { previous -> this[previous] = getValue(id) }
+        }
+        catalog.eventReplacements.forEach { (previous, current) ->
+            this[previous] = getValue(current)
+        }
+    }
+    private val historyByFamily = history.groupBy { family(it.eventId) }
+    private val familyLastDays = historyByFamily.mapValues { (_, events) -> events.maxOf(::lastEncounter) }
+    private val familyCounts = historyByFamily.mapValues { (_, events) ->
+        events.sumOf { maxOf(it.offerCount, it.completionCount).toLong() }
+    }
+    private val games = catalog.policies.mapValues { (_, policy) ->
+        (listOfNotNull(policy.deedGameKind) + policy.choiceGameKinds.values).toSet()
+    }
+    private val latestGameDay = history.filter { gameKinds(it.eventId).isNotEmpty() }
+        .maxOfOrNull(::lastEncounter) ?: 0
+    private val recentGames = history.filter { lastEncounter(it) == latestGameDay && latestGameDay > 0 }
+        .flatMap { gameKinds(it.eventId) }.toSet()
+
+    fun family(id: String): String = families[id] ?: id
+
+    fun wasShown(id: String): Boolean = historyByFamily[family(id)].orEmpty().any {
+        it.offerCount > 0 || it.completionCount > 0 || it.lastOfferedDay != null || it.lastCompletedDay != null
+    }
+
+    fun ranked(ids: List<String>, selected: List<String>): List<String> {
+        val selectedFamilies = selected.map(::family).toSet()
+        val avoidGames = recentGames + selected.flatMap(::gameKinds)
+        val selectedKinds = selected.mapNotNull { catalog.policies[it]?.scheduling?.kind }.toSet()
+        val candidates = ids.distinct()
+        val positions = candidates.withIndex().associate { it.value to it.index }
+        return candidates.sortedWith(
+            compareBy<String> { family(it) in selectedFamilies }
+                .thenBy { gameKinds(it).any(avoidGames::contains) }
+                .thenBy { familyLastDays[family(it)] ?: 0 }
+                .thenBy { familyCounts[family(it)] ?: 0L }
+                .thenBy { catalog.policies[it]?.scheduling?.kind in selectedKinds }
+                .thenBy { positions.getValue(it) })
+    }
+
+    private fun gameKinds(id: String) = games[id].orEmpty()
+
+    private fun lastEncounter(exposure: EventExposure): Int =
+        maxOf(exposure.lastOfferedDay ?: 0, exposure.lastCompletedDay ?: 0)
 }

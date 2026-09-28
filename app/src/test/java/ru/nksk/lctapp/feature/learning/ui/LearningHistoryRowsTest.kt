@@ -85,7 +85,7 @@ class LearningHistoryRowsTest {
             LedgerEntry("separate-deposit", LedgerKind.DEPOSIT, 2),
         ))), catalog, "Тоша")
         assertEquals(listOf(
-            "День 1: Купили: Карта звёзд. Потратили 21 монету из копилки и 3 монеты из текущих денег",
+            "День 1: Купили: Карта звёзд. Потратили 21 монету из копилки и 3 из денег с собой",
             "День 1: Отложили в копилку 2 монеты",
         ), rows)
     }

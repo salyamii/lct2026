@@ -23,6 +23,6 @@ fun EntryProviderScope<NavKey>.campaignArchiveEntry(onBack: (NavKey) -> Unit, on
         LaunchedEffect(state.restarted) { if (state.restarted) onRestarted(source) }
         CampaignArchiveScreen(state, onRestart = dropUnlessResumed { model.restart() },
             onArchive = model::openArchive, onCloseArchive = model::closeArchive,
-            onRetry = model::reload, onBack = dropUnlessResumed { onBack(source) })
+            onRetry = model::retry, onBack = dropUnlessResumed { onBack(source) })
     }
 }

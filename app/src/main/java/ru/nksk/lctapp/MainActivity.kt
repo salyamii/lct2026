@@ -9,9 +9,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import dagger.hilt.android.AndroidEntryPoint
 import ru.nksk.lctapp.app.LctApp
+import ru.nksk.lctapp.data.diagnostics.AppDiagnostics
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject lateinit var diagnostics: AppDiagnostics
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge(
@@ -24,5 +28,15 @@ class MainActivity : ComponentActivity() {
         setContent {
             LctApp()
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        diagnostics.updateContext("lifecycle", "foreground")
+    }
+
+    override fun onStop() {
+        diagnostics.updateContext("lifecycle", "background")
+        super.onStop()
     }
 }

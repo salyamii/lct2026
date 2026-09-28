@@ -90,6 +90,7 @@ class GameSession(
     fun observeHistory() = games.observeHistory()
     fun observeHistorySequence() = games.observeHistorySequence()
     suspend fun history() = games.readHistory()
+    suspend fun recordedFacts(eventIds: Set<String>) = games.readFacts(eventIds)
     suspend fun exportSnapshot() = games.exportSnapshot()
     suspend fun archivedRuns() = games.archivedRuns()
     suspend fun archivedRun(runId: String) = games.archivedRun(runId)

@@ -176,8 +176,8 @@ internal fun chronoscopeHorizon(result: TimeMachineResult, day: Int?): String {
     val shownDay = day ?: result.baseline?.state?.engine?.day ?: 1
     return when {
         result.status == TimeMachineStatus.DIVERGED -> "День $shownDay. Посмотрим, что успело бы произойти."
-        result.baseline?.state?.engine?.phase == DayPhase.FINISHED -> "Что изменилось бы к концу дня $shownDay"
-        else -> "Что изменилось бы в день $shownDay к этому моменту"
+        result.baseline?.state?.engine?.phase == DayPhase.FINISHED -> "Что изменилось бы к концу $shownDay-го дня"
+        else -> "День $shownDay. Что изменилось бы к этому моменту?"
     }
 }
 

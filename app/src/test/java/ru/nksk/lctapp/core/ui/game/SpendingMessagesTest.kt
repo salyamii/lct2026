@@ -23,7 +23,7 @@ class SpendingMessagesTest {
 
     @Test fun unaffordableOfferStillShowsItsPriceWithoutPromisingAPartialPayment() {
         val quote = EconomyOperations.quote(EconomyState(BudgetPlan(0, 4, 0, 0)), 7, SpendingKind.WANT)
-        assertEquals("Для оплаты нужно 7 монет. Не хватает ещё 3 монет.", quote.playerDescription(SpendingKind.WANT))
+        assertEquals("Цена — 7 монет. Не хватает ещё 3.", quote.playerDescription(SpendingKind.WANT))
     }
 
     @Test fun forbiddenEarningCostDoesNotAdvertiseASpend() {

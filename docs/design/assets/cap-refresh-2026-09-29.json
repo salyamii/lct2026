@@ -1,0 +1,132 @@
+{
+  "audited_on": "2026-09-29",
+  "figma_file_key": "bAod1cKtTX9Q8omQ067q3q",
+  "method": "Current individual Figma frame export, natural 1x canvas; lossless exact WebP. No crop, recentering or manual painting.",
+  "raster_encoding": {
+    "format": "WebP",
+    "lossless": true,
+    "exact": true,
+    "method": 6,
+    "pillow_version": "12.3.0"
+  },
+  "refreshed": [
+    {
+      "resource": "ryzhik_adult_body_accessory_hat",
+      "manifest_entry": {
+        "resource": "ryzhik_adult_body_accessory_hat",
+        "category": "Ryzhik adult",
+        "figma": {
+          "file_key": "bAod1cKtTX9Q8omQ067q3q",
+          "node_id": "89:38",
+          "node_name": "adult_body_accessory_hat_512",
+          "collection_id": "89:2",
+          "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-38"
+        },
+        "design_canvas": [
+          512,
+          512
+        ],
+        "export_scale": 1,
+        "source_method": "figma_export",
+        "format": "webp",
+        "width": 512,
+        "height": 512,
+        "bytes": 87984,
+        "sha256": "d2075f0c155061228e25aeb0c0b8fd1a2e6105ce3cd8b125a60d8ba78874601f",
+        "rgba_sha256": "08e88074be8a0b9152bd9dcc50a5e1285c20b2d0fab2b9e9d20720097f0e6bdb",
+        "alpha_bounds": [
+          44,
+          21,
+          436,
+          494
+        ],
+        "source_sha256": "4d78c368b12a66058665f57e9b4f59232692299ed3f13fbe9f016c930b1821ce",
+        "source_bytes": 135054,
+        "source_format": "png",
+        "lossless_rgba_verified": true,
+        "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_hat.webp",
+        "refreshed_on": "2026-09-29"
+      },
+      "previous_pixel_bytes_sha256": "7465a8f74d16cbaf2f56eeeb98f5793cc9045de39823aa65be5892e63099c1b4"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_hat_dark_russet",
+      "manifest_entry": {
+        "resource": "ryzhik_adult_body_accessory_hat_dark_russet",
+        "category": "Ryzhik adult",
+        "figma": {
+          "file_key": "bAod1cKtTX9Q8omQ067q3q",
+          "node_id": "89:154",
+          "node_name": "adult_body_accessory_hat_dark_russet_512",
+          "collection_id": "89:2",
+          "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-154"
+        },
+        "design_canvas": [
+          512,
+          512
+        ],
+        "export_scale": 1,
+        "source_method": "figma_export",
+        "format": "webp",
+        "width": 512,
+        "height": 512,
+        "bytes": 92038,
+        "sha256": "5b07b991f6dd930cc336a3c6a12a17d7e56a6c3c07f314815333cb74fcc62bdc",
+        "rgba_sha256": "ffd1cd1e30646f4a70aa46ff6dc5a31f1ad8389cddcb5f5cb9aca0ff18539879",
+        "alpha_bounds": [
+          47,
+          21,
+          438,
+          494
+        ],
+        "source_sha256": "cf2d35b4d3b965030d800c88753c7c39bc4bc8e218f93cf727d250d639d78cde",
+        "source_bytes": 137511,
+        "source_format": "png",
+        "lossless_rgba_verified": true,
+        "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_hat_dark_russet.webp",
+        "refreshed_on": "2026-09-29"
+      },
+      "previous_pixel_bytes_sha256": "e9a12631833a225fb8dbacbb68347095a69205c453513d13b35f8786e90274a1"
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_hat_sand",
+      "manifest_entry": {
+        "resource": "ryzhik_adult_body_accessory_hat_sand",
+        "category": "Ryzhik adult",
+        "figma": {
+          "file_key": "bAod1cKtTX9Q8omQ067q3q",
+          "node_id": "89:121",
+          "node_name": "adult_body_accessory_hat_sand_512",
+          "collection_id": "89:2",
+          "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-121"
+        },
+        "design_canvas": [
+          512,
+          512
+        ],
+        "export_scale": 1,
+        "source_method": "figma_export",
+        "format": "webp",
+        "width": 512,
+        "height": 512,
+        "bytes": 88432,
+        "sha256": "c610eafe295ce02ef9f7e8e48edad43b4d2fa180c26862470e1ed991c2242138",
+        "rgba_sha256": "112710faffb5818c9e37d10cadf31677a66f3cbe091dba212af1da22b471705a",
+        "alpha_bounds": [
+          155,
+          20,
+          434,
+          494
+        ],
+        "source_sha256": "28c50fb869e773743e29019c90e82eb3a4c568314e9d7cc02b21066407ba3303",
+        "source_bytes": 135715,
+        "source_format": "png",
+        "lossless_rgba_verified": true,
+        "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_hat_sand.webp",
+        "refreshed_on": "2026-09-29"
+      },
+      "previous_pixel_bytes_sha256": "e347d530fbe59c7eb5f133ffeccff8eeb422706d1e484ca604379f1ea3b74e6d"
+    }
+  ],
+  "rgba_hash_format": "SHA-256 of 4-byte big-endian width, 4-byte big-endian height, then RGBA bytes (verify_assets convention)"
+}

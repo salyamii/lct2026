@@ -58,6 +58,7 @@ class MiniGameScreensTest {
                     MemoryGameScreen(
                         MemoryGameUiState(MemoryState(faces = (0..7).toList() + (0..7).toList())),
                         onAction = actions::add, onBack = {},
+                        deed = DeedGamePresentation("Найди пару", maximumReward = 12, canPlay = true),
                     )
                 }
             }
@@ -75,7 +76,8 @@ class MiniGameScreensTest {
                     DeviceConfigurationOverride.FontScale(2f),
             ) {
                 LCTAppTheme {
-                    TargetStopScreen(TargetStopUiState(TargetStopState(zoneStart = 40)), actions::add, {})
+                    TargetStopScreen(TargetStopUiState(TargetStopState(zoneStart = 40)), actions::add, {},
+                        deed = DeedGamePresentation("Настрой телескоп", maximumReward = 5, canPlay = true))
                 }
             }
         }

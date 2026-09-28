@@ -38,6 +38,10 @@ internal class CampaignArchiveViewModel @Inject constructor(private val session:
 
     init { reload() }
 
+    fun retry() {
+        if (pendingRestart != null) restart() else reload()
+    }
+
     fun reload() {
         if (state.value.busy) return
         state.value = state.value.copy(loading = true, error = null)

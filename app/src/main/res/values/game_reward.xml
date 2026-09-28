@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="deeds_reward_available">Можно заработать</string>
+    <string name="deeds_reward_available_description">Можно заработать %1$d из %2$d монет</string>
+</resources>

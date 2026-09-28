@@ -4774,20 +4774,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 85424,
-      "sha256": "9510a165c542adf3c6d55d92a6c80e78e00232b7d86e764215a6e9e7002e0cf1",
-      "rgba_sha256": "d4da903e9b16c54d8274e36d926e6e7b2bf9294bb9fe6b51148d1efcffe09202",
+      "bytes": 91076,
+      "sha256": "1edc2ae451382d5118b5bf8aaf6fd91e4a65935b550f6c1d254bbbc8d1eee332",
+      "rgba_sha256": "14b1fc10f3de85e5d2b6a124d1a33c83039518ddaa9f19c8af281262b1510674",
       "alpha_bounds": [
-        156,
-        22,
-        419,
-        488
+        54,
+        16,
+        464,
+        491
       ],
-      "source_sha256": "78b3291fdc616502b4b2c9f3f1756cffa3f1a5b10c074a522e609461d30e79d6",
-      "source_bytes": 131179,
+      "source_sha256": "11c65a8fe99ea8fa85937237a54aa2075ed30b7801497c9b99837ce5baeb22dc",
+      "source_bytes": 135533,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_base_no_accessory.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_base_no_accessory.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_body_accessory_bandana",
@@ -4808,20 +4816,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 84718,
-      "sha256": "11eb1564764e292726c2223846beefd4d1344403c29a9ae39e6bb5869daa60c1",
-      "rgba_sha256": "53a059258752f70a570d5bd84272a151bf7d0feef4cb7b717d9cf1ce0e9bf075",
+      "bytes": 94166,
+      "sha256": "e6bbca6b577b4a13e3d90bd2f9a9c0fefdba81c4d43159bae4dbbcd6835096f5",
+      "rgba_sha256": "36c0d6f1d1ff244fc66f32172de217b9f43e1df384c1ea91f11110b2fb25c3f3",
       "alpha_bounds": [
-        163,
-        22,
-        424,
-        485
+        50,
+        20,
+        428,
+        494
       ],
-      "source_sha256": "ce5dd0dacfee34af286dc5db66ad535b87ddfaaeb43fc208579fe1736604f27e",
-      "source_bytes": 130248,
+      "source_sha256": "2ada6cebf7daf768f8a0d172c67e7e53b1b6a013db2bc51e557f619bff5f71f6",
+      "source_bytes": 139887,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_bandana.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_bandana.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_body_accessory_backpack",
@@ -4842,20 +4858,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 98030,
-      "sha256": "3d257e89ed17f3cd6f8f38a6df5a3da419adedad1fe56cdf0077392fd257061a",
-      "rgba_sha256": "bca0667b7b20ae18a344a3202d745931ab84e2b2bac05287637b8646ecb913ea",
+      "bytes": 97390,
+      "sha256": "3d0225caf17c5f34ad3677811a5fc8f40a252f4a583f46e8b935f4447f363ae7",
+      "rgba_sha256": "564f8e3d30f6a504f33948feb783c6463045dc41e805cdc555e363e1c00925c5",
       "alpha_bounds": [
-        156,
+        48,
         21,
-        419,
-        488
+        435,
+        494
       ],
-      "source_sha256": "d86749e530c66379808bd9b368a28a24a9337589aeb29edf529b202694977a36",
-      "source_bytes": 149834,
+      "source_sha256": "d2b96836915646c7d291fbcd107f76efd799389ec07ee490fa2d303f77654e30",
+      "source_bytes": 148082,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_backpack.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_backpack.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_body_accessory_route_patch",
@@ -4876,20 +4900,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 90378,
-      "sha256": "9a38d4b7c3a92a0deb5b9c3d4ea6a98814bf7b0518881111fb8ada32eca05520",
-      "rgba_sha256": "3f07224a525a79ba52276f4b0355e30857808c22609bff237d8c7f9af9842707",
+      "bytes": 89220,
+      "sha256": "657805da60ff5ecde5ed67e9072bd0be53954852989d6fa24bce4cf9f2cb5255",
+      "rgba_sha256": "4ff8ce2efba111e74b04589fd446f8e30388370fa0d37fdf722abf7a3221817c",
       "alpha_bounds": [
-        156,
-        21,
-        420,
-        488
+        44,
+        20,
+        434,
+        494
       ],
-      "source_sha256": "96ad1017b09187e0d4dd415f10029ed79a01349d6100c358c4cc17c6213ad7d1",
-      "source_bytes": 138144,
+      "source_sha256": "03cad28c79590ab14bd85611d8e57757fd4c55f0617ce0b6bdba319783688e50",
+      "source_bytes": 133290,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_route_patch.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_route_patch.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_body_accessory_hat",
@@ -4910,20 +4942,21 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 88624,
-      "sha256": "395566887c9441a44dffd0169f7fced065eadfd05767d0cb79ccd111d80cda43",
-      "rgba_sha256": "c294927added0ecd6dd42a6b39686fbe60d24cf14d436c4b9faf475e42371f68",
+      "bytes": 87984,
+      "sha256": "d2075f0c155061228e25aeb0c0b8fd1a2e6105ce3cd8b125a60d8ba78874601f",
+      "rgba_sha256": "08e88074be8a0b9152bd9dcc50a5e1285c20b2d0fab2b9e9d20720097f0e6bdb",
       "alpha_bounds": [
-        156,
+        44,
         21,
-        420,
-        488
+        436,
+        494
       ],
-      "source_sha256": "483ca2662efaa1eecd16424dee2c1ac8323ee728422da18ebe6dda55de063f2f",
-      "source_bytes": 137067,
+      "source_sha256": "4d78c368b12a66058665f57e9b4f59232692299ed3f13fbe9f016c930b1821ce",
+      "source_bytes": 135054,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_hat.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_hat.webp",
+      "refreshed_on": "2026-09-29"
     },
     {
       "resource": "ryzhik_adult_body_accessory_goggles",
@@ -4944,20 +4977,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 90244,
-      "sha256": "39974a1d05c53b93a887add4149b660cbc2cd783d8158b7566bf1d912feaf602",
-      "rgba_sha256": "33c59c0f6c4edb68df1fc6ce84e0c56107e22ff9f37e07646b8fe24dfc8479c1",
+      "bytes": 90582,
+      "sha256": "76ce934d894d4a3f08fd847a92e6a2a9858e32b1240d0bb9e5f98693aabfeb22",
+      "rgba_sha256": "41e7fcc4397beffa7f30a199efbb8651eb0eaf7c684edc9617baad47853a0a13",
       "alpha_bounds": [
-        156,
-        21,
-        420,
-        488
+        163,
+        20,
+        430,
+        494
       ],
-      "source_sha256": "2f81df371129db43c689663683de03e466721aab4d3e6f794becd567665f0d6b",
-      "source_bytes": 137268,
+      "source_sha256": "afe5c5fb9c1b82ae2f2c5b4926eb3220b221acc7ff9d0d34b5921d87741ed4ff",
+      "source_bytes": 134732,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_goggles.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_goggles.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_body_accessory_compass",
@@ -4978,20 +5019,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 95348,
-      "sha256": "2c31e77f74960228fff8e755e016f1b14bdc68eec875b4db444144ab1bad0462",
-      "rgba_sha256": "cebb193fc645fdd9e279cb312b78b2cb3fef071d1d773dd5f893a631702ed1ec",
+      "bytes": 92964,
+      "sha256": "77f03bb3248695070dbf27e39ce3e7e02737fb048e1d1b53806ed7f0bc773a36",
+      "rgba_sha256": "c0be16b594a0b6cbb57551d33143d499adb3e159515519059c40f77dda3d6972",
       "alpha_bounds": [
-        115,
-        16,
-        427,
-        491
+        130,
+        20,
+        434,
+        494
       ],
-      "source_sha256": "1dc977bc2ced7f435c33ab6058f40dafc2b70895ce31282f2864582af984dde1",
-      "source_bytes": 148622,
+      "source_sha256": "bfe4710485e426affd00a81451b7fd3f10e43f2f9cd81931b4e04ed3f9da7278",
+      "source_bytes": 139188,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_compass.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_compass.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_body_accessory_lantern",
@@ -5046,20 +5095,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 89198,
-      "sha256": "573cc30d588ad245616638bea6ba58c29da8d49ff6b8c16e1a30a4b9539ccf3e",
-      "rgba_sha256": "f7ed09e97ed98c534d56f51611277a667a2f563a818892dbd9c21dac3775730b",
+      "bytes": 90680,
+      "sha256": "66669fdc9f1da2e8adcb8877fc699eb9585f714e808247d778e3063e94ef0a7b",
+      "rgba_sha256": "ab989674d0fb64745c28f94f5627fe2e4d48a24e8608ddf0be85ca94f3a9cead",
       "alpha_bounds": [
-        152,
-        21,
-        419,
-        488
+        52,
+        20,
+        435,
+        493
       ],
-      "source_sha256": "f111886165f8c9d4bb75b956dae96ffed0d5d95d4ac17a4aa56d236be3b1654d",
-      "source_bytes": 135470,
+      "source_sha256": "4889ee44a75f6c376397231ebce6b5acd6dbcae4c3322811d079248155a383b3",
+      "source_bytes": 136766,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_binoculars.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_binoculars.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_face_patch_neutral",
@@ -5319,20 +5376,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 88094,
-      "sha256": "3070bc7d9a807b9d3cad474c456444a552d03affe68d083eb2f6a766c498578e",
-      "rgba_sha256": "30e650b479c587e4c3adc56451341f5e3bb205b3052c28c0dc3ea1e7fa728606",
+      "bytes": 90094,
+      "sha256": "3ab449ecfc2dc877732a1f2715c2420b6bcd77cfdefef3123847dfdc5637de1a",
+      "rgba_sha256": "a885713b648e63ec977abecb45b05dbb7149a7b5a406db625a1b67a099a8bc52",
       "alpha_bounds": [
-        156,
-        21,
-        420,
-        488
+        47,
+        20,
+        430,
+        494
       ],
-      "source_sha256": "0a963bdb8948449f79b44932eb59cb7bcf6eaed4041a7526e6342fa69d011080",
-      "source_bytes": 136532,
+      "source_sha256": "816251d296d0cd51bdd1af9a8e5e6ac97db68162d9d69d20270b73eb86317cf4",
+      "source_bytes": 134594,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_bandana_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_bandana_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_body_accessory_backpack_sand",
@@ -5353,20 +5418,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 95374,
-      "sha256": "e64fe8f55952b5bfed97266584eefb79dad866e581f5afeaf98e0763ca0444b1",
-      "rgba_sha256": "54724de8185acc54af2f3ac1048310d32b78ff7442b3484dcb25938b89b67eba",
+      "bytes": 98504,
+      "sha256": "ec4bcbdc8c1df29546b91095201cc0e1b3f1d4a5393fc5a98d463c6c94835021",
+      "rgba_sha256": "fa8c00a6fdfce527ece339ba3e43387c4dbba25638297efbbd31c21da3c18b08",
       "alpha_bounds": [
-        159,
-        21,
-        422,
-        487
+        161,
+        20,
+        435,
+        493
       ],
-      "source_sha256": "82d19b4a2c09a286f26f42c0e8b78858fbf5918ef146e26cf0ae60bc59e0fa37",
-      "source_bytes": 146624,
+      "source_sha256": "42c1e398eb786bf69f1979a0942c406b1f082a92f162c3bc43e41c25a0256960",
+      "source_bytes": 146789,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_backpack_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_backpack_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_body_accessory_route_patch_sand",
@@ -5387,20 +5460,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 85202,
-      "sha256": "0dd10ff3ee2af2aa8471fc1e93a16fdcabb3267b3d14f7c1f7ea1244709d2998",
-      "rgba_sha256": "5f76cf3d20aa7f62586eaf43ba292df2c599e29b1ee262a97a9a09335fd26d14",
+      "bytes": 88812,
+      "sha256": "dcdbb185272e1ea97eda04b1f34d16113bea1a9b8a59b552be70ed6b728d2f08",
+      "rgba_sha256": "98827088146a9b50e1db10a929ac91c4434f30540f2f2b0afb4acd819ff3b8be",
       "alpha_bounds": [
-        160,
-        21,
-        424,
-        487
+        159,
+        20,
+        430,
+        494
       ],
-      "source_sha256": "9ac339a55f1b331925ea8fbcac274272e7d9a7b109285a4ab597fa2fe5ba3e19",
-      "source_bytes": 132145,
+      "source_sha256": "f6f303d48f295c7c12b1c021546fc7ee037495cdcaa9d71e825edcf36940fbd8",
+      "source_bytes": 134978,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_route_patch_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_route_patch_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_body_accessory_hat_sand",
@@ -5421,20 +5502,21 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 84764,
-      "sha256": "bfea2017d01a896d27ee3c194ac53a771412231439ad1b415daa35f8923a4af3",
-      "rgba_sha256": "d04ccce74de8bee44119fb3f077298425e5e69e0e09059666cc6272fbf466967",
+      "bytes": 88432,
+      "sha256": "c610eafe295ce02ef9f7e8e48edad43b4d2fa180c26862470e1ed991c2242138",
+      "rgba_sha256": "112710faffb5818c9e37d10cadf31677a66f3cbe091dba212af1da22b471705a",
       "alpha_bounds": [
-        160,
-        28,
-        423,
-        487
+        155,
+        20,
+        434,
+        494
       ],
-      "source_sha256": "116e26303a9e09f5c1714b89a0b8b9cc610d7aa8614f5c2f3c26339610bbc13c",
-      "source_bytes": 132296,
+      "source_sha256": "28c50fb869e773743e29019c90e82eb3a4c568314e9d7cc02b21066407ba3303",
+      "source_bytes": 135715,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_hat_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_hat_sand.webp",
+      "refreshed_on": "2026-09-29"
     },
     {
       "resource": "ryzhik_adult_body_accessory_goggles_sand",
@@ -5455,20 +5537,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 88044,
-      "sha256": "2ee7fb98b1ed87f60b3ec9754f16e5cef6e38a7c12ebdc38e27116c9da01353d",
-      "rgba_sha256": "01f89ccf2d76c288b2e4737fde76a27f636e5e9088f0b73131a0b71a9513bbf8",
+      "bytes": 93702,
+      "sha256": "0aa88477a01e94c850f8d3fa8c757a8cd3b33bacb3aec3ae1724b849e693f6bc",
+      "rgba_sha256": "576a32c34890ad6d58b5c9436fc42747a67989435c6f61923cc6a2198acb5574",
       "alpha_bounds": [
-        157,
+        48,
         21,
-        420,
-        488
+        437,
+        493
       ],
-      "source_sha256": "2aed24195ffed41e80128ce9aeedb20d108bcdfc4fb7a4a55ea77f91cb9946ab",
-      "source_bytes": 136803,
+      "source_sha256": "1ae842fc8b580fb5dc0c0ed97f2307dada7ce4c83f82c29e02b6cabb3d355bcd",
+      "source_bytes": 139501,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_goggles_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_goggles_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_body_accessory_compass_sand",
@@ -5489,20 +5579,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 96272,
-      "sha256": "a1668199a36d669b97cf16d6b1bdc67a0c2bf8dd0cc30a664c21a37df058a674",
-      "rgba_sha256": "2f72dda88716c635034dcd7bdd3ee01fb69d67d989e5ed982f1c5486fc1a406d",
+      "bytes": 93276,
+      "sha256": "6fe4e1f86b64e47227abce16bf3360c1ef2bdaf30df11ff9a2c15ce4da8bc5dc",
+      "rgba_sha256": "0bba881cf32fce38460dfc1d096654a99a93cb99f17a9859a450cafd643cf5b1",
       "alpha_bounds": [
-        111,
-        21,
-        420,
-        488
+        46,
+        20,
+        433,
+        494
       ],
-      "source_sha256": "3b6ee1258ef50ae4a4dda0f44eac501a083b36f638680280a830cebbe19b280f",
-      "source_bytes": 147415,
+      "source_sha256": "ef2110fc0eaba9d9a7f494c038993eaf042abb5ce2820012237b273d5c4ca81f",
+      "source_bytes": 144361,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_compass_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_compass_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_body_accessory_lantern_sand",
@@ -5557,20 +5655,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 90980,
-      "sha256": "c38ff4ef17a932fd78c9cd6e0481b8293b594cb446cfa8ea1d717e2abc2782f7",
-      "rgba_sha256": "6b9d84728b364fe59107f0948e3b0a3347d306cdc1c8091794c68c3eee98de80",
+      "bytes": 88642,
+      "sha256": "415d195911b145f90ef65623b75c460d4d9acd43d95ec7d36092e55d810db407",
+      "rgba_sha256": "3a0ceb404f41d0797db20f5304eea53b83a259be24d2bd5276ac79da36641c15",
       "alpha_bounds": [
-        139,
-        21,
-        416,
-        488
+        158,
+        20,
+        426,
+        494
       ],
-      "source_sha256": "87eaaf705db0aa9927b458ee2d57dd2265a4f0087c1d640a4ec49b99b13f4a5c",
-      "source_bytes": 139811,
+      "source_sha256": "18dba8f212931ac36cffe158d2d8e204cfe46b31d06b59fc9e462839d914dbf3",
+      "source_bytes": 134713,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_binoculars_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_binoculars_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_body_accessory_bandana_dark_russet",
@@ -5591,20 +5697,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 82580,
-      "sha256": "41db9e545115b68720615a9a5a04e5798b8489612e38d46f60df52ec7abc222f",
-      "rgba_sha256": "75fd970cb5e7d8ef0c7cf367d9290097ed96d3831bf2eab01d7af7223db4f951",
+      "bytes": 91762,
+      "sha256": "9c1eca8a99ebb8acbf48b690f1b2b77d03b29793ec5ffdad71c43ad19af7e0c2",
+      "rgba_sha256": "5848f87ff70d4cc562eb2122f2000737fba6bec5a7ecd1eb226bdf6494f48156",
       "alpha_bounds": [
-        160,
-        22,
-        422,
-        488
+        49,
+        20,
+        435,
+        493
       ],
-      "source_sha256": "da278e8fac1d275c26f9545c747d8b12c86b7ad859617a05a87133d742444ed4",
-      "source_bytes": 133471,
+      "source_sha256": "3c1c764b81750658d2c1fa49bfb44744b9cc8b165c520863d6092a7bfec00e25",
+      "source_bytes": 137850,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_bandana_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_bandana_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_body_accessory_backpack_dark_russet",
@@ -5625,20 +5739,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 93168,
-      "sha256": "c963b49110497c73e6dfa767f491b54cbd2918610643a346b1dbaa21f54ac8e8",
-      "rgba_sha256": "61af62b8b6bdbb3903984cb288ff02e6b4e5a839ec3ddfdbe098f1e771c8018b",
+      "bytes": 101272,
+      "sha256": "f4f6b0941c3e4d0e702a0d36e2eefcc1b5e95e271cd45a48830a51f9b2717e88",
+      "rgba_sha256": "080521ac82724dde9f6f0a0a3efb6b4e11c1657774c488715035ab5c44274000",
       "alpha_bounds": [
-        156,
-        21,
-        420,
-        488
+        49,
+        20,
+        437,
+        494
       ],
-      "source_sha256": "36ddc721b1bea770d1d6543067982aa9b14c8dedbd45b0729aad2f04a01ffb87",
-      "source_bytes": 146568,
+      "source_sha256": "f1c694d00b4b6ac4d9676a6111548f18b799eb9277b708c883dcd0a096779e25",
+      "source_bytes": 152964,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_backpack_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_backpack_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_body_accessory_route_patch_dark_russet",
@@ -5659,20 +5781,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 87386,
-      "sha256": "dc39549769f9a1bfbf1ec73146fa99aac4e74683c1114d7496656fdc4102ba74",
-      "rgba_sha256": "565fcfc885271d829ba128fdd54bc8fcb19c8365cee41df8a1378ddd9c6c3c76",
+      "bytes": 90598,
+      "sha256": "cf2546c742704b27bd7aef80785133ff9698f2b7032e631c5be6555359b3ba65",
+      "rgba_sha256": "80fef465e3a6aa6465973cece80bcb12c19ef09cb16ae90ccf6de0b613a1d86e",
       "alpha_bounds": [
-        156,
-        21,
-        419,
-        487
+        51,
+        20,
+        438,
+        494
       ],
-      "source_sha256": "08f4530d1016312ed8394cecdedf5c2ec74024d71fe847aa48f97a0259ede9d8",
-      "source_bytes": 135392,
+      "source_sha256": "4ca5a8299378d877cc2c4eac1d08e1b2b9764f9db00e43ff7666b8bef68a0ae1",
+      "source_bytes": 136451,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_route_patch_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_route_patch_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_body_accessory_hat_dark_russet",
@@ -5693,20 +5823,21 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 81844,
-      "sha256": "a6a05648910bc0bef8e8119f448f9938ab6714c1f31f9d2e7eedf97044042bb4",
-      "rgba_sha256": "80fcd71a155e84578e04bd9f6158f59853a12e1801a1592cfd95b380d3614431",
+      "bytes": 92038,
+      "sha256": "5b07b991f6dd930cc336a3c6a12a17d7e56a6c3c07f314815333cb74fcc62bdc",
+      "rgba_sha256": "ffd1cd1e30646f4a70aa46ff6dc5a31f1ad8389cddcb5f5cb9aca0ff18539879",
       "alpha_bounds": [
-        156,
-        22,
-        421,
-        488
+        47,
+        21,
+        438,
+        494
       ],
-      "source_sha256": "2593d9d2446290a241c22df9459efb6491be15ddc89ccfa0d2e340b97dc41409",
-      "source_bytes": 129606,
+      "source_sha256": "cf2d35b4d3b965030d800c88753c7c39bc4bc8e218f93cf727d250d639d78cde",
+      "source_bytes": 137511,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_hat_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_hat_dark_russet.webp",
+      "refreshed_on": "2026-09-29"
     },
     {
       "resource": "ryzhik_adult_body_accessory_goggles_dark_russet",
@@ -5727,20 +5858,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 80554,
-      "sha256": "64bd4f975ac46cc9cab5dd7a59402677af088371f4426f24963841571e222f2f",
-      "rgba_sha256": "3b82995ac9fd536c618bb45494077cabdf7732ae08d49c4676e1d5e5c6f65b5f",
+      "bytes": 88864,
+      "sha256": "4f42e37c8e98231635ecc41fd53a43e9a3b1c4798603367a8e82fdafd4e4213f",
+      "rgba_sha256": "c946164ad0e6bae26eab223d66fd5feee0ce21bfd1eadf2f6d421d741d07e370",
       "alpha_bounds": [
-        156,
-        21,
-        420,
-        488
+        25,
+        20,
+        427,
+        493
       ],
-      "source_sha256": "261ea50385ed136ff0847c7718fc64ac2b7add46ef896506e9e04e2329dd406a",
-      "source_bytes": 129925,
+      "source_sha256": "a1f47806e130c249fa6701d7c93ad01777acd48c6d5027020d1c8f6dc2e0c271",
+      "source_bytes": 133300,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_goggles_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_goggles_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_body_accessory_compass_dark_russet",
@@ -5761,20 +5900,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 88586,
-      "sha256": "e84111e4c8afe05e0b8574fe01b215488986fdc0858612560c0c7b3c96da693c",
-      "rgba_sha256": "be071baac7ed56b779c4e14562e36b678e832bfff5852e87fe30c5e0c5f5c08a",
+      "bytes": 96244,
+      "sha256": "2e9074b8318d926d983213843c57c31e863cbfff1129744d5cacb457e8fe5675",
+      "rgba_sha256": "dde98363b02fef8ff06d5ccecb2719d02fecf336d0e0553d0d183972f5c7f38e",
       "alpha_bounds": [
-        109,
+        123,
         21,
-        429,
-        488
+        439,
+        493
       ],
-      "source_sha256": "4d8388f8dd6905640e2ac5f3d60c9ef7b105a3b381d12dfbb178c56185a3f1e8",
-      "source_bytes": 141532,
+      "source_sha256": "e4434e559ee4904203ad521475132aec21662cabbaf58bbf1ebd4d6614823c2e",
+      "source_bytes": 146102,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_compass_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_compass_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_body_accessory_lantern_dark_russet",
@@ -5829,20 +5976,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 85624,
-      "sha256": "22664bc9c8d45946e47c40bf8e686601fca416cacffe22def5a25cc96bb9f4ee",
-      "rgba_sha256": "e1bd1ed9f788166b9855537ee689cbf9c5ea69b8157a875579f2a416a8457add",
+      "bytes": 90572,
+      "sha256": "1883d04dedf206a66449b6ccd781d7e9f0b819fe139e238ce69ae0ec9762ea59",
+      "rgba_sha256": "71e7e5241cf1cc035942b1aed80f5c1a3be42567c2a5d07280ba54f517cce297",
       "alpha_bounds": [
-        156,
-        21,
-        420,
-        488
+        165,
+        20,
+        434,
+        494
       ],
-      "source_sha256": "1bb57a7734ccfc2bd6d781310f36256df269e12be23cc192aa22bb9064738cda",
-      "source_bytes": 136536,
+      "source_sha256": "5d81a3d431fb5214650a1d61295d40dc64a171047088a7d93f9dd6ea73adcc0c",
+      "source_bytes": 137538,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_binoculars_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_binoculars_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_body_base_sand",
@@ -5863,20 +6018,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 81914,
-      "sha256": "85040681f3338591a92006c62e6c42a66c5b14ad9c96f88646a0389ac7b8c4e5",
-      "rgba_sha256": "8a61046817a144a640df344546e93d54a49ea592f91cfd8c51133f31e5728b62",
+      "bytes": 87618,
+      "sha256": "296db1612bb039b083a68aa7d7bb4fb975ed5a13fd943fdc7ea8aecb909f48cc",
+      "rgba_sha256": "912142ccaee484600cea1e596ce88869f661b8092585a4b8f51f1a76de8c3e78",
       "alpha_bounds": [
-        159,
-        22,
-        423,
-        488
+        43,
+        20,
+        432,
+        494
       ],
-      "source_sha256": "fea3b11cc5ff184f3b1eca6161230b99ef2a80564223bb53342e76925a8a91fd",
-      "source_bytes": 132142,
+      "source_sha256": "71fa245da8bdc14900c726481f81a5f3898b054c8da8ac5965c0396cfc7e3c28",
+      "source_bytes": 135551,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_base_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_base_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_body_base_dark_russet",
@@ -5897,20 +6060,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 80904,
-      "sha256": "e66c251b023631243ae087006e8bb3b61b541f2225fe086ebc26afe8e1235e1c",
-      "rgba_sha256": "51a1deb01450761165d16b15a08763f52baa4a1862a6630d867a0f30d2300e64",
+      "bytes": 86450,
+      "sha256": "583ae1f0a62e9cdafbaaa3054e1f3b918a0535f03819c15995aa8f1818fdd3b6",
+      "rgba_sha256": "8dc1dbf23ba45b5a11d18b400a07724d075147236e81e1582c297df45e6539e7",
       "alpha_bounds": [
-        156,
+        45,
         21,
-        419,
-        488
+        431,
+        493
       ],
-      "source_sha256": "0c6a234544e20192699af03819201ba040ee3fc62b8795aba49d9772ed67c263",
-      "source_bytes": 127739,
+      "source_sha256": "0f0f81d977ef9ce489a97fbf2410507072af7e47bb64a3da496bfea25b54799d",
+      "source_bytes": 131157,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_base_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_base_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_state_sick_copper",
@@ -5931,20 +6102,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 84976,
-      "sha256": "e4c152551d2d960ff86826a77b75713ddb867569403beffc553f6dc231145336",
-      "rgba_sha256": "4a437ece048c94c35ac2fa4719b7147134fb75478fd533316213e7f7cacdd784",
+      "bytes": 89826,
+      "sha256": "b31669cabcb00d25f3a90447860117f0bb50ebaa3424712a10f78d3e5a80de90",
+      "rgba_sha256": "4dc54de37b09c1077e2b67e36c3603c6f7544c7900b224a899fb7d5109f5e1fa",
       "alpha_bounds": [
-        156,
-        21,
-        419,
-        488
+        158,
+        20,
+        431,
+        494
       ],
-      "source_sha256": "fd6c2362177164e3c72645c01df9161c124b5a42726da0761d1ccf28f3c74b72",
-      "source_bytes": 133203,
+      "source_sha256": "ee771df296193cf839a4532e137b9bc6e318b7062a96415c37c44f38ed912e4e",
+      "source_bytes": 136775,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sick_copper.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sick_copper.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_state_satiated_copper",
@@ -5999,20 +6178,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 93738,
-      "sha256": "9fecedfbae0c548ae5cd5793cc6629e1d7f197547b6be0ceede2710021fcfa37",
-      "rgba_sha256": "15a0e41dcbf8e3d44a79cb0e36480fdc1cfdd6dd278e704eb4a3dca3f347c964",
+      "bytes": 91476,
+      "sha256": "3141e2a1ea661bb5f458109f920780c2da37c31be8b6156abecb0c6aa78fc368",
+      "rgba_sha256": "d62ad6e6fc887a16bb10d4f9dfa34c637f8b77f6559074b57cb0c680efabdd2c",
       "alpha_bounds": [
-        156,
+        55,
         21,
-        447,
-        488
+        429,
+        494
       ],
-      "source_sha256": "17943f953d178e5079c6af71d17b2f9349b909bbdebe5c9edd05340fc042e335",
-      "source_bytes": 144852,
+      "source_sha256": "819a0e5edebc4808b0ceb9c9da8b88ff0f067e3dd203dd00b6129aaafb54d27f",
+      "source_bytes": 140013,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_joy_copper.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_joy_copper.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_state_sad_copper",
@@ -6033,20 +6220,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 85240,
-      "sha256": "b161bec9903dbd71bd440cabe748cafae55d5a159d593c2b5e970362726ec4fd",
-      "rgba_sha256": "838dbdf532586ba590384de1e2108edd9fa622724b84ec0ae27c990c4c717dc3",
+      "bytes": 90464,
+      "sha256": "fc98d5bbc653167b1428f14d741fbf456e79aad634b9e7b1f28894232c4b8762",
+      "rgba_sha256": "777cac85719eb1f447b2bd2fc9ed95aeef8051d3e72b47c82a662d4209b2c012",
       "alpha_bounds": [
-        156,
+        27,
         21,
-        419,
-        488
+        434,
+        495
       ],
-      "source_sha256": "387e92e6d04902345b70c7e2b370e4d76bad8087e5c77d017e99950fd194736e",
-      "source_bytes": 135946,
+      "source_sha256": "7086cf2c71f889909597deec2081136ddbf25218d925fc7d8e9a340dbbdef616",
+      "source_bytes": 138754,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sad_copper.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sad_copper.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_state_sick_sand",
@@ -6067,20 +6262,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 82986,
-      "sha256": "84d6737081cf78e356c936f9f1cd5d7a0304f09b5a1a375ea4e40b362be02fe3",
-      "rgba_sha256": "169bd7c67637629a4c78f1424d5eebd58a4f913ec8ead0b79582309ed180f31e",
+      "bytes": 92468,
+      "sha256": "7ec4e5e9b3545a60626e1ce7d7a7a0f867576bc4e46b96cc7228e168391fddd2",
+      "rgba_sha256": "ee9f4dbf3277169fe1c94c1c02ba566a3ab2c4e232b282dc6ca97fa755944f05",
       "alpha_bounds": [
-        164,
-        23,
-        428,
-        487
+        38,
+        20,
+        481,
+        494
       ],
-      "source_sha256": "a158ef5cfee930c291971fe3c3a1e75aa5b2d3c9eceef3d8c0a8ddfbf27fb118",
-      "source_bytes": 130657,
+      "source_sha256": "fa3cc02179843ad2ec7fb46dd4ab5a13dc09b440a3dcc6649e70faf188964ccc",
+      "source_bytes": 142007,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sick_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sick_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_state_satiated_sand",
@@ -6135,20 +6338,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 98700,
-      "sha256": "8de60d5ef6a5459b4b3d1a9d111bff41f3a4de61b73d99f7480fc75139412cac",
-      "rgba_sha256": "4d86721c06bd883160453d885123838680a56ea20b3710632694c56d7377f370",
+      "bytes": 96164,
+      "sha256": "c660c7ccd3b943108d690199b63fff76954a782f96f6c370cdbbc9a0ba7b3e5d",
+      "rgba_sha256": "58262b247a2a79c6977f4b6bcb13ff64a91580b9b976d225633fdaf6f838c322",
       "alpha_bounds": [
-        156,
+        46,
         21,
-        458,
-        488
+        444,
+        494
       ],
-      "source_sha256": "56eb3a00c25688d48cb277b91891b8913b53f581a22817e61c237da3322e9e42",
-      "source_bytes": 148738,
+      "source_sha256": "e73877bc4f017adc3563190701412787a4bd753a67ed2fba83bfe880805fe5f4",
+      "source_bytes": 144960,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_joy_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_joy_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_state_sad_sand",
@@ -6169,20 +6380,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 88516,
-      "sha256": "2a15a51c694df96e1df9ddc38d9cbc4b68fdc1edb37b71a8f5e065e162ef0acf",
-      "rgba_sha256": "e4c2f9db76ac272425fc6705e5fb6b88f8b94282034a32186168ecf689fc521f",
+      "bytes": 91104,
+      "sha256": "d2ae0de619220e29e84c522b845685846ae92652a6bc6223652be0686735805c",
+      "rgba_sha256": "5f202bc7666f92c069a3751a0c734741239d64035be5289d13e3e5bdb1e16ce1",
       "alpha_bounds": [
-        156,
-        21,
-        419,
-        488
+        86,
+        20,
+        441,
+        495
       ],
-      "source_sha256": "16243af533239f714150bb737bc2bf1e4ad19acd95dd2c4a44d62682fc34498e",
-      "source_bytes": 135854,
+      "source_sha256": "af066b978d33e985607f0cdd6afdd994b7bc77890a5eb059d2247eea56f3aaea",
+      "source_bytes": 139923,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sad_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sad_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_state_sick_dark_russet",
@@ -6203,20 +6422,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 83648,
-      "sha256": "e08f9998fca1a9de65a1a5d016a5dfd76ef42c2ff7de79ecbc9648568792fba3",
-      "rgba_sha256": "b969401d333bf121c53ddc05f88fd17f76e1bc2d03117194e7494d4dd68de709",
+      "bytes": 94082,
+      "sha256": "0d658f1a7e7ca49661d898daa342744cbbe02714a5ae44312723267e68cf15df",
+      "rgba_sha256": "1a52494f7050594b125257a496f6e323ba897c30d16c7aadfcaa55f2cbec4c5a",
       "alpha_bounds": [
-        158,
-        21,
-        421,
-        487
+        35,
+        20,
+        447,
+        494
       ],
-      "source_sha256": "84bb1f15b33ce5f6e34df5e6244eaa1bab3d0b45c83b07449ada0a6adb24ef94",
-      "source_bytes": 130024,
+      "source_sha256": "fc3a5b45a99b0d42ee95d11f767335f1d8e52682f81f8724e8d7c276f43b0102",
+      "source_bytes": 141411,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sick_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sick_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_state_satiated_dark_russet",
@@ -6271,20 +6498,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 85300,
-      "sha256": "eba915d4bf770ecfb8dfb780cfe8df080d19ebdbbcaf161c6ec761760e0fc18c",
-      "rgba_sha256": "858615d52cb16cee1159542b013c9db7137a7dbd2b629bb15421958c6428d813",
+      "bytes": 95254,
+      "sha256": "4c8b2cb2b24e78190bd659d5ee179b4db3fa76209a45b573d3d00a55c7d93273",
+      "rgba_sha256": "d43062eb3c7f8dd6d226f5bd9a5e1daaef68c4c2086b35711eb3707514eee1c5",
       "alpha_bounds": [
-        157,
+        50,
         21,
-        421,
-        488
+        435,
+        494
       ],
-      "source_sha256": "4b119662ad0089090731000a96d98116058a4d36b87cc489445311c08b0d9b4d",
-      "source_bytes": 131512,
+      "source_sha256": "18445e93b3f96137d5e6b9560a770c5b6747217d048be8bcd96ea64fd7ef5a20",
+      "source_bytes": 143592,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_joy_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_joy_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_state_sad_dark_russet",
@@ -6305,20 +6540,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 82084,
-      "sha256": "baafba1a808d44e539cee1ef57f8b88f979a11a5e1cb8759fe77a7d0f753cf83",
-      "rgba_sha256": "1b926ddd2b77333c8e6da093d4de32ed34392943b28cffb0c8bc9aaa7705e0e0",
+      "bytes": 87804,
+      "sha256": "b62d67b7667b89b778ef338fdcad1f758ed0458400dfe66c9d474907f94e790d",
+      "rgba_sha256": "950be27e2ad7ec6a2f02022f6cdd924a05531b96543b0a2ba474836b9e5613c1",
       "alpha_bounds": [
-        156,
-        21,
-        420,
-        488
+        85,
+        1,
+        443,
+        495
       ],
-      "source_sha256": "f7b9ae577d45383c4dec34216c7f38c79910c527fe2fb3b77688eaf46586b758",
-      "source_bytes": 129148,
+      "source_sha256": "82fbf73a1aed38c166c42d4f2cfd97f3e121c791fea09d5056dc1e0adb81005f",
+      "source_bytes": 134800,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sad_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sad_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_state_hungry_copper",
@@ -6339,20 +6582,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 85116,
-      "sha256": "08216add7e8ab844601dcb25171e04ac042315d8be8f823cef99fc67b983198c",
-      "rgba_sha256": "5d839d2bff0cdb1c34274b902827c739c2338ec61676514a0233388406dd462f",
+      "bytes": 82290,
+      "sha256": "f15edfa9f1b2f25daeeae31735cd0eaf5ab7bafc4e849e01a45a6b372e048893",
+      "rgba_sha256": "ff4120d9d8f24bcaca1db88eaca0a73320bd2a2e6b79b9ca3061f3c9970c4f9e",
       "alpha_bounds": [
-        156,
+        50,
         21,
-        419,
-        488
+        428,
+        493
       ],
-      "source_sha256": "54dbcca08e523408290da8b42a00bcb47f6e84d98ffe818d859df1252a23ddd5",
-      "source_bytes": 133659,
+      "source_sha256": "ba9b99f4debd1af0b1af59c2cdb21cad3ae36ee30612f80a9ceaa57285174097",
+      "source_bytes": 128565,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_hungry_copper.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_hungry_copper.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_state_hungry_sand",
@@ -6373,20 +6624,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 84424,
-      "sha256": "b03b9b285d49f9689bca490b3a94c89b7be4f67e45f2efc09dabbef1365d69db",
-      "rgba_sha256": "e1c3236cb05b2a6abbbafe03e0326a8f796532eb133acdc1598d6c0921d958b7",
+      "bytes": 85642,
+      "sha256": "5d8e2fe6a35a523fc139dba4ca3f11e67c9a594b0113fd78fb18f68814fa4860",
+      "rgba_sha256": "3d3137bcdbb148da510b5ec35b47d84a0c11814db4e9cf6fea97d85b0b344e08",
       "alpha_bounds": [
-        157,
+        53,
         21,
-        417,
-        487
+        426,
+        493
       ],
-      "source_sha256": "9ca6a8bc976b63f512fced0d86328fdd176b9df9aaa12a9c5ee295f14b056035",
-      "source_bytes": 134671,
+      "source_sha256": "c75e94fb1b42100d61980c5397acf1d851ac89b1ffca99f67af1a913d5f13262",
+      "source_bytes": 129749,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_hungry_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_hungry_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_state_hungry_dark_russet",
@@ -6403,24 +6662,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 83614,
-      "sha256": "eaa4a4e86a109e70a2e0ae1b9fdc81e121f78d2be53db5077a14b0edd8c2a7e0",
-      "rgba_sha256": "e831e93ca9703bbe271b3ec7f68c6f412b82014113206551fdbc701dded0e733",
+      "bytes": 85316,
+      "sha256": "f1e909dce9ab78787e27a9dc96d678dd5a6e1127cbff31a81616f8dde317258a",
+      "rgba_sha256": "6740d8e3f372a2be8f166891d9f7b313b36a7857e62a30066de1697016603717",
       "alpha_bounds": [
-        156,
-        21,
-        420,
-        488
+        22,
+        17,
+        429,
+        494
       ],
-      "source_sha256": "3cdd9360ed18fb2d187cbd5ff3bb2a49ebbfb89b64edc950123c360957f4039f",
-      "source_bytes": 129993,
+      "source_sha256": "dc21e8d248eff4c033ba341266a8e18624ce441aea057bc6b0cfb787fdf70e4e",
+      "source_bytes": 129392,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_hungry_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_hungry_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_state_thoughtful_copper",
@@ -6441,20 +6708,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 90274,
-      "sha256": "8413bc06c211ffca6f1616e905ce27a085d72ccd9a53c92d003c5b7fdccd0caa",
-      "rgba_sha256": "3bdc728677c2a952a096b8d9fd7a516709f0090be875e2f341d594cef91e04f3",
+      "bytes": 90000,
+      "sha256": "89480aae1d41ec34e551df6af9ab9ac9a6db63911141a00018ca5c45241dfdda",
+      "rgba_sha256": "1a0491fa1150724385c5c194ff5bed8c7dc56122a8c32e2f120cef400d0e2e11",
       "alpha_bounds": [
-        155,
-        22,
-        419,
-        488
+        168,
+        20,
+        427,
+        494
       ],
-      "source_sha256": "72c99138f4e7184caf68dfc8a66e99e60036d0ac30b68982fd29b38e0dd2e178",
-      "source_bytes": 138939,
+      "source_sha256": "d0966c50627934fcb9202619a40fcefe3afd29a759a0a0c37836f21460952762",
+      "source_bytes": 134907,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_thoughtful_copper.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_thoughtful_copper.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_state_tired_copper",
@@ -6471,24 +6746,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 83898,
-      "sha256": "119bfd2f9dc77cb4d2fab28e483f4ee48bc97a1b410a0741a246b8f22530a8b7",
-      "rgba_sha256": "59087087d969d9441ba9ce218a2ef20164c0cfddf4c163844827fed0987094b9",
+      "bytes": 86946,
+      "sha256": "b437991a2a365f9bf35c581206c6cdd8531d901e34239022a2df77fe3fcaa6fd",
+      "rgba_sha256": "daca484bef3afb0c8144153d7e5467b9882a16ae4e1e8cab21e8ca41f6701e4c",
       "alpha_bounds": [
-        156,
+        84,
         21,
-        419,
-        488
+        431,
+        493
       ],
-      "source_sha256": "78ca13aa2bb2a10788cdac3235d4d5a980664c6a9b5787d0a67d4881068d1cee",
-      "source_bytes": 131250,
+      "source_sha256": "27657d25dd149216e390e7706d7114538f8d7503151606b83aaf17e53cfea840",
+      "source_bytes": 133182,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_tired_copper.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_tired_copper.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_state_thoughtful_sand",
@@ -6505,24 +6788,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 85978,
-      "sha256": "73223332f7f4b56ad6efa316e7da9be2a971472328e4a6af5d3d3b46c0bb0e46",
-      "rgba_sha256": "24d6452b90afb822316c0712115005a44876564f0ef98d2a461ccbe24499b391",
+      "bytes": 84274,
+      "sha256": "6d10d43ef2262845ef10d2270d590d95d68fc758f81bffbcdbbff4ff3e0a39cb",
+      "rgba_sha256": "54767887c2805f4f21a33d91594a7f60d5c8a58f29c643aa391b566d8d5050f2",
       "alpha_bounds": [
-        144,
+        46,
         20,
-        410,
-        487
+        478,
+        494
       ],
-      "source_sha256": "16497c57b5863ccd76ea2a356d5aed661d5092ffd1db398367efd5c99d8b8c7e",
-      "source_bytes": 132998,
+      "source_sha256": "72808067b65a4353e7ad62902faeb15684de52bca6d973eff7d45cdcfe4e8699",
+      "source_bytes": 131614,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_thoughtful_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_thoughtful_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_state_tired_sand",
@@ -6543,20 +6834,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 82768,
-      "sha256": "247aa685d81f41d4c882108888c0655ec2bc326f2cfed40df3892f516f1b7935",
-      "rgba_sha256": "6ae3212dab710dfe608b10912b85a073f1588f5378392989a2154564331cb8b7",
+      "bytes": 91976,
+      "sha256": "e1a5f85494503e787d3efee9793898ba2d0bd4562135a86bc803a1daafabf13c",
+      "rgba_sha256": "eea04177244ea7343adc67bb86b42bec17826c31898eacdd7c07488be14bbf4f",
       "alpha_bounds": [
-        155,
-        22,
-        417,
-        485
+        38,
+        21,
+        431,
+        495
       ],
-      "source_sha256": "65b0828e4ad34713f33e6a410a96063c8aa1e59408f9942f217b0eaa81869f59",
-      "source_bytes": 129188,
+      "source_sha256": "039bf18534608d352948832574d8339505e56bc3bf94c391cb5bbb552b5b2898",
+      "source_bytes": 137718,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_tired_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_tired_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_state_thoughtful_dark_russet",
@@ -6573,24 +6872,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 81752,
-      "sha256": "3f4f146473ac18132f090ad64c36259bee4f8ee289734e9701db64b2c6600d99",
-      "rgba_sha256": "c191c1795805e2114e8a13ce9085f73b29889d0b205e78e6a15c976edeb25238",
+      "bytes": 85134,
+      "sha256": "bd7869c8982fa14f176a3ceefea058b24acb1f8c95a28458d88322ce75969f8f",
+      "rgba_sha256": "28bcf4c3b84d21beb484d52a7964ab117479f2dfe1da94a3f642da8affa694d6",
       "alpha_bounds": [
         158,
-        21,
-        421,
-        487
+        20,
+        431,
+        494
       ],
-      "source_sha256": "2bb9f31b640eacb1d70601dcd24ee55c011f69be37bd00ccabbbd111bd53471c",
-      "source_bytes": 130437,
+      "source_sha256": "69b89b327f50901a7a88ac666f6b9c22a8ee3fc078e5211ed4785cb26b3a8989",
+      "source_bytes": 132218,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_thoughtful_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_thoughtful_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_adult_state_tired_dark_russet",
@@ -6607,24 +6914,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 84094,
-      "sha256": "37611743dd60115d760dc63105eab39836efdaf07f2479aa33bac322f7bf4fee",
-      "rgba_sha256": "4cdbb998a95baf0e5e0ff476be5a4ce774a05871ad583a2cdfdfebde300b4ace",
+      "bytes": 87512,
+      "sha256": "46cf915f68284ac586a4d60d679b5ef51cc4176615fddb9ae6bbae54a17c6128",
+      "rgba_sha256": "b49c51682e297d83194421996700622a506df17b29e836c9fedea3bff11b1d56",
       "alpha_bounds": [
-        156,
-        21,
-        419,
-        488
+        81,
+        20,
+        432,
+        493
       ],
-      "source_sha256": "811c45326bd4d8fe12c8f33f0e28759994ae9ece8d4fe7ef01b3f76a6976554d",
-      "source_bytes": 131784,
+      "source_sha256": "103503586eca6c19d3dcdba0fc2559a1717186b0e4aedb90462786847d012fc9",
+      "source_bytes": 132087,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_tired_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_tired_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_base_no_accessory",
@@ -6645,20 +6960,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 85656,
-      "sha256": "628e015bf0c0612b860db3f40c2cdbaeba6e25b4207380099c645d90063c2b4d",
-      "rgba_sha256": "2f1c4fe560f63f0cad2a5c887064295d508086f9de2adb4af5f2899a8244870a",
+      "bytes": 92070,
+      "sha256": "6de3e1707b76faa702c6eb0ebb5843714afe2b4c0bbfca285a939ff82afd312f",
+      "rgba_sha256": "67c5175bfc4c704424c0cf8dca358d15e64fe8107b4482392759900d0ee392b3",
       "alpha_bounds": [
         156,
-        26,
-        412,
-        484
+        24,
+        414,
+        486
       ],
-      "source_sha256": "43c131e8f9b35169eba08d2a722b47892069e6fd4d8004fbcda69239abf0f1c2",
-      "source_bytes": 132121,
+      "source_sha256": "5516bf2c3ec9c8cbf29ea9260ea7db82813852892d18b9b315c18f8aa9679cdc",
+      "source_bytes": 137428,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_base_no_accessory.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_base_no_accessory.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_accessory_bandana",
@@ -6675,24 +6998,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 84298,
-      "sha256": "d4815feb2ddbc5218ebf6d40913dfc984c70c1aef67b07f20f24e496949c0624",
-      "rgba_sha256": "bff5d526629a1e7de2c59feacca25b6160c603d406d277c7bb14f7b6dd6aca2b",
+      "bytes": 96800,
+      "sha256": "bc7c217e7459c9ae3481b92403c36698f604400c47c5b7d53ec1643d8eca9def",
+      "rgba_sha256": "5d5adba1778073fdc17f16a518bc276ebd307be43cba273dd8e3ab1a21534c40",
       "alpha_bounds": [
         156,
-        26,
-        412,
-        484
+        24,
+        414,
+        486
       ],
-      "source_sha256": "030eb601e1a259814cbe54f84ae7af6b477a4d49982d972c0a1ef2887145df86",
-      "source_bytes": 133987,
+      "source_sha256": "2136202871c1eb308738978f8ebed4f708e59daccc1eda8db66f8fa7ddd63325",
+      "source_bytes": 144593,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_bandana.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_bandana.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_accessory_backpack",
@@ -6713,20 +7044,28 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 96110,
-      "sha256": "515f5576ee2d27380e19ac427921614d44f587e7adc9f33394ef9775d4778b05",
-      "rgba_sha256": "1851f81bd1265eb943b2db3edbb123c18acd243b3f4f7c6f2ecc66b2b353c86d",
+      "bytes": 108128,
+      "sha256": "0c8c6f79beb04fa3521d1c30bc7dec754097035482516db58994ce476a0371d9",
+      "rgba_sha256": "2701fd006407d6ba88370f10be00deebd15009140ad66931c78b2097c38fbc19",
       "alpha_bounds": [
-        156,
-        26,
-        412,
-        484
+        42,
+        23,
+        414,
+        486
       ],
-      "source_sha256": "ce2dba19f022fe9056a4669c43ac3ba03cb8c616f8e581983dfc1d87a06669c5",
-      "source_bytes": 151520,
+      "source_sha256": "35878e9ba5c048cecdd3537363eac6e1a07a94f5e53b9c885b8cc74f2488ddf7",
+      "source_bytes": 160517,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_backpack.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_backpack.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_accessory_route_patch",
@@ -6743,24 +7082,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 82870,
-      "sha256": "31445e7f2bb03933aac4b36c42e0a9a1f686bc14bbc301b3268aa8346e65d2e4",
-      "rgba_sha256": "8d027001b43a5bbc2cef38af1e2b4735f29cc6ad09762472d82482ef364d2214",
+      "bytes": 94818,
+      "sha256": "0f63691e977debb6ab853acbea41797492a98072f8b3ae579a2a31a02d22374c",
+      "rgba_sha256": "a732b7abd8a3e3bf92bfe34466ab23b09481ce85dc7cdc66a6235c92bdd6667b",
       "alpha_bounds": [
-        156,
-        26,
-        412,
-        484
+        42,
+        22,
+        416,
+        488
       ],
-      "source_sha256": "af3f822518a650c79875f4db53384ebfafd24e009f6c795c8e784445b383d4b3",
-      "source_bytes": 132563,
+      "source_sha256": "3ad2277bc053886d4d26a5957e8dbd3d1433795329b8407f458b602076c5d9ea",
+      "source_bytes": 141976,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_route_patch.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_route_patch.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_accessory_hat",
@@ -6777,24 +7124,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 83658,
-      "sha256": "e4b89b2c82bc9ded53b99efadc202dd16e2977ea907e1b1c2476cb73dd2b700c",
-      "rgba_sha256": "aa0b69d572fd632e911e9aa6b8e034c04abbb47ccf3e5f7ecf38bc0214ea5fc7",
+      "bytes": 94664,
+      "sha256": "f79b02200bc471478789aa4e6b984b312da67602ceaaa170ffcbcb3d62b68d4c",
+      "rgba_sha256": "af30de486e9e11df30a59407631c337df62ecb64c8d7a45a5d3d328e8c85ffea",
       "alpha_bounds": [
         156,
-        26,
-        412,
-        484
+        24,
+        425,
+        487
       ],
-      "source_sha256": "9eb4c2fcb34c3ee4745800e5648c07e82a8f268a9cb1b467aad7ffd0f6397fa6",
-      "source_bytes": 132329,
+      "source_sha256": "daae91c147045a63bc2d66dd277c2b1d0bb20b6bac939dd736a2b853ed38b6f8",
+      "source_bytes": 141239,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_hat.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_hat.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_accessory_goggles",
@@ -6811,24 +7166,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 85924,
-      "sha256": "dfd4f760fea859a34ad1e65408f7191038985324bf80ef8f3b47c032baeb699d",
-      "rgba_sha256": "e5c31697b7983d9c91385bb29d7f045b5c411648e386ef07b230832b0fce2e98",
+      "bytes": 94162,
+      "sha256": "2cfa42e5131a1cf627a008ab3e44301fbd2c563684ce68ea1c924445efe0d64a",
+      "rgba_sha256": "a6c812d5cd8187b2c38a100e1d4b95f1138ff75d76c0e1e7812c8f6b194d0b1f",
       "alpha_bounds": [
-        156,
-        26,
-        412,
-        484
+        42,
+        25,
+        414,
+        486
       ],
-      "source_sha256": "f538b7c2b5ad91d8db34621878a0eeb25d1ba4eb8521dfaab6483637d9bb5d00",
-      "source_bytes": 131226,
+      "source_sha256": "cd5b443d1172feecedb5facfb5794374c6a692ecb23450ee45b855dd1e4c892a",
+      "source_bytes": 139474,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_goggles.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_goggles.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_accessory_compass",
@@ -6845,24 +7208,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 86012,
-      "sha256": "b49caba660a0efde98ea288b21fa5ffa3e3985816ca7a3107ac4cec3e97e5c4f",
-      "rgba_sha256": "1a9b7ee5e4d586ab7dfaa42019d4650256bbaf700e621c2c2ab7b988c3025f8d",
+      "bytes": 96366,
+      "sha256": "14b385712be30635c8bb652b304a83905f95d5df7c0e255125a4bc9c05725c1a",
+      "rgba_sha256": "a14cbffe96a799252710e18668565157a4b369c218bcc70cd457f721412f9d95",
       "alpha_bounds": [
-        156,
-        26,
-        412,
-        484
+        42,
+        24,
+        425,
+        498
       ],
-      "source_sha256": "e355d7ebf2c3bbccb6bcbb8a2188b5d439eb49126993939f46637093e601a054",
-      "source_bytes": 134756,
+      "source_sha256": "60d597f069f938d7f28cb182ceb608ece8e8f2563de967309d8bbff34fcaad0c",
+      "source_bytes": 143973,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_compass.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_compass.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_accessory_lantern",
@@ -6913,24 +7284,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 85760,
-      "sha256": "3e0bff84573e749b6c37a263918f1180b6ccb5ab2417afcdbbf93e5019f06a81",
-      "rgba_sha256": "167443573323fe270ecab49b793a429c84c9c04719a4ee302e1798a844131127",
+      "bytes": 97138,
+      "sha256": "2240c730f471f13809cd6bc1b8b5f01062bb7028c3f62fec49a947cdca06f914",
+      "rgba_sha256": "2d393b6f56d610b097930ea0eae17b9908a6494f14990cc694ed7a2b3ce40ab0",
       "alpha_bounds": [
-        134,
-        26,
-        416,
-        484
+        42,
+        25,
+        425,
+        486
       ],
-      "source_sha256": "744ae745380d40f1f756bfa6b20e4cdd50127170d60cdea742211cda0dc9f447",
-      "source_bytes": 135723,
+      "source_sha256": "7da9d1a83f4a7beabde43caa2cdb372159699060c096daa831eae44fa910fbc5",
+      "source_bytes": 145436,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_binoculars.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_binoculars.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_face_patch_neutral",
@@ -7185,24 +7564,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 82534,
-      "sha256": "719b86f1b8011b8106d4298443320338f43bbd66bebafc400017ee7608d892d8",
-      "rgba_sha256": "edcb31f4f27a1672a540254819c024c8c1e3ff07fd8832c4e3607ca8123382f8",
+      "bytes": 93514,
+      "sha256": "e9a3acc7dab095b3bc5fb18113191a1f6f170c8730d3f919b9773a97e0919d82",
+      "rgba_sha256": "a31b6088ba58e1d1c7fff5d1ca5309f9e926fc56b3ecf6bff73f89a0287c5b50",
       "alpha_bounds": [
-        156,
-        26,
-        412,
-        484
+        157,
+        24,
+        414,
+        486
       ],
-      "source_sha256": "6ed99032744dcb48ce91627d32152a6a5784205356ba25ec2e3515d6843a406a",
-      "source_bytes": 133149,
+      "source_sha256": "9d1da3d8d08c1449357b1b0932f044675d55c63f7b2f47a68454f4b51a486a14",
+      "source_bytes": 144142,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_bandana_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_bandana_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_accessory_backpack_sand",
@@ -7219,24 +7606,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 91320,
-      "sha256": "ae011171b081ee3aa1c843af899e0867609ac562bcf1b7f332a7195a79f57e79",
-      "rgba_sha256": "389a535d6413a7bc0399d6a1bd52d94c42e1059f3fb03aad9e88a60a53d18b8d",
+      "bytes": 98150,
+      "sha256": "bd563fb53911495a78df9b4cd7afe3f776b21d121091d7e523bccb795a28f821",
+      "rgba_sha256": "9fd39c2605d7e9dbb86b3e89ffe5be5321c9c4ffde16d1078e22b1c8105b973c",
       "alpha_bounds": [
-        156,
-        26,
-        412,
-        484
+        157,
+        25,
+        414,
+        486
       ],
-      "source_sha256": "deeefa9843676bf5288d540d7ee68f65a49c5b709ed88eeb95793d163fe50e43",
-      "source_bytes": 143805,
+      "source_sha256": "aa227bcc00cab06bdbef2af70a3acc4e6b2508dbf7147e54992197d336520b64",
+      "source_bytes": 149928,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_backpack_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_backpack_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_accessory_route_patch_sand",
@@ -7253,24 +7648,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 82262,
-      "sha256": "aabfad00d93dafce27055c09fe96cb7f348218f9e6972ccfa9a440b575c5a472",
-      "rgba_sha256": "950b36d28ee849755a7390b8d9eed7f1036cb6abc6c882c6431ad7746768ef34",
+      "bytes": 88042,
+      "sha256": "58d055aaacae6bcc14fcb8afdce3c374f01769461966452ac8a6f1d5b193c23c",
+      "rgba_sha256": "62372af8b0f7a50cc4997eb083a7292a053fd580d439455ffb8ad5d22b857819",
       "alpha_bounds": [
-        156,
-        26,
-        412,
-        484
+        46,
+        21,
+        429,
+        486
       ],
-      "source_sha256": "847f27dfec96e29573d5ff4202d3c4ea1cda50d641a92d4c9063e81a858c019a",
-      "source_bytes": 131490,
+      "source_sha256": "903c9c93f6dff7cf04dc20a8d9165dd23036289afb7252f21065d5971fe29e9a",
+      "source_bytes": 133225,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_route_patch_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_route_patch_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_accessory_hat_sand",
@@ -7287,24 +7690,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 81676,
-      "sha256": "7cbc721c7c9ff4116b09ad917808108c3356a4f39c471f2d296bc8c8d2be7405",
-      "rgba_sha256": "939e8e818fd5e06f1778624f7d2745de27774dcaaaee8ea8807cdecf146e36ca",
+      "bytes": 91846,
+      "sha256": "85250615e3400cb952a047c0aab32f852dae518207a7e76c4261a788b2d21333",
+      "rgba_sha256": "b1a260c8fc427496f081b921de2562843cb519bc8fb1b0c036658fc24f11c378",
       "alpha_bounds": [
-        156,
-        26,
-        413,
-        484
+        42,
+        24,
+        415,
+        486
       ],
-      "source_sha256": "7c3a912ac7f08ad0ac767bf8aff11487fe4d20e0c2fbc3c8308833ea1499c2da",
-      "source_bytes": 131166,
+      "source_sha256": "83c244865a0bdc32de11eb4b4dcfbb32c16a7863996623fc6e9794e20dd835fd",
+      "source_bytes": 139405,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_hat_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_hat_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_accessory_goggles_sand",
@@ -7321,24 +7732,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 84440,
-      "sha256": "2fe5e9dc25e2fa3a835156dbf34a7d3eaab8962e8c7612609667c2f000775396",
-      "rgba_sha256": "1cd42b9c53c1e080c44499d50556197e38bd7fd5599d90d87bb0bc4c78fe3ec7",
+      "bytes": 92864,
+      "sha256": "f5a10ba08050ab7e3a998f42ec17465f140657c0ac4cdc15c781fea479c52f9e",
+      "rgba_sha256": "a20b4f13b2e4c7796960b42c185efd29195c1db1dea143ccdafe1442db47641d",
       "alpha_bounds": [
-        156,
-        26,
-        412,
-        484
+        42,
+        22,
+        425,
+        504
       ],
-      "source_sha256": "4ffff83128470ad191ea9ed6490397fdf423c071b31d9583ca48af9818b0e4bd",
-      "source_bytes": 131897,
+      "source_sha256": "4323daa201e218b6da522aa08c8d4ea638cf7f1031114bc58b0f24146a36a0a6",
+      "source_bytes": 141129,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_goggles_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_goggles_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_accessory_compass_sand",
@@ -7355,24 +7774,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 85244,
-      "sha256": "91f75c5e43678761bb58304da792d2bb246aa1ae58ae520d85c6441dcc2053ab",
-      "rgba_sha256": "068899f456812090e8d6738c449a2ba4f98f2f47a1af89a51f759e30da2725e3",
+      "bytes": 93794,
+      "sha256": "dd0839b4a863b06a886e4af8fee597706bd079ef1c284b2f850e004a24266bdf",
+      "rgba_sha256": "b6ed41232d617afa916440f09177def059e427814c44628ed9b56ea8ef59a4f8",
       "alpha_bounds": [
-        156,
-        26,
-        412,
-        484
+        46,
+        25,
+        414,
+        486
       ],
-      "source_sha256": "be7fe317a79a43eb1da078630791b936dbc840514ef670ba1e21fa693402d3db",
-      "source_bytes": 135938,
+      "source_sha256": "4885ccf81209070670b799ff83dee855773012ea897ebbf3ad26a5dea4205373",
+      "source_bytes": 145338,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_compass_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_compass_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_accessory_lantern_sand",
@@ -7423,24 +7850,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 85228,
-      "sha256": "1de9d22a4f88d1c177def05c14267190231ac876b89b8e2b1d1a73c94e9d16a9",
-      "rgba_sha256": "09d8288fccf1743deddfb98b2a2a50f441d7198f9950656533d448b629e841a4",
+      "bytes": 92282,
+      "sha256": "639d85aaba60a8c784c623e632639ccc98934522ddc65424b5a4640eddbe4f47",
+      "rgba_sha256": "9feff1c6dae584175ef01bbe84ea4e7e5e226763a28c0d3106c2ff8125afcc1d",
       "alpha_bounds": [
-        138,
-        26,
-        412,
-        484
+        42,
+        24,
+        415,
+        486
       ],
-      "source_sha256": "833cbd18a05df4f0875791b9faae97ba9ad43d4dd1faaf07f3691519d1b97f6b",
-      "source_bytes": 136280,
+      "source_sha256": "770f9781d5d6a8beeacc7bf77c3ac9badcce04a8e0759aa05a16e255661d8ac2",
+      "source_bytes": 140475,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_binoculars_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_binoculars_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_accessory_bandana_dark_russet",
@@ -7457,24 +7892,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 87746,
-      "sha256": "0b2072f6ba19931a3bed2d12d7b93fde7d9263ac47a79d9f6cf77d182dd9bd78",
-      "rgba_sha256": "ceb9ccc8a8bd47462c9040a5fa80a1b41c70ce43a98e33a284436144abbcc3f5",
+      "bytes": 100064,
+      "sha256": "5638947e7f580030d4ffb12873238b34db50915f469968bdf003a28efa2eb2ae",
+      "rgba_sha256": "4f0041f4aaab22c612a5d362ba91f90aba92fc6481d6d94eafd82c454633dcd4",
       "alpha_bounds": [
-        156,
-        26,
-        413,
-        484
+        42,
+        25,
+        425,
+        486
       ],
-      "source_sha256": "a00d424403d902b2fb405c519130b7c0178ac00b9d639cd79b5ac0f2e3f0a377",
-      "source_bytes": 137545,
+      "source_sha256": "c833196329f19bd2f989b501b832130b225f320b8c4eb9bd532e2f0eb1689cc1",
+      "source_bytes": 149935,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_bandana_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_bandana_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_accessory_backpack_dark_russet",
@@ -7491,24 +7934,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 97822,
-      "sha256": "2d5977b1ffecfefb63e263aec0764765939ec2ec591927afea4ad91719da4c7a",
-      "rgba_sha256": "05669d9dae586a9df4d59fab6d87f77501bf5ba9cbf6d4da1e5ed741bac15683",
+      "bytes": 103362,
+      "sha256": "efff05979e607ec63ba21cd106ffd7416bd5f4b7e093aae614ae960e3e28bc16",
+      "rgba_sha256": "456253a12807dca820541c383528fdb1f58507f7dfa2856efa9bef2f3779f17f",
       "alpha_bounds": [
         156,
-        26,
-        413,
-        484
+        25,
+        414,
+        486
       ],
-      "source_sha256": "bdc7378531ea2477cb0b08214e80324f7baeb1c2a7e420e1ba7a9eb7802d27f9",
-      "source_bytes": 149021,
+      "source_sha256": "79a68727bbdd35b54c1d6ed94486ab74e21cbdb41f17eb050a8b243e7340b51f",
+      "source_bytes": 158161,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_backpack_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_backpack_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_accessory_route_patch_dark_russet",
@@ -7525,24 +7976,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 84526,
-      "sha256": "b699f625f97254c5624e17ca75af0736ddc281490cf11b58736bbd9aba5a0b27",
-      "rgba_sha256": "3763c2d9aafd2f1e1c5bbc94080b63967ce49357de86baaafc4a8e7d2d8d8d6c",
+      "bytes": 93216,
+      "sha256": "363eefe65d514b3cab2e70aa60324dbaf12976470b4836afb4ec4c7573ace07d",
+      "rgba_sha256": "53516a0bfb8be438df507f23e20fdf3e5b49be2b44d5099a95c631f8e99d1bab",
       "alpha_bounds": [
-        156,
-        26,
-        413,
-        484
+        160,
+        21,
+        420,
+        478
       ],
-      "source_sha256": "b1664fa77cb75997232634efc1175c50b17a9db7b2001b1f72296f4b8beee33a",
-      "source_bytes": 134248,
+      "source_sha256": "db2186459a2d3951f211877371488101431db0f8d9329e328996d3910c0e50f7",
+      "source_bytes": 139324,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_route_patch_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_route_patch_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_accessory_hat_dark_russet",
@@ -7559,24 +8018,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 86842,
-      "sha256": "4d3726ba784b76f3ee33ba2e60d1aac33efe74f073fc9e2401d6b6fc389ca0ba",
-      "rgba_sha256": "a99d4b78d34361859065e61482c4ec3029151895cea37a1a79da4987fb30764b",
+      "bytes": 96856,
+      "sha256": "0a94f6dbbcb4c209d234f1fa03f36554539f1a1d42f12fb9c8e239d2c6cb120a",
+      "rgba_sha256": "63aa52765a334a2192bcbee222a1be5f777379e96e5708c46e5119768ad5ee5e",
       "alpha_bounds": [
-        157,
-        26,
-        414,
-        484
+        42,
+        23,
+        420,
+        486
       ],
-      "source_sha256": "e82506340d218c44b2ca7fa4e5ac98b9d3607b7165c5a5342f5f9604d65dfcf7",
-      "source_bytes": 133456,
+      "source_sha256": "99d3196dc10562ecc90d8a0325abf68a1badd43268fe462bdc3b4d2bb4198b39",
+      "source_bytes": 145593,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_hat_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_hat_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_accessory_goggles_dark_russet",
@@ -7593,24 +8060,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 86834,
-      "sha256": "978b5999229756331350d9f37bd7cd98765c2a154eb6564ff6b9e94c4c9a97c0",
-      "rgba_sha256": "45ab339f380c845ce614ea0dc8c959d4f6fc85067a613fe0b42c8e05e4c0c690",
+      "bytes": 92994,
+      "sha256": "861cd6f087a5fb0ec4c863869f5cdeaef0d83aa694a15f9136d9c54abb950f7b",
+      "rgba_sha256": "5f4a68a5ea802fbf24698924dccb9d0508592f999bfab6c4e28e5a3af53d4d00",
       "alpha_bounds": [
-        156,
-        26,
-        413,
-        484
+        42,
+        24,
+        425,
+        486
       ],
-      "source_sha256": "a6ff0771a1a36df35de34facbe2f88062719d4adb95352cc4e8d29f339e5ddb2",
-      "source_bytes": 134629,
+      "source_sha256": "e4f358fa22c5d7130f959115b55c0c6f5dd6ed8334c161cad643bf74fa1f6d9d",
+      "source_bytes": 142973,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_goggles_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_goggles_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_accessory_compass_dark_russet",
@@ -7627,24 +8102,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 87896,
-      "sha256": "b83e3a49da754685d3f4c2b8e937d7975b5ea49091663c395995aadc5eab9fbd",
-      "rgba_sha256": "36d351fe15d6a4dca1ed3212a5f23de71be95181a394c87b9864be4870a48bbb",
+      "bytes": 94804,
+      "sha256": "f1dad2653c69eb689f9e957046c41efce8cc2bfdb7080c40d1684f4a88e49d83",
+      "rgba_sha256": "acabc3cc12e89e7592959791f5e0a68f667488ea939f442e5237e49cfba04631",
       "alpha_bounds": [
-        157,
-        26,
-        414,
-        484
+        42,
+        23,
+        425,
+        486
       ],
-      "source_sha256": "b2ec77df8bb70b48120c91ad0c58ed72e6b3dbd3ac8df2601f1220dd7f0675bd",
-      "source_bytes": 136640,
+      "source_sha256": "1b936aab5dc0f42a147aaf12e8fc6996a4fc0d8cd1e98647e3a35db917c96b16",
+      "source_bytes": 146161,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_compass_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_compass_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_accessory_lantern_dark_russet",
@@ -7695,24 +8178,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 86558,
-      "sha256": "24cb8b8f9b5da68e8369cb613474ad14b440d851499bbc40d2aaddf647e0c3e5",
-      "rgba_sha256": "02e08eb6d700e4e569d0064a11ad20a247709443fff3e64fe27b1b5fd7d3005f",
+      "bytes": 96602,
+      "sha256": "e14eb105ecf875a5380e0b62ea60d6a11414785ad75fafc8aaaa6c0bc276f8ac",
+      "rgba_sha256": "21f10cf5ab7f94d322582df48d04607e064e535c06524aba2f5de23fc44cc04c",
       "alpha_bounds": [
-        156,
-        26,
-        413,
-        484
+        42,
+        24,
+        425,
+        486
       ],
-      "source_sha256": "7a2ab275d12e3e42cdf95ab7f937f95e768b75381d4904dfc12ad4f0f4a91d59",
-      "source_bytes": 135652,
+      "source_sha256": "2f2be658c2b06ec76d43c9c0d4bfe657e7d78d0cd368a2f4343bf77213a405c6",
+      "source_bytes": 145389,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_binoculars_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_binoculars_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_base_sand",
@@ -7729,24 +8220,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 80940,
-      "sha256": "e0c3593e101e59e2e21cf5d1cb869abad22a410a349249a75bbfc176bc3da8c2",
-      "rgba_sha256": "fdd06301230bd9e244d14b6cad7354349c5c11769c2895e479197e005175c310",
+      "bytes": 88230,
+      "sha256": "409c50a6fbdb550c963377d6046168882ee75717212a07f59a7b13dd89447e37",
+      "rgba_sha256": "299a9a9fdfb633e8a9e12541b131850ba7faebcf2c96e905c881a7178910f44b",
       "alpha_bounds": [
-        156,
-        26,
-        412,
-        484
+        42,
+        24,
+        414,
+        486
       ],
-      "source_sha256": "27da3e2a3bceee940bb0d28fad07117e2da59c5907d23baa0922e50d2c1bb9a7",
-      "source_bytes": 129890,
+      "source_sha256": "d19c10a9133e3c9fc4c07b927ca1154aa41716f27f63a82744d6acbc30ee98f3",
+      "source_bytes": 136050,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_base_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_base_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_body_base_dark_russet",
@@ -7763,24 +8262,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 84188,
-      "sha256": "a730769f2f4a2b6e7e229b0818dcf6467a0f480fa4303e1c159fa5d4cce3419d",
-      "rgba_sha256": "cd86a9af29c19b3edaef9af9b7d095462091d98e40a3748e470b30d21ce82572",
+      "bytes": 94922,
+      "sha256": "53f95f2a30a9593f40d56217c831dd22d27fe87327d642482497c4b81bc05d21",
+      "rgba_sha256": "0ded2dbbec1f0fbb187b0fabcbbc7781b9a1e9d71ae93693fb42ec2eed60151e",
       "alpha_bounds": [
         156,
-        26,
-        413,
-        484
+        23,
+        414,
+        486
       ],
-      "source_sha256": "85b29ade92f3e12d8f4b70597b542190909ab8cc319a7fbec9971044dfb1ceef",
-      "source_bytes": 132845,
+      "source_sha256": "4813dfef37196ab68e8c03266bcef09527302c1e10c944b2f5568acbfad4cf76",
+      "source_bytes": 144169,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_base_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_base_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_state_sick_copper",
@@ -7797,24 +8304,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 90832,
-      "sha256": "60ffd9a043b6b22c440b7610478080618f2e76d0db01adfcaf1ad6db0e5fa6a2",
-      "rgba_sha256": "8866630cd7c8a6a5e03775a0ef5d37c13040d817053dc10ac851a3413c97be95",
+      "bytes": 93232,
+      "sha256": "0fe68922265e29ed5dfcc048bde2a158ea54a725c873cf55ecb4541e5ece9435",
+      "rgba_sha256": "9102793a8a8a9fd9ae24dd7f40d03422d5d21330075f678177a32cd0e8dec7a9",
       "alpha_bounds": [
-        148,
-        43,
-        412,
-        488
+        42,
+        41,
+        414,
+        492
       ],
-      "source_sha256": "1a8ea5c90151a918d5af484d510968dbce48047cd00a1710d3d37a3a5d1ca229",
-      "source_bytes": 140727,
+      "source_sha256": "591bdaa7bb1d9294a59793e5fac3c545953cc7b73a8a7ad99ec5ba69b6bab2da",
+      "source_bytes": 143850,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sick_copper.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sick_copper.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_state_satiated_copper",
@@ -7865,24 +8380,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 103132,
-      "sha256": "e148d8301d1fcbd96283d2dce88e48a3d4929aec3cab65bb7693b4f7acda7d3b",
-      "rgba_sha256": "c3b51e6a34ec827015df5900dc870bbba69f89d6f4a63bda9523be7ce2ae32cc",
+      "bytes": 115462,
+      "sha256": "b869574c76129fee593a36387b8201ca89b5b63ee83b1e9b0b8b28bd9a905a10",
+      "rgba_sha256": "9ff9610738576021d4ba872e036a1c1c27b9fc042e73369815cc4a45618309bf",
       "alpha_bounds": [
-        80,
-        30,
-        463,
-        482
+        42,
+        27,
+        465,
+        486
       ],
-      "source_sha256": "165699cd72dc543a8a19e5b9cede180fa019a0d58a904f6460cf03bb33c3e3cd",
-      "source_bytes": 157439,
+      "source_sha256": "cc40dc0ec31c738ec9af496e616d77e525c532c31da3727115c4d1de008b623e",
+      "source_bytes": 170679,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_joy_copper.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_joy_copper.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_state_sad_copper",
@@ -7899,24 +8422,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 82000,
-      "sha256": "f338aad72069e0f17fbcfc0051bfff05f7f64f602956a73204499c9ec8803a38",
-      "rgba_sha256": "4eac6ba3da64c49d7bbb070a545cf83ea0e750c4ba67b066201aa44fffc8a7c0",
+      "bytes": 87102,
+      "sha256": "8b0a0b2021da82aacd8849822ee772f73f9184aee0c4caa9594f082e0ea87718",
+      "rgba_sha256": "24e173964c781124776dd2fee9c65cbba24b2959c46c3740990c63a1a2dfa58c",
       "alpha_bounds": [
-        145,
-        35,
-        419,
-        482
+        46,
+        34,
+        420,
+        485
       ],
-      "source_sha256": "05f97b70692291f4871de8f6584cfc8b006cf89d300a45e4dfec705be851af79",
-      "source_bytes": 128000,
+      "source_sha256": "8edda96ae5d86c4967563389d790b8057235df232ba9016a7811cee306332fef",
+      "source_bytes": 134185,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sad_copper.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sad_copper.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_state_sick_sand",
@@ -7933,24 +8464,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 88578,
-      "sha256": "19dc1ed292ab80dc44b6bfac76ef7a689730e42a15c8fe097cf89bc0e2763829",
-      "rgba_sha256": "c71f121afd88208e2205dcd3e69f519b119eb548394806f870a3f57e2d347ca9",
+      "bytes": 102054,
+      "sha256": "ae921db6243a356599131534c374ac3b93f553c2f0447e195464a91a75a6f543",
+      "rgba_sha256": "e684fb6ae5ebae7fb5e566d8112961fb2ac05b5ab7b43eeb2b395ce319573631",
       "alpha_bounds": [
-        156,
-        26,
-        412,
-        484
+        42,
+        20,
+        425,
+        486
       ],
-      "source_sha256": "47ebde794f6a79c302ea3af03d6b6f4120ec20f1f8896fae74edf579f2cee93f",
-      "source_bytes": 140054,
+      "source_sha256": "522ca467628440f9d3451b675034e98016cf55a5afbadba4798d06e4a973fe7b",
+      "source_bytes": 154717,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sick_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sick_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_state_satiated_sand",
@@ -8001,24 +8540,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 91102,
-      "sha256": "f80c8431f2e756c9bad9c1b03c75b1b54b394e073aa2e9457efb1d829f5fd7b0",
-      "rgba_sha256": "5a184d5b4501ea0c8ca11502acd051753c5a6c868a534f0f411ca93d3f0b4906",
+      "bytes": 100246,
+      "sha256": "cf70c28cbec2d3866496160687301e1c1f78622cb5fdaf3e52205d0aaa8da0be",
+      "rgba_sha256": "be92a3eadc7776565e424041692ddee5470ac60ee1b477f64d69be323873afd1",
       "alpha_bounds": [
-        72,
         30,
-        442,
-        479
+        27,
+        446,
+        488
       ],
-      "source_sha256": "f2946e496a360154a674d60a2ac2e8946eb219192fedf0502dd9f76a47b7c5bf",
-      "source_bytes": 142626,
+      "source_sha256": "41dda0515e030028aaf7981484d100187a2f66316399a47ec58783edaa3f019d",
+      "source_bytes": 152913,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_joy_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_joy_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_state_sad_sand",
@@ -8035,24 +8582,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 75644,
-      "sha256": "f152c600560b960591b0a76d2d5b69d2851e4ed36bd76ce488ea745de5fb77a7",
-      "rgba_sha256": "7ea7d6bf3c0d86ea7693b85b78a62fdfb505d92bf8075c38255911c2c7c56c39",
+      "bytes": 98200,
+      "sha256": "d1648bf36ae11008d24389c299c1a0c128350aed38633f6f0935be4b8e5baaf5",
+      "rgba_sha256": "5050e1a659ccafb40a98ccee7578bbf2b8ce7623c7342daa9af45f869619c50c",
       "alpha_bounds": [
-        153,
-        68,
-        427,
-        482
+        42,
+        31,
+        477,
+        492
       ],
-      "source_sha256": "aaadd69dac6cd32990ac72fee55fac7653e517d5c71bdf6ba2d45ce8393901ee",
-      "source_bytes": 121762,
+      "source_sha256": "7e7a172a60e5ff072c123b403d5709bb519f5a02f3f3517ec70a204c0ad41cca",
+      "source_bytes": 147828,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sad_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sad_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_state_sick_dark_russet",
@@ -8069,24 +8624,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 89418,
-      "sha256": "7830176a128cd0a9a29132e31ba8831965b093a52055bf357c3adddd66f179b3",
-      "rgba_sha256": "6d70ca41b604a13629005cda47811d04e4a3f3ff2d0ef14467f931cef24a8ffe",
+      "bytes": 98614,
+      "sha256": "42b483fedfd7d1a124d18818a8ae5fe9e3b9b5993e683407ad03e2943bc229cd",
+      "rgba_sha256": "74d617ad9cd8dc1d5479242ca1b85f762a3cdb4678a2b10afe8f8a743e72ab1a",
       "alpha_bounds": [
         151,
-        32,
-        418,
-        484
+        29,
+        422,
+        487
       ],
-      "source_sha256": "b74ece472c155fb3846441b14743638db8773a921fc71ee5ee65db586c0067c4",
-      "source_bytes": 141880,
+      "source_sha256": "d1b4d362fa9fe900b6d350d50306c4da240ef2057da1f71f9bfb720299d0f6c4",
+      "source_bytes": 153134,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sick_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sick_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_state_satiated_dark_russet",
@@ -8137,24 +8700,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 92852,
-      "sha256": "0bb50d9d76bd7a88745e9668057a21ccb4f8f0d81948a9a92f03a5580dba2535",
-      "rgba_sha256": "30ac5b14300f4e858d189188f33de25eba2da6a63cc99ccd588c023f1239808f",
+      "bytes": 98498,
+      "sha256": "ade73d470f652c26c08d118564607c8f9771da91693a8feb3bbc22bc706c38cb",
+      "rgba_sha256": "09a488a29e35697c4806b29f7552ad6d80cadf9bdd8d1b093dc19fc75bd0177a",
       "alpha_bounds": [
-        111,
-        26,
-        432,
-        483
+        42,
+        24,
+        433,
+        486
       ],
-      "source_sha256": "f99af7f3c32915f65f81e406338b70eeed7e4af7d1cf1535b9b9ce38abe918ae",
-      "source_bytes": 142786,
+      "source_sha256": "2d0d3f57462dde328a45323a3ffcac439a664ecfe1402468047925e22d27aff1",
+      "source_bytes": 151073,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_joy_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_joy_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_state_sad_dark_russet",
@@ -8171,24 +8742,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 77514,
-      "sha256": "784fef6ea4956585cb0a7da4bb5b8b9f53797365c4581e8e0a1c1a6822be6d15",
-      "rgba_sha256": "9e866f9d1ad2db8ef59c377a469cfde0694b4a29e4a0d1972b9558541becd6cd",
+      "bytes": 85236,
+      "sha256": "5c69c7055a4613403c7f0b7f9fb5db8837cd1a54a28f556c55ff340546f6d8d8",
+      "rgba_sha256": "609f4bc83f5ff9c0b6688c9e7bc23f5efbba17e44e4eb1ebaba2e8cc366321c1",
       "alpha_bounds": [
-        156,
-        41,
-        414,
-        484
+        42,
+        39,
+        416,
+        486
       ],
-      "source_sha256": "f4e854cf3e81e74e6171d6458554fe174e3c2cbe4ab1c13409fc49badb1a811b",
-      "source_bytes": 124548,
+      "source_sha256": "f7841f6ce588ef9708a2ce32c2e60a6f8b80dbafa42a94094e5aa4d3f14379d3",
+      "source_bytes": 130947,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sad_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sad_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_state_hungry_copper",
@@ -8205,24 +8784,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 70114,
-      "sha256": "ccb4f2cb58744969a749e299e20bac645090938e7ffa80f6ac217cf9554ddd7c",
-      "rgba_sha256": "9b416f4b6689695331a20a5b681bba6b9fa3581d75dd36eac9b1f517dccb780e",
+      "bytes": 75980,
+      "sha256": "b3d733339d476425f326362af989d1627e29573e9d43c752c5c8f82442ce9066",
+      "rgba_sha256": "8d668d2fbc6bafe980bfee8bd5b39ed7a7176d4946569db0eed107fb97484a8c",
       "alpha_bounds": [
-        160,
-        38,
-        335,
-        481
+        42,
+        34,
+        337,
+        486
       ],
-      "source_sha256": "dfb3b5f8f988eeb015220c9ccf33a1d9dde60c6bd0c73757a24cd1e6e2e40093",
-      "source_bytes": 113410,
+      "source_sha256": "dfef5558b36121fdc4d72331c2fd02b82a494d43b2df7ad23514994ef79d829e",
+      "source_bytes": 117830,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_hungry_copper.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_hungry_copper.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_state_hungry_sand",
@@ -8239,24 +8826,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 81588,
-      "sha256": "5231f04b7837fdc32562ec02650aa30128ce416d7440996a5ac60b05066e36d0",
-      "rgba_sha256": "ef0be52df4cd576a6c5424ad353361fa443921301d93b4c055a41c28b82673ff",
+      "bytes": 88500,
+      "sha256": "63bd1529c9c74f64911d057e1b1d526eca908bff46f02eb4193803164cf1cddd",
+      "rgba_sha256": "23dd5d68dcf4974aae203d89dd3f56175e02a7817fadb6561030f34ea4572018",
       "alpha_bounds": [
-        159,
-        29,
-        416,
-        482
+        46,
+        26,
+        477,
+        486
       ],
-      "source_sha256": "69c9e33573a8ce03b79754e8d89e99dcad5a5893f25204d78ace332cfdd77f76",
-      "source_bytes": 129670,
+      "source_sha256": "211a907ebb9cc81e6f23ae984f722549b497a1b002edf020da5957bc402f6247",
+      "source_bytes": 138293,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_hungry_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_hungry_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_state_hungry_dark_russet",
@@ -8273,24 +8868,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 80510,
-      "sha256": "c717c9db045da1f32c18df48281df37bea9f6df77c1bd12100c40d1bbcf8bbf8",
-      "rgba_sha256": "9025789990c8ff641b380cf36e2cc4149ea848a2b4d9d8fb56b274c93ed58c1b",
+      "bytes": 85922,
+      "sha256": "5b88c49cc16221a7abf6aace59144557b3f788cf2f7541d2580dc3b6c61b1d3f",
+      "rgba_sha256": "a39f63a4f7d10787a3b50502a9d9e6b827cf16ccfe23f90c0625d1c2d839ecd1",
       "alpha_bounds": [
-        147,
-        36,
-        412,
-        483
+        146,
+        33,
+        414,
+        485
       ],
-      "source_sha256": "525481888501130d6e9e8026fdfeabd87172feee2007c2bd85d584894e0b5fad",
-      "source_bytes": 127584,
+      "source_sha256": "a4b17423a8b95e9841d99fb49d00f27e94d7f004f27c67767a67168f2a37c988",
+      "source_bytes": 134124,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_hungry_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_hungry_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_state_thoughtful_copper",
@@ -8307,24 +8910,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 76772,
-      "sha256": "caee277aeda8c12b2afb4813d2a10480970588713d93a6087f6c7ba12695402a",
-      "rgba_sha256": "1f5f8779492444b247f373dc2795607d7a040d491ea17d44bbcda7838046df36",
+      "bytes": 85050,
+      "sha256": "d919c59c6317d9b455572ed95f5437de73d1550091530ff15829df472836bfd7",
+      "rgba_sha256": "55dcbb38b5735b363761e5e9f1ce0bbc1be3968b516ae81dd0f009ad5141f66a",
       "alpha_bounds": [
-        170,
-        32,
-        403,
-        478
+        42,
+        31,
+        407,
+        483
       ],
-      "source_sha256": "5e00bcf3ac19e89509b92f66805bb5c911761c10faa9f41ffb52538f0bca567e",
-      "source_bytes": 119442,
+      "source_sha256": "0faeb98e88fbba15db63af43b43db16ccff00b9432e9206916f89e782e77a3ba",
+      "source_bytes": 128357,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_thoughtful_copper.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_thoughtful_copper.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_state_tired_copper",
@@ -8341,24 +8952,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 83632,
-      "sha256": "c111d171163c96e2b143b04fefef4e692bf401b20957c7ccfdd2ed70f0cf70ff",
-      "rgba_sha256": "6d5b041d8e61fd16bb212d6ab8a49c3ab4c1b8a289517d36429f852cdb6436c4",
+      "bytes": 87288,
+      "sha256": "0df4c5cd11daffa6346c0298a734aca234ac4eabddb2a374fe50d45551d97251",
+      "rgba_sha256": "8fc1942f86b380ae81b627109c0937cb194d6f010d849e137bbd56fb4bfd1ae7",
       "alpha_bounds": [
-        152,
-        35,
-        407,
-        484
+        42,
+        33,
+        409,
+        486
       ],
-      "source_sha256": "7cb4959c6df7719f36e13f12d90aaf46af7518064077307ef462c6e285e45021",
-      "source_bytes": 128878,
+      "source_sha256": "009bed9d4a2a8853c7313beeafca63903c3f1b4499964b7150d59cf15834dc32",
+      "source_bytes": 133371,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_tired_copper.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_tired_copper.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_state_thoughtful_sand",
@@ -8375,24 +8994,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 82966,
-      "sha256": "1f8e213a7de0cb3bac60e4e30d12fbfa20c9d9d7f718e2aee29dd516a5aff6e4",
-      "rgba_sha256": "86a50c6d887f6e49622b5f2f260fb1a915e61389efc2cff44b235eb28e464400",
+      "bytes": 90090,
+      "sha256": "13d6007dec7b792261983356436d76399735024913c1569aac460e714eabb19e",
+      "rgba_sha256": "f698832b827d8302c28de8e8106a9e7460209879172f004dfb5713ca31e342dd",
       "alpha_bounds": [
-        151,
-        25,
-        415,
-        483
+        42,
+        24,
+        425,
+        485
       ],
-      "source_sha256": "a4ea6a9fe9d6a244e0a37f90b10a598ace4675991a061b0617f7fabea82b160c",
-      "source_bytes": 128296,
+      "source_sha256": "1f0765a1a08253a1b66363fe01b80780903865b734f6a963ef9550e2ba048e59",
+      "source_bytes": 136084,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_thoughtful_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_thoughtful_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_state_tired_sand",
@@ -8409,24 +9036,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 83310,
-      "sha256": "0569c450d1b6eee0939b221aeb47d442ac2ad050f39fdd9b16df65032becdb72",
-      "rgba_sha256": "c44fa0ab6ca19dad20cf47b1a3842c287791b8d4e1ddae6ec6d1150298bce32a",
+      "bytes": 86964,
+      "sha256": "9cecfae8415429b6d8e737eef3c5b71d0837beccb71d0fe5e2ff3c98dede7e38",
+      "rgba_sha256": "ba488616016e452c0db60314a4f51d1196dd7616fd8567060214e3b88878b372",
       "alpha_bounds": [
-        158,
-        36,
-        413,
-        483
+        42,
+        34,
+        425,
+        486
       ],
-      "source_sha256": "cd42d66738049a25cd759b847a1685a435d32470eba33351ad84187e545a5561",
-      "source_bytes": 128132,
+      "source_sha256": "fc3abcfe5ba717abd53f7b41d2f0308e2858923ef316c81ebe29e0f3977dd84c",
+      "source_bytes": 134184,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_tired_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_tired_sand.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_state_thoughtful_dark_russet",
@@ -8443,24 +9078,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 66524,
-      "sha256": "51cc72a73190d55d78510ff9596bc62e946572f24de66c7d6276d72f6034a112",
-      "rgba_sha256": "45aac05c3d34e32f9f9109367cd22b140eb96f9da1d095f55488cc5f377ea641",
+      "bytes": 69866,
+      "sha256": "2b10e7e149fccaf16920fc50720bf10f238759c6473c662365b0cf46b1c777b7",
+      "rgba_sha256": "1c7136d3ced267c4ae9c9cdb7675f470e5b296cf0a3045936baf55a1222c7e6e",
       "alpha_bounds": [
-        157,
-        28,
-        340,
-        483
+        156,
+        27,
+        425,
+        485
       ],
-      "source_sha256": "31b3b223f9d7a5cf6c0154c323dd602713dc462f192e82a3e60ff258ecdc6c4c",
-      "source_bytes": 103630,
+      "source_sha256": "6f3a9c449ecff7670cb0ff781be804dd889adc0d817a5f002c618901d7cab93f",
+      "source_bytes": 107074,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_thoughtful_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_thoughtful_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "ryzhik_senior_state_tired_dark_russet",
@@ -8477,24 +9120,32 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 81452,
-      "sha256": "f7b6ada2e042cc995fb36cc1d55e9f5989ebc8074ae16425d36f79b5fafb5867",
-      "rgba_sha256": "af0ce2f69222e37089e14075db9759ea461f12ca12da7204fde66f486a141926",
+      "bytes": 86422,
+      "sha256": "071e94d2f3056757e8ac12c8829edfae2d2f82e1f333b5e70b1b60e01aed4058",
+      "rgba_sha256": "e74b857e8e93a4ee561b3b9d7fdff1e74f0269f363bbdc536a1bc7fa43f72583",
       "alpha_bounds": [
-        138,
-        32,
-        393,
-        482
+        42,
+        29,
+        425,
+        485
       ],
-      "source_sha256": "ff5076b45fe6933aa38c84c34620e9b71e1fc93de87ab87d191298bd087fd026",
-      "source_bytes": 128252,
+      "source_sha256": "7c327b8e433cbf37b003638016d8d6ec4c297ae1b1ac3559166d7f204e93a2a1",
+      "source_bytes": 134335,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_tired_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_tired_dark_russet.webp",
+      "refreshed_on": "2026-09-29",
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
     },
     {
       "resource": "location_observatory",
@@ -15319,8 +15970,8 @@
       "format": "vector_xml",
       "width": 24,
       "height": 24,
-      "bytes": 897,
-      "sha256": "9cd0fa389818d034425c38228404cef4e2d3031494681d6d1b6cadb29a7269ca",
+      "bytes": 891,
+      "sha256": "7aeb48b8aa2b5cd3c2f65a48e596f3bf82f2948439733a6953fd8c3d7c6a246e",
       "source_method": "locally_authored_svg",
       "source_path": "docs/design/assets/debug_settings.svg",
       "source_sha256": "83dbfbeabe462e85a827f1c2ebd7181f6cb0307fabb74fa589ed277e86bc773b",

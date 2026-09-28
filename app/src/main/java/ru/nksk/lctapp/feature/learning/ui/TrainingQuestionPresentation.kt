@@ -6,7 +6,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import ru.nksk.lctapp.domain.engine.GameSession
 import ru.nksk.lctapp.domain.finance.FinancialQuestion
-import ru.nksk.lctapp.domain.finance.FinancialQuestionKind
 
 /** A question's wording belongs to its original boundary, not to each subsequent answer. */
 internal class TrainingQuestionPresentation(private val session: GameSession) {
@@ -15,9 +14,7 @@ internal class TrainingQuestionPresentation(private val session: GameSession) {
     private var wording: FinancialQuestion? = null
 
     suspend fun display(question: FinancialQuestion?): FinancialQuestion? {
-        if (question == null || question.kind != FinancialQuestionKind.PLAN_REVIEW || question.reviewEvidence == null) {
-            return question
-        }
+        if (question == null) return null
         return mutex.withLock {
             // Answer progress is deliberately excluded: retries must not reread or reinterpret history.
             val key = question.copy(answeredOptionId = null, usedHint = false, attempts = 0)

@@ -61,7 +61,7 @@ fun AdventureGoalBriefingScreen(
             Text("Это наше первое задание от Гильдии Смотрителей. " +
                 "Поможем подготовиться к наблюдениям за звёздами!",
                 color = GoalInk, fontFamily = artwork.bodyFont, fontSize = 16.sp, lineHeight = 23.sp)
-            Text("Нужны карта звёзд, штатив, телескоп и поездка. Выберем, с чего начать.",
+            Text("Нужно купить карту звёзд, штатив и телескоп, а ещё оплатить поездку. Выберем, с чего начать.",
                 color = GoalInk.copy(alpha = .8f), fontFamily = artwork.bodyFont,
                 fontSize = 15.sp, lineHeight = 22.sp)
         }

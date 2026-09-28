@@ -2,15 +2,11 @@ package ru.nksk.lctapp.feature.tasks.ui
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.UUID
 import javax.inject.Inject
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import ru.nksk.lctapp.domain.minigame.PriceQuizState
 import ru.nksk.lctapp.domain.minigame.QuizQuestion
 
@@ -21,6 +17,7 @@ data class PriceQuizUiState(val game: PriceQuizState) {
 
 sealed interface PriceQuizAction {
     data class Answer(val pickedLeft: Boolean, val questionIndex: Int? = null) : PriceQuizAction
+    data class Next(val questionIndex: Int) : PriceQuizAction
     data object Restart : PriceQuizAction
 }
 
@@ -28,7 +25,6 @@ sealed interface PriceQuizAction {
 class PriceQuizViewModel @Inject constructor(private val savedState: SavedStateHandle) : ViewModel() {
     private val mutableUiState = MutableStateFlow(PriceQuizUiState(restore()))
     val uiState = mutableUiState.asStateFlow()
-    private var feedbackJob: Job? = null
     private var seriesId: String = savedState.get<String>("comparison_series_id")
         ?: UUID.randomUUID().toString().also { savedState["comparison_series_id"] = it }
     private var selectedAnswers: IntArray = savedState.get<IntArray>("comparison_answers")
@@ -40,7 +36,6 @@ class PriceQuizViewModel @Inject constructor(private val savedState: SavedStateH
 
     init {
         publish(uiState.value.game)
-        advanceAfterFeedback()
     }
 
     fun onAction(action: PriceQuizAction) {
@@ -53,11 +48,13 @@ class PriceQuizViewModel @Inject constructor(private val savedState: SavedStateH
                     selectedAnswers[before.current] = if (action.pickedLeft) 1 else 0
                     saveEvidence()
                     publish(after)
-                    advanceAfterFeedback()
                 }
             }
+            is PriceQuizAction.Next -> {
+                val before = uiState.value.game
+                if (action.questionIndex == before.current) publish(before.next())
+            }
             PriceQuizAction.Restart -> {
-                feedbackJob?.cancel()
                 val fresh = PriceQuizState.create()
                 seriesId = UUID.randomUUID().toString()
                 selectedAnswers = IntArray(fresh.questions.size) { -1 }
@@ -91,15 +88,6 @@ class PriceQuizViewModel @Inject constructor(private val savedState: SavedStateH
         savedState["comparison_series_id"] = seriesId
         savedState["comparison_answers"] = selectedAnswers.copyOf()
         savedState["comparison_presented"] = presentedQuestions.copyOf()
-    }
-
-    private fun advanceAfterFeedback() {
-        if (uiState.value.game.lastCorrect == null) return
-        feedbackJob?.cancel()
-        feedbackJob = viewModelScope.launch {
-            delay(750)
-            publish(uiState.value.game.next())
-        }
     }
 
     private fun publish(game: PriceQuizState) {

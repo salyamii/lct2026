@@ -16,6 +16,7 @@ internal data class AdventurePetPresentation(
     val name: String = PetDefaults.FOX_NAME,
     val artworkScale: Float = 1f,
     val motionIntensity: Float = 1f,
+    val eventCompanionWidthFraction: Float = .56f,
 )
 
 internal fun PetState.toAdventurePetPresentation(showReaction: Boolean = true): AdventurePetPresentation {
@@ -70,6 +71,7 @@ internal fun PetState.toAdventurePetPresentation(showReaction: Boolean = true): 
     return result.copy(
         name = name,
         artworkScale = if (age == PetAge.CUB) 0.8f else 1f,
+        eventCompanionWidthFraction = if (age == PetAge.ADULT || age == PetAge.SENIOR) .72f else .56f,
         // This only softens the gesture on an existing special-state sprite; no mood is changed.
         motionIntensity = if (visibleAppearance is PetAppearance.SelectedLook || visualState == PetVisualState.HAPPY) 1f else .35f,
     )

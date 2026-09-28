@@ -31,9 +31,10 @@ internal fun CampaignArchiveScreen(state: CampaignArchiveUiState, onRestart: () 
                         MovingPetArtwork(image, state.pet.name, modifier = Modifier.size(180.dp))
                     }
                 }
-                AdventureBody("Хроноскоп вернёт ${state.pet?.name.orEmpty()} в детство. Ещё раз пройдём знакомую историю и попробуем другие решения.")
-                AdventureBody("Монеты, покупки и задания начнутся заново. Всё прошлое приключение останется здесь — его можно будет перечитать.")
-                PracticeButton(if (state.error == null) "Вернуться в начало" else "Повторить возвращение", !state.busy, primary = true, onClick = onRestart)
+                AdventureBody("С помощью хроноскопа ${state.pet?.name.orEmpty()} вернётся в детство. Ещё раз пройдём знакомую историю и попробуем другие решения.")
+                AdventureBody("Запас монет станет таким же, как в начале игры. Покупать снаряжение и выполнять задания будем заново. Прошлое приключение останется здесь — его можно будет перечитать.")
+                PracticeButton(if (state.error == null) "Вернуться в начало" else "Повторить возвращение", true,
+                    interactionBlocked = state.busy, onClick = onRestart)
             }
         }
         if (!state.loading && state.archives.isEmpty()) item {
@@ -44,7 +45,7 @@ internal fun CampaignArchiveScreen(state: CampaignArchiveUiState, onRestart: () 
         itemsIndexed(state.archives, key = { _, archive -> archive.runId }) { index, archive ->
             LearningCard("Приключение ${index + 1}") {
                 AdventureBody("${archive.petName} · ${archive.finalDay?.let { "до $it-го дня" } ?: "история завершена"}")
-                PracticeButton("Открыть историю", !state.busy, primary = false) { onArchive(archive.runId) }
+                PracticeButton("Открыть историю", true, primary = false, interactionBlocked = state.busy) { onArchive(archive.runId) }
             }
         }
     }

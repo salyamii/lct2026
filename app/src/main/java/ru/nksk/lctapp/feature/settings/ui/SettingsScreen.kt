@@ -17,6 +17,9 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -35,7 +38,8 @@ internal fun SettingsGearButton(onClick: () -> Unit) {
 @Composable
 internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -> Unit, onBack: () -> Unit,
     onCopyProfile: (String) -> Unit, debugButton: (@Composable () -> Unit)? = null,
-    onShareCode: () -> Unit = {}, sharingCode: Boolean = false, shareError: Boolean = false) {
+    onShareCode: () -> Unit = {}, sharingCode: Boolean = false, shareError: Boolean = false,
+    onDownloadDiagnostics: () -> Unit = {}, pickingDiagnostics: Boolean = false) {
     Column(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding().background(GamePaper)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -47,6 +51,7 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
         Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)) {
             SoundSettingsCard(state.sound, onAction)
+            DiagnosticsSettingsCard(state.diagnostics, pickingDiagnostics, onDownloadDiagnostics)
             SettingsCard {
                 Text("Для родителей", color = GameInk, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 AdventureBody("Покажите код родителю, чтобы он мог видеть прогресс и присылать подарки.")
@@ -88,6 +93,27 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
     }
     state.cloud.restorePreview?.let { preview ->
         CloudRestoreDialog(preview, busy = state.cloud.busy, onAction = onAction)
+    }
+}
+
+@Composable
+private fun DiagnosticsSettingsCard(state: DiagnosticsUiState, picking: Boolean, onDownload: () -> Unit) {
+    SettingsCard {
+        Text("Журнал ошибок", color = GameInk, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        AdventureBody("Сохрани журнал, чтобы передать его для разбора ошибок.")
+        GameActionButton("Скачать журнал", onDownload, enabled = !picking && !state.saving)
+        val message = when {
+            picking -> "Выбираем, куда сохранить журнал…"
+            state.saving -> "Сохраняем журнал…"
+            state.result == DiagnosticsExportResult.SAVED -> "Журнал сохранён."
+            state.result == DiagnosticsExportResult.EXPORT_FAILED -> "Не удалось сохранить журнал. Выбери другое место и попробуй ещё раз."
+            state.result == DiagnosticsExportResult.PICKER_FAILED -> "Не удалось открыть выбор файла. Попробуй ещё раз."
+            else -> null
+        }
+        message?.let {
+            Text(it, Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                color = GameInk, style = MaterialTheme.typography.bodyMedium)
+        }
     }
 }
 
@@ -136,10 +162,10 @@ private fun ParentCodeContent(state: SettingsUiState, onAction: (SettingsAction)
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { ParentLinkQrCode(qr) }
                 AdventurePrimaryButton(if (sharingCode) "Готовим изображение…" else "Поделиться QR-кодом",
                     onShareCode, enabled = !sharingCode)
-                if (shareError) AdventureBody("Не удалось открыть отправку. Попробуйте ещё раз.")
+                if (shareError) AdventureBody("Не удалось поделиться кодом. Попробуйте ещё раз.")
             }
             if (!state.backendConfigured) {
-                AdventureBody("Подключение родителей станет доступно после подключения сервера.")
+                AdventureBody("Родитель сможет подключиться, когда заработает сервер.")
             } else when (state.registrationStatus) {
                 ProfileRegistrationStatus.LOADING -> {
                     LinearProgressIndicator(Modifier.fillMaxWidth())

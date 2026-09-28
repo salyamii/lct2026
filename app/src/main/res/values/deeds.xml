@@ -10,8 +10,8 @@
     <string name="deeds_price_prompt">Какая покупка дороже?</string>
     <string name="deeds_question">Счёт %1$d из %2$d</string>
     <string name="deeds_correct">Верно! Счета сходятся 🎉</string>
-    <string name="deeds_incorrect">Не сходится — гляди внимательнее</string>
-    <string name="deeds_price_hint">Тапни по товару с большей ценой</string>
+    <string name="deeds_incorrect">Неправильно</string>
+    <string name="deeds_price_hint">Выбери более дорогой товар</string>
     <string name="deeds_price_complete">Счета сверены!</string>
     <string name="deeds_amount">%1$d монет</string>
     <string name="deeds_target_prompt">Поймай сигнал звезды</string>
@@ -19,12 +19,12 @@
     <string name="deeds_hit">Сигнал пойман! +%1$d демо-монет</string>
     <string name="deeds_miss">Сигнал ушёл — попробуй ещё</string>
     <string name="deeds_ready">Готово!</string>
-    <string name="deeds_target_hint">Тапни «Стоп», когда центр бегунка в зелёной зоне</string>
+    <string name="deeds_target_hint">Нажми «Стоп», когда центр бегунка в зелёной зоне</string>
     <string name="deeds_stop">Стоп!</string>
     <string name="deeds_target_complete">Телескоп настроен!</string>
     <string name="deeds_memory_prompt">Найди пары предметов</string>
     <string name="deeds_moves">Ходы: %1$d</string>
-    <string name="deeds_memory_complete">Все созвездия на местах!</string>
+    <string name="deeds_memory_complete">Все пары найдены!</string>
     <string name="deeds_card_hidden">Карта %1$d, закрыта</string>
     <string name="deeds_card_open">Карта %1$d, %2$s</string>
     <string name="deeds_card_matched">Карта %1$d, %2$s, пара найдена</string>
@@ -32,7 +32,7 @@
     <string name="deeds_cost">При успехе: +%1$d голода и +%2$d усталости</string>
     <string name="deeds_unavailable">Недоступно: не хватает запаса сил или сытости</string>
     <string name="deeds_saving">Сохраняем результат…</string>
-    <string name="deeds_save_error">Не удалось сохранить результат. Повторите сохранение.</string>
+    <string name="deeds_save_error">Не удалось сохранить результат. Попробуй ещё раз.</string>
     <string name="deeds_cost_applied">Голод и усталость увеличены</string>
     <string name="deeds_no_cost">Голод и усталость не изменились</string>
 </resources>

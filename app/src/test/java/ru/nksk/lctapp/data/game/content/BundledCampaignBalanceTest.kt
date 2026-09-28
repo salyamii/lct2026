@@ -294,7 +294,11 @@ class BundledCampaignBalanceTest {
             DeedGameKind.COMPARISON -> DeedGameScore.fromComparison(PriceQuizState.create().copy(
                 current = PriceQuizState.QUESTION_COUNT, correctAnswers = PriceQuizState.QUESTION_COUNT * cap / 100))
             DeedGameKind.MEMORY -> DeedGameScore.fromMemory(MemoryState((0 until MemoryState.PAIRS).flatMap { listOf(it, it) })
-                .let { it.copy(matched = it.faces.indices.toSet(), moves = (MemoryState.PAIRS * 100 + cap - 1) / cap) })
+                .let {
+                    val attempts = (MemoryState.PAIRS * 100 + cap - 1) / cap
+                    it.copy(matched = it.faces.indices.toSet(), moves = attempts,
+                        recallMistakes = attempts - MemoryState.PAIRS)
+                })
         })
     }
 }

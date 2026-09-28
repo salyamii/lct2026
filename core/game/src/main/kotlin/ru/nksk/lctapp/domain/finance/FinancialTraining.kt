@@ -13,16 +13,16 @@ object FinancialTraining {
         val source = listOf("training:$seriesId:example")
         val first = when (kind) {
             FinancialQuestionKind.PLAN_REVIEW -> FinancialQuestion(id, kind,
-                "Представь: получили 40 монет. На еду оставили 25, на приятные покупки — 10. Сколько осталось распределить?",
+                "Представь: у тебя 40 монет. Ты отложил 25 на еду и 10 на игрушку. Сколько монет ещё не распределено?",
                 listOf(FinancialAnswerOption("5", "5 монет"), FinancialAnswerOption("15", "15 монет"),
-                    FinancialAnswerOption("40", "40 монет")), "5", "Уже распределили 25 + 10 = 35 монет. Из 40 осталось ещё 5.",
+                    FinancialAnswerOption("40", "40 монет")), "5", "На еду и игрушку отложено 25 + 10 = 35 монет. Осталось распределить 40 − 35 = 5.",
                 sourceActionIds = source, version = 2)
             FinancialQuestionKind.CONSEQUENCE -> FinancialQuestion(id, kind,
-                "Представь: у нас 30 монет, а на еду нужно 25. Игра на ярмарке стоит 7. Что произойдёт, если сыграем?",
+                "Представь: у тебя 30 монет. На еду до следующей недели нужно 25. Если заплатить 7 за игру на ярмарке, хватит ли оставшихся монет на еду?",
                 listOf(FinancialAnswerOption("short", "На еду не хватит 2 монет"),
-                    FinancialAnswerOption("covered", "На еду всё ещё хватит"),
-                    FinancialAnswerOption("automatic", "Копилка сама оплатит игру")), "short",
-                "Останется 30 − 7 = 23 монеты. На еду нужно 25 — не хватает 2.",
+                    FinancialAnswerOption("covered", "На еду хватит, ещё и останется"),
+                    FinancialAnswerOption("automatic", "Останется ровно 25 монет на еду")), "short",
+                "После игры останется 30 − 7 = 23 монеты. На еду нужно 25, значит, не хватит 25 − 23 = 2.",
                 sourceActionIds = source, version = 2)
             FinancialQuestionKind.TRANSACTION_ACCOUNTING -> {
                 val task = AssessmentTask.ReadLedger(40, 0, listOf(
@@ -30,18 +30,18 @@ object FinancialTraining {
                     LedgerEntry("$seriesId:example:repair", LedgerKind.AVAILABLE_EXPENSE, 8),
                     LedgerEntry("$seriesId:example:saving", LedgerKind.DEPOSIT, 10),
                 ), LedgerQuestion.EXPENSE, 0)
-                FinancialQuestion(id, kind, "Представь: обед стоил 5 монет, ремонт рюкзака — 8. Ещё 10 положили в копилку. Сколько потратили?",
+                FinancialQuestion(id, kind, "Представь: ты заплатил 5 монет за обед и 8 за ремонт рюкзака. Ещё 10 переложил в копилку. Сколько монет ушло на обед и ремонт вместе?",
                     listOf(FinancialAnswerOption("13", "13 монет"), FinancialAnswerOption("23", "23 монеты"),
                         FinancialAnswerOption("10", "10 монет")), "13",
-                    "Обед и ремонт стоили 5 + 8 = 13 монет. Десять монет в копилке по-прежнему наши — это не трата.",
+                    "За обед и ремонт заплатили 5 + 8 = 13 монет. А 10 в копилке всё ещё твои: их никто не получил за покупку или работу.",
                     sourceActionIds = source, version = 2, ledgerTask = task)
             }
             FinancialQuestionKind.SAVING_PRACTICE -> FinancialQuestion(id, kind,
-                "Копим на новое снаряжение. Как постепенно собрать нужную сумму?",
-                listOf(FinancialAnswerOption("repeat", "Каждый раз оставлять на нужное, а часть полученных монет сберегать"),
-                    FinancialAnswerOption("circle", "Брать из копилки и сразу возвращать те же монеты"),
-                    FinancialAnswerOption("wish", "Просто записать большую сумму в план")), "repeat",
-                "Каждый раз оставляем на еду, а часть новых монет откладываем. Так копилка растёт.",
+                "Представь: ты копишь на телескоп. Как добавлять монеты в копилку каждую неделю и оставлять деньги на еду?",
+                listOf(FinancialAnswerOption("repeat", "Сначала оставить на еду, потом отложить часть остатка"),
+                    FinancialAnswerOption("circle", "Вынимать и возвращать одни и те же монеты"),
+                    FinancialAnswerOption("wish", "Только записывать желаемую сумму в план")), "repeat",
+                "Сначала оставь на еду, затем положи часть остатка в копилку. Когда снова получишь деньги, повтори. Так постепенно накопишь на телескоп.",
                 sourceActionIds = source, version = 2)
         }
         return start(first, seriesId)
@@ -70,6 +70,26 @@ object FinancialTraining {
             questionNumber = series.questionNumber + 1,
             remainingQuestions = series.remainingQuestions.drop(1),
         ))
+    }
+
+    /** Rebuild only known example templates; callers still verify their frozen answer and task facts. */
+    fun exampleWording(question: FinancialQuestion): FinancialQuestion? {
+        if (question.version != 2) return null
+        val series = question.series ?: return null
+        if (series.questionNumber == 1) {
+            return standalone(question.kind, series.id).takeIf {
+                it.id == question.id && it.sourceActionIds == question.sourceActionIds
+            }
+        }
+        val variation = Math.floorMod(series.id.hashCode(), 5).toLong()
+        val builder = Questions(question.kind, series.id, question.sourceActionIds.take(1), variation)
+        val examples = when (question.kind) {
+            FinancialQuestionKind.PLAN_REVIEW -> builder.plan()
+            FinancialQuestionKind.CONSEQUENCE -> builder.consequences()
+            FinancialQuestionKind.TRANSACTION_ACCOUNTING -> builder.accounting()
+            FinancialQuestionKind.SAVING_PRACTICE -> builder.saving()
+        }
+        return examples.getOrNull(series.questionNumber - 2)?.takeIf { it.id == question.id }
     }
 
     private class Questions(val kind: FinancialQuestionKind, val seriesId: String,
@@ -102,17 +122,17 @@ object FinancialTraining {
             val spent = planned - 5
             val initial = 30 + variation * 5
             return listOf(
-                amount("Представь: на еду оставили $planned монет и потратили $spent. Сколько осталось на еду?",
+                amount("Представь: ты отложил на еду $planned монет и уже потратил $spent на обеды. Сколько осталось на еду?",
                     5, planned, planned + spent,
-                    "Осталось $planned − $spent = 5 монет."),
-                amount("Представь: у нас $initial монет. Заработали ещё 10. Сколько теперь можно распределить?",
+                    "На еду отложили $planned монет и потратили $spent. Осталось $planned − $spent = 5."),
+                amount("Представь: у тебя $initial монет. Ты получил ещё 10 за помощь в мастерской и ничего не потратил. Сколько монет теперь у тебя?",
                     initial + 10, initial, initial - 10,
-                    "Теперь у нас $initial + 10 = ${initial + 10} монет."),
-                choice("Представь: починили рюкзак и заплатили монетами из запаса. Что делаем с бюджетом?",
-                    "Посмотрим, сколько осталось, и при необходимости распределим монеты заново",
-                    "Вернём в бюджет прежние цифры, будто ничего не потратили",
-                    "Забудем про еду и потратим всё оставшееся",
-                    "После ремонта монет стало меньше. Посчитаем остаток и сначала оставим на нужное."),
+                    "Прибавляем заработанные 10 к тому, что было: $initial + 10 = ${initial + 10} монет."),
+                choice("Представь: ты неожиданно заплатил за ремонт рюкзака. Монет стало меньше. Как теперь проверить, на что их хватит?",
+                    "Посчитать остаток и обновить план расходов",
+                    "Считать, что монет осталось столько же",
+                    "Не учитывать ремонт в расходах",
+                    "За ремонт уже заплатили — эти монеты потрачены. Сначала посчитай остаток, оставь на еду, а затем реши, сколько можно потратить на другие покупки."),
             )
         }
 
@@ -122,21 +142,22 @@ object FinancialTraining {
             val price = 8L
             val reward = 5 + variation
             return listOf(
-                choice("Представь: у нас $wallet монет, на еду нужно $food. Игрушка стоит $price. Что будет, если её купить?",
+                choice("Представь: у тебя $wallet монет. На еду нужно $food, а игрушка стоит $price. Если купить игрушку, что будет с деньгами на еду?",
                     "На еду не хватит 3 монет",
-                    "На еду хватит, ведь игрушку мы смогли оплатить",
-                    "Монеты на еду сами появятся в копилке",
-                    "Останется $wallet − $price = ${wallet - price} монет. На еду нужно $food — не хватает 3."),
-                choice("За помощь в мастерской обещали $reward ${coins(reward)}. Работу ещё не сделали. Можно уже тратить награду?",
-                    "Нет, сначала нужно выполнить работу и получить монеты",
-                    "Да, обещанная награда уже лежит у нас",
-                    "Да, копилка сама даст монеты за будущую работу",
+                    "Останется ровно $food монет на еду",
+                    "На еду хватит, ещё и останется",
+                    "После покупки останется $wallet − $price = ${wallet - price} ${coins(wallet - price)}. " +
+                        "На еду нужно $food. Не хватает 3 монет: $food − ${wallet - price} = 3."),
+                choice("Представь: за помощь в мастерской обещали $reward ${coins(reward)}. Ты ещё не выполнил работу. Когда можно потратить эти монеты?",
+                    "После работы, когда получу награду",
+                    "Сразу после обещания",
+                    "Как только начну работу",
                     "Награду получим после работы. Пока этих монет у нас нет."),
-                choice("Представь: решили пройти мимо ярмарочной игры. Что произойдёт с монетами?",
-                    "Они останутся у нас, и позже мы решим, на что их потратить",
-                    "Они автоматически перейдут в копилку",
-                    "Монет станет больше, потому что мы отказались от игры",
-                    "За игру не платили, поэтому монеты остались у нас. В копилку они сами не переходят."),
+                choice("Представь: у тебя $wallet монет. Ты прошёл мимо платной игры на ярмарке и ничего не купил. Что стало с монетами?",
+                    "Осталось столько же: $wallet монет",
+                    "Все монеты перешли в копилку",
+                    "Монет стало больше",
+                    "Ты ничего не оплатил и не заработал. Поэтому осталось столько же — $wallet монет. Отказ от покупки сохраняет деньги, но не добавляет новые."),
             )
         }
 
@@ -159,15 +180,15 @@ object FinancialTraining {
                 LedgerEntry("$seriesId:example:withdrawal", LedgerKind.WITHDRAWAL, withdrawal),
             ), LedgerQuestion.AVAILABLE_REMAINDER, 0)
             return listOf(
-                amount("Представь: заработали $earned ${coins(earned)}, получили в подарок $gift и потратили $spending на еду. Сколько монет получили?",
+                amount("Представь: тебе заплатили $earned ${coins(earned)} за работу и подарили ещё $gift. Потом ты купил обед за $spending. Сколько новых монет ты получил от работы и подарка вместе?",
                     earned + gift, earned + gift - spending, earned + gift + spending,
-                    "Получили $earned + $gift = ${earned + gift} монет. На еду монеты потратили, поэтому её сюда не прибавляем.", incomeTask),
-                amount("Представь: положили $deposit монет в копилку и купили обед за $spending. Сколько монет потратили на покупки?",
+                    "Работа и подарок принесли $earned + $gift = ${earned + gift} монет. Обед — расход. Здесь считаем полученные монеты, поэтому цену обеда не вычитаем.", incomeTask),
+                amount("Представь: ты переложил $deposit монет в копилку и заплатил $spending за обед. Сколько монет ушло на покупку, а не осталось у тебя?",
                     spending, deposit + spending, 0,
-                    "Потратили $spending монет на обед. Монеты в копилке остались нашими.", expenseTask),
-                amount("Представь: под рукой 10 монет, в копилке 20. Взяли из копилки $withdrawal ${coins(withdrawal)}. Сколько теперь под рукой?",
+                    "За обед отдали $spending монет — это расход. А $deposit в копилке всё ещё твои, поэтому к расходам их не прибавляем.", expenseTask),
+                amount("Представь: с собой у тебя 10 монет, в копилке — 20. Ты взял из копилки $withdrawal ${coins(withdrawal)}. Сколько теперь монет с собой?",
                     10 + withdrawal, 30, 10 - withdrawal,
-                    "Под рукой стало 10 + $withdrawal = ${10 + withdrawal} монет. Мы взяли их из копилки, а не заработали.", withdrawalTask),
+                    "К 10 монетам с собой добавились $withdrawal из копилки: 10 + $withdrawal = ${10 + withdrawal}. В копилке стало меньше, а новых денег не появилось.", withdrawalTask),
             )
         }
 
@@ -179,15 +200,15 @@ object FinancialTraining {
             val contribution = 5L
             val times = 4 + variation
             return listOf(
-                amount("Представь: для цели нужно $target монет, а в копилке уже $saved. Сколько ещё осталось накопить?",
+                amount("Представь: фонарь стоит $target монет. Ты уже накопил $saved. Сколько монет не хватает на фонарь?",
                     target - saved, target, target + saved,
-                    "Осталось накопить $target − $saved = ${target - saved} монет."),
-                amount("Представь: у нас $wallet монет. До следующей недели на еду нужно $food. Сколько можно отложить, чтобы на еду хватило?",
+                    "Из цены фонаря вычитаем накопленное: $target − $saved = ${target - saved} монет. Именно столько ещё нужно добавить."),
+                amount("Представь: у тебя $wallet монет. До следующей недели на еду нужно $food. Других обязательных трат нет. Сколько можно отложить в копилку, оставив всю сумму на еду?",
                     10, wallet, food,
                     "Оставляем $food монет на еду. В копилку можно положить $wallet − $food = 10 монет."),
-                amount("Представь: осталось накопить ${times * contribution} монет. Каждый раз будем откладывать по $contribution. Сколько таких пополнений понадобится?",
+                amount("Представь: на фонарь не хватает ${times * contribution} монет. Ты будешь добавлять в копилку по $contribution и ничего из неё не брать. Сколько пополнений нужно?",
                     times, times + 2, times * contribution,
-                    "$times ${deposits(times)} по $contribution монет: $times × $contribution = ${times * contribution}.",
+                    "Нужно $times ${deposits(times)} по $contribution монет: $times × $contribution = ${times * contribution}. После этого на фонарь хватит.",
                     unit = { deposits(it) }),
             )
         }

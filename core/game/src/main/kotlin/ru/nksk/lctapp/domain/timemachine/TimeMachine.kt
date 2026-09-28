@@ -33,6 +33,15 @@ class TimeMachine(
     /** End-of-day reflections revisit optional spending or paid help that had a feasible free alternative. */
     suspend fun availableReflections(): TimeMachineAvailability = availability(::reflection)
 
+    /** The summary needs only one day's presence check, not every historical checkpoint. */
+    suspend fun hasReflection(day: Int): Boolean {
+        val entries = games.readDayHistory(day) ?: return false
+        return withContext(Dispatchers.Default) {
+            entries.any { entry -> entry.type == AuditType.COMMAND && entry.before?.engine?.day == day &&
+                compatible(entry) && reflection(entry)?.alternatives?.isNotEmpty() == true }
+        }
+    }
+
     private suspend fun availability(select: (AuditEntry) -> TimeMachineDecision?): TimeMachineAvailability {
         val snapshot = readCoherent() ?: return TimeMachineAvailability(TimeMachineStatus.UNAVAILABLE, reason = "Сохранение обновилось. Открой машину времени ещё раз.")
         val decisions = withContext(Dispatchers.Default) {
@@ -40,14 +49,14 @@ class TimeMachine(
                 .mapNotNull { entry -> select(entry)?.takeIf { it.alternatives.isNotEmpty() } }
         }
         return TimeMachineAvailability(TimeMachineStatus.READY, decisions,
-            if (decisions.isEmpty()) "Пока нет сохранённых решений с доступными альтернативами." else null)
+            if (decisions.isEmpty()) "Пока нет решений, для которых можно посмотреть другой путь." else null)
     }
 
     suspend fun simulate(request: TimeMachineRequest): TimeMachineResult {
-        val snapshot = readCoherent() ?: return unavailable(request, "Нет согласованной истории для пересчёта.")
+        val snapshot = readCoherent() ?: return unavailable(request, "Не удалось прочитать историю. Открой сравнение ещё раз.")
         val target = snapshot.history.firstOrNull { it.id == request.entryId && it.type == AuditType.COMMAND }
             ?: return unavailable(request, "Это решение отсутствует в истории текущей игры.")
-        if (target.contentFingerprint == null) return unavailable(request, "Для этого решения не сохранена версия содержимого игры.")
+        if (target.contentFingerprint == null) return unavailable(request, "Для сравнения этого решения не хватает сохранённых данных.")
         if (!compatible(target)) return TimeMachineResult(TimeMachineStatus.INCOMPATIBLE_VERSION, request, reason = "Версия правил или содержимого изменилась.")
         val alternative = decision(target)?.alternatives?.firstOrNull { it.id == request.alternativeId }
             ?: return unavailable(request, "Этот вариант не был доступен в момент решения.")
@@ -237,7 +246,7 @@ class TimeMachine(
             if (command is EngineCommand.RequestFinancialPractice &&
                 command.kind == ru.nksk.lctapp.domain.finance.FinancialQuestionKind.PLAN_REVIEW) {
                 return result(TimeMachineStatus.DIVERGED,
-                    "После изменения решения нужен новый разбор плана и факта. Старый ответ нельзя перенести в этот вариант; сравнение показано до разбора.")
+                    "После другого выбора расходы изменились бы, поэтому нужно заново сравнить их с планом. Здесь сравниваем пути до этого разбора.")
             }
             if (command is EngineCommand.BeginDay && entry.id != target.id && catalog.plan(branch) != command.eventIds) {
                 return result(TimeMachineStatus.DIVERGED, "После этого выбора план следующего дня был бы другим.")
@@ -408,13 +417,22 @@ class TimeMachine(
             catalog.content.events.firstOrNull { it.id == initial.engine?.currentEvent?.eventId } else null
         val context = event?.let { "В истории «${renderPetText(catalog.displayTitle(it), initial.pet.name)}» выбираем «$action»." }
             ?: "Представим, что выбрали «$action»."
+        val walletExpenses = branch.operations.filter { it.kind == LedgerKind.AVAILABLE_EXPENSE }
+            .fold(0L) { total, entry -> Math.addExact(total, entry.amount) }
+        val savingsExpenses = branch.operations.filter { it.kind == LedgerKind.SAVINGS_EXPENSE }
+            .fold(0L) { total, entry -> Math.addExact(total, entry.amount) }
+        val purchases = "Заплатили монетами с собой: $walletExpenses.\nВзяли на покупки из копилки: $savingsExpenses."
+        val movements = buildString {
+            if (branch.deposited > 0) append("\nОтдельно положили в копилку: ${branch.deposited}.")
+            if (branch.withdrawn > 0) append("\nВзяли из копилки обратно: ${branch.withdrawn}.")
+        }
         val public = TimeMachineQuiz(id, requireNotNull(result.simulationId), requireNotNull(result.resultHash), TimeMachineQuizKind.LEDGER,
-            "$context Сколько монет потратим всего? Считай и покупки, которые случились дальше в сравнении.",
+            "$context\nПосчитаем расходы на всём пути, который мы сравниваем:\n$purchases$movements\nСколько монет ушло именно на покупки?",
             options, answerAlreadyShown = true)
         val explanation = buildString {
-            append("В этом варианте на все покупки и услуги потратили ${reflectionCoins(expected)}.")
-            if (branch.deposited > 0) append(" В копилку положили ещё ${reflectionCoins(branch.deposited)}, но эти монеты всё ещё наши. Их не считаем потраченными.")
-            if (branch.withdrawn > 0) append(" Из копилки достали ${reflectionCoins(branch.withdrawn)}. Просто достать монеты — ещё не значит потратить их.")
+            append("Складываем расходы: $walletExpenses + $savingsExpenses = $expected. Всего потратили ${reflectionCoins(expected)}.")
+            if (branch.deposited > 0) append(" В копилку положили ещё ${branch.deposited}. Эта сумма всё ещё у нас: это не расход.")
+            if (branch.withdrawn > 0) append(" Из копилки взяли ${branch.withdrawn}. Само снятие — не расход: считаем только покупки.")
         }
         return VerifiedQuiz(public, requireNotNull(result.runId), "time-machine:${simulation.target.id}:ledger", null,
             explanation) { option ->
@@ -459,31 +477,35 @@ class TimeMachine(
         val effort = if (spentEnergy == 1) "немного устанем" else "устанем"
         val correctId = "spent_less"
         val options = if (work) listOf(
-            TimeMachineQuizOption(correctId, "Сделаем сами: сохраним $amount, но $effort"),
-            TimeMachineQuizOption("paid_for_help", "Сделаем сами и всё равно заплатим $amount"),
-            TimeMachineQuizOption("no_work_needed", "Сохраним $amount и совсем не устанем"),
+            TimeMachineQuizOption(correctId, "Не заплатим $amount, но $effort"),
+            TimeMachineQuizOption("paid_for_help", "Заплатим $amount и $effort"),
+            TimeMachineQuizOption("no_work_needed", "Не заплатим и не устанем"),
         ) else if (item != null) listOf(
-            TimeMachineQuizOption(correctId, "Сохраним $amount, но «$item» не получим"),
+            TimeMachineQuizOption(correctId, "Останемся без покупки, зато сохраним $amount"),
             TimeMachineQuizOption("paid_anyway", "Потратим $amount и получим «$item»"),
             TimeMachineQuizOption("paid_for_refusal", "Потратим $amount, но «$item» не получим"),
         ) else listOf(
             TimeMachineQuizOption(correctId, "Не будем платить и сохраним $amount"),
             TimeMachineQuizOption("paid_anyway", "Заплатим $amount, как в нашей истории"),
-            TimeMachineQuizOption("paid_for_refusal", "Откажемся, но всё равно потратим $amount"),
+            TimeMachineQuizOption("paid_for_refusal", "Получим ещё $amount за отказ"),
         )
         val orderedOptions = options.sortedBy { HistoryCodec.sha256("${result.resultHash}:${it.id}") }
         val id = "time-quiz:${HistoryCodec.sha256("${result.resultHash}:cause:2") }"
         val actual = if (item != null) "Мы купили «$item» за $amount."
-            else "«${renderPetText(catalog.displayTitle(event), before.pet.name)}»: мы потратили $amount."
+            else "В событии «${renderPetText(catalog.displayTitle(event), before.pet.name)}» мы заплатили $amount."
         val public = TimeMachineQuiz(id, requireNotNull(result.simulationId), requireNotNull(result.resultHash), TimeMachineQuizKind.CAUSE,
-            "$actual А если выбрать «$action», что изменится?",
+            "$actual\nПредставим, что вместо этого выбрали «$action». " +
+                if (work) "Сколько заплатим и устанем ли?" else "Что получим и сколько заплатим?",
             orderedOptions, answerAlreadyShown = true)
         val explanation = if (work) {
-            "При выборе «$action» сделаем работу сами и $effort. Платить за это действие не нужно: сохраним $amount."
+            "При выборе «$action» выполняем работу сами: $effort, зато платить не нужно. " +
+                "В нашей истории ушло $amount, а здесь — 0. Сохраним всю эту сумму."
         } else if (item != null) {
-            "В нашей истории мы потратили $amount на «$item». При выборе «$action» не покупаем этот предмет, поэтому сохраняем $amount."
+            "При выборе «$action» мы не получим «$item», зато сохраним $amount. " +
+                "Нужно решить, что сейчас важнее: покупка или деньги на что-то другое."
         } else {
-            "В нашей истории мы заплатили $amount. При выборе «$action» платить не нужно, поэтому сохраняем $amount."
+            "При выборе «$action» платить не нужно, поэтому сохраним $amount. " +
+                "Новых монет за отказ не дают: просто не тратим те, что уже были."
         }
         val comparisonFamily = simulation.target.facts.firstOrNull {
             it.detail is FactDetail.OptionalPurchase || it.detail is FactDetail.ResourceChoice || it.detail is FactDetail.SavingMovement

@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,6 +79,7 @@ private class CompletionNotice(val message: String)
 fun LctNavHost(
     modifier: Modifier = Modifier,
     debugSettingsButton: (@Composable () -> Unit)? = null,
+    onScreenShown: (String) -> Unit = {},
 ) {
     val backStack = rememberNavBackStack(AppNavigationSavedStateConfiguration, MainMenu)
     val navigator = remember(backStack) { AppNavigator(backStack) }
@@ -100,6 +102,13 @@ fun LctNavHost(
         }
     }
     val redirectingToBudget = shouldPresentBudget(pending, destination, presentedPlanningId)
+    // Only the route type is diagnostic context, never its occurrence, choice or day arguments.
+    val screen = when {
+        gate.loading || redirectingToBudget -> "BudgetGateLoading"
+        gate.failed -> "BudgetGateError"
+        else -> destination.diagnosticScreen()
+    }
+    SideEffect { onScreenShown(screen) }
     if (gate.loading || gate.failed || redirectingToBudget) {
         Box(Modifier.fillMaxSize().background(AdventureNight), contentAlignment = Alignment.Center) {
             if (gate.loading || redirectingToBudget) CircularProgressIndicator()
@@ -190,7 +199,12 @@ fun LctNavHost(
                     onOpenBudget = { source -> navigator.navigateToExisting(source, Economy) },
                     onContinueStory = { source -> navigator.navigateToExisting(source, Day) },
                     onArchives = { source -> navigator.navigate(source, CampaignArchive) })
-                campaignArchiveEntry(onBack = navigator::goBack, onRestarted = navigator::returnToRoot)
+                campaignArchiveEntry(onBack = navigator::goBack, onRestarted = { source ->
+                    if (backStack.lastOrNull() == source) {
+                        navigator.returnToRoot(source)
+                        navigator.navigate(MainMenu, Economy)
+                    }
+                })
                 mapEntry(onBack = navigator::goBack, onSelected = navigator::returnToRoot)
                 dayEntry(onBack = navigator::goBack, onFinished = finish,
                     isCurrentEntry = { destination == it },
@@ -210,4 +224,23 @@ fun LctNavHost(
             )
         }
     }
+}
+
+private fun NavKey?.diagnosticScreen(): String = when (this) {
+    MainMenu -> "MainMenu"
+    Gear -> "Gear"
+    Tasks -> "Tasks"
+    Goal -> "Goal"
+    Economy -> "Economy"
+    Savings -> "Savings"
+    Day -> "Day"
+    GameMap -> "GameMap"
+    Learning -> "Learning"
+    SkillTraining -> "SkillTraining"
+    ChapterPractice -> "ChapterPractice"
+    CampaignArchive -> "CampaignArchive"
+    Settings -> "Settings"
+    is OtherPaths -> "OtherPaths"
+    is DeedGame -> "DeedGame"
+    else -> "UnknownScreen"
 }

@@ -15,9 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -32,8 +32,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.Nunito
+import ru.nksk.lctapp.core.ui.game.coinAmount
 import ru.nksk.lctapp.core.ui.theme.Rubik
 import ru.nksk.lctapp.domain.minigame.PriceQuizState
+import ru.nksk.lctapp.domain.minigame.DeedRewardPreview
 
 // Порядок важен для пар вопросов: вопрос берёт товар [i] и [i+3].
 private val GOODS_ART = listOf(
@@ -70,7 +72,7 @@ fun PriceQuizScreen(
                 Modifier.align(Alignment.BottomEnd).size(92.dp)) }
             DeedHeader(deed?.title ?: stringResource(R.string.deeds_price_title), onBack = onBack)
         }
-        DeedSheet(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+        DeedGameSheet(deed, DeedRewardPreview.fromComparison(state), modifier = Modifier.weight(1f)) {
             Text(
                 deed?.instructions ?: if (deed != null) "Сравни значения и выбери большее. Ошибки уменьшают награду." else stringResource(R.string.deeds_price_prompt),
                 fontSize = 18.sp,
@@ -84,8 +86,7 @@ fun PriceQuizScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 DeedChip(stringResource(R.string.deeds_question, minOf(state.current + 1, PriceQuizState.QUESTION_COUNT), PriceQuizState.QUESTION_COUNT))
-                if (deed?.storyAction != true) CoinChip(deed?.let { "Награда до ${it.maximumReward} монет" }
-                    ?: stringResource(R.string.deeds_demo_reward, state.reward))
+                if (deed == null) CoinChip(stringResource(R.string.deeds_demo_reward, state.reward))
             }
             Spacer(Modifier.height(14.dp))
             // Connected work returns to the menu after saving. Keep the last pair
@@ -117,13 +118,24 @@ fun PriceQuizScreen(
                 Spacer(Modifier.height(14.dp))
                 Text(
                     when (state.lastCorrect) {
-                        true -> stringResource(R.string.deeds_correct)
-                        false -> stringResource(R.string.deeds_incorrect)
-                        null -> stringResource(if (state.finished) R.string.deeds_ready else R.string.deeds_price_hint)
+                        true -> "Правильно"
+                        false -> "Неправильно"
+                        null -> if (state.finished) stringResource(R.string.deeds_ready) else "Выбери большую сумму"
                     },
-                    fontSize = 14.sp,
+                    modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
+                    minLines = 2,
+                    fontSize = 18.sp,
+                    lineHeight = 24.sp,
+                    fontWeight = FontWeight.ExtraBold,
                     fontFamily = Nunito,
-                    color = if (state.lastCorrect == true) DeedColors.Text else DeedColors.TextSoft,
+                    color = DeedColors.Text,
+                )
+                Spacer(Modifier.height(8.dp))
+                DeedButton(
+                    text = if (displayedIndex == state.questions.lastIndex) "Завершить" else "Дальше",
+                    onClick = { onAction(PriceQuizAction.Next(state.current)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !state.finished && state.lastCorrect != null && deed?.canPlay != false,
                 )
             }
         }
@@ -168,6 +180,6 @@ private fun InvoiceCard(
             modifier = Modifier.size(96.dp),
         )
         Spacer(Modifier.height(12.dp))
-        CoinChip(stringResource(R.string.deeds_amount, amount))
+        CoinChip(coinAmount(amount.toLong()))
     }
 }

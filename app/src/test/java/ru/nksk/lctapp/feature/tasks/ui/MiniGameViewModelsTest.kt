@@ -58,31 +58,79 @@ class MiniGameViewModelsTest {
         assertEquals(fresh, model.uiState.value)
         assertEquals(0, fresh.game.moves)
         assertFalse(fresh.game.won)
+        assertTrue(fresh.game.seen.isEmpty())
+        assertEquals(0, fresh.game.recallMistakes)
     }
 
-    @Test fun quizRestoresAnswerAndAdvancesWithoutCountingRepeatedTaps() = runTest(dispatcher) {
+    @Test fun memoryRestoresKnowledgeAndCountsAMissedKnownPairOnlyOnce() = runTest(dispatcher) {
+        val saved = SavedStateHandle(mapOf("faces" to intArrayOf(0, 0, 1, 1, 2, 2)))
+        val model = MemoryGameViewModel(saved)
+        model.onAction(MemoryGameAction.Tap(0))
+        model.onAction(MemoryGameAction.Tap(2))
+        advanceUntilIdle()
+        assertEquals(0, model.uiState.value.game.recallMistakes)
+        model.onAction(MemoryGameAction.Tap(1))
+
+        val restoredSave = copyOf(saved)
+        val restored = MemoryGameViewModel(restoredSave)
+        assertEquals(setOf(0, 1, 2), restored.uiState.value.game.seen)
+        restored.onAction(MemoryGameAction.Tap(4)) // The matching card at 0 was already shown.
+        assertEquals(1, restored.uiState.value.game.recallMistakes)
+        val pendingRestored = MemoryGameViewModel(copyOf(restoredSave))
+        assertEquals(1, pendingRestored.uiState.value.game.recallMistakes)
+        advanceUntilIdle()
+        assertEquals(1, pendingRestored.uiState.value.game.recallMistakes)
+        assertEquals(setOf(0, 1, 2, 4), pendingRestored.uiState.value.game.seen)
+        pendingRestored.onAction(MemoryGameAction.Restart)
+        assertTrue(pendingRestored.uiState.value.game.seen.isEmpty())
+        assertEquals(0, pendingRestored.uiState.value.game.recallMistakes)
+    }
+
+    @Test fun oldMemorySaveDoesNotInventKnowledgeOrPenaltiesFromMoves() = runTest(dispatcher) {
+        val restored = MemoryGameViewModel(SavedStateHandle(mapOf(
+            "faces" to intArrayOf(0, 0, 1, 1), "matched" to intArrayOf(0, 1),
+            "face_up" to intArrayOf(2), "moves" to 6,
+        )))
+        assertEquals(setOf(0, 1, 2), restored.uiState.value.game.seen)
+        assertEquals(6, restored.uiState.value.game.moves)
+        assertEquals(0, restored.uiState.value.game.recallMistakes)
+    }
+
+    @Test fun quizRestoresFeedbackAndWaitsForExplicitNextWithoutCountingRepeatedTaps() = runTest(dispatcher) {
         val saved = SavedStateHandle(mapOf("questions" to intArrayOf(80, 20, 15, 60)))
         val model = PriceQuizViewModel(saved)
+        model.onAction(PriceQuizAction.Next(0))
+        assertEquals(0, model.uiState.value.game.current)
         model.onAction(PriceQuizAction.Answer(true))
         model.onAction(PriceQuizAction.Answer(true))
         val restored = PriceQuizViewModel(copyOf(saved))
         assertTrue(restored.uiState.value.leftIsAnswer)
         assertEquals(2, restored.uiState.value.game.reward)
         advanceUntilIdle()
+        assertEquals(0, restored.uiState.value.game.current)
+        assertEquals(true, restored.uiState.value.game.lastCorrect)
+        restored.onAction(PriceQuizAction.Next(0))
         assertEquals(1, restored.uiState.value.game.current)
         assertNull(restored.uiState.value.game.lastCorrect)
         restored.onAction(PriceQuizAction.Answer(false))
+        restored.onAction(PriceQuizAction.Next(0)) // A delayed click from the previous question cannot advance.
         advanceUntilIdle()
+        assertEquals(1, restored.uiState.value.game.current)
+        assertEquals(true, restored.uiState.value.game.lastCorrect)
+        assertFalse(restored.uiState.value.game.finished)
+        restored.onAction(PriceQuizAction.Next(1))
+        restored.onAction(PriceQuizAction.Next(1))
         assertTrue(restored.uiState.value.game.finished)
         assertEquals(4, restored.uiState.value.game.reward)
         assertFalse(restored.uiState.value.rightIsAnswer)
     }
 
-    @Test fun quizRestartCancelsThePreviousQuestionsFeedback() = runTest(dispatcher) {
+    @Test fun quizRestartClearsFeedbackAndCannotSkipTheNewQuestion() = runTest(dispatcher) {
         val model = PriceQuizViewModel(SavedStateHandle())
         model.onAction(PriceQuizAction.Answer(true))
         model.onAction(PriceQuizAction.Restart)
         val fresh = model.uiState.value
+        model.onAction(PriceQuizAction.Next(0))
         advanceUntilIdle()
         assertEquals(fresh, model.uiState.value)
         assertEquals(0, fresh.game.current)

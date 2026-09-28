@@ -1,5 +1,7 @@
 package ru.nksk.lctapp.core.ui.game
 
+import ru.nksk.lctapp.domain.pet.renderPetText
+
 internal fun deedDeadline(currentDay: Int, expiresDay: Int): String = when (expiresDay - currentDay) {
     0 -> "Можно выполнить сегодня"
     1 -> "Можно выполнить сегодня или завтра"
@@ -8,6 +10,19 @@ internal fun deedDeadline(currentDay: Int, expiresDay: Int): String = when (expi
 
 private val decorativeSeparator = Regex("\\s*\u00b7\\s*")
 private val pricedAction = Regex("^(.+?)\\s*\u00b7\\s*(\\+?)(\\d+)(?:\\s+монет[аы]?)?$")
+private val unnamedEffort = Regex("(^|[,;:.!?]\\s*)((?:немного |средне |заметно |сильно )?устанет|не тратит силы)(?=[.!?,;:]|$)",
+    RegexOption.IGNORE_CASE)
+private val manualEffortPrefix = Regex("^Самому:\\s*", RegexOption.IGNORE_CASE)
+
+/** Name the hero in standalone effort clauses, leaving already named clauses unchanged. */
+internal fun String.asPetEffortText(petName: String): String {
+    val template = asGameUiText().trim().replace(manualEffortPrefix, "Если сделать самим, ")
+        .replace("средне устанет", "заметно устанет", ignoreCase = true)
+        .replace(unnamedEffort) { match ->
+            "${match.groupValues[1]}{petName} ${match.groupValues[2].lowercase()}"
+        }
+    return renderPetText(template, petName.trim().ifBlank { "Герой" })
+}
 
 /** Adapt immutable catalog copy for display without rewriting content or historical facts. */
 internal fun String.asGameUiText(separator: String = ", "): String =

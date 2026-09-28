@@ -1,0 +1,344 @@
+{
+  "retrievedOn": "2026-09-29",
+  "fileKey": "bAod1cKtTX9Q8omQ067q3q",
+  "checked": 42,
+  "changed": 0,
+  "entries": [
+    {
+      "resource": "story_cargo_journal",
+      "id": "3238:429",
+      "exists": true,
+      "hashes": [
+        "02761a13a573e93aea6bdd82c1400495d935ac4a"
+      ]
+    },
+    {
+      "resource": "story_observation_journal",
+      "id": "3238:434",
+      "exists": true,
+      "hashes": [
+        "878ef418c8ea47339983b6cf7e5c117588b9c4cd"
+      ]
+    },
+    {
+      "resource": "story_letter",
+      "id": "3238:439",
+      "exists": true,
+      "hashes": [
+        "1d8315605f15192e6b231d1e4414e4d1f5ad1110"
+      ]
+    },
+    {
+      "resource": "story_old_photograph",
+      "id": "3238:444",
+      "exists": true,
+      "hashes": [
+        "320a7662af295b199dfc9e17c82f49681992e2da"
+      ]
+    },
+    {
+      "resource": "story_instruction_journal",
+      "id": "3238:449",
+      "exists": true,
+      "hashes": [
+        "d6a368129b1007568b6776c4581e2df2a001b49e"
+      ]
+    },
+    {
+      "resource": "story_route_map",
+      "id": "3238:454",
+      "exists": true,
+      "hashes": [
+        "0922759bb610feff0f747f3c20503409966b64dd"
+      ]
+    },
+    {
+      "resource": "story_map_table",
+      "id": "3238:459",
+      "exists": true,
+      "hashes": [
+        "13cd251c0b622d13952bff69f73d0e5fbc4130ca"
+      ]
+    },
+    {
+      "resource": "story_map_missing_region",
+      "id": "3238:464",
+      "exists": true,
+      "hashes": [
+        "09cbf9286a0fb44bf889d7613d2d540c1195d360"
+      ]
+    },
+    {
+      "resource": "story_assembled_map",
+      "id": "3238:469",
+      "exists": true,
+      "hashes": [
+        "d07f2e8f5f69dd4d0aabae6a1433b2b80e7cc3f8"
+      ]
+    },
+    {
+      "resource": "story_telescope_parts",
+      "id": "3238:477",
+      "exists": true,
+      "hashes": [
+        "2998d392e908a7a0cd936612c0cf3b3bd2885271"
+      ]
+    },
+    {
+      "resource": "story_north_tower_signal",
+      "id": "3238:482",
+      "exists": true,
+      "hashes": [
+        "53df618d6571818bcfeef2b443c9c71c3ec70ada"
+      ]
+    },
+    {
+      "resource": "story_signal_post",
+      "id": "3238:487",
+      "exists": true,
+      "hashes": [
+        "0fbbf3589c5741acc422bf39d04ef2e7cf388181"
+      ]
+    },
+    {
+      "resource": "story_three_lights_mechanism",
+      "id": "3238:492",
+      "exists": true,
+      "hashes": [
+        "9b46d8d000bfbb28c5b58afb34bbdf6f72b21c21"
+      ]
+    },
+    {
+      "resource": "story_tower_receiver",
+      "id": "3238:497",
+      "exists": true,
+      "hashes": [
+        "14ab6b6a2e78b31862cfbbf42560b0ef9e43f084"
+      ]
+    },
+    {
+      "resource": "story_return_signal",
+      "id": "3238:502",
+      "exists": true,
+      "hashes": [
+        "bdeaa383ec8170729ed861a58f07eea4a23eb754"
+      ]
+    },
+    {
+      "resource": "story_chronoscope",
+      "id": "3238:507",
+      "exists": true,
+      "hashes": [
+        "0229b727ab04ba38c8c3364482d7e45f20017927"
+      ]
+    },
+    {
+      "resource": "story_chronoscope_ring",
+      "id": "3238:512",
+      "exists": true,
+      "hashes": [
+        "651782be4c2f95aee33e20c884b84ad4451dfa51"
+      ]
+    },
+    {
+      "resource": "story_signal_lens",
+      "id": "3238:517",
+      "exists": true,
+      "hashes": [
+        "ecf4900253e06ddeb1300420c8e809c1381c3348"
+      ]
+    },
+    {
+      "resource": "story_route_tester",
+      "id": "3238:522",
+      "exists": true,
+      "hashes": [
+        "9212b1a2219caddf20dbb3e008fdca2c62d91813"
+      ]
+    },
+    {
+      "resource": "story_relay",
+      "id": "3238:527",
+      "exists": true,
+      "hashes": [
+        "e2ef7889b94c97fd744ea6d4d03eac9409d5d800"
+      ]
+    },
+    {
+      "resource": "story_astrolabe",
+      "id": "3238:532",
+      "exists": true,
+      "hashes": [
+        "c4645679f219f492740f8bf83c07d65dea816000"
+      ]
+    },
+    {
+      "resource": "story_marked_crate",
+      "id": "3238:540",
+      "exists": true,
+      "hashes": [
+        "6a48f7eed23ff2d42843c8034a59752e6ea0920d"
+      ]
+    },
+    {
+      "resource": "story_cleaning_worktable",
+      "id": "3238:545",
+      "exists": true,
+      "hashes": [
+        "6b51ea8507b39db4f1c6caba388256619f048dc8"
+      ]
+    },
+    {
+      "resource": "story_story_plate",
+      "id": "3238:550",
+      "exists": true,
+      "hashes": [
+        "039bdd981cbcc1c0cac9862b52ec06abd5f26bcc"
+      ]
+    },
+    {
+      "resource": "story_service_emblem",
+      "id": "3238:555",
+      "exists": true,
+      "hashes": [
+        "333eecd49a5e35e9f00665070644c5be59def801"
+      ]
+    },
+    {
+      "resource": "story_stone_post",
+      "id": "3238:560",
+      "exists": true,
+      "hashes": [
+        "cec8696098c109c044e3939d90a00d9c8d740bb3"
+      ]
+    },
+    {
+      "resource": "story_two_paths_device",
+      "id": "3238:565",
+      "exists": true,
+      "hashes": [
+        "f42afffee31f103264f6a5c4515f49628f74fe30"
+      ]
+    },
+    {
+      "resource": "story_caretakers_seal",
+      "id": "3238:570",
+      "exists": true,
+      "hashes": [
+        "9bad4874582acf752a4deed2d2bedf2dbf77af53"
+      ]
+    },
+    {
+      "resource": "story_mailbox",
+      "id": "3238:575",
+      "exists": true,
+      "hashes": [
+        "bb9092a5dbc2e413f0177eb1388ae5b085557651"
+      ]
+    },
+    {
+      "resource": "story_token_crate",
+      "id": "3238:580",
+      "exists": true,
+      "hashes": [
+        "fa0431180494a59ad8eab42caa9b5af2d44c37b7"
+      ]
+    },
+    {
+      "resource": "story_mountain_sign",
+      "id": "3238:585",
+      "exists": true,
+      "hashes": [
+        "bce732d3450d50dac4ce5114db10c1c3e4676a47"
+      ]
+    },
+    {
+      "resource": "story_waystone",
+      "id": "3238:590",
+      "exists": true,
+      "hashes": [
+        "11124d41929ccd1b0416dc7fb7ccf60b3848fcfa"
+      ]
+    },
+    {
+      "resource": "story_border_beacon",
+      "id": "3238:595",
+      "exists": true,
+      "hashes": [
+        "316469585e2b9973c6a9ae39534e13d26e724a34"
+      ]
+    },
+    {
+      "resource": "story_route_token",
+      "id": "3238:600",
+      "exists": true,
+      "hashes": [
+        "001a28fbdee42fd70fb23f08cdf1daf695b23414"
+      ]
+    },
+    {
+      "resource": "story_supply_bag",
+      "id": "3238:605",
+      "exists": true,
+      "hashes": [
+        "46177464969499a965987e76cbe67d2790d00789"
+      ]
+    },
+    {
+      "resource": "story_new_map_book",
+      "id": "3238:610",
+      "exists": true,
+      "hashes": [
+        "481b7bbee8a6f1980a835248aff6383cb67bcb70"
+      ]
+    },
+    {
+      "resource": "story_route_fragment_tower",
+      "id": "3238:623",
+      "exists": true,
+      "hashes": [
+        "151467944e26585bf2d09ee86dff2864637f8220"
+      ]
+    },
+    {
+      "resource": "story_route_fragment_mountain",
+      "id": "3238:628",
+      "exists": true,
+      "hashes": [
+        "a10cd09ce109b055d8d5337302bd928943ffef62"
+      ]
+    },
+    {
+      "resource": "story_route_fragment_winding",
+      "id": "3238:633",
+      "exists": true,
+      "hashes": [
+        "87bf64682c330688f085a2b352c3559569bd9103"
+      ]
+    },
+    {
+      "resource": "story_route_fragment_forest",
+      "id": "3238:638",
+      "exists": true,
+      "hashes": [
+        "ac02aaa5ee3e5a1946b86230713c4177d209cc7e"
+      ]
+    },
+    {
+      "resource": "story_bridge_token",
+      "id": "3238:643",
+      "exists": true,
+      "hashes": [
+        "c985369ca2c05323fc3cecac528e445537410057"
+      ]
+    },
+    {
+      "resource": "story_tower_token",
+      "id": "3238:648",
+      "exists": true,
+      "hashes": [
+        "8452bf826dc4241279a420185f6184356470474b"
+      ]
+    }
+  ]
+}

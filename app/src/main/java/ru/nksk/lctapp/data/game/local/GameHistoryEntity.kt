@@ -53,6 +53,15 @@ internal interface GameHistoryDao {
     @Insert suspend fun insertRun(row: GameRunEntity)
     @Query("SELECT * FROM GAME_AUDIT ORDER BY sequence")
     suspend fun read(): List<GameAuditEntity>
+    @Query("SELECT id FROM GAME_AUDIT ORDER BY sequence DESC LIMIT 1")
+    suspend fun latestId(): String?
+    // The application always uses BundledSQLiteDriver, including on pre-JSON1 Android versions.
+    @Query("SELECT * FROM GAME_AUDIT WHERE type = 'COMMAND' AND json_extract(payload, '$.before.engine.day') = :day ORDER BY sequence")
+    suspend fun commandsForDay(day: Int): List<GameAuditEntity>
+    @Query("SELECT * FROM GAME_AUDIT WHERE json_type(payload, '$.after') IS NOT NULL AND json_type(payload, '$.after') != 'null' ORDER BY sequence DESC LIMIT 1")
+    suspend fun latestCheckpoint(): GameAuditEntity?
+    @Query("SELECT COUNT(DISTINCT run_id) <= 1 AND COUNT(*) = COUNT(DISTINCT sequence) FROM GAME_AUDIT")
+    suspend fun hasCoherentOrder(): Boolean
     @Query("SELECT * FROM GAME_AUDIT WHERE id = :id")
     suspend fun find(id: String): GameAuditEntity?
     @Query("SELECT * FROM GAME_AUDIT WHERE run_id = :runId AND type = 'INITIALIZED' ORDER BY sequence LIMIT 1")

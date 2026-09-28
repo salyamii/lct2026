@@ -18,6 +18,7 @@ import ru.nksk.lctapp.domain.media.MediaPreferencesRepository
 import ru.nksk.lctapp.domain.parentlink.ParentLinkRepository
 import ru.nksk.lctapp.domain.backend.CloudSyncRepository
 import ru.nksk.lctapp.domain.backend.CloudSyncResult
+import ru.nksk.lctapp.domain.diagnostics.DiagnosticLogRepository
 
 internal enum class ParentCodeStatus { NONE, LOADING, READY, ERROR }
 internal enum class ProfileRegistrationStatus { NONE, LOADING, REGISTERED, ERROR }
@@ -40,6 +41,7 @@ internal data class SettingsUiState(
     val registrationStatus: ProfileRegistrationStatus = ProfileRegistrationStatus.NONE,
     val sound: SoundSettingsUiState = SoundSettingsUiState(),
     val cloud: CloudSettingsUiState = CloudSettingsUiState(),
+    val diagnostics: DiagnosticsUiState = DiagnosticsUiState(),
 )
 
 internal sealed interface SettingsAction {
@@ -52,6 +54,9 @@ internal sealed interface SettingsAction {
     data object PrepareCloudRestore : SettingsAction
     data class ConfirmCloudRestore(val previewId: String) : SettingsAction
     data class DismissCloudRestore(val previewId: String) : SettingsAction
+    data object PrepareDiagnosticsExport : SettingsAction
+    data object DiagnosticsPickerFailed : SettingsAction
+    data class ExportDiagnostics(val destination: String) : SettingsAction
 }
 
 @HiltViewModel
@@ -59,6 +64,7 @@ internal class SettingsViewModel @Inject constructor(
     private val repository: ParentLinkRepository,
     private val mediaPreferences: MediaPreferencesRepository,
     private val cloudRepository: CloudSyncRepository,
+    private val diagnosticLogs: DiagnosticLogRepository,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(SettingsUiState())
     val uiState = mutableState.asStateFlow()
@@ -85,7 +91,40 @@ internal class SettingsViewModel @Inject constructor(
             SettingsAction.PrepareCloudRestore -> prepareCloudRestore()
             is SettingsAction.ConfirmCloudRestore -> restoreCloud(action.previewId)
             is SettingsAction.DismissCloudRestore -> dismissCloudRestore(action.previewId)
+            SettingsAction.PrepareDiagnosticsExport -> if (!mutableState.value.diagnostics.saving) {
+                updateDiagnostics { copy(result = null) }
+            }
+            SettingsAction.DiagnosticsPickerFailed -> if (!mutableState.value.diagnostics.saving) {
+                updateDiagnostics { copy(result = DiagnosticsExportResult.PICKER_FAILED) }
+            }
+            is SettingsAction.ExportDiagnostics -> exportDiagnostics(action.destination)
         }
+    }
+
+    private fun exportDiagnostics(destination: String) {
+        if (mutableState.value.diagnostics.saving) return
+        if (destination.isBlank()) {
+            updateDiagnostics { copy(result = DiagnosticsExportResult.EXPORT_FAILED) }
+            return
+        }
+        updateDiagnostics { copy(saving = true, result = null) }
+        viewModelScope.launch {
+            try {
+                diagnosticLogs.exportTo(destination)
+                updateDiagnostics { copy(result = DiagnosticsExportResult.SAVED) }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                updateDiagnostics { copy(result = DiagnosticsExportResult.EXPORT_FAILED) }
+            } finally {
+                updateDiagnostics { copy(saving = false) }
+            }
+        }
+    }
+
+    private inline fun updateDiagnostics(transform: DiagnosticsUiState.() -> DiagnosticsUiState) {
+        val current = mutableState.value
+        mutableState.value = current.copy(diagnostics = current.diagnostics.transform())
     }
 
     private fun observeCloud() {

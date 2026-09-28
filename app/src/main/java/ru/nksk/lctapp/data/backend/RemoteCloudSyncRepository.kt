@@ -81,7 +81,11 @@ internal class RemoteCloudSyncRepository @Inject constructor(
                 var moreRewards = false
                 attempt { moreRewards = receiveRewards(identity, snapshot.runId, snapshot.localGeneration()) }
                 metadata = checkNotNull(store.read(identity.profileId))
-                snapshot = session.exportSnapshot()
+                // Polling without a new gameplay record can reuse the same immutable snapshot.
+                // Gifts, restore and actions all append an audit entry and therefore refresh it.
+                if (games.latestHistoryId() != snapshot.history.lastOrNull()?.id) {
+                    snapshot = session.exportSnapshot()
+                }
                 check(snapshot.localGeneration() == metadata.localGeneration) { "World was restored during synchronization" }
                 if (failures.isEmpty()) attempt { metadata = uploadWorld(identity, metadata, snapshot) }
                 attempt { metadata = uploadSkills(identity, metadata, snapshot) }
@@ -96,7 +100,7 @@ internal class RemoteCloudSyncRepository @Inject constructor(
                 }
                 mutableState.value = mutableState.value.copy(phase = CloudSyncPhase.IDLE,
                     lastSyncedAt = metadata.lastSyncedAtEpochMs?.let(::displayTime), message = null)
-                val changedDuringUpload = games.readHistory().lastOrNull()?.id != snapshot.history.lastOrNull()?.id
+                val changedDuringUpload = games.latestHistoryId() != snapshot.history.lastOrNull()?.id
                 if (moreRewards || changedDuringUpload || metadata.lastSnapshotChecksum != snapshot.checksum ||
                     metadata.lastAnalyticsSequence < snapshot.historySequence) CloudSyncResult.RETRY else CloudSyncResult.SUCCESS
             } catch (cancelled: CancellationException) {

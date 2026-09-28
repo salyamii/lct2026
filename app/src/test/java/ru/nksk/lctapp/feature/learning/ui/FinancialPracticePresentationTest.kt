@@ -4,6 +4,7 @@ import org.junit.Assert.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import ru.nksk.lctapp.domain.content.StoryContent
+import ru.nksk.lctapp.domain.content.EventType
 import ru.nksk.lctapp.domain.content.StoryContentRepository
 import ru.nksk.lctapp.domain.engine.GameSession
 import ru.nksk.lctapp.domain.game.GameRepository
@@ -24,6 +25,7 @@ import ru.nksk.lctapp.domain.engine.DayPhase
 import ru.nksk.lctapp.domain.engine.EngineCommand
 import ru.nksk.lctapp.domain.engine.EngineRequest
 import ru.nksk.lctapp.domain.engine.EngineState
+import ru.nksk.lctapp.domain.engine.MealPolicy
 import ru.nksk.lctapp.domain.finance.BudgetPlanRevision
 import ru.nksk.lctapp.domain.finance.FinancialBudgetProjection
 import ru.nksk.lctapp.domain.finance.FinancialPeriod
@@ -31,6 +33,7 @@ import ru.nksk.lctapp.domain.finance.FinancialPeriods
 import ru.nksk.lctapp.domain.finance.FinancialPracticeSeries
 import ru.nksk.lctapp.domain.finance.FinancialProgress
 import ru.nksk.lctapp.domain.finance.FinancialQuestionKind
+import ru.nksk.lctapp.domain.finance.FinancialTraining
 import ru.nksk.lctapp.domain.history.AuditEntry
 import ru.nksk.lctapp.domain.history.AuditType
 import ru.nksk.lctapp.domain.history.HistoryCodec
@@ -132,7 +135,82 @@ class FinancialPracticePresentationTest {
         cache.display(answered.copy(version = answered.version + 1))
         assertEquals(2, reads)
         cache.display(answered.copy(kind = FinancialQuestionKind.CONSEQUENCE))
-        assertEquals(2, reads)
+        assertEquals(3, reads)
+    }
+
+    @Test fun frozenExampleCopyRefreshesWithoutChangingItsQueuedQuestionsOrAnswerProgress() {
+        val catalog = bundledGameCatalog()
+        for (kind in FinancialQuestionKind.entries) {
+            val first = FinancialTraining.standalone(kind, "frozen:$kind")
+            val second = FinancialTraining.advance(first.copy(answeredOptionId = first.correctAnswerId))
+            for (current in listOf(first, second)) {
+                val saved = current.copy(prompt = "Прежний текст", explanation = "Прежнее объяснение",
+                    options = current.options.reversed().map { it.copy(text = "Старый ответ ${it.id}") },
+                    answeredOptionId = current.options.first { it.id != current.correctAnswerId }.id,
+                    usedHint = true, attempts = 2)
+                val encoded = HistoryCodec.encodeQuestion(saved)
+                val displayed = checkNotNull(financialPracticePresentation(saved, emptyList(), catalog))
+                assertEquals(current.prompt, displayed.prompt)
+                assertEquals(current.explanation, displayed.explanation)
+                assertEquals(saved.options.map { it.id }, displayed.options.map { it.id })
+                assertEquals(saved, displayed.copy(prompt = saved.prompt, explanation = saved.explanation, options = saved.options))
+                assertEquals(encoded, HistoryCodec.encodeQuestion(saved))
+            }
+        }
+    }
+
+    @Test fun exampleCopyCannotReplaceDifferentFrozenLedgerFacts() {
+        val original = FinancialTraining.standalone(FinancialQuestionKind.TRANSACTION_ACCOUNTING, "frozen-ledger")
+        val saved = original.copy(prompt = "Иной сохранённый пример",
+            ledgerTask = checkNotNull(original.ledgerTask).copy(openingAvailable = 90))
+        assertSame(saved, financialPracticePresentation(saved, emptyList(), bundledGameCatalog()))
+    }
+
+    @Test fun savedAccountingAndSavingQuestionsUseTheirCreationBoundaryRatherThanTheLatestWorld() {
+        val fixture = Fixture()
+        val before = checkNotNull(fixture.history.last().before)
+        for (kind in listOf(FinancialQuestionKind.TRANSACTION_ACCOUNTING, FinancialQuestionKind.SAVING_PRACTICE)) {
+            val current = FinancialPeriods.question(before, "active:$kind", kind)
+            val saved = current.copy(prompt = "Старый вопрос", explanation = "Старое объяснение")
+            val after = before.copy(financial = before.financial.copy(practice = saved))
+            val history = fixture.history.dropLast(1) + AuditEntry("create:$kind", 4, "run", AuditType.COMMAND,
+                request = EngineRequest("create:$kind", null, EngineCommand.RequestFinancialPractice(kind)),
+                before = before, after = after) + AuditEntry("later", 5, "run", AuditType.TECHNICAL_UPDATE,
+                before = after, after = after.copy(financial = after.financial.copy(
+                    periods = listOf(after.financial.currentPeriod!!.copy(spentAvailable = 999)))))
+            val displayed = checkNotNull(financialPracticePresentation(saved, history, fixture.catalog))
+            assertEquals(current.prompt, displayed.prompt)
+            assertEquals(current.explanation, displayed.explanation)
+            assertEquals(saved.ledgerTask, displayed.ledgerTask)
+            assertFalse(displayed.prompt.contains("999"))
+        }
+    }
+
+    @Test fun consequenceCopyRequiresTheSameSavedPurchaseAndFoodRequirement() {
+        val fixture = Fixture()
+        val before = checkNotNull(fixture.history.last().before)
+        val catalog = fixture.catalog
+        val purchase = catalog.content.choices.first { choice -> choice.moneyDelta < 0 &&
+            catalog.content.events.any { it.id == choice.eventId && it.type == EventType.WANT } }
+        val price = Math.negateExact(purchase.moneyDelta)
+        val title = catalog.content.events.first { it.id == purchase.eventId }.title
+        val needs = MealPolicy(catalog.meals).foodRequirement(before)
+        val current = FinancialPeriods.question(before, "consequence:copy", FinancialQuestionKind.CONSEQUENCE,
+            knownNeeds = needs, purchasePrice = price, purchaseTitle = title)
+        val saved = current.copy(prompt = "У нас ${before.economy.availableBalance} монет. На еду до следующей недели нужно $needs. " +
+            "Если купим «$title» за $price, хватит ли после этого на еду?", explanation = "Старое объяснение")
+        val history = fixture.history.dropLast(1) + AuditEntry("create-consequence", 4, "run", AuditType.COMMAND,
+            request = EngineRequest("create-consequence", null,
+                EngineCommand.RequestFinancialPractice(FinancialQuestionKind.CONSEQUENCE)),
+            before = before, after = before.copy(financial = before.financial.copy(practice = saved)))
+        val displayed = checkNotNull(financialPracticePresentation(saved, history, catalog))
+        assertEquals(current.prompt, displayed.prompt)
+        assertEquals(current.explanation, displayed.explanation)
+        assertEquals(saved.correctAnswerId, displayed.correctAnswerId)
+        val unknownFood = saved.copy(prompt = saved.prompt.replace("нужно $needs.", "нужно 999."))
+        assertSame(unknownFood, financialPracticePresentation(unknownFood, history, catalog))
+        val unknownPrice = saved.copy(prompt = saved.prompt.replace("за $price,", "за 999,"))
+        assertSame(unknownPrice, financialPracticePresentation(unknownPrice, history, catalog))
     }
 
     private class Fixture {

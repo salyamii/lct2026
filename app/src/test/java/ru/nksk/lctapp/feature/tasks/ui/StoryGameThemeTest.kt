@@ -23,7 +23,6 @@ class StoryGameThemeTest {
                 DeedGameKind.MEMORY -> {
                     assertTrue(choiceId, instructions.contains("по две карточки"))
                     assertFalse(choiceId, instructions.contains("маркер"))
-                    assertEquals(choiceId, 8, theme.pairs.distinct().size)
                 }
                 DeedGameKind.PRECISION -> {
                     assertTrue(choiceId, instructions.contains("маркер в зелёной зоне"))

@@ -17,6 +17,9 @@ internal data class PriceQuizEvidence(val seriesId: String, val answers: List<Pr
 internal object PriceQuizEvidenceMapper {
     fun eventId(occurrenceId: String, seriesId: String, index: Int) = "comparison:$occurrenceId:$seriesId:answer:$index"
 
+    fun eventIds(evidence: PriceQuizEvidence, occurrenceId: String): Set<String> =
+        evidence.answers.map { eventId(occurrenceId, evidence.seriesId, it.index) }.toSet()
+
     fun facts(evidence: PriceQuizEvidence, occurrenceId: String, runId: String, sequence: Long,
         day: Int?, periodId: String?, contentVersion: String, rulesVersion: String): List<AnalyticsFact> =
         evidence.answers.map { answer ->

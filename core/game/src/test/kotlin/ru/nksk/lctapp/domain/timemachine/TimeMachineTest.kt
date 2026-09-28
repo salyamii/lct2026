@@ -15,6 +15,48 @@ import ru.nksk.lctapp.domain.pet.*
 import ru.nksk.lctapp.domain.story.*
 
 class TimeMachineTest {
+    @Test fun dayReflectionPresenceMatchesFullAvailabilityWithoutRequestingFullHistory() = runTest {
+        val fixtures = listOf(Fixture(), Fixture(foodPurchase = true), Fixture(manualRepair = true),
+            Fixture(manualRepair = true, energy = 1), Fixture(shopType = EventType.RANDOM),
+            Fixture(manualRepair = true, shopType = EventType.STORY),
+            Fixture(manualRepair = true, shopType = EventType.STORY, gameWork = false))
+        for (f in fixtures) {
+            f.record(EngineCommand.CompleteEvent("shop-occurrence", "buy"))
+            val expected = f.machine.availableReflections().decisions.any { it.day == 1 }
+            val dayEntries = checkNotNull(f.repo.readDayHistory(1))
+            val saved = HistoryCodec.encodeState(f.repo.state)
+            val history = f.repo.entries.toList()
+            var dayReads = 0
+            val limited = object : GameRepository by f.repo {
+                override suspend fun readHistory(): List<AuditEntry> = error("Summary must not read all checkpoints")
+                override suspend fun readDayHistory(day: Int): List<AuditEntry> {
+                    dayReads++
+                    return dayEntries.filter { it.before?.engine?.day == day }
+                }
+            }
+            val machine = TimeMachine(limited, f.engine, f.catalog)
+            assertEquals(expected, machine.hasReflection(1))
+            assertFalse(machine.hasReflection(2))
+            assertEquals(2, dayReads)
+            assertEquals(saved, HistoryCodec.encodeState(f.repo.state))
+            assertEquals(history, f.repo.entries)
+            assertEquals(0, f.repo.updateCalls)
+        }
+    }
+
+    @Test fun dayReflectionPresenceRejectsIncompatibleMissingReceiptsAndStaleCheckpoints() = runTest {
+        val f = Fixture()
+        val purchase = f.record(EngineCommand.CompleteEvent("shop-occurrence", "buy"))
+        assertTrue(f.machine.hasReflection(1))
+        f.repo.entries[0] = purchase.copy(contentFingerprint = "older-content")
+        assertFalse(f.machine.hasReflection(1))
+        f.repo.entries[0] = purchase.copy(operations = emptyList())
+        assertFalse(f.machine.hasReflection(1))
+        f.repo.entries[0] = purchase
+        f.repo.state = f.repo.state.copy(fatigue = f.repo.state.fatigue + 1)
+        assertFalse(f.machine.hasReflection(1))
+    }
+
     @Test fun correctAnswerWithoutConfirmedQuestionPresentationKeepsIncompleteEvidence() = runTest {
         val f = Fixture()
         val choice = f.record(EngineCommand.CompleteEvent("shop-occurrence", "buy"))
@@ -67,13 +109,13 @@ class TimeMachineTest {
         val quiz = requireNotNull(f.machine.quiz(requireNotNull(result.simulationId), TimeMachineQuizKind.CAUSE))
         assertTrue(quiz.prompt.contains("Заклинило компас"))
         assertTrue(quiz.prompt.contains("Починить самому"))
-        assertEquals("Сделаем сами: сохраним 25 монет, но устанем",
+        assertEquals("Не заплатим 25 монет, но устанем",
             quiz.options.single { it.id == "spent_less" }.text)
         assertFalse(f.machine.submitQuiz(quiz.id, "paid_for_help", "repair-wrong").correct)
         val answer = f.machine.submitQuiz(quiz.id, "spent_less", "repair-correct")
         assertTrue(answer.correct)
-        assertEquals("При выборе «Починить самому» сделаем работу сами и устанем. Платить за это действие не нужно: сохраним 25 монет.",
-            answer.explanation)
+        assertTrue(answer.explanation.contains("выполняем работу сами: устанем, зато платить не нужно"))
+        assertTrue(answer.explanation.contains("В нашей истории ушло 25 монет, а здесь — 0"))
         assertFalse(quiz.options.any { "силы" in it.text || "помощь" in it.text })
         assertEquals(live, HistoryCodec.encodeState(f.repo.state))
     }
@@ -89,8 +131,8 @@ class TimeMachineTest {
         assertFalse(quiz.options.any { it.id == "different_income" || it.id == "different_transfer" })
         val answer = f.machine.submitQuiz(quiz.id, "spent_less", "ring-answer")
         assertTrue(answer.correct)
-        assertEquals("В нашей истории мы заплатили 7 монет. При выборе «Пройти мимо» платить не нужно, поэтому сохраняем 7 монет.",
-            answer.explanation)
+        assertTrue(answer.explanation.contains("При выборе «Пройти мимо» платить не нужно, поэтому сохраним 7 монет."))
+        assertTrue(answer.explanation.contains("Новых монет за отказ не дают"))
     }
 
     @Test fun purchaseQuestionConnectsTheCoinsToTheItemActuallyBought() = runTest {
@@ -99,14 +141,14 @@ class TimeMachineTest {
         val purchase = f.record(EngineCommand.CompleteEvent("shop-occurrence", "buy"))
         val result = f.machine.simulate(TimeMachineRequest(purchase.id, "choice:pass"))
         val quiz = requireNotNull(f.machine.quiz(requireNotNull(result.simulationId), TimeMachineQuizKind.CAUSE))
-        assertEquals("Мы купили «Игрушечный кораблик» за 5 монет. А если выбрать «Пройти мимо», что изменится?", quiz.prompt)
-        assertEquals("Сохраним 5 монет, но «Игрушечный кораблик» не получим",
+        assertTrue(quiz.prompt.contains("Мы купили «Игрушечный кораблик» за 5 монет."))
+        assertTrue(quiz.prompt.contains("вместо этого выбрали «Пройти мимо»"))
+        assertEquals("Останемся без покупки, зато сохраним 5 монет",
             quiz.options.single { it.id == "spent_less" }.text)
         assertFalse(f.machine.submitQuiz(quiz.id, "paid_anyway", "item-wrong").correct)
         val answer = f.machine.submitQuiz(quiz.id, "spent_less", "item-correct")
         assertTrue(answer.correct)
-        assertEquals("В нашей истории мы потратили 5 монет на «Игрушечный кораблик». При выборе «Пройти мимо» не покупаем этот предмет, поэтому сохраняем 5 монет.",
-            answer.explanation)
+        assertTrue(answer.explanation.contains("При выборе «Пройти мимо» мы не получим «Игрушечный кораблик», зато сохраним 5 монет."))
     }
 
     @Test fun questionDoesNotClaimLosingAnItemGrantedInBothChoices() = runTest {
@@ -146,8 +188,9 @@ class TimeMachineTest {
         val purchase = f.record(EngineCommand.CompleteEvent("shop-occurrence", "buy"))
         val result = f.machine.simulate(TimeMachineRequest(purchase.id, "choice:pass"))
         val quiz = requireNotNull(f.machine.quiz(requireNotNull(result.simulationId), TimeMachineQuizKind.CAUSE))
-        assertEquals("«Пластина покрылась налётом»: мы потратили 3 монеты. А если выбрать «Почистить самим», что изменится?", quiz.prompt)
-        assertEquals("Сделаем сами: сохраним 3 монеты, но немного устанем", quiz.options.single { it.id == "spent_less" }.text)
+        assertTrue(quiz.prompt.contains("В событии «Пластина покрылась налётом» мы заплатили 3 монеты."))
+        assertTrue(quiz.prompt.contains("выбрали «Почистить самим»"))
+        assertEquals("Не заплатим 3 монеты, но немного устанем", quiz.options.single { it.id == "spent_less" }.text)
         val answer = f.machine.submitQuiz(quiz.id, "spent_less", "cleaning-answer")
         assertTrue(answer.correct)
         assertFalse("помощ" in answer.explanation)
@@ -460,10 +503,12 @@ class TimeMachineTest {
         assertTrue(quiz.options.any { it.id == "coins:5" })
         assertTrue(quiz.prompt.contains("Лавка у причала"))
         assertTrue(quiz.prompt.contains("Пройти мимо"))
-        assertTrue(quiz.prompt.contains("покупки, которые случились дальше"))
+        assertTrue(quiz.prompt.contains("расходы на всём пути, который мы сравниваем"))
+        assertTrue(quiz.prompt.contains("Заплатили монетами с собой: 5"))
+        assertTrue(quiz.prompt.contains("Взяли на покупки из копилки: 0"))
         val answer = f.machine.submitQuiz(quiz.id, "coins:5", "submission-1", questionPresented = true)
         assertTrue(answer.correct)
-        assertEquals("В этом варианте на все покупки и услуги потратили 5 монет.", answer.explanation)
+        assertEquals("Складываем расходы: 5 + 0 = 5. Всего потратили 5 монет.", answer.explanation)
         assertEquals(1, answer.attempt)
         val retry = f.machine.submitQuiz(quiz.id, "coins:5", "submission-1", questionPresented = true)
         assertTrue(retry.alreadyRecorded)
@@ -487,9 +532,9 @@ class TimeMachineTest {
         val quiz = requireNotNull(f.machine.quiz(requireNotNull(result.simulationId), TimeMachineQuizKind.LEDGER))
         val answer = f.machine.submitQuiz(quiz.id, "coins:5", "ledger-savings")
         assertTrue(answer.correct)
-        assertTrue(answer.explanation.startsWith("В этом варианте на все покупки и услуги потратили 5 монет."))
-        assertTrue(answer.explanation.contains("В копилку положили ещё 10 монет"))
-        assertTrue(answer.explanation.contains("Из копилки достали 3 монеты"))
+        assertTrue(answer.explanation.startsWith("Складываем расходы: 5 + 0 = 5. Всего потратили 5 монет."))
+        assertTrue(answer.explanation.contains("В копилку положили ещё 10"))
+        assertTrue(answer.explanation.contains("Из копилки взяли 3"))
         assertFalse(answer.explanation.contains("перевод", ignoreCase = true))
     }
 

@@ -62,7 +62,7 @@ internal fun TrainingScreen(state: TrainingUiState, onAction: (TrainingAction) -
                     GameArtwork(R.drawable.menu_tasks, null, Modifier.size(76.dp))
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text("Разберёмся с монетами", color = GameInk, style = MaterialTheme.typography.titleMedium)
-                        AdventureBody("Выбери тему и разбирайся с монетами в своём темпе.")
+                        AdventureBody("Выбери тему. Можно не торопиться и подумать над каждым вопросом.")
                     }
                 }
             }
@@ -192,7 +192,7 @@ private fun ChapterPracticeNext(state: TrainingUiState, onAction: (TrainingActio
         when (state.chapterStep) {
             ChapterPracticeStep.SAVING, ChapterPracticeStep.REVIEW -> {
                 AdventureBody(if (state.chapterStep == ChapterPracticeStep.SAVING)
-                    "Вспомним, как мы копили на снаряжение. Ответим на вопрос и продолжим разбор."
+                    "Вспомним, как мы копили на снаряжение. Ответим на вопрос и продолжим историю."
                 else "Посмотрим, что планировали и сколько потратили. После разбора вернёмся к истории.")
                 PracticeButton(if (state.question?.correct == true) "Следующий вопрос" else "Начать разбор",
                     enabled, interactionBlocked = state.busy) { onAction(TrainingAction.StartChapterPractice) }
@@ -203,7 +203,7 @@ private fun ChapterPracticeNext(state: TrainingUiState, onAction: (TrainingActio
                 PracticeButton("К приключению", enabled, interactionBlocked = state.busy, onClick = onContinueStory)
             }
             ChapterPracticeStep.COMPLETE -> {
-                AdventureBody("С разбором закончили. Всё готово, чтобы продолжить историю!")
+                AdventureBody("Разбор завершён. Продолжим историю!")
                 PracticeButton("Продолжить историю", enabled, interactionBlocked = state.busy, onClick = onContinueStory)
             }
             null -> Unit

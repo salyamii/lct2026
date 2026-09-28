@@ -44,7 +44,7 @@ class ChronoscopeUiStateTest {
 
     @Test fun horizonDoesNotCallASavedFragmentTheEndOfTheDay() {
         val result = TimeMachineResult(TimeMachineStatus.COMPLETE, request)
-        assertEquals("Что изменилось бы в день 9 к этому моменту", chronoscopeHorizon(result, 9))
+        assertEquals("День 9. Что изменилось бы к этому моменту?", chronoscopeHorizon(result, 9))
         assertEquals("День 9. Посмотрим, что успело бы произойти.", chronoscopeHorizon(result.copy(status = TimeMachineStatus.DIVERGED), 9))
     }
 
@@ -53,8 +53,8 @@ class ChronoscopeUiStateTest {
             DayPhase.FINISHED, 4, 0, true, null, 100, emptyList(), emptyList()))
         val result = TimeMachineResult(TimeMachineStatus.COMPLETE, request,
             baseline = TimeMachineBranch(finished, emptyList()))
-        assertEquals("Что изменилось бы к концу дня 9", chronoscopeHorizon(result, null))
-        assertFalse(chronoscopeHorizon(result.copy(status = TimeMachineStatus.DIVERGED), 9).contains("к концу дня"))
+        assertEquals("Что изменилось бы к концу 9-го дня", chronoscopeHorizon(result, null))
+        assertFalse(chronoscopeHorizon(result.copy(status = TimeMachineStatus.DIVERGED), 9).contains("к концу"))
     }
 
     @Test fun memoryNamesTheChosenActionRatherThanMoneyReceiptsOrALaterEvent() {

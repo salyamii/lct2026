@@ -59,6 +59,8 @@ fun EntryProviderScope<NavKey>.dayEntry(onBack: (Day) -> Unit, onFinished: (Day,
             state = state,
             onAction = { if (it is DayAction.FinancialContextPresented || lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) viewModel.onAction(it) },
             onBack = dropUnlessResumed { onBack(source) },
+            // Starting the day was already committed. Continue to the existing menu without another command.
+            onLoadingContinue = dropUnlessResumed { onFinished(source, null) },
         )
     }
 }

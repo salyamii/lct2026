@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import ru.nksk.lctapp.domain.engine.CompletedGoalProject
 import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.domain.game.GameState
@@ -234,6 +236,36 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
     }
 
     override suspend fun readHistory(): List<AuditEntry> = withLiveBudgetRead { history.read().map { it.decode() } }
+
+    override suspend fun latestHistoryId(): String? = withLiveBudgetRead { history.latestId() }
+
+    override suspend fun readFacts(eventIds: Set<String>): HistoryFactLookup? = withContext(Dispatchers.IO) {
+        withLiveBudgetRead {
+            val run = history.run(CURRENT_GAME_ID) ?: return@withLiveBudgetRead null
+            val sequence = history.sequence()
+            val decoded = mutableMapOf<String, AuditEntry>()
+            val facts = eventIds.mapNotNull { eventId ->
+                val auditId = history.factAudit(eventId) ?: return@mapNotNull null
+                val audit = decoded[auditId] ?: checkNotNull(history.find(auditId)).decode().also {
+                    decoded[auditId] = it
+                }
+                audit.facts.single { it.eventId == eventId }
+            }
+            HistoryFactLookup(run.runId, sequence, facts)
+        }
+    }
+
+    override suspend fun readDayHistory(day: Int): List<AuditEntry>? = withContext(Dispatchers.IO) {
+        require(day > 0)
+        withLiveBudgetRead {
+            val state = readInTransaction() ?: return@withLiveBudgetRead null
+            if (!history.hasCoherentOrder()) return@withLiveBudgetRead null
+            val latest = history.latestCheckpoint()?.decode()?.after
+            if (latest != null && HistoryCodec.encodeState(state) != HistoryCodec.encodeState(latest))
+                return@withLiveBudgetRead null
+            history.commandsForDay(day).map { it.decode() }
+        }
+    }
 
     override suspend fun recordRejected(request: EngineRequest, reasonName: String, contentFingerprint: String?) {
         require(reasonName.isNotBlank())

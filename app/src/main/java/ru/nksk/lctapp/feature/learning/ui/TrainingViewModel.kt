@@ -112,7 +112,7 @@ internal class TrainingViewModel @Inject constructor(private val session: GameSe
             return
         }
         if (state.value.needsBudgetPlanning) {
-            state.value = state.value.copy(error = "Сначала заверши план монет, затем вернёмся к практике.")
+            state.value = state.value.copy(error = "Сначала распредели бюджет, затем вернёмся к практике.")
             return
         }
         val game = saved ?: return

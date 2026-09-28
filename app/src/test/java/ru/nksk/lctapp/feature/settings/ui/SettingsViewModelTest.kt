@@ -21,6 +21,7 @@ import ru.nksk.lctapp.domain.backend.CloudSyncPhase
 import ru.nksk.lctapp.domain.backend.CloudSyncRepository
 import ru.nksk.lctapp.domain.backend.CloudSyncResult
 import ru.nksk.lctapp.domain.backend.CloudSyncState
+import ru.nksk.lctapp.domain.diagnostics.DiagnosticLogRepository
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModelTest {
@@ -323,9 +324,92 @@ class SettingsViewModelTest {
         assertTrue(cloud.restores.isEmpty())
     }
 
+    @Test fun diagnosticExportWorksWhileProfileIsStillLoadingWithoutABackend() = runTest(dispatcher) {
+        val repository = FakeRepository(configured = false).apply { pendingProfile = CompletableDeferred() }
+        val diagnostics = FakeDiagnosticLogs()
+        val model = model(repository, diagnostics = diagnostics)
+        runCurrent()
+        assertTrue(model.uiState.value.loading)
+
+        model.onAction(SettingsAction.ExportDiagnostics("content://documents/diagnostics.txt"))
+        assertTrue(model.uiState.value.diagnostics.saving)
+        runCurrent()
+
+        assertEquals(listOf("content://documents/diagnostics.txt"), diagnostics.destinations)
+        assertEquals(DiagnosticsExportResult.SAVED, model.uiState.value.diagnostics.result)
+        assertFalse(model.uiState.value.diagnostics.saving)
+        assertTrue(model.uiState.value.loading)
+        assertEquals(0, repository.registrationCalls)
+    }
+
+    @Test fun failedProfileDoesNotBlockDiagnosticExportAndDuplicateTapDoesNotWriteTwice() = runTest(dispatcher) {
+        val diagnostics = FakeDiagnosticLogs().apply { pending = CompletableDeferred() }
+        val model = model(FakeRepository().apply { profileFailure = true }, diagnostics = diagnostics)
+        runCurrent()
+        assertTrue(model.uiState.value.profileError)
+
+        model.onAction(SettingsAction.ExportDiagnostics("content://documents/first.txt"))
+        model.onAction(SettingsAction.ExportDiagnostics("content://documents/second.txt"))
+        runCurrent()
+        assertEquals(listOf("content://documents/first.txt"), diagnostics.destinations)
+        assertTrue(model.uiState.value.diagnostics.saving)
+        assertNull(model.uiState.value.diagnostics.result)
+
+        diagnostics.pending!!.complete(Unit)
+        runCurrent()
+        assertEquals(DiagnosticsExportResult.SAVED, model.uiState.value.diagnostics.result)
+        assertFalse(model.uiState.value.diagnostics.saving)
+    }
+
+    @Test fun failedDiagnosticExportCanBeRetriedAtAnotherDestination() = runTest(dispatcher) {
+        val diagnostics = FakeDiagnosticLogs().apply { fail = true }
+        val model = model(FakeRepository(), diagnostics = diagnostics)
+        runCurrent()
+        model.onAction(SettingsAction.ExportDiagnostics("content://documents/full.txt"))
+        runCurrent()
+        assertEquals(DiagnosticsExportResult.EXPORT_FAILED, model.uiState.value.diagnostics.result)
+        assertFalse(model.uiState.value.diagnostics.saving)
+
+        model.onAction(SettingsAction.PrepareDiagnosticsExport)
+        assertNull(model.uiState.value.diagnostics.result)
+        diagnostics.fail = false
+        model.onAction(SettingsAction.ExportDiagnostics("content://documents/retry.txt"))
+        runCurrent()
+        assertEquals(DiagnosticsExportResult.SAVED, model.uiState.value.diagnostics.result)
+        assertEquals(listOf("content://documents/full.txt", "content://documents/retry.txt"), diagnostics.destinations)
+    }
+
+    @Test fun pickerFailureIsSeparateFromWritingAndOpeningPickerDoesNotExport() = runTest(dispatcher) {
+        val diagnostics = FakeDiagnosticLogs()
+        val model = model(FakeRepository(), diagnostics = diagnostics)
+        runCurrent()
+        model.onAction(SettingsAction.PrepareDiagnosticsExport)
+        runCurrent()
+        assertTrue(diagnostics.destinations.isEmpty())
+        assertNull(model.uiState.value.diagnostics.result)
+
+        model.onAction(SettingsAction.DiagnosticsPickerFailed)
+        assertEquals(DiagnosticsExportResult.PICKER_FAILED, model.uiState.value.diagnostics.result)
+        assertTrue(diagnostics.destinations.isEmpty())
+        model.onAction(SettingsAction.PrepareDiagnosticsExport)
+        assertNull(model.uiState.value.diagnostics.result)
+    }
+
     private fun model(repository: ParentLinkRepository, sound: MediaPreferencesRepository = FakeMediaRepository(),
-        cloud: CloudSyncRepository = FakeCloudRepository()) = SettingsViewModel(repository, sound, cloud)
+        cloud: CloudSyncRepository = FakeCloudRepository(), diagnostics: DiagnosticLogRepository = FakeDiagnosticLogs()) =
+        SettingsViewModel(repository, sound, cloud, diagnostics)
         .also { store.put("settings", it) }
+
+    private class FakeDiagnosticLogs : DiagnosticLogRepository {
+        val destinations = mutableListOf<String>()
+        var pending: CompletableDeferred<Unit>? = null
+        var fail = false
+        override suspend fun exportTo(destination: String) {
+            destinations += destination
+            pending?.await()
+            if (fail) throw java.io.IOException("Destination is unavailable")
+        }
+    }
 
     private class FakeCloudRepository : CloudSyncRepository {
         override val state = MutableStateFlow(CloudSyncState())
@@ -381,11 +465,12 @@ class SettingsViewModelTest {
         var createCalls = 0
         var registrationCalls = 0
         var pendingCode: CompletableDeferred<ParentLinkCode>? = null
+        var pendingProfile: CompletableDeferred<ParentLinkProfile>? = null
         var pendingRegistration: CompletableDeferred<Unit>? = null
         var beforeRegistration: () -> Unit = {}
         override suspend fun profile(): ParentLinkProfile {
             if (profileFailure) error("Storage unavailable")
-            return ParentLinkProfile(ProfileId, configured)
+            return pendingProfile?.await() ?: ParentLinkProfile(ProfileId, configured)
         }
         override suspend fun createCode(): ParentLinkCode {
             createCalls++

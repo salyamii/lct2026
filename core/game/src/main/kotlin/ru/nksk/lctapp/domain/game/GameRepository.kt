@@ -8,6 +8,9 @@ import ru.nksk.lctapp.domain.analytics.DecisionContext
 import ru.nksk.lctapp.domain.engine.EngineRequest
 import ru.nksk.lctapp.domain.engine.CampaignReconciliation
 import ru.nksk.lctapp.domain.history.AuditEntry
+import ru.nksk.lctapp.domain.history.AuditType
+import ru.nksk.lctapp.domain.history.HistoryCodec
+import ru.nksk.lctapp.domain.history.HistoryFactLookup
 import ru.nksk.lctapp.domain.history.GameSnapshot
 import ru.nksk.lctapp.domain.history.RestoreGuard
 import ru.nksk.lctapp.domain.history.HistorySourceGuard
@@ -53,6 +56,29 @@ interface GameRepository {
 
     /** History is loaded explicitly; it never inflates observe() emissions. */
     suspend fun readHistory(): List<AuditEntry> = emptyList()
+    /** Lightweight revision marker for sync; no world snapshots need to be decoded. */
+    suspend fun latestHistoryId(): String? = readHistory().lastOrNull()?.id
+    /** Only the requested facts plus coherent run/sequence metadata; storage uses its fact-ID index. */
+    suspend fun readFacts(eventIds: Set<String>): HistoryFactLookup? {
+        val history = readHistory()
+        val latest = history.lastOrNull() ?: return null
+        return HistoryFactLookup(latest.runId, latest.sequence,
+            history.flatMap { it.facts }.filter { it.eventId in eventIds })
+    }
+    /**
+     * Commands begun on one game day, coherent with the current checkpoint, or null
+     * if the world/history do not match. Storage implementations filter before decoding.
+     * This read never edits, repairs or discards historical records.
+     */
+    suspend fun readDayHistory(day: Int): List<AuditEntry>? {
+        require(day > 0)
+        val state = read() ?: return null
+        val entries = readHistory()
+        val latest = entries.lastOrNull { it.after != null }?.after
+        if (latest != null && HistoryCodec.encodeState(state) != HistoryCodec.encodeState(latest)) return null
+        if (entries.zipWithNext().any { (a, b) -> a.sequence >= b.sequence || a.runId != b.runId }) return null
+        return entries.filter { it.type == AuditType.COMMAND && it.before?.engine?.day == day }
+    }
     fun observeHistory(): Flow<List<AuditEntry>> = flowOf(emptyList())
     /** Lightweight wake-up signal; transport acknowledgements are not world changes. */
     fun observeHistorySequence(): Flow<Long> = observeHistory().map { it.lastOrNull()?.sequence ?: 0L }

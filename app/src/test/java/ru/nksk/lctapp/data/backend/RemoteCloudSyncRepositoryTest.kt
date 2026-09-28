@@ -29,6 +29,19 @@ import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.history.*
 
 class RemoteCloudSyncRepositoryTest {
+    @Test fun unchangedPollingExportsOnceAndChecksOnlyTheHistoryHead() = runTest {
+        val fixture = Fixture()
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.synchronize())
+        fixture.games.snapshotExports = 0
+        fixture.games.historyReads = 0
+
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.synchronize())
+
+        assertEquals(1, fixture.games.snapshotExports)
+        assertEquals(0, fixture.games.historyReads)
+        assertEquals(1, fixture.api.snapshotUploads.size)
+    }
+
     @Test fun firstSyncRegistersAndBacksUpTheWorldBeforeUploadingEvidenceAndAcknowledgingOutbox() = runTest {
         val fixture = Fixture()
         val before = fixture.games.exportSnapshot()
@@ -366,6 +379,8 @@ class RemoteCloudSyncRepositoryTest {
 
     /** In-memory atomic checkpoint fixture. Reward arithmetic delegates to the existing domain policy. */
     private class MemoryGames(var runId: String = "local-run") : GameRepository {
+        var snapshotExports = 0
+        var historyReads = 0
         val value = MutableStateFlow(createInitialGameState().copy(
             economy = EconomyState(BudgetPlan(35, 20, 20, 25))))
         private val history = mutableListOf(AuditEntry("$runId:initial", 1, runId, AuditType.INITIALIZED, after = value.value))
@@ -396,8 +411,15 @@ class RemoteCloudSyncRepositoryTest {
             history.clear()
             history += AuditEntry("$runId:initial", 1, runId, AuditType.INITIALIZED, after = value.value)
         }
-        override suspend fun readHistory() = history.toList()
-        override suspend fun exportSnapshot() = HistoryCodec.snapshot(runId, value.value, history.toList(), archives.toList())
+        override suspend fun readHistory(): List<AuditEntry> {
+            historyReads++
+            return history.toList()
+        }
+        override suspend fun latestHistoryId() = history.lastOrNull()?.id
+        override suspend fun exportSnapshot(): GameSnapshot {
+            snapshotExports++
+            return HistoryCodec.snapshot(runId, value.value, history.toList(), archives.toList())
+        }
         override suspend fun acknowledgeOutbox(ids: Set<String>) { acknowledged += ids }
         override suspend fun applyParentRewards(profileId: String, gameRunId: String, rewards: List<ParentRewardDto>,
             expectedRestoreGeneration: String): List<ParentRewardReceiptDto> {

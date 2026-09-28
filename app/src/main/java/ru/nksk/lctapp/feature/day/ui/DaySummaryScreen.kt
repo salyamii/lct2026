@@ -156,7 +156,7 @@ private fun DiaryMoney(summary: DaySummaryUiState) {
         }
         summary.netChange?.let { net ->
             val amount = if (net.signum() > 0) "+${diaryNumber(net)}" else diaryNumber(net)
-            DiaryNote("Изменение за день: $amount монет")
+            DiaryNote("Разница за день: $amount")
         }
     }
 }

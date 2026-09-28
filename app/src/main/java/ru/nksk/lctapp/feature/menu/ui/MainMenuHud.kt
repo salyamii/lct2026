@@ -234,7 +234,7 @@ private fun BudgetPopupSummary(budget: MenuBudgetUiState) {
         BudgetArticleRow("Запас", budget.reserve)
         if (budget.unallocated > 0) {
             Spacer(Modifier.height(6.dp))
-            Text("Ещё не распределили ${budget.unallocated} монет", color = GameInk.copy(alpha = .72f),
+            Text("Осталось распределить: ${budget.unallocated}", color = GameInk.copy(alpha = .72f),
                 fontFamily = Nunito, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, lineHeight = 18.sp)
         }
     }

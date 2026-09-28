@@ -15,6 +15,10 @@ data class MemoryState(
     val matched: Set<Int> = emptySet(),
     val pending: PendingPair? = null,
     val moves: Int = 0,
+    /** Positions revealed in this board, including the current face-up cards. */
+    val seen: Set<Int> = emptySet(),
+    /** Mismatches where the first card's matching position was already known. */
+    val recallMistakes: Int = 0,
 ) {
     val won: Boolean get() = matched.size == faces.size
 
@@ -28,9 +32,15 @@ data class MemoryState(
         if (index in faceUp || index in matched) return this
         val open = faceUp.singleOrNull()
         return if (open == null) {
-            copy(faceUp = faceUp + index)
+            copy(faceUp = faceUp + index, seen = seen + index)
         } else {
-            copy(faceUp = faceUp + index, pending = PendingPair(open, index), moves = moves + 1)
+            // Only information revealed before this tap can make it a recall mistake.
+            // A known mate of the second card does not retroactively penalize discovering it.
+            val missedKnownPair = faces[open] != faces[index] && seen.any { known ->
+                known != open && known !in matched && known in faces.indices && faces[known] == faces[open]
+            }
+            copy(faceUp = faceUp + index, pending = PendingPair(open, index), moves = moves + 1,
+                seen = seen + index, recallMistakes = recallMistakes + if (missedKnownPair) 1 else 0)
         }
     }
 

@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
  * Measure actions at their natural height first: a constrained Column otherwise
  * gives its final buttons zero remaining height. If actions do not fit, the same
  * body and actions form one scrollable panel, without shrinking their contents.
+ * The fixed section can also precede the body, for a persistent game status header.
  */
 @Composable
 internal fun AdaptiveActionPanel(
@@ -33,6 +34,7 @@ internal fun AdaptiveActionPanel(
     actionSpacing: Dp = 8.dp,
     sectionSpacing: Dp = 12.dp,
     fillBody: Boolean = false,
+    actionsAtTop: Boolean = false,
     contentScrollState: ScrollState? = null,
     actions: @Composable ColumnScope.() -> Unit,
     content: @Composable ColumnScope.() -> Unit,
@@ -43,8 +45,9 @@ internal fun AdaptiveActionPanel(
     BoxWithConstraints(modifier.fillMaxWidth()) {
         if (!constraints.hasBoundedHeight) {
             Column(Modifier.fillMaxWidth().padding(contentPadding), verticalArrangement = Arrangement.spacedBy(sectionSpacing)) {
+                if (actionsAtTop) Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(actionSpacing), content = actions)
                 Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(contentSpacing), content = content)
-                Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(actionSpacing), content = actions)
+                if (!actionsAtTop) Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(actionSpacing), content = actions)
             }
         } else {
             val viewportHeight = constraints.maxHeight
@@ -71,8 +74,8 @@ internal fun AdaptiveActionPanel(
                 ))
                 val naturalHeight = bodyPlaceable.height + gap + actionPlaceable.height
                 layout(childConstraints.maxWidth, naturalHeight.coerceAtLeast(childConstraints.minHeight)) {
-                    bodyPlaceable.placeRelative(0, 0)
-                    actionPlaceable.placeRelative(0, bodyPlaceable.height + gap)
+                    bodyPlaceable.placeRelative(0, if (actionsAtTop) actionPlaceable.height + gap else 0)
+                    actionPlaceable.placeRelative(0, if (actionsAtTop) 0 else bodyPlaceable.height + gap)
                 }
             }
         }

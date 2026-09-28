@@ -48,7 +48,7 @@ internal fun MainMenuContent(state: MainMenuLoadState, onRetry: () -> Unit, onAc
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("На обычный обед не хватает монет. После бесплатного обеда сегодня понадобится отдых. Утром ${state.menu.pet.name} будет немного уставшим.")
                     if ((state.menu.budget?.actualSavings ?: 0) > 0) {
-                        Text("В копилке есть ${state.menu.budget?.actualSavings} монет. Открой её через план монет, чтобы отдельно подтвердить снятие на еду.")
+                        Text("В копилке: ${state.menu.budget?.actualSavings}. Открой её через бюджет, чтобы взять на еду.")
                         TextButton(onClick = { onDismissMeal(); onAction(MainMenuAction.Coins) }, enabled = !state.menu.busy) {
                             Text("Открыть бюджет")
                         }

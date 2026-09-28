@@ -1,6 +1,10 @@
 package ru.nksk.lctapp.domain.minigame
 
 import java.math.BigInteger
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -18,12 +22,13 @@ class DeedGameScoreTest {
     }
 
     @Test fun memoryMistakesReduceTheRewardDespiteAllPairsEventuallyBeingFound() {
-        var board = MemoryState(List(MemoryState.PAIRS * 2) { it / 2 })
+        var board = MemoryState(List(MemoryState.PAIRS * 2) { it / 2 }).tap(1).tap(2).resolvePending()
         repeat(2) { board = board.tap(0).tap(2).resolvePending() }
         repeat(MemoryState.PAIRS) { pair -> board = board.tap(pair * 2).tap(pair * 2 + 1).resolvePending() }
         val score = checkNotNull(DeedGameScore.fromMemory(board))
         assertEquals(8, score.correct)
         assertEquals(10, score.attempts)
+        assertEquals(11, board.moves)
         assertEquals(8L, score.reward(10))
     }
 
@@ -38,7 +43,7 @@ class DeedGameScoreTest {
     }
 
     @Test fun findingAllPairsStillPaysOneCoinAfterManyMistakes() {
-        var board = MemoryState(List(MemoryState.PAIRS * 2) { it / 2 })
+        var board = MemoryState(List(MemoryState.PAIRS * 2) { it / 2 }).tap(1).tap(2).resolvePending()
         repeat(40) { board = board.tap(0).tap(2).resolvePending() }
         repeat(MemoryState.PAIRS) { pair -> board = board.tap(pair * 2).tap(pair * 2 + 1).resolvePending() }
         val score = checkNotNull(DeedGameScore.fromMemory(board))
@@ -63,5 +68,33 @@ class DeedGameScoreTest {
         assertNull(DeedGameScore.fromComparison(PriceQuizState(emptyList(), current = 5, correctAnswers = 5)))
         assertNull(DeedGameScore.fromPrecision(TargetStopState.create()))
         assertNull(DeedGameScore.fromPrecision(TargetStopState(10, round = 5, hits = 6, lastHit = true)))
+    }
+
+    @Test fun exploratoryMemoryMovesDoNotReduceTheCompletedReward() {
+        var board = MemoryState(List(MemoryState.PAIRS * 2) { it / 2 })
+        repeat(5) { board = board.tap(0).tap(2).resolvePending() }
+        repeat(MemoryState.PAIRS) { pair -> board = board.tap(pair * 2).tap(pair * 2 + 1).resolvePending() }
+        val score = checkNotNull(DeedGameScore.fromMemory(board))
+        assertEquals(13, board.moves)
+        assertEquals(0, board.recallMistakes)
+        assertEquals(8, score.attempts)
+        assertEquals(12L, score.reward(12))
+    }
+
+    @Test fun completedMemoryRejectsImpossibleRecallCounts() {
+        var board = MemoryState(List(MemoryState.PAIRS * 2) { it / 2 })
+        repeat(MemoryState.PAIRS) { pair -> board = board.tap(pair * 2).tap(pair * 2 + 1).resolvePending() }
+        assertNotNull(DeedGameScore.fromMemory(board))
+        assertNull(DeedGameScore.fromMemory(board.copy(recallMistakes = -1)))
+        assertNull(DeedGameScore.fromMemory(board.copy(recallMistakes = 1)))
+    }
+
+    @Test fun storedMemoryScoresKeepTheirExistingShapeAndRecordedReward() {
+        val recorded = Json.decodeFromString<DeedGameScore>(
+            """{"kind":"MEMORY","correct":8,"attempts":10}""",
+        )
+        assertEquals(8L, recorded.reward(10))
+        val encoded = Json.parseToJsonElement(Json.encodeToString(recorded)).jsonObject
+        assertEquals(setOf("kind", "correct", "attempts"), encoded.keys)
     }
 }

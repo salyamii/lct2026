@@ -75,7 +75,8 @@ internal fun GameCatalog.withStoryCampaign(): GameCatalog {
                 listOf(LoreOption("continue", scene.action, scene.facts, scene.energy, gameKind = scene.gameKind, recap = scene.recap, gamePresentation = scene.gamePresentation, destination = scene.destination)) +
                     if (source?.optional == true) listOf(LoreOption("skip", "Пропустить", emptySet())) else emptyList()
             }
-            val presentation = scene.presentation?.forEvent(id, options.map { it.key }) ?: EventPresentation()
+            val presentation = (scene.presentation?.forEvent(id, options.map { it.key }) ?: EventPresentation())
+                .withCurrentLoreCopy(scene)
             val gameMedia = options.mapNotNull { it.gamePresentation }.distinct().singleOrNull()?.media
             val event = EventDefinition(id, EventType.STORY, scene.title ?: checkNotNull(source).title,
                 scene.body ?: checkNotNull(source).body, null, null, null, 0, null,

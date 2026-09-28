@@ -58,7 +58,7 @@ private val AccessoryCardShape = RoundedCornerShape(18.dp)
 
 enum class OnboardingAccessory(val label: String, val id: String, val available: Boolean = true) {
     None("Без аксессуара", "PLAIN"), Backpack("Рюкзак", "BACKPACK"), Bandana("Бандана", "BANDANA"),
-    Lantern("Фонарик", "LANTERN", false), Patch("Маршрутный патч", "PATCH", false),
+    Lantern("Фонарик", "LANTERN", false), Patch("Нашивка путешественника", "PATCH", false),
     Hat("Шляпа", "HAT", false), Goggles("Очки", "GLASSES", false),
     Compass("Компас", "COMPASS", false), Binoculars("Бинокль", "BINOCULARS", false),
 }
@@ -244,7 +244,7 @@ private fun AccessoryCarousel(
         Box(Modifier.fillMaxWidth().testTag("accessory_hint").padding(bottom = 4.dp), contentAlignment = Alignment.TopCenter) {
             listOf(
                 true to "Листай, чтобы примерить аксессуар",
-                false to "Этот предмет сейчас недоступен. Ты сможешь получить его во время прохождения.",
+                false to "Этот предмет пока недоступен. Ты сможешь получить его во время приключения.",
             ).forEach { (available, message) ->
                 val visible = items[pager.currentPage].available == available
                 Text(message, color = AccessoryMuted, fontSize = 12.sp, lineHeight = 17.sp,

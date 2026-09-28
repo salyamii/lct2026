@@ -17,8 +17,8 @@ internal fun eventCompletionMessage(before: GameState, after: GameState,
     val summary = catalog.displayOutcome(choice) ?: "Завершили: ${catalog.displayTitle(event)}"
     val parts = mutableListOf(renderPetText(summary, after.pet.name).trimEnd('.') + ".")
     val spent = before.economy.balance - after.economy.balance
-    if (spent > 0) parts += "Потратили $spent монет."
-    else if (spent < 0) parts += "Получили ${-spent} монет."
+    if (spent > 0) parts += "Потратили ${paymentCoinAmount(spent)}."
+    else if (spent < 0) parts += "Получили ${paymentCoinAmount(-spent)}."
     val effort = (before.engine?.energy ?: 0) - (after.engine?.energy ?: 0)
     val equipped = after.ownedItems.any { item -> before.ownedItems.none { it.id == item.id } &&
         ru.nksk.lctapp.domain.pet.PetCosmetics.forItem(item.itemId) != null }
@@ -52,29 +52,29 @@ internal fun energyDescription(remaining: Int, maximum: Int): String = when {
 }
 
 internal fun BlockReason.playerMessage(petName: String): String = when (this) {
-    BlockReason.BudgetPlanningRequired -> "Сначала распредели монеты по статьям и подтверди бюджет."
+    BlockReason.BudgetPlanningRequired -> "Сначала реши, на что пойдут монеты, и подтверди бюджет."
     is BlockReason.FinancialPracticeRequired -> "Всё готово! Ответим на вопросы о наших решениях — и продолжим историю."
     BlockReason.SavingsWithdrawalConfirmationRequired -> "Чтобы взять монеты из копилки, сначала подтверди решение."
-    BlockReason.InvalidPetName -> "Введи непустое имя в одну строку."
+    BlockReason.InvalidPetName -> "Напиши имя спутника в одну строку."
     BlockReason.MustEat -> "$petName проголодался. Сначала нужно поесть, затем можно продолжить."
     BlockReason.MustSleep -> "$petName устал. Сил на это действие не хватает. Сначала нужно отдохнуть — оставшиеся события дождутся завтра."
     BlockReason.StaleRevision -> "Игра уже изменилась. Данные обновлены, повтори действие."
     BlockReason.EventInProgress -> "Сначала закончи текущее событие или выбери «Вернуться позже»."
-    BlockReason.OnlyShortDeedsAfterSchedule -> "Сегодня остались только короткие дела. Это дело можно выполнить завтра, если его срок ещё не закончится."
+    BlockReason.OnlyShortDeedsAfterSchedule -> "Сегодня можно заняться только короткими делами. К этому делу вернёмся завтра, если ещё успеваем по сроку."
     BlockReason.DeedUnavailable -> "Срок этого дела закончился или оно уже выполнено."
     BlockReason.UnfinishedEvents -> "На сегодня ещё остались события. Продолжи день."
     BlockReason.DayNotStarted -> "Сначала начни день на главном экране."
     BlockReason.DayFinished -> "День завершён. Новые дела можно выполнить после отдыха."
     BlockReason.NoNextEvent -> "Все события на сегодня закончились."
     BlockReason.PreviousLoreIncomplete -> "Сначала нужно завершить предыдущий шаг истории."
-    BlockReason.StoryConditionsNotMet -> "Для этой сцены ещё нужны открытия или действия. Продолжай историю."
-    BlockReason.ChapterGoalIncomplete -> "Для продолжения нужен весь комплект большой цели."
+    BlockReason.StoryConditionsNotMet -> "Мы ещё не всё сделали для этого шага. Продолжай историю."
+    BlockReason.ChapterGoalIncomplete -> "Чтобы продолжить историю, собери всё снаряжение для цели."
     BlockReason.GoalUnavailable -> "Эта цель пока недоступна. Выбери одну из открытых целей."
     BlockReason.GoalAlreadySelected -> "Большая цель уже выбрана."
     BlockReason.ItemAlreadyOwned -> "Эта часть комплекта уже куплена."
-    is BlockReason.FoodBudgetWarning -> "Останется $remainingBalance монет, а на еду до конца недели нужно $neededForFood."
+    is BlockReason.FoodBudgetWarning -> "Останется ${coinAmount(remainingBalance)}, а на еду до конца недели нужно $neededForFood."
     is BlockReason.MissingItems -> "Для этого события ещё нужны предметы."
-    is BlockReason.InsufficientMoney -> "Не хватает $missing монет. Можно вернуться к делам и заработать."
+    is BlockReason.InsufficientMoney -> "Не хватает ${missingCoinAmount(missing)}. Можно вернуться к делам и заработать."
     BlockReason.InvalidEventAction -> "Это действие уже недоступно. Открой событие заново."
     BlockReason.MissingCarriedLore, is BlockReason.InvalidContent -> "Не удалось продолжить эту игру с текущим содержимым. Сохранение осталось на месте."
 }

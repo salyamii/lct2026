@@ -14,14 +14,16 @@ import ru.nksk.lctapp.domain.engine.EventLayout
 import ru.nksk.lctapp.core.ui.components.*
 
 @Composable
-internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit) {
+internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit,
+    onLoadingContinue: () -> Unit = onBack) {
     // Saving overlays the existing card. It must not insert a row, shift the scroll
     // position or recolour every choice immediately before the route disappears.
     BackHandler(enabled = state.busy) {}
     Box(Modifier.fillMaxSize()) {
         DayContent(state.copy(busy = false),
             onAction = { if (!state.busy) onAction(it) },
-            onBack = { if (!state.busy) onBack() })
+            onBack = { if (!state.busy) onBack() },
+            onLoadingContinue = { if (!state.busy) onLoadingContinue() })
         if (state.busy) Box(Modifier.fillMaxSize().pointerInput(Unit) {
             awaitPointerEventScope {
                 while (true) awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() }
@@ -41,16 +43,21 @@ internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
 }
 
 @Composable
-private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit) {
+private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit,
+    onLoadingContinue: () -> Unit) {
     if (state.loading || state.failed) {
         Surface(Modifier.fillMaxSize()) {
             Column(Modifier.safeDrawingPadding().padding(24.dp), verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally) {
-                if (state.loading) CircularProgressIndicator() else {
+                if (state.loading) {
+                    CircularProgressIndicator()
+                    Spacer(Modifier.height(16.dp))
+                    Button(onLoadingContinue) { Text("Вперёд") }
+                } else {
                     Text("Не удалось загрузить игру. Сохранение не изменено.")
                     Button({ onAction(DayAction.Retry) }) { Text("Повторить") }
+                    TextButton(onBack) { Text("Назад") }
                 }
-                TextButton(onBack) { Text("Назад") }
             }
         }
         return

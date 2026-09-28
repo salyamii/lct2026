@@ -17,7 +17,10 @@ import ru.nksk.lctapp.domain.economy.EconomyOperations
 import ru.nksk.lctapp.domain.economy.SpendingKind
 import ru.nksk.lctapp.core.ui.game.playerMessage
 import ru.nksk.lctapp.core.ui.game.asGameUiText
+import ru.nksk.lctapp.core.ui.game.asPetEffortText
 import ru.nksk.lctapp.core.ui.game.deedDeadline
+import ru.nksk.lctapp.core.ui.game.missingCoinAmount
+import ru.nksk.lctapp.core.ui.game.paymentCoinAmount
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
 
@@ -114,15 +117,15 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
                 val card = catalog.cards.getValue(event.id)
                 val reward = catalog.content.choices.single { it.eventId == event.id }.moneyDelta
                 OfferedDeedUiState(offer.id, renderPetText(event.title, saved.pet.name).asGameUiText(),
-                    renderPetText(event.description, saved.pet.name).asGameUiText(), "До $reward монет",
-                    renderPetText(card.effort, saved.pet.name).asGameUiText(),
+                    renderPetText(event.description, saved.pet.name).asGameUiText(), "До ${missingCoinAmount(reward)}",
+                    card.effort.asPetEffortText(saved.pet.name),
                     deedDeadline(saved.engine!!.day, offer.expiresDay), card.scene)
             },
             meals = if (!needsFood) emptyList() else catalog.mealPolicy.choices(saved).map {
-                DeedsMealUiState(it.id, if (it.price == 0L) "Поесть бесплатно" else "Поесть за ${it.price} монет",
+                DeedsMealUiState(it.id, if (it.price == 0L) "Поесть бесплатно" else "Поесть за ${paymentCoinAmount(it.price)}",
                     session.engine.blockReason(saved, EngineCommand.Feed(it.id)) == null,
                     EconomyOperations.quote(saved.economy, it.price, SpendingKind.FEEDING).playerDescription(SpendingKind.FEEDING),
-                    "После еды сегодня понадобится отдых. Утром будем немного уставшими.".takeIf { _ -> catalog.mealPolicy.effects(it.id).exhaustsCurrentEnergy })
+                    "После еды ${saved.pet.name} устанет — пора будет отдыхать. Утром он будет немного уставшим.".takeIf { _ -> catalog.mealPolicy.effects(it.id).exhaustsCurrentEnergy })
             },
         )
     }

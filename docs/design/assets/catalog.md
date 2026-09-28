@@ -545,6 +545,8 @@ Twelve verified active transparent image fills: four ages × three colors. Full 
 ## Existing deed pairs
 
 Already tracked mini-game artwork, indexed without changing its bytes. Original Figma node/export provenance is not recorded.
+Per MINIGAME-UI-D-001 (2026-09-28), this is the exclusive face set for every
+memory board, including story work and repairs. Event media cannot replace it.
 
 | Android resource | Canvas | File |
 | --- | --- | --- |
@@ -701,3 +703,33 @@ Full canvas preserved; lossless exact WebP. Dedicated to the weekly receipt Prev
 | Resource | Size | Android | Provenance |
 | --- | --- | --- | --- |
 | `settings_gear` | 24 × 24 | [Vector XML](../../../app/src/main/res/drawable/settings_gear.xml) | Точная копия геометрии [debug_settings.svg](debug_settings.svg) для общего source set приложения. Одинаковые path, viewport и evenOdd; release не зависит от debug-модуля, поэтому межмодульный alias недоступен. |
+
+## Повторная сверка лора и возрастных образов — 2026-09-29
+
+[Отчёт по 60 карточкам](../content/lore-audit-2026-09-29.md) содержит актуальные
+снимки Design и FigJam. [Все 42 сюжетных предмета](story-object-audit-2026-09-29.json)
+совпали по активным IMAGE hash; повторная загрузка не нужна.
+
+[Кепка: источники и проверка пикселей](cap-refresh-2026-09-29.json): обновлены
+`ryzhik_adult_body_accessory_hat`, `ryzhik_adult_body_accessory_hat_sand`,
+`ryzhik_adult_body_accessory_hat_dark_russet` из узлов 89:38, 89:121, 89:154.
+У каждого сохранён полный холст 512 × 512 и прозрачные поля, lossless exact WebP;
+manifest содержит новые размеры и контрольные суммы. Grounding следует текущим
+координатам ног, изображение не обрезается и не центрируется заново.
+
+Затем [полная проверка используемых ADULT/SENIOR кадров](age-runtime-refresh-2026-09-29.json)
+охватила 90 изображений. В активной коллекции [89:2](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-2)
+«Рыжик · взрослый · мягкий образ · runtime kit · 3 colors» изменена сама фигура,
+включая базовый образ, аксессуары и эмоции. Обновлены ещё 39 взрослых и 42 старших
+кадра из [89:185](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-185).
+Вместе с тремя кепками это 84 актуальных экспорта с полным холстом 512 × 512.
+Шесть кадров сна сохраняют исходный холст 1024 × 1024: их активные Figma IMAGE hash
+и контрольные суммы пикселей совпали с каталогом. Старые макеты, маски глаз и
+неиспользуемые face patches не переимпортировались. Имена ресурсов и число
+файлов сохранены; новые дубликаты не добавлены. Manifest содержит обновлённые
+контрольные суммы, а оба отчёта — происхождение и проверку exact lossless RGBA.
+
+Для сцены с NPC взрослый/старший герой размещается по статическим видимым
+границам полного холста. `EventArtworkBounds` хранит измерения на этапе разработки;
+после обновления фигур границы и опора ног перемерены. Для раскладки изображения
+на UI-потоке не декодируются.

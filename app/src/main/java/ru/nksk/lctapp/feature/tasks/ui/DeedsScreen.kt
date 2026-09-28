@@ -113,7 +113,7 @@ private fun DeedsContent(onTraining: () -> Unit, onExit: () -> Unit,
                             Button({ onFeed(meal.id) }, enabled = meal.enabled && !state.busy) { Text(meal.label) }
                         }
                         if (!state.loading && !state.failed && state.offers.isEmpty()) {
-                            Text("Пока нет предложенных дел. Продолжи день, чтобы встретить новые поручения.", color = DeedColors.TextSoft)
+                            Text("Пока нет новых дел. Продолжи день, чтобы узнать, кому нужна помощь.", color = DeedColors.TextSoft)
                         }
                     }
                 }

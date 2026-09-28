@@ -35,6 +35,7 @@ import ru.nksk.lctapp.domain.analytics.SkillEvaluator
 import ru.nksk.lctapp.domain.history.AuditEntry
 import ru.nksk.lctapp.domain.history.AuditType
 import ru.nksk.lctapp.domain.history.HistorySourceGuard
+import ru.nksk.lctapp.domain.history.HistoryFactLookup
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DeedGameViewModelTest {
@@ -80,7 +81,6 @@ class DeedGameViewModelTest {
             assertTrue(presentation.instructions!!.contains(contextWord))
             assertTrue(presentation.instructions.contains("по две карточки"))
             assertFalse(presentation.instructions.contains("маркер"))
-            assertEquals(8, presentation.pairArtwork.distinct().size)
             assertEquals(before, repo.read())
             assertTrue(repo.attempted.isEmpty())
         }
@@ -247,6 +247,61 @@ class DeedGameViewModelTest {
         runCurrent()
         assertEquals(5, f.repo.readHistory().flatMap { it.facts }.size)
         assertEquals(1, f.repo.writes)
+    }
+
+    @Test fun newAnswerDuringFactWriteUsesOnlyIndexedLookupsAndRetriesWithoutDuplicates() = runTest(dispatcher) {
+        val f = fixture()
+        runCurrent()
+        val before = f.repo.read()
+        f.repo.forbidFullHistoryRead = true
+        val gate = CompletableDeferred<Unit>()
+        f.repo.beforeFacts = { gate.await() }
+        val first = PriceQuizEvidence("bounded-series", listOf(PriceQuizAnswerEvidence(0, 80, 20, true, true, false)))
+        val second = first.copy(answers = first.answers + PriceQuizAnswerEvidence(1, 10, 60, false, true, false))
+        f.model.recordComparisonAnswers(first)
+        runCurrent()
+        f.model.recordComparisonAnswers(second)
+        runCurrent()
+        assertTrue(f.repo.recordedFacts.isEmpty())
+        gate.complete(Unit)
+        runCurrent()
+        assertEquals(PriceQuizEvidenceMapper.eventIds(second, f.id), f.repo.recordedFacts.map { it.eventId }.toSet())
+        assertEquals(2, f.repo.recordedFacts.size)
+        assertTrue(f.repo.factReadRequests.all { it.size <= 2 && it.all(PriceQuizEvidenceMapper.eventIds(second, f.id)::contains) })
+        assertEquals(before, f.repo.read())
+        assertNull(f.model.uiState.value.message)
+        f.model.recordComparisonAnswers(second)
+        runCurrent()
+        assertEquals(2, f.repo.recordedFacts.size)
+        assertEquals(0, f.repo.writes)
+        assertNull(f.model.uiState.value.message)
+    }
+
+    @Test fun newAnswerDuringAnAlreadySavedAnswerLookupIsNotLost() = runTest(dispatcher) {
+        val f = fixture()
+        runCurrent()
+        f.repo.forbidFullHistoryRead = true
+        val first = PriceQuizEvidence("lookup-series", listOf(PriceQuizAnswerEvidence(0, 80, 20, true, true, false)))
+        f.model.recordComparisonAnswers(first)
+        runCurrent()
+        assertEquals(1, f.repo.recordedFacts.size)
+        val gate = CompletableDeferred<Unit>()
+        f.repo.beforeFactRead = { gate.await() }
+        f.model.recordComparisonAnswers(first)
+        runCurrent()
+        val second = first.copy(answers = first.answers + PriceQuizAnswerEvidence(1, 10, 60, false, true, false))
+        f.model.recordComparisonAnswers(second)
+        gate.complete(Unit)
+        runCurrent()
+        assertEquals(2, f.repo.recordedFacts.size)
+        assertEquals(PriceQuizEvidenceMapper.eventIds(second, f.id), f.repo.recordedFacts.map { it.eventId }.toSet())
+        assertNull(f.model.uiState.value.message)
+
+        f.model.recordComparisonAnswers(second.copy(answers = second.answers.map { it.copy(pickedLeft = !it.pickedLeft) }))
+        runCurrent()
+        assertEquals(2, f.repo.recordedFacts.size)
+        assertTrue(f.model.uiState.value.canRetry)
+        assertNotNull(f.model.uiState.value.message)
     }
 
     @Test fun storyCompletionRetryRetainsTheOriginalFinancialExposureEvidence() = runTest(dispatcher) {
@@ -420,6 +475,10 @@ private class DeedRepository(initial: GameState) : GameRepository {
     var afterWrite: suspend () -> Unit = {}
     var writes = 0
     var beforeFacts: suspend () -> Unit = {}
+    var beforeFactRead: suspend () -> Unit = {}
+    var forbidFullHistoryRead = false
+    val factReadRequests = mutableListOf<Set<String>>()
+    val recordedFacts: List<AnalyticsFact> get() = history.flatMap { it.facts }
     val attempted = mutableListOf<EngineRequest>()
     val committed = mutableListOf<EngineRequest>()
     private data class Receipt(val request: EngineRequest, val context: DecisionContext?, val fingerprint: String?)
@@ -428,7 +487,16 @@ private class DeedRepository(initial: GameState) : GameRepository {
     override fun observe() = state
     override suspend fun read() = state.value
     override suspend fun initializeIfAbsent(initial: GameState) = state.value
-    override suspend fun readHistory() = history.toList()
+    override suspend fun readHistory(): List<AuditEntry> {
+        check(!forbidFullHistoryRead) { "Comparison answers must not read all checkpoints" }
+        return history.toList()
+    }
+    override suspend fun readFacts(eventIds: Set<String>): HistoryFactLookup {
+        factReadRequests += eventIds
+        beforeFactRead()
+        return HistoryFactLookup(history.last().runId, history.last().sequence,
+            recordedFacts.filter { it.eventId in eventIds })
+    }
     override suspend fun recordFacts(facts: List<AnalyticsFact>, sourceGuard: HistorySourceGuard?) {
         failure?.let { throw it }
         beforeFacts()
