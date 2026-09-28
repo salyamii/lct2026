@@ -719,3 +719,17 @@ lossless 512×512; угол добит до квадрата прозрачны�
 | `R.drawable.deed_game_pipes_end_red` | 512 × 512 | [deed_game_pipes_end_red.webp](../../../app/src/main/res/drawable-nodpi/deed_game_pipes_end_red.webp) | [rope_end_red.png](sources/mini-game-ropes-2026-09-28/rope_end_red.png) |
 | `R.drawable.deed_game_pipes_end_blue` | 512 × 512 | [deed_game_pipes_end_blue.webp](../../../app/src/main/res/drawable-nodpi/deed_game_pipes_end_blue.webp) | [rope_end_blue.png](sources/mini-game-ropes-2026-09-28/rope_end_blue.png) |
 | `R.drawable.deed_game_pipes_end_green` | 512 × 512 | [deed_game_pipes_end_green.webp](../../../app/src/main/res/drawable-nodpi/deed_game_pipes_end_green.webp) | [rope_end_green.png](sources/mini-game-ropes-2026-09-28/rope_end_green.png) |
+Сигнальные иллюминаторы башни для «Сигналов башни» (та же партия,
+User-supplied images → WebP lossless 512×512, четыре цвета в тёмном
+и светящемся состояниях).
+
+| Android resource | Canvas | Файл | Источник |
+| --- | --- | --- | --- |
+| `R.drawable.deed_game_signal_amber_off` | 512 × 512 | [webp](../../../app/src/main/res/drawable-nodpi/deed_game_signal_amber_off.webp) | [png](sources/mini-game-signals-2026-09-28/signal_amber_off.png) |
+| `R.drawable.deed_game_signal_amber_on` | 512 × 512 | [webp](../../../app/src/main/res/drawable-nodpi/deed_game_signal_amber_on.webp) | [png](sources/mini-game-signals-2026-09-28/signal_amber_on.png) |
+| `R.drawable.deed_game_signal_green_off` | 512 × 512 | [webp](../../../app/src/main/res/drawable-nodpi/deed_game_signal_green_off.webp) | [png](sources/mini-game-signals-2026-09-28/signal_green_off.png) |
+| `R.drawable.deed_game_signal_green_on` | 512 × 512 | [webp](../../../app/src/main/res/drawable-nodpi/deed_game_signal_green_on.webp) | [png](sources/mini-game-signals-2026-09-28/signal_green_on.png) |
+| `R.drawable.deed_game_signal_blue_off` | 512 × 512 | [webp](../../../app/src/main/res/drawable-nodpi/deed_game_signal_blue_off.webp) | [png](sources/mini-game-signals-2026-09-28/signal_blue_off.png) |
+| `R.drawable.deed_game_signal_blue_on` | 512 × 512 | [webp](../../../app/src/main/res/drawable-nodpi/deed_game_signal_blue_on.webp) | [png](sources/mini-game-signals-2026-09-28/signal_blue_on.png) |
+| `R.drawable.deed_game_signal_red_off` | 512 × 512 | [webp](../../../app/src/main/res/drawable-nodpi/deed_game_signal_red_off.webp) | [png](sources/mini-game-signals-2026-09-28/signal_red_off.png) |
+| `R.drawable.deed_game_signal_red_on` | 512 × 512 | [webp](../../../app/src/main/res/drawable-nodpi/deed_game_signal_red_on.webp) | [png](sources/mini-game-signals-2026-09-28/signal_red_on.png) |

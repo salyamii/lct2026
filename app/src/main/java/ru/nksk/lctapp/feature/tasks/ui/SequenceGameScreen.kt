@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.feature.tasks.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,15 +16,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -34,11 +35,19 @@ import ru.nksk.lctapp.core.ui.components.GameArtwork
 import ru.nksk.lctapp.core.ui.theme.Rubik
 import ru.nksk.lctapp.domain.minigame.SequenceState
 
-private val SIGNAL_COLORS = listOf(
-    Color(0xFFF6C445), // янтарный
-    Color(0xFFA8E830), // лаймовый
-    Color(0xFF7EB2FF), // лазурный
-    Color(0xFFE58BD0), // розовый
+// Иллюминаторы башни: тёмное и светящееся состояния каждого сигнала.
+private val SIGNAL_DARK = listOf(
+    R.drawable.deed_game_signal_amber_off,
+    R.drawable.deed_game_signal_green_off,
+    R.drawable.deed_game_signal_blue_off,
+    R.drawable.deed_game_signal_red_off,
+)
+
+private val SIGNAL_LIT = listOf(
+    R.drawable.deed_game_signal_amber_on,
+    R.drawable.deed_game_signal_green_on,
+    R.drawable.deed_game_signal_blue_on,
+    R.drawable.deed_game_signal_red_on,
 )
 
 /** Shared signal-repeating board for offered deeds. */
@@ -96,10 +105,10 @@ fun SequenceGameScreen(
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 SequenceState.SIGNALS.chunked(2).forEach { rowSignals ->
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    rowSignals.forEach { signal ->
-                        val flashing = uiState.phase == SequencePhase.SHOWING &&
-                            state.sequence.getOrNull(uiState.showingIndex ?: -1) == signal
-                            val shape = CircleShape
+                        rowSignals.forEach { signal ->
+                            val flashing = uiState.phase == SequencePhase.SHOWING &&
+                                state.sequence.getOrNull(uiState.showingIndex ?: -1) == signal
+                            val shape = RoundedCornerShape(20.dp)
                             val description = "Сигнал ${signal + 1}"
                             Box(
                                 modifier = Modifier
@@ -107,13 +116,20 @@ fun SequenceGameScreen(
                                     .aspectRatio(1f)
                                     .semantics { contentDescription = description }
                                     .clip(shape)
-                                    .background(if (flashing) SIGNAL_COLORS[signal] else SIGNAL_COLORS[signal].copy(alpha = 0.25f))
-                                    .then(if (flashing) Modifier.border(4.dp, DeedColors.Text.copy(alpha = 0.3f), shape) else Modifier)
                                     .clickable(enabled = uiState.phase == SequencePhase.INPUT && deed?.canPlay != false) {
                                         onAction(SequenceGameAction.Tap(signal))
                                     },
                                 contentAlignment = Alignment.Center,
-                            ) {}
+                            ) {
+                                val lamp = if (flashing) SIGNAL_LIT[signal] else SIGNAL_DARK[signal]
+                                Image(
+                                    painter = painterResource(lamp),
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize(),
+                                    alignment = Alignment.Center,
+                                    contentScale = ContentScale.Crop,
+                                )
+                            }
                         }
                     }
                 }
