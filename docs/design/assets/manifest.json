@@ -1,5 +1,4 @@
 {
-  "media_manifest": "media-manifest.json",
   "schema_version": 1,
   "imported_on": "2026-09-17",
   "figma_file_key": "bAod1cKtTX9Q8omQ067q3q",
@@ -15327,265 +15326,389 @@
       "source_notes": "Exact copy of the existing debug_settings geometric gear in the app common source set. Both release and debug use this permanent settings button. A drawable alias to feature/debug is not possible because release does not depend on that module. Original SVG path, viewport and evenOdd fill are unchanged."
     },
     {
-      "resource": "loading_coin",
-      "category": "Loading animations",
-      "path": "app/src/main/res/raw/loading_coin.json",
-      "format": "lottie_json",
-      "width": 480,
-      "height": 480,
-      "bytes": 25642,
-      "sha256": "c33fb9ffd5f89d26792acee5ccf6dcc8bceeab1efe20201aa8cec33d2d221a05",
-      "source_path": "docs/design/assets/sources/loading-coin/coin.lottie",
-      "source_sha256": "ccf7421bf4e4f35e6e9a412462993a5f9268d6bf85c49f1e38776c6bd2c36bb8",
-      "source_bytes": 4194,
-      "source_url": "https://lottiefiles.com/free-animation/coin-MHXcO7DuOl",
-      "download_url": "https://assets-v2.lottiefiles.com/a/aa995c28-6adb-11ef-ba75-c35e73fa55e9/zzu0t6E7mY.lottie",
-      "author": "Daily Scoop",
-      "license_path": "app/src/main/assets/licenses/lottie-coin.txt",
-      "imported_on": "2026-09-28",
-      "frame_rate": 60,
-      "in_frame": 0,
-      "out_frame": 180,
-      "conversion": "Extract animations/b0d87fd3-b988-46b7-9986-bf540f062af5.json byte-for-byte; no modifications",
-      "figma": {
-        "file_key": null,
-        "node_id": null,
-        "collection_id": null
-      }
+      "resource": "deed_game_lights_off",
+      "category": "Mini-game icons — 2026-09-28",
+      "source_method": "user_provided_image",
+      "source_note": "Lantern pair for the observatory lights mini-game; background is natively transparent.",
+      "source_file": "docs/design/assets/sources/mini-game-lanterns-2026-09-28/lantern_off.png",
+      "format": "webp",
+      "width": 341,
+      "height": 512,
+      "bytes": 160480,
+      "sha256": "6bb8a3fe478d2b1ad135e79763791da1c6530a9eedd2e4cd513121787260ff33",
+      "rgba_sha256": "e0b39ff4ae0b003824c478dd39fe7caa8dc0f30e567defd139512fd18bf1c07c",
+      "alpha_bounds": [
+        57,
+        11,
+        292,
+        485
+      ],
+      "source_sha256": "3f1a7c813e42eeae6a7b8a42f4604b84c23292e629aa447181e9e8dd1fa54b40",
+      "source_bytes": 1099909,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/deed_game_lights_off.webp"
     },
     {
-      "resource": "loading_coin_frame",
-      "category": "Loading animations",
-      "path": "app/src/main/res/drawable/loading_coin_frame.xml",
-      "format": "vector_xml",
-      "width": 120,
-      "height": 120,
-      "viewport_width": 480,
-      "viewport_height": 480,
-      "bytes": 5239,
-      "sha256": "0e18ebd4facd428d2a3640072746fab609a843e7be0a80a8e08a952e868684c6",
-      "source_path": "docs/design/assets/sources/loading-coin/frame-zero.svg",
-      "source_sha256": "379583fc750e083aeb6624d365359ceeb1a435699efd44e2ee5fc45a5bfd3034",
-      "source_url": "https://lottiefiles.com/free-animation/coin-MHXcO7DuOl",
-      "license_path": "app/src/main/assets/licenses/lottie-coin.txt",
-      "imported_on": "2026-09-28",
-      "conversion": "Frame 0 cubic paths, solid fills and gradients exported by scripts/export_loading_coin_frame.py. Splash variant centers the 480-unit frame in a 1152 viewport to display its original canvas at 120dp.",
-      "figma": {
-        "file_key": null,
-        "node_id": null,
-        "collection_id": null
-      }
+      "resource": "deed_game_lights_on",
+      "category": "Mini-game icons — 2026-09-28",
+      "source_method": "user_provided_image",
+      "source_note": "Lantern pair for the observatory lights mini-game; background is natively transparent.",
+      "source_file": "docs/design/assets/sources/mini-game-lanterns-2026-09-28/lantern_on.png",
+      "format": "webp",
+      "width": 341,
+      "height": 512,
+      "bytes": 157748,
+      "sha256": "8d54e334d676c7a68c70628fa4c9301a07e3d93a7be724ded8dda18f13753e01",
+      "rgba_sha256": "a1f558589adca2fe50bec337eb0cc3c8627520c63032df17e9953f3e8a4b2cc9",
+      "alpha_bounds": [
+        0,
+        10,
+        293,
+        485
+      ],
+      "source_sha256": "fc97597a40f8a22c4dba4669a1fe9bf0fcf886d07619a227ff6fa5416d480447",
+      "source_bytes": 1079022,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/deed_game_lights_on.webp"
     },
     {
-      "resource": "loading_coin_splash",
-      "category": "Loading animations",
-      "path": "app/src/main/res/drawable/loading_coin_splash.xml",
-      "format": "vector_xml",
-      "width": 288,
-      "height": 288,
-      "viewport_width": 1152,
-      "viewport_height": 1152,
-      "bytes": 5400,
-      "sha256": "ab95a9be68e6a491543afce24e6038539781fb49fff8177e589985133ef3570a",
-      "source_path": "docs/design/assets/sources/loading-coin/frame-zero.svg",
-      "source_sha256": "379583fc750e083aeb6624d365359ceeb1a435699efd44e2ee5fc45a5bfd3034",
-      "source_url": "https://lottiefiles.com/free-animation/coin-MHXcO7DuOl",
-      "license_path": "app/src/main/assets/licenses/lottie-coin.txt",
-      "imported_on": "2026-09-28",
-      "conversion": "Frame 0 cubic paths, solid fills and gradients exported by scripts/export_loading_coin_frame.py. Splash variant centers the 480-unit frame in a 1152 viewport to display its original canvas at 120dp.",
-      "figma": {
-        "file_key": null,
-        "node_id": null,
-        "collection_id": null
-      }
+      "resource": "deed_game_pipes_straight",
+      "category": "Mini-game icons — 2026-09-28",
+      "source_method": "user_provided_image",
+      "source_note": "Rope tiles for the connect-the-ends mini-game: straight, corner and three colored ends.",
+      "source_file": "docs/design/assets/sources/mini-game-ropes-2026-09-28/rope_straight.png",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 79152,
+      "sha256": "d97d6cf271460156ff1bfc5d93a68196a6d9e384662626863bcd0f2895571a56",
+      "rgba_sha256": "dd42efdac85af039076f8dbee1aa5e0c698eadd6727d32381aef47361b33ada2",
+      "alpha_bounds": [
+        42,
+        0,
+        427,
+        511
+      ],
+      "source_sha256": "0db055d130bf41dfedaf9383e7d13b933079889f8605b4f434c356b6249d99d1",
+      "source_bytes": 486848,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/deed_game_pipes_straight.webp"
+    },
+    {
+      "resource": "deed_game_pipes_corner",
+      "category": "Mini-game icons — 2026-09-28",
+      "source_method": "user_provided_image",
+      "source_note": "Rope tiles for the connect-the-ends mini-game: straight, corner and three colored ends.",
+      "source_file": "docs/design/assets/sources/mini-game-ropes-2026-09-28/rope_corner.png",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 74898,
+      "sha256": "398f28e488ca6a23a9e49a788ff4b28eff1cbbf274e7b80beb1e139c8658f128",
+      "rgba_sha256": "a7eb6293f6871c858103729d080e3c180cf13c662e9ba56630663c1d1631fdcd",
+      "alpha_bounds": [
+        24,
+        0,
+        511,
+        474
+      ],
+      "source_sha256": "ef9a0d1dfaeab7a6f449bd32891cbe3b150a691c558d3978aea52687966300e7",
+      "source_bytes": 538208,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/deed_game_pipes_corner.webp"
+    },
+    {
+      "resource": "deed_game_pipes_end_red",
+      "category": "Mini-game icons — 2026-09-28",
+      "source_method": "user_provided_image",
+      "source_note": "Rope tiles for the connect-the-ends mini-game: straight, corner and three colored ends.",
+      "source_file": "docs/design/assets/sources/mini-game-ropes-2026-09-28/rope_end_red.png",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 84400,
+      "sha256": "3ff8c2955f545a2c5275428517a612b45ec94fcba717fe58ca254354572299c2",
+      "rgba_sha256": "03b3bef023bc31187c0e26bd4f2ce2b83af81754e6c79854220acf72f4e71952",
+      "alpha_bounds": [
+        16,
+        26,
+        486,
+        482
+      ],
+      "source_sha256": "6c43bae8585573b48c93f9aab259cd4da57e38a720e34eeaff15890f91a940d1",
+      "source_bytes": 496777,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/deed_game_pipes_end_red.webp"
+    },
+    {
+      "resource": "deed_game_pipes_end_blue",
+      "category": "Mini-game icons — 2026-09-28",
+      "source_method": "user_provided_image",
+      "source_note": "Rope tiles for the connect-the-ends mini-game: straight, corner and three colored ends.",
+      "source_file": "docs/design/assets/sources/mini-game-ropes-2026-09-28/rope_end_blue.png",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 82736,
+      "sha256": "aada5b3dae231b656f6cdf1468139ed84dda325afb15bfd102cfb27aa39af9f7",
+      "rgba_sha256": "1c524fc5e007f2a155b92b7cea71055978892bcc463b83210ca7f04126232afe",
+      "alpha_bounds": [
+        39,
+        25,
+        427,
+        481
+      ],
+      "source_sha256": "f31d6db16447e2aa55e71acf8dfc38181b4a641407a5aee7f61448aeea464d42",
+      "source_bytes": 480169,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/deed_game_pipes_end_blue.webp"
+    },
+    {
+      "resource": "deed_game_pipes_end_green",
+      "category": "Mini-game icons — 2026-09-28",
+      "source_method": "user_provided_image",
+      "source_note": "Rope tiles for the connect-the-ends mini-game: straight, corner and three colored ends.",
+      "source_file": "docs/design/assets/sources/mini-game-ropes-2026-09-28/rope_end_green.png",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 83266,
+      "sha256": "08b70f59e7c59a4960900fc3da58b04c621c6f0a8c9312547c489f95c0a31ff5",
+      "rgba_sha256": "8e78c729b9322d377f11a32b2859b03c87000e68e6667278e9046e1a8cd2c92c",
+      "alpha_bounds": [
+        39,
+        25,
+        486,
+        490
+      ],
+      "source_sha256": "229e3fd4b77c17db7ae226db60d0426a38637489095981b902dfc561e97c633d",
+      "source_bytes": 484006,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/deed_game_pipes_end_green.webp"
+    },
+    {
+      "resource": "deed_game_signal_amber_off",
+      "category": "Mini-game icons — 2026-09-28",
+      "source_method": "user_provided_image",
+      "source_note": "Tower porthole signal lamps for the sequence mini-game: dark and glowing states in four colors.",
+      "source_file": "docs/design/assets/sources/mini-game-signals-2026-09-28/signal_amber_off.png",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 390012,
+      "sha256": "f25085196533559fc2935c101a87406456496f6d581d6aa8b72c2339581b942c",
+      "rgba_sha256": "a4cdd270423cad5cdbb67ea75088d1b581ee61a869eb9c8cdd83cc3a8f0c37ef",
+      "alpha_bounds": [
+        0,
+        0,
+        510,
+        510
+      ],
+      "source_sha256": "cd813e54ccad7cdaa7dc310c768cdd273f9aea6525b7f70a8dbbef4124444dfa",
+      "source_bytes": 612825,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/deed_game_signal_amber_off.webp"
+    },
+    {
+      "resource": "deed_game_signal_amber_on",
+      "category": "Mini-game icons — 2026-09-28",
+      "source_method": "user_provided_image",
+      "source_note": "Tower porthole signal lamps for the sequence mini-game: dark and glowing states in four colors.",
+      "source_file": "docs/design/assets/sources/mini-game-signals-2026-09-28/signal_amber_on.png",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 404192,
+      "sha256": "81fec6056b2424433f889adb056f5edc42d45c003a18c58191cb9b1fdcf87ee8",
+      "rgba_sha256": "219baea7de3d599988ded1c84e136914389191688c4598cd24edba7defca450d",
+      "alpha_bounds": [
+        0,
+        0,
+        510,
+        510
+      ],
+      "source_sha256": "783e6c5e2ab6d1c77f1752b867c705749e61f564787eae0d70331d4f5ce59030",
+      "source_bytes": 623297,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/deed_game_signal_amber_on.webp"
+    },
+    {
+      "resource": "deed_game_signal_green_off",
+      "category": "Mini-game icons — 2026-09-28",
+      "source_method": "user_provided_image",
+      "source_note": "Tower porthole signal lamps for the sequence mini-game: dark and glowing states in four colors.",
+      "source_file": "docs/design/assets/sources/mini-game-signals-2026-09-28/signal_green_off.png",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 391578,
+      "sha256": "2ae23061ab5f8d6ae2b2a04ef4e251d04bbdab724c510fa51d84ae10f4a40ad2",
+      "rgba_sha256": "17b3393e8312faeb7f1d8dd7ebe8abcd6779110da001738fb7f5b5bbada7a1b9",
+      "alpha_bounds": [
+        0,
+        0,
+        510,
+        510
+      ],
+      "source_sha256": "1fef1d7401506b76403ad448d60639c54a350c7f07c670e920958d713d072820",
+      "source_bytes": 617410,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/deed_game_signal_green_off.webp"
+    },
+    {
+      "resource": "deed_game_signal_green_on",
+      "category": "Mini-game icons — 2026-09-28",
+      "source_method": "user_provided_image",
+      "source_note": "Tower porthole signal lamps for the sequence mini-game: dark and glowing states in four colors.",
+      "source_file": "docs/design/assets/sources/mini-game-signals-2026-09-28/signal_green_on.png",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 429552,
+      "sha256": "eda8aa67e429913c5fd70b0e4881000a4ff9462c4e1b0f8a2cb0d73673e98d7c",
+      "rgba_sha256": "4b27a7cf1166c2c10ea03990090475ed2bf1de348466aa0e3a917f8721355d79",
+      "alpha_bounds": [
+        0,
+        0,
+        510,
+        510
+      ],
+      "source_sha256": "1d8d24f71a2c9211035e9b05648c00002420729fdd9a67858d01b4b7d7db014e",
+      "source_bytes": 651040,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/deed_game_signal_green_on.webp"
+    },
+    {
+      "resource": "deed_game_signal_blue_off",
+      "category": "Mini-game icons — 2026-09-28",
+      "source_method": "user_provided_image",
+      "source_note": "Tower porthole signal lamps for the sequence mini-game: dark and glowing states in four colors.",
+      "source_file": "docs/design/assets/sources/mini-game-signals-2026-09-28/signal_blue_off.png",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 396294,
+      "sha256": "9a5ec94ba02954405c832f62a96803fcc2e063dc435b83180a8bc1370451a1ec",
+      "rgba_sha256": "3a33055d5162f240feb1ec848da9b7446ce8fd69e23233f6e76d0174199a54a7",
+      "alpha_bounds": [
+        0,
+        0,
+        510,
+        510
+      ],
+      "source_sha256": "14b89618f910ae011fe7ec2da53f89009332165c15e8412e0b5d5bbe3f51118c",
+      "source_bytes": 621694,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/deed_game_signal_blue_off.webp"
+    },
+    {
+      "resource": "deed_game_signal_blue_on",
+      "category": "Mini-game icons — 2026-09-28",
+      "source_method": "user_provided_image",
+      "source_note": "Tower porthole signal lamps for the sequence mini-game: dark and glowing states in four colors.",
+      "source_file": "docs/design/assets/sources/mini-game-signals-2026-09-28/signal_blue_on.png",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 424800,
+      "sha256": "701e341a31042cd9bb7a3b155d4befe29c521d18a293c27abcc851931083a1cd",
+      "rgba_sha256": "5178e5763b17eb24835ff46162c2a8e17b3bc910fbeb0def5c846d305b5f9fe0",
+      "alpha_bounds": [
+        0,
+        0,
+        510,
+        510
+      ],
+      "source_sha256": "b1fa138d1ba30ee9387eefbed7065a93134bca4c509ccc1ad06bfb44d03f79d5",
+      "source_bytes": 639365,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/deed_game_signal_blue_on.webp"
+    },
+    {
+      "resource": "deed_game_signal_red_off",
+      "category": "Mini-game icons — 2026-09-28",
+      "source_method": "user_provided_image",
+      "source_note": "Tower porthole signal lamps for the sequence mini-game: dark and glowing states in four colors.",
+      "source_file": "docs/design/assets/sources/mini-game-signals-2026-09-28/signal_red_off.png",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 393098,
+      "sha256": "94a054b0c3241fb90c94dd33698e9158bbec7eab1cfdcd632bdee72182c86f47",
+      "rgba_sha256": "83a32b14ae6b27bcb0663b16bac7eda8c30754fd1e7cf51443bd799ad506613b",
+      "alpha_bounds": [
+        0,
+        0,
+        510,
+        510
+      ],
+      "source_sha256": "92b3b92326d46700aa32b347c8046d5e93c7a09609060c485a2a2aaa1ec74189",
+      "source_bytes": 615349,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/deed_game_signal_red_off.webp"
+    },
+    {
+      "resource": "deed_game_signal_red_on",
+      "category": "Mini-game icons — 2026-09-28",
+      "source_method": "user_provided_image",
+      "source_note": "Tower porthole signal lamps for the sequence mini-game: dark and glowing states in four colors.",
+      "source_file": "docs/design/assets/sources/mini-game-signals-2026-09-28/signal_red_on.png",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 410740,
+      "sha256": "2eaf83e29ec0966c683f542338f2fac80feaf81ff1f124c245eff3b9974bc8ef",
+      "rgba_sha256": "60640ca09990e90284b6856c8e2890c4520f8fdb2b5757e7d115c2078ffe2d70",
+      "alpha_bounds": [
+        0,
+        0,
+        510,
+        510
+      ],
+      "source_sha256": "aac71efbe9b3e314234b09b9b8f54c21e061adb383684c823d67d174bf833444",
+      "source_bytes": 628005,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/deed_game_signal_red_on.webp"
+    },
+    {
+      "resource": "deed_game_crate",
+      "category": "Mini-game icons — 2026-09-28",
+      "source_method": "user_provided_image",
+      "source_note": "Branded crate for the pier stacking mini-game; drawn as a cube whose side follows its width.",
+      "source_file": "docs/design/assets/sources/mini-game-crate-2026-09-28/crate.png",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 300522,
+      "sha256": "89c8604f2e5e40d720f0bd0566759fb530c34ac2dff0342cac901fad734418ee",
+      "rgba_sha256": "d568add1a635c4c1d46c89788f99a46cef4f6a7dd0e69bf6c01321200349e951",
+      "alpha_bounds": [
+        20,
+        16,
+        468,
+        494
+      ],
+      "source_sha256": "501277af03c802e729591cb82012d80649e19704f947e40ed787723a22f7d14a",
+      "source_bytes": 1292002,
+      "source_format": "png",
+      "lossless_rgba_verified": true,
+      "path": "app/src/main/res/drawable-nodpi/deed_game_crate.webp"
     }
   ],
-  "missing": [],
-  "launcher_icons": {
-    "decision": "APP-ICON-D-002",
-    "approved_on": "2026-09-28",
-    "source_method": "built_in_imagegen_outpainting",
-    "source": {
-      "path": "docs/design/assets/sources/launcher-fox-jar/adaptive-source.png",
-      "bytes": 2786886,
-      "sha256": "ea3adee0e4743e919087f32a15a9c8898d4f8a6d12ab9f4941874265fd6086fa",
-      "width": 1254,
-      "height": 1254,
-      "rgba_sha256": "10f999a3b19354d9b382f677b96f761e0f94d71ee82f4fc2407e059197f91a61"
-    },
-    "reference_sources": [
-      {
-        "path": "docs/design/assets/sources/launcher-fox-jar/source.png",
-        "bytes": 2093721,
-        "sha256": "56fdf56041f217ea863044af5e7034c8e91b1910a613c0762e0fe19e111da73e",
-        "width": 1254,
-        "height": 1254,
-        "rgba_sha256": "75f8dd58c4d388abbea1c6d34dac790127bfec6219ce747b30e05e3b65d3692d"
-      },
-      {
-        "path": "docs/design/assets/sources/launcher-fox-jar/outpaint-step1.png",
-        "bytes": 2354359,
-        "sha256": "2b3c2cc105278ffeb5714fb2554578965baa65bb56c4ba27fffb55d3a9b2431e",
-        "width": 1254,
-        "height": 1254,
-        "rgba_sha256": "a2dbb64f667b86dd09e2a73e93d015ddb6cfde84d9925c0f02fdac970b74b793"
-      }
-    ],
-    "reference_resource": "ryzhik_mvp_idle_copper",
-    "reference_figma_url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-65",
-    "monochrome_source": {
-      "path": "docs/design/assets/sources/launcher-fox-jar/monochrome.svg",
-      "bytes": 610,
-      "sha256": "b4b5cb78aebe2024241bd406e76689dc423757ff180110d17d3d44421d9cdcb3"
-    },
-    "conversion": {
-      "pillow_version": "12.3.0",
-      "format": "lossless exact WebP",
-      "resampling": "Lanczos",
-      "adaptive_canvas_dp": 108,
-      "padding": "none; natural scenery outpainted into the source",
-      "resampling_passes_per_output": 1,
-      "legacy_icon_dp": 48,
-      "legacy_viewport_dp": 72,
-      "layers": "opaque composite background, transparent foreground",
-      "monochrome": "locally authored jar and paw coin; SVG paths copied to vector XML"
-    },
-    "outputs": [
-      {
-        "path": "app/src/main/res/mipmap-mdpi/ic_launcher_art.webp",
-        "bytes": 28480,
-        "sha256": "8ec18101e2fb01e99871b961b51d272b196774c4be3738b9ad472039a864d8b4",
-        "width": 108,
-        "height": 108,
-        "rgba_sha256": "d865c104f0cec0b3f2ece54ccc86f7d2f77595133532562be1de856e96d4c6e9"
-      },
-      {
-        "path": "app/src/main/res/mipmap-mdpi/ic_launcher.webp",
-        "bytes": 6472,
-        "sha256": "fd86d0671fd6b2a568fd7c03a08ef4f635cc41efa6540b124008011e29fadb17",
-        "width": 48,
-        "height": 48,
-        "rgba_sha256": "94f624d05bd6b7481a997eb024475db322067013537bf76b5d16576ebce3d99e"
-      },
-      {
-        "path": "app/src/main/res/mipmap-mdpi/ic_launcher_round.webp",
-        "bytes": 5988,
-        "sha256": "875f62028c1a4824578d88d8bad7b14932d54829b6eff84e1c734656935bb413",
-        "width": 48,
-        "height": 48,
-        "rgba_sha256": "d1cd26dd6bb1db18b6efe060a19a4b99e85c3da3afcd95f6a099d245fbf56018"
-      },
-      {
-        "path": "app/src/main/res/mipmap-hdpi/ic_launcher_art.webp",
-        "bytes": 61524,
-        "sha256": "6d80752ccabcbbf29b54ba472ffba075e48cb20f6c5c9e6ea4cd2e51d80fc741",
-        "width": 162,
-        "height": 162,
-        "rgba_sha256": "feaa04c66836baadf93e8d3ab7df2f097f8ead896cb35c008730d6c60b5c02f1"
-      },
-      {
-        "path": "app/src/main/res/mipmap-hdpi/ic_launcher.webp",
-        "bytes": 13544,
-        "sha256": "2f102f8373329f827862a8081ccb5a369a28e7ac01cd4ca3f7a6c2d0d9f22baa",
-        "width": 72,
-        "height": 72,
-        "rgba_sha256": "9c16270f64c94e37d904c5e3942eab13ebfc953accd2d06fa1d2bcf79280796b"
-      },
-      {
-        "path": "app/src/main/res/mipmap-hdpi/ic_launcher_round.webp",
-        "bytes": 12102,
-        "sha256": "b81cd0402ee9b8dde13e669ac9abd94f0839cec063b06876ac3451282dc54e46",
-        "width": 72,
-        "height": 72,
-        "rgba_sha256": "d65cea05111213cf232efba2a9d0c662ff405e822a5cb694434feb9fdf111070"
-      },
-      {
-        "path": "app/src/main/res/mipmap-xhdpi/ic_launcher_art.webp",
-        "bytes": 104558,
-        "sha256": "a50d544b24c4fe52e6c98bda893c53d872a627cfacb766a1beea857b59f5ee4c",
-        "width": 216,
-        "height": 216,
-        "rgba_sha256": "8afa7355371962b002de19f60655218784a27de871a2a9ca3ed26dcbb6b94ef7"
-      },
-      {
-        "path": "app/src/main/res/mipmap-xhdpi/ic_launcher.webp",
-        "bytes": 22778,
-        "sha256": "0f6c2574ebc32593e4a868d998984f1aac75e8ed48d840ecfadb4786fedf7235",
-        "width": 96,
-        "height": 96,
-        "rgba_sha256": "14496188daeffa517b70a535a62e4ee56832702e66d57d25177c2c4eecd686f3"
-      },
-      {
-        "path": "app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp",
-        "bytes": 20124,
-        "sha256": "21333ccde3fcc66ad82d010c7420a6b3ca3f8eb2e1bbb72329c5a94c828ea738",
-        "width": 96,
-        "height": 96,
-        "rgba_sha256": "ef0419f5e21117a82112b2f8f90f3e3ddcbf1c82829e2ebaaa5f1fb658ebd17a"
-      },
-      {
-        "path": "app/src/main/res/mipmap-xxhdpi/ic_launcher_art.webp",
-        "bytes": 218138,
-        "sha256": "b935e6b88d515db601546b4394c18802879bc10dfd59f2ae283bc541c10b270b",
-        "width": 324,
-        "height": 324,
-        "rgba_sha256": "a233e9cc00029913a090b51eb74a893f123d87bff9a8904d12f94d7fbe8dbd6d"
-      },
-      {
-        "path": "app/src/main/res/mipmap-xxhdpi/ic_launcher.webp",
-        "bytes": 46868,
-        "sha256": "b570f0028543ce8c7eb914aa41b056f908fc463af7820c9763aac8c70470f9f3",
-        "width": 144,
-        "height": 144,
-        "rgba_sha256": "41f50677d9256cf82795d6aa68a3ba156d71404d2c02485f00d2057385ff6e82"
-      },
-      {
-        "path": "app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp",
-        "bytes": 41038,
-        "sha256": "ae78d2b03891584089059072641191c8b995f998ab99d448d4a21b36c584dbb4",
-        "width": 144,
-        "height": 144,
-        "rgba_sha256": "6c1f898fb1c90d6586eac4f1e4396a7f9766390ad2001269f6c161c4d1fa5be1"
-      },
-      {
-        "path": "app/src/main/res/mipmap-xxxhdpi/ic_launcher_art.webp",
-        "bytes": 366864,
-        "sha256": "723fdd06a1c5382cfd99ac15fcbe1892ad57bb7b468956321b6d5ad872f230e2",
-        "width": 432,
-        "height": 432,
-        "rgba_sha256": "93b476b2504ee29805cec6ac08bc4f7db0c20ec24af39f23715a80d2d508ab86"
-      },
-      {
-        "path": "app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp",
-        "bytes": 78214,
-        "sha256": "92818e6ddaa7d4519c7e0b958e052dc1e1f0d090aac6855acd1c74292b9da833",
-        "width": 192,
-        "height": 192,
-        "rgba_sha256": "d6662f9c50ad92b7147f1b17839ded13aa5acc1d6c99b4c1c75aebfad6f81284"
-      },
-      {
-        "path": "app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp",
-        "bytes": 67522,
-        "sha256": "35bfed496e8962b550d013d4cfcbff2823caabe3d90bf0cb491cf14c53bd9a99",
-        "width": 192,
-        "height": 192,
-        "rgba_sha256": "1ea8ecf4f26049e5825b5c55df774140cab61a464db19d7ef71885e7b9a1ffea"
-      },
-      {
-        "path": "app/src/main/res/drawable/ic_launcher_monochrome.xml",
-        "bytes": 838,
-        "sha256": "cde1fc25b4d06a7cba7b108e1b9e3b01098c3cc9ba039d45b727d54865b0d2c8"
-      },
-      {
-        "path": "app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
-        "bytes": 418,
-        "sha256": "1ea5a8f04130e9871fd701bdf348b4ddc1813bf87578acd9954bb49d60239388"
-      },
-      {
-        "path": "app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml",
-        "bytes": 418,
-        "sha256": "1ea5a8f04130e9871fd701bdf348b4ddc1813bf87578acd9954bb49d60239388"
-      }
-    ]
-  }
+  "missing": []
 }
