@@ -33,6 +33,11 @@ class StoryGameThemeTest {
                     assertTrue(choiceId, instructions.contains("выбери большее"))
                     assertFalse(choiceId, instructions.contains("маркер"))
                 }
+                DeedGameKind.LIGHTS -> assertTrue(choiceId, instructions.contains("фонарь и соседи"))
+                DeedGameKind.SEQUENCE -> assertTrue(choiceId, instructions.contains("вспышки башни"))
+                DeedGameKind.PIPES -> assertTrue(choiceId, instructions.contains("концы одного цвета"))
+                DeedGameKind.DIFFERENCES -> assertTrue(choiceId, instructions.contains("отличия между полками"))
+                DeedGameKind.STACKING -> assertTrue(choiceId, instructions.contains("ящик на предыдущий"))
             }
         }
     }
