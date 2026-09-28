@@ -121,7 +121,7 @@ internal fun bundledGameCatalog(): GameCatalog {
         "figma-2289-2-v1" to DeedGameKind.COMPARISON,
         "figma-2289-56-v1" to DeedGameKind.PIPES,
         "figma-2289-110-v1" to DeedGameKind.LIGHTS,
-        "figma-2289-164-v1" to DeedGameKind.MEMORY,
+        "figma-2289-164-v1" to DeedGameKind.SEQUENCE,
         "figma-2289-218-v1" to DeedGameKind.COMPARISON,
     )
     return GameCatalog(

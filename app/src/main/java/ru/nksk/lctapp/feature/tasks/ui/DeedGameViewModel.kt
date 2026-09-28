@@ -25,7 +25,7 @@ import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.minigame.*
 
-enum class DeedGameType { MEMORY, COMPARISON, PRECISION, LIGHTS, PIPES, DIFFERENCES, STACKING }
+enum class DeedGameType { MEMORY, COMPARISON, PRECISION, LIGHTS, SEQUENCE, PIPES, DIFFERENCES, STACKING }
 data class DeedGamePresentation(val title: String, val maximumReward: Long, val canPlay: Boolean,
     val storyAction: Boolean = false, val sceneRes: Int? = null, val instructions: String? = null,
     val activityArtworkRes: Int? = null, val pairArtwork: List<Int> = emptyList())
@@ -86,6 +86,7 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
     }
     fun finishPrecision(state: TargetStopState) { DeedGameScore.fromPrecision(state)?.let(::finish) }
     fun finishLights(state: LightsState) { DeedGameScore.fromLights(state)?.let(::finish) }
+    fun finishSequence(state: SequenceState) { DeedGameScore.fromSequence(state)?.let(::finish) }
     fun finishPipes(state: PipesState) { DeedGameScore.fromPipes(state)?.let(::finish) }
     fun finishDifferences(state: DifferencesState) { DeedGameScore.fromDifferences(state)?.let(::finish) }
     fun finishStacking(state: StackingState) { DeedGameScore.fromStacking(state)?.let(::finish) }
@@ -271,6 +272,7 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
                 DeedGameKind.COMPARISON -> DeedGameType.COMPARISON
                 DeedGameKind.PRECISION -> DeedGameType.PRECISION
                 DeedGameKind.LIGHTS -> DeedGameType.LIGHTS
+                DeedGameKind.SEQUENCE -> DeedGameType.SEQUENCE
                 DeedGameKind.PIPES -> DeedGameType.PIPES
                 DeedGameKind.DIFFERENCES -> DeedGameType.DIFFERENCES
                 DeedGameKind.STACKING -> DeedGameType.STACKING
@@ -283,6 +285,7 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
                     DeedGameKind.PRECISION -> "Останови маркер в зелёной зоне. Выполни пять точных движений, чтобы закончить работу."
                     DeedGameKind.COMPARISON -> "Сравни числа и выбери верный ответ."
                     DeedGameKind.LIGHTS -> "Погаси все фонари, чтобы закончить работу."
+                    DeedGameKind.SEQUENCE -> "Повтори вспышки башни в каждом раунде, чтобы закончить работу."
                     DeedGameKind.PIPES -> "Соедини концы одного цвета, чтобы закончить работу."
                     DeedGameKind.DIFFERENCES -> "Найди все отличия, чтобы закончить работу."
                     DeedGameKind.STACKING -> "Уложи все ящики, чтобы закончить работу."

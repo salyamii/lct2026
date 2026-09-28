@@ -299,6 +299,12 @@ class BundledCampaignBalanceTest {
             // Лампы и концы не делятся на доли: партия либо решена, либо нет.
             DeedGameKind.LIGHTS -> DeedGameScore.fromLights(LightsState(
                 List(LightsState.SIZE * LightsState.SIZE) { false }, moves = 1))
+            DeedGameKind.SEQUENCE -> DeedGameScore.fromSequence(SequenceState(
+                sequence = List(SequenceState.FIRST_ROUND_LENGTH) { 0 },
+                round = SequenceState.ROUNDS,
+                correct = SequenceState.ROUNDS * cap / 100,
+                lastCorrect = true,
+            ))
             DeedGameKind.PIPES -> DeedGameScore.fromPipes(PipesState(PipesState.PUZZLE, paths = solvedPipePaths()))
             // Отличия всегда ищутся до конца, поэтому их доля всегда полная.
             DeedGameKind.DIFFERENCES -> DeedGameScore.fromDifferences(DifferencesState.create().let { board ->

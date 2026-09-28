@@ -44,6 +44,7 @@ class DeedGameScoreTest {
         assertNull(DeedGameScore.fromPrecision(TargetStopState.create()))
         assertNull(DeedGameScore.fromPrecision(TargetStopState(10, round = 5, hits = 6, lastHit = true)))
         assertNull(DeedGameScore.fromLights(LightsState.create()))
+        assertNull(DeedGameScore.fromSequence(SequenceState.create()))
         assertNull(DeedGameScore.fromPipes(PipesState.create()))
         assertNull(DeedGameScore.fromDifferences(DifferencesState.create()))
         assertNull(DeedGameScore.fromStacking(StackingState.create()))
@@ -56,6 +57,14 @@ class DeedGameScoreTest {
     }
 
     @Test fun layeredGamesPayForTheirExactProgress() {
+        var sequence = SequenceState.create()
+        repeat(SequenceState.ROUNDS) { round ->
+            sequence = sequence.playRound(win = round != 3).next()
+        }
+        val sequenceScore = checkNotNull(DeedGameScore.fromSequence(sequence))
+        assertEquals(SequenceState.ROUNDS - 1, sequenceScore.correct)
+        assertEquals(3L, sequenceScore.reward(4))
+
         var stack = StackingState.create().dropAt(20)
         repeat(3) { stack = stack.dropAt(stack.locked.last().x) }
         val stackScore = checkNotNull(DeedGameScore.fromStacking(stack.copy(finished = true)))
@@ -69,4 +78,8 @@ class DeedGameScoreTest {
         // Все отличия найдены без промахов — награда полная.
         assertEquals(8L, differencesScore.reward(8))
     }
+
+    private fun SequenceState.playRound(win: Boolean): SequenceState =
+        if (win) sequence.fold(this) { state, signal -> state.tap(signal) }
+        else tap((sequence.first() + 1) % SequenceState.SIGNAL_COUNT)
 }

@@ -355,6 +355,12 @@ class StoryCampaignTest {
                 .let { it.copy(matched = it.faces.indices.toSet(), moves = MemoryState.PAIRS) })
             DeedGameKind.LIGHTS -> DeedGameScore.fromLights(LightsState(
                 List(LightsState.SIZE * LightsState.SIZE) { false }, moves = 1))
+            DeedGameKind.SEQUENCE -> DeedGameScore.fromSequence(SequenceState(
+                sequence = List(SequenceState.FIRST_ROUND_LENGTH) { 0 },
+                round = SequenceState.ROUNDS,
+                correct = SequenceState.ROUNDS,
+                lastCorrect = true,
+            ))
             DeedGameKind.PIPES -> DeedGameScore.fromPipes(PipesState(PipesState.PUZZLE, paths = mapOf(
                 0 to listOf(0, 5, 10, 15, 20),
                 1 to listOf(4, 9, 14, 19, 24),

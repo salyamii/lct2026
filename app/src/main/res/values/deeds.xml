@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="deeds_subtitle">Семь мини-игр с пробными наградами</string>
+    <string name="deeds_subtitle">Восемь мини-игр с пробными наградами</string>
     <string name="deeds_demo_notice">Демо-монеты не меняют общий баланс</string>
     <string name="deeds_demo_max">До 10 демо-монет</string>
     <string name="deeds_star_title">Перепутанные находки</string>
@@ -11,6 +11,8 @@
     <string name="deeds_target_description">Ловящий сигнал уходит в сторону. Останови бегунок в зелёной зоне — и башня снова найдёт звезду.</string>
     <string name="deeds_lights_title">Фонари обсерватории</string>
     <string name="deeds_lights_description">Перед наблюдениями гаснут не все фонари. Нажатие гасит фонарь и его соседей — погаси все!</string>
+    <string name="deeds_sequence_title">Сигналы башни</string>
+    <string name="deeds_sequence_description">Башня мигает цветными сигналами. Запомни вспышки и повтори их по памяти.</string>
     <string name="deeds_pipes_title">Свяжи концы</string>
     <string name="deeds_pipes_description">Канаты перепутались на полке. Соедини концы одного цвета линией, не задевая чужие.</string>
     <string name="deeds_differences_title">Сверка находок</string>

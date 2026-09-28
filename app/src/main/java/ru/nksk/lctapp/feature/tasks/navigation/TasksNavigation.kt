@@ -24,6 +24,8 @@ import ru.nksk.lctapp.feature.tasks.ui.MemoryGameViewModel
 import ru.nksk.lctapp.feature.tasks.ui.PipesGameScreen
 import ru.nksk.lctapp.feature.tasks.ui.PipesGameViewModel
 import ru.nksk.lctapp.feature.tasks.ui.PriceQuizScreen
+import ru.nksk.lctapp.feature.tasks.ui.SequenceGameScreen
+import ru.nksk.lctapp.feature.tasks.ui.SequenceGameViewModel
 import ru.nksk.lctapp.feature.tasks.ui.PriceQuizViewModel
 import ru.nksk.lctapp.feature.tasks.ui.StackingGameScreen
 import ru.nksk.lctapp.feature.tasks.ui.StackingGameViewModel
@@ -49,6 +51,10 @@ data object Telescope : NavKey
 @Serializable
 @SerialName("tasks_lights")
 data object LightsGame : NavKey
+
+@Serializable
+@SerialName("tasks_sequence")
+data object SequenceGame : NavKey
 
 @Serializable
 @SerialName("tasks_pipes")
@@ -113,6 +119,11 @@ fun EntryProviderScope<NavKey>.tasksEntry(
         val viewModel = hiltViewModel<LightsGameViewModel>()
         val state by viewModel.uiState.collectAsStateWithLifecycle()
         LightsGameScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) })
+    }
+    entry<SequenceGame> { source ->
+        val viewModel = hiltViewModel<SequenceGameViewModel>()
+        val state by viewModel.uiState.collectAsStateWithLifecycle()
+        SequenceGameScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) })
     }
     entry<PipesGame> { source ->
         val viewModel = hiltViewModel<PipesGameViewModel>()

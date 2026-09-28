@@ -43,7 +43,7 @@ import ru.nksk.lctapp.core.ui.theme.Rubik
 
 enum class DeedsAction {
     StarPlates, PriceCheck, Telescope, SkillTraining,
-    Lights, Pipes, Differences, Stacking,
+    Lights, Sequence, Pipes, Differences, Stacking,
 }
 
 @Composable
@@ -202,6 +202,16 @@ private fun DeedsContent(onOpen: (DeedsAction) -> Unit, onExit: () -> Unit,
                         rewardLabel = stringResource(R.string.deeds_demo_max),
                         scene = R.drawable.location_observatory,
                         onOpen = { onOpen(DeedsAction.Lights) },
+                    )
+                    Spacer(Modifier.height(14.dp))
+                }
+                item(key = "training-sequence", contentType = "deed") {
+                    DeedCard(
+                        title = stringResource(R.string.deeds_sequence_title),
+                        description = stringResource(R.string.deeds_sequence_description),
+                        rewardLabel = stringResource(R.string.deeds_demo_max),
+                        scene = R.drawable.location_observatory,
+                        onOpen = { onOpen(DeedsAction.Sequence) },
                     )
                     Spacer(Modifier.height(14.dp))
                 }

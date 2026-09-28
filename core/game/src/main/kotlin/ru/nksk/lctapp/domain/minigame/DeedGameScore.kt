@@ -1,7 +1,7 @@
 package ru.nksk.lctapp.domain.minigame
 
 /** Supported mechanics, not a closed list of authored deeds or content IDs. */
-enum class DeedGameKind { MEMORY, COMPARISON, PRECISION, LIGHTS, PIPES, DIFFERENCES, STACKING }
+enum class DeedGameKind { MEMORY, COMPARISON, PRECISION, LIGHTS, SEQUENCE, PIPES, DIFFERENCES, STACKING }
 
 /** A completed round set; incomplete boards cannot be submitted for payment. */
 @kotlinx.serialization.Serializable
@@ -17,6 +17,7 @@ class DeedGameScore private constructor(
             DeedGameKind.COMPARISON -> attempts == PriceQuizState.QUESTION_COUNT
             DeedGameKind.PRECISION -> attempts == TargetStopState.ROUNDS
             DeedGameKind.LIGHTS -> attempts == 1 && correct == 1
+            DeedGameKind.SEQUENCE -> attempts == SequenceState.ROUNDS
             DeedGameKind.PIPES -> attempts == 1 && correct == 1
             DeedGameKind.DIFFERENCES -> correct == DifferencesState.DIFF_COUNT && attempts >= DifferencesState.DIFF_COUNT
             DeedGameKind.STACKING -> attempts == StackingState.ROUNDS
@@ -51,6 +52,13 @@ class DeedGameScore private constructor(
             if (state.won && state.grid.size == LightsState.SIZE * LightsState.SIZE &&
                 state.grid.toSet() == setOf(false) && state.moves >= 1
             ) DeedGameScore(DeedGameKind.LIGHTS, 1, 1) else null
+
+        fun fromSequence(state: SequenceState): DeedGameScore? =
+            if (state.finished && state.round == SequenceState.ROUNDS && state.lastCorrect != null &&
+                state.correct in 0..SequenceState.ROUNDS &&
+                state.sequence.size in SequenceState.FIRST_ROUND_LENGTH..SequenceState.MAX_ROUND_LENGTH &&
+                state.sequence.all { it in SequenceState.SIGNALS.indices }
+            ) DeedGameScore(DeedGameKind.SEQUENCE, state.correct, SequenceState.ROUNDS) else null
 
         fun fromPipes(state: PipesState): DeedGameScore? =
             if (state.won && PipesState.isLayoutValid(state.endpoints) &&
