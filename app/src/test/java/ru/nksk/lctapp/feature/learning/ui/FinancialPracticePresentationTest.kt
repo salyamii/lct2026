@@ -138,6 +138,37 @@ class FinancialPracticePresentationTest {
         assertEquals(3, reads)
     }
 
+    @Test fun currentQuestionsAndFrozenExamplesDisplayEvenWhenHistoryIsUnavailable() = runTest {
+        val fixture = Fixture()
+        val current = checkNotNull(fixture.history.last().after)
+        val repository = object : GameRepository {
+            override fun observe() = MutableStateFlow(current)
+            override suspend fun read() = current
+            override suspend fun initializeIfAbsent(initial: GameState) = current
+            override suspend fun update(transform: (GameState) -> GameState) = error("Presentation cannot write")
+            override suspend fun readHistory(): List<AuditEntry> = error("History unavailable")
+        }
+        val session = GameSession(repository, object : StoryContentRepository {
+            override suspend fun read(): StoryContent = fixture.catalog.content
+            override suspend fun install(content: StoryContent) = Unit
+        }, fixture.catalog, current)
+        val cache = TrainingQuestionPresentation(session)
+        cache.expectCurrentQuestion(fixture.fresh.id)
+        assertEquals(fixture.fresh, cache.display(fixture.fresh))
+        for (kind in FinancialQuestionKind.entries) {
+            val first = FinancialTraining.standalone(kind, "offline:$kind")
+            val second = FinancialTraining.advance(first.copy(answeredOptionId = first.correctAnswerId))
+            for (question in listOf(first, second)) {
+                val saved = question.copy(prompt = "Старый текст", explanation = "Старое объяснение",
+                    answeredOptionId = question.correctAnswerId, usedHint = true, attempts = 2)
+                val displayed = checkNotNull(cache.display(saved))
+                assertEquals(question.prompt, displayed.prompt)
+                assertEquals(question.explanation, displayed.explanation)
+                assertEquals(saved, displayed.copy(prompt = saved.prompt, explanation = saved.explanation))
+            }
+        }
+    }
+
     @Test fun frozenExampleCopyRefreshesWithoutChangingItsQueuedQuestionsOrAnswerProgress() {
         val catalog = bundledGameCatalog()
         for (kind in FinancialQuestionKind.entries) {

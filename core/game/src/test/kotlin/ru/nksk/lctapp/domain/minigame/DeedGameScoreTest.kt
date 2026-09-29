@@ -64,7 +64,7 @@ class DeedGameScoreTest {
     @Test fun pipesPayWhenThePathWasDrawnFromTheSecondEnd() {
         val layout = PipesState.layout(1)
         var board = PipesState.create(layout)
-        // Первую пару игрок ведёт со второго конца к первому — платформа это разрешает.
+        // Первую пару игрок ведёт со второго конца к первому - платформа это разрешает.
         for (cell in listOf(4, 3, 2, 1, 0)) board = board.press(cell)
         // Остальные пары ведутся в прямом направлении.
         for (cell in listOf(20, 21, 22, 23, 24)) board = board.press(cell)
@@ -125,11 +125,12 @@ class DeedGameScoreTest {
     @Test fun layeredGamesPayForTheirExactProgress() {
         var sequence = SequenceState.create()
         repeat(SequenceState.ROUNDS) { round ->
-            sequence = sequence.playRound(win = round != 3).next()
+            sequence = sequence.playRound(win = round != SequenceState.ROUNDS - 1).next()
         }
         val sequenceScore = checkNotNull(DeedGameScore.fromSequence(sequence))
         assertEquals(SequenceState.ROUNDS - 1, sequenceScore.correct)
-        assertEquals(3L, sequenceScore.reward(4))
+        assertEquals(3, sequenceScore.attempts)
+        assertEquals(2L, sequenceScore.reward(4))
 
         var stack = StackingState.create().dropAt(20)
         repeat(1) { stack = stack.dropAt(stack.locked.last().x) }
@@ -141,8 +142,23 @@ class DeedGameScoreTest {
         differences.differences.forEach { cell -> differences = differences.tap(cell) }
         val differencesScore = checkNotNull(DeedGameScore.fromDifferences(differences))
         assertEquals(DifferencesState.DIFF_COUNT, differencesScore.correct)
-        // Все отличия найдены без промахов — награда полная.
+        // Все отличия найдены без промахов - награда полная.
         assertEquals(8L, differencesScore.reward(8))
+    }
+
+    @Test fun serializedSequenceResultsAcceptNewThreeAndHistoricalFiveAttemptsOnly() {
+        for (attempts in listOf(3, 5)) {
+            val json = """{"kind":"SEQUENCE","correct":2,"attempts":$attempts}"""
+            val recorded = Json.decodeFromString<DeedGameScore>(json)
+            assertEquals(attempts, recorded.attempts)
+            assertEquals(12L * 2 / attempts, recorded.reward(12))
+            assertEquals(Json.parseToJsonElement(json), Json.parseToJsonElement(Json.encodeToString(recorded)))
+        }
+        for (attempts in listOf(1, 2, 4, 6)) {
+            assertTrue(runCatching {
+                Json.decodeFromString<DeedGameScore>("""{"kind":"SEQUENCE","correct":1,"attempts":$attempts}""")
+            }.isFailure)
+        }
     }
 
     private fun SequenceState.playRound(win: Boolean): SequenceState =

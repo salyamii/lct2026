@@ -6,7 +6,7 @@ import kotlin.random.Random
  * Чистое состояние игры «Сигналы башни»: в раунде башня показывает
  * последовательность из [sequence.size] вспышек, игрок повторяет её.
  * Верный раунд увеличивает [correct]; ошибка завершает раунд без очка.
- * Финал после [ROUNDS] раундов. Все переходы возвращают новое состояние.
+ * Финал после [roundLimit] раундов. Все переходы возвращают новое состояние.
  */
 data class SequenceState(
     val sequence: List<Int>,
@@ -14,15 +14,29 @@ data class SequenceState(
     val correct: Int = 0,
     val position: Int = 0,
     val lastCorrect: Boolean? = null,
+    val roundLimit: Int = ROUNDS,
 ) {
     /** Текущая длина последовательности, которую надо повторить. */
     val requiredLength: Int get() = sequence.size
 
     /** Финал, когда пройдены все раунды. */
-    val finished: Boolean get() = round >= ROUNDS
+    val finished: Boolean get() = round >= roundLimit
+
+    /** Both current and already saved five-round sessions are supported. */
+    val isValid: Boolean get() {
+        if (!isSupportedRoundLimit(roundLimit) || round !in 0..roundLimit || correct !in 0..round) return false
+        val activeRound = round - if (lastCorrect != null) 1 else 0
+        if (activeRound !in 0 until roundLimit || sequence.size != FIRST_ROUND_LENGTH + activeRound ||
+            sequence.any { it !in SIGNALS.indices }) return false
+        return when (lastCorrect) {
+            null -> position in sequence.indices
+            true -> position == 0 && correct > 0
+            false -> position == 0 && correct < round
+        }
+    }
 
     /**
-     * Нажатие на сигнал. Пока показан результат раунда, нажатия игнорируются —
+     * Нажатие на сигнал. Пока показан результат раунда, нажатия игнорируются -
      * UI должен сначала вызвать [next].
      */
     fun tap(signal: Int): SequenceState {
@@ -51,9 +65,12 @@ data class SequenceState(
     }
 
     companion object {
-        const val ROUNDS = 5
+        const val ROUNDS = 3
+        const val LEGACY_ROUNDS = 5
         const val FIRST_ROUND_LENGTH = 3
         const val MAX_ROUND_LENGTH = ROUNDS - 1 + FIRST_ROUND_LENGTH
+
+        fun isSupportedRoundLimit(roundLimit: Int): Boolean = roundLimit == ROUNDS || roundLimit == LEGACY_ROUNDS
 
         /** Число различных сигналов башни. */
         const val SIGNAL_COUNT = 4

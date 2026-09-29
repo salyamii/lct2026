@@ -1162,6 +1162,12 @@ components:
           type: integer
           format: int64
           minimum: 0
+        historyStartSequence:
+          type: integer
+          format: int64
+          minimum: 0
+          default: 0
+          description: Earlier history is unavailable after a current-world restore. Preserve previously accepted evidence; skills describe only the supplied range.
         facts:
           type: array
           items:

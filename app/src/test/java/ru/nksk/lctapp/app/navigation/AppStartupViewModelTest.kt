@@ -28,6 +28,50 @@ class AppStartupViewModelTest {
     @Before fun setUp() { Dispatchers.setMain(dispatcher) }
     @After fun tearDown() { Dispatchers.resetMain() }
 
+    @Test fun preparedNewCampaignResumesCharacterSelectionAndOnlyCommitsTheNewProfile() = runTest(dispatcher) {
+        val repository = StartupRepository()
+        repository.hasArchivedRun = true
+        val drafts = MemoryDrafts().also {
+            it.save(OnboardingDraft(PetCustomization(name = ""), OnboardingStep.Character))
+        }
+        val session = session(repository)
+        try { session.prepare(); fail("A background caller must not initialize the default hero") }
+        catch (_: IllegalStateException) { assertNull(repository.read()) }
+        val model = AppStartupViewModel(session, drafts)
+        advanceUntilIdle()
+        assertEquals(AppStartupState.Choose(), model.uiState.value)
+        model.startAdventure()
+        advanceUntilIdle()
+        model.finishIntroVideo()
+        model.editCustomization(PetCustomization("Тоша", PetTemperament.Joyful, PetFur.Russet))
+        model.finishCustomization()
+        advanceUntilIdle()
+        model.selectAccessory("BANDANA")
+        model.confirmAccessory()
+        advanceUntilIdle()
+        model.continueToGoals()
+        advanceUntilIdle()
+        model.selectGoal("stargazing-tripod-v1")
+        advanceUntilIdle()
+        model.confirmGoal()
+        advanceUntilIdle()
+        // Process recreation resumes the last durable setup step, not the archived profile.
+        val resumed = model(repository, drafts)
+        advanceUntilIdle()
+        assertTrue(resumed.uiState.value is AppStartupState.Introduction)
+        assertNull(repository.read())
+        resumed.finishOnboarding()
+        advanceUntilIdle()
+        assertEquals(AppStartupState.Ready, resumed.uiState.value)
+        assertEquals("next-run", resumed.navigationRunId)
+        val saved = checkNotNull(repository.read())
+        assertEquals(PetCustomization("Тоша", PetTemperament.Joyful, PetFur.Russet).toPetState("BANDANA"), saved.pet)
+        assertEquals(listOf("starter-bandana-v1"), saved.ownedItems.map { it.itemId })
+        assertTrue(saved.story.decisions.isEmpty())
+        assertEquals(1, repository.archivedRuns().size)
+        assertEquals(1, repository.initializations)
+    }
+
     @Test fun openingOnboardingDoesNotCreateGameOrStartStory() = runTest(dispatcher) {
         val repository = StartupRepository()
         val model = model(repository)
@@ -489,12 +533,18 @@ class AppStartupViewModelTest {
 private class StartupRepository(initial: GameState? = null) : GameRepository {
     val state = MutableStateFlow(initial)
     var initializations = 0
+    var hasArchivedRun = false
+    override suspend fun archivedRuns() = if (hasArchivedRun) listOf(
+        ru.nksk.lctapp.domain.history.ArchivedGameRunSummary("past-run", "Рыжик", 42, 200)) else emptyList()
     var readFailure: Exception? = null
     var writeFailure: Exception? = null
     override fun observe() = state
     override suspend fun read(): GameState? {
         readFailure?.let { throw it }
         return state.value
+    }
+    override suspend fun readSnapshotHead() = read()?.let {
+        ru.nksk.lctapp.domain.history.GameSnapshotHead(if (hasArchivedRun) "next-run" else "first-run", it, 1)
     }
     override suspend fun initializeIfAbsent(initial: GameState): GameState {
         writeFailure?.let { throw it }

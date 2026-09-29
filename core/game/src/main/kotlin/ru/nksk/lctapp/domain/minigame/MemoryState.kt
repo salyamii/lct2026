@@ -23,7 +23,7 @@ data class MemoryState(
     val won: Boolean get() = matched.size == faces.size
 
     /**
-     * Открыть карту. Пока открыта неразобранная пара, клики игнорируются —
+     * Открыть карту. Пока открыта неразобранная пара, клики игнорируются -
      * UI должен сначала вызвать [resolvePending].
      */
     fun tap(index: Int): MemoryState {

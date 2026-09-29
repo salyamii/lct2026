@@ -262,7 +262,7 @@ object FinancialPeriods {
         }
         val rotation = (id.hashCode().toLong().and(0x7fffffff) % options.size).toInt()
         return FinancialQuestion(id, FinancialQuestionKind.CONSEQUENCE,
-            if (!affordable) "У нас с собой ${coinAmount(available)}, а в копилке — $savings.\n«$title» стоит $price. " +
+            if (!affordable) "У нас с собой ${coinAmount(available)}, а в копилке - $savings.\n«$title» стоит $price. " +
                 "Сможем купить, если копилку не трогать?"
             else "У нас с собой ${coinAmount(available)}. На еду до следующей недели нужно $knownNeeds.\n" +
                 "Купим «$title» за $price, не трогая копилку. Хватит ли остатка на еду?",

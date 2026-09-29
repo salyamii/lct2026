@@ -1,4 +1,4 @@
-# Loading coin — 2026-09-28
+# Loading coin - 2026-09-28
 
 Source: [Coin by Daily Scoop](https://lottiefiles.com/free-animation/coin-MHXcO7DuOl).
 Approved use: LOADING-D-001/002 in the [decision register](../../../decisions.md).
@@ -51,7 +51,7 @@ retain their safe-area padding. Existing startup routing decides when to leave.
 Build checks cover debug/release. Static SVG rendering checks the derived artwork;
 the app and emulators are not launched under the project's verification preference.
 
-## Alignment across startup stages — 2026-09-28
+## Alignment across startup stages - 2026-09-28
 
 `GameLoadingScreen` is shared by the startup check, navigation budget gate, menu
 data loading, menu artwork loading, and unfinished-budget loading. Each uses the

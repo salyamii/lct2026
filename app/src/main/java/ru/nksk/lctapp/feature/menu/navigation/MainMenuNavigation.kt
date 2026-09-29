@@ -41,7 +41,12 @@ fun EntryProviderScope<NavKey>.mainMenuEntry(
         }
         LaunchedEffect(viewModel, lifecycle) {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                viewModel.openDay.collect { onAction(source, MainMenuAction.ContinueDay) }
+                viewModel.setActive(true)
+                try {
+                    viewModel.openDay.collect { onAction(source, MainMenuAction.ContinueDay) }
+                } finally {
+                    viewModel.setActive(false)
+                }
             }
         }
         LaunchedEffect(viewModel, lifecycle, "training") {
@@ -58,7 +63,7 @@ fun EntryProviderScope<NavKey>.mainMenuEntry(
             state = state,
             settingsButton = settingsButton,
             onRetry = viewModel::retry,
-            onFreeMeal = dropUnlessResumed { viewModel.feedFree() },
+            onMeal = { if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) viewModel.selectMeal(it) },
             onDismissMeal = dropUnlessResumed { viewModel.dismissFreeMeal() },
             onAction = { action ->
                 // Ignore events from an outgoing entry while a transition is in progress.

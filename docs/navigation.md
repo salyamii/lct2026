@@ -31,6 +31,13 @@ is not a persistent tab bar requiring independent stacks.
   stack for recreation and process restoration. Store persistent game data in the
   data layer, not in navigation keys.
 
+Live budget redirects keep `NavDisplay` and its entry decorators mounted. The
+outgoing screen is temporarily noninteractive until the persisted planning route
+replaces it; only initial gate loading uses the full loading screen. Successful
+Day actions that require this redirect freeze their outgoing presentation too.
+Short Day writes block duplicate input immediately, but show their saving
+indicator only after 300 ms, avoiding a spinner flash for fast local commits.
+
 | Menu action | Destination |
 | --- | --- |
 | Gear | `Gear` |
@@ -118,7 +125,7 @@ or saved-state registry identity.
 - [Modularize navigation code](https://developer.android.com/guide/navigation/navigation-3/modularize)
 
 
-## Game actions on existing routes — 2026-09-19
+## Game actions on existing routes - 2026-09-19
 
 MainMenu, Day and Tasks retain their serialized route IDs. A menu click dispatches
 an explicit domain action before navigation; reopening an active event or saved
@@ -139,7 +146,7 @@ to the existing menu entry, including when the event was opened from Tasks.
 Ordinary Back still pops one screen. Stale completion callbacks cannot clear
 the stack of a newer destination, and the root is never removed.
 
-## Illustrated screen transitions — 2026-09-19
+## Illustrated screen transitions - 2026-09-19
 
 The host uses opaque horizontal slides (160 ms) for forward, Back and predictive
 Back transitions. This replaces Navigation 3's default 700 ms crossfade, which
@@ -147,7 +154,7 @@ blended the Tasks and menu artwork and text during a return. The host fills the
 window with the shared night background. Route order and entry-scoped state
 retention are unchanged; predictive Back still follows the gesture.
 
-## Offered deed mini-games — 2026-09-19
+## Offered deed mini-games - 2026-09-19
 
 The stable `deed_game` route carries the occurrence ID and, since 2026-09-26,
 an optional `choiceId` for a practical STORY/RANDOM branch. Its default is null,
@@ -169,7 +176,7 @@ a route whose occurrence was already completed or paused only exits; it grants
 no rewards and does not execute a new event. Outgoing Day cards remain frozen
 until replacement to avoid showing the intermediate generic day screen.
 
-## Transient completion confirmation — 2026-09-19
+## Transient completion confirmation - 2026-09-19
 
 Day and DeedGame exit callbacks optionally carry presentation text after a
 successful completion command. The app host accepts it only from the current
@@ -183,7 +190,7 @@ failed writes and restoring an already completed occurrence send no success
 text. Deed payout text uses the committed balance delta of the revision-checked
 command. Screens and the menu ViewModel do not recalculate or grant this reward.
 
-## Waking and feeding — 2026-09-19
+## Waking and feeding - 2026-09-19
 
 The summary's start-day action commits BeginDay with openFirst=false and exits
 to the menu. The next Continue action opens the first pending/carried event.
@@ -192,12 +199,16 @@ create an offered deed. The outgoing summary remains frozen until navigation
 removes it, just like other successful exits. Starting a day sends no event-
 completion snackbar. Failed writes keep the summary open for retry.
 
-Optional feeding is available on the menu. If the paid meal is unaffordable,
-the menu offers the free meal in place, with its next-morning consequence.
+Optional feeding opens a shared meal selector on the menu, event cards and Tasks.
+By MEAL-D-001, paid meals cost 5/7/10; the latter two restore current effort by
+1/2 up to the normal maximum and show HAPPY. The ordinary meal is unchanged.
+If the ordinary meal is unaffordable, the selector also offers the free meal
+with its current-day and next-morning consequences. Opening or cancelling the
+selector does not execute a command; confirmation retains the source screen.
 Event cards have no secondary feeding link; hunger replaces the blocked action
 with feeding. Feeding never automatically executes the original action.
 
-## Goal screen — 2026-09-19
+## Goal screen - 2026-09-19
 
 The `goal` key is unchanged. Its entry obtains GoalViewModel and collects state
 with lifecycle awareness. Selecting a goal and buying parts stay on that screen;
@@ -218,14 +229,25 @@ under ADVENTURE-D-008. Regression sources cover continuation, guards and retries
 They are compiled only under the user's verification preference; this does not
 claim an on-device result.
 
-## Pet name and floating village action — 2026-09-19
+## Pet name and floating village action - 2026-09-19
 
-### Финальный Хроноскоп и архив прохождений — 2026-09-28
+### Финальный Хроноскоп и архив прохождений - 2026-09-28
 
-После завершения пятой главы главное действие меню открывает `CampaignArchive`
-(`campaign_archive`), где ребёнок явно выбирает «Вернуться в начало». Только
-успешный атомарный restart открывает стек `MainMenu → Economy` с новым начальным
-бюджетом, независимо от порядка обновления budget gate. При неопределённой записи повторяется исходный запрос.
+По CAMPAIGN-D-003 финальная карточка показывает «Воспользоваться силой».
+Day сохраняет финальное событие, подготавливает архив и отправляет отдельное
+событие app-owned startup gate. App очищает старый игровой стек до MainMenu и
+выходит из него в CharacterSelection (`AppStartupState.Choose`). Промежуточного
+перехода в меню или архив нет. У уже завершённого сохранения действие меню
+по-прежнему открывает `CampaignArchive` (`campaign_archive`), где та же кнопка
+ведёт в выбор персонажа. При неопределённой записи повторяется исходный запрос;
+успешное финальное событие не выполняется повторно ради ошибки архива.
+Budget gate сохраняет последнюю проекцию при временном отсутствии активного мира,
+чтобы не уничтожить исходный экран до доставки перехода. После завершения новой
+настройки создаётся новый мир и открывается обычное меню с начальным бюджетом.
+AppStartupViewModel читает run ID из лёгкого snapshot head перед Ready. Этот ID
+задаёт Compose-ключ NavHost: новое прохождение не восстанавливает старый игровой
+стек даже при закрытии процесса между записью архива и навигационным callback.
+Повторное открытие того же run сохраняет обычное восстановление маршрутов.
 В истории текущего приключения есть вход «Прошлые приключения» в тот же экран.
 Выбор архива читает его полную историю для просмотра, без restore и игровых команд.
 Back из архивной детализации возвращает к списку. Ни snapshot, ни mutable state
@@ -247,7 +269,7 @@ Name and age are never navigation keys; moving these controls adds no game
 transitions or travel costs.
 
 
-## Goal chooser — 2026-09-20
+## Goal chooser - 2026-09-20
 
 The same Goal route now hosts the catalog list and a project's detail view.
 GoalViewModel's SavedStateHandle keeps viewed_goal/show_list as presentation
@@ -256,7 +278,7 @@ button leaves the feature. System Back follows the same detail/list behavior.
 Select/Buy carry catalog IDs into GameSession commands; no game snapshot or
 progress flag is added to route keys. [Campaign rules](design/campaign-choice.md).
 
-## First-launch gate — 2026-09-19
+## First-launch gate - 2026-09-19
 
 LctApp checks AppStartupViewModel before composing LctNavHost. The onboarding
 entry belongs to `:feature:onboarding` and receives an app-owned start callback.
@@ -267,7 +289,14 @@ change. The feature uses SavedStateHandle for the local fox selection only;
 persistent completion is the existence of the aggregate save. Read errors do
 not substitute a new game. See [onboarding](design/onboarding.md).
 
-### Customization step — 2026-09-20
+CAMPAIGN-D-003 adds durable CHARACTER to the existing onboarding step column.
+An archived completed run can leave no active aggregate while a new profile is
+being selected. Startup resumes Choose for CHARACTER and the saved editor step
+for subsequent drafts. A missing active world never erases the archive. The
+ordinary final onboarding write commits the chosen new profile and clears the
+draft atomically; late background preparation cannot create a default profile.
+
+### Customization step - 2026-09-20
 
 The startup gate has Choose, IntroVideo, Customize, Accessories, GoalBriefing,
 GoalSelection and Introduction steps. Start from the character screen persists a
@@ -297,7 +326,7 @@ and Coins open it explicitly. Allocation, weekly receipts and restored gameplay
 routes retain the mandatory budget gate.
 Existing saves skip onboarding. No Navigation 3 key or day/event transition is added.
 
-### Intro video after character selection — 2026-09-27
+### Intro video after character selection - 2026-09-27
 
 Only a successful `startAdventure` draft save enters transient `IntroVideo`.
 Completion, Skip and system Back all continue to `Customize` with that same
@@ -314,7 +343,7 @@ The video has no Navigation 3 key, Room step or world flag. Its mute button uses
 the same persistent sound setting as Settings; a media/preference error leaves
 an explicit way to continue. [Intro contract](design/intro-video.md).
 
-## Карта — 2026-09-20
+## Карта - 2026-09-20
 
 `feature/map/navigation/GameMap` заменяет заглушку Village. Стабильный serial ID
 `village` и чтение старого имени `ru.nksk.lctapp.ui.village.navigation.Village`
@@ -323,7 +352,7 @@ mapEntry; после успешного сохранения AppNavigator воз
 MapViewModel получает GameLocationController через Hilt; entry собирает состояние
 с lifecycle и обрабатывает завершение только в RESUMED. UI получает callbacks.
 
-## Экономика — 2026-09-21
+## Экономика - 2026-09-21
 
 feature/economy заменяет coins; Economy сохраняет serial ID `coins` и чтение
 старого имени `ru.nksk.lctapp.ui.coins.navigation.Coins`. Ключ не содержит данные.
@@ -334,14 +363,31 @@ EconomyGateViewModel в app наблюдает сохранённую сесси
 Текущая сессия не открывается циклически сама собой.
 Continue вновь открывает её. Этап RECEIPT/ALLOCATION читается из Room.
 
+По LEARNING-D-007 (2026-09-29) бюджет, открытый из `ChapterPractice`, после
+подтверждения или обычного выхода возвращает к сохранённому разбору главы.
+Принятые ответы остаются в том же entry. После завершения разбора кнопка
+«Продолжить историю» сначала вычисляет `GameSession.continueDayPlan` по свежему
+агрегату и сохраняет его команду, затем открывает `Day` без промежуточного меню.
+Существующий `Day` переиспользуется, иначе он заменяет завершённый разбор.
+Неопределённый повтор сохраняет исходный ID и revision команды.
+Если бюджет уже находится ниже разбора в стеке, его единственный ключ переносится
+поверх разбора без удаления промежуточного пути и без дублирования `Economy`.
+
+Успешное подтверждение бюджета передаёт ID завершённой сессии в app host.
+Пока наблюдатель догоняет запись, только эта сессия не вызывает повторный
+редирект; другой ID и холодное восстановление по-прежнему проходят gate.
+После правильного итогового ответа новая редакция бюджета не требуется.
+Реальная уже открытая незавершённая сессия и питание остаются доменными
+ограничениями. Продолжение не кормит и не подтверждает бюджет само.
+
 После знакомства с выбранным приключением host открывает INITIAL/RECEIPT.
 Вне сессии тот же маршрут открывает редактор; первое изменение создаёт MANUAL/ALLOCATION без начисления. Подтверждение
 и Back возвращают к меню. Gameplay-защита независимо находится в домене;
 навигационный переход сам по себе не начисляет деньги.
 
-По D-142 «Монетки» всегда открывает редактор текущих статей. MANUAL/ALLOCATION создаётся при первом изменении на их основе и сохраняет черновик; требует распределить все доступные деньги. По FINANCE-UI-D-015 минимум «Нужно» для INITIAL/WEEKLY — min(35, база), для MANUAL/MIGRATION — min(оставшаяся потребность в еде, база). Простое открытие ничего не начисляет и не блокирует игру; без редактирования выход не требует заново пополнять потраченное на еду. Автоматического распределения нет.
+По D-142 «Монетки» всегда открывает редактор текущих статей. MANUAL/ALLOCATION создаётся при первом изменении на их основе и сохраняет черновик; требует распределить все доступные деньги. По FINANCE-UI-D-015 минимум «Нужно» для INITIAL/WEEKLY - min(35, база), для MANUAL/MIGRATION - min(оставшаяся потребность в еде, база). Простое открытие ничего не начисляет и не блокирует игру; без редактирования выход не требует заново пополнять потраченное на еду. Автоматического распределения нет.
 
-## Выбор подцели — CAMPAIGN-D-001, 2026-09-24
+## Выбор подцели - CAMPAIGN-D-001, 2026-09-24
 
 Маршрут онбординга сохранён: GoalBriefing → GoalSelection → Introduction.
 Выбирается savingItemId из четырёх предметов первой главы. GameSession создаёт
@@ -355,10 +401,10 @@ Continue вновь открывает её. Этап RECEIPT/ALLOCATION чит�
 главы, даже если подцель ещё не выбрана. Просмотр не выполняет SelectGoal.
 «Другие цели» открывает список превью; View запоминает источник входа в
 SavedStateHandle. Back из открытой таким способом главы возвращает список,
-а из первоначально открытой текущей главы — предыдущий маршрут. Суммы и
+а из первоначально открытой текущей главы - предыдущий маршрут. Суммы и
 предметы остаются в наблюдаемом игровом состоянии, не в ключе маршрута.
 
-## Копилка и Хроноскоп — FINANCE-UI-D-007/017, актуализация 2026-09-26
+## Копилка и Хроноскоп - FINANCE-UI-D-007/017, актуализация 2026-09-26
 
 `Savings` (`savings`) зарегистрирован в сериализации и принадлежит economy.
 Экран открывается из меню, HUD бюджета и задания. По реализации
@@ -392,7 +438,7 @@ Back при открытом подтверждении или предупре�
 | `SkillTraining` / `skill_training` | `TrainingViewModel` | `TrainingScreen` |
 | `OtherPaths(day)` / `other_paths` | `ReflectionViewModel` | `ReflectionScreen`, шаги в `ChronoscopeScreen` |
 
-День в `OtherPaths` — фильтр просмотра, не копия игры. Entry получает ViewModel
+День в `OtherPaths` - фильтр просмотра, не копия игры. Entry получает ViewModel
 через Hilt, собирает UiState с lifecycle и передаёт UI только состояние и callbacks.
 History и Reflection через `repeatOnLifecycle(RESUMED)` включают наблюдение
 в `setActive(true)` и при уходе отменяют только observer job. Это прекращает
@@ -401,7 +447,7 @@ History и Reflection через `repeatOnLifecycle(RESUMED)` включают �
 в `viewModelScope` и не отменяются при переходе в STARTED/STOPPED.
 
 Шаги пересмотра принадлежат `ReflectionViewModel`: воспоминания → выбор →
-сравнение → вопрос → объяснение. Back возвращает по шагам; выход — к итогам.
+сравнение → вопрос → объяснение. Back возвращает по шагам; выход - к итогам.
 В тренировке Back закрывает вопрос с сохранением серии либо возвращает из
 списка тем. Автоматический переход после верного ответа выполняется только
 в RESUMED и несёт ID вопроса; закрытый или уже сменившийся вопрос не продвигается.
@@ -410,7 +456,7 @@ History и Reflection через `repeatOnLifecycle(RESUMED)` включают �
 [Текущие сценарии и разделение состояния](design/skills-and-reflection.md).
 
 
-## Кнопка панели в главном меню — 2026-09-26
+## Кнопка панели в главном меню - 2026-09-26
 
 По ADVENTURE-D-004 существующая debug-панель открывается шестерёнкой в верхней
 строке главного меню. `LctApp` передаёт необязательный composable-слот через
@@ -420,7 +466,7 @@ History и Reflection через `repeatOnLifecycle(RESUMED)` включают �
 по-прежнему не включает отладочный модуль.
 
 
-## Распределение сразу после onboarding — 2026-09-27
+## Распределение сразу после onboarding - 2026-09-27
 
 CUST-D-022: Introduction → INITIAL/ALLOCATION → MainMenu. Кнопка
 «Распределить монеты» завершает onboarding с уже выбранными целью и подцелью;
@@ -434,7 +480,7 @@ CUST-D-022: Introduction → INITIAL/ALLOCATION → MainMenu. Кнопка
 стоит отдельно справа. Переход к цели остаётся у нижней кнопки меню.
 
 
-## Settings — 2026-09-27
+## Settings - 2026-09-27
 
 The separate menu gear opens `feature/settings` in both debug and release builds.
 The `settings` key carries no game state, profile identifier, linking token or QR
@@ -459,7 +505,7 @@ to the entry. A private FileProvider exposes only `cache/parent_qr/` with tempor
 read access. Sharing does not register a profile, regenerate its ID or upload the
 world; it remains available offline. The user chooses the recipient application.
 
-## Встроенный родительский режим — 2026-09-28
+## Встроенный родительский режим - 2026-09-28
 
 По PARENT-MODE-D-001/002 короткое нажатие шестерёнки сохраняет `Settings`,
 долгое вызывает app-owned launcher внутренней `ParentsActivity`. Callback

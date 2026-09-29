@@ -60,7 +60,8 @@ internal object PetVisualLifecycle {
         if (previous == PetVisualState.NEEDS_HELP && authored == null && !helpResolved) visual = PetVisualState.NEEDS_HELP
         else if (authored == null && !needsHelp && !helpResolved) {
             if (previous == PetVisualState.HUNGRY && !feeding) visual = PetVisualState.HUNGRY
-            if (previous == PetVisualState.TIRED && !newDay) visual = PetVisualState.TIRED
+            val restoredEnergy = day.energy > (before.engine?.energy ?: day.energy)
+            if (previous == PetVisualState.TIRED && !newDay && !restoredEnergy) visual = PetVisualState.TIRED
         }
 
         // Existing gameplay thresholds only. The current need replaces a reaction;
@@ -98,6 +99,8 @@ internal object PetVisualLifecycle {
             is EngineCommand.CompleteEvent -> command.choiceId
             is EngineCommand.CompleteStoryGame -> command.choiceId
             is EngineCommand.CompleteDeed -> before.engine?.currentEvent?.eventId?.let { factory.choices(it).singleOrNull()?.id }
+            is EngineCommand.SkipMiniGame -> command.choiceId
+                ?: before.engine?.currentEvent?.eventId?.let { factory.choices(it).singleOrNull()?.id }
             else -> null
         }
         return choiceId?.let { id -> factory.content.choices.find { it.id == id } }

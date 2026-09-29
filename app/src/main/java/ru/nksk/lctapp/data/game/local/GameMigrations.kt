@@ -4,6 +4,26 @@ import androidx.room3.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 
+/** Split old archives inside SQLite, without reading a complete historical JSON string into the VM. */
+internal val MIGRATION_22_23 = object : Migration(22, 23) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("""
+            CREATE TABLE IF NOT EXISTS GAME_RUN_ARCHIVE_AUDIT (
+                archive_run_id TEXT NOT NULL, sequence INTEGER NOT NULL, payload TEXT NOT NULL,
+                PRIMARY KEY(archive_run_id, sequence),
+                FOREIGN KEY(archive_run_id) REFERENCES GAME_RUN_ARCHIVE(run_id)
+                    ON UPDATE NO ACTION ON DELETE CASCADE)
+        """.trimIndent())
+        connection.execSQL("""
+            INSERT INTO GAME_RUN_ARCHIVE_AUDIT(archive_run_id, sequence, payload)
+            SELECT archive.run_id, json_extract(entry.value, '$.sequence'), entry.value
+            FROM GAME_RUN_ARCHIVE AS archive, json_each(archive.snapshot_payload, '$.history') AS entry
+        """.trimIndent())
+        // This is a storage header, not a standalone snapshot. Its checksum still covers the child rows.
+        connection.execSQL("UPDATE GAME_RUN_ARCHIVE SET snapshot_payload = json_set(snapshot_payload, '$.history', json('[]'))")
+    }
+}
+
 /** Add archival documents without changing any existing world, journal, or transport row. */
 internal val MIGRATION_21_22 = object : Migration(21, 22) {
     override suspend fun migrate(connection: SQLiteConnection) {

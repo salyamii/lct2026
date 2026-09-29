@@ -45,17 +45,29 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
     private var purchaseSubmitted = false
     // Observation may refresh the purchase quote, but must not discard an uncertain continuation.
     private var pendingContinuation: GameActionAttempt? = null
+    private var shownDemoMode = false
+    private var screenActive = true
 
     init { load() }
 
+    fun setActive(active: Boolean) {
+        if (screenActive == active) return
+        screenActive = active
+        if (active) load() else {
+            observation?.cancel(); observation = null
+        }
+    }
+
     private fun load() {
-        if (observation?.isActive == true) return
+        if (!screenActive || observation?.isActive == true) return
         observation = viewModelScope.launch {
-            mutableState.value = GoalUiState()
+            if (saved == null) mutableState.value = GoalUiState()
             try {
                 session.prepare()
                 session.observe().collect { value ->
                     val game = checkNotNull(value)
+                    if (shownDemoMode != session.demoModeEnabled && !purchaseSubmitted) clearPurchase()
+                    shownDemoMode = session.demoModeEnabled
                     if (saved != game) {
                         message = null
                         if (pending?.expectedRevision != game.engine?.revision || saved?.economy != game.economy) {
@@ -77,7 +89,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
             if (confirmation?.contextId == action.id) presentedContext = action.id
             return
         }
-        if (busy) return
+        if (busy || !screenActive) return
         if (action == GoalAction.Retry) { load(); return }
         val game = saved ?: return
         when (action) {
@@ -106,7 +118,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
     }
 
     private fun request(game: GameState, command: EngineCommand) =
-        EngineRequest(UUID.randomUUID().toString(), game.engine?.revision, command)
+        EngineRequest(UUID.randomUUID().toString(), game.engine?.revision, command, demoMode = session.demoModeEnabled)
 
     private fun clearPurchase() {
         pending = null
@@ -124,7 +136,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
             message = block.playerMessage(game.pet.name); render(); return
         }
         val item = session.catalog.content.items.firstOrNull { it.id == action.itemId } ?: return
-        val price = item.priceCoins ?: return
+        val price = if (session.demoModeEnabled) 0L else item.priceCoins ?: return
         val quote = EconomyOperations.goalPurchaseQuote(game.economy, price)
         if (!quote.affordable) return
         val remaining = game.economy.availableBalance - quote.fromAvailableAmount
@@ -134,7 +146,8 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
         pending = prepared
         confirmation = PurchaseConfirmation(item.id, renderPetText(item.name, game.pet.name).asGameUiText(), price,
             quote.fromSavings, quote.fromAvailable.parts, game.economy.availableBalance, game.economy.savingsBalance,
-            remaining, game.economy.savingsBalance - quote.fromSavings, food, "goal-purchase:${prepared.id}")
+            remaining, game.economy.savingsBalance - quote.fromSavings, food, "goal-purchase:${prepared.id}",
+            demoMode = session.demoModeEnabled)
         message = null
         render()
     }
@@ -201,7 +214,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
                                 // Selection and explicit continuation are separate guarded commands.
                                 continue
                             }
-                            openContinuation(if (session.continueDayPlan(checkNotNull(saved)) == ContinueDayPlan.NeedsBudget)
+                            openContinuation(if (checkNotNull(saved).economy.let { it.planning != null || it.unallocated != 0L })
                                 GoalContinuationDestination.BUDGET else GoalContinuationDestination.DAY)
                             return@launch
                         }
@@ -253,6 +266,12 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
                             handle["viewed_goal"] = command.goalId; handle["show_list"] = false
                         }
                         if (command is EngineCommand.BuyGoalItem) {
+                            val receipt = result.state.engine?.journal?.firstOrNull {
+                                it.id.startsWith("${request.id}:journal:") && it.kind == DayJournalKind.ITEM_PURCHASE &&
+                                    it.sourceId == command.itemId
+                            }
+                            handle["purchase_result_price"] = receipt?.moneyDelta?.let(Math::negateExact)
+                                ?: confirmation?.price
                             clearPurchase()
                             handle["purchase_result_item"] = command.itemId
                         }
@@ -274,6 +293,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
     }
 
     private fun render() {
+        if (!screenActive) return
         val game = saved ?: return
         val catalog = session.catalog
         val story = catalog.storyProgress(game)
@@ -303,6 +323,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
         val goal = catalog.goals.firstOrNull { it.goalId == handle.get<String>("viewed_goal") } ?: activeGoal ?: story.requiredGoal
         val showList = handle.get<Boolean>("show_list") ?: false
         val common = GoalUiState(loading = false, busy = busy, petName = game.pet.name,
+            demoMode = session.demoModeEnabled,
             character = adventurePetArtwork(game.pet),
             balance = game.economy.savingsBalance, availableBalance = game.economy.availableBalance,
             contextId = "goal:${game.engine?.revision}:${game.economy.availableBalance}:${game.economy.savingsBalance}:${knownNeeds(game)}",
@@ -315,7 +336,8 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
             message = message, confirmation = confirmation, celebration = celebration,
             purchaseResult = handle.get<String>("purchase_result_item")?.let { id ->
                 catalog.content.items.firstOrNull { it.id == id && game.ownedItems.any { owned -> owned.itemId == id } }
-                    ?.let { item -> GoalPurchaseResult(item.id, renderPetText(item.name, game.pet.name).asGameUiText(), checkNotNull(item.priceCoins)) }
+                    ?.let { item -> GoalPurchaseResult(item.id, renderPetText(item.name, game.pet.name).asGameUiText(),
+                        handle.get<Long>("purchase_result_price") ?: checkNotNull(item.priceCoins)) }
             })
         if (goal == null) { mutableState.value = common; return }
         val definition = catalog.content.goals.first { it.id == goal.goalId }
@@ -326,22 +348,25 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
             goalId = goal.goalId, scene = goal.scene,
             canSelect = activeGoal == null && story.goalAvailable(goal) && progress.isCollected, completedProject = completed,
             title = renderPetText(definition.title, game.pet.name), description = renderPetText(definition.description, game.pet.name),
-            selected = selected, balance = game.economy.savingsBalance, totalPrice = progress.totalPrice,
-            remainingPrice = progress.remainingPrice, collected = progress.boughtCount,
+            selected = selected, balance = game.economy.savingsBalance,
+            totalPrice = if (session.demoModeEnabled && selected) 0 else progress.totalPrice,
+            remainingPrice = if (session.demoModeEnabled && selected) 0 else progress.remainingPrice, collected = progress.boughtCount,
             parts = progress.items.map { item ->
                 val owned = item.id in progress.ownedItemIds
                 val target = game.selectedSavingItemId == item.id
-                val quote = EconomyOperations.goalPurchaseQuote(game.economy, checkNotNull(item.priceCoins))
+                val price = if (session.demoModeEnabled && selected) 0L else checkNotNull(item.priceCoins)
+                val quote = EconomyOperations.goalPurchaseQuote(game.economy, price)
                 val block = if (selected && target && !owned) session.engine.blockReason(game,
                     EngineCommand.BuyGoalItem(goal.goalId, item.id)) else null
-                GoalPartUiState(item.id, renderPetText(item.name, game.pet.name).asGameUiText(), renderPetText(item.description, game.pet.name), checkNotNull(item.priceCoins), owned,
+                GoalPartUiState(item.id, renderPetText(item.name, game.pet.name).asGameUiText(), renderPetText(item.description, game.pet.name), price, owned,
                     selected && target && !owned && (block == null || block is BlockReason.FoodBudgetWarning),
                     block?.takeUnless { it is BlockReason.FoodBudgetWarning || it is BlockReason.InsufficientMoney }?.playerMessage(game.pet.name),
                     (block as? BlockReason.InsufficientMoney)?.missing,
                     savingTarget = target, canSelect = selected && !owned && game.economy.planning == null && game.economy.unallocated == 0L,
-                    savedCoins = minOf(game.economy.savingsBalance, checkNotNull(item.priceCoins)),
-                    remainingCoins = maxOf(0L, checkNotNull(item.priceCoins) - game.economy.savingsBalance),
-                    availableContribution = if (quote.affordable) quote.fromAvailableAmount else 0L)
+                    savedCoins = minOf(game.economy.savingsBalance, price),
+                    remainingCoins = maxOf(0L, price - game.economy.savingsBalance),
+                    availableContribution = if (quote.affordable) quote.fromAvailableAmount else 0L,
+                    demoMode = session.demoModeEnabled && selected)
             },
             storyHint = when {
                 completed -> "Эта глава пройдена. Купленные вещи остаются у тебя."

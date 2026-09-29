@@ -1,7 +1,7 @@
 [
   {
     "resource": "story_cargo_journal",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:429",
@@ -37,7 +37,7 @@
   },
   {
     "resource": "story_observation_journal",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:434",
@@ -73,7 +73,7 @@
   },
   {
     "resource": "story_letter",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:439",
@@ -109,7 +109,7 @@
   },
   {
     "resource": "story_old_photograph",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:444",
@@ -145,7 +145,7 @@
   },
   {
     "resource": "story_instruction_journal",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:449",
@@ -181,7 +181,7 @@
   },
   {
     "resource": "story_route_map",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:454",
@@ -217,7 +217,7 @@
   },
   {
     "resource": "story_map_table",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:459",
@@ -253,7 +253,7 @@
   },
   {
     "resource": "story_map_missing_region",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:464",
@@ -289,7 +289,7 @@
   },
   {
     "resource": "story_assembled_map",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:469",
@@ -325,7 +325,7 @@
   },
   {
     "resource": "story_telescope_parts",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:477",
@@ -361,7 +361,7 @@
   },
   {
     "resource": "story_north_tower_signal",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:482",
@@ -397,7 +397,7 @@
   },
   {
     "resource": "story_signal_post",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:487",
@@ -433,7 +433,7 @@
   },
   {
     "resource": "story_three_lights_mechanism",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:492",
@@ -469,7 +469,7 @@
   },
   {
     "resource": "story_tower_receiver",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:497",
@@ -505,7 +505,7 @@
   },
   {
     "resource": "story_return_signal",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:502",
@@ -541,7 +541,7 @@
   },
   {
     "resource": "story_chronoscope",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:507",
@@ -577,7 +577,7 @@
   },
   {
     "resource": "story_chronoscope_ring",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:512",
@@ -613,7 +613,7 @@
   },
   {
     "resource": "story_signal_lens",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:517",
@@ -649,7 +649,7 @@
   },
   {
     "resource": "story_route_tester",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:522",
@@ -685,7 +685,7 @@
   },
   {
     "resource": "story_relay",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:527",
@@ -721,7 +721,7 @@
   },
   {
     "resource": "story_astrolabe",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:532",
@@ -757,7 +757,7 @@
   },
   {
     "resource": "story_marked_crate",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:540",
@@ -793,7 +793,7 @@
   },
   {
     "resource": "story_cleaning_worktable",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:545",
@@ -802,7 +802,7 @@
       "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-545"
     },
     "source_method": "figma_download_assets_original_image_bytes",
-    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G1.03 · Пластина с тем же знаком | G1.05 · Три ответа — в одном свете",
+    "source_notes": "Transparent original active IMAGE fill from object catalog 3238:421; presentation cards excluded. Full canvas and exact RGBA preserved. Authored scenes: G1.03 · Пластина с тем же знаком | G1.05 · Три ответа - в одном свете",
     "figma_image_sha1": "6b51ea8507b39db4f1c6caba388256619f048dc8",
     "source_path": "docs/design/assets/sources/story-objects-transparent-2026-09-26/story_cleaning_worktable.png",
     "source_sha256": "a9eb3148558d166f626032a1578d34dc9c8e5b747e26521107d8316606eb38e5",
@@ -829,7 +829,7 @@
   },
   {
     "resource": "story_story_plate",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:550",
@@ -865,7 +865,7 @@
   },
   {
     "resource": "story_service_emblem",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:555",
@@ -901,7 +901,7 @@
   },
   {
     "resource": "story_stone_post",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:560",
@@ -937,7 +937,7 @@
   },
   {
     "resource": "story_two_paths_device",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:565",
@@ -973,7 +973,7 @@
   },
   {
     "resource": "story_caretakers_seal",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:570",
@@ -1009,7 +1009,7 @@
   },
   {
     "resource": "story_mailbox",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:575",
@@ -1045,7 +1045,7 @@
   },
   {
     "resource": "story_token_crate",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:580",
@@ -1081,7 +1081,7 @@
   },
   {
     "resource": "story_mountain_sign",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:585",
@@ -1117,7 +1117,7 @@
   },
   {
     "resource": "story_waystone",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:590",
@@ -1153,7 +1153,7 @@
   },
   {
     "resource": "story_border_beacon",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:595",
@@ -1189,7 +1189,7 @@
   },
   {
     "resource": "story_route_token",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:600",
@@ -1225,7 +1225,7 @@
   },
   {
     "resource": "story_supply_bag",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:605",
@@ -1261,7 +1261,7 @@
   },
   {
     "resource": "story_new_map_book",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:610",
@@ -1297,7 +1297,7 @@
   },
   {
     "resource": "story_route_fragment_tower",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:623",
@@ -1333,7 +1333,7 @@
   },
   {
     "resource": "story_route_fragment_mountain",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:628",
@@ -1369,7 +1369,7 @@
   },
   {
     "resource": "story_route_fragment_winding",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:633",
@@ -1405,7 +1405,7 @@
   },
   {
     "resource": "story_route_fragment_forest",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:638",
@@ -1441,7 +1441,7 @@
   },
   {
     "resource": "story_bridge_token",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:643",
@@ -1477,7 +1477,7 @@
   },
   {
     "resource": "story_tower_token",
-    "category": "Transparent story objects — 2026-09-26",
+    "category": "Transparent story objects - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "3238:648",

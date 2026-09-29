@@ -53,6 +53,7 @@ internal fun TrainingScreen(state: TrainingUiState, onAction: (TrainingAction) -
                 if (state.needsBudgetPlanning) BudgetReminder(true, !state.busy, onOpenBudget)
                 else ChapterPracticeNext(state, onAction, onOpenBudget, onContinueStory)
             }
+            if (!state.loading && state.hasGame && state.demoMode) item { SkipChapterPracticeButton(state, onAction) }
         }
     } else LearningPage("Тренировка навыков", onBack) {
         learningStatus(state.loading, state.busy, state.error, state.practiceRetryRequired) { onAction(TrainingAction.Retry) }
@@ -142,6 +143,7 @@ private fun PracticeQuestionScreen(state: TrainingUiState, question: FinancialQu
     LearningPage(question.kind.trainingTitle(), onBack, backEnabled = !state.busy, listState = questionScroll) {
         learningStatus(state.loading, state.busy, state.error, state.practiceRetryRequired, showSaving = false) { onAction(TrainingAction.Retry) }
         if (state.needsBudgetPlanning) item { BudgetReminder(true, !state.busy && !state.practiceRetryRequired, onOpenBudget) }
+        if (state.chapterPractice && state.demoMode) item { SkipChapterPracticeButton(state, onAction) }
         item {
             LearningCard {
                 Text(question.prompt.asGameUiText(), color = GameInk, style = MaterialTheme.typography.titleMedium,
@@ -188,6 +190,15 @@ private fun PracticeQuestionScreen(state: TrainingUiState, question: FinancialQu
 }
 
 @Composable
+private fun SkipChapterPracticeButton(state: TrainingUiState, onAction: (TrainingAction) -> Unit) {
+    OutlinedButton(onClick = { onAction(TrainingAction.SkipChapterPractice) },
+        enabled = !state.loading && !state.busy && !state.practiceRetryRequired,
+        modifier = Modifier.fillMaxWidth()) {
+        Text("Пропустить разбор")
+    }
+}
+
+@Composable
 private fun ChapterPracticeNext(state: TrainingUiState, onAction: (TrainingAction) -> Unit,
     onOpenBudget: () -> Unit, onContinueStory: () -> Unit) {
     val enabled = !state.needsBudgetPlanning && !state.practiceRetryRequired && state.error == null
@@ -200,7 +211,6 @@ private fun ChapterPracticeNext(state: TrainingUiState, onAction: (TrainingActio
                 PracticeButton(if (state.question?.correct == true) "Следующий вопрос" else "Начать разбор",
                     enabled, interactionBlocked = state.busy) { onAction(TrainingAction.StartChapterPractice) }
             }
-            ChapterPracticeStep.BUDGET -> BudgetReminder(false, enabled && !state.busy, onOpenBudget)
             ChapterPracticeStep.FOOD -> {
                 AdventureBody("С вопросами закончили. Осталось позаботиться о еде для спутника.")
                 PracticeButton("К приключению", enabled, interactionBlocked = state.busy, onClick = onContinueStory)

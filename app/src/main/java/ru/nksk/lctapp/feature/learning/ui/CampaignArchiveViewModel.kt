@@ -47,11 +47,11 @@ internal class CampaignArchiveViewModel @Inject constructor(private val session:
         state.value = state.value.copy(loading = true, error = null)
         viewModelScope.launch {
             try {
-                val snapshot = session.exportSnapshot()
+                val saved = checkNotNull(session.read())
                 val archives = session.archivedRuns()
                 state.value = CampaignArchiveUiState(loading = false,
-                    canRestart = session.canRestartCampaign(snapshot.state),
-                    pet = snapshot.state.pet.toAdventurePetPresentation(showReaction = false), archives = archives)
+                    canRestart = session.canRestartCampaign(saved),
+                    pet = saved.pet.toAdventurePetPresentation(showReaction = false), archives = archives)
             } catch (cancelled: CancellationException) { throw cancelled }
             catch (_: Exception) { state.value = state.value.copy(loading = false, error = "Не удалось прочитать историю. Попробуй ещё раз.") }
         }
@@ -82,12 +82,12 @@ internal class CampaignArchiveViewModel @Inject constructor(private val session:
         state.value = state.value.copy(busy = true, error = null)
         viewModelScope.launch {
             try {
-                val request = pendingRestart ?: session.exportSnapshot().let { snapshot ->
+                val request = pendingRestart ?: checkNotNull(session.snapshotHead()).let { snapshot ->
                     check(session.canRestartCampaign(snapshot.state))
                     CampaignRestartRequest(UUID.randomUUID().toString(), snapshot.runId,
                         snapshot.state.engine?.revision, snapshot.historySequence).also { pendingRestart = it }
                 }
-                session.restartCampaign(request)
+                session.prepareCampaignRestart(request)
                 pendingRestart = null
                 state.value = state.value.copy(restarted = true)
             } catch (cancelled: CancellationException) { throw cancelled }
@@ -96,7 +96,7 @@ internal class CampaignArchiveViewModel @Inject constructor(private val session:
                 state.value = state.value.copy(canRestart = false,
                     error = "Приключение изменилось. Обнови страницу перед возвращением в начало.")
             } catch (_: Exception) {
-                state.value = state.value.copy(error = "Не удалось подтвердить возвращение. Повтори попытку — история сохранится один раз.")
+                state.value = state.value.copy(error = "Не удалось подтвердить возвращение. Повтори попытку - история сохранится один раз.")
             } finally { state.value = state.value.copy(busy = false) }
         }
     }

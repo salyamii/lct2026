@@ -29,7 +29,7 @@ private val editedLoreVariants = mapOf(
     "N3.WORKBENCH" to listOf(EventCardVariant(StoryCondition.Always,
         "Тико помогает открыть отсек под старым верстаком. Посмотрим, что там спрятано.")),
     "G3.12" to listOf(EventCardVariant(StoryCondition.GoalCollected(HOME_GOAL),
-        "Дом обустроен, а загадка старой мастерской раскрыта. Тико остаётся помогать с приборами. Чтобы собрать найденные фрагменты карты, Смотритель предлагает пригласить Луну — сову-картографа.")),
+        "Дом обустроен, а загадка старой мастерской раскрыта. Тико остаётся помогать с приборами. Чтобы собрать найденные фрагменты карты, Смотритель предлагает пригласить Луну - сову-картографа.")),
     "G4.02" to listOf(
         EventCardVariant(StoryCondition.OwnsItem("$MAP_GOAL:table"),
             "Луна и {petName} раскладывают фрагменты на новом столе. Сначала совместим дороги, затем отметим сигнальные посты и безопасные пути."),
@@ -46,11 +46,11 @@ private val editedLoreVariants = mapOf(
 
 private val currentLoreCopy = mapOf(
     // https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2363-4
-    "G1.01" to LoreDisplayCopy(body = "Смотритель обсерватории, енот: «Скоро откроется старый небесный зал. Телескоп пока не готов. Соберём комплект постепенно — это наша большая цель»."),
+    "G1.01" to LoreDisplayCopy(body = "Смотритель обсерватории, енот: «Скоро откроется старый небесный зал. Телескоп пока не готов. Соберём комплект постепенно - это наша большая цель»."),
     // https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2371-2
     "G1.02" to LoreDisplayCopy(title = "На ящике странная метка", body = "Портовый смотритель-бобёр: «Это метка грузов для северной башни. Только она давно погасла…»"),
     // https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2386-2
-    "G1.05" to LoreDisplayCopy(title = "Три ответа — в одном свете"),
+    "G1.05" to LoreDisplayCopy(title = "Три ответа - в одном свете"),
     // https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2397-206
     "G1.10" to LoreDisplayCopy(body = "Смотритель настраивает малый телескоп. {petName} читает в журнале: «Северный пост отвечает тремя огнями». Их цвета совпадают с найденным порядком."),
     // https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2397-257
@@ -58,11 +58,11 @@ private val currentLoreCopy = mapOf(
     // https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2451-163
     "G2.04" to LoreDisplayCopy(body = "За мостом сохранился сигнальный пост. Его линзы направлены на башню. Надпись велит проверить автоматический ответ реле перед входом."),
     // https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2451-215
-    "G2.05" to LoreDisplayCopy(body = "На петле свежая смазка, у реле — металлическая стружка. Кто-то обслуживал башню после закрытия. Журнал дежурного должен объяснить, кто и зачем."),
+    "G2.05" to LoreDisplayCopy(body = "На петле свежая смазка, у реле - металлическая стружка. Кто-то обслуживал башню после закрытия. Журнал дежурного должен объяснить, кто и зачем."),
     // https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2451-319
     "G2.07" to LoreDisplayCopy(body = "Журнал: башню закрыли по приказу. Смотритель обсерватории продолжал смазывать реле, чтобы путники могли проверить сигнал перед входом."),
     // https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2451-475
-    "G2.10" to LoreDisplayCopy(body = "Приёмник подтверждает: обслуженное реле связывает башню с обсерваторией. После установки ключа стрелка указывает на её нижний зал — там основной механизм."),
+    "G2.10" to LoreDisplayCopy(body = "Приёмник подтверждает: обслуженное реле связывает башню с обсерваторией. После установки ключа стрелка указывает на её нижний зал - там основной механизм."),
     // https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2479-56
     "G3.05" to LoreDisplayCopy(title = "Деталь Хроноскопа"),
     // https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2479-74
@@ -78,7 +78,7 @@ private val currentLoreCopy = mapOf(
     // https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2480-92
     "G3.12" to LoreDisplayCopy(title = "Дом становится базой", body = "Дом вновь работает как мастерская. Тико остаётся помогать герою. Фрагменты старой карты требуют картографа, и Смотритель обсерватории приглашает знакомую сову Луну."),
     // https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2558-7
-    "G4.01" to LoreDisplayCopy(body = "По приглашению Смотрителя приходит Луна — сова-картограф. Она изучает фрагменты и замечает: «Некоторые маршруты сняли с карты намеренно»."),
+    "G4.01" to LoreDisplayCopy(body = "По приглашению Смотрителя приходит Луна - сова-картограф. Она изучает фрагменты и замечает: «Некоторые маршруты сняли с карты намеренно»."),
     // https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2558-205
     "G4.12" to LoreDisplayCopy(body = "Карта указывает регион последнего узла и знак восстановления, но не точную станцию. Луна: «Есть направление. Теперь нужна большая экспедиция»."),
     // https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2574-7

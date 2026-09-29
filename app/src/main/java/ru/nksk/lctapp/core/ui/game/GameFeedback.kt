@@ -24,7 +24,7 @@ internal fun eventCompletionMessage(before: GameState, after: GameState,
         ru.nksk.lctapp.domain.pet.PetCosmetics.forItem(item.itemId) != null }
     when {
         equipped -> parts += "Обновку можно надеть в «Снаряжении»."
-        after.engine?.energy == 0 -> parts += "${after.pet.name} без сил — пора отдохнуть."
+        after.engine?.energy == 0 -> parts += "${after.pet.name} без сил - пора отдохнуть."
         effort > 0 -> parts += "${after.pet.name} ${energyDescription(after.engine!!.energy, catalog.rules.fullEnergy).lowercase()}."
         after.engine?.ateToday == true && before.engine?.ateToday == false -> parts += "${after.pet.name} поел."
         catalog.policies[event.id]?.scheduling?.blocksStoryUntilResolved == true -> parts += "Можно продолжить историю."
@@ -53,11 +53,11 @@ internal fun energyDescription(remaining: Int, maximum: Int): String = when {
 
 internal fun BlockReason.playerMessage(petName: String): String = when (this) {
     BlockReason.BudgetPlanningRequired -> "Сначала реши, на что пойдут монеты, и подтверди бюджет."
-    is BlockReason.FinancialPracticeRequired -> "Всё готово! Ответим на вопросы о наших решениях — и продолжим историю."
+    is BlockReason.FinancialPracticeRequired -> "Всё готово! Ответим на вопросы о наших решениях - и продолжим историю."
     BlockReason.SavingsWithdrawalConfirmationRequired -> "Чтобы взять монеты из копилки, сначала подтверди решение."
     BlockReason.InvalidPetName -> "Напиши имя спутника в одну строку."
     BlockReason.MustEat -> "$petName проголодался. Сначала нужно поесть, затем можно продолжить."
-    BlockReason.MustSleep -> "$petName устал. Сил на это действие не хватает. Сначала нужно отдохнуть — оставшиеся события дождутся завтра."
+    BlockReason.MustSleep -> "$petName устал. Сил на это действие не хватает. Сначала нужно отдохнуть - оставшиеся события дождутся завтра."
     BlockReason.StaleRevision -> "Игра уже изменилась. Данные обновлены, повтори действие."
     BlockReason.EventInProgress -> "Сначала закончи текущее событие или выбери «Вернуться позже»."
     BlockReason.OnlyShortDeedsAfterSchedule -> "Сегодня можно заняться только короткими делами. К этому делу вернёмся завтра, если ещё успеваем по сроку."

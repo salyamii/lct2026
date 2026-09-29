@@ -145,7 +145,10 @@ object FinancialProgressionPolicy {
             state.recoveryQuestionId != null, state.complete)
     }
 
-    /** A correct comparison can explain either overspending or underspending; adaptation is not a failure. */
+    /** Finishing the chapter review does not require changing an otherwise confirmed budget. */
+    fun chapterReviewReady(evidence: PeriodReviewEvidence?): Boolean = evidence?.answerCorrect == true
+
+    /** Actual plan management remains distinct from answering the chapter's practice question. */
     fun reviewReady(evidence: PeriodReviewEvidence?): Boolean = evidence?.let {
         it.answerCorrect && (it.comparedKnownFacts && it.planRevisionId != null && it.managedPlan == true ||
             it.recoveryPlanRevisionId != null)

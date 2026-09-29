@@ -1,4 +1,4 @@
-# Outpainting prompts — 2026-09-28
+# Outpainting prompts - 2026-09-28
 
 Built-in imagegen, authorized by APP-ICON-D-002.
 

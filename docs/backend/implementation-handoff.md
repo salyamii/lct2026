@@ -1,8 +1,8 @@
 # Контракт для backend
 
-Обновлено **2026-09-27**. Базовый адрес: `https://fin-api.mortypython.ru/`.
+Обновлено **2026-09-29**. Базовый адрес: `https://fin-api.mortypython.ru/`.
 Android уже вызывает семь методов ниже. Backend должен реализовать эти тела и
-ответы; совместимость текущего сервера не подтверждена — предыдущие проверки
+ответы; совместимость текущего сервера не подтверждена - предыдущие проверки
 из среды разработки завершились тайм-аутом. [OpenAPI](openapi.yaml).
 
 ## Идентификатор и повтор запросов
@@ -17,9 +17,9 @@ QR содержит ровно сохранённый `deviceId`, обычным
 Тела и ответы: `Content-Type: application/json`. Четыре операции записи
 (регистрация, snapshot, аналитика, ACK) также передают `Idempotency-Key`.
 Это ID операции для защиты от повторного выполнения при сетевом сбое, не токен
-доступа. Область ключа — HTTP-метод, маршрут и deviceId. Одинаковый ключ с тем же
-телом возвращает прежний результат; другое тело — `409 IDEMPOTENCY_CONFLICT`.
-Для snapshot ключ равен `uploadId`, для аналитики — `batchId`.
+доступа. Область ключа - HTTP-метод, маршрут и deviceId. Одинаковый ключ с тем же
+телом возвращает прежний результат; другое тело - `409 IDEMPOTENCY_CONFLICT`.
+Для snapshot ключ равен `uploadId`, для аналитики - `batchId`.
 Читающие POST не требуют этого заголовка и не меняют игровой мир.
 
 `gameRunId` обозначает конкретное прохождение, чтобы награда или аналитика не
@@ -28,11 +28,12 @@ QR содержит ровно сохранённый `deviceId`, обычным
 
 ## 1. Регистрация питомца
 
-Актуализация формата мира: snapshot **5** сохраняет также полные прошлые
-прохождения после финального возврата Хроноскопа; Room **22**. Ручки и `deviceId`
-в JSON остаются прежними. Backend должен принимать смену run при подтверждённой
-цепочке `archivedRuns` и прежней серверной ревизии; подробности в
-[формате snapshot](world-snapshot.md#возвращение-через-хроноскоп-после-пятой-главы).
+По CLOUD-WORLD-D-001 новые snapshot содержат только текущий мир:
+`payloadKind=CURRENT_WORLD`, внутренний `worldFormatVersion=1`. Локальный
+snapshot format5 с audit и архивами остаётся на устройстве. Прежние полные
+форматы читаются; старые замороженные запросы продолжают повторяться побайтово.
+HTTP-ручки, deviceId, ID запросов и серверные ревизии сохраняются.
+[Формат мира и restore](world-snapshot.md).
 
 `POST https://fin-api.mortypython.ru/api/pets`
 
@@ -65,7 +66,7 @@ QR содержит ровно сохранённый `deviceId`, обычным
 [Полный запрос](examples/register-profile.json),
 [ответ](examples/register-profile-response.json).
 
-## 2. Отправка полного snapshot
+## 2. Отправка текущего мира
 
 `PUT https://fin-api.mortypython.ru/v1/profiles/snapshot`
 
@@ -74,19 +75,19 @@ QR содержит ровно сохранённый `deviceId`, обычным
 
 **Тело:** `deviceId`, `uploadId`, `expectedServerRevision`, `gameRunId`,
 `throughHistorySequence`, `currentContentFingerprint`, `snapshotFormatVersion`,
-`checksum`, `snapshotJson`, `schemaVersion`.
+`checksum`, `snapshotJson`, `schemaVersion`, `payloadKind="CURRENT_WORLD"`.
 [Полный запрос](examples/snapshot-upload.json),
 [ответ](examples/snapshot-upload-response.json).
 
 Ответ `201` для первой записи / `200` для последующих: `uploadId`, `gameRunId`,
-`serverRevision`, `checksum`. Первая ревизия — 1; принятая новая запись увеличивает
+`serverRevision`, `checksum`. Первая ревизия - 1; принятая новая запись увеличивает
 её на один. Повтор прежней операции ревизию не увеличивает.
 
 - `expectedServerRevision=null` означает отсутствие серверного архива.
-- Иначе ожидаемая ревизия должна совпасть с текущей; конфликт —
+- Иначе ожидаемая ревизия должна совпасть с текущей; конфликт -
   `409 SNAPSHOT_REVISION_CONFLICT`, без замены архива.
 - `snapshotJson` хранится и возвращается **неизменённой строкой**. Внутри полный
-  текущий мир, журнал, история решений и квитанции подарков. Сервер не сортирует
+  текущий мир и компактные квитанции подарков, без audit и архивов. Сервер не сортирует
   массивы, не округляет числа и не пересобирает JSON.
 - Архив и его новая ревизия сохраняются атомарно. Клиент не заменяет свой
   более свежий мир серверным при обычной синхронизации.
@@ -96,7 +97,7 @@ QR содержит ровно сохранённый `deviceId`, обычным
 ```kotlin
 val body = snapshotUploadRequest(
     deviceId = identity.deviceId,
-    snapshot = session.exportSnapshot(),
+    snapshot = checkNotNull(games.readCloudWorld()).world,
     uploadId = UUID.randomUUID().toString(),
     expectedServerRevision = null, // только при отсутствии серверной копии
     currentContentFingerprint = session.contentFingerprint,
@@ -117,7 +118,7 @@ val bodyJson = BackendJson.encodeToString(body)
 **Когда:** сверка неизвестной серверной ревизии и действие восстановления в
 настройках. Ответ `200`: `gameRunId`, `serverRevision`,
 `currentContentFingerprint`, `snapshotJson`, `schemaVersion`.
-Если архива нет — `404` с `{"code":"SNAPSHOT_NOT_FOUND"}`.
+Если архива нет - `404` с `{"code":"SNAPSHOT_NOT_FOUND"}`.
 [Запрос](examples/snapshot-download-request.json),
 [ответ](examples/snapshot-download-response.json).
 
@@ -147,9 +148,9 @@ val bodyJson = BackendJson.encodeToString(body)
 [ответ](examples/parent-rewards-response.json).
 
 Журнал неизменяемый, sequence непрерывен с 1 для каждого устройства/прохождения.
-Страница начинается после afterSequence; limit — 1…100, Android запрашивает 50.
-nextAfterSequence — номер последней записи либо исходный курсор пустой страницы.
-У пустой страницы hasMore=false. Незарегистрированное прохождение —
+Страница начинается после afterSequence; limit - 1…100, Android запрашивает 50.
+nextAfterSequence - номер последней записи либо исходный курсор пустой страницы.
+У пустой страницы hasMore=false. Незарегистрированное прохождение -
 `409 GAME_RUN_NOT_REGISTERED`. Записи остаются доступными после ACK, поскольку
 восстановленный старый архив может ещё не содержать их применения.
 
@@ -185,7 +186,9 @@ ACK сам не начисляет награду и не удаляет её. �
 `POST https://fin-api.mortypython.ru/v1/profiles/analytics`
 
 **Когда:** изменились сохранённые данные аналитики. Отчёт строится на той же
-границе истории, что полный snapshot.
+эффективной границе истории, что текущий world snapshot. После восстановления
+`historyStartSequence` обозначает отсутствующую локальную часть; сервер хранит
+уже принятые факты и не считает её отсутствие провалом ребёнка.
 
 **Тело:** `deviceId`, `batchId`, `gameRunId`, `throughHistorySequence`, `facts`,
 `skills`, `schemaVersion`, `projectionVersion`, `evaluatorVersion`.
@@ -239,10 +242,9 @@ ACK сам не начисляет награду и не удаляет её. �
 
 ## Проверяемые примеры
 
-Основные snapshot/analytics JSON сгенерированы настоящими Kotlin DTO и
-HistoryCodec из **синтетического минимального мира**. В нём запись INITIALIZED
-с sequence=1 и валидный checksum; это транспортная фикстура, не данные ребёнка.
-Fingerprint принадлежит отдельному синтетическому каталогу, не bundled-каталогу
-приложения. [world-snapshot.json](examples/world-snapshot.json),
-[генератор](tools/README.md).
-Примеры запросов содержат полные JSON-тела и готовы для разбора на сервере.
+Примеры описывают синтетический минимальный мир: текущие деньги и состояние,
+server cursor 1, без решений и свидетельств освоения. Новые world JSON обновлены
+по текущим полям и формуле подписи. Kotlin-генератор обновлён для WorldSnapshot;
+сборка и запуск генератора в этой правке не выполнялись по просьбе пользователя.
+Fingerprint остаётся примером синтетического каталога, не bundled-каталога.
+[world-snapshot.json](examples/world-snapshot.json), [генератор](tools/README.md).

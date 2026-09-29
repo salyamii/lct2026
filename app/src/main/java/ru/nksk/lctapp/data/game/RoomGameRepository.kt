@@ -41,6 +41,11 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
 
     override suspend fun initializeIfAbsent(initial: GameState): GameState = withLiveBudgetWrite {
         readInTransaction() ?: run {
+            if (archives.latestNextRunId() != null) {
+                check(database.onboardingDraftDao().read()?.step == "INTRODUCTION") {
+                    "Choose the new companion before initializing the next run"
+                }
+            }
             dao.insertState(initial.toEntity())
             writeChildren(initial)
             database.onboardingDraftDao().clear()
@@ -235,7 +240,132 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
         }
     }
 
-    override suspend fun readHistory(): List<AuditEntry> = withLiveBudgetRead { history.read().map { it.decode() } }
+    override suspend fun readHistory(): List<AuditEntry> = withLiveBudgetRead { history.read().encodedEntries() }
+
+    override suspend fun readSnapshotHead(): GameSnapshotHead? = withLiveBudgetRead {
+        val current = readInTransaction() ?: return@withLiveBudgetRead null
+        val run = history.run(CURRENT_GAME_ID) ?: return@withLiveBudgetRead null
+        GameSnapshotHead(run.runId, current, history.sequence())
+    }
+
+    override suspend fun readCloudWorld(): CloudWorldRead? {
+        val rows = withLiveBudgetRead { captureCloudRows() } ?: return null
+        return withContext(Dispatchers.Default) { rows.toCloudRead() }
+    }
+
+    override suspend fun readCloudEvidence(): CloudEvidenceRead? {
+        val captured = withLiveBudgetRead {
+            val head = captureCloudRows() ?: return@withLiveBudgetRead null
+            head to history.fromSequence(head.runId, head.baseline?.sequence ?: 1L)
+        } ?: return null
+        return withContext(Dispatchers.Default) {
+            val (head, rows) = captured
+            CloudEvidenceRead(head.toCloudRead(), HistoryCodec.encodedHistory(rows.map { it.payload }) { index, entry ->
+                rows[index].requireMatches(entry)
+            })
+        }
+    }
+
+    private data class CloudReadRows(
+        val runId: String,
+        val state: GameState,
+        val sequence: Long,
+        val latestId: String?,
+        val generation: String,
+        val baseline: CloudBaselineRow?,
+        val rewardPayloads: List<String>,
+        val predecessors: List<CloudWorldAncestor>,
+    ) {
+        fun toCloudRead(): CloudWorldRead {
+            val restored = baseline?.let { WorldSnapshotCodec.decodeBaseline(it.payload) }
+            val rewards = linkedMapOf<String, ParentRewardApplication>()
+            (restored?.parentRewards.orEmpty() + rewardPayloads.map(WorldSnapshotCodec::decodeParentReward)).forEach {
+                val prior = rewards.putIfAbsent(it.reward.rewardId, it)
+                require(prior == null || prior == it) { "Conflicting parent reward receipt" }
+            }
+            val effective = restored?.let { Math.addExact(it.sourceHistorySequence, sequence - checkNotNull(baseline).sequence) }
+                ?: sequence
+            return CloudWorldRead(WorldSnapshotCodec.create(runId, state, effective, generation,
+                rewards.values.toList(), predecessors), sequence, latestId, baseline?.sequence,
+                restored?.sourceHistorySequence ?: 0L)
+        }
+    }
+
+    private suspend fun captureCloudRows(through: Long? = null): CloudReadRows? {
+        val current = readInTransaction() ?: return null
+        val run = history.run(CURRENT_GAME_ID) ?: return null
+        val latest = history.sequence()
+        val sequence = through ?: latest
+        if (sequence !in 1..latest) return null
+        val state = if (sequence == latest) current else history.checkpointThrough(run.runId, sequence)?.decode()?.after ?: return null
+        val baseline = history.cloudBaseline(run.runId, sequence)
+        val restored = baseline?.let { WorldSnapshotCodec.decodeBaseline(it.payload) }
+        return CloudReadRows(run.runId, state, sequence, if (sequence == latest) history.latestId() else null,
+            localGameGeneration(run.runId, history.restoreIdThrough(run.runId, sequence)), baseline,
+            history.parentRewardPayloads(run.runId, baseline?.sequence ?: 0L, sequence),
+            cloudPredecessors(run.runId, restored?.predecessors.orEmpty()))
+    }
+
+    /** Archive headers contain only lineage/cursors; historical worlds stay encoded in SQLite. */
+    private suspend fun cloudPredecessors(runId: String, inherited: List<CloudWorldAncestor>): List<CloudWorldAncestor> {
+        val result = inherited.associateByTo(linkedMapOf()) { it.runId }
+        val visited = hashSetOf(runId)
+        var next = runId
+        while (true) {
+            val prior = archives.predecessorHead(next) ?: break
+            check(visited.add(prior.runId)) { "Cyclic archived game runs" }
+            val baseline = prior.baselinePayload?.let(WorldSnapshotCodec::decodeBaseline)
+            baseline?.predecessors.orEmpty().forEach { result.putIfAbsent(it.runId, it) }
+            val effective = baseline?.let { Math.addExact(it.sourceHistorySequence,
+                prior.historySequence - checkNotNull(prior.baselineSequence)) } ?: prior.historySequence
+            result[prior.runId] = CloudWorldAncestor(prior.runId, localGameGeneration(prior.runId, prior.restoreId), effective)
+            next = prior.runId
+        }
+        return result.values.toList()
+    }
+
+    override suspend fun readCommandReceipt(requestId: String): AuditEntry? {
+        require(requestId.isNotBlank())
+        val row = withLiveBudgetRead {
+            val run = history.run(CURRENT_GAME_ID) ?: return@withLiveBudgetRead null
+            history.find("command:${run.runId}:$requestId") ?: history.commandByRequest(run.runId, requestId)
+        }
+        return withContext(Dispatchers.Default) {
+            row?.decode()?.also {
+                check(it.type == AuditType.COMMAND && it.request?.id == requestId) { "Command receipt does not match its request" }
+            }
+        }
+    }
+
+    override suspend fun readLatestCommand(): AuditEntry? {
+        val row = withLiveBudgetRead {
+            history.run(CURRENT_GAME_ID)?.let { history.latestCommand(it.runId) }
+        }
+        return withContext(Dispatchers.Default) {
+            row?.decode()?.also { check(it.type == AuditType.COMMAND && it.request != null) }
+        }
+    }
+
+    override suspend fun readExpenseRecoveryHistory(): List<AuditEntry> {
+        val rows = withLiveBudgetRead {
+            history.run(CURRENT_GAME_ID)?.let { history.expenseRecoveryHistory(it.runId) }.orEmpty()
+        }
+        return withContext(Dispatchers.Default) { rows.map { it.decode() } }
+    }
+
+    override suspend fun readBudgetPlanHistory(planId: String): List<AuditEntry> {
+        require(planId.isNotBlank())
+        val rows = withLiveBudgetRead {
+            val run = history.run(CURRENT_GAME_ID) ?: return@withLiveBudgetRead emptyList()
+            // Current plans use <request>:plan. Older restored IDs retain a JSON-filtered fallback.
+            val canonical = planId.takeIf { it.endsWith(":plan") }?.removeSuffix(":plan")
+                ?.let { history.find("command:${run.runId}:$it") }
+            val sequence = canonical?.sequence ?: history.budgetPlanAnchor(run.runId, planId)
+                ?: return@withLiveBudgetRead emptyList()
+            history.fromSequence(run.runId, sequence)
+        }
+        return withContext(Dispatchers.Default) { rows.map { it.decode() } }
+    }
 
     override suspend fun latestHistoryId(): String? = withLiveBudgetRead { history.latestId() }
 
@@ -337,6 +467,15 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
         if (ids.isNotEmpty()) history.acknowledge(ids.toList())
     }
 
+    override suspend fun acknowledgeOutboxThrough(runId: String, generation: String, throughSequence: Long): Boolean = withLiveBudgetWrite {
+        require(throughSequence >= 0)
+        val currentRun = history.run(CURRENT_GAME_ID) ?: return@withLiveBudgetWrite false
+        if (currentRun.runId != runId || localGameGeneration(runId, history.latestRestoreId(runId)) != generation ||
+            throughSequence > history.sequence()) return@withLiveBudgetWrite false
+        history.acknowledgeThrough(runId, throughSequence)
+        true
+    }
+
     override suspend fun applyParentRewards(profileId: String, gameRunId: String, rewards: List<ParentRewardDto>,
         expectedRestoreGeneration: String): List<ParentRewardReceiptDto> = withLiveBudgetWrite {
         require(profileId.isNotBlank() && gameRunId.isNotBlank() && expectedRestoreGeneration.isNotBlank())
@@ -345,19 +484,26 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
         if (run.runId != gameRunId || localGameGeneration(run.runId, history.latestRestoreId(run.runId)) != expectedRestoreGeneration)
             throw ParentRewardTargetChangedException()
         require(rewards.all { it.profileId == profileId && it.gameRunId == gameRunId }) { "Parent reward belongs to another profile or game run" }
-        history.firstParentReward(run.runId)?.decode()?.parentReward?.let {
+        val cloudBaseline = history.cloudBaseline(run.runId, history.sequence())
+        val restoredRewards = cloudBaseline?.let { WorldSnapshotCodec.decodeBaseline(it.payload).parentRewards }.orEmpty()
+        val branchRewards = history.parentRewardPayloads(run.runId, cloudBaseline?.sequence ?: 0L, history.sequence())
+            .map(WorldSnapshotCodec::decodeParentReward)
+        val recorded = linkedMapOf<String, ParentRewardApplication>()
+        (restoredRewards + branchRewards).forEach {
             require(it.reward.profileId == profileId) { "Parent rewards are already bound to another profile" }
+            val prior = recorded.putIfAbsent(it.reward.rewardId, it)
+            if (prior != null && prior != it) throw ParentRewardConflictException(it.reward.rewardId)
         }
         val unique = rewards.groupBy { it.rewardId }.map { (id, copies) ->
             if (copies.any { it != copies.first() }) throw ParentRewardConflictException(id)
             copies.first()
         }
         fun entryId(rewardId: String) = "parent-reward:" + HistoryCodec.sha256(
-            listOf(run.runId, rewardId).joinToString("") { "${it.length}:$it" })
+            (if (cloudBaseline == null) listOf(run.runId, rewardId)
+            else listOf(run.runId, expectedRestoreGeneration, rewardId)).joinToString("") { "${it.length}:$it" })
         // Validate every previously committed identity before applying any new grant in this batch.
-        val previous = unique.mapNotNull { reward -> history.find(entryId(reward.rewardId))?.decode()?.let { entry ->
-            val application = entry.parentReward
-            if (application == null || application.reward != reward) throw ParentRewardConflictException(reward.rewardId)
+        val previous = unique.mapNotNull { reward -> recorded[reward.rewardId]?.let { application ->
+            if (application.reward != reward) throw ParentRewardConflictException(reward.rewardId)
             reward.rewardId to application.receipt
         } }.toMap()
         val accessories = database.storyContentDao().readItem().filter { it.category == "ACCESSORY" }.map { it.id }.toSet()
@@ -387,15 +533,37 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
         receipts
     }
 
-    override suspend fun exportSnapshot(): GameSnapshot = withLiveBudgetWrite {
-        val current = checkNotNull(readInTransaction()) { "Game has not been initialized" }
-        val run = ensureBaseline(current)
-        HistoryCodec.snapshot(run.runId, current, history.read().map { it.decode() }, archives.read().map { it.decodeArchive() })
+    override suspend fun exportSnapshot(): GameSnapshot {
+        val captured = withLiveBudgetWrite {
+            val current = checkNotNull(readInTransaction()) { "Game has not been initialized" }
+            val run = ensureBaseline(current)
+            SnapshotExportRows(run.runId, current, history.read(), archives.read().map {
+                ArchiveExportRows(it, archives.readHistory(it.runId))
+            })
+        }
+        // The detached rows belong to one committed world. Decoding its complete history and
+        // checksumming archives must not hold the writer needed by the next player action.
+        return withContext(Dispatchers.Default) {
+            HistoryCodec.snapshot(captured.runId, captured.state,
+                captured.history.encodedEntries(), captured.archives.map { it.decodeArchive() })
+        }
     }
 
+    private data class SnapshotExportRows(
+        val runId: String,
+        val state: GameState,
+        val history: List<GameAuditEntity>,
+        val archives: List<ArchiveExportRows>,
+    )
+
+    private data class ArchiveExportRows(
+        val header: GameRunArchiveEntity,
+        val entries: List<GameRunArchiveAuditEntity>,
+    )
+
     override suspend fun archivedRuns(): List<ArchivedGameRunSummary> = withLiveBudgetRead {
-        archives.read().map { row -> row.decodeArchive().snapshot.let {
-            ArchivedGameRunSummary(it.runId, it.state.pet.name, it.state.engine?.day, it.history.size)
+        archives.read().map { row -> row.decodeHeader().let {
+            ArchivedGameRunSummary(it.runId, it.state.pet.name, it.state.engine?.day, Math.toIntExact(it.historySequence))
         } }
     }
 
@@ -407,24 +575,21 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
         transform: (GameState, GameState?) -> GameState): GameState = withLiveBudgetWrite {
         val current = checkNotNull(readInTransaction()) { "Game has not been initialized" }
         val run = ensureBaseline(current)
-        archives.forRestart(request.id)?.decodeArchive()?.let { prior ->
-            require(prior.snapshot.runId == request.expectedRunId &&
-                prior.snapshot.state.engine?.revision == request.expectedEngineRevision &&
-                prior.snapshot.historySequence == request.expectedHistorySequence) { "Conflicting rewind identity" }
+        archives.forRestart(request.id)?.let { prior ->
+            val saved = prior.decodeHeader()
+            require(saved.runId == request.expectedRunId &&
+                saved.state.engine?.revision == request.expectedEngineRevision &&
+                saved.historySequence == request.expectedHistorySequence) { "Conflicting rewind identity" }
             if (prior.nextRunId != run.runId) throw CampaignRestartConflictException()
             return@withLiveBudgetWrite current
         }
         if (run.runId != request.expectedRunId || current.engine?.revision != request.expectedEngineRevision ||
             history.sequence() != request.expectedHistorySequence) throw CampaignRestartConflictException()
-        val previousHistory = history.read().map { it.decode() }
-        val previous = HistoryCodec.snapshot(run.runId, current, previousHistory)
-        HistoryCodec.validate(previous)
-        val initial = previousHistory.firstOrNull { it.type == AuditType.INITIALIZED }?.after
+        val initial = history.initialization(run.runId)?.decode()?.after
         val next = transform(current, initial)
         require(next.economy.hasValidLiveBudget()) { "Invalid new-game budget" }
         val nextRunId = UUID.randomUUID().toString()
-        archives.insert(GameRunArchiveEntity(run.runId, archives.read().size, request.id,
-            nextRunId, HistoryCodec.encodeSnapshot(previous)))
+        archiveCurrentRun(run.runId, current, request.id, nextRunId)
         finance.clearPractice(); finance.clearCursor(); finance.clearPlans(); finance.clearPeriods()
         history.clearOutbox(); history.clearFacts(); history.clearAudit(); history.clearRun()
         persistGame(next)
@@ -435,6 +600,181 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
         appendAudit(AuditEntry("initialize:$nextRunId", 1, nextRunId, AuditType.INITIALIZED, after = saved))
         saved
     }
+
+    override suspend fun prepareCampaignRestart(request: CampaignRestartRequest,
+        validateCurrent: (GameState) -> Unit) = withLiveBudgetWrite {
+        val current = readInTransaction()
+        val run = history.run(CURRENT_GAME_ID)
+        archives.forRestart(request.id)?.let { prior ->
+            val saved = prior.decodeHeader()
+            if (saved.runId != request.expectedRunId || saved.state.engine?.revision != request.expectedEngineRevision ||
+                saved.historySequence != request.expectedHistorySequence ||
+                (run != null && run.runId != prior.nextRunId) ||
+                (run == null && archives.latestNextRunId() != prior.nextRunId)) {
+                throw CampaignRestartConflictException()
+            }
+            return@withLiveBudgetWrite
+        }
+        if (current == null || run == null || run.runId != request.expectedRunId ||
+            current.engine?.revision != request.expectedEngineRevision || history.sequence() != request.expectedHistorySequence) {
+            throw CampaignRestartConflictException()
+        }
+        validateCurrent(current)
+        archiveCurrentRun(run.runId, current, request.id, UUID.randomUUID().toString())
+        finance.clearPractice(); finance.clearCursor(); finance.clearPlans(); finance.clearPeriods()
+        history.clearOutbox(); history.clearFacts(); history.clearAudit(); history.clearRun()
+        dao.deleteBudgetPlanning(CURRENT_GAME_ID)
+        dao.deleteEventExposure(CURRENT_GAME_ID)
+        dao.deleteMiniGameCompletions(CURRENT_GAME_ID)
+        dao.deleteGoalSelection(CURRENT_GAME_ID)
+        dao.deleteSavingGoalSelection(CURRENT_GAME_ID)
+        dao.deleteCompletedGoalProjects(CURRENT_GAME_ID)
+        dao.deleteDecisions(CURRENT_GAME_ID)
+        dao.deleteOwnedItems(CURRENT_GAME_ID)
+        dao.deleteEngineEvents(CURRENT_GAME_ID)
+        dao.deleteEngineDeeds(CURRENT_GAME_ID)
+        dao.deleteDayJournal(CURRENT_GAME_ID)
+        dao.deleteEngine(CURRENT_GAME_ID)
+        dao.deleteLegacyExpenseState(CURRENT_GAME_ID)
+        check(dao.deleteArchivedState(CURRENT_GAME_ID) == 1)
+        database.onboardingDraftDao().save(OnboardingDraftEntity(
+            name = "", temperament = "Curious", fur = "Copper", step = "CHARACTER"))
+    }
+
+    /** Called inside the restart transaction: no combined history String is ever created. */
+    private suspend fun archiveCurrentRun(runId: String, current: GameState, requestId: String, nextRunId: String) {
+        val sequence = history.sequence()
+        val header = HistoryCodec.createArchiveHeader(runId, current, sequence) { after, limit ->
+            history.readPage(runId, after, limit).map { row ->
+                // Keep the persisted index and payload in agreement while processing one small page.
+                row.requireMatches(HistoryCodec.decodeEntry(row.payload))
+                row.payload
+            }
+        }
+        archives.insert(GameRunArchiveEntity(runId, archives.nextPosition(), requestId, nextRunId, header))
+        archives.insertActiveHistory(runId)
+    }
+
+    override suspend fun restoreCloudWorld(world: WorldSnapshot, expected: RestoreGuard, restoreRequestId: String): GameState {
+        WorldSnapshotCodec.validate(world)
+        require(restoreRequestId.isNotBlank())
+        require(world.legacyBudgetModel || world.state.economy.hasValidLiveBudget()) { "Live budget does not reconcile with the available account" }
+        return withLiveBudgetWrite {
+            val current = readInTransaction()
+            val currentRun = history.run(CURRENT_GAME_ID)
+            findCloudRestoreInTransaction(restoreRequestId)?.let { receipt ->
+                require(receipt.sourceChecksum == world.checksum && receipt.runId == world.runId) { "Conflicting cloud restore identity" }
+                val currentGeneration = currentRun?.let { localGameGeneration(it.runId, history.latestRestoreId(it.runId)) }
+                val stillCurrent = currentRun?.runId == receipt.runId && currentGeneration == receipt.generation
+                val predecessor = currentRun?.let { cloudPredecessors(it.runId, emptyList()) }.orEmpty()
+                    .any { it.runId == receipt.runId && it.generation == receipt.generation }
+                require(stillCurrent || predecessor) { "The restored world has since been replaced" }
+                return@withLiveBudgetWrite checkNotNull(current)
+            }
+            require(current?.engine?.revision == expected.engineRevision && history.sequence() == expected.historySequence) {
+                "Local game changed since restore was requested"
+            }
+            world.state.engine?.rulesId?.let { rules ->
+                require((expected.supportedRulesId ?: current?.engine?.rulesId) == rules) { "Incompatible game rules" }
+            }
+            require(!archives.contains(world.runId)) { "This run already exists in the local completed archive" }
+            val sameRun = currentRun?.runId == world.runId
+            // Same-run restoration preserves the local journal, with an explicit discontinuity.
+            // An explicit different-run restore replaces active history; completed local archives remain intact.
+            finance.clearPractice(); finance.clearCursor(); finance.clearPlans(); finance.clearPeriods()
+            if (!sameRun) {
+                history.clearOutbox(); history.clearFacts(); history.clearAudit(); history.clearRun()
+            }
+            if (current == null) {
+                dao.insertState(world.state.toEntity())
+                writeChildren(world.state)
+            } else persistGame(world.state)
+            database.onboardingDraftDao().clear()
+            if (!sameRun) history.insertRun(GameRunEntity(CURRENT_GAME_ID, world.runId))
+            val saved = checkNotNull(readInTransaction())
+            check(HistoryCodec.encodeState(saved) == HistoryCodec.encodeState(world.state)) { "Restored world was not preserved completely" }
+            appendAudit(AuditEntry("restore-world:$restoreRequestId", nextSequence(), world.runId, AuditType.RESTORED,
+                after = saved, worldRestore = WorldRestoreBaseline(world.historySequence, world.generation,
+                    world.checksum, restoreRequestId, world.parentRewards, world.predecessors)))
+            if (world.legacyBudgetModel) upgradeBudgetInTransaction(saved, world.runId) else saved
+        }
+    }
+
+    override suspend fun findCloudRestoreReceipt(restoreRequestId: String, source: WorldSnapshot?): CloudRestoreReceipt? = withLiveBudgetRead {
+        require(restoreRequestId.isNotBlank())
+        findCloudRestoreInTransaction(restoreRequestId) ?: source?.let { legacyCloudRestoreReceipt(restoreRequestId, it) }
+    }
+
+    private suspend fun findCloudRestoreInTransaction(requestId: String): CloudRestoreReceipt? {
+        history.cloudRestore(requestId)?.let { row ->
+            val run = checkNotNull(history.run(CURRENT_GAME_ID))
+            val baseline = WorldSnapshotCodec.decodeBaseline(row.payload)
+            return CloudRestoreReceipt(run.runId, localGameGeneration(run.runId, row.id), requestId, baseline.sourceChecksum)
+        }
+        return archives.cloudRestore(requestId)?.let { row ->
+            val baseline = WorldSnapshotCodec.decodeBaseline(row.payload)
+            CloudRestoreReceipt(row.runId, localGameGeneration(row.runId, row.id), requestId, baseline.sourceChecksum)
+        }
+    }
+
+    /** Compatibility for a durable restore intent written before compact-world receipts existed. */
+    private suspend fun legacyCloudRestoreReceipt(requestId: String, source: WorldSnapshot): CloudRestoreReceipt? {
+        WorldSnapshotCodec.validate(source)
+        val sequence = Math.addExact(source.historySequence, 1L)
+        if (history.run(CURRENT_GAME_ID)?.runId == source.runId) {
+            val marker = history.atSequence(source.runId, sequence)?.decode()
+            if (marker?.type == AuditType.RESTORED && marker.worldRestore == null && marker.after == source.state &&
+                captureCloudRows(source.historySequence)?.toCloudRead()?.world?.matchingLegacyFormat(source)?.checksum == source.checksum) {
+                return CloudRestoreReceipt(source.runId, localGameGeneration(source.runId, marker.id), requestId, source.checksum)
+            }
+        }
+        val archived = archives.find(source.runId)?.decodeArchive()?.snapshot ?: return null
+        val marker = archived.history.getOrNull((sequence - 1L).takeIf { it in 0..Int.MAX_VALUE }?.toInt() ?: return null)
+        if (marker?.type != AuditType.RESTORED || marker.worldRestore != null || marker.after != source.state) return null
+        if (archivedCloudPrefix(archived, source)?.checksum != source.checksum) return null
+        return CloudRestoreReceipt(source.runId, localGameGeneration(source.runId, marker.id), requestId, source.checksum)
+    }
+
+    override suspend fun cloudContains(world: WorldSnapshot): Boolean = withLiveBudgetRead {
+        WorldSnapshotCodec.validate(world)
+        val rows = captureCloudRows() ?: return@withLiveBudgetRead false
+        val head = rows.toCloudRead()
+        val baseline = rows.baseline?.let { WorldSnapshotCodec.decodeBaseline(it.payload) }
+        if (rows.runId == world.runId && baseline?.sourceChecksum == world.checksum) return@withLiveBudgetRead true
+        if (rows.runId == world.runId) {
+            if (head.generation != world.generation) return@withLiveBudgetRead false
+            val localSequence = localCloudSequence(head, world.historySequence) ?: return@withLiveBudgetRead false
+            return@withLiveBudgetRead captureCloudRows(localSequence)?.toCloudRead()?.world?.matchingLegacyFormat(world)?.checksum == world.checksum
+        }
+        if (head.world.predecessors.none { it.runId == world.runId && it.generation == world.generation }) return@withLiveBudgetRead false
+        val archived = archives.find(world.runId)?.decodeArchive()?.snapshot ?: return@withLiveBudgetRead false
+        archivedCloudPrefix(archived, world)?.checksum == world.checksum
+    }
+
+    private fun localCloudSequence(head: CloudWorldRead, transportSequence: Long): Long? {
+        val sequence = head.baselineSequence?.let {
+            if (transportSequence < head.sourceHistorySequence) return null
+            Math.addExact(it, transportSequence - head.sourceHistorySequence)
+        } ?: transportSequence
+        return sequence.takeIf { it in 1..head.localHistorySequence }
+    }
+
+    /** Rare lineage recovery decodes one archived checkpoint at a time through the lazy local codec. */
+    private suspend fun archivedCloudPrefix(snapshot: GameSnapshot, world: WorldSnapshot): WorldSnapshot? {
+        val full = snapshot.toCloudWorldRead()
+        val localSequence = localCloudSequence(full, world.historySequence) ?: return null
+        if (localSequence > snapshot.history.size) return null
+        val prefix = snapshot.history.subList(0, localSequence.toInt())
+        val state = prefix.lastOrNull { it.after != null }?.after ?: return null
+        val captured = snapshot.copy(state = state, history = prefix, historySequence = localSequence).toCloudWorldRead()
+        if (captured.generation != world.generation) return null
+        val predecessors = cloudPredecessors(snapshot.runId, captured.world.predecessors)
+        return WorldSnapshotCodec.create(snapshot.runId, state, captured.world.historySequence, captured.generation,
+            captured.world.parentRewards, predecessors).matchingLegacyFormat(world)
+    }
+
+    private fun WorldSnapshot.matchingLegacyFormat(source: WorldSnapshot): WorldSnapshot =
+        if (source.legacyBudgetModel) WorldSnapshotCodec.withLegacyBudgetModel(this) else this
 
     override suspend fun restoreSnapshot(snapshot: GameSnapshot, expected: RestoreGuard): GameState {
         HistoryCodec.validate(snapshot)
@@ -455,7 +795,17 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
             archives.clear()
             snapshot.archivedRuns.forEachIndexed { position, archive ->
                 archives.insert(GameRunArchiveEntity(archive.snapshot.runId, position, archive.restartRequestId,
-                    archive.nextRunId, HistoryCodec.encodeSnapshot(archive.snapshot)))
+                    archive.nextRunId, HistoryCodec.encodeArchiveHeader(archive.snapshot)))
+                // Bounded batches also preserve full local archives imported from older snapshots.
+                var start = 0
+                while (start < archive.snapshot.history.size) {
+                    val end = minOf(start + 16, archive.snapshot.history.size)
+                    archives.insertHistory((start until end).map { index ->
+                        val entry = archive.snapshot.history[index]
+                        GameRunArchiveAuditEntity(archive.snapshot.runId, entry.sequence, HistoryCodec.encode(entry))
+                    })
+                    start = end
+                }
             }
             if (current == null) {
                 dao.insertState(snapshot.state.toEntity())
@@ -518,7 +868,7 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
     }
 
     private suspend fun ensureRun(): GameRunEntity = history.run(CURRENT_GAME_ID) ?: GameRunEntity(
-        CURRENT_GAME_ID, UUID.randomUUID().toString()).also { history.insertRun(it) }
+        CURRENT_GAME_ID, archives.latestNextRunId() ?: UUID.randomUUID().toString()).also { history.insertRun(it) }
 
     private suspend fun ensureBaseline(current: GameState): GameRunEntity = ensureRun().also { run ->
         if (history.sequence() == 0L) appendAudit(AuditEntry("baseline:${run.runId}", 1, run.runId,
@@ -534,16 +884,42 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
         history.insertOutbox(AuditOutboxEntity(entry.id))
     }
 
-    private fun GameAuditEntity.decode(): AuditEntry = HistoryCodec.decodeEntry(payload).also {
-        check(it.id == id && it.sequence == sequence && it.runId == runId && it.type.name == type && it.formatVersion == formatVersion) {
+    private fun GameAuditEntity.decode(): AuditEntry = HistoryCodec.decodeEntry(payload).also { requireMatches(it) }
+
+    private fun GameAuditEntity.requireMatches(entry: AuditEntry) {
+        check(entry.id == id && entry.sequence == sequence && entry.runId == runId && entry.type.name == type && entry.formatVersion == formatVersion) {
             "Historical payload does not match its index"
         }
     }
 
-    private fun GameRunArchiveEntity.decodeArchive(): ArchivedGameRun {
-        val snapshot = HistoryCodec.decodeSnapshot(snapshotPayload)
+    private fun List<GameAuditEntity>.encodedEntries(): List<AuditEntry> =
+        HistoryCodec.encodedHistory(map { it.payload }) { index, entry ->
+            val row = this[index]
+            check(entry.id == row.id && entry.sequence == row.sequence && entry.runId == row.runId &&
+                entry.type.name == row.type && entry.formatVersion == row.formatVersion) {
+                "Historical payload does not match its index"
+            }
+        }
+
+    private fun GameRunArchiveEntity.decodeHeader(): GameSnapshot {
+        val snapshot = HistoryCodec.decodeArchiveHeader(snapshotPayload)
         check(snapshot.runId == runId) { "Archived snapshot does not match its index" }
-        return ArchivedGameRun(restartRequestId, nextRunId, snapshot)
+        return snapshot
+    }
+
+    private suspend fun GameRunArchiveEntity.decodeArchive(): ArchivedGameRun =
+        ArchiveExportRows(this, archives.readHistory(runId)).decodeArchive()
+
+    private fun ArchiveExportRows.decodeArchive(): ArchivedGameRun {
+        val archiveHistory = HistoryCodec.encodedHistory(entries.map { it.payload }, canonical = false) { index, entry ->
+            val row = entries[index]
+            check(entry.runId == header.runId && row.archiveRunId == header.runId && entry.sequence == row.sequence) {
+                "Archived history does not match its index"
+            }
+        }
+        val snapshot = header.decodeHeader().copy(history = archiveHistory)
+        HistoryCodec.validate(snapshot)
+        return ArchivedGameRun(header.restartRequestId, header.nextRunId, snapshot)
     }
 
 }

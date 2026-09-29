@@ -134,9 +134,13 @@ SideEffect: a background window can stop scheduling frames before recomposition.
 Foreground return resumes the retained playback position and keeps sound preferences.
 
 Illustrated adventure screens and the menu use `GameArtworkScene` to reveal their
-initial image group together after asynchronous decode. Errors release the barrier;
+initial foreground image group together after asynchronous decode. Backgrounds,
+text and controls remain mounted and visible while images load; decoding never
+replaces the entire screen with a loading page. Errors release the barrier;
 later pose or clothing updates do not hide a scene already on screen. Scene identity
 is an event/location key, never the changing world revision or animation phase.
+Background blur uses a bounded cached software transform; a failed transform
+falls back once to the same location without blur. It never changes the location.
 
 Before a world exists, the same music projection selects the first authored act's
 theme for onboarding. App composition suppresses the music cue only while the
@@ -217,8 +221,12 @@ or decides whether a purchase is affordable.
 `MealPolicy` is the common food use case for engine transitions and UI offers:
 ordinary meal, free alternative, availability, food requirement and consequences.
 The ordinary price is the cheapest positive authored meal price, not the first
-list entry. The current bundled paid/free rules are unchanged. UI only formats
-these offers and renders the engine's block reasons.
+list entry. MEAL-D-001 adds paid options at 7/10 coins with HAPPY and capped
+current-energy restoration of 1/2; the ordinary 5-coin and free options retain
+their effects. A shared meal selector projects these offers and the engine's
+block reasons for Menu, Day and Tasks. Selecting, rather than opening the
+selector, executes Feed; the existing journal records its actual money/energy
+delta. Uncertain menu meal writes retain their request for an explicit retry.
 
 ## Learning scenarios
 
@@ -231,9 +239,16 @@ Each has its own state/actions and navigation entry. Stable route IDs remain
 and pure projectors remain reusable; no mode flag makes one ViewModel build all
 three scenarios on every answer.
 
-Ordinary training does not read the complete audit or calculate history reports.
-For an old plan-review question, `TrainingQuestionPresentation` caches only its
-immutable presentation keyed independently from answer/attempt/hint progress.
+Training reads the audit only to create a new plan review for an active financial
+period or to refresh a restored question's legacy wording. Saving, consequence,
+accounting and standalone examples use their frozen task or period values.
+The engine prepares only the requested period's report on `Dispatchers.Default`
+before the write transaction, then verifies the source snapshot still matches
+the latest transactional save. A concurrent change rejects the stale request.
+`TrainingQuestionPresentation` accepts current wording for questions authored by
+this screen and reconstructs frozen examples without history. Restored questions
+retain verified wording refresh; its immutable presentation is cached independently
+from answer/attempt/hint progress. History decoding and wording projection run off Main.
 Stale answers and uncertain writes retain their guards. Explanation exposure and
 automatic advancement respect the route's active lifecycle.
 
@@ -243,12 +258,15 @@ job. Re-entry reads the latest committed state.
 
 ## Persistence and compatibility
 
-Room is version 22; snapshot is format 5 and history format 1. Schemas and earlier
+Room is version 23; snapshot is format 5 and history format 1. Schemas and earlier
 migrations remain in `app/schemas`. A full snapshot includes the aggregate and
 complete validated history, plus the flat archive of completed runs. Restore does not mean merging multiple active devices.
 There is no destructive fallback or silent reset to the initial fixture.
 
 Format 5 also carries the flat archive of completed runs added by CAMPAIGN-D-002.
+Room v23 stores each archive's ordered audit records separately from its snapshot
+header, avoiding one complete history JSON string during restart. Migration 22→23
+splits existing archives inside SQLite, preserving their worlds and checksums.
 Release optimization remains disabled by [BUILD-D-001](design/decisions.md):
 stability work takes priority over reducing the package size.
 

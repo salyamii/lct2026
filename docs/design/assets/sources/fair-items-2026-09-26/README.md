@@ -1,4 +1,4 @@
-# Предметы ярмарки из Figma — 2026-09-26
+# Предметы ярмарки из Figma - 2026-09-26
 
 Five original image fills imported from the existing event cards in
 [«Питомец Дизайн»](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/).

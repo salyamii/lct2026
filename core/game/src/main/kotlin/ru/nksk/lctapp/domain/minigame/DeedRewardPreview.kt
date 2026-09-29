@@ -54,10 +54,9 @@ class DeedRewardPreview private constructor(
         }
 
         fun fromSequence(state: SequenceState): DeedRewardPreview {
-            require(state.round in 0..SequenceState.ROUNDS)
-            require(state.correct in 0..state.round)
+            require(state.isValid)
             val mistakes = state.round - state.correct
-            return DeedRewardPreview(mistakes, SequenceState.ROUNDS - mistakes, SequenceState.ROUNDS)
+            return DeedRewardPreview(mistakes, state.roundLimit - mistakes, state.roundLimit)
         }
 
         fun fromPipes(state: PipesState): DeedRewardPreview {

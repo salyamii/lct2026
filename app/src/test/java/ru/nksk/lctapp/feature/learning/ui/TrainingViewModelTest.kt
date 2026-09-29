@@ -5,6 +5,7 @@ import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -26,6 +27,8 @@ import ru.nksk.lctapp.domain.analytics.SkillId
 import ru.nksk.lctapp.domain.analytics.ObservationOutcome
 import ru.nksk.lctapp.domain.content.StoryContent
 import ru.nksk.lctapp.domain.content.StoryContentRepository
+import ru.nksk.lctapp.domain.demo.DemoPreferences
+import ru.nksk.lctapp.domain.demo.DemoPreferencesRepository
 import ru.nksk.lctapp.domain.economy.BudgetPlan
 import ru.nksk.lctapp.domain.economy.EconomyOperations
 import ru.nksk.lctapp.domain.economy.EconomyState
@@ -48,13 +51,15 @@ class TrainingViewModelTest {
     @After fun cleanup() { store.clear(); Dispatchers.resetMain() }
 
     @Test fun chapterPracticeAnswersOnlyMissingTopicsAndNeverStartsTheEndlessTrainingLoop() = runTest(dispatcher) {
-        val (repository, model) = fixture()
+        val (repository, model) = fixture(needsProvided = true)
         model.setChapterPractice()
         assertEquals(ChapterPracticeStep.SAVING, model.uiState.value.chapterStep)
         assertFalse(model.uiState.value.practiceOpen)
 
+        repository.failHistoryRead = true
         model.onAction(TrainingAction.StartChapterPractice)
         val saving = checkNotNull(model.uiState.first { !it.busy }.question)
+        assertEquals(0, repository.historyReads)
         assertEquals(FinancialQuestionKind.SAVING_PRACTICE, saving.kind)
         model.onAction(TrainingAction.QuestionPresented(saving.id))
         model.onAction(TrainingAction.Answer(saving.correctAnswerId))
@@ -66,20 +71,22 @@ class TrainingViewModelTest {
         runCurrent()
         assertEquals(attempts, repository.attempted.size)
 
+        repository.failHistoryRead = false
         model.onAction(TrainingAction.StartChapterPractice)
         val review = checkNotNull(model.uiState.first { !it.busy }.question)
+        assertEquals(1, repository.historyReads)
         assertEquals(FinancialQuestionKind.PLAN_REVIEW, review.kind)
         model.onAction(TrainingAction.QuestionPresented(review.id))
         model.onAction(TrainingAction.Answer(review.correctAnswerId))
         val reviewed = model.uiState.first { !it.busy }
-        assertEquals(ChapterPracticeStep.BUDGET, reviewed.chapterStep)
+        assertEquals(ChapterPracticeStep.COMPLETE, reviewed.chapterStep)
         assertNull(reviewed.automaticAdvance(resumed = true))
         assertEquals(2, repository.committed.values.count { it.command is EngineCommand.RequestFinancialPractice })
         assertFalse(repository.committed.values.any { it.command is EngineCommand.AdvanceFinancialPractice })
 
         val (restoredRepository, restoredModel) = fixture(savedGame = repository.state.value)
         restoredModel.setChapterPractice()
-        assertEquals(ChapterPracticeStep.BUDGET, restoredModel.uiState.value.chapterStep)
+        assertEquals(ChapterPracticeStep.COMPLETE, restoredModel.uiState.value.chapterStep)
         restoredModel.onAction(TrainingAction.StartChapterPractice)
         runCurrent()
         assertTrue(restoredRepository.attempted.isEmpty())
@@ -413,11 +420,12 @@ class TrainingViewModelTest {
     @Test fun answeringAdvancingAndClosingDoNotReadHistoryOrFailWhenHistoryIsUnavailable() = runTest(dispatcher) {
         val (repository, model) = fixture()
         assertEquals(0, repository.historyReads)
+        repository.failHistoryRead = true
         model.onAction(TrainingAction.ReviewTransactions)
         val first = checkNotNull(model.uiState.first { !it.busy }.question)
-        // Starting a series legitimately reads history inside the engine; rendering and answering do not.
+        // This topic uses the saved period totals; neither generation nor display needs the audit.
         val readsAfterStart = repository.historyReads
-        repository.failHistoryRead = true
+        assertEquals(0, readsAfterStart)
         model.onAction(TrainingAction.Answer(first.correctAnswerId))
         assertTrue(checkNotNull(model.uiState.first { !it.busy }.question).correct)
         model.onAction(TrainingAction.NextQuestion(first.id))
@@ -436,6 +444,7 @@ class TrainingViewModelTest {
         val question = checkNotNull(model.uiState.first { !it.busy }.question)
         assertNotNull(question.reviewEvidence)
         val readsAfterQuestion = repository.historyReads
+        assertEquals(1, readsAfterQuestion)
         repository.failHistoryRead = true
         model.onAction(TrainingAction.Answer(question.correctAnswerId))
         val answered = model.uiState.first { !it.busy }
@@ -445,8 +454,128 @@ class TrainingViewModelTest {
         assertNull(answered.error)
     }
 
+    @Test fun completedChapterPracticePreparesTheStoryBeforeNavigatingToDay() = runTest(dispatcher) {
+        val (initialRepository, _) = fixture()
+        val (repository, model) = fixture(savedGame = completedPractice(initialRepository.state.value))
+        model.setChapterPractice()
+        assertEquals(ChapterPracticeStep.COMPLETE, model.uiState.value.chapterStep)
+
+        model.continueStory()
+        model.uiState.first { !it.busy }
+
+        assertEquals(TrainingContinuationDestination.DAY, model.openContinuation.first())
+        assertEquals(EngineCommand.OpenNextEvent, repository.committed.values.single().command)
+        assertNotNull(repository.state.value.engine?.currentEvent)
+        assertTrue(repository.committed.values.none { it.command is EngineCommand.Feed || it.command is EngineCommand.ConfirmBudget })
+    }
+
+    @Test fun completedPracticeKeepsAGenuinePendingBudgetRequired() = runTest(dispatcher) {
+        val (initialRepository, _) = fixture()
+        val completed = completedPractice(initialRepository.state.value).let {
+            it.copy(economy = EconomyOperations.beginManual(it.economy, "still-required"))
+        }
+        val (repository, model) = fixture(savedGame = completed)
+        model.setChapterPractice()
+
+        model.continueStory()
+        model.uiState.first { !it.busy }
+
+        assertEquals(TrainingContinuationDestination.BUDGET, model.openContinuation.first())
+        assertTrue(repository.attempted.isEmpty())
+        assertEquals(completed, repository.state.value)
+    }
+
+    @Test fun uncertainStoryContinuationRetriesTheSameCommand() = runTest(dispatcher) {
+        val (initialRepository, _) = fixture()
+        val (repository, model) = fixture(savedGame = completedPractice(initialRepository.state.value))
+        model.setChapterPractice()
+        repository.failAfterCommit = true
+        model.continueStory()
+        assertTrue(model.uiState.first { !it.busy }.practiceRetryRequired)
+        val original = repository.attempted.single()
+
+        model.onAction(TrainingAction.Retry)
+        model.uiState.first { !it.busy }
+
+        assertEquals(TrainingContinuationDestination.DAY, model.openContinuation.first())
+        assertEquals(listOf(original, original), repository.attempted)
+        assertEquals(1, repository.committed.size)
+    }
+
+    @Test fun uncertainContinuationCanRetryAfterTheSaveObserverFails() = runTest(dispatcher) {
+        val (initialRepository, _) = fixture()
+        val (repository, model) = fixture(savedGame = completedPractice(initialRepository.state.value))
+        model.setChapterPractice()
+        repository.failAfterCommit = true
+        model.continueStory()
+        model.uiState.first { !it.busy }
+        val original = repository.attempted.single()
+        repository.observationHealthy.value = false
+        model.uiState.first { it.error == "Не удалось открыть тренировку. Повтори попытку." }
+        repository.observationHealthy.value = true
+
+        model.onAction(TrainingAction.Retry)
+        model.uiState.first { !it.busy }
+
+        assertEquals(TrainingContinuationDestination.DAY, model.openContinuation.first())
+        assertEquals(listOf(original, original), repository.attempted)
+        assertEquals(1, repository.committed.size)
+    }
+
+    @Test fun demoCanSkipAnOpenChapterQuestionWithoutAnsweringIt() = runTest(dispatcher) {
+        val (repository, model) = fixture(demoMode = true)
+        model.setChapterPractice()
+        model.onAction(TrainingAction.StartChapterPractice)
+        val question = checkNotNull(model.uiState.first { !it.busy }.question)
+        assertFalse(question.correct)
+        val before = repository.state.value
+
+        model.onAction(TrainingAction.SkipChapterPractice)
+        model.uiState.first { !it.busy }
+
+        assertEquals(TrainingContinuationDestination.DAY, model.openContinuation.first())
+        assertEquals(question, repository.state.value.financial.practice)
+        assertEquals(before.financial.currentPeriod!!.missingMilestones,
+            repository.state.value.financial.currentPeriod!!.missingMilestones)
+        assertTrue(repository.committed.values.none { it.command is EngineCommand.AnswerFinancialQuestion })
+        assertTrue(repository.committed.values.last().demoMode)
+        assertTrue(repository.facts.isEmpty())
+    }
+
+    @Test fun demoChapterSkipRoutesAnUnfinishedBudgetWithoutWritingIt() = runTest(dispatcher) {
+        val (repository, model) = fixture(planning = true, demoMode = true)
+        model.setChapterPractice()
+        val before = repository.state.value
+        model.onAction(TrainingAction.SkipChapterPractice)
+        model.uiState.first { !it.busy }
+        assertEquals(TrainingContinuationDestination.BUDGET, model.openContinuation.first())
+        assertEquals(before, repository.state.value)
+        assertTrue(repository.attempted.isEmpty())
+    }
+
+    @Test fun ordinaryChapterPracticeCannotRequestTheDemoSkip() = runTest(dispatcher) {
+        val (repository, model) = fixture()
+        model.setChapterPractice()
+        model.onAction(TrainingAction.SkipChapterPractice)
+        runCurrent()
+        assertFalse(model.uiState.value.demoMode)
+        assertFalse(model.uiState.value.busy)
+        assertTrue(repository.attempted.isEmpty())
+    }
+
+    private fun completedPractice(game: GameState): GameState {
+        val period = checkNotNull(game.financial.currentPeriod)
+        return game.copy(financial = game.financial.copy(periods = listOf(period.copy(
+            needsProvided = true,
+            savingPractice = checkNotNull(period.savingPractice).copy(recoveryQuestionId = "saving-answer"),
+            reviewEvidence = ru.nksk.lctapp.domain.finance.PeriodReviewEvidence("review-answer", "plan", true,
+                true, managedPlan = true),
+        ))))
+    }
+
     private suspend fun fixture(planning: Boolean = false, activeGoal: Boolean = true,
-        savedGame: GameState? = null): Pair<LearningRepository, TrainingViewModel> {
+        savedGame: GameState? = null, demoMode: Boolean = false,
+        needsProvided: Boolean = false): Pair<LearningRepository, TrainingViewModel> {
         val catalog = bundledGameCatalog()
         val initial = savedGame ?: FinancialPeriods.adopt(createInitialGameState().copy(
             economy = EconomyState(BudgetPlan(35, 20, 20, 25), availableBalance = 100, savingsBalance = 0),
@@ -455,12 +584,20 @@ class TrainingViewModelTest {
                 false, null, 100, emptyList(), emptyList()),
         ), imported = false).let { game ->
             if (planning) game.copy(economy = EconomyOperations.beginManual(game.economy, "unfinished")) else game
+        }.let { game ->
+            if (!needsProvided) game else game.copy(financial = game.financial.copy(periods =
+                game.financial.periods.map { it.copy(needsProvided = true) }))
         }
         val repository = LearningRepository(initial)
         val session = GameSession(repository, object : StoryContentRepository {
             override suspend fun read(): StoryContent = catalog.content
             override suspend fun install(content: StoryContent) = Unit
-        }, catalog, initial)
+        }, catalog, initial, object : DemoPreferencesRepository {
+            private val preferences = MutableStateFlow(DemoPreferences(demoMode))
+            override fun observe() = preferences
+            override suspend fun read() = preferences.value
+            override suspend fun setDemoModeEnabled(enabled: Boolean) { preferences.value = DemoPreferences(enabled) }
+        })
         val model = TrainingViewModel(session)
         store.put("learning", model)
         model.uiState.first { !it.loading }
@@ -471,6 +608,7 @@ class TrainingViewModelTest {
 /** Mirrors repository command identity semantics; failures can happen before or after commit. */
 private class LearningRepository(initial: GameState) : GameRepository {
     val state = MutableStateFlow(initial)
+    val observationHealthy = MutableStateFlow(true)
     val attempted = mutableListOf<EngineRequest>()
     val committed = linkedMapOf<String, EngineRequest>()
     val facts = mutableListOf<AnalyticsFact>()
@@ -484,7 +622,10 @@ private class LearningRepository(initial: GameState) : GameRepository {
         if (failHistoryRead) throw IOException("History unavailable")
         return emptyList()
     }
-    override fun observe() = state
+    override fun observe() = combine(state, observationHealthy) { game, healthy ->
+        if (!healthy) throw IOException("Observation unavailable")
+        game
+    }
     override suspend fun read() = state.value
     override suspend fun initializeIfAbsent(initial: GameState) = state.value
     override suspend fun update(transform: (GameState) -> GameState): GameState = transform(state.value).also { state.value = it }

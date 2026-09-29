@@ -56,7 +56,7 @@ class StoryProgress(
     private val campaign: StoryCampaign?,
     private val state: GameState,
 ) {
-    private val families = EventFamilyIndex(policies)
+    private val families by lazy(LazyThreadSafetyMode.PUBLICATION) { EventFamilyIndex(policies) }
     private val choiceIds = state.story.decisions.map { it.choiceId }.toSet()
     private val completedEvents = content.choices.filter { it.id in choiceIds }.map { it.eventId }.toSet()
     val facts: Set<String> = policies.values.flatMap { policy ->

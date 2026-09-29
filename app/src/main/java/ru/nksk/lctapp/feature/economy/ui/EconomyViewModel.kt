@@ -91,12 +91,14 @@ internal sealed interface EconomyAction {
     data object DismissError : EconomyAction
 }
 
+internal data class BudgetCompletion(val planningId: String?)
+
 /** Every durable outcome goes through the same game command transaction and analytics. */
 @HiltViewModel
 internal class EconomyViewModel @Inject constructor(private val session: GameSession) : ViewModel() {
     private val state = MutableStateFlow(EconomyUiState())
     val uiState = state.asStateFlow()
-    private val completions = Channel<Unit>(Channel.BUFFERED)
+    private val completions = Channel<BudgetCompletion>(Channel.BUFFERED)
     val completed = completions.receiveAsFlow()
     private data class Pending(val action: EconomyAction, val id: String = UUID.randomUUID().toString(),
         var request: EngineRequest? = null, val context: DecisionContext? = null,
@@ -106,6 +108,7 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
         val budgetEditBase: Long? = null)
     private val actions = Channel<Pending>(Channel.UNLIMITED)
     private var observation: Job? = null
+    private var screenActive = true
     private var expenseHistory: Job? = null
     private var budgetHistoryJob: Job? = null
     private var budgetHistoryRequest = 0L
@@ -131,12 +134,22 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
         }
     }
 
+    fun setActive(active: Boolean) {
+        if (screenActive == active) return
+        screenActive = active
+        if (active) observe() else {
+            observation?.cancel(); observation = null
+            expenseHistory?.cancel()
+            budgetHistoryJob?.cancel()
+        }
+    }
+
     private fun observe() {
-        if (observation?.isActive == true) return
+        if (!screenActive || observation?.isActive == true) return
         observation = viewModelScope.launch {
             try {
                 session.prepare()
-                if (expenseHistory == null) loadExpenseHistory()
+                if (expenseHistory == null || expenseHistory?.isCancelled == true) loadExpenseHistory()
                 session.observe().collect { game ->
                     checkNotNull(game) { "Game is not initialized" }
                     project(game)
@@ -307,10 +320,11 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
     }
 
     private fun loadExpenseHistory() {
+        if (!screenActive) return
         expenseHistory = viewModelScope.launch {
             state.value = state.value.copy(expenseHistoryLoading = true, expenseHistoryUnavailable = false)
             try {
-                val history = session.history()
+                val history = session.expenseRecoveryHistory()
                 val options = withContext(Dispatchers.Default) { unexpectedExpenseOptions(history, session.catalog) }
                 state.value = state.value.copy(unexpectedExpenses = options, expenseHistoryLoading = false,
                     selectedExpenseOperationId = state.value.selectedExpenseOperationId
@@ -327,6 +341,7 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
 
     /** A history response belongs only to the exact saved state that was displayed when requested. */
     private fun loadBudgetHistory() {
+        if (!screenActive) return
         val snapshot = projectedGame ?: return
         budgetHistoryJob?.cancel()
         val request = ++budgetHistoryRequest
@@ -335,7 +350,8 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
         budgetHistoryJob = viewModelScope.launch {
             fun isCurrent() = request == budgetHistoryRequest && state.value.budgetHistoryVisible && projectedGame == snapshot
             try {
-                val history = session.history()
+                val history = snapshot.financial.plans.lastOrNull()?.id
+                    ?.let { session.budgetPlanHistory(it) }.orEmpty()
                 val result = withContext(Dispatchers.Default) { budgetHistoryUi(snapshot, history) }
                 if (!isCurrent()) return@launch
                 state.value = state.value.copy(budgetHistory = result, budgetHistoryLoading = false,
@@ -368,7 +384,7 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
             pet = game.pet, revision = game.engine?.revision, savingsTarget = target,
             withdrawal = state.value.withdrawal.takeUnless { confirmationChanged },
             savingsStep = if (confirmationChanged) SavingsStep.WITHDRAW else state.value.savingsStep)
-        if (changed && state.value.budgetHistoryVisible) loadBudgetHistory()
+        if (screenActive && state.value.budgetHistoryVisible && (changed || budgetHistoryJob?.isCancelled == true)) loadBudgetHistory()
     }
 
     /** Captured from the rendered model, never invented from a fresh invisible storage read. */
@@ -420,7 +436,7 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
                 return
             }
             if (pending.action == EconomyAction.Confirm && planning == null) {
-                completions.send(Unit)
+                completions.send(BudgetCompletion((pending.request?.command as? EngineCommand.ConfirmBudget)?.sessionId))
                 return
             }
             val id = planning?.id ?: manualId
@@ -452,6 +468,7 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
                 state.value = state.value.copy(error = "Баланс изменился. Проверь сумму перевода ещё раз.")
                 return
             }
+            val retrying = pending.request != null
             val request = pending.request ?: EngineRequest(pending.id,
                 if (transfer) pending.shownRevision else current.engine?.revision, command, context).also { pending.request = it }
             when (val result = session.dispatch(request)) {
@@ -465,15 +482,22 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
                             else -> error("Not a transfer")
                         }
                         val withdrawing = command is EngineCommand.WithdrawSavings
-                        val after = result.state.economy
+                        // A lost reply can be retried after other commands changed the balances.
+                        // Feedback belongs to the original receipt, while the screen keeps the latest world.
+                        val receipt = if (retrying) try {
+                            session.commandReceipt(request.id)
+                        } catch (cancelled: CancellationException) { throw cancelled }
+                        catch (_: Exception) { null } else null
+                        val after = if (retrying) receipt?.after?.economy else result.state.economy
+                        val before = receipt?.before?.economy
                         state.value = state.value.copy(savingsStep = if (withdrawing) SavingsStep.WITHDRAW else SavingsStep.DEPOSIT,
                             transferInput = "", withdrawal = null, depositWarning = null,
-                            transferReceipt = SavingsReceipt(amount, withdrawing,
-                                if (withdrawing) after.availableBalance - amount else after.availableBalance + amount,
-                                if (withdrawing) after.savingsBalance + amount else after.savingsBalance - amount,
-                                after.availableBalance, after.savingsBalance))
+                            transferReceipt = after?.let { SavingsReceipt(amount, withdrawing,
+                                before?.availableBalance ?: if (withdrawing) it.availableBalance - amount else it.availableBalance + amount,
+                                before?.savingsBalance ?: if (withdrawing) it.savingsBalance + amount else it.savingsBalance - amount,
+                                it.availableBalance, it.savingsBalance) })
                     }
-                    if (pending.action == EconomyAction.Confirm) completions.send(Unit)
+                    if (command is EngineCommand.ConfirmBudget) completions.send(BudgetCompletion(command.sessionId))
                 }
                 is EngineResult.Blocked -> {
                     val latest = session.read()

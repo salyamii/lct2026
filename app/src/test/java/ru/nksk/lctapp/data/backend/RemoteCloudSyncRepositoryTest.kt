@@ -45,6 +45,14 @@ import ru.nksk.lctapp.domain.backend.SnapshotDownloadRequest
 import ru.nksk.lctapp.domain.backend.SnapshotDownloadResponse
 import ru.nksk.lctapp.domain.backend.SnapshotUploadRequest
 import ru.nksk.lctapp.domain.backend.SnapshotUploadResponse
+import ru.nksk.lctapp.domain.backend.worldSnapshot
+import ru.nksk.lctapp.domain.history.CloudWorldRead
+import ru.nksk.lctapp.domain.history.CloudEvidenceRead
+import ru.nksk.lctapp.domain.history.CloudRestoreReceipt
+import ru.nksk.lctapp.domain.history.WorldSnapshot
+import ru.nksk.lctapp.domain.history.WorldSnapshotCodec
+import ru.nksk.lctapp.domain.history.WorldRestoreBaseline
+import ru.nksk.lctapp.domain.history.toCloudWorldRead
 import ru.nksk.lctapp.domain.content.StoryContent
 import ru.nksk.lctapp.domain.content.StoryContentRepository
 import ru.nksk.lctapp.domain.economy.BudgetPlan
@@ -64,7 +72,107 @@ import ru.nksk.lctapp.domain.history.localGeneration
 import java.io.IOException
 
 class RemoteCloudSyncRepositoryTest {
-    @Test fun unchangedPollingExportsOnceAndChecksOnlyTheHistoryHead() = runTest {
+    @Test fun newBackupsContainOnlyTheCurrentWorldEvenAfterHundredsOfLocalChanges() = runTest {
+        val fixture = Fixture()
+        repeat(500) { fixture.games.rename("Локальное имя $it") }
+        val local = fixture.games.exportSnapshot()
+        fixture.games.snapshotExports = 0
+
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.synchronize())
+
+        val request = fixture.api.snapshotUploads.single().second
+        val body = BackendJson.parseToJsonElement(request.snapshotJson).jsonObject
+        assertEquals("CURRENT_WORLD", request.payloadKind)
+        assertTrue("history" !in body && "archivedRuns" !in body)
+        assertEquals(local.state, WorldSnapshotCodec.decode(request.snapshotJson).state)
+        assertTrue(request.snapshotJson.length < HistoryCodec.encodeSnapshot(local).length / 20)
+        assertEquals(0, fixture.games.snapshotExports)
+        assertEquals(501, fixture.games.readHistory().size)
+    }
+
+    @Test fun currentWorldRestoreKeepsLocalHistoryAndContinuesAtTheSourceEvidenceCursor() = runTest {
+        val fixture = Fixture()
+        fixture.games.rename("Старое локальное действие")
+        val before = fixture.games.exportSnapshot()
+        val world = WorldSnapshotCodec.create(before.runId, before.state, 900, "remote-generation")
+        fixture.api.remote = SnapshotDownloadResponse(world.runId, 1, "test-content",
+            WorldSnapshotCodec.encode(world), payloadKind = "CURRENT_WORLD")
+        val preview = fixture.repository.prepareRestore()
+        fixture.repository.restore(preview.id)
+
+        assertEquals(before.history, fixture.games.readHistory().dropLast(1))
+        assertEquals(3L, fixture.games.readCloudWorld().localHistorySequence)
+        assertEquals(900L, fixture.games.readCloudWorld().world.historySequence)
+        fixture.games.recordObservation("real-after-restore")
+        assertEquals(CloudSyncResult.SUCCESS, fixture.newRepository().synchronize())
+        val analytics = fixture.api.analyticsUploads.last().second
+        assertEquals(901L, analytics.throughHistorySequence)
+        assertEquals(900L, analytics.historyStartSequence)
+        assertEquals("real-after-restore", analytics.facts.single().eventId)
+        assertEquals(901L, analytics.facts.single().sequence)
+        assertEquals(4, fixture.games.readHistory().size)
+    }
+
+    @Test fun pendingLegacyFullArchiveRetriesItsOriginalBytesBeforeANewCompactUpload() = runTest {
+        val fixture = Fixture()
+        val local = fixture.games.exportSnapshot()
+        val legacy = ru.nksk.lctapp.domain.backend.snapshotUploadRequest(ProfileId, local,
+            "frozen-legacy", null, "legacy-content")
+        val payload = BackendJson.encodeToString(legacy)
+        fixture.store.stage(PendingBackendRequestEntity(ProfileId, "snapshot", legacy.uploadId, payload))
+
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.synchronize())
+
+        assertEquals("frozen-legacy" to legacy, fixture.api.snapshotUploads.first())
+        assertEquals(payload, BackendJson.encodeToString(fixture.api.snapshotUploads.first().second))
+        assertEquals("CURRENT_WORLD", fixture.api.snapshotUploads.last().second.payloadKind)
+        assertTrue(fixture.store.pendingRequests.isEmpty())
+    }
+
+    @Test fun freshlyPreparedRequestsAreDurableAndByteEquivalentBeforeEitherHttpCall() = runTest {
+        val fixture = Fixture()
+        fixture.api.beforeSnapshot = { request ->
+            val staged = checkNotNull(fixture.store.pending(ProfileId, "snapshot"))
+            assertEquals(request.uploadId, staged.requestId)
+            assertEquals(BackendJson.encodeToString(request), staged.payload)
+        }
+        fixture.api.beforeAnalytics = {
+            val request = fixture.api.analyticsUploads.last().second
+            val staged = checkNotNull(fixture.store.pending(ProfileId, "analytics"))
+            assertEquals(request.batchId, staged.requestId)
+            assertEquals(BackendJson.encodeToString(request), staged.payload)
+        }
+
+        assertEquals(CloudSyncResult.SUCCESS, fixture.repository.synchronize())
+        assertEquals(1, fixture.api.snapshotUploads.size)
+        assertEquals(1, fixture.api.analyticsUploads.size)
+    }
+
+    @Test fun modernFrozenRequestsForAnotherDeviceStayPendingWithoutBeingSent() = runTest {
+        val fixture = Fixture()
+        fixture.api.loseNextSnapshotResponse = true
+        fixture.api.loseNextAnalyticsResponse = true
+        assertEquals(CloudSyncResult.RETRY, fixture.repository.synchronize())
+        val pending = fixture.store.pendingRequests.mapValues { (_, staged) ->
+            val payload = when (staged.kind) {
+                "snapshot" -> BackendJson.encodeToString(BackendJson.decodeFromString<SnapshotUploadRequest>(staged.payload)
+                    .copy(deviceId = "another-device"))
+                "analytics" -> BackendJson.encodeToString(BackendJson.decodeFromString<AnalyticsUploadRequest>(staged.payload)
+                    .copy(deviceId = "another-device"))
+                else -> staged.payload
+            }
+            staged.copy(payload = payload)
+        }
+        fixture.store.pendingRequests.putAll(pending)
+
+        assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.newRepository().synchronize())
+        assertEquals(1, fixture.api.snapshotUploads.size)
+        assertEquals(1, fixture.api.analyticsUploads.size)
+        assertEquals(pending, fixture.store.pendingRequests)
+        assertTrue(fixture.games.acknowledged.isEmpty())
+    }
+
+    @Test fun unchangedPollingDoesNotExportOrReadTheWholeHistory() = runTest {
         val fixture = Fixture()
         assertEquals(CloudSyncResult.SUCCESS, fixture.repository.synchronize())
         fixture.games.snapshotExports = 0
@@ -72,12 +180,12 @@ class RemoteCloudSyncRepositoryTest {
 
         assertEquals(CloudSyncResult.SUCCESS, fixture.repository.synchronize())
 
-        assertEquals(1, fixture.games.snapshotExports)
+        assertEquals(0, fixture.games.snapshotExports)
         assertEquals(0, fixture.games.historyReads)
         assertEquals(1, fixture.api.snapshotUploads.size)
     }
 
-    @Test fun unchangedParentRefreshExportsOnceWithoutReadingTheWholeHistoryAgain() = runTest {
+    @Test fun unchangedParentRefreshDoesNotExportOrReadTheWholeHistory() = runTest {
         val fixture = Fixture()
         assertEquals(CloudSyncResult.SUCCESS, fixture.repository.refreshSkills())
         fixture.games.snapshotExports = 0
@@ -85,7 +193,7 @@ class RemoteCloudSyncRepositoryTest {
 
         assertEquals(CloudSyncResult.SUCCESS, fixture.repository.refreshSkills())
 
-        assertEquals(1, fixture.games.snapshotExports)
+        assertEquals(0, fixture.games.snapshotExports)
         assertEquals(0, fixture.games.historyReads)
         assertEquals(SkillSyncPhase.IDLE, fixture.repository.state.value.skillsPhase)
     }
@@ -96,11 +204,11 @@ class RemoteCloudSyncRepositoryTest {
 
         assertEquals(CloudSyncResult.SUCCESS, fixture.repository.synchronize())
 
-        val uploaded = HistoryCodec.decodeSnapshot(fixture.api.snapshotUploads.single().second.snapshotJson)
+        val uploaded = WorldSnapshotCodec.decode(fixture.api.snapshotUploads.single().second.snapshotJson)
         assertEquals(fixture.games.read(), uploaded.state)
         assertEquals(2L, uploaded.historySequence)
         assertEquals(uploaded.historySequence, fixture.api.analyticsUploads.single().second.throughHistorySequence)
-        assertEquals(2, fixture.games.snapshotExports)
+        assertEquals(0, fixture.games.snapshotExports)
         assertEquals(0, fixture.games.historyReads)
     }
 
@@ -156,12 +264,13 @@ class RemoteCloudSyncRepositoryTest {
     @Test fun staleRestoredAnalyticsResumesWithANewBatchAfterProgressAndProcessRecreation() = runTest {
         val fixture = restoredBehindAcceptedAnalytics()
         val restored = fixture.games.exportSnapshot()
-        assertEquals(11L, restored.historySequence)
+        assertEquals(21L, restored.historySequence)
+        assertEquals(10L, restored.toCloudWorldRead().world.historySequence)
 
         assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.repository.synchronize())
         val rejected = checkNotNull(fixture.store.pending(ProfileId, "analytics"))
         val rejectedBody = BackendJson.decodeFromString<AnalyticsUploadRequest>(rejected.payload)
-        assertEquals(11L, rejectedBody.throughHistorySequence)
+        assertEquals(10L, rejectedBody.throughHistorySequence)
         assertEquals(0L, fixture.store.read(ProfileId)?.lastAnalyticsSequence)
         assertTrue(fixture.games.acknowledged.isEmpty())
         assertEquals(restored, fixture.games.exportSnapshot())
@@ -169,9 +278,9 @@ class RemoteCloudSyncRepositoryTest {
         // No new boundary means no new key and no acknowledgement of the rejected facts.
         assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.newRepository().refreshSkills())
         assertEquals(rejected, fixture.store.pending(ProfileId, "analytics"))
-        repeat(10) { fixture.games.rename("После восстановления $it") }
+        repeat(11) { fixture.games.rename("После восстановления $it") }
         val current = fixture.games.exportSnapshot()
-        assertEquals(21L, current.historySequence)
+        assertEquals(32L, current.historySequence)
 
         assertEquals(CloudSyncResult.SUCCESS, fixture.newRepository().synchronize())
 
@@ -199,7 +308,7 @@ class RemoteCloudSyncRepositoryTest {
         assertEquals(2, fixture.api.analyticsUploads.size - before)
         val replacement = checkNotNull(fixture.store.pending(ProfileId, "analytics"))
         assertNotEquals(rejected.requestId, replacement.requestId)
-        assertEquals(12L, BackendJson.decodeFromString<AnalyticsUploadRequest>(replacement.payload).throughHistorySequence)
+        assertEquals(11L, BackendJson.decodeFromString<AnalyticsUploadRequest>(replacement.payload).throughHistorySequence)
         assertEquals(0L, fixture.store.read(ProfileId)?.lastAnalyticsSequence)
         assertTrue(fixture.games.acknowledged.isEmpty())
         val after = fixture.api.analyticsUploads.size
@@ -212,7 +321,7 @@ class RemoteCloudSyncRepositoryTest {
         val fixture = restoredBehindAcceptedAnalytics()
         assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.repository.refreshSkills())
         val rejected = checkNotNull(fixture.store.pending(ProfileId, "analytics"))
-        repeat(10) { fixture.games.rename("После старого batch $it") }
+        repeat(11) { fixture.games.rename("После старого batch $it") }
         fixture.api.loseNextAnalyticsResponse = true
 
         assertEquals(CloudSyncResult.RETRY, fixture.newRepository().refreshSkills())
@@ -287,7 +396,7 @@ class RemoteCloudSyncRepositoryTest {
         val fixture = restoredBehindAcceptedAnalytics()
         assertEquals(CloudSyncResult.NEEDS_ATTENTION, fixture.repository.refreshSkills())
         val rejected = checkNotNull(fixture.store.pending(ProfileId, "analytics"))
-        repeat(10) { fixture.games.rename("Действие перед перемоткой $it") }
+        repeat(11) { fixture.games.rename("Действие перед перемоткой $it") }
         fixture.games.restart("next-run")
         val current = fixture.games.exportSnapshot()
 
@@ -453,7 +562,7 @@ class RemoteCloudSyncRepositoryTest {
         assertEquals(listOf("register", "get-snapshot", "put-snapshot", "get-rewards", "post-analytics", "get-skills"),
             fixture.api.calls)
         assertEquals(before, fixture.games.exportSnapshot())
-        assertEquals(before, HistoryCodec.decodeSnapshot(fixture.api.snapshotUploads.single().second.snapshotJson))
+        assertEquals(before.toCloudWorldRead().world, WorldSnapshotCodec.decode(fixture.api.snapshotUploads.single().second.snapshotJson))
         assertEquals(before.historySequence, fixture.api.analyticsUploads.single().second.throughHistorySequence)
         assertEquals(before.history.map { it.id }.toSet(), fixture.games.acknowledged)
         assertEquals(before.historySequence, fixture.repository.state.value.skills?.basedOnHistorySequence)
@@ -483,7 +592,7 @@ class RemoteCloudSyncRepositoryTest {
         if (result == CloudSyncResult.RETRY) assertEquals(CloudSyncResult.SUCCESS, recreated.synchronize())
         else assertEquals(CloudSyncResult.SUCCESS, result)
 
-        assertEquals(newer, HistoryCodec.decodeSnapshot(checkNotNull(fixture.api.remote).snapshotJson))
+        assertEquals(newer.toCloudWorldRead().world, checkNotNull(fixture.api.remote).worldSnapshot())
         assertEquals(newer.historySequence, fixture.api.analyticsUploads.last().second.throughHistorySequence)
         assertEquals(newer.history.map { it.id }.toSet(), fixture.games.acknowledged)
         assertEquals(newer, fixture.games.exportSnapshot())
@@ -508,7 +617,7 @@ class RemoteCloudSyncRepositoryTest {
         assertEquals(originalSnapshot, fixture.api.snapshotUploads.last())
         assertEquals(originalAnalytics, fixture.api.analyticsUploads.last())
         assertTrue(fixture.store.pendingRequests.isEmpty())
-        assertEquals(fixture.games.exportSnapshot(), HistoryCodec.decodeSnapshot(originalSnapshot.second.snapshotJson))
+        assertEquals(fixture.games.exportSnapshot().toCloudWorldRead().world, WorldSnapshotCodec.decode(originalSnapshot.second.snapshotJson))
     }
 
     @Test fun cloudConflictDoesNotReplaceLocalPlayOrPreventACommittedGiftFromBeingAcknowledged() = runTest {
@@ -559,7 +668,7 @@ class RemoteCloudSyncRepositoryTest {
         assertEquals("next-run", fixture.api.analyticsUploads.last().second.gameRunId)
         assertEquals(identity, fixture.identities.value)
         assertEquals(1, fixture.api.calls.count { it == "register" })
-        assertEquals(restarted, HistoryCodec.decodeSnapshot(checkNotNull(fixture.api.remote).snapshotJson))
+        assertEquals(restarted.toCloudWorldRead().world, checkNotNull(fixture.api.remote).worldSnapshot())
         assertEquals(restarted, fixture.games.exportSnapshot())
         assertEquals(restarted.localGeneration(), fixture.store.read(ProfileId)?.localGeneration)
         assertTrue(fixture.store.pendingRequests.isEmpty())
@@ -621,7 +730,7 @@ class RemoteCloudSyncRepositoryTest {
         assertEquals(CloudSyncResult.SUCCESS, fixture.newRepository().synchronize())
 
         assertEquals(1L, fixture.api.snapshotUploads.last().second.expectedServerRevision)
-        assertEquals(restarted, HistoryCodec.decodeSnapshot(checkNotNull(fixture.api.remote).snapshotJson))
+        assertEquals(restarted.toCloudWorldRead().world, checkNotNull(fixture.api.remote).worldSnapshot())
         assertEquals(restarted, fixture.games.exportSnapshot())
     }
 
@@ -715,7 +824,8 @@ class RemoteCloudSyncRepositoryTest {
         fixture.repository.restore(confirmed.id)
         assertEquals(foreign.state, fixture.games.read())
         assertEquals(1, fixture.games.restoredWorlds)
-        assertEquals(foreign.history, fixture.games.readHistory().dropLast(1))
+        assertTrue(fixture.games.readHistory().dropLast(1).isEmpty())
+        assertEquals(foreign.historySequence, fixture.games.readHistory().last().worldRestore?.sourceHistorySequence)
         assertEquals(AuditType.RESTORED, fixture.games.readHistory().last().type)
         assertNull(fixture.store.pending(ProfileId, "restore"))
         assertEquals(fixture.games.exportSnapshot().localGeneration(), fixture.store.read(ProfileId)?.localGeneration)
@@ -728,7 +838,7 @@ class RemoteCloudSyncRepositoryTest {
         repeat(9) { fixture.games.rename("До облачной копии $it") }
         assertEquals(CloudSyncResult.SUCCESS, fixture.repository.synchronize())
         val cloud = checkNotNull(fixture.api.remote)
-        assertEquals(10L, HistoryCodec.decodeSnapshot(cloud.snapshotJson).historySequence)
+        assertEquals(10L, cloud.worldSnapshot().historySequence)
         repeat(10) { fixture.games.rename("Только аналитика $it") }
         assertEquals(CloudSyncResult.SUCCESS, fixture.repository.refreshSkills())
         assertEquals(20L, fixture.api.analyticsUploads.last().second.throughHistorySequence)
@@ -826,6 +936,12 @@ class RemoteCloudSyncRepositoryTest {
             return next
         }
         suspend fun rename(name: String) { update { it.copy(pet = it.pet.copy(name = name)) } }
+        fun recordObservation(id: String) {
+            val sequence = history.last().sequence + 1
+            history += AuditEntry("fact:$id", sequence, runId, AuditType.FACTS, facts = listOf(
+                ru.nksk.lctapp.domain.analytics.AnalyticsFact(id, runId, "episode:$id", "action:$id", sequence,
+                    ru.nksk.lctapp.domain.analytics.FactDetail.Interaction("observed"))))
+        }
         fun restart(nextRunId: String) {
             val previous = HistoryCodec.snapshot(runId, value.value, history.toList())
             archives += ArchivedGameRun("restart:$nextRunId", nextRunId, previous)
@@ -844,12 +960,60 @@ class RemoteCloudSyncRepositoryTest {
             return currentSnapshot()
         }
         private fun currentSnapshot() = HistoryCodec.snapshot(runId, value.value, history.toList(), archives.toList())
+        override suspend fun readCloudWorld() = currentSnapshot().toCloudWorldRead()
+        override suspend fun readCloudEvidence() = CloudEvidenceRead(readCloudWorld(), history.toList())
+        override suspend fun archivedRun(runId: String) = archives.firstOrNull { it.snapshot.runId == runId }?.snapshot
+        override suspend fun pendingOutbox(limit: Int) = history.filter { it.id !in acknowledged }.take(limit)
+        override suspend fun acknowledgeOutboxThrough(runId: String, generation: String, throughSequence: Long): Boolean {
+            if (runId != this.runId || generation != currentSnapshot().localGeneration() ||
+                throughSequence > history.last().sequence) return false
+            acknowledged += history.filter { it.sequence <= throughSequence }.map { it.id }
+            return true
+        }
+        override suspend fun cloudContains(world: WorldSnapshot): Boolean {
+            val current = currentSnapshot()
+            val owner = (listOf(current) + archives.map { it.snapshot }).firstOrNull { it.runId == world.runId } ?: return false
+            val baseline = owner.history.lastOrNull { it.worldRestore != null }
+            if (baseline?.worldRestore?.sourceChecksum == world.checksum) return true
+            val head = owner.toCloudWorldRead()
+            if (head.generation != world.generation || head.world.historySequence < world.historySequence) return false
+            val localSequence = if (baseline == null) world.historySequence else
+                baseline.sequence + world.historySequence - checkNotNull(baseline.worldRestore).sourceHistorySequence
+            val checkpoint = owner.history.lastOrNull { it.sequence <= localSequence && it.after != null }?.after ?: return false
+            return checkpoint == world.state
+        }
+        override suspend fun findCloudRestoreReceipt(restoreRequestId: String, source: WorldSnapshot?): CloudRestoreReceipt? {
+            (listOf(currentSnapshot()) + archives.map { it.snapshot }).forEach { owner ->
+                owner.history.firstOrNull { it.worldRestore?.restoreRequestId == restoreRequestId }?.let { entry ->
+                    return CloudRestoreReceipt(owner.runId, owner.localGeneration(), restoreRequestId,
+                        checkNotNull(entry.worldRestore).sourceChecksum)
+                }
+            }
+            return null
+        }
+        override suspend fun restoreCloudWorld(world: WorldSnapshot, expected: RestoreGuard, restoreRequestId: String): GameState {
+            restoreAttempts++
+            check(expected.historySequence == history.last().sequence && expected.engineRevision == value.value.engine?.revision) {
+                "World changed since preview"
+            }
+            WorldSnapshotCodec.validate(world)
+            if (runId != world.runId) history.clear()
+            runId = world.runId
+            value.value = world.state
+            acknowledged.clear()
+            restoredWorlds++
+            history += AuditEntry("restore:$restoredWorlds", (history.lastOrNull()?.sequence ?: 0) + 1,
+                runId, AuditType.RESTORED, after = world.state,
+                worldRestore = WorldRestoreBaseline(world.historySequence, world.generation, world.checksum,
+                    restoreRequestId, world.parentRewards, world.predecessors))
+            return value.value
+        }
         override suspend fun acknowledgeOutbox(ids: Set<String>) { acknowledged += ids }
         override suspend fun applyParentRewards(profileId: String, gameRunId: String, rewards: List<ParentRewardDto>,
             expectedRestoreGeneration: String): List<ParentRewardReceiptDto> {
             check(gameRunId == runId && currentSnapshot().localGeneration() == expectedRestoreGeneration)
             return rewards.map { reward ->
-                history.firstOrNull { it.parentReward?.reward?.rewardId == reward.rewardId }?.parentReward?.receipt
+                readCloudWorld().world.parentRewards.firstOrNull { it.reward.rewardId == reward.rewardId }?.receipt
                     ?: run {
                         val applicationId = "apply:${reward.rewardId}"
                         val before = value.value
@@ -891,6 +1055,7 @@ class RemoteCloudSyncRepositoryTest {
         var remote: SnapshotDownloadResponse? = null
         var rewards: List<ParentRewardDto> = emptyList()
         var beforeRegister: suspend () -> Unit = {}
+        var beforeSnapshot: suspend (SnapshotUploadRequest) -> Unit = {}
         var beforeRewards: suspend () -> Unit = {}
         var beforeRewardAck: suspend (AckParentRewardsRequest) -> Unit = {}
         var loseNextSnapshotResponse = false
@@ -924,11 +1089,12 @@ class RemoteCloudSyncRepositoryTest {
             calls += "put-snapshot"
             assertEquals(ProfileId, body.deviceId)
             snapshotUploads += requestId to body
+            beforeSnapshot(body)
             if (failSnapshotRequests) throw IOException("Offline")
             snapshotReceipts[requestId]?.let { (original, response) -> check(original == body); return response }
             check(body.expectedServerRevision == remote?.serverRevision)
             val response = SnapshotUploadResponse(body.uploadId, body.gameRunId, (remote?.serverRevision ?: 0) + 1, body.checksum)
-            remote = SnapshotDownloadResponse(body.gameRunId, response.serverRevision, body.currentContentFingerprint, body.snapshotJson)
+            remote = SnapshotDownloadResponse(body.gameRunId, response.serverRevision, body.currentContentFingerprint, body.snapshotJson, payloadKind = body.payloadKind)
             snapshotReceipts[requestId] = body to response
             if (loseNextSnapshotResponse) { loseNextSnapshotResponse = false; throw IOException("Lost committed upload response") }
             return response

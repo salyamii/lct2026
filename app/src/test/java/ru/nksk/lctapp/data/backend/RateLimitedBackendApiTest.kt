@@ -37,6 +37,7 @@ class RateLimitedBackendApiTest {
                 .build()
         }.build()
         val delegate = Retrofit.Builder().baseUrl(Backend).client(client)
+            .addConverterFactory(StreamingUploadConverter(mediaType))
             .addConverterFactory(BackendJson.asConverterFactory(mediaType)).build().create(BackendApi::class.java)
         val preferences = object : DataStore<Preferences> {
             override val data = MutableStateFlow(emptyPreferences())

@@ -6,9 +6,15 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import ru.nksk.lctapp.core.ui.game.GameActionAttempt
 import ru.nksk.lctapp.core.ui.game.playerMessage
 import ru.nksk.lctapp.domain.analytics.DecisionContext
 import ru.nksk.lctapp.domain.engine.*
@@ -24,6 +30,7 @@ internal data class TrainingUiState(
     val needsBudgetRevision: Boolean = false, val needsBudgetPlanning: Boolean = false,
     val practiceRetryRequired: Boolean = false,
     val chapterPractice: Boolean = false,
+    val demoMode: Boolean = false,
     val chapterStep: ChapterPracticeStep? = null,
 )
 
@@ -34,24 +41,38 @@ internal sealed interface TrainingAction {
     data object ReviewTransactions : TrainingAction
     data object PracticeSaving : TrainingAction
     data object StartChapterPractice : TrainingAction
+    data object SkipChapterPractice : TrainingAction
     data class Answer(val id: String) : TrainingAction
     data class QuestionPresented(val id: String) : TrainingAction
     data object CloseQuestion : TrainingAction
     data class NextQuestion(val questionId: String) : TrainingAction
 }
 
+internal enum class TrainingContinuationDestination { DAY, BUDGET }
+
 @HiltViewModel
 internal class TrainingViewModel @Inject constructor(private val session: GameSession) : ViewModel() {
     private val state = MutableStateFlow(TrainingUiState())
     val uiState = state.asStateFlow()
     private var saved: GameState? = null
-    private var observing = false
+    private var observation: Job? = null
+    private val observing: Boolean get() = observation?.isActive == true
+    private var screenActive = true
     private var presentedQuestion: String? = null
     private var pendingPracticeRequest: EngineRequest? = null
+    private var pendingContinuation: GameActionAttempt? = null
+    private val continuationNavigation = Channel<TrainingContinuationDestination>(Channel.BUFFERED)
+    val openContinuation = continuationNavigation.receiveAsFlow()
     private var refreshRequired = false
     private val presentation = TrainingQuestionPresentation(session)
 
     init { observe() }
+
+    fun setActive(active: Boolean) {
+        if (screenActive == active) return
+        screenActive = active
+        if (active) observe() else { observation?.cancel(); observation = null }
+    }
 
     fun setChapterPractice() {
         if (state.value.chapterPractice) return
@@ -60,9 +81,8 @@ internal class TrainingViewModel @Inject constructor(private val session: GameSe
     }
 
     private fun observe() {
-        if (observing) return
-        observing = true
-        viewModelScope.launch {
+        if (!screenActive || observing) return
+        observation = viewModelScope.launch {
             try {
                 session.prepare()
                 session.observe().collect { game ->
@@ -79,14 +99,15 @@ internal class TrainingViewModel @Inject constructor(private val session: GameSe
                 state.value = state.value.copy(loading = false, practiceRetryRequired = true,
                     error = "Не удалось открыть тренировку. Повтори попытку.")
             }
-            finally { observing = false }
         }
     }
 
     private suspend fun render(game: GameState) {
+        if (!screenActive) return
         val question = presentation.display(game.financial.practice)
-        if (saved != game) return
+        if (!screenActive || saved != game) return
         state.value = state.value.copy(loading = false, hasGame = true, question = question,
+            demoMode = session.demoModeEnabled,
             chapterStep = game.chapterPracticeStep().takeIf { state.value.chapterPractice },
             canReview = game.economy.planning == null && game.economy.unallocated == 0L,
             needsBudgetPlanning = game.economy.planning != null || game.economy.unallocated != 0L,
@@ -103,14 +124,16 @@ internal class TrainingViewModel @Inject constructor(private val session: GameSe
         if (state.value.busy) return
         if (action == TrainingAction.Retry) {
             state.value = state.value.copy(error = null)
+            if (pendingContinuation != null) { continueStory(); return }
             if (pendingPracticeRequest != null || observing) retryPracticeOrRefresh(pendingPracticeRequest) else observe()
             return
         }
-        if (pendingPracticeRequest != null || refreshRequired) {
+        if (pendingPracticeRequest != null || pendingContinuation != null || refreshRequired) {
             state.value = state.value.copy(error = "Сначала сохраним предыдущее действие. Нажми «Повторить».",
                 practiceRetryRequired = true)
             return
         }
+        if (action == TrainingAction.SkipChapterPractice) { continueStory(skipPractice = true); return }
         if (state.value.needsBudgetPlanning) {
             state.value = state.value.copy(error = "Сначала распредели бюджет, затем вернёмся к практике.")
             return
@@ -148,11 +171,74 @@ internal class TrainingViewModel @Inject constructor(private val session: GameSe
                             EngineCommand.RequestFinancialPractice(question.kind, series = true)
                         else EngineCommand.AdvanceFinancialPractice(action.questionId))
                     }
-                    TrainingAction.Retry, is TrainingAction.QuestionPresented -> Unit
+                    TrainingAction.Retry, TrainingAction.SkipChapterPractice, is TrainingAction.QuestionPresented -> Unit
                 }
             } catch (cancelled: CancellationException) { throw cancelled }
             catch (_: Exception) { showActionFailure() }
             finally { state.value = state.value.copy(busy = false) }
+        }
+    }
+
+    /** An explicit continuation advances the saved day before leaving the completed chapter review. */
+    fun continueStory(skipPractice: Boolean = false) {
+        val shown = state.value
+        if (shown.busy || !shown.chapterPractice || pendingPracticeRequest != null ||
+            refreshRequired && pendingContinuation == null) return
+        val demoSkip = skipPractice && shown.demoMode && session.demoModeEnabled
+        if (skipPractice && !demoSkip) return
+        if (pendingContinuation == null && !demoSkip && shown.chapterStep !in setOf(
+                ChapterPracticeStep.COMPLETE, ChapterPracticeStep.FOOD)) return
+        state.value = shown.copy(busy = true, error = null)
+        viewModelScope.launch {
+            try {
+                val current = checkNotNull(session.read()) { "The real save is unavailable" }
+                saved = current
+                refreshRequired = false
+                if (!observing) observe()
+                val mode = session.demoModeEnabled
+                val attempt = pendingContinuation ?: when (val plan = withContext(Dispatchers.Default) {
+                    session.continueDayPlan(current, mode)
+                }) {
+                    ContinueDayPlan.NeedsBudget -> {
+                        continuationNavigation.send(TrainingContinuationDestination.BUDGET)
+                        return@launch
+                    }
+                    is ContinueDayPlan.Day -> {
+                        val command = plan.command
+                        if (command == null) {
+                            continuationNavigation.send(TrainingContinuationDestination.DAY)
+                            return@launch
+                        }
+                        GameActionAttempt.prepare(current, command).also { pendingContinuation = it }
+                    }
+                }
+                when (val result = attempt.submit(session)) {
+                    is EngineResult.Applied -> {
+                        pendingContinuation = null
+                        if ((saved?.engine?.revision ?: -1) <= (result.state.engine?.revision ?: -1)) saved = result.state
+                        val committed = checkNotNull(saved)
+                        continuationNavigation.send(if (committed.economy.planning != null || committed.economy.unallocated != 0L)
+                            TrainingContinuationDestination.BUDGET else TrainingContinuationDestination.DAY)
+                    }
+                    is EngineResult.Blocked -> {
+                        pendingContinuation = null
+                        val refreshed = checkNotNull(session.read())
+                        saved = refreshed
+                        render(refreshed)
+                        when (result.reason) {
+                            BlockReason.BudgetPlanningRequired -> continuationNavigation.send(TrainingContinuationDestination.BUDGET)
+                            BlockReason.MustEat, BlockReason.MustSleep, BlockReason.EventInProgress,
+                            BlockReason.DayFinished, BlockReason.NoNextEvent -> continuationNavigation.send(TrainingContinuationDestination.DAY)
+                            else -> state.value = state.value.copy(error = result.reason.playerMessage(refreshed.pet.name))
+                        }
+                    }
+                }
+                state.value = state.value.copy(practiceRetryRequired = false)
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (_: Exception) {
+                state.value = state.value.copy(error = "Не удалось продолжить историю. Повтори попытку.",
+                    practiceRetryRequired = true)
+            } finally { state.value = state.value.copy(busy = false) }
         }
     }
 
@@ -163,6 +249,9 @@ internal class TrainingViewModel @Inject constructor(private val session: GameSe
                 complete = presentedQuestion == it.questionId)
         }
         val request = EngineRequest(UUID.randomUUID().toString(), game.engine?.revision, command, context)
+        if (command is EngineCommand.RequestFinancialPractice) {
+            presentation.expectCurrentQuestion("${request.id}:question")
+        }
         pendingPracticeRequest = request
         applyPracticeRequest(request)
     }

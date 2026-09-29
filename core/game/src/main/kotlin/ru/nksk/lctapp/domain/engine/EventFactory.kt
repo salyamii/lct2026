@@ -99,6 +99,10 @@ class EventFactory(
             require(policy.choiceEnergyCosts.keys.all { choice -> eventChoices.any { it.id == choice } }) {
                 "Energy override must belong to this event: $id"
             }
+            require(policy.choiceEnergyRestores.isEmpty() || definition.type == EventType.WANT &&
+                policy.choiceEnergyRestores.keys.all { choice -> choice in policy.choiceGameKinds }) {
+                "Restored energy must belong to a leisure mini-game choice: $id"
+            }
             require(definition.minSatiety == null && definition.maxFatigue == null) {
                 "Translate legacy satiety/fatigue thresholds to the selected rules before activating $id"
             }
@@ -110,9 +114,9 @@ class EventFactory(
                 require(reward != null && reward.moneyDelta >= 0) { "A mini-game needs one maximum reward: $id" }
             }
             if (policy.choiceGameKinds.isNotEmpty()) {
-                require(definition.type in setOf(EventType.STORY, EventType.RANDOM) && policy.deedGameKind == null)
+                require(definition.type in setOf(EventType.STORY, EventType.RANDOM, EventType.WANT) && policy.deedGameKind == null)
                 require(policy.choiceGameKinds.keys.all { choice -> eventChoices.any { it.id == choice } }) {
-                    "A story mini-game must name an existing choice: $id"
+                    "An event mini-game must name an existing choice: $id"
                 }
             }
             val startItems = content.eventItemEffects.filter { it.eventId == id }

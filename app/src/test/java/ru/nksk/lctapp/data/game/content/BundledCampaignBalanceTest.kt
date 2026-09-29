@@ -304,7 +304,7 @@ class BundledCampaignBalanceTest {
             DeedGameKind.LIGHTS -> DeedGameScore.fromLights(LightsState(
                 List(LightsState.SIZE * LightsState.SIZE) { false }, moves = 1))
             DeedGameKind.SEQUENCE -> DeedGameScore.fromSequence(SequenceState(
-                sequence = List(SequenceState.FIRST_ROUND_LENGTH) { 0 },
+                sequence = List(SequenceState.MAX_ROUND_LENGTH) { 0 },
                 round = SequenceState.ROUNDS,
                 correct = SequenceState.ROUNDS * cap / 100,
                 lastCorrect = true,

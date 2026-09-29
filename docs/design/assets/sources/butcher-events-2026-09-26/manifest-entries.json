@@ -1,7 +1,7 @@
 [
   {
     "resource": "npc_butcher_tray",
-    "category": "Butcher event originals — 2026-09-26",
+    "category": "Butcher event originals - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "2289:23",
@@ -37,7 +37,7 @@
   },
   {
     "resource": "npc_butcher_tying",
-    "category": "Butcher event originals — 2026-09-26",
+    "category": "Butcher event originals - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "2289:77",
@@ -73,7 +73,7 @@
   },
   {
     "resource": "npc_butcher_pointing",
-    "category": "Butcher event originals — 2026-09-26",
+    "category": "Butcher event originals - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "2289:131",
@@ -109,7 +109,7 @@
   },
   {
     "resource": "npc_butcher_orders",
-    "category": "Butcher event originals — 2026-09-26",
+    "category": "Butcher event originals - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "2289:185",
@@ -145,7 +145,7 @@
   },
   {
     "resource": "npc_butcher_scales",
-    "category": "Butcher event originals — 2026-09-26",
+    "category": "Butcher event originals - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "2289:239",
@@ -181,7 +181,7 @@
   },
   {
     "resource": "location_butcher_shop",
-    "category": "Butcher event originals — 2026-09-26",
+    "category": "Butcher event originals - 2026-09-26",
     "figma": {
       "file_key": "bAod1cKtTX9Q8omQ067q3q",
       "node_id": "2289:4",

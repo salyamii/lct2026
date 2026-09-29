@@ -24,6 +24,7 @@ import ru.nksk.lctapp.feature.learning.ui.ReflectionScreen
 import ru.nksk.lctapp.feature.learning.ui.ReflectionViewModel
 import ru.nksk.lctapp.feature.learning.ui.TrainingScreen
 import ru.nksk.lctapp.feature.learning.ui.TrainingViewModel
+import ru.nksk.lctapp.feature.learning.ui.TrainingContinuationDestination
 
 /** Keep the saved history route readable across the split into history and training. */
 @Serializable
@@ -75,6 +76,19 @@ private fun TrainingEntryContent(source: NavKey, chapterPractice: Boolean, onBac
     val state by model.uiState.collectAsStateWithLifecycle()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     LaunchedEffect(model, chapterPractice) { if (chapterPractice) model.setChapterPractice() }
+    LaunchedEffect(model, lifecycle) {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            model.setActive(true)
+            try {
+                model.openContinuation.collect { destination ->
+                    when (destination) {
+                        TrainingContinuationDestination.DAY -> onContinueStory(source)
+                        TrainingContinuationDestination.BUDGET -> onOpenBudget(source)
+                    }
+                }
+            } finally { model.setActive(false) }
+        }
+    }
     // Do not let a restored voluntary answer auto-advance before the entry configures its mode.
     val visibleState = if (chapterPractice && !state.chapterPractice)
         state.copy(loading = true, chapterPractice = true, practiceOpen = false) else state
@@ -82,7 +96,7 @@ private fun TrainingEntryContent(source: NavKey, chapterPractice: Boolean, onBac
         if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) model.onAction(it)
     }, onBack = dropUnlessResumed { onBack(source) },
         onOpenBudget = dropUnlessResumed { onOpenBudget(source) },
-        onContinueStory = dropUnlessResumed { onContinueStory(source) })
+        onContinueStory = dropUnlessResumed { model.continueStory() })
 }
 
 @Composable

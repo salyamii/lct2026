@@ -25,15 +25,15 @@ internal fun CampaignArchiveScreen(state: CampaignArchiveUiState, onRestart: () 
     LearningPage("Хроноскоп", onBack, backEnabled = !state.busy) {
         learningStatus(state.loading, false, state.error, onRetry = onRetry)
         if (!state.loading && state.canRestart) item {
-            LearningCard("Вернёмся к началу?") {
+            LearningCard("Другие пути ещё ждут") {
                 state.pet?.artworkRes?.let { image ->
                     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                         MovingPetArtwork(image, state.pet.name, modifier = Modifier.size(180.dp))
                     }
                 }
-                AdventureBody("С помощью хроноскопа ${state.pet?.name.orEmpty()} вернётся в детство. Ещё раз пройдём знакомую историю и попробуем другие решения.")
-                AdventureBody("Запас монет станет таким же, как в начале игры. Покупать снаряжение и выполнять задания будем заново. Прошлое приключение останется здесь — его можно будет перечитать.")
-                PracticeButton(if (state.error == null) "Вернуться в начало" else "Повторить возвращение", true,
+                AdventureBody("Мы открыли часть тайн Смотрителей, но ещё не прошли все пути. Их сила вернёт нас к выбору героя: начнём знакомое приключение заново и попробуем другие решения.")
+                AdventureBody("Монеты и снаряжение начнутся с обычного стартового набора. История этого приключения останется в архиве - её можно будет перечитать.")
+                PracticeButton(if (state.error == null) "Воспользоваться силой" else "Повторить возвращение", true,
                     interactionBlocked = state.busy, onClick = onRestart)
             }
         }

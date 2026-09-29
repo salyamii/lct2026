@@ -74,6 +74,12 @@ object FinancialBudgetProjection {
     fun report(state: GameState, history: List<AuditEntry>, content: StoryContent): List<PeriodBudgetReport> =
         state.financial.periods.map { period -> report(period, state.financial.plans, history, content) }
 
+    /** A practice question needs one period, without rebuilding all earlier goals' reports. */
+    fun reportPeriod(state: GameState, periodId: String?, history: List<AuditEntry>,
+        content: StoryContent): PeriodBudgetReport? = state.financial.periods.firstOrNull { it.id == periodId }?.let {
+        report(it, state.financial.plans, history, content)
+    }
+
     private fun report(period: FinancialPeriod, plans: List<BudgetPlanRevision>, history: List<AuditEntry>,
         content: StoryContent): PeriodBudgetReport {
         val first = history.firstOrNull { entry -> entry.after?.financial?.periods?.any { it.id == period.id } == true }

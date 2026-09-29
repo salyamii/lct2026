@@ -47,6 +47,7 @@ class ExtendedMiniGameRestorationTest {
             "sequence" to intArrayOf(0, 1, 2), "round" to 1, "correct" to 1,
             "position" to 0, "last_correct" to true, "phase" to SequencePhase.FEEDBACK.name,
         ))).also { store.put("sequence", it) }
+        model.onAction(SequenceGameAction.ArtworkReady)
         advanceUntilIdle()
         assertEquals(SequencePhase.INPUT, model.uiState.value.phase)
         assertEquals(1, model.uiState.value.game.round)

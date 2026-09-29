@@ -20,8 +20,7 @@ internal class GameActionAttempt private constructor(
         val revision = request.expectedRevision
         if (revision != null && current.engine?.revision == revision + 1) return current
         return try {
-            session.history().lastOrNull { it.request?.id == request.id &&
-                it.type == ru.nksk.lctapp.domain.history.AuditType.COMMAND }?.after
+            session.commandReceipt(request.id)?.after
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (_: Exception) {

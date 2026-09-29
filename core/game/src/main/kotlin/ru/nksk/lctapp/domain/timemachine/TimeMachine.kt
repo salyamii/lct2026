@@ -300,7 +300,8 @@ class TimeMachine(
                     val action = catalog.displayAction(option)
                     val label = if (action != option.text && option.moneyDelta < 0)
                         "$action · ${Math.negateExact(option.moneyDelta)} монет" else action
-                    TimeMachineAlternative("choice:${option.id}", if (work) "$label — если закончить работу" else label,
+                    val completion = if (event.type == EventType.WANT) "партию" else "работу"
+                    TimeMachineAlternative("choice:${option.id}", if (work) "$label - если закончить $completion" else label,
                         if (command is EngineCommand.Choose && !work) EngineCommand.Choose(occurrence.id, option.id) else EngineCommand.CompleteEvent(occurrence.id, option.id),
                         assumesCompletedWork = work)
                 }
@@ -432,7 +433,7 @@ class TimeMachine(
         val explanation = buildString {
             append("Складываем расходы: $walletExpenses + $savingsExpenses = $expected. Всего потратили ${reflectionCoins(expected)}.")
             if (branch.deposited > 0) append(" В копилку положили ещё ${branch.deposited}. Эта сумма всё ещё у нас: это не расход.")
-            if (branch.withdrawn > 0) append(" Из копилки взяли ${branch.withdrawn}. Само снятие — не расход: считаем только покупки.")
+            if (branch.withdrawn > 0) append(" Из копилки взяли ${branch.withdrawn}. Само снятие - не расход: считаем только покупки.")
         }
         return VerifiedQuiz(public, requireNotNull(result.runId), "time-machine:${simulation.target.id}:ledger", null,
             explanation) { option ->
@@ -499,7 +500,7 @@ class TimeMachine(
             orderedOptions, answerAlreadyShown = true)
         val explanation = if (work) {
             "При выборе «$action» выполняем работу сами: $effort, зато платить не нужно. " +
-                "В нашей истории ушло $amount, а здесь — 0. Сохраним всю эту сумму."
+                "В нашей истории ушло $amount, а здесь - 0. Сохраним всю эту сумму."
         } else if (item != null) {
             "При выборе «$action» мы не получим «$item», зато сохраним $amount. " +
                 "Нужно решить, что сейчас важнее: покупка или деньги на что-то другое."

@@ -19,7 +19,7 @@ internal fun financialPracticePresentation(
     catalog: GameCatalog,
 ): FinancialQuestion? {
     if (question == null) return null
-    FinancialTraining.exampleWording(question)?.let { return copyVerifiedWording(question, it) }
+    financialPracticeExamplePresentation(question)?.let { return it }
     val anchor = history.firstOrNull { entry ->
         entry.type == AuditType.COMMAND && entry.after?.financial?.practice?.id == question.id &&
             (entry.request?.command as? EngineCommand.RequestFinancialPractice)?.kind == question.kind
@@ -28,8 +28,8 @@ internal fun financialPracticePresentation(
     val period = before.financial.currentPeriod ?: return question
     val fresh = runCatching {
         val priorHistory = history.filter { it.sequence < anchor.sequence }
-        val report = FinancialBudgetProjection.report(before, priorHistory, catalog.content)
-            .firstOrNull { it.periodId == period.id }
+        val report = if (question.kind == FinancialQuestionKind.PLAN_REVIEW)
+            FinancialBudgetProjection.reportPeriod(before, period.id, priorHistory, catalog.content) else null
         val purchase = catalog.content.choices.firstOrNull { choice ->
             choice.moneyDelta < 0 && catalog.content.events.any { it.id == choice.eventId && it.type == EventType.WANT }
         }
@@ -49,6 +49,10 @@ internal fun financialPracticePresentation(
     }.getOrNull() ?: return question
     return copyVerifiedWording(question, fresh)
 }
+
+/** Frozen examples carry all their inputs; their wording never needs the save's audit history. */
+internal fun financialPracticeExamplePresentation(question: FinancialQuestion): FinancialQuestion? =
+    FinancialTraining.exampleWording(question)?.let { copyVerifiedWording(question, it) }
 
 private fun copyVerifiedWording(question: FinancialQuestion, fresh: FinancialQuestion): FinancialQuestion {
     if (fresh.correctAnswerId != question.correctAnswerId ||

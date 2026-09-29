@@ -32,7 +32,7 @@ import ru.nksk.lctapp.core.ui.theme.Rubik
 import ru.nksk.lctapp.domain.minigame.DeedRewardPreview
 import ru.nksk.lctapp.domain.minigame.DifferencesState
 
-// Полки собираются из находок Смотрителя; отличия — другой предмет в ячейке.
+// Полки собираются из находок Смотрителя; отличия - другой предмет в ячейке.
 private val SHELF_ART = listOf(
     R.drawable.deed_pair_key,
     R.drawable.deed_pair_armillary,

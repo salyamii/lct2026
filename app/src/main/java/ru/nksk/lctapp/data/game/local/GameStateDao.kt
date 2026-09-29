@@ -5,9 +5,15 @@ import androidx.room3.Insert
 import androidx.room3.Query
 import androidx.room3.Update
 
-/** No REPLACE or parent deletion: references and unrelated rows must survive writes. */
+/** Ordinary writes preserve the parent; only an explicitly archived restart removes it. */
 @Dao
 internal interface GameStateDao {
+    @Query("DELETE FROM GAME_STATE WHERE id = :gameId")
+    suspend fun deleteArchivedState(gameId: String): Int
+
+    @Query("DELETE FROM LEGACY_EXPENSE_STATE WHERE game_state_id = :gameId")
+    suspend fun deleteLegacyExpenseState(gameId: String)
+
     @Query("SELECT * FROM EVENT_EXPOSURE WHERE game_state_id = :gameId ORDER BY position")
     suspend fun readEventExposure(gameId: String): List<EventExposureEntity>
     @Insert suspend fun insertEventExposure(rows: List<EventExposureEntity>)

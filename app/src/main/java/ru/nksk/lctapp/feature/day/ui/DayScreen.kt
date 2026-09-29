@@ -29,7 +29,7 @@ internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
                 while (true) awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() }
             }
         }) {
-            GameLoadingIndicator(Modifier.align(Alignment.Center).safeDrawingPadding())
+            GameLoadingIndicator(Modifier.align(Alignment.Center).safeDrawingPadding(), delayMillis = 300)
         }
         if (state.retryRequired && !state.busy) AlertDialog(
             onDismissRequest = onBack,
@@ -111,26 +111,9 @@ private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
             ) { Text(text) }
         }
     }
-    if (state.showMeals) AlertDialog(
-        onDismissRequest = { if (!state.busy) onAction(DayAction.CloseMeals) },
-        containerColor = GamePaper, titleContentColor = GameInk, textContentColor = GameInk,
-        title = { Text("${state.petName} проголодался") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Еда утолит голод, а сон вернёт силы.")
-                state.message?.let { Text(it) }
-                state.meals.forEach { meal ->
-                    meal.spending?.let { Text(it) }
-                    meal.consequence?.let { Text(it) }
-                    GameButton(meal.label, meal.enabled && !state.busy) { onAction(DayAction.Feed(meal.id)) }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton({ onAction(DayAction.CloseMeals) }, enabled = !state.busy,
-                colors = ButtonDefaults.textButtonColors(contentColor = GameInk)) { Text("Вернуться") }
-        },
-    )
+    if (state.showMeals) MealSelectionDialog(state.meals, state.busy,
+        onChoose = { onAction(DayAction.Feed(it)) }, onDismiss = { onAction(DayAction.CloseMeals) },
+        message = state.message)
 }
 
 @Composable

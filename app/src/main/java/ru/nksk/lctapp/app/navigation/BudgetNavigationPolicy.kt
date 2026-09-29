@@ -15,9 +15,10 @@ internal fun shouldPresentBudget(
     pending: BudgetPlanning?,
     destination: NavKey?,
     presentedPlanningId: String?,
+    confirmedPlanningId: String? = null,
 ): Boolean {
     // Settings are read-only with respect to the game and remain available during planning.
-    if (pending == null || destination == Economy || destination == Settings) return false
+    if (pending == null || pending.id == confirmedPlanningId || destination == Economy || destination == Settings) return false
     if (destination == MainMenu && pending.reason == BudgetPlanningReason.INITIAL &&
         pending.stage == BudgetPlanningStage.RECEIPT) return false
     return presentedPlanningId != pending.id || destination == Day || destination == Tasks ||

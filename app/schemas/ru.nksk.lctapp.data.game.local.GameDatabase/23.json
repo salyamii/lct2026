@@ -1,0 +1,2789 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 23,
+    "identityHash": "a1652553040eed34ff90b3882e66af5b",
+    "entities": [
+      {
+        "tableName": "GOAL",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "ITEM",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `category` TEXT NOT NULL DEFAULT 'STORY', `price_coins` INTEGER, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "category",
+            "columnName": "category",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'STORY'"
+          },
+          {
+            "fieldPath": "priceCoins",
+            "columnName": "price_coins",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "CHAPTER",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `goal_id` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`goal_id`) REFERENCES `GOAL`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "goalId",
+            "columnName": "goal_id",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_CHAPTER_goal_id",
+            "unique": false,
+            "columnNames": [
+              "goal_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CHAPTER_goal_id` ON `${TABLE_NAME}` (`goal_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "GOAL",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "goal_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "GAME_DAY",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `chapter_id` TEXT NOT NULL, `day_number` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`chapter_id`) REFERENCES `CHAPTER`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chapterId",
+            "columnName": "chapter_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dayNumber",
+            "columnName": "day_number",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_GAME_DAY_chapter_id",
+            "unique": false,
+            "columnNames": [
+              "chapter_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_GAME_DAY_chapter_id` ON `${TABLE_NAME}` (`chapter_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "CHAPTER",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "chapter_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "EVENT",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `min_satiety` INTEGER, `max_fatigue` INTEGER, `pet_state_on_start` TEXT, `money_delta_on_start` INTEGER NOT NULL, `budget_section_on_start` TEXT, `next_chapter_id` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`next_chapter_id`) REFERENCES `CHAPTER`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "minSatiety",
+            "columnName": "min_satiety",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "maxFatigue",
+            "columnName": "max_fatigue",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "petStateOnStart",
+            "columnName": "pet_state_on_start",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "moneyDeltaOnStart",
+            "columnName": "money_delta_on_start",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "budgetSectionOnStart",
+            "columnName": "budget_section_on_start",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nextChapterId",
+            "columnName": "next_chapter_id",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_EVENT_next_chapter_id",
+            "unique": false,
+            "columnNames": [
+              "next_chapter_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_EVENT_next_chapter_id` ON `${TABLE_NAME}` (`next_chapter_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "CHAPTER",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "next_chapter_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "DAY_EVENT",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `day_id` TEXT NOT NULL, `position` INTEGER NOT NULL, `event_id` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`day_id`) REFERENCES `GAME_DAY`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`event_id`) REFERENCES `EVENT`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dayId",
+            "columnName": "day_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eventId",
+            "columnName": "event_id",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_DAY_EVENT_day_id_position",
+            "unique": true,
+            "columnNames": [
+              "day_id",
+              "position"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_DAY_EVENT_day_id_position` ON `${TABLE_NAME}` (`day_id`, `position`)"
+          },
+          {
+            "name": "index_DAY_EVENT_event_id",
+            "unique": false,
+            "columnNames": [
+              "event_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_DAY_EVENT_event_id` ON `${TABLE_NAME}` (`event_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "GAME_DAY",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "day_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "EVENT",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "event_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "EVENT_CHOICE",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `event_id` TEXT NOT NULL, `position` INTEGER NOT NULL, `text` TEXT NOT NULL, `money_delta` INTEGER NOT NULL, `budget_section` TEXT, `pet_state_after` TEXT, `goal_impact` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`event_id`) REFERENCES `EVENT`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eventId",
+            "columnName": "event_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "text",
+            "columnName": "text",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "moneyDelta",
+            "columnName": "money_delta",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "budgetSection",
+            "columnName": "budget_section",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "petStateAfter",
+            "columnName": "pet_state_after",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "goalImpact",
+            "columnName": "goal_impact",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_EVENT_CHOICE_event_id_position",
+            "unique": true,
+            "columnNames": [
+              "event_id",
+              "position"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_EVENT_CHOICE_event_id_position` ON `${TABLE_NAME}` (`event_id`, `position`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "EVENT",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "event_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "GOAL_REQUIRED_ITEM",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`goal_id` TEXT NOT NULL, `item_id` TEXT NOT NULL, PRIMARY KEY(`goal_id`, `item_id`), FOREIGN KEY(`goal_id`) REFERENCES `GOAL`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`item_id`) REFERENCES `ITEM`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "goalId",
+            "columnName": "goal_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "itemId",
+            "columnName": "item_id",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "goal_id",
+            "item_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_GOAL_REQUIRED_ITEM_item_id",
+            "unique": false,
+            "columnNames": [
+              "item_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_GOAL_REQUIRED_ITEM_item_id` ON `${TABLE_NAME}` (`item_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "GOAL",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "goal_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "ITEM",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "item_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "EVENT_ITEM_EFFECT",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `event_id` TEXT NOT NULL, `position` INTEGER NOT NULL, `item_id` TEXT NOT NULL, `operation` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`event_id`) REFERENCES `EVENT`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`item_id`) REFERENCES `ITEM`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eventId",
+            "columnName": "event_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "itemId",
+            "columnName": "item_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "operation",
+            "columnName": "operation",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_EVENT_ITEM_EFFECT_event_id_position",
+            "unique": true,
+            "columnNames": [
+              "event_id",
+              "position"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_EVENT_ITEM_EFFECT_event_id_position` ON `${TABLE_NAME}` (`event_id`, `position`)"
+          },
+          {
+            "name": "index_EVENT_ITEM_EFFECT_item_id",
+            "unique": false,
+            "columnNames": [
+              "item_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_EVENT_ITEM_EFFECT_item_id` ON `${TABLE_NAME}` (`item_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "EVENT",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "event_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "ITEM",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "item_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "CHOICE_ITEM_EFFECT",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `choice_id` TEXT NOT NULL, `position` INTEGER NOT NULL, `item_id` TEXT NOT NULL, `operation` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`choice_id`) REFERENCES `EVENT_CHOICE`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`item_id`) REFERENCES `ITEM`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "choiceId",
+            "columnName": "choice_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "itemId",
+            "columnName": "item_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "operation",
+            "columnName": "operation",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_CHOICE_ITEM_EFFECT_choice_id_position",
+            "unique": true,
+            "columnNames": [
+              "choice_id",
+              "position"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_CHOICE_ITEM_EFFECT_choice_id_position` ON `${TABLE_NAME}` (`choice_id`, `position`)"
+          },
+          {
+            "name": "index_CHOICE_ITEM_EFFECT_item_id",
+            "unique": false,
+            "columnNames": [
+              "item_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CHOICE_ITEM_EFFECT_item_id` ON `${TABLE_NAME}` (`item_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "EVENT_CHOICE",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "choice_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "ITEM",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "item_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "GAME_STATE",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `visual_state` TEXT NOT NULL, `selected_look` TEXT NOT NULL, `satiety` INTEGER NOT NULL, `fatigue` INTEGER NOT NULL, `unallocated` INTEGER NOT NULL, `needs` INTEGER NOT NULL, `wants` INTEGER NOT NULL, `savings` INTEGER NOT NULL, `reserve` INTEGER NOT NULL, `available_balance` INTEGER NOT NULL DEFAULT 0, `savings_balance` INTEGER NOT NULL DEFAULT 0, `budget_model_version` INTEGER NOT NULL DEFAULT 0, `current_day_id` TEXT, `next_script_position` INTEGER, `active_event_id` TEXT, `pet_temperament` TEXT, `pet_name` TEXT NOT NULL DEFAULT 'Рыжик', `pet_age` TEXT NOT NULL DEFAULT 'CUB', `pet_color` TEXT NOT NULL DEFAULT 'COPPER', `location_id` TEXT NOT NULL DEFAULT 'city', `location_lighting` TEXT NOT NULL DEFAULT 'DAY', PRIMARY KEY(`id`), FOREIGN KEY(`current_day_id`) REFERENCES `GAME_DAY`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`current_day_id`, `next_script_position`) REFERENCES `DAY_EVENT`(`day_id`, `position`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`active_event_id`) REFERENCES `EVENT`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "visualState",
+            "columnName": "visual_state",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "selectedLook",
+            "columnName": "selected_look",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "satiety",
+            "columnName": "satiety",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fatigue",
+            "columnName": "fatigue",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unallocated",
+            "columnName": "unallocated",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "needs",
+            "columnName": "needs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wants",
+            "columnName": "wants",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "savings",
+            "columnName": "savings",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reserve",
+            "columnName": "reserve",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "availableBalance",
+            "columnName": "available_balance",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "savingsBalance",
+            "columnName": "savings_balance",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "budgetModelVersion",
+            "columnName": "budget_model_version",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "currentDayId",
+            "columnName": "current_day_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nextScriptPosition",
+            "columnName": "next_script_position",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "activeEventId",
+            "columnName": "active_event_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "petTemperament",
+            "columnName": "pet_temperament",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "petName",
+            "columnName": "pet_name",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'Рыжик'"
+          },
+          {
+            "fieldPath": "petAge",
+            "columnName": "pet_age",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'CUB'"
+          },
+          {
+            "fieldPath": "petColor",
+            "columnName": "pet_color",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'COPPER'"
+          },
+          {
+            "fieldPath": "locationId",
+            "columnName": "location_id",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'city'"
+          },
+          {
+            "fieldPath": "locationLighting",
+            "columnName": "location_lighting",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'DAY'"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_GAME_STATE_current_day_id",
+            "unique": false,
+            "columnNames": [
+              "current_day_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_GAME_STATE_current_day_id` ON `${TABLE_NAME}` (`current_day_id`)"
+          },
+          {
+            "name": "index_GAME_STATE_current_day_id_next_script_position",
+            "unique": false,
+            "columnNames": [
+              "current_day_id",
+              "next_script_position"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_GAME_STATE_current_day_id_next_script_position` ON `${TABLE_NAME}` (`current_day_id`, `next_script_position`)"
+          },
+          {
+            "name": "index_GAME_STATE_active_event_id",
+            "unique": false,
+            "columnNames": [
+              "active_event_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_GAME_STATE_active_event_id` ON `${TABLE_NAME}` (`active_event_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "GAME_DAY",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "current_day_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "DAY_EVENT",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "current_day_id",
+              "next_script_position"
+            ],
+            "referencedColumns": [
+              "day_id",
+              "position"
+            ]
+          },
+          {
+            "table": "EVENT",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "active_event_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "BUDGET_PLANNING",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`game_state_id` TEXT NOT NULL, `session_id` TEXT NOT NULL, `reason` TEXT NOT NULL, `stage` TEXT NOT NULL, `income` INTEGER NOT NULL, `revision` INTEGER NOT NULL, `draft_needs` INTEGER, `draft_wants` INTEGER, `draft_savings` INTEGER, `draft_reserve` INTEGER, `base_amount` INTEGER, PRIMARY KEY(`game_state_id`), FOREIGN KEY(`game_state_id`) REFERENCES `GAME_STATE`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "gameStateId",
+            "columnName": "game_state_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionId",
+            "columnName": "session_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reason",
+            "columnName": "reason",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stage",
+            "columnName": "stage",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "income",
+            "columnName": "income",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revision",
+            "columnName": "revision",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "draftNeeds",
+            "columnName": "draft_needs",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "draftWants",
+            "columnName": "draft_wants",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "draftSavings",
+            "columnName": "draft_savings",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "draftReserve",
+            "columnName": "draft_reserve",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "baseAmount",
+            "columnName": "base_amount",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "game_state_id"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "GAME_STATE",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_state_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "PLAYER_DECISION",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `game_state_id` TEXT NOT NULL, `position` INTEGER NOT NULL, `choice_id` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`game_state_id`) REFERENCES `GAME_STATE`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`choice_id`) REFERENCES `EVENT_CHOICE`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gameStateId",
+            "columnName": "game_state_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "choiceId",
+            "columnName": "choice_id",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_PLAYER_DECISION_game_state_id_position",
+            "unique": true,
+            "columnNames": [
+              "game_state_id",
+              "position"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_PLAYER_DECISION_game_state_id_position` ON `${TABLE_NAME}` (`game_state_id`, `position`)"
+          },
+          {
+            "name": "index_PLAYER_DECISION_choice_id",
+            "unique": false,
+            "columnNames": [
+              "choice_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PLAYER_DECISION_choice_id` ON `${TABLE_NAME}` (`choice_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "GAME_STATE",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_state_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "EVENT_CHOICE",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "choice_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "OWNED_ITEM",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `game_state_id` TEXT NOT NULL, `position` INTEGER NOT NULL, `item_id` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`game_state_id`) REFERENCES `GAME_STATE`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`item_id`) REFERENCES `ITEM`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gameStateId",
+            "columnName": "game_state_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "itemId",
+            "columnName": "item_id",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_OWNED_ITEM_game_state_id_position",
+            "unique": true,
+            "columnNames": [
+              "game_state_id",
+              "position"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_OWNED_ITEM_game_state_id_position` ON `${TABLE_NAME}` (`game_state_id`, `position`)"
+          },
+          {
+            "name": "index_OWNED_ITEM_item_id",
+            "unique": false,
+            "columnNames": [
+              "item_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_OWNED_ITEM_item_id` ON `${TABLE_NAME}` (`item_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "GAME_STATE",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_state_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "ITEM",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "item_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "ENGINE_STATE",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`game_state_id` TEXT NOT NULL, `rules_id` TEXT NOT NULL, `revision` INTEGER NOT NULL, `day` INTEGER NOT NULL, `phase` TEXT NOT NULL, `steps` INTEGER NOT NULL, `energy` INTEGER NOT NULL, `ate_today` INTEGER NOT NULL, `next_morning_energy` INTEGER, `opening_balance` INTEGER NOT NULL, `opening_energy` INTEGER, `balance_adjustment` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`game_state_id`), FOREIGN KEY(`game_state_id`) REFERENCES `GAME_STATE`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "gameStateId",
+            "columnName": "game_state_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rulesId",
+            "columnName": "rules_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revision",
+            "columnName": "revision",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "day",
+            "columnName": "day",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "phase",
+            "columnName": "phase",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "steps",
+            "columnName": "steps",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "energy",
+            "columnName": "energy",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ateToday",
+            "columnName": "ate_today",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nextMorningEnergy",
+            "columnName": "next_morning_energy",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "openingBalance",
+            "columnName": "opening_balance",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "openingEnergy",
+            "columnName": "opening_energy",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "balanceAdjustment",
+            "columnName": "balance_adjustment",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "game_state_id"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "GAME_STATE",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_state_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "ENGINE_EVENT",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `game_state_id` TEXT NOT NULL, `position` INTEGER NOT NULL, `event_id` TEXT, `status` TEXT NOT NULL, `deed_offer_id` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`game_state_id`) REFERENCES `ENGINE_STATE`(`game_state_id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`event_id`) REFERENCES `EVENT`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`deed_offer_id`) REFERENCES `ENGINE_DEED`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gameStateId",
+            "columnName": "game_state_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eventId",
+            "columnName": "event_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deedOfferId",
+            "columnName": "deed_offer_id",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_ENGINE_EVENT_game_state_id_position",
+            "unique": true,
+            "columnNames": [
+              "game_state_id",
+              "position"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ENGINE_EVENT_game_state_id_position` ON `${TABLE_NAME}` (`game_state_id`, `position`)"
+          },
+          {
+            "name": "index_ENGINE_EVENT_event_id",
+            "unique": false,
+            "columnNames": [
+              "event_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ENGINE_EVENT_event_id` ON `${TABLE_NAME}` (`event_id`)"
+          },
+          {
+            "name": "index_ENGINE_EVENT_deed_offer_id",
+            "unique": true,
+            "columnNames": [
+              "deed_offer_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ENGINE_EVENT_deed_offer_id` ON `${TABLE_NAME}` (`deed_offer_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "ENGINE_STATE",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_state_id"
+            ],
+            "referencedColumns": [
+              "game_state_id"
+            ]
+          },
+          {
+            "table": "EVENT",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "event_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "ENGINE_DEED",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "deed_offer_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "ENGINE_DEED",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `game_state_id` TEXT NOT NULL, `position` INTEGER NOT NULL, `event_id` TEXT NOT NULL, `expires_day` INTEGER NOT NULL, `completed` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`game_state_id`) REFERENCES `ENGINE_STATE`(`game_state_id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`event_id`) REFERENCES `EVENT`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gameStateId",
+            "columnName": "game_state_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eventId",
+            "columnName": "event_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "expiresDay",
+            "columnName": "expires_day",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completed",
+            "columnName": "completed",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_ENGINE_DEED_game_state_id_position",
+            "unique": true,
+            "columnNames": [
+              "game_state_id",
+              "position"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ENGINE_DEED_game_state_id_position` ON `${TABLE_NAME}` (`game_state_id`, `position`)"
+          },
+          {
+            "name": "index_ENGINE_DEED_event_id",
+            "unique": false,
+            "columnNames": [
+              "event_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ENGINE_DEED_event_id` ON `${TABLE_NAME}` (`event_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "ENGINE_STATE",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_state_id"
+            ],
+            "referencedColumns": [
+              "game_state_id"
+            ]
+          },
+          {
+            "table": "EVENT",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "event_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "LEGACY_EXPENSE_STATE",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`game_state_id` TEXT NOT NULL, `expense_sequence` INTEGER NOT NULL, `expense_stage` TEXT NOT NULL, `earning_attempt` INTEGER NOT NULL, PRIMARY KEY(`game_state_id`), FOREIGN KEY(`game_state_id`) REFERENCES `GAME_STATE`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "gameStateId",
+            "columnName": "game_state_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "expenseSequence",
+            "columnName": "expense_sequence",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "expenseStage",
+            "columnName": "expense_stage",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "earningAttempt",
+            "columnName": "earning_attempt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "game_state_id"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "GAME_STATE",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_state_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "MINI_GAME_COMPLETION",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`attempt_id` TEXT NOT NULL, `game_state_id` TEXT NOT NULL, PRIMARY KEY(`attempt_id`), FOREIGN KEY(`game_state_id`) REFERENCES `GAME_STATE`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "attemptId",
+            "columnName": "attempt_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gameStateId",
+            "columnName": "game_state_id",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "attempt_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_MINI_GAME_COMPLETION_game_state_id",
+            "unique": false,
+            "columnNames": [
+              "game_state_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_MINI_GAME_COMPLETION_game_state_id` ON `${TABLE_NAME}` (`game_state_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "GAME_STATE",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_state_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "ONBOARDING_DRAFT",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `temperament` TEXT NOT NULL, `fur` TEXT NOT NULL, `step` TEXT NOT NULL DEFAULT 'PROFILE', `accessory_id` TEXT NOT NULL DEFAULT 'BACKPACK', `goal_id` TEXT, `saving_item_id` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "temperament",
+            "columnName": "temperament",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fur",
+            "columnName": "fur",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "step",
+            "columnName": "step",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'PROFILE'"
+          },
+          {
+            "fieldPath": "accessoryId",
+            "columnName": "accessory_id",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'BACKPACK'"
+          },
+          {
+            "fieldPath": "goalId",
+            "columnName": "goal_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "savingItemId",
+            "columnName": "saving_item_id",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "GOAL_SELECTION",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`game_state_id` TEXT NOT NULL, `goal_id` TEXT NOT NULL, PRIMARY KEY(`game_state_id`), FOREIGN KEY(`game_state_id`) REFERENCES `GAME_STATE`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`goal_id`) REFERENCES `GOAL`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "gameStateId",
+            "columnName": "game_state_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "goalId",
+            "columnName": "goal_id",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "game_state_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_GOAL_SELECTION_goal_id",
+            "unique": false,
+            "columnNames": [
+              "goal_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_GOAL_SELECTION_goal_id` ON `${TABLE_NAME}` (`goal_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "GAME_STATE",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_state_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "GOAL",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "goal_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "SAVING_GOAL_SELECTION",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`game_state_id` TEXT NOT NULL, `item_id` TEXT NOT NULL, PRIMARY KEY(`game_state_id`), FOREIGN KEY(`game_state_id`) REFERENCES `GAME_STATE`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`item_id`) REFERENCES `ITEM`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "gameStateId",
+            "columnName": "game_state_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "itemId",
+            "columnName": "item_id",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "game_state_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_SAVING_GOAL_SELECTION_item_id",
+            "unique": false,
+            "columnNames": [
+              "item_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_SAVING_GOAL_SELECTION_item_id` ON `${TABLE_NAME}` (`item_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "GAME_STATE",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_state_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "ITEM",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "item_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "COMPLETED_GOAL_PROJECT",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`decision_id` TEXT NOT NULL, `goal_id` TEXT NOT NULL, PRIMARY KEY(`decision_id`), FOREIGN KEY(`decision_id`) REFERENCES `PLAYER_DECISION`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`goal_id`) REFERENCES `GOAL`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "decisionId",
+            "columnName": "decision_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "goalId",
+            "columnName": "goal_id",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "decision_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_COMPLETED_GOAL_PROJECT_goal_id",
+            "unique": false,
+            "columnNames": [
+              "goal_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_COMPLETED_GOAL_PROJECT_goal_id` ON `${TABLE_NAME}` (`goal_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "PLAYER_DECISION",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "decision_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "GOAL",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "goal_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "DAY_JOURNAL",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `game_state_id` TEXT NOT NULL, `position` INTEGER NOT NULL, `kind` TEXT NOT NULL, `source_id` TEXT NOT NULL, `money_delta` INTEGER NOT NULL, `energy_delta` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`game_state_id`) REFERENCES `ENGINE_STATE`(`game_state_id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gameStateId",
+            "columnName": "game_state_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sourceId",
+            "columnName": "source_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "moneyDelta",
+            "columnName": "money_delta",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "energyDelta",
+            "columnName": "energy_delta",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_DAY_JOURNAL_game_state_id_position",
+            "unique": true,
+            "columnNames": [
+              "game_state_id",
+              "position"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_DAY_JOURNAL_game_state_id_position` ON `${TABLE_NAME}` (`game_state_id`, `position`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "ENGINE_STATE",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_state_id"
+            ],
+            "referencedColumns": [
+              "game_state_id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "GAME_RUN",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`game_state_id` TEXT NOT NULL, `run_id` TEXT NOT NULL, PRIMARY KEY(`game_state_id`), FOREIGN KEY(`game_state_id`) REFERENCES `GAME_STATE`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "gameStateId",
+            "columnName": "game_state_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "runId",
+            "columnName": "run_id",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "game_state_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_GAME_RUN_run_id",
+            "unique": true,
+            "columnNames": [
+              "run_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_GAME_RUN_run_id` ON `${TABLE_NAME}` (`run_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "GAME_STATE",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_state_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "GAME_AUDIT",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `run_id` TEXT NOT NULL, `sequence` INTEGER NOT NULL, `type` TEXT NOT NULL, `format_version` INTEGER NOT NULL, `payload` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`run_id`) REFERENCES `GAME_RUN`(`run_id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "runId",
+            "columnName": "run_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sequence",
+            "columnName": "sequence",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "formatVersion",
+            "columnName": "format_version",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "payload",
+            "columnName": "payload",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_GAME_AUDIT_run_id_sequence",
+            "unique": true,
+            "columnNames": [
+              "run_id",
+              "sequence"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_GAME_AUDIT_run_id_sequence` ON `${TABLE_NAME}` (`run_id`, `sequence`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "GAME_RUN",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "run_id"
+            ],
+            "referencedColumns": [
+              "run_id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "AUDIT_FACT_ID",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`fact_id` TEXT NOT NULL, `audit_id` TEXT NOT NULL, PRIMARY KEY(`fact_id`), FOREIGN KEY(`audit_id`) REFERENCES `GAME_AUDIT`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "factId",
+            "columnName": "fact_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "auditId",
+            "columnName": "audit_id",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "fact_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_AUDIT_FACT_ID_audit_id",
+            "unique": false,
+            "columnNames": [
+              "audit_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_AUDIT_FACT_ID_audit_id` ON `${TABLE_NAME}` (`audit_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "GAME_AUDIT",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "audit_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "AUDIT_OUTBOX",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`audit_id` TEXT NOT NULL, `acknowledged` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`audit_id`), FOREIGN KEY(`audit_id`) REFERENCES `GAME_AUDIT`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "auditId",
+            "columnName": "audit_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "acknowledged",
+            "columnName": "acknowledged",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "audit_id"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "GAME_AUDIT",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "audit_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "FINANCIAL_PERIOD",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `game_state_id` TEXT NOT NULL, `position` INTEGER NOT NULL, `goal_id` TEXT NOT NULL, `ordinal` INTEGER NOT NULL, `started_day` INTEGER NOT NULL, `opening_available` INTEGER NOT NULL, `opening_savings` INTEGER NOT NULL, `closed_day` INTEGER, `needs_provided` INTEGER NOT NULL, `independently_saved` INTEGER NOT NULL, `reviewed_plan` INTEGER NOT NULL, `imported` INTEGER NOT NULL, `income` INTEGER NOT NULL, `spent_available` INTEGER NOT NULL, `spent_savings` INTEGER NOT NULL, `deposited` INTEGER NOT NULL, `withdrawn` INTEGER NOT NULL, `savings_practice_payload` TEXT, `review_evidence_payload` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`game_state_id`) REFERENCES `GAME_STATE`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gameStateId",
+            "columnName": "game_state_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "goalId",
+            "columnName": "goal_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ordinal",
+            "columnName": "ordinal",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startedDay",
+            "columnName": "started_day",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "openingAvailable",
+            "columnName": "opening_available",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "openingSavings",
+            "columnName": "opening_savings",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "closedDay",
+            "columnName": "closed_day",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "needsProvided",
+            "columnName": "needs_provided",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "independentlySaved",
+            "columnName": "independently_saved",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reviewedPlan",
+            "columnName": "reviewed_plan",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imported",
+            "columnName": "imported",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "income",
+            "columnName": "income",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spentAvailable",
+            "columnName": "spent_available",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spentSavings",
+            "columnName": "spent_savings",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deposited",
+            "columnName": "deposited",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "withdrawn",
+            "columnName": "withdrawn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "savingsPracticePayload",
+            "columnName": "savings_practice_payload",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "reviewEvidencePayload",
+            "columnName": "review_evidence_payload",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_FINANCIAL_PERIOD_game_state_id_position",
+            "unique": true,
+            "columnNames": [
+              "game_state_id",
+              "position"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_FINANCIAL_PERIOD_game_state_id_position` ON `${TABLE_NAME}` (`game_state_id`, `position`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "GAME_STATE",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_state_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "FINANCIAL_CURSOR",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`game_state_id` TEXT NOT NULL, `period_id` TEXT, PRIMARY KEY(`game_state_id`), FOREIGN KEY(`game_state_id`) REFERENCES `GAME_STATE`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`period_id`) REFERENCES `FINANCIAL_PERIOD`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "gameStateId",
+            "columnName": "game_state_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "periodId",
+            "columnName": "period_id",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "game_state_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_FINANCIAL_CURSOR_period_id",
+            "unique": false,
+            "columnNames": [
+              "period_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_FINANCIAL_CURSOR_period_id` ON `${TABLE_NAME}` (`period_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "GAME_STATE",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_state_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "FINANCIAL_PERIOD",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "period_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "BUDGET_PLAN_REVISION",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `game_state_id` TEXT NOT NULL, `position` INTEGER NOT NULL, `period_id` TEXT, `ordinal` INTEGER NOT NULL, `day` INTEGER NOT NULL, `available_basis` INTEGER NOT NULL, `needs` INTEGER NOT NULL, `wants` INTEGER NOT NULL, `savings` INTEGER NOT NULL, `reserve` INTEGER NOT NULL, `reason` TEXT NOT NULL, `previous_id` TEXT, `known_needs` INTEGER, `cause_action_id` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`game_state_id`) REFERENCES `GAME_STATE`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`period_id`) REFERENCES `FINANCIAL_PERIOD`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gameStateId",
+            "columnName": "game_state_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "periodId",
+            "columnName": "period_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ordinal",
+            "columnName": "ordinal",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "day",
+            "columnName": "day",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "availableBasis",
+            "columnName": "available_basis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "needs",
+            "columnName": "needs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wants",
+            "columnName": "wants",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "savings",
+            "columnName": "savings",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reserve",
+            "columnName": "reserve",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reason",
+            "columnName": "reason",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "previousId",
+            "columnName": "previous_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "knownNeeds",
+            "columnName": "known_needs",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "causeActionId",
+            "columnName": "cause_action_id",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_BUDGET_PLAN_REVISION_game_state_id_position",
+            "unique": true,
+            "columnNames": [
+              "game_state_id",
+              "position"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_BUDGET_PLAN_REVISION_game_state_id_position` ON `${TABLE_NAME}` (`game_state_id`, `position`)"
+          },
+          {
+            "name": "index_BUDGET_PLAN_REVISION_period_id",
+            "unique": false,
+            "columnNames": [
+              "period_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_BUDGET_PLAN_REVISION_period_id` ON `${TABLE_NAME}` (`period_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "GAME_STATE",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_state_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "FINANCIAL_PERIOD",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "period_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "FINANCIAL_PRACTICE",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`game_state_id` TEXT NOT NULL, `task_payload` TEXT NOT NULL, `answered_option_id` TEXT, `used_hint` INTEGER NOT NULL, `attempts` INTEGER NOT NULL, PRIMARY KEY(`game_state_id`), FOREIGN KEY(`game_state_id`) REFERENCES `GAME_STATE`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "gameStateId",
+            "columnName": "game_state_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskPayload",
+            "columnName": "task_payload",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "answeredOptionId",
+            "columnName": "answered_option_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "usedHint",
+            "columnName": "used_hint",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attempts",
+            "columnName": "attempts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "game_state_id"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "GAME_STATE",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_state_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "EVENT_EXPOSURE",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`game_state_id` TEXT NOT NULL, `event_id` TEXT NOT NULL, `position` INTEGER NOT NULL, `last_offered_day` INTEGER, `last_completed_day` INTEGER, `offer_count` INTEGER NOT NULL, `completion_count` INTEGER NOT NULL, PRIMARY KEY(`game_state_id`, `event_id`), FOREIGN KEY(`game_state_id`) REFERENCES `GAME_STATE`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`event_id`) REFERENCES `EVENT`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "gameStateId",
+            "columnName": "game_state_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eventId",
+            "columnName": "event_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastOfferedDay",
+            "columnName": "last_offered_day",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastCompletedDay",
+            "columnName": "last_completed_day",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "offerCount",
+            "columnName": "offer_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completionCount",
+            "columnName": "completion_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "game_state_id",
+            "event_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_EVENT_EXPOSURE_game_state_id_position",
+            "unique": true,
+            "columnNames": [
+              "game_state_id",
+              "position"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_EVENT_EXPOSURE_game_state_id_position` ON `${TABLE_NAME}` (`game_state_id`, `position`)"
+          },
+          {
+            "name": "index_EVENT_EXPOSURE_event_id",
+            "unique": false,
+            "columnNames": [
+              "event_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_EVENT_EXPOSURE_event_id` ON `${TABLE_NAME}` (`event_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "GAME_STATE",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "game_state_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "EVENT",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "event_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "BACKEND_SYNC_STATE",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`profile_id` TEXT NOT NULL, `backend_url` TEXT NOT NULL, `server_revision` INTEGER, `last_snapshot_checksum` TEXT, `last_analytics_sequence` INTEGER NOT NULL, `last_synced_at_epoch_ms` INTEGER, `skills_payload` TEXT, `game_run_id` TEXT, `local_generation` TEXT, `reward_fetch_cursor` INTEGER, PRIMARY KEY(`profile_id`))",
+        "fields": [
+          {
+            "fieldPath": "profileId",
+            "columnName": "profile_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "backendUrl",
+            "columnName": "backend_url",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "serverRevision",
+            "columnName": "server_revision",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastSnapshotChecksum",
+            "columnName": "last_snapshot_checksum",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastAnalyticsSequence",
+            "columnName": "last_analytics_sequence",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastSyncedAtEpochMs",
+            "columnName": "last_synced_at_epoch_ms",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "skillsPayload",
+            "columnName": "skills_payload",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "gameRunId",
+            "columnName": "game_run_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "localGeneration",
+            "columnName": "local_generation",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rewardFetchCursor",
+            "columnName": "reward_fetch_cursor",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "profile_id"
+          ]
+        }
+      },
+      {
+        "tableName": "PENDING_BACKEND_REQUEST",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`profile_id` TEXT NOT NULL, `kind` TEXT NOT NULL, `request_id` TEXT NOT NULL, `payload` TEXT NOT NULL, PRIMARY KEY(`profile_id`, `kind`))",
+        "fields": [
+          {
+            "fieldPath": "profileId",
+            "columnName": "profile_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requestId",
+            "columnName": "request_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "payload",
+            "columnName": "payload",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "profile_id",
+            "kind"
+          ]
+        }
+      },
+      {
+        "tableName": "GAME_RUN_ARCHIVE",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`run_id` TEXT NOT NULL, `position` INTEGER NOT NULL, `restart_request_id` TEXT NOT NULL, `next_run_id` TEXT NOT NULL, `snapshot_payload` TEXT NOT NULL, PRIMARY KEY(`run_id`))",
+        "fields": [
+          {
+            "fieldPath": "runId",
+            "columnName": "run_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "restartRequestId",
+            "columnName": "restart_request_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nextRunId",
+            "columnName": "next_run_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "snapshotPayload",
+            "columnName": "snapshot_payload",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "run_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_GAME_RUN_ARCHIVE_position",
+            "unique": true,
+            "columnNames": [
+              "position"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_GAME_RUN_ARCHIVE_position` ON `${TABLE_NAME}` (`position`)"
+          },
+          {
+            "name": "index_GAME_RUN_ARCHIVE_restart_request_id",
+            "unique": true,
+            "columnNames": [
+              "restart_request_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_GAME_RUN_ARCHIVE_restart_request_id` ON `${TABLE_NAME}` (`restart_request_id`)"
+          },
+          {
+            "name": "index_GAME_RUN_ARCHIVE_next_run_id",
+            "unique": true,
+            "columnNames": [
+              "next_run_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_GAME_RUN_ARCHIVE_next_run_id` ON `${TABLE_NAME}` (`next_run_id`)"
+          }
+        ]
+      },
+      {
+        "tableName": "GAME_RUN_ARCHIVE_AUDIT",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`archive_run_id` TEXT NOT NULL, `sequence` INTEGER NOT NULL, `payload` TEXT NOT NULL, PRIMARY KEY(`archive_run_id`, `sequence`), FOREIGN KEY(`archive_run_id`) REFERENCES `GAME_RUN_ARCHIVE`(`run_id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "archiveRunId",
+            "columnName": "archive_run_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sequence",
+            "columnName": "sequence",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "payload",
+            "columnName": "payload",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "archive_run_id",
+            "sequence"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "GAME_RUN_ARCHIVE",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "archive_run_id"
+            ],
+            "referencedColumns": [
+              "run_id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a1652553040eed34ff90b3882e66af5b')"
+    ]
+  }
+}

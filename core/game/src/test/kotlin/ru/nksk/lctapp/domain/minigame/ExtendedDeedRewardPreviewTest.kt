@@ -33,7 +33,7 @@ class ExtendedDeedRewardPreviewTest {
         val partial = next.tap(next.sequence.first())
         for (board in listOf(wrong, wrong.tap(1), next, partial)) {
             assertEquals(1, DeedRewardPreview.fromSequence(board).mistakes)
-            assertEquals(9L, DeedRewardPreview.fromSequence(board).reward(12))
+            assertEquals(8L, DeedRewardPreview.fromSequence(board).reward(12))
             assertNull(DeedGameScore.fromSequence(board))
         }
         for (correctRounds in 0..SequenceState.ROUNDS) {
@@ -45,6 +45,20 @@ class ExtendedDeedRewardPreviewTest {
             }
             assertFinal(DeedRewardPreview.fromSequence(board), checkNotNull(DeedGameScore.fromSequence(board)))
         }
+    }
+
+    @Test fun legacySequencePreviewAndPaymentKeepTheirFiveRoundDenominator() {
+        var board = SequenceState.create().copy(roundLimit = SequenceState.LEGACY_ROUNDS)
+        board = board.tap((board.sequence.first() + 1) % SequenceState.SIGNAL_COUNT)
+        assertEquals(9L, DeedRewardPreview.fromSequence(board).reward(12))
+        repeat(4) {
+            board = board.next()
+            board = board.sequence.fold(board) { game, signal -> game.tap(signal) }
+        }
+        val score = checkNotNull(DeedGameScore.fromSequence(board))
+        assertEquals(5, score.attempts)
+        assertEquals(4, score.correct)
+        assertFinal(DeedRewardPreview.fromSequence(board), score)
     }
 
     @Test fun differencesChargeMissesAndKeepPreviewEqualToTheFinalScore() {

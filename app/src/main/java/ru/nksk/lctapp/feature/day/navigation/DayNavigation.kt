@@ -24,7 +24,8 @@ data object Day : NavKey
 fun EntryProviderScope<NavKey>.dayEntry(onBack: (Day) -> Unit, onFinished: (Day, String?) -> Unit,
     onGame: (Day, String) -> Unit, onLearning: (Day) -> Unit = {},
     onStoryGame: (Day, String, String) -> Unit = { _, _, _ -> },
-    onReflection: (Day, Int) -> Unit = { _, _ -> }, isCurrentEntry: (Day) -> Boolean = { true }) {
+    onReflection: (Day, Int) -> Unit = { _, _ -> }, isCurrentEntry: (Day) -> Boolean = { true },
+    onRestarted: (Day) -> Unit = {}) {
     entry<Day> { source ->
         val viewModel = hiltViewModel<DayViewModel>()
         val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -32,7 +33,9 @@ fun EntryProviderScope<NavKey>.dayEntry(onBack: (Day) -> Unit, onFinished: (Day,
         EventAudioEffect(state.audioOccurrenceId, state.eventMedia, isCurrentEntry(source))
         LaunchedEffect(viewModel, lifecycle) {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                viewModel.exit.collect { onFinished(source, it) }
+                viewModel.setActive(true)
+                try { viewModel.exit.collect { onFinished(source, it) } }
+                finally { viewModel.setActive(false) }
             }
         }
         LaunchedEffect(viewModel, lifecycle, "game") {
@@ -53,6 +56,11 @@ fun EntryProviderScope<NavKey>.dayEntry(onBack: (Day) -> Unit, onFinished: (Day,
         LaunchedEffect(viewModel, lifecycle, "reflection") {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.openReflection.collect { onReflection(source, it) }
+            }
+        }
+        LaunchedEffect(viewModel, lifecycle, "restart") {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.restarted.collect { onRestarted(source) }
             }
         }
         DayScreen(

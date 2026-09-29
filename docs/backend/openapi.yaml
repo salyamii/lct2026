@@ -71,14 +71,13 @@ paths:
   /v1/profiles/snapshot:
     put:
       operationId: uploadSnapshot
-      summary: Store the complete game archive
+      summary: Store the current game world
       description: Idempotency-Key must equal uploadId. Compare expectedServerRevision atomically; null means no existing
-        save. Validate envelope metadata against snapshotJson. Persist the entire archive before publishing a new
-        serverRevision. Same upload does not increase the revision. A new gameRunId is allowed when snapshot format 5
-        contains the current server run in archivedRuns and its nextRunId chain ends at the uploaded run; the archived
-        history must preserve the server history prefix. Otherwise return GAME_RUN_CONFLICT. Keep snapshotJson unchanged. After long offline periods a 409 conflict
-        preserves the current local world, reward receipts and outbox. Do not download-and-overwrite automatically,
-        bypass compare-and-swap with a guessed revision or merge balances using timestamps.
+        save. New uploads use payloadKind CURRENT_WORLD and worldFormatVersion 1 inside snapshotJson, containing only
+        the current state, reward application receipts and compact predecessor metadata. Local audit and archived worlds
+        are not uploaded. A successor gameRunId must name the current server run in predecessors. Frozen legacy full
+        archive requests remain valid idempotent retries. Publish the exact payload and new serverRevision atomically;
+        never reserialize snapshotJson or automatically merge conflicting worlds.
       tags:
       - World snapshots
       x-implementation-status: android-transport-contract; server-proposed
@@ -153,7 +152,7 @@ paths:
     post:
       operationId: uploadAnalytics
       summary: Upload full skill evidence at an audit boundary
-      description: Idempotency-Key must equal batchId. This is the complete projection through throughHistorySequence,
+      description: Idempotency-Key must equal batchId. This is the complete locally available projection through throughHistorySequence; historyStartSequence declares an absent pre-restore prefix,
         not counter increments. Original facts are immutable; versioned derived facts may be refined at later boundaries.
         Accepted facts and mastery assessments are separate. See analytics.md for deduplication and projection rules.
       tags:
@@ -542,14 +541,18 @@ components:
           type: integer
           minimum: 1
           maximum: 5
+          description: 1 for CURRENT_WORLD; legacy archive format 1 through 5 when payloadKind is absent.
         checksum:
           type: string
           pattern: ^[a-f0-9]{64}$
         snapshotJson:
           type: string
           minLength: 1
-          description: Exact HistoryCodec.encodeSnapshot output, opaque UTF-8 JSON string. No server reserialization.
-            Contains state, complete ordered history and checksum.
+          description: Exact WorldSnapshotCodec.encode output for CURRENT_WORLD; legacy full format1-5 archives only for old frozen requests. No server reserialization.
+        payloadKind:
+          type: string
+          const: CURRENT_WORLD
+          description: Present for new current-world payloads; absent for legacy archives.
         schemaVersion:
           type: integer
           const: 1
@@ -602,6 +605,10 @@ components:
           type: string
           minLength: 1
           description: Unmodified snapshotJson accepted by the server.
+        payloadKind:
+          type: string
+          const: CURRENT_WORLD
+          description: Present for new current-world payloads; absent for legacy archives.
         schemaVersion:
           type: integer
           const: 1

@@ -19,7 +19,7 @@
     <string name="deeds_target_prompt">Поймай сигнал звезды</string>
     <string name="deeds_round">Раунд %1$d из %2$d</string>
     <string name="deeds_hit">Сигнал пойман! +%1$d демо-монет</string>
-    <string name="deeds_miss">Сигнал ушёл — попробуй ещё</string>
+    <string name="deeds_miss">Сигнал ушёл - попробуй ещё</string>
     <string name="deeds_ready">Готово!</string>
     <string name="deeds_target_hint">Нажми «Стоп», когда центр бегунка в зелёной зоне</string>
     <string name="deeds_stop">Стоп!</string>

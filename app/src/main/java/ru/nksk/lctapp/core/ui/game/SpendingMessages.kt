@@ -11,7 +11,7 @@ internal fun SpendingQuote.playerDescription(kind: SpendingKind): String? {
     if (missing > 0) {
         return if (kind == SpendingKind.WANT) {
             val price = Math.addExact(parts.sumOf { it.amount }, missing)
-            "Цена — ${coinAmount(price)}. Не хватает ещё $missing."
+            "Цена - ${coinAmount(price)}. Не хватает ещё $missing."
         } else "Не хватает $missing ${missingCoins(missing)}. Деньги не будут списаны."
     }
     if (parts.isEmpty()) return null

@@ -43,7 +43,7 @@ internal class FileCrashJournal(private val directory: File, private val header:
     }
 
     fun writeReport(writer: Writer) {
-        writer.write("Лапки и монеты — диагностический журнал\n$header\n")
+        writer.write("Лапки и монеты - диагностический журнал\n$header\n")
         writer.write("Exported at epoch ms: ${System.currentTimeMillis()}\nCurrent context: $context\n")
         val files = reports()
         if (files.isEmpty()) writer.write("\nСохранённых отчётов о падении пока нет.\n")

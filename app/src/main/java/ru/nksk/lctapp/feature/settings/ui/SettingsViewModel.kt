@@ -19,10 +19,20 @@ import ru.nksk.lctapp.domain.parentlink.ParentLinkRepository
 import ru.nksk.lctapp.domain.backend.CloudSyncRepository
 import ru.nksk.lctapp.domain.backend.CloudSyncResult
 import ru.nksk.lctapp.domain.diagnostics.DiagnosticLogRepository
+import ru.nksk.lctapp.domain.demo.DemoPreferencesRepository
 
 internal enum class ParentCodeStatus { NONE, LOADING, READY, ERROR }
 internal enum class ProfileRegistrationStatus { NONE, LOADING, REGISTERED, ERROR }
 internal enum class SoundSettingsError { READ, WRITE }
+internal enum class DemoSettingsError { READ, WRITE }
+internal data class DemoSettingsUiState(
+    val enabled: Boolean? = null,
+    val loading: Boolean = true,
+    val saving: Boolean = false,
+    val error: DemoSettingsError? = null,
+) {
+    val canChange: Boolean get() = enabled != null && !loading && !saving && error != DemoSettingsError.READ
+}
 internal data class SoundSettingsUiState(
     val enabled: Boolean? = null,
     val loading: Boolean = true,
@@ -42,6 +52,7 @@ internal data class SettingsUiState(
     val sound: SoundSettingsUiState = SoundSettingsUiState(),
     val cloud: CloudSettingsUiState = CloudSettingsUiState(),
     val diagnostics: DiagnosticsUiState = DiagnosticsUiState(),
+    val demo: DemoSettingsUiState = DemoSettingsUiState(),
 )
 
 internal sealed interface SettingsAction {
@@ -50,6 +61,8 @@ internal sealed interface SettingsAction {
     data object RetryRegistration : SettingsAction
     data class SetSoundEnabled(val enabled: Boolean) : SettingsAction
     data object RetrySound : SettingsAction
+    data class SetDemoModeEnabled(val enabled: Boolean) : SettingsAction
+    data object RetryDemoMode : SettingsAction
     data object SyncCloud : SettingsAction
     data object PrepareCloudRestore : SettingsAction
     data class ConfirmCloudRestore(val previewId: String) : SettingsAction
@@ -65,6 +78,7 @@ internal class SettingsViewModel @Inject constructor(
     private val mediaPreferences: MediaPreferencesRepository,
     private val cloudRepository: CloudSyncRepository,
     private val diagnosticLogs: DiagnosticLogRepository,
+    private val demoPreferences: DemoPreferencesRepository,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(SettingsUiState())
     val uiState = mutableState.asStateFlow()
@@ -72,8 +86,10 @@ internal class SettingsViewModel @Inject constructor(
     private var registration: Job? = null
     private var soundObserver: Job? = null
     private var pendingSoundEnabled: Boolean? = null
+    private var demoObserver: Job? = null
+    private var pendingDemoEnabled: Boolean? = null
 
-    init { loadProfile(); observeSound(); observeCloud() }
+    init { loadProfile(); observeSound(); observeCloud(); observeDemo() }
 
     fun onAction(action: SettingsAction) {
         when (action) {
@@ -86,6 +102,11 @@ internal class SettingsViewModel @Inject constructor(
                     if (mutableState.value.sound.error == SoundSettingsError.READ) observeSound()
                     else pendingSoundEnabled?.let(::setSoundEnabled)
                 }
+            }
+            is SettingsAction.SetDemoModeEnabled -> setDemoEnabled(action.enabled)
+            SettingsAction.RetryDemoMode -> if (!mutableState.value.demo.saving) {
+                if (mutableState.value.demo.error == DemoSettingsError.READ) observeDemo()
+                else pendingDemoEnabled?.let(::setDemoEnabled)
             }
             SettingsAction.SyncCloud -> synchronizeCloud()
             SettingsAction.PrepareCloudRestore -> prepareCloudRestore()
@@ -232,6 +253,49 @@ internal class SettingsViewModel @Inject constructor(
             }.parse(value, position)?.takeIf { position.index == value.length }
         } ?: return null
         return SimpleDateFormat("d MMM, HH:mm", Locale.forLanguageTag("ru")).format(date)
+    }
+
+    private fun observeDemo() {
+        if (demoObserver?.isActive == true) return
+        updateDemo { copy(loading = true, error = null) }
+        demoObserver = viewModelScope.launch {
+            try {
+                demoPreferences.observe().collect { preferences ->
+                    val confirmed = !mutableState.value.demo.saving && pendingDemoEnabled == preferences.demoModeEnabled
+                    if (confirmed) pendingDemoEnabled = null
+                    updateDemo { copy(enabled = preferences.demoModeEnabled, loading = false,
+                        error = error.takeUnless { confirmed || it == DemoSettingsError.READ }) }
+                }
+            } catch (cancelled: CancellationException) { throw cancelled
+            } catch (_: Exception) { updateDemo { copy(loading = false, error = DemoSettingsError.READ) } }
+        }
+    }
+
+    private fun setDemoEnabled(enabled: Boolean) {
+        if (!mutableState.value.demo.canChange || mutableState.value.demo.enabled == enabled && pendingDemoEnabled == null) return
+        pendingDemoEnabled = enabled
+        updateDemo { copy(saving = true, error = null) }
+        viewModelScope.launch {
+            try {
+                demoPreferences.setDemoModeEnabled(enabled)
+                pendingDemoEnabled = null
+                updateDemo { copy(enabled = enabled, saving = false) }
+            } catch (cancelled: CancellationException) { throw cancelled
+            } catch (_: Exception) {
+                val confirmed = mutableState.value.demo.error != DemoSettingsError.READ && mutableState.value.demo.enabled == enabled
+                if (confirmed) pendingDemoEnabled = null
+                updateDemo { copy(saving = false, error = when {
+                    error == DemoSettingsError.READ -> DemoSettingsError.READ
+                    confirmed -> null
+                    else -> DemoSettingsError.WRITE
+                }) }
+            }
+        }
+    }
+
+    private inline fun updateDemo(transform: DemoSettingsUiState.() -> DemoSettingsUiState) {
+        val current = mutableState.value
+        mutableState.value = current.copy(demo = current.demo.transform())
     }
 
     private fun observeSound() {

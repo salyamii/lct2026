@@ -41,6 +41,7 @@ class BackendApiContractTest {
                 .body(checkNotNull(responses[request.url.encodedPath]).toResponseBody(mediaType)).build()
         }.build()
         val api = Retrofit.Builder().baseUrl("https://backend.example.test/").client(client)
+            .addConverterFactory(StreamingUploadConverter(mediaType))
             .addConverterFactory(BackendJson.asConverterFactory(mediaType)).build().create(BackendApi::class.java)
         val receipt = ParentRewardReceiptDto("reward", "application", "history", 1, ParentRewardOutcome.APPLIED)
 

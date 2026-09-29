@@ -1,7 +1,5 @@
 package ru.nksk.lctapp.feature.menu.ui
 
-import ru.nksk.lctapp.core.ui.game.paymentCoinAmount
-
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
@@ -70,7 +68,7 @@ internal fun MenuActions(onAction: (MainMenuAction) -> Unit, viewport: DpSize, s
         }
         state.notice?.let { Text(it, Modifier.padding(horizontal = 20.dp), color = AdventureLabel, fontFamily = Rubik) }
         if (state.canFeed) GameActionButton(
-            text = state.mealPrice?.let { "Покормить за ${paymentCoinAmount(it)}" } ?: "Покормить",
+            text = "Выбрать обед",
             onClick = { onAction(MainMenuAction.Feed) },
             modifier = Modifier.padding(horizontal = 18.dp),
             interactionBlocked = state.busy,

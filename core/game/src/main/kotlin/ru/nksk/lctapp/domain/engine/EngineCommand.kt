@@ -13,9 +13,11 @@ import ru.nksk.lctapp.domain.economy.BudgetPlan
 import ru.nksk.lctapp.domain.finance.FinancialQuestionKind
 
 /** Revision is captured with the UI state. A stale command never changes a newer save. */
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class EngineRequest(val id: String, val expectedRevision: Long?, val command: EngineCommand,
-    val context: DecisionContext? = null) {
+    val context: DecisionContext? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val demoMode: Boolean = false) {
     init { require(id.isNotBlank()) }
 }
 
@@ -84,6 +86,8 @@ sealed interface EngineCommand {
     /** Also used for manual RANDOM repairs; wire identity is kept stable. */
     @Serializable data class CompleteStoryGame(val occurrenceId: String, val choiceId: String, val score: DeedGameScore,
         val resourcePriorityOfferId: String? = null) : EngineCommand
+    /** Explicit demonstration completion; never a played score or skill answer. */
+    @Serializable data class SkipMiniGame(val occurrenceId: String, val choiceId: String? = null) : EngineCommand
     @Serializable data class DismissDeedProposal(val occurrenceId: String) : EngineCommand
     /** Leave without recording a choice, spending effort or completing the story. */
     @Serializable data class PauseEvent(val occurrenceId: String) : EngineCommand

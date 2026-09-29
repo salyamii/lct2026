@@ -37,7 +37,7 @@ fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> 
         }
         BackHandler(enabled = resumed) { model.leave() }
         val leave = { if (resumed) model.leave() }
-        DeedGameHost(state, model::retry, leave) {
+        DeedGameHost(state, model::retry, leave, onSkipGame = { if (resumed) model.skipGame() }) {
             when (state.type) {
                 DeedGameType.MEMORY -> {
                     val game = hiltViewModel<MemoryGameViewModel>()
@@ -80,7 +80,11 @@ fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> 
                     val game = hiltViewModel<SequenceGameViewModel>()
                     val board by game.uiState.collectAsStateWithLifecycle()
                     LaunchedEffect(board.game) { model.finishSequence(board.game) }
-                    SequenceGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
+                    SequenceGameScreen(board, {
+                        if (it == SequenceGameAction.ArtworkReady || (resumed && state.presentation?.canPlay == true)) {
+                            game.onAction(it)
+                        }
+                    },
                         leave, state.presentation)
                 }
                 DeedGameType.PIPES -> {

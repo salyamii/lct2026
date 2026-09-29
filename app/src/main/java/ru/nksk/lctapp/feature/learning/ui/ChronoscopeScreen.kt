@@ -168,7 +168,7 @@ internal fun ChronoscopeScreen(state: ReflectionUiState, onAction: (ReflectionAc
             ChronoscopeStep.MEMORY, ChronoscopeStep.ALTERNATIVES -> memory?.let {
                 GameTitle(renderPetText(it.decision.title, name).asGameUiText())
                 StoryNote("Тогда мы решили", it.originalAction)
-                Text("Сверху — сколько монет было до этого решения", color = GameInk.copy(alpha = .65f),
+                Text("Сверху - сколько монет было до этого решения", color = GameInk.copy(alpha = .65f),
                     style = MaterialTheme.typography.labelMedium)
                 it.knownNeeds?.takeIf { needed -> needed > 0 }?.let { needed ->
                     GameBody("На ближайшие нужды тогда требовалось $needed монет.")

@@ -28,7 +28,9 @@ internal class EconomyGateViewModel @Inject constructor(private val games: GameR
             state.value = EconomyGateState()
             try {
                 games.observe().collect { game ->
-                    state.value = EconomyGateState(loading = false, planning = checkNotNull(game).economy.planning)
+                    // A completed run briefly has no active world while the app leaves for
+                    // character setup. Keep the outgoing entry alive to deliver that callback.
+                    if (game != null) state.value = EconomyGateState(loading = false, planning = game.economy.planning)
                 }
             } catch (cancelled: CancellationException) { throw cancelled }
             catch (_: Exception) { state.value = EconomyGateState(loading = false, failed = true) }

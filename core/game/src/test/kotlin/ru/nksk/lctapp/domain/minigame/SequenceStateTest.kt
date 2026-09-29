@@ -41,7 +41,7 @@ class SequenceStateTest {
     }
 
     @Test fun tapsAreIgnoredUntilNextRoundStarts() {
-        val board = SequenceState(listOf(0, 1)).tap(0).tap(1)
+        val board = SequenceState(listOf(0, 1, 2)).tap(0).tap(1).tap(2)
         assertEquals(board, board.tap(0))
         val next = board.next(fixed)
         // В новом раунде последовательность на одну вспышку длиннее.
@@ -50,14 +50,46 @@ class SequenceStateTest {
         assertEquals(board.correct, next.correct)
     }
 
-    @Test fun fullGameFinishesAfterFiveRounds() {
+    @Test fun newGameFinishesAfterThreeCombinationsOfThreeFourAndFiveSignals() {
         var board = SequenceState.create(fixed)
+        assertEquals(3, board.roundLimit)
         repeat(SequenceState.ROUNDS) {
+            assertEquals(3 + it, board.requiredLength)
+            assertTrue(board.isValid)
+            assertFalse(board.finished)
             board = board.playRound()
         }
         assertTrue(board.finished)
         assertEquals(SequenceState.ROUNDS, board.round)
         assertEquals(SequenceState.ROUNDS, board.correct)
+        assertTrue(board.isValid)
+        assertEquals(board, board.tap(0).next(fixed))
+    }
+
+    @Test fun restoredLegacySessionStillCompletesAllFiveCombinations() {
+        var board = SequenceState.create(fixed).copy(roundLimit = SequenceState.LEGACY_ROUNDS)
+        repeat(5) { round ->
+            assertFalse(board.finished)
+            assertTrue(board.isValid)
+            assertEquals(3 + round, board.requiredLength)
+            board = board.playRound()
+        }
+        assertTrue(board.finished)
+        assertTrue(board.isValid)
+        assertEquals(5, board.correct)
+        assertEquals(7, board.requiredLength)
+    }
+
+    @Test fun invalidSessionBoundsCannotBecomeCompletedScores() {
+        val completed = (0 until 3).fold(SequenceState.create(fixed)) { board, _ -> board.playRound() }
+        for (invalid in listOf(
+            completed.copy(roundLimit = 4), completed.copy(round = 4), completed.copy(position = 1),
+            completed.copy(sequence = listOf(0, 1, 2)), completed.copy(sequence = List(5) { 4 }),
+            completed.copy(lastCorrect = null), completed.copy(correct = 0),
+        )) {
+            assertFalse(invalid.isValid)
+            assertNull(DeedGameScore.fromSequence(invalid))
+        }
     }
 
     @Test fun createDealsTheShortestFirstRound() {

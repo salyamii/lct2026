@@ -20,7 +20,7 @@ class LorePlateCleaningEventTest {
 
     @Test fun installationAppendsOnlyTheNewLoreDefinitionAndKeepsTheOriginalChoice() {
         val oldEvent = EventDefinition(LEGACY, EventType.STORY, "Пластина с тем же знаком",
-            "Смотритель: «Я не ошибся. Тот же знак». Надпись на пластине почти скрыта налётом — её придётся очистить.",
+            "Смотритель: «Я не ошибся. Тот же знак». Надпись на пластине почти скрыта налётом - её придётся очистить.",
             null, null, null, 0, null, null)
         val oldChoice = EventChoiceDefinition("$LEGACY:continue", LEGACY, 0, "Очистить пластину",
             0, null, null, GoalImpact.NEUTRAL)

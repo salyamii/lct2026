@@ -1,6 +1,6 @@
 # Последовательные главы и накопительные подцели
 
-Обновлено: 2026-09-24. Основание — CAMPAIGN-D-001, FINANCE-D-001/002/006/009
+Обновлено: 2026-09-24. Основание - CAMPAIGN-D-001, FINANCE-D-001/002/006/009
 в [реестре решений](decisions.md). Свободный порядок больших проектов отменён.
 [Исходный лор](content/campaign-lore.figma.json) и
 [выгрузка экранов](content/chapter-1-screens.figma.json) сохраняются без правок.
@@ -70,7 +70,7 @@ StoryAct.goalId. Следующая глава открывается после
 ## Код, UI и хранение
 
 GameState.selectedGoalId обозначает активированный комплект главы;
-selectedSavingItemId — выбранный предмет. Room v19 хранит предмет отдельно
+selectedSavingItemId - выбранный предмет. Room v19 хранит предмет отдельно
 в SAVING_GOAL_SELECTION(game_state_id, item_id), без копирования цены,
 главы, накопленной суммы и остатка. Черновик онбординга хранит saving_item_id.
 См. [схему](schema-normalization.md) и [требования хранения](room-persistence.md).

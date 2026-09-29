@@ -71,10 +71,10 @@ The starter dependencies require compile SDK 37, so compileSdk was raised from 3
 
 Menu validation: debug APK build and lint (no errors), plus emulator instrumentation tests covering menu callbacks, village hit bounds, and compact/landscape layouts at 150% text. Native rendering was visually checked on a Pixel 10 Pro emulator running API 36. Navigation behavior has separate instrumentation coverage described in the navigation guide.
 
-## Временные данные меню — 2026-09-19
+## Временные данные меню - 2026-09-19
 
-По [MAIN-D-074](decisions.md) блок накоплений показывает «НАКОПЛЕНИЯ» и «—»,
-верхний блок — только «Текущая цель», основная кнопка — «Название ивента»,
-кнопка локации — «Карта». Фиктивные название цели и счётчик убраны до подключения
+По [MAIN-D-074](decisions.md) блок накоплений показывает «НАКОПЛЕНИЯ» и «-»,
+верхний блок - только «Текущая цель», основная кнопка - «Название ивента»,
+кнопка локации - «Карта». Фиктивные название цели и счётчик убраны до подключения
 контента. Стили и ресурсы переиспользованы; голод, усталость и питомец по-прежнему
 отображают сохранённые данные.

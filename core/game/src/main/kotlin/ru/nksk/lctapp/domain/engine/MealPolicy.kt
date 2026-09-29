@@ -9,6 +9,7 @@ data class MealEffects(
     val exhaustsCurrentEnergy: Boolean,
     val nextMorningEnergy: Int?,
     val visualStateAfter: PetVisualState?,
+    val energyRestore: Int = 0,
 )
 
 /** Shared authored food policy for commands, financial advice and every entry to feeding. */
@@ -38,7 +39,7 @@ class MealPolicy(meals: List<MealDefinition>) {
     fun foodRequirement(state: GameState): Long = foodCostUntilWeekEnd(state, basicMeal.price)
 
     fun effects(mealId: String): MealEffects = meal(mealId).let {
-        MealEffects(it.price == 0L, it.nextMorningEnergy, it.visualStateAfter)
+        MealEffects(it.price == 0L, it.nextMorningEnergy, it.visualStateAfter, it.energyRestore)
     }
 
     /** Running-day and command/revision guards remain in GameEngine; this is its pure food outcome. */
@@ -51,7 +52,11 @@ class MealPolicy(meals: List<MealDefinition>) {
         return state.copy(economy = economy,
             pet = effects.visualStateAfter?.let { state.pet.transitionTo(it) } ?: state.pet,
             engine = day.copy(ateToday = true,
-                energy = if (effects.exhaustsCurrentEnergy) 0 else day.energy,
+                energy = when {
+                    effects.exhaustsCurrentEnergy -> 0
+                    effects.energyRestore == 0 -> day.energy
+                    else -> (day.energy.toLong() + effects.energyRestore).coerceAtMost(fullEnergy.toLong()).toInt()
+                },
                 nextMorningEnergy = effects.nextMorningEnergy ?: day.nextMorningEnergy),
         )
     }

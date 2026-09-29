@@ -1,4 +1,4 @@
-# Музыка глав, озвучка и вступительный ролик — 2026-09-27
+# Музыка глав, озвучка и вступительный ролик - 2026-09-27
 
 [Основной каталог](catalog.md) · [Машиночитаемый media manifest](media-manifest.json) · [Правила событий](../event-authoring.md)
 
@@ -10,7 +10,7 @@
 локально синтезированный механический эффект, 1.250 с. Он не входит в архив.
 [Генератор, исходный WAV и параметры](sources/telescope-adjustment-2026-09-27/README.md)
 сохранены отдельно. С ним manifest содержит 96 записей: 95 архивных и одну
-сгенерированную; runtime — 87 файлов (86 MP3 и один MP4).
+сгенерированную; runtime - 87 файлов (86 MP3 и один MP4).
 
 ## Привязки и воспроизведение
 
@@ -25,7 +25,7 @@
 - `sound.payment` находится в `actionAudio` только платных вариантов событий; отказ, ручная работа и бесплатные действия не получают этот звук. Проигрывание не выполняет платежи.
 - `sound.purchase_appears` находится в `PurchasePresentation.media.appearanceCueKey`.
 - `sound.telescope_adjustment` находится в `appearanceCueKey` только дела «Настроить малый телескоп», включая унаследованную версию `balance-v2`. Один проход за экземпляр события; пятый короткий эффект в ограниченном прогреве.
-- `ambient.port` связан с пятью исходными карточками «Короткое дело · Порт» и первым делом «Смотритель просит помочь» у причала; `ambient.butcher_shop` — с пятью карточками «Короткое дело · Мясная лавка». Реплики места не назначаются всем карточкам ярмарки или новым событиям по строковому ID.
+- `ambient.port` связан с пятью исходными карточками «Короткое дело · Порт» и первым делом «Смотритель просит помочь» у причала; `ambient.butcher_shop` - с пятью карточками «Короткое дело · Мясная лавка». Реплики места не назначаются всем карточкам ярмарки или новым событиям по строковому ID.
 - Короткий клип места проигрывается два раза за открытие события. Рекомпозиции не начинают эти два повтора заново; бесконечного повтора нет.
 - `video.intro_fox` доступен платформенному intro flow через `INTRO_VIDEO_ASSET`.
 
@@ -39,12 +39,12 @@
 также не имеют отдельных записей в архиве. Чужие реплики им не подставляются.
 Проверка полноты отдельно учитывает 95 архивных записей и сгенерированные,
 сравнивает все записи manifest с путями и контрольными
-суммами ресурсов, а озвучку — с исходными событиями и их актуальными версиями.
+суммами ресурсов, а озвучку - с исходными событиями и их актуальными версиями.
 
 ## Форматы и соответствие исходникам
 
 Обработка `ambient.port`: исходный средний уровень −29.3 dB и пик −17.4 dB;
-после `volume=10dB` и качественного `libmp3lame` 192 кбит/с — средний −19.6 dB,
+после `volume=10dB` и качественного `libmp3lame` 192 кбит/с - средний −19.6 dB,
 пик −7.6 dB. Клиппинга нет, длительность осталась 2.600 с. Manifest v2 хранит
 для этого файла раздельные `source_bytes`/`source_sha256` и
 `runtime_bytes`/`runtime_sha256`, а также исходный и итоговый probe/уровни.
@@ -126,7 +126,7 @@ ffprobe проверил все 86 импортированных файлов. 
 | `narration.story.storm_shelter` | Глава 5/Запись в штормовом убежище.mp3 | [asset](../../../app/src/main/assets/media/audio/narration_story_storm_shelter.mp3) | 11.600 |
 | `narration.story.telescope_journal` | Глава 1/Малый телескоп и старый журнал.mp3 | [asset](../../../app/src/main/assets/media/audio/narration_story_telescope_journal.mp3) | 9.680 |
 | `narration.story.tester` | Глава 3/Тико запускает тестер.mp3 | [asset](../../../app/src/main/assets/media/audio/narration_story_tester.mp3) | 16.240 |
-| `narration.story.three_answers` | Глава 1/Три ответа — в одном свете.mp3 | [asset](../../../app/src/main/assets/media/audio/narration_story_three_answers.mp3) | 12.160 |
+| `narration.story.three_answers` | Глава 1/Три ответа - в одном свете.mp3 | [asset](../../../app/src/main/assets/media/audio/narration_story_three_answers.mp3) | 12.160 |
 | `narration.story.three_lenses` | Глава 1/Схема трёх линз.mp3 | [asset](../../../app/src/main/assets/media/audio/narration_story_three_lenses.mp3) | 8.720 |
 | `narration.story.three_lights` | Глава 2/Механизм трёх огней.mp3 | [asset](../../../app/src/main/assets/media/audio/narration_story_three_lights.mp3) | 10.880 |
 | `narration.story.tiko_arrives` | Глава 3/Тико приходит помочь.mp3 | [asset](../../../app/src/main/assets/media/audio/narration_story_tiko_arrives.mp3) | 15.600 |

@@ -59,6 +59,7 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
         Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)) {
             SoundSettingsCard(state.sound, onAction)
+            DemoSettingsCard(state.demo, onAction)
             DiagnosticsSettingsCard(state.diagnostics, pickingDiagnostics, onDownloadDiagnostics)
             SettingsCard {
                 Text("Для родителей", color = GameInk, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -101,6 +102,35 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
     }
     state.cloud.restorePreview?.let { preview ->
         CloudRestoreDialog(preview, busy = state.cloud.busy, onAction = onAction)
+    }
+}
+
+@Composable
+private fun DemoSettingsCard(state: DemoSettingsUiState, onAction: (SettingsAction) -> Unit) {
+    SettingsCard {
+        Row(Modifier.fillMaxWidth().heightIn(min = 56.dp)
+            .toggleable(value = state.enabled == true, enabled = state.canChange, role = Role.Switch,
+                onValueChange = { onAction(SettingsAction.SetDemoModeEnabled(it)) }),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text("Режим бога", color = GameInk, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                AdventureBody("Для показа: питомец не устаёт, предметы большой цели бесплатны.")
+            }
+            Switch(checked = state.enabled == true, onCheckedChange = null, enabled = state.canChange,
+                colors = SwitchDefaults.colors(checkedTrackColor = AdventureLime, checkedThumbColor = GameInk,
+                    uncheckedTrackColor = GamePaper, uncheckedThumbColor = GameInk,
+                    uncheckedBorderColor = GameInk.copy(alpha = .35f)))
+        }
+        AdventureBody("Прогресс и полученные предметы остаются в этой игре после выключения режима.")
+        if (state.loading || state.saving) {
+            AdventureBody(if (state.saving) "Сохраняем…" else "Открываем настройку режима…")
+        }
+        state.error?.let { error ->
+            AdventureBody(if (error == DemoSettingsError.READ) "Не удалось прочитать настройку режима. Попробуйте ещё раз."
+                else "Не удалось сохранить настройку режима. Попробуйте ещё раз.")
+            GameActionButton("Повторить", { onAction(SettingsAction.RetryDemoMode) }, enabled = !state.saving,
+                style = GameActionStyle.SECONDARY)
+        }
     }
 }
 
@@ -180,7 +210,7 @@ private fun ParentCodeContent(state: SettingsUiState, onAction: (SettingsAction)
                     AdventureBody("Регистрируем профиль на сервере…")
                 }
                 ProfileRegistrationStatus.ERROR -> {
-                    AdventureBody("Не удалось зарегистрировать профиль. Код сохранён — попробуйте ещё раз.")
+                    AdventureBody("Не удалось зарегистрировать профиль. Код сохранён - попробуйте ещё раз.")
                     OutlinedButton(onClick = { onAction(SettingsAction.RetryRegistration) },
                         modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = GameInk)) {

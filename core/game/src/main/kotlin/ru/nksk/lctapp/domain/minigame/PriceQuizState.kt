@@ -9,7 +9,7 @@ data class QuizQuestion(val leftAmount: Int, val rightAmount: Int) {
 
 /**
  * Чистое состояние викторины «Что дороже?»: [QUESTION_COUNT] вопросов,
- * за каждый верный ответ — награда. Финал после последнего вопроса.
+ * за каждый верный ответ - награда. Финал после последнего вопроса.
  */
 data class PriceQuizState(
     val questions: List<QuizQuestion>,
@@ -25,7 +25,7 @@ data class PriceQuizState(
     /** Награда в монетах за текущий результат. */
     val reward: Int get() = correctAnswers * REWARD_PER_CORRECT
 
-    /** Ответ игрока: true — выбрана левая карточка. Фиксирует результат, ждёт [next]. */
+    /** Ответ игрока: true - выбрана левая карточка. Фиксирует результат, ждёт [next]. */
     fun answer(pickedLeft: Boolean): PriceQuizState {
         if (finished || lastCorrect != null) return this
         val correct = question.leftIsBigger == pickedLeft

@@ -1,4 +1,4 @@
-# Budget icons — 2026-09-21
+# Budget icons - 2026-09-21
 
 Generated with the built-in image_gen tool from the user-approved budget mockup.
 Reference: `budget-plan-reference.png` in this directory. These are generated

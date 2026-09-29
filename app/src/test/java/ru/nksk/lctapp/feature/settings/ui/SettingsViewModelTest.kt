@@ -22,6 +22,8 @@ import ru.nksk.lctapp.domain.backend.CloudSyncRepository
 import ru.nksk.lctapp.domain.backend.CloudSyncResult
 import ru.nksk.lctapp.domain.backend.CloudSyncState
 import ru.nksk.lctapp.domain.diagnostics.DiagnosticLogRepository
+import ru.nksk.lctapp.domain.demo.DemoPreferences
+import ru.nksk.lctapp.domain.demo.DemoPreferencesRepository
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModelTest {
@@ -395,10 +397,54 @@ class SettingsViewModelTest {
         assertNull(model.uiState.value.diagnostics.result)
     }
 
+    @Test fun demoModeShowsPersistedValueAndWaitsForTheWrite() = runTest(dispatcher) {
+        val demo = FakeDemoRepository().apply { pendingWrite = CompletableDeferred() }
+        val model = model(FakeRepository(), demo = demo)
+        runCurrent()
+        assertEquals(false, model.uiState.value.demo.enabled)
+        model.onAction(SettingsAction.SetDemoModeEnabled(true))
+        runCurrent()
+        assertTrue(model.uiState.value.demo.saving)
+        assertEquals(false, model.uiState.value.demo.enabled)
+        demo.pendingWrite!!.complete(Unit)
+        runCurrent()
+        assertEquals(true, model.uiState.value.demo.enabled)
+        assertFalse(model.uiState.value.demo.saving)
+    }
+
+    @Test fun demoWriteFailureKeepsPersistedValueAndRetryUsesRequestedValue() = runTest(dispatcher) {
+        val demo = FakeDemoRepository().apply { writeFailure = true }
+        val model = model(FakeRepository(), demo = demo)
+        runCurrent()
+        model.onAction(SettingsAction.SetDemoModeEnabled(true))
+        runCurrent()
+        assertEquals(false, model.uiState.value.demo.enabled)
+        assertEquals(DemoSettingsError.WRITE, model.uiState.value.demo.error)
+        demo.writeFailure = false
+        model.onAction(SettingsAction.RetryDemoMode)
+        runCurrent()
+        assertEquals(true, model.uiState.value.demo.enabled)
+        assertNull(model.uiState.value.demo.error)
+    }
+
     private fun model(repository: ParentLinkRepository, sound: MediaPreferencesRepository = FakeMediaRepository(),
-        cloud: CloudSyncRepository = FakeCloudRepository(), diagnostics: DiagnosticLogRepository = FakeDiagnosticLogs()) =
-        SettingsViewModel(repository, sound, cloud, diagnostics)
+        cloud: CloudSyncRepository = FakeCloudRepository(), diagnostics: DiagnosticLogRepository = FakeDiagnosticLogs(),
+        demo: DemoPreferencesRepository = FakeDemoRepository()) =
+        SettingsViewModel(repository, sound, cloud, diagnostics, demo)
         .also { store.put("settings", it) }
+
+    private class FakeDemoRepository : DemoPreferencesRepository {
+        val saved = MutableStateFlow(DemoPreferences())
+        var pendingWrite: CompletableDeferred<Unit>? = null
+        var writeFailure = false
+        override fun observe() = saved
+        override suspend fun read() = saved.value
+        override suspend fun setDemoModeEnabled(enabled: Boolean) {
+            pendingWrite?.await()
+            if (writeFailure) error("Preference write failed")
+            saved.value = DemoPreferences(enabled)
+        }
+    }
 
     private class FakeDiagnosticLogs : DiagnosticLogRepository {
         val destinations = mutableListOf<String>()

@@ -3,7 +3,7 @@
 Аудио и видео учитываются отдельно: [музыка глав, озвучка и вступительный ролик](media-catalog.md),
 [media manifest](media-manifest.json). Счётчики и manifest изображений ниже относятся только к artwork.
 
-## Коллекция покупок и звёздный атлас — 2026-09-26
+## Коллекция покупок и звёздный атлас - 2026-09-26
 
 26 новых иллюстраций встроенного imagegen: 23 части пяти целей и три звёздные страницы.
 Полные исходники 1254 × 1254 сохранены как lossless exact WebP без обрезки.
@@ -44,7 +44,7 @@ See [the guide](README.md) for storage and usage rules and [the manifest](manife
 
 442 logical assets; 3 exact drawable aliases; 0 unavailable exports.
 
-## Fair purchase props — 2026-09-26
+## Fair purchase props - 2026-09-26
 
 Five original PNG image fills from the existing Figma event cards. Every source
 SHA-1 matches its Figma image hash. Real alpha and the complete 1254 × 1254 canvas
@@ -62,7 +62,7 @@ are preserved as exact lossless WebP, without resizing or cropping.
 The earlier generated bun remains an [unused draft](sources/bakery-bun-2026-09-26/README.md)
 outside runtime resources; `prop_bakery_bun` now uses the Figma original.
 
-## Goal chapter previews — 2026-09-25
+## Goal chapter previews - 2026-09-25
 
 Five original illustrations generated with the built-in imagegen tool for the chapter carousel.
 They show the undertaking of each chapter; they do not introduce item ownership, prices or unlock rules.
@@ -79,7 +79,7 @@ preserved as exact lossless WebP with no resizing or cropping.
 | Карта королевства | `R.drawable.goal_preview_kingdom_map` | [WebP](../../../app/src/main/res/drawable-nodpi/goal_preview_kingdom_map.webp) |
 | Большая экспедиция | `R.drawable.goal_preview_expedition` | [WebP](../../../app/src/main/res/drawable-nodpi/goal_preview_expedition.webp) |
 
-## Financial adventure screens — 2026-09-25
+## Financial adventure screens - 2026-09-25
 
 Imported for the new savings, lore and Chronoscope screens. Generated scene originals remain
 in [the Figma design folder](../figma/financial-adventure-2026-09-25/README.md).
@@ -102,7 +102,7 @@ actual saved location and appearance; later chapters have no invented item illus
 
 Locations retain their original 941 × 1672 pixels. Earlier character and equipment layers retain a 512 × 512 canvas; new sleep originals retain 1024 × 1024 (2× Figma frame). Names are artwork labels, not gameplay rules.
 
-## Deferred eye animation — 2026-09-22
+## Deferred eye animation - 2026-09-22
 
 D-119 excludes blink code and its six image resources from the current MR.
 Sources, prompts and placement metadata are preserved in the external prototype
@@ -123,7 +123,7 @@ They are outside the bundled asset count below.
 | `R.drawable.menu_tasks` | 1254 × 1254 | [menu_tasks.webp](../../../app/src/main/res/drawable-nodpi/menu_tasks.webp) | [2214:36](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2214-36) |
 | `R.drawable.menu_village` | 941 × 1672 | [menu_village.webp](../../../app/src/main/res/drawable-nodpi/menu_village.webp) | [2186:732](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2186-732) |
 
-## User-supplied menu artwork — 2026-09-20
+## User-supplied menu artwork - 2026-09-20
 
 | Android resource | Canvas | File | Source |
 | --- | --- | --- | --- |
@@ -427,7 +427,7 @@ at its right edge as requested in D-095; the source file is not cropped.
 
 [Покрытие игровых карточек и недостающие уникальные арты](event-card-coverage.md).
 
-### Мясная лавка — перенесено 2026-09-26
+### Мясная лавка - перенесено 2026-09-26
 
 Активные оригинальные IMAGE fills проверены по SHA-1, полотна и RGBA сохранены.
 [Исходники и воспроизводимый импорт](sources/butcher-events-2026-09-26/README.md).
@@ -441,7 +441,7 @@ at its right edge as requested in D-095; the source file is not cropped.
 | `R.drawable.npc_butcher_scales` | 1086 × 1448 | [WebP](../../../app/src/main/res/drawable-nodpi/npc_butcher_scales.webp) | [2289:239](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2289-239) |
 | `R.drawable.location_butcher_shop` | 1086 × 1448 | [WebP](../../../app/src/main/res/drawable-nodpi/location_butcher_shop.webp) | [2289:4](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2289-4) |
 
-### Предметы неожиданных событий — перенесено 2026-09-26
+### Предметы неожиданных событий - перенесено 2026-09-26
 
 22 оригинальных предмета с соответствующим повреждением или неисправностью.
 [Проверка источников, аудит сюжета и импорт](sources/unexpected-events-2026-09-26/README.md).
@@ -501,14 +501,14 @@ at its right edge as requested in D-095; the source file is not cropped.
 
 | Android resource | Canvas | File / canonical asset | Figma source |
 | --- | --- | --- | --- |
-| `R.font.nunito_extrabold` | — | [nunito_extrabold.ttf](../../../app/src/main/res/font/nunito_extrabold.ttf) | [font provenance](../README.md#typography) |
-| `R.font.rubik_extrabold` | — | [rubik_extrabold.ttf](../../../app/src/main/res/font/rubik_extrabold.ttf) | [font provenance](../README.md#typography) |
+| `R.font.nunito_extrabold` | - | [nunito_extrabold.ttf](../../../app/src/main/res/font/nunito_extrabold.ttf) | [font provenance](../README.md#typography) |
+| `R.font.rubik_extrabold` | - | [rubik_extrabold.ttf](../../../app/src/main/res/font/rubik_extrabold.ttf) | [font provenance](../README.md#typography) |
 
 
 ## Deeds goods
 
 Предметные арты и текстуры раздела «Дела». Designer export (PNG source → WebP lossless);
-Figma node-id не передан — уточнить при следующей синхронизации.
+Figma node-id не передан - уточнить при следующей синхронизации.
 
 | Android resource | Canvas | Файл |
 | --- | --- | --- |
@@ -522,7 +522,7 @@ Figma node-id не передан — уточнить при следующей
 | `R.drawable.deed_gear_marker` | 128 × 128 | [deed_gear_marker.webp](../../../app/src/main/res/drawable-nodpi/deed_gear_marker.webp) |
 
 
-## Sleeping foxes — 2026-09-20
+## Sleeping foxes - 2026-09-20
 
 Twelve verified active transparent image fills: four ages × three colors. Full original 1024 × 1024 canvases map to Figma’s 512 × 512 frames at 2×; all transparent margins are preserved. Presentation resolves the saved PetState age and color through the shared PetArtwork adapter (D-109/D-110). New and migrated saves default to copper.
 
@@ -559,7 +559,7 @@ memory board, including story work and repairs. Event media cannot replace it.
 | `R.drawable.deed_pair_tag` | 920 × 1120 | [deed_pair_tag.webp](../../../app/src/main/res/drawable-nodpi/deed_pair_tag.webp) |
 | `R.drawable.deed_pair_telescope` | 920 × 1120 | [deed_pair_telescope.webp](../../../app/src/main/res/drawable-nodpi/deed_pair_telescope.webp) |
 
-## Launcher icon — 2026-09-28
+## Launcher icon - 2026-09-28
 
 Approved by APP-ICON-D-001, outpainting correction APP-ICON-D-002: Ryzhik holding a glass jar of coins, generated with
 built-in imagegen from the [teen fox design](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-65).
@@ -603,7 +603,7 @@ differs from `npc_tiko_body`; the fox has no backpack, unlike `menu_ryzhik`.
 | --- | --- | --- | --- |
 | `customization_courtyard` | 941 × 1672 | [customization_courtyard.webp](../../../app/src/main/res/drawable-nodpi/customization_courtyard.webp) | [2223:51](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2223-51) |
 
-### Иконки кастомизации — 2026-09-20
+### Иконки кастомизации - 2026-09-20
 
 | Ресурс | Формат и размер | Источник |
 | --- | --- | --- |
@@ -614,7 +614,7 @@ SVG-оригиналы лежат рядом с каталогом. Контур
 скруглённый прямоугольник замочка переведены в эквивалентные дуги VectorDrawable.
 Лицензия Lucide: `app/src/main/assets/licenses/lucide.txt`. Хеши в manifest.
 
-### Иконки знакомства — 2026-09-20
+### Иконки знакомства - 2026-09-20
 
 | Ресурс | Формат | Источник |
 | --- | --- | --- |
@@ -646,7 +646,7 @@ Built-in imagegen lighting edits, 2026-09-20. [PNG sources and exact prompts](so
 
 Observatory already has a night image (`location_observatory`); its daytime counterpart remains unavailable. The five existing Figma day/evening pairs are unchanged.
 
-## Budget illustrations — 2026-09-21
+## Budget illustrations - 2026-09-21
 
 Generated from the approved budget mockup with image_gen; not Figma exports.
 [Prompts and provenance](sources/budget-icons.md). Full transparent canvases preserved as lossless exact WebP.
@@ -658,7 +658,7 @@ Generated from the approved budget mockup with image_gen; not Figma exports.
 | `R.drawable.budget_savings` | 1254 × 1254 | [budget_savings.webp](../../../app/src/main/res/drawable-nodpi/budget_savings.webp) |
 | `R.drawable.budget_reserve` | 1254 × 1254 | [budget_reserve.webp](../../../app/src/main/res/drawable-nodpi/budget_reserve.webp) |
 
-## Weekly income event background — 2026-09-21
+## Weekly income event background - 2026-09-21
 
 | Resource | Canvas | File | Provenance |
 | --- | --- | --- | --- |
@@ -666,7 +666,7 @@ Generated from the approved budget mockup with image_gen; not Figma exports.
 
 Full canvas preserved; lossless exact WebP. Dedicated to the weekly receipt Preview.
 
-## Прозрачные сюжетные предметы — 2026-09-26
+## Прозрачные сюжетные предметы - 2026-09-26
 
 42 оригинальных IMAGE fills из отдельного [каталога предметов Figma](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-421).
 Полные холсты и RGBA сохранены. Светлые подложки карточек не входят в изображения.
@@ -718,13 +718,13 @@ Full canvas preserved; lossless exact WebP. Dedicated to the weekly receipt Prev
 | `story_bridge_token` | 188 × 204 | [WebP](../../../app/src/main/res/drawable-nodpi/story_bridge_token.webp) | [3238:643](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-643) |
 | `story_tower_token` | 188 × 204 | [WebP](../../../app/src/main/res/drawable-nodpi/story_tower_token.webp) | [3238:648](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3238-648) |
 
-### Общие настройки — 2026-09-27
+### Общие настройки - 2026-09-27
 
 | Resource | Size | Android | Provenance |
 | --- | --- | --- | --- |
 | `settings_gear` | 24 × 24 | [Vector XML](../../../app/src/main/res/drawable/settings_gear.xml) | Точная копия геометрии [debug_settings.svg](debug_settings.svg) для общего source set приложения. Одинаковые path, viewport и evenOdd; release не зависит от debug-модуля, поэтому межмодульный alias недоступен. |
 
-## Повторная сверка лора и возрастных образов — 2026-09-29
+## Повторная сверка лора и возрастных образов - 2026-09-29
 
 [Отчёт по 60 карточкам](../content/lore-audit-2026-09-29.md) содержит актуальные
 снимки Design и FigJam. [Все 42 сюжетных предмета](story-object-audit-2026-09-29.json)
@@ -747,18 +747,18 @@ manifest содержит новые размеры и контрольные с
 и контрольные суммы пикселей совпали с каталогом. Старые макеты, маски глаз и
 неиспользуемые face patches не переимпортировались. Имена ресурсов и число
 файлов сохранены; новые дубликаты не добавлены. Manifest содержит обновлённые
-контрольные суммы, а оба отчёта — происхождение и проверку exact lossless RGBA.
+контрольные суммы, а оба отчёта - происхождение и проверку exact lossless RGBA.
 
 Для сцены с NPC взрослый/старший герой размещается по статическим видимым
 границам полного холста. `EventArtworkBounds` хранит измерения на этапе разработки;
 после обновления фигур границы и опора ног перемерены. Для раскладки изображения
 на UI-потоке не декодируются.
 
-## Анимация загрузки — 2026-09-28
+## Анимация загрузки - 2026-09-28
 
 | Resource | Canvas / timing | File | Source |
 | --- | --- | --- | --- |
-| `R.raw.loading_coin` | 480 × 480, 60 fps, 3 s | [Lottie JSON](../../../app/src/main/res/raw/loading_coin.json) | [Coin — Daily Scoop](https://lottiefiles.com/free-animation/coin-MHXcO7DuOl) |
+| `R.raw.loading_coin` | 480 × 480, 60 fps, 3 s | [Lottie JSON](../../../app/src/main/res/raw/loading_coin.json) | [Coin - Daily Scoop](https://lottiefiles.com/free-animation/coin-MHXcO7DuOl) |
 
 LOADING-D-001: общий индикатор старта и загрузки. Полный холст, исходные цвета и
 тайминг сохранены. JSON извлечён без изменений; работает офлайн.
@@ -773,7 +773,7 @@ LOADING-D-002: системная заставка и Compose использую
 центр окна и исходный холст монеты размером 120 dp. Подготовка Lottie показывает
 тот же статичный кадр. [Воспроизводимый экспорт](../../../scripts/export_loading_coin_frame.py).
 
-## Иллюстрации мини-игр — импорт из main, сверка 2026-09-29
+## Иллюстрации мини-игр - импорт из main, сверка 2026-09-29
 
 Фирменный ящик для «Ящиков на причале» предоставлен пользователем.
 Сохранён пришедший из main WebP 512 × 512 с прозрачным фоном; исходный PNG
@@ -810,7 +810,7 @@ RGBA-хеш с префиксом размеров, границы прозра�
 Для фонарей, канатов и сигналов отдельный автор/поставщик источника в каталоге
 не указан. Совместные координаты возрастных персонажей этими импортами не затронуты.
 
-## Night bedroom — 2026-09-29
+## Night bedroom - 2026-09-29
 
 SLEEP-D-001: фон в момент засыпания на итогах дня. Исходная иллюстрация без
 персонажа из [карточки 3785:705](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3785-705);
@@ -822,4 +822,4 @@ SLEEP-D-001: фон в момент засыпания на итогах дня.
 
 [Исходный PNG](sources/location_bedroom_night.png) сохранён целиком. Конвертация:
 Pillow 12.3.0, WebP `lossless=True`, `exact=True`, `method=6`; размеры и все RGBA
-пиксели проверены на точное совпадение. Хеши и параметры — в [manifest.json](manifest.json).
+пиксели проверены на точное совпадение. Хеши и параметры - в [manifest.json](manifest.json).

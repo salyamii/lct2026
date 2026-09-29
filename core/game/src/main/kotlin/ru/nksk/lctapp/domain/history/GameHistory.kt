@@ -37,6 +37,9 @@ data class AuditEntry(
     /** Omitted for old records so decoding/re-encoding keeps their exact historical checksums. */
     @EncodeDefault(EncodeDefault.Mode.NEVER)
     val parentReward: ParentRewardApplication? = null,
+    /** A cloud current-world import has an explicit source cursor, without invented historical events. */
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
+    val worldRestore: WorldRestoreBaseline? = null,
 ) {
     init {
         require(id.isNotBlank() && runId.isNotBlank() && sequence > 0)
@@ -50,6 +53,7 @@ data class AuditEntry(
         require(type != AuditType.FACTS || (before == null && after == null && request == null))
         require(type != AuditType.REJECTED || (request != null && before == null && after == null && operations.isEmpty()))
         require((type == AuditType.PARENT_REWARD) == (parentReward != null))
+        require(worldRestore == null || type == AuditType.RESTORED)
         parentReward?.let { application ->
             require(request == null && before != null && after != null)
             require(application.reward.gameRunId == runId)
@@ -100,9 +104,14 @@ data class GameSnapshot(
         require(formatVersion in 1..SNAPSHOT_FORMAT_VERSION) { "Unsupported snapshot format" }
         require(runId.isNotBlank() && historySequence >= 0 && checksum.isNotBlank())
         require(rulesId == state.engine?.rulesId)
-        require(history.all { it.runId == runId && it.sequence <= historySequence })
-        require(history.zipWithNext().all { (a, b) -> a.sequence < b.sequence })
-        require(history.map { it.id }.distinct().size == history.size)
+        var previousSequence = 0L
+        val historyIds = HashSet<String>()
+        history.forEach { entry ->
+            require(entry.runId == runId && entry.sequence <= historySequence)
+            require(entry.sequence > previousSequence)
+            require(historyIds.add(entry.id))
+            previousSequence = entry.sequence
+        }
         require(formatVersion >= 5 || archivedRuns.isEmpty())
         require(archivedRuns.none { it.snapshot.runId == runId })
         require(archivedRuns.map { it.snapshot.runId }.distinct().size == archivedRuns.size)
@@ -125,7 +134,95 @@ object HistoryCodec {
     fun encodeSnapshot(snapshot: GameSnapshot): String = buildString {
         writeSnapshot(snapshot) { append(it) }
     }
-    fun decodeSnapshot(value: String): GameSnapshot = json.decodeFromString<GameSnapshot>(value).also(::validate)
+    fun decodeSnapshot(value: String): GameSnapshot = decodeStoredSnapshot(value).also(::validate)
+
+    /** Room stores canonical entry documents; keep them encoded until a consumer needs one world. */
+    fun encodedHistory(entries: List<String>, canonical: Boolean = true,
+        checkEntry: (Int, AuditEntry) -> Unit = { _, _ -> }): List<AuditEntry> =
+        EncodedAuditHistory(entries.toList(), canonical, checkEntry)
+
+    /**
+     * Local archive metadata. Its signature covers the separately stored complete history,
+     * so this document is not a standalone transport snapshot and must not pass validate().
+     */
+    fun encodeArchiveHeader(snapshot: GameSnapshot): String {
+        require(snapshot.archivedRuns.isEmpty()) { "An archived run cannot contain other archives" }
+        return encodeSnapshot(snapshot.copy(history = emptyList()))
+    }
+
+    fun decodeArchiveHeader(value: String): GameSnapshot = decodeStoredSnapshot(value).also {
+        require(it.history.isEmpty() && it.archivedRuns.isEmpty()) { "Archive header contains history" }
+    }
+
+    /**
+     * Sign and check persisted entry documents in bounded pages. Callers must keep
+     * state, historySequence and every page in the same read/write transaction. No complete
+     * history list or giant snapshot String is created when a campaign is archived.
+     */
+    suspend fun createArchiveHeader(runId: String, state: GameState, historySequence: Long,
+        readPage: suspend (afterSequence: Long, limit: Int) -> List<String>): String {
+        require(runId.isNotBlank() && historySequence >= 0)
+        val digest = Utf8Digest()
+        digest.write("$SNAPSHOT_FORMAT_VERSION\n$runId\n$historySequence\n")
+        digest.write(encodeState(state))
+        digest.write("\n[")
+        val validation = HistoryValidation(runId)
+        while (true) {
+            val page = readPage(validation.sequence, 16)
+            require(page.size <= 16) { "History page exceeds the requested limit" }
+            if (page.isEmpty()) break
+            page.forEach { encoded ->
+                val entry = decodeEntry(encoded)
+                require(entry.sequence <= historySequence) { "History changed while archiving" }
+                if (validation.sequence > 0) digest.write(",")
+                validation.accept(entry)
+                // Old persisted rows may omit fields that now have serialized defaults.
+                // Match normal snapshot signing and reconstruction, while keeping raw rows
+                // unchanged in storage and retaining only this one decoded entry.
+                digest.write(encode(entry))
+            }
+        }
+        validation.finish(state, historySequence)
+        digest.write("]\n[]")
+        return encodeArchiveHeader(GameSnapshot(runId = runId, state = state, history = emptyList(),
+            historySequence = historySequence, checksum = digest.finish()))
+    }
+
+    /** Decode only the small envelope here; checkpoint objects are released as traversal advances. */
+    internal fun decodeStoredSnapshot(value: String): GameSnapshot {
+        val fields = SnapshotJsonSlices.objectFields(value)
+        val historyRange = fields["history"] ?: error("Snapshot history is missing")
+        val archiveRange = fields["archivedRuns"]
+        val replacements = listOfNotNull(historyRange, archiveRange).sortedBy { it.first }
+        val envelope = buildString {
+            var start = 0
+            replacements.forEach { range ->
+                append(value, start, range.first)
+                append("[]")
+                start = range.last + 1
+            }
+            append(value, start, value.length)
+        }
+        val header = json.decodeFromString<GameSnapshot>(envelope)
+        val historySlices = SnapshotJsonSlices.arrayElements(value, historyRange)
+        val entries = EncodedAuditHistory(IndexedDecodedList(historySlices.size) { index ->
+            value.substring(historySlices[index])
+        }, canonical = false)
+        val archives = archiveRange?.let { range ->
+            val slices = SnapshotJsonSlices.arrayElements(value, range)
+            IndexedDecodedList(slices.size) { index ->
+                val archived = value.substring(slices[index])
+                val parts = SnapshotJsonSlices.objectFields(archived)
+                require(parts.keys == setOf("restartRequestId", "nextRunId", "snapshot")) { "Invalid archive fields" }
+                ArchivedGameRun(
+                    json.decodeFromString(archived.substring(parts.getValue("restartRequestId"))),
+                    json.decodeFromString(archived.substring(parts.getValue("nextRunId"))),
+                    decodeStoredSnapshot(archived.substring(parts.getValue("snapshot"))),
+                )
+            }
+        } ?: emptyList()
+        return header.copy(history = entries, archivedRuns = archives)
+    }
 
     fun snapshot(runId: String, state: GameState, history: List<AuditEntry>, archivedRuns: List<ArchivedGameRun> = emptyList()): GameSnapshot {
         val sequence = history.lastOrNull()?.sequence ?: 0
@@ -139,22 +236,51 @@ object HistoryCodec {
             snapshot.formatVersion, snapshot.archivedRuns)) {
             "Snapshot checksum mismatch"
         }
-        require(snapshot.historySequence == (snapshot.history.lastOrNull()?.sequence ?: 0))
-        require(snapshot.history.withIndex().all { (index, entry) -> entry.sequence == index.toLong() + 1L }) {
-            "Snapshot history has gaps"
-        }
-        val factIds = snapshot.history.flatMap { it.facts }.map { it.eventId }
-        require(factIds.distinct().size == factIds.size) { "Repeated analytics fact identity" }
-        val requestIds = snapshot.history.filter { it.type == AuditType.COMMAND }.mapNotNull { it.request?.id }
-        require(requestIds.distinct().size == requestIds.size) { "Repeated command identity" }
-        val operationIds = snapshot.history.flatMap { it.operations }.map { it.operationId }
-        require(operationIds.distinct().size == operationIds.size) { "Repeated financial receipt identity" }
-        val rewards = snapshot.history.mapNotNull { it.parentReward }
-        require(rewards.map { it.reward.rewardId }.distinct().size == rewards.size) { "Repeated parent reward identity" }
-        require(rewards.map { it.receipt.applicationId }.distinct().size == rewards.size) { "Repeated parent reward application" }
-        require(rewards.map { it.reward.profileId }.distinct().size <= 1) { "Parent rewards belong to different profiles" }
-        var previous: GameState? = null
-        snapshot.history.forEach { entry ->
+        val validation = HistoryValidation(snapshot.runId)
+        snapshot.history.forEach(validation::accept)
+        validation.finish(snapshot.state, snapshot.historySequence)
+    }
+
+    /** Only identities and the previous checkpoint survive between entries/pages. */
+    private class HistoryValidation(private val runId: String) {
+        private val historyIds = HashSet<String>()
+        private val factIds = HashSet<String>()
+        private val requestIds = HashSet<String>()
+        private val operationIds = HashSet<String>()
+        private val rewardIds = HashSet<String>()
+        private val applicationIds = HashSet<String>()
+        private var rewardProfile: String? = null
+        private var previous: GameState? = null
+        var sequence: Long = 0
+            private set
+
+        fun accept(entry: AuditEntry) {
+            require(entry.runId == runId) { "History entry belongs to another run" }
+            require(entry.sequence == sequence + 1L) { "Snapshot history has gaps" }
+            require(historyIds.add(entry.id)) { "Repeated history identity" }
+            if (entry.worldRestore != null) {
+                rewardIds.clear()
+                applicationIds.clear()
+                rewardProfile = null
+                entry.worldRestore.parentRewards.forEach { reward ->
+                    require(reward.reward.gameRunId == entry.runId) { "Restored reward belongs to another run" }
+                    require(rewardIds.add(reward.reward.rewardId)) { "Repeated restored reward identity" }
+                    require(applicationIds.add(reward.receipt.applicationId)) { "Repeated restored reward application" }
+                    require(rewardProfile == null || rewardProfile == reward.reward.profileId) { "Restored rewards belong to different profiles" }
+                    rewardProfile = reward.reward.profileId
+                }
+            }
+            entry.facts.forEach { require(factIds.add(it.eventId)) { "Repeated analytics fact identity" } }
+            if (entry.type == AuditType.COMMAND) entry.request?.let {
+                require(requestIds.add(it.id)) { "Repeated command identity" }
+            }
+            entry.operations.forEach { require(operationIds.add(it.operationId)) { "Repeated financial receipt identity" } }
+            entry.parentReward?.let { reward ->
+                require(rewardIds.add(reward.reward.rewardId)) { "Repeated parent reward identity" }
+                require(applicationIds.add(reward.receipt.applicationId)) { "Repeated parent reward application" }
+                require(rewardProfile == null || rewardProfile == reward.reward.profileId) { "Parent rewards belong to different profiles" }
+                rewardProfile = reward.reward.profileId
+            }
             if (entry.before != null && previous != null) {
                 require(encodeState(entry.before) == encodeState(checkNotNull(previous))) { "Historical checkpoint chain is broken" }
             }
@@ -162,9 +288,14 @@ object HistoryCodec {
                 CanonicalLedger.validate(checkNotNull(entry.before), checkNotNull(entry.after), entry.operations)
             }
             if (entry.after != null) previous = entry.after
+            sequence = entry.sequence
         }
-        val tip = snapshot.history.lastOrNull { it.after != null }?.after
-        require(tip == null || encodeState(tip) == encodeState(snapshot.state)) { "Snapshot state differs from history tip" }
+
+        fun finish(state: GameState, expectedSequence: Long) {
+            require(sequence == expectedSequence) { "Snapshot history sequence mismatch" }
+            val tip = previous
+            require(tip == null || encodeState(tip) == encodeState(state)) { "Snapshot state differs from history tip" }
+        }
     }
 
     private fun checksum(runId: String, state: GameState, history: List<AuditEntry>, sequence: Long,
@@ -185,9 +316,9 @@ object HistoryCodec {
     private fun writeHistory(history: List<AuditEntry>, version: Int, canonicalJson: Boolean,
         write: (String) -> Unit) {
         write("[")
-        history.forEachIndexed { index, entry ->
+        history.indices.forEach { index ->
             if (index > 0) write(",")
-            val encoded = versioned(encode(entry), version)
+            val encoded = versioned((history as? EncodedAuditHistory)?.canonicalEntry(index) ?: encode(history[index]), version)
             // Snapshot JSON previously passed through JsonElement.toString(), whereas
             // the signed history for formats 3+ used the serializer output directly.
             write(if (canonicalJson) json.parseToJsonElement(encoded).toString() else encoded)

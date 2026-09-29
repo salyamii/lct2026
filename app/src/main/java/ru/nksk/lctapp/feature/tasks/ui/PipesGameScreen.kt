@@ -60,7 +60,7 @@ private fun outwardRotation(state: PipesState, cell: Int, color: Int): Float {
     return towards * 90f
 }
 
-/** 0 — вверх, 1 — вправо, 2 — вниз, 3 — влево. */
+/** 0 - вверх, 1 - вправо, 2 - вниз, 3 - влево. */
 private fun direction(from: Int, to: Int): Int = when {
     to == from - PipesState.SIZE -> 0
     to == from + 1 && to / PipesState.SIZE == from / PipesState.SIZE -> 1
@@ -68,7 +68,7 @@ private fun direction(from: Int, to: Int): Int = when {
     else -> 3
 }
 
-/** Угол по паре «откуда пришёл → куда идёт»: канат входит сверху и уходит вправо — 0°. */
+/** Угол по паре «откуда пришёл → куда идёт»: канат входит сверху и уходит вправо - 0°. */
 private fun cornerRotation(from: Int, outTo: Int): Int = when {
     from == 0 && outTo == 1 -> 0
     from == 1 && outTo == 2 -> 90
@@ -77,8 +77,8 @@ private fun cornerRotation(from: Int, outTo: Int): Int = when {
 }
 
 /**
- * Раскладывает канатные тайлы по ячейкам: концы пары — цветной канат,
- * повороты — уголок (при необходимости зеркальный), прямоходы — прямой канат.
+ * Раскладывает канатные тайлы по ячейкам: концы пары - цветной канат,
+ * повороты - уголок (при необходимости зеркальный), прямоходы - прямой канат.
  */
 private fun ropeTiles(state: PipesState, activeColor: Int?): Map<Int, RopeTile> {
     val endRes = listOf(
@@ -104,8 +104,8 @@ private fun ropeTiles(state: PipesState, activeColor: Int?): Map<Int, RopeTile> 
                 else -> null
             }
             val tile = when {
-                // Начало тропинки — конец каната: до первого шага смотрит наружу,
-                // после — поворачивается по направлению, выбранному игроком.
+                // Начало тропинки - конец каната: до первого шага смотрит наружу,
+                // после - поворачивается по направлению, выбранному игроком.
                 index == 0 && !locked && path.size == 1 ->
                     RopeTile(endRes[color % endRes.size], outwardRotation(state, cell, color))
                 index == 0 -> RopeTile(endRes[color % endRes.size], (inFrom ?: 0) * 90f)

@@ -135,7 +135,7 @@ internal fun BudgetPlanScreen(state: BudgetUiState, onAmountChange: (BudgetArtic
                             append(state.foodAdvice)
                             if (state.isEditing) {
                                 if (state.minimumNeeds > state.knownNeeds) append(" На необходимое оставим хотя бы ${paymentCoinAmount(state.minimumNeeds)}.")
-                                if (state.total < state.knownNeeds && state.total > 0) append(" Пока есть только ${state.total} — сохраним их на еду.")
+                                if (state.total < state.knownNeeds && state.total > 0) append(" Пока есть только ${state.total} - сохраним их на еду.")
                             }
                         }, Modifier.padding(12.dp), color = GameInk, fontFamily = Nunito,
                             fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, lineHeight = 19.sp)
@@ -215,7 +215,7 @@ private fun BudgetAllocationSummary(state: BudgetUiState) {
         progressBarRangeInfo = ProgressBarRangeInfo(
             if (total > 0) (assigned.toDouble() / total).toFloat().coerceIn(0f, 1f) else 0f, 0f..1f)
     }) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
             Row(Modifier.fillMaxWidth().height(7.dp).clip(RoundedCornerShape(4.dp))
                 .background(Color(0xFFE4DFD6))) {
                 if (total > 0) {
@@ -229,9 +229,13 @@ private fun BudgetAllocationSummary(state: BudgetUiState) {
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 BudgetArticle.entries.forEach { article ->
-                    Text(article.title, Modifier.weight(1f), color = GameInk.copy(alpha = .72f),
-                        fontFamily = Nunito, fontWeight = FontWeight.SemiBold,
-                        fontSize = 11.sp, lineHeight = 14.sp, textAlign = TextAlign.Center)
+                    Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally)) {
+                        Box(Modifier.size(6.dp).background(article.allocationColor, CircleShape))
+                        Text(article.title, color = GameInk.copy(alpha = .72f),
+                            fontFamily = Nunito, fontWeight = FontWeight.SemiBold,
+                            fontSize = 11.sp, lineHeight = 14.sp, textAlign = TextAlign.Center)
+                    }
                 }
             }
         }

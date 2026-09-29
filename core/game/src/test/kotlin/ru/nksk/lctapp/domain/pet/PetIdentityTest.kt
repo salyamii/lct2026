@@ -11,8 +11,8 @@ class PetIdentityTest {
     }
 
     @Test fun legacyContentUsesWholeNominativeNamesWithoutGuessingDeclension() {
-        assertEquals("Тоша поел. Тоша рад. Рыжиковский — название.",
-            renderPetText("Рыжик поел. {petName} рад. Рыжиковский — название.", "Тоша"))
+        assertEquals("Тоша поел. Тоша рад. Рыжиковский - название.",
+            renderPetText("Рыжик поел. {petName} рад. Рыжиковский - название.", "Тоша"))
     }
 
     @Test fun changingVisualStatePreservesSavedIdentityAndLook() {

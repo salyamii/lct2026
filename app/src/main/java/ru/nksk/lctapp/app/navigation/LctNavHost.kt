@@ -27,8 +27,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.activity.compose.BackHandler
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
@@ -81,6 +85,7 @@ fun LctNavHost(
     modifier: Modifier = Modifier,
     debugSettingsButton: (@Composable () -> Unit)? = null,
     onScreenShown: (String) -> Unit = {},
+    onNewCampaignSetup: () -> Unit = {},
 ) {
     val backStack = rememberNavBackStack(AppNavigationSavedStateConfiguration, MainMenu)
     val navigator = remember(backStack) { AppNavigator(backStack) }
@@ -89,28 +94,35 @@ fun LctNavHost(
     val gateModel: EconomyGateViewModel = hiltViewModel()
     val gate by gateModel.uiState.collectAsStateWithLifecycle()
     var presentedPlanningId by rememberSaveable { mutableStateOf<String?>(null) }
+    // A confirmed write can reach its callback before the gate's Room observation catches up.
+    var confirmedPlanningId by remember { mutableStateOf<String?>(null) }
     val destination = backStack.lastOrNull()
     val pending = gate.planning
-    LaunchedEffect(pending, destination) {
-        if (shouldPresentBudget(pending, destination, presentedPlanningId)) {
+    LaunchedEffect(pending, destination, confirmedPlanningId) {
+        if (pending?.id != confirmedPlanningId) confirmedPlanningId = null
+        if (shouldPresentBudget(pending, destination, presentedPlanningId, confirmedPlanningId)) {
             presentedPlanningId = checkNotNull(pending).id
-            // Persisted budget has priority over restored gameplay routes; Back returns to the menu.
-            backStack.clear()
-            backStack.add(MainMenu)
-            backStack.add(Economy)
+            if (destination == ChapterPractice) navigator.moveToTop(destination, Economy)
+            else {
+                // Persisted budget has priority over restored gameplay routes.
+                backStack.clear()
+                backStack.add(MainMenu)
+                backStack.add(Economy)
+            }
         } else if (pending != null && destination == Economy) {
             presentedPlanningId = pending.id
         }
     }
-    val redirectingToBudget = shouldPresentBudget(pending, destination, presentedPlanningId)
+    val redirectingToBudget = shouldPresentBudget(pending, destination, presentedPlanningId, confirmedPlanningId)
     // Only the route type is diagnostic context, never its occurrence, choice or day arguments.
     val screen = when {
-        gate.loading || redirectingToBudget -> "BudgetGateLoading"
+        gate.loading -> "BudgetGateLoading"
+        redirectingToBudget -> "BudgetRedirect"
         gate.failed -> "BudgetGateError"
         else -> destination.diagnosticScreen()
     }
     SideEffect { onScreenShown(screen) }
-    if (gate.loading || redirectingToBudget) {
+    if (gate.loading) {
         GameLoadingScreen(modifier)
         return
     }
@@ -140,9 +152,13 @@ fun LctNavHost(
         if (completion === notice) completion = null
     }
 
+    BackHandler(enabled = redirectingToBudget) {}
     BoxWithConstraints(modifier.fillMaxSize().background(AdventureNight)) {
         NavDisplay(
-            modifier = Modifier.fillMaxSize(),
+            // A live budget redirect keeps the outgoing screen and entry stores in composition.
+            // Replacing the entire host with a loader used to flash and restart its artwork.
+            modifier = Modifier.fillMaxSize().then(
+                if (redirectingToBudget) Modifier.clearAndSetSemantics {} else Modifier),
             backStack = backStack,
             onBack = navigator::goBack,
             // Keep illustrated screens opaque: the default crossfade blends their text and artwork.
@@ -181,7 +197,7 @@ fun LctNavHost(
                             MainMenuAction.Savings -> Savings
                             MainMenuAction.CampaignArchive -> CampaignArchive
                             MainMenuAction.Village -> GameMap
-                            MainMenuAction.ContinueDay, MainMenuAction.Feed -> if (pending != null) Economy else Day
+                            MainMenuAction.ContinueDay, MainMenuAction.Feed -> Day
                         },
                     )
                 }
@@ -198,23 +214,38 @@ fun LctNavHost(
                     onContinueDay = { source -> navigator.replace(source, Day) },
                     onBudget = { source -> navigator.navigateToExisting(source, Economy) },
                     onTraining = { source -> navigator.navigateToExisting(source, ChapterPractice) })
-                economyEntry(onBack = navigator::returnToRoot, onConfirmed = navigator::returnToRoot,
+                economyEntry(onBack = { source -> navigator.finishBudget(source, ChapterPractice) },
+                    onConfirmed = { source, planningId ->
+                        if (backStack.lastOrNull() == source) {
+                            confirmedPlanningId = planningId.takeIf { it == gateModel.uiState.value.planning?.id }
+                            navigator.finishBudget(source, ChapterPractice)
+                        }
+                    },
                     onOpenSavings = { source -> navigator.navigateToExisting(source, Savings) })
                 savingsEntry(onBack = navigator::goBack,
                     onOpenGoal = { source -> navigator.navigateToExisting(source, Goal) },
                     onOpenBudget = { source -> navigator.navigateToExisting(source, Economy) })
                 learningEntry(onBack = navigator::goBack,
-                    onOpenBudget = { source -> navigator.navigateToExisting(source, Economy) },
-                    onContinueStory = { source -> navigator.navigateToExisting(source, Day) },
+                    onOpenBudget = { source ->
+                        if (source == ChapterPractice) navigator.moveToTop(source, Economy)
+                        else navigator.navigateToExisting(source, Economy)
+                    },
+                    onContinueStory = { source -> navigator.returnToOrReplace(source, Day) },
                     onArchives = { source -> navigator.navigate(source, CampaignArchive) })
                 campaignArchiveEntry(onBack = navigator::goBack, onRestarted = { source ->
                     if (backStack.lastOrNull() == source) {
                         navigator.returnToRoot(source)
-                        navigator.navigate(MainMenu, Economy)
+                        onNewCampaignSetup()
                     }
                 })
                 mapEntry(onBack = navigator::goBack, onSelected = navigator::returnToRoot)
                 dayEntry(onBack = navigator::goBack, onFinished = finish,
+                    onRestarted = { source ->
+                        if (backStack.lastOrNull() == source) {
+                            navigator.returnToRoot(source)
+                            onNewCampaignSetup()
+                        }
+                    },
                     isCurrentEntry = { destination == it },
                     onGame = { source, id -> navigator.replace(source, DeedGame(id)) },
                     onStoryGame = { source, id, choice -> navigator.replace(source, DeedGame(id, choice)) },
@@ -223,6 +254,11 @@ fun LctNavHost(
                 deedGameEntry(onFinished = finish, isCurrentEntry = { destination == it })
             },
         )
+        if (redirectingToBudget) Box(Modifier.matchParentSize().pointerInput(Unit) {
+            awaitPointerEventScope {
+                while (true) awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() }
+            }
+        })
         if (destination == MainMenu) {
             SnackbarHost(
                 hostState = snackbarHost,

@@ -13,11 +13,11 @@
     <string name="menu_tasks">Дела</string>
     <string name="menu_goal">Цель</string>
     <string name="menu_continue">Продолжить день</string>
-    <string name="menu_fox_description">%1$s — питомец с рюкзаком</string>
-    <string name="menu_pet_plain">%1$s — питомец без аксессуаров</string>
-    <string name="menu_pet_bandana">%1$s — питомец в бандане</string>
-    <string name="menu_pet_glasses">%1$s — питомец в очках</string>
-    <string name="menu_pet_hat">%1$s — питомец в шляпе</string>
+    <string name="menu_fox_description">%1$s - питомец с рюкзаком</string>
+    <string name="menu_pet_plain">%1$s - питомец без аксессуаров</string>
+    <string name="menu_pet_bandana">%1$s - питомец в бандане</string>
+    <string name="menu_pet_glasses">%1$s - питомец в очках</string>
+    <string name="menu_pet_hat">%1$s - питомец в шляпе</string>
     <string name="menu_pet_needs_help">%1$s просит помощи</string>
     <string name="menu_pet_hungry">%1$s голоден</string>
     <string name="menu_pet_tired">%1$s устал</string>

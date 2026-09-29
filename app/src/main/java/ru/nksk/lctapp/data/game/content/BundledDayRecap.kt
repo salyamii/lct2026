@@ -21,7 +21,7 @@ internal fun GameCatalog.withDayRecapCopy(): GameCatalog {
     )
     val summaries = buildMap {
         deeds.forEach { (event, text) -> put("$event:complete", text) }
-        put("figma-2363-4-v1:complete", "Выбрали большую цель — Ночь наблюдений")
+        put("figma-2363-4-v1:complete", "Выбрали большую цель - Ночь наблюдений")
         put("figma-2164-2-v1:buy", "Купили кепку исследователя")
         put("figma-2164-2-v1:pass", "Отказались от покупки кепки")
         put("figma-2313-2-v1:pay", "Отдали рюкзак на очистку от смолы")

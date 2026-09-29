@@ -46,6 +46,9 @@ internal class AppStartupViewModel @Inject constructor(
     private var selectedAccessory = "BACKPACK"
     private var selectedSavingItemId: String? = null
     val savingItemIds: List<String> = session.onboardingSavingItemIds
+    /** Scopes saved navigation to its committed run, without putting world data in route keys. */
+    var navigationRunId: String? = null
+        private set
 
     init { retry() }
 
@@ -58,11 +61,13 @@ internal class AppStartupViewModel @Inject constructor(
                     // Reconcile owned starter equipment before restoring any destination,
                     // including an inventory route that bypasses the menu entry.
                     session.prepare()
+                    navigationRunId = checkNotNull(session.snapshotHead()).runId
                     AppStartupState.Ready
                 } else drafts.read()?.let {
                     selectedAccessory = it.accessoryId
                     selectedSavingItemId = it.savingItemId
                     when (it.step) {
+                        OnboardingStep.Character -> AppStartupState.Choose()
                         OnboardingStep.Profile -> AppStartupState.Customize(it.profile)
                         OnboardingStep.Accessories -> AppStartupState.Accessories(it)
                         OnboardingStep.GoalBriefing -> AppStartupState.GoalBriefing(it)
@@ -96,6 +101,13 @@ internal class AppStartupViewModel @Inject constructor(
                 state.value = AppStartupState.Choose(failed = true)
             }
         }
+    }
+
+    /** Called only after the completed run was durably archived and setup was prepared. */
+    fun showNewCampaignSetup() {
+        if (state.value != AppStartupState.Ready) return
+        state.value = AppStartupState.Loading
+        retry()
     }
 
     /** Playback is transient UI; the already saved Profile draft remains the cold-start fallback. */
@@ -309,6 +321,7 @@ internal class AppStartupViewModel @Inject constructor(
                     session.prepare(current.draft.profile.toPetState(current.draft.accessoryId),
                         savingItemId = current.draft.savingItemId, beginInitialAllocation = true)
                 }
+                navigationRunId = checkNotNull(session.snapshotHead()).runId
                 state.value = AppStartupState.Ready
             } catch (cancelled: CancellationException) { throw cancelled }
             catch (_: Exception) { state.value = current.copy(failed = true) }

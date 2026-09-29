@@ -112,7 +112,7 @@ fun AdventureGoalSelectionScreen(
                     }
                 }
             }
-            GoalBody("Это части одного задания. Выбор можно изменить позже — накопленные монеты сохранятся.", artwork)
+            GoalBody("Это части одного задания. Выбор можно изменить позже - накопленные монеты сохранятся.", artwork)
         }
         if (saveFailed) GoalSaveError(artwork)
         GoalFooter(if (saving) "Сохраняем…" else "Начать с этого", artwork,

@@ -2,6 +2,7 @@ package ru.nksk.lctapp.feature.menu.ui
 
 import ru.nksk.lctapp.domain.pet.PetState
 import ru.nksk.lctapp.domain.pet.PetVisualState
+import ru.nksk.lctapp.core.ui.components.MealChoiceUiState
 
 /** Values rendered by the menu; this is presentation state, not a saved game. */
 data class MainMenuUiState(
@@ -17,6 +18,8 @@ data class MainMenuUiState(
     val notice: String? = null,
     val mealPrice: Long? = null,
     val showFreeMeal: Boolean = false,
+    val showMeals: Boolean = false,
+    val meals: List<MealChoiceUiState> = emptyList(),
     val goalTitle: String = "Выбрать большую цель",
     val budget: MenuBudgetUiState? = null,
     val spendingPreview: String? = null,

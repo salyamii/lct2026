@@ -104,6 +104,7 @@ private fun EngineCommand.diagnosticAction(): String = when (this) {
     is EngineCommand.CompleteDeed -> "CompleteDeed"
     is EngineCommand.StartStoryGame -> "StartStoryGame"
     is EngineCommand.CompleteStoryGame -> "CompleteStoryGame"
+    is EngineCommand.SkipMiniGame -> "SkipMiniGame"
     is EngineCommand.DismissDeedProposal -> "DismissDeedProposal"
     is EngineCommand.PauseEvent -> "PauseEvent"
     is EngineCommand.Feed -> "Feed"

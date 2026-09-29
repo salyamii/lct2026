@@ -52,6 +52,7 @@ internal fun GameArtwork(
     modifier: Modifier = Modifier,
     alignment: Alignment = Alignment.Center,
     contentScale: ContentScale = ContentScale.Fit,
+    revealWithScene: Boolean = true,
 ) {
     if (LocalInspectionMode.current) {
         Image(painterResource(resource), contentDescription, modifier, alignment, contentScale)
@@ -60,7 +61,8 @@ internal fun GameArtwork(
         // A local replacement keeps its last frame while the next resource is decoded.
         // The scene's initial barrier is separate and never blanks a revealed scene again.
         var previous by remember { mutableStateOf<Painter?>(null) }
-        AsyncImage(resource, contentDescription, modifier = modifier,
+        AsyncImage(resource, contentDescription,
+            modifier = modifier.then(if (revealWithScene) gameArtworkVisibility() else Modifier),
             placeholder = previous, error = previous,
             onLoading = { settled = false },
             onSuccess = { previous = it.painter; settled = true },

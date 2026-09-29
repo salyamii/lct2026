@@ -1,4 +1,4 @@
-# Коллекция приобретённых предметов — 2026-09-26
+# Коллекция приобретённых предметов - 2026-09-26
 
 По FINANCE-UI-D-021 созданы 23 самостоятельные иллюстрации покупаемых частей
 пяти больших целей и три страницы звёздного атласа. Это новые изображения
@@ -14,7 +14,7 @@
 PNG сохранены рядом с соответствующими prompts. Полные нативные canvases
 1254 × 1254, включая поля и фон, сохранены без изменения размера и обрезки.
 Кремовый фон предметов намеренный; ночные карты имеют тёмный фон.
-Runtime — `app/src/main/res/drawable-nodpi/collection_*.webp`, lossless exact
+Runtime - `app/src/main/res/drawable-nodpi/collection_*.webp`, lossless exact
 WebP с `quality=100`, `method=6`. Декодированные RGBA PNG/WebP совпадают.
 Все файлы и SHA-256 записаны в [общем манифесте](../../manifest.json).
 
@@ -26,19 +26,19 @@ WebP с `quality=100`, `method=6`. Декодированные RGBA PNG/WebP с
 
 - [Орион](stargazing/collection_sky_orion.png): семь главных отмеченных звёзд,
   пояс из трёх звёзд. Имена Альнитак, Альнилам, Минтака и принадлежность поясу
-  проверены по [NASA — Orion](https://science.nasa.gov/universe/stories/quick-reads/discovering-the-universe-through-the-constellation-orion/).
+  проверены по [NASA - Orion](https://science.nasa.gov/universe/stories/quick-reads/discovering-the-universe-through-the-constellation-orion/).
 - [Большой Ковш](stargazing/collection_sky_ursa_major.png): семь отмеченных звёзд,
-  четыре в чаше и три в ручке. Ковш — часть Большой Медведицы, а не всё созвездие:
-  [NASA — Asterisms](https://science.nasa.gov/solar-system/what-are-asterisms/).
+  четыре в чаше и три в ручке. Ковш - часть Большой Медведицы, а не всё созвездие:
+  [NASA - Asterisms](https://science.nasa.gov/solar-system/what-are-asterisms/).
 - [Млечный Путь](stargazing/collection_sky_milky_way.png): художественное
   изображение светлой полосы и пылевых прослоек при взгляде изнутри галактики;
   не фотография NASA и не внешний вид спирали. Объяснение проверено по
-  [NASA — Galaxies](https://science.nasa.gov/universe/galaxies/).
+  [NASA - Galaxies](https://science.nasa.gov/universe/galaxies/).
 
 Рисунки на обложках атласов декоративные, маршруты на игровых картах вымышленные.
 У телескопа нет придуманных численных характеристик: страница объясняет части
 и назначение. Штатив сопровождается короткой инструкцией установки.
-Поездка представлена билетом, подготовка перевозки — памятной квитанцией;
+Поездка представлена билетом, подготовка перевозки - памятной квитанцией;
 просмотр не оформляет новую поездку и не списывает деньги.
 
 ## Проверка

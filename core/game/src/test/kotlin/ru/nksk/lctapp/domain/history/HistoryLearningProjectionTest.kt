@@ -2,6 +2,7 @@ package ru.nksk.lctapp.domain.history
 
 import org.junit.Assert.*
 import org.junit.Test
+import kotlin.random.Random
 import ru.nksk.lctapp.domain.analytics.*
 import ru.nksk.lctapp.domain.analytics.FactDetail.*
 import ru.nksk.lctapp.domain.economy.BudgetPlan
@@ -19,6 +20,53 @@ class HistoryLearningProjectionTest {
         StoryState(null, null, null, emptyList()), 0, 0, emptyList())
     private fun context(day: Int = 1, needs: Long = 35) = DecisionContext("shown-$day", true, true,
         FinancialPosition(70, 30, needs), FinancialPosition(70, 30, needs), true, day = day)
+
+    @Test fun compactEvidenceMatchesLegacyForLazyShuffledDuplicateAndDamagedHistories() {
+        val seeds = listOf(week(), week(freeFood = true), week(bakeryDay = 3), repairHistory(),
+            repairHistory(planAfterPresentation = true), repairHistory(originalPresentationMissing = true),
+            repairHistory(reopenAfterPlan = true))
+        for (history in seeds) repeat(10) { variation ->
+            val random = Random(variation)
+            val changed = if (variation == 0) history else history.mapNotNull { entry ->
+                when (random.nextInt(7)) {
+                    0 -> null
+                    1 -> entry.copy(request = entry.request?.copy(demoMode = true))
+                    2 -> entry.copy(before = entry.before?.let { it.copy(pet = it.pet.copy(name = "Changed checkpoint")) })
+                    3 -> entry.copy(type = AuditType.RESTORED)
+                    4 -> entry.copy(operations = emptyList())
+                    else -> entry
+                }
+            }
+            val anotherRun = changed.map { entry -> entry.copy(id = "second:${entry.id}", runId = "second-run",
+                facts = entry.facts.map { it.copy(eventId = "second:${it.eventId}", gameRunId = "second-run") }) }
+            val combined = (changed + anotherRun + changed.take(2)).shuffled(random)
+            val encoded = combined.map(HistoryCodec::encode)
+            var reads = 0
+            val lazy = object : AbstractList<AuditEntry>() {
+                override val size get() = encoded.size
+                override fun get(index: Int): AuditEntry {
+                    reads++
+                    return HistoryCodec.decodeEntry(encoded[index])
+                }
+            }
+            assertEquals("Variation $variation", LegacyHistoryLearningProjection.facts(combined),
+                HistoryLearningProjection.facts(lazy))
+            // Metadata and evidence each decode a unique row once; duplicates only revisit their original.
+            assertEquals(encoded.size * 2, reads)
+        }
+    }
+
+    @Test fun compactEvidenceStillRejectsConflictingIdentityAndSequence() {
+        val history = week()
+        val first = history.first()
+        for (conflict in listOf(first.copy(after = first.after!!.copy(satiety = 1)),
+            first.copy(id = "different-identity-same-sequence"))) {
+            val input = history + conflict
+            val oldFailure = assertThrows(IllegalArgumentException::class.java) { LegacyHistoryLearningProjection.facts(input) }
+            val newFailure = assertThrows(IllegalArgumentException::class.java) { HistoryLearningProjection.facts(input) }
+            assertEquals(oldFailure.message, newFailure.message)
+        }
+    }
 
     @Test fun completeWeekClosesIncomeAndReserveOnceAndIsReplayable() {
         val history = week()

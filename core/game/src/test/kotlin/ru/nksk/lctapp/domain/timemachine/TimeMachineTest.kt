@@ -115,7 +115,7 @@ class TimeMachineTest {
         val answer = f.machine.submitQuiz(quiz.id, "spent_less", "repair-correct")
         assertTrue(answer.correct)
         assertTrue(answer.explanation.contains("выполняем работу сами: устанем, зато платить не нужно"))
-        assertTrue(answer.explanation.contains("В нашей истории ушло 25 монет, а здесь — 0"))
+        assertTrue(answer.explanation.contains("В нашей истории ушло 25 монет, а здесь - 0"))
         assertFalse(quiz.options.any { "силы" in it.text || "помощь" in it.text })
         assertEquals(live, HistoryCodec.encodeState(f.repo.state))
     }

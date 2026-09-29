@@ -138,7 +138,7 @@ internal fun chronoscopeDifferences(original: ChronoscopePath, alternative: Chro
         }
         if (before.energy != after.energy) {
             fun effort(own: Int, other: Int) = when {
-                own == 0 -> "Силы закончились — нужен отдых"
+                own == 0 -> "Силы закончились - нужен отдых"
                 other == 0 -> "Силы ещё остались"
                 own > other -> "Устал меньше"
                 else -> "Устал больше"

@@ -139,7 +139,7 @@ internal fun SavingsScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
                             else "Пока нет доступных монет. Их можно заработать в делах."
                         state.transferInput.isNotEmpty() && amount == null -> "Введи сумму от 1 до $maximum."
                         amount != null && amount > maximum -> "Доступно для перевода: ${savingsCoins(maximum)}."
-                        else -> "Выбери сумму — ниже увидишь, сколько монет останется."
+                        else -> "Выбери сумму - ниже увидишь, сколько монет останется."
                     })
                 }
                 if (confirming) AdventureQuietButton("Изменить сумму", {

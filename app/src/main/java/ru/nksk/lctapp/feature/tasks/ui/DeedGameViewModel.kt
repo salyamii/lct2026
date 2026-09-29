@@ -38,6 +38,8 @@ internal data class DeedGameUiState(
     val canRetry: Boolean = false,
     val audioOccurrenceId: String? = null,
     val eventMedia: EventMedia = EventMedia(),
+    val canSkipGame: Boolean = false,
+    val demoMode: Boolean = false,
 )
 
 /** Connects an actual offered deed to a transient board and one atomic engine outcome. */
@@ -98,6 +100,13 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
         val id = occurrenceId ?: return
         execute(choiceId?.let { EngineCommand.CompleteStoryGame(id, it, score) }
             ?: EngineCommand.CompleteDeed(id, score))
+    }
+
+    fun skipGame() {
+        if (busy || pending != null || rejectedAction != null || !session.demoModeEnabled ||
+            !uiState.value.canSkipGame) return
+        val id = occurrenceId ?: return
+        execute(EngineCommand.SkipMiniGame(id, choiceId))
     }
 
     fun leave() {
@@ -169,7 +178,11 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
                 if (batches == comparisonEvidence.values.toList()) return@withLock
                 continue
             }
-            session.recordFacts(missing)
+            if (!session.recordFacts(missing)) {
+                // Demo answers intentionally produce no evidence, so a read-back retry cannot complete.
+                batches.forEach { if (comparisonEvidence[it.seriesId] == it) comparisonEvidence.remove(it.seriesId) }
+                return@withLock
+            }
             // An answer may have arrived during the write; loop before allowing completion or exit.
         }
     }
@@ -190,15 +203,16 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
         busy = true
         message = null
         mutableState.value = mutableState.value.copy(busy = true, message = null,
+            canSkipGame = false,
             presentation = mutableState.value.presentation?.copy(canPlay = false))
         viewModelScope.launch {
             var leaving = false
             try {
-                flushComparisonAnswers()
+                if (command !is EngineCommand.SkipMiniGame) flushComparisonAnswers()
                 comparisonSaveFailed = false
                 val attempt = action.attempt ?: run {
                     val evidence = if (command is EngineCommand.CompleteStoryGame)
-                        eventGameStartEvidence(session.history(), game, command) else null
+                        eventGameStartEvidence(session.latestCommand(), game, command) else null
                     val submitted = if (command is EngineCommand.CompleteStoryGame)
                         command.copy(resourcePriorityOfferId = evidence?.priorityOfferId) else command
                     GameActionAttempt.prepare(game, submitted, evidence?.context).also { action.attempt = it }
@@ -208,7 +222,8 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
                         pending = null
                         latest = result.state
                         leaving = true
-                        val committed = attempt.committedState(session, result.state)
+                        val committed = if (command is EngineCommand.SkipMiniGame) null
+                            else attempt.committedState(session, result.state)
                         exits.send(when (command) {
                             is EngineCommand.CompleteDeed -> committed?.let {
                                 deedCompletionMessage(it.economy.balance - game.economy.balance)
@@ -217,6 +232,7 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
                                 eventCompletionMessage(game, it,
                                     EngineCommand.CompleteEvent(command.occurrenceId, command.choiceId), session.catalog)
                             } ?: "Готово!"
+                            is EngineCommand.SkipMiniGame -> "Игра пропущена · режим бога"
                             else -> null
                         })
                     }
@@ -239,6 +255,7 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
     private fun exit() {
         busy = true
         mutableState.value = mutableState.value.copy(busy = true,
+            canSkipGame = false,
             presentation = mutableState.value.presentation?.copy(canPlay = false))
         exits.trySend(null)
     }
@@ -247,6 +264,7 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
         if (busy) return
         if (pending != null) {
             mutableState.value = mutableState.value.copy(busy = false, message = message, canRetry = true,
+                canSkipGame = false,
                 presentation = mutableState.value.presentation?.copy(canPlay = false))
             return
         }
@@ -292,6 +310,8 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
             canRetry = pending != null || rejectedAction != null || comparisonSaveFailed,
             audioOccurrenceId = occurrence.id,
             eventMedia = card?.presentation?.media ?: EventMedia(),
+            canSkipGame = session.demoModeEnabled && rejectedAction == null,
+            demoMode = session.demoModeEnabled,
         )
     }
 

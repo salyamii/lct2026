@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -98,8 +99,11 @@ private fun LctAppContent(debugSettingsButton: (@Composable () -> Unit)?, startu
                     val reactions: PetReactionViewModel = hiltViewModel()
                     val reaction by reactions.uiState.collectAsStateWithLifecycle()
                     CompositionLocalProvider(LocalLivePetReaction provides reaction) {
-                        LctNavHost(debugSettingsButton = debugSettingsButton,
-                            onScreenShown = diagnostics::screenShown)
+                        key(startup.navigationRunId) {
+                            LctNavHost(debugSettingsButton = debugSettingsButton,
+                                onScreenShown = diagnostics::screenShown,
+                                onNewCampaignSetup = startup::showNewCampaignSetup)
+                        }
                     }
                 }
                 is AppStartupState.Choose -> OnboardingEntry(

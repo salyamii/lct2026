@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -167,16 +168,22 @@ private fun BudgetBadge(
     // so expanding it cannot resize the pet scene or reposition the map/actions.
     Box {
         Row(
-            Modifier.width(154.dp).heightIn(min = MenuBadgeMinHeight)
+            Modifier.widthIn(min = 164.dp).heightIn(min = MenuBadgeMinHeight)
                 .clip(RoundedCornerShape(20.dp))
                 .background(AdventurePanel.copy(alpha = 0.9f))
                 .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(20.dp))
                 .clickable(role = Role.Button, onClickLabel = openBudgetLabel, onClick = onClick)
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .padding(start = 12.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            MenuText(stringResource(R.string.menu_budget_title), 13, color = AdventureLabel,
-                modifier = Modifier.weight(1f).padding(start = 8.dp))
+            GameArtwork(R.drawable.menu_coin, null, Modifier.size(26.dp), contentScale = ContentScale.Fit)
+            Spacer(Modifier.width(8.dp))
+            Column {
+                MenuText(stringResource(R.string.menu_budget_title), 11, color = AdventureMuted)
+                Text(budget.available.toString(), color = AdventureLabel, fontFamily = Rubik,
+                    fontWeight = FontWeight.Bold, fontSize = 18.sp, maxLines = 1)
+            }
+            Spacer(Modifier.width(8.dp))
             IconButton(onClick = { onExpandedChange(!expanded) }, modifier = Modifier.size(48.dp)) {
                 Icon(
                     painter = painterResource(R.drawable.menu_chevron),
@@ -207,14 +214,14 @@ private fun BudgetBadge(
 @Preview(name = "Монетки · свернуто", showBackground = true, backgroundColor = 0xFF120F30)
 @Composable
 private fun CollapsedBudgetBadgePreview() {
-    LCTAppTheme { BudgetBadge(MenuBudgetUiState(35, 20, 20, 25), false, {}, {}) }
+    LCTAppTheme { BudgetBadge(MenuBudgetUiState(25, 0, 66, 20), false, {}, {}) }
 }
 
 @Preview(name = "Монетки · раскрыто", showBackground = true, backgroundColor = 0xFF120F30)
 @Preview(name = "Монетки · крупный текст", fontScale = 1.5f, showBackground = true, backgroundColor = 0xFF120F30)
 @Composable
 private fun ExpandedBudgetBadgePreview() {
-    LCTAppTheme { BudgetBadge(MenuBudgetUiState(35, 20, 20, 25, actualSavings = 41), true, {}, {}, {}, {}) }
+    LCTAppTheme { BudgetBadge(MenuBudgetUiState(25, 0, 66, 20), true, {}, {}, {}, {}) }
 }
 
 @Composable

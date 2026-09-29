@@ -5,7 +5,21 @@ import ru.nksk.lctapp.domain.content.ItemOperation
 import ru.nksk.lctapp.domain.content.StoryContent
 
 /** Append-only definition identity protects the meaning of historical decision JOINs. */
-internal fun StoryContent.newDefinitionsComparedTo(old: StoryContent): StoryContent {
+internal fun StoryContent.newDefinitionsComparedTo(old: StoryContent): StoryContent =
+    withCurrentTypography().newDefinitionsComparedToNormalized(old.withCurrentTypography())
+
+/** Display-only compatibility; never changes IDs, gameplay fields, stored rows or audit documents. */
+internal fun StoryContent.withCurrentTypography(): StoryContent = copy(
+    chapters = chapters.map { it.copy(title = it.title.currentTypography()) },
+    events = events.map { it.copy(title = it.title.currentTypography(), description = it.description.currentTypography()) },
+    choices = choices.map { it.copy(text = it.text.currentTypography()) },
+    items = items.map { it.copy(name = it.name.currentTypography(), description = it.description.currentTypography()) },
+    goals = goals.map { it.copy(title = it.title.currentTypography(), description = it.description.currentTypography()) },
+)
+
+private fun String.currentTypography(): String = replace('\u2014', '-')
+
+private fun StoryContent.newDefinitionsComparedToNormalized(old: StoryContent): StoryContent {
     val added = StoryContent(
         chapters = newRows(chapters, old.chapters) { it.id },
         days = newRows(days, old.days) { it.id },

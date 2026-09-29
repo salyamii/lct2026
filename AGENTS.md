@@ -1,6 +1,6 @@
 # Agent instructions
 
-## Current verification preference — 2026-09-19
+## Current verification preference - 2026-09-19
 
 The user runs the application personally. Check builds only; do not start the
 app, launch emulators, or run connected/instrumented tests unless the user

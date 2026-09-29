@@ -5,6 +5,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -25,10 +29,20 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import ru.nksk.lctapp.R
+import kotlinx.coroutines.delay
 
 /** Bundled, cached animation. Its lifetime follows the caller's loading state. */
 @Composable
-internal fun GameLoadingIndicator(modifier: Modifier = Modifier, size: Dp = 80.dp, isPlaying: Boolean = true) {
+internal fun GameLoadingIndicator(modifier: Modifier = Modifier, size: Dp = 80.dp, isPlaying: Boolean = true,
+    delayMillis: Long = 0) {
+    // Short writes keep their existing scene without a one-frame spinner. This changes only
+    // the feedback: the caller still blocks duplicate input immediately.
+    var visible by remember(delayMillis) { mutableStateOf(delayMillis <= 0) }
+    LaunchedEffect(delayMillis) {
+        if (delayMillis > 0) delay(delayMillis)
+        visible = true
+    }
+    if (!visible) return
     val composition = rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading_coin))
     val lifecycle by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
     val progress = animateLottieCompositionAsState(

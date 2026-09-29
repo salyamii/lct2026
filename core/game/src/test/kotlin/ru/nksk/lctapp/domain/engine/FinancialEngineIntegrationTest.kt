@@ -426,6 +426,125 @@ class FinancialEngineIntegrationTest {
         assertFalse(f.state.financial.currentPeriod!!.reviewedPlan)
     }
 
+    @Test fun demoCanContinueAndFinishTheChapterWithoutInventingPracticeCompletion() = runTest {
+        val f = Fixture()
+        f.select(); f.confirm()
+        f.send(EngineCommand.DepositSavings(20))
+        f.send(EngineCommand.BuyGoalItem("goal", "part"))
+        f.send(EngineCommand.OpenNextEvent)
+        f.completeCurrent("intro")
+        f.send(EngineCommand.Feed("meal"))
+        f.send(EngineCommand.RequestFinancialPractice(FinancialQuestionKind.SAVING_PRACTICE))
+        val before = f.state
+        val missing = listOf(FinancialMilestone.SAVE_FOR_GOAL, FinancialMilestone.REVIEW_PLAN)
+        assertEquals(BlockReason.FinancialPracticeRequired(missing), f.blocked(EngineCommand.OpenNextEvent))
+
+        val opening = f.request(EngineCommand.OpenNextEvent).copy(demoMode = true)
+        assertTrue(f.engine.dispatch(opening) is EngineResult.Applied)
+        assertEquals(before.financial.practice, f.state.financial.practice)
+        assertEquals(missing, f.state.financial.currentPeriod!!.missingMilestones)
+        assertEquals(before.economy, f.state.economy)
+        assertTrue(f.repo.entries.last().facts.isEmpty())
+
+        val occurrence = checkNotNull(f.state.engine!!.currentEvent)
+        assertEquals("final", occurrence.eventId)
+        val complete = EngineCommand.CompleteEvent(occurrence.id, "final:done")
+        assertEquals(BlockReason.FinancialPracticeRequired(missing), f.blocked(complete))
+        assertTrue(f.engine.dispatch(f.request(complete).copy(demoMode = true)) is EngineResult.Applied)
+        val period = f.state.financial.periods.single()
+        assertEquals(1, period.closedDay)
+        assertEquals(missing, period.missingMilestones)
+        assertNull(period.reviewEvidence)
+        assertNull(period.savingPractice?.recoveryQuestionId)
+        assertTrue(f.repo.entries.last().facts.isEmpty())
+    }
+
+    @Test fun demoChapterSkipStillRequiresRealFoodAndPendingBudget() = runTest {
+        val f = Fixture()
+        f.select(); f.confirm()
+        f.send(EngineCommand.DepositSavings(20))
+        f.send(EngineCommand.BuyGoalItem("goal", "part"))
+        f.send(EngineCommand.OpenNextEvent)
+        f.completeCurrent("intro")
+        assertEquals(EngineResult.Blocked(BlockReason.MustEat),
+            f.engine.dispatch(f.request(EngineCommand.OpenNextEvent).copy(demoMode = true)))
+        f.repo.update { it.copy(economy = EconomyOperations.beginManual(it.economy, "pending-demo-plan")) }
+        assertEquals(EngineResult.Blocked(BlockReason.BudgetPlanningRequired),
+            f.engine.dispatch(f.request(EngineCommand.OpenNextEvent).copy(demoMode = true)))
+    }
+
+    @Test fun foodOnlyChapterRequirementOpensFeedingInsteadOfAnotherQuiz() = runTest {
+        val f = Fixture()
+        f.prepareFoodOnlyFinale()
+        val before = f.state
+        assertEquals(listOf(FinancialMilestone.PROVIDE_NEEDS), before.financial.currentPeriod!!.missingMilestones)
+        assertEquals(BlockReason.MustEat, f.blocked(EngineCommand.OpenNextEvent))
+        assertEquals(before, f.state)
+
+        f.send(EngineCommand.Feed("meal"))
+        assertTrue(f.state.financial.currentPeriod!!.missingMilestones.isEmpty())
+        f.send(EngineCommand.OpenNextEvent)
+        assertEquals("final", f.state.engine!!.currentEvent!!.eventId)
+    }
+
+    @Test fun foodOnlyLegacyPeriodCanBeSatisfiedEvenIfTodaysMealFlagWasAlreadySet() = runTest {
+        val f = Fixture()
+        f.prepareFoodOnlyFinale()
+        f.repo.update { it.copy(engine = it.engine!!.copy(ateToday = true)) }
+        val before = f.state
+        assertEquals(BlockReason.MustEat, f.blocked(EngineCommand.OpenNextEvent))
+        assertEquals(before, f.state)
+        assertFalse(f.state.financial.currentPeriod!!.needsProvided)
+
+        // A new explicit meal is valid and credited to this period; the guard invents no meal.
+        f.send(EngineCommand.Feed("meal"))
+        assertTrue(f.state.financial.currentPeriod!!.needsProvided)
+        f.send(EngineCommand.OpenNextEvent)
+        assertEquals("final", f.state.engine!!.currentEvent!!.eventId)
+    }
+
+    @Test fun onlyNewPeriodPlanReviewReadsHistoryAndKeepsTheSameFrozenQuestion() = runTest {
+        for (kind in FinancialQuestionKind.entries) {
+            val f = Fixture()
+            f.select(); f.confirm()
+            val request = f.request(EngineCommand.RequestFinancialPractice(kind, series = true))
+            val expected = f.engine.transition(f.state, request, f.repo.entries.toList())
+            f.repo.failHistoryRead = kind != FinancialQuestionKind.PLAN_REVIEW
+
+            val actual = f.engine.dispatch(request) as EngineResult.Applied
+            assertEquals(expected, actual.state)
+            assertEquals(if (kind == FinancialQuestionKind.PLAN_REVIEW) 1 else 0, f.repo.historyReads)
+
+            // Reopening an unanswered series keeps its frozen task even if audit storage is unavailable.
+            f.repo.failHistoryRead = true
+            f.send(EngineCommand.RequestFinancialPractice(kind, series = true))
+            assertEquals(expected.financial.practice, f.state.financial.practice)
+            assertEquals(if (kind == FinancialQuestionKind.PLAN_REVIEW) 1 else 0, f.repo.historyReads)
+        }
+    }
+
+    @Test fun standalonePlanReviewDoesNotNeedTheGameAudit() = runTest {
+        val f = Fixture()
+        f.repo.failHistoryRead = true
+        f.send(EngineCommand.RequestFinancialPractice(series = true))
+        assertNotNull(f.state.financial.practice)
+        assertEquals(0, f.repo.historyReads)
+    }
+
+    @Test fun concurrentStateChangeDuringReviewPreparationCannotCommitAnOldReport() = runTest {
+        val f = Fixture()
+        f.select(); f.confirm()
+        val before = f.state
+        val latest = before.copy(pet = before.pet.copy(name = "Новое имя"))
+        f.repo.afterHistoryRead = { f.repo.update { latest } }
+        val entriesBefore = f.repo.entries.size
+
+        assertEquals(BlockReason.StaleRevision, f.blocked(EngineCommand.RequestFinancialPractice()))
+        assertEquals(latest, f.state)
+        assertNull(f.state.financial.practice)
+        assertEquals(entriesBefore, f.repo.entries.size)
+    }
+
     private class Fixture(available: Long = 100, savings: Long = 0) {
         val repo = AuditRepository(GameState(PetState("PLAIN", PetVisualState.NORMAL),
             EconomyState(BudgetPlan(available, 0, 0, 0), availableBalance = available, savingsBalance = savings),
@@ -479,6 +598,18 @@ class FinancialEngineIntegrationTest {
             assertEquals(expected, event.eventId)
             send(EngineCommand.CompleteEvent(event.id, "$expected:done"))
         }
+        suspend fun prepareFoodOnlyFinale() {
+            select(); confirm()
+            send(EngineCommand.DepositSavings(20))
+            send(EngineCommand.BuyGoalItem("goal", "part"))
+            send(EngineCommand.OpenNextEvent)
+            completeCurrent("intro")
+            for (kind in listOf(FinancialQuestionKind.SAVING_PRACTICE, FinancialQuestionKind.PLAN_REVIEW)) {
+                send(EngineCommand.RequestFinancialPractice(kind))
+                val question = checkNotNull(state.financial.practice)
+                send(EngineCommand.AnswerFinancialQuestion(question.id, question.correctAnswerId))
+            }
+        }
     }
 
     /** In-memory atomic boundary captures the very facts and receipts production storage receives. */
@@ -486,9 +617,16 @@ class FinancialEngineIntegrationTest {
         private val flow = MutableStateFlow(initial)
         val value get() = flow.value
         val entries = mutableListOf<AuditEntry>()
+        var historyReads = 0
+        var failHistoryRead = false
+        var afterHistoryRead: suspend () -> Unit = {}
         override fun observe() = flow
         override suspend fun read() = value
-        override suspend fun readHistory() = entries.toList()
+        override suspend fun readHistory(): List<AuditEntry> {
+            historyReads += 1
+            check(!failHistoryRead) { "History unavailable" }
+            return entries.toList().also { afterHistoryRead() }
+        }
         override suspend fun initializeIfAbsent(initial: GameState) = value
         override suspend fun update(transform: (GameState) -> GameState) = transform(value).also { flow.value = it }
         override suspend fun commit(request: EngineRequest, context: DecisionContext?, contentFingerprint: String?,

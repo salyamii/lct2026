@@ -74,6 +74,27 @@ class FinancialBudgetProjectionTest {
         }
     }
 
+    @Test fun targetedPeriodReportMatchesTheWholeHistoryReportIncludingIncompleteEvidence() {
+        val f = Fixture()
+        f.plan("original", BudgetPlan(35, 25, 25, 15))
+        f.operation(LedgerKind.AVAILABLE_EXPENSE, 5, DayJournalKind.MEAL, "basic")
+        f.plan("revised", BudgetPlan(30, 25, 25, 15))
+        f.operation(LedgerKind.AVAILABLE_EXPENSE, 7, DayJournalKind.EVENT_CHOICE, "buy")
+        f.operation(LedgerKind.DEPOSIT, 20)
+        val current = checkNotNull(f.state.financial.currentPeriod)
+        val prior = current.copy(id = "previous", closedDay = 1)
+        val state = f.state.copy(financial = f.state.financial.copy(periods = listOf(prior, current)))
+        for (history in listOf(f.history.toList(), f.history.filterNot { it.sequence == 3L }, emptyList())) {
+            val all = FinancialBudgetProjection.report(state, history, content)
+            for (period in state.financial.periods) {
+                assertEquals(all.first { it.periodId == period.id },
+                    FinancialBudgetProjection.reportPeriod(state, period.id, history, content))
+            }
+        }
+        assertNull(FinancialBudgetProjection.reportPeriod(state, "unknown", f.history, content))
+        assertNull(FinancialBudgetProjection.reportPeriod(state, null, f.history, content))
+    }
+
     @Test fun categoriesAndTransfersAreSeparatedAndGoalPurchaseIsNotAnotherDeposit() {
         val f = Fixture()
         f.plan("plan", BudgetPlan(35, 25, 25, 15))
