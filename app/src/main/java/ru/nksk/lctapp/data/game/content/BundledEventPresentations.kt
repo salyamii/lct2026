@@ -56,6 +56,7 @@ private fun purchase(title: String, body: String, artwork: String, action: Strin
 
 /** Current story copy is selected in its LoreScene without rewriting historical definitions. */
 internal enum class StoryPresentation(private val template: EventPresentation, private val actionLabel: String? = null) {
+    LUNA_NOTE(EventPresentation(title = "Старая заметка Луны")),
     OBSERVATORY_INVITATION(EventPresentation(layout = EventLayout.INTRODUCTION,
             body = "Смотритель зовёт нас на Ночь наблюдений.\n\nПоможем подготовить телескоп и разгадаем старые загадки.",
             locationTitle = "История", showEffort = false,
