@@ -31,6 +31,10 @@ imported once. The 2026-09-20 sleep additions use the active transparent PNG
 fills at their original 1024 × 1024 size (2× the 512-square Figma frame),
 without trimming or resizing. The manifest records the active image hashes;
 hidden opaque fills and the board background are excluded.
+SLEEP-D-002 refreshes the six adult/senior sleep originals on 2026-09-29.
+Their complete transparent 1254 × 1254 canvases map to the same 512-square
+Figma frames at 2.44921875×; original PNGs are retained in `sources/`.
+Cub and teen sleep fills still match the 2026-09-20 imports at 1024 × 1024.
 The teen and cub collections were discovered in the same file.
 The catalog also covers the existing eight menu bitmaps, two vector icons and
 two fonts. Older screen mockups, hidden RAW working layers and presentation

@@ -108,7 +108,17 @@ the two 64 × 64 SVG illustrations retain their viewport in Android vectors.
 The hat stall depicts a specific item, not a generic historical event. Replays select their
 actual saved location and appearance; later chapters have no invented item illustrations.
 
-Locations retain their original 941 × 1672 pixels. Earlier character and equipment layers retain a 512 × 512 canvas; new sleep originals retain 1024 × 1024 (2× Figma frame). Names are artwork labels, not gameplay rules.
+Locations retain their original 941 × 1672 pixels. Earlier character and equipment layers retain a 512 × 512 canvas; sleep originals retain 1024 × 1024 for cub/teen (2× Figma frame) and 1254 × 1254 for adult/senior (2.44921875×). Names are artwork labels, not gameplay rules.
+
+FIGMA-SYNC-D-003 refreshes all six adult/senior `body_accessory_route_patch`
+resources on 2026-09-29: copper, sand and dark russet at each age. The current
+configured PNG exports preserve the complete transparent 512 × 512 runtime
+frames and character placement; card backgrounds are excluded. Resource names
+and the existing age/color selection remain unchanged. PNG sources are retained
+in `sources/ryzhik_{adult,senior}_body_accessory_route_patch{,_sand,_dark_russet}.png`;
+exact paths, Figma node links, active fill hashes, source/output SHA-256 and
+alpha bounds are recorded in [manifest.json](manifest.json). Lossless WebP uses
+Pillow 12.3.0, `exact=True`, method 6; decoded RGBA matches each export exactly.
 
 ## Deferred eye animation - 2026-09-22
 
@@ -530,9 +540,11 @@ Figma node-id не передан - уточнить при следующей �
 | `R.drawable.deed_gear_marker` | 128 × 128 | [deed_gear_marker.webp](../../../app/src/main/res/drawable-nodpi/deed_gear_marker.webp) |
 
 
-## Sleeping foxes - 2026-09-20
+## Sleeping foxes - refreshed 2026-09-29
 
-Twelve verified active transparent image fills: four ages × three colors. Full original 1024 × 1024 canvases map to Figma’s 512 × 512 frames at 2×; all transparent margins are preserved. Presentation resolves the saved PetState age and color through the shared PetArtwork adapter (D-109/D-110). New and migrated saves default to copper.
+Twelve verified active transparent image fills: four ages × three colors. SLEEP-D-002 refreshes the six adult/senior images with the current «Сон в кровати» designs: their full original 1254 × 1254 canvases map to Figma’s 512 × 512 frames at 2.44921875×. Cub/teen source hashes still match the imported 1024 × 1024 originals (2×). All transparent margins are preserved. Presentation resolves the saved PetState age and color through the shared PetArtwork adapter (D-109/D-110). New and migrated saves default to copper. The scene remains the night bedroom; the explicit next-day action and sleep guards are unchanged.
+
+The six refreshed PNG originals are retained in `sources/ryzhik_{adult,senior}_state_sleep_{copper,sand,dark_russet}.png`; exact source paths, SHA-1 Figma fill identifiers, source/output SHA-256, canvas and alpha bounds are recorded in [manifest.json](manifest.json). Conversion uses Pillow 12.3.0, lossless WebP, `exact=True`, method 6. Decoded output RGBA bytes match each source; no crop, resize or recentering is applied.
 
 | Android resource | Canvas | File | Figma source |
 | --- | --- | --- | --- |
@@ -542,12 +554,12 @@ Twelve verified active transparent image fills: four ages × three colors. Full 
 | `R.drawable.ryzhik_cub_state_sleep_copper` | 1024 × 1024 | [ryzhik_cub_state_sleep_copper.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_cub_state_sleep_copper.webp) | [2736:19](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-19) |
 | `R.drawable.ryzhik_cub_state_sleep_sand` | 1024 × 1024 | [ryzhik_cub_state_sleep_sand.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_cub_state_sleep_sand.webp) | [2736:23](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-23) |
 | `R.drawable.ryzhik_cub_state_sleep_dark_russet` | 1024 × 1024 | [ryzhik_cub_state_sleep_dark_russet.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_cub_state_sleep_dark_russet.webp) | [2736:27](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-27) |
-| `R.drawable.ryzhik_adult_state_sleep_copper` | 1024 × 1024 | [ryzhik_adult_state_sleep_copper.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_adult_state_sleep_copper.webp) | [2736:33](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-33) |
-| `R.drawable.ryzhik_adult_state_sleep_sand` | 1024 × 1024 | [ryzhik_adult_state_sleep_sand.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_adult_state_sleep_sand.webp) | [2736:37](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-37) |
-| `R.drawable.ryzhik_adult_state_sleep_dark_russet` | 1024 × 1024 | [ryzhik_adult_state_sleep_dark_russet.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_adult_state_sleep_dark_russet.webp) | [2736:41](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-41) |
-| `R.drawable.ryzhik_senior_state_sleep_copper` | 1024 × 1024 | [ryzhik_senior_state_sleep_copper.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_senior_state_sleep_copper.webp) | [2736:47](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-47) |
-| `R.drawable.ryzhik_senior_state_sleep_sand` | 1024 × 1024 | [ryzhik_senior_state_sleep_sand.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_senior_state_sleep_sand.webp) | [2736:51](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-51) |
-| `R.drawable.ryzhik_senior_state_sleep_dark_russet` | 1024 × 1024 | [ryzhik_senior_state_sleep_dark_russet.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_senior_state_sleep_dark_russet.webp) | [2736:55](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-55) |
+| `R.drawable.ryzhik_adult_state_sleep_copper` | 1254 × 1254 | [ryzhik_adult_state_sleep_copper.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_adult_state_sleep_copper.webp) | [2736:33](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-33) |
+| `R.drawable.ryzhik_adult_state_sleep_sand` | 1254 × 1254 | [ryzhik_adult_state_sleep_sand.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_adult_state_sleep_sand.webp) | [2736:37](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-37) |
+| `R.drawable.ryzhik_adult_state_sleep_dark_russet` | 1254 × 1254 | [ryzhik_adult_state_sleep_dark_russet.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_adult_state_sleep_dark_russet.webp) | [2736:41](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-41) |
+| `R.drawable.ryzhik_senior_state_sleep_copper` | 1254 × 1254 | [ryzhik_senior_state_sleep_copper.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_senior_state_sleep_copper.webp) | [2736:47](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-47) |
+| `R.drawable.ryzhik_senior_state_sleep_sand` | 1254 × 1254 | [ryzhik_senior_state_sleep_sand.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_senior_state_sleep_sand.webp) | [2736:51](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-51) |
+| `R.drawable.ryzhik_senior_state_sleep_dark_russet` | 1254 × 1254 | [ryzhik_senior_state_sleep_dark_russet.webp](../../../app/src/main/res/drawable-nodpi/ryzhik_senior_state_sleep_dark_russet.webp) | [2736:55](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-55) |
 
 
 ## Existing deed pairs
