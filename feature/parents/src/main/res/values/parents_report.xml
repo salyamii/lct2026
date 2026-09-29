@@ -14,8 +14,7 @@
     <string name="parents_report_no_observations">Наблюдений пока нет</string>
     <string name="parents_report_observations">Наблюдений: %1$d</string>
     <string name="parents_report_quests_title">Квесты из реальной жизни</string>
-    <string name="parents_report_quests_body">Создайте задание из реальной жизни и назначьте награду</string>
-    <string name="parents_report_create_quest">Создать квест</string>
+    <string name="parents_report_quests_body">Выполняйте задания из реальной жизни вместе с ребёнком</string>
     <string name="parents_report_no_game_title">Игра ещё не начата</string>
     <string name="parents_report_no_game_body">Вернитесь в игру и завершите знакомство с питомцем. Здесь появятся его данные.</string>
     <string name="parents_report_error">Не удалось прочитать данные игры. Попробуйте ещё раз.</string>

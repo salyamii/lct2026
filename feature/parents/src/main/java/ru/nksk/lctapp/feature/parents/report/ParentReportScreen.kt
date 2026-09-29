@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -37,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
 import ru.nksk.lctapp.feature.parents.R
+import ru.nksk.lctapp.feature.parents.quests.ParentQuest
 
 /** Local observations and server assessments using the donor's parent theme. */
 @Composable
@@ -45,7 +45,7 @@ fun ParentReportScreen(
     onRetry: () -> Unit,
     onRefresh: () -> Unit,
     onOpenTopic: (String) -> Unit,
-    onOpenQuests: () -> Unit,
+    onOpenQuest: (ParentQuest) -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -97,7 +97,7 @@ fun ParentReportScreen(
                                 onRefresh = onRefresh,
                             )
                         }
-                        item { QuestCard(onOpenQuests) }
+                        item { QuestCard(onOpenQuest) }
                         item {
                             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Text(stringResource(R.string.parents_report_skills), style = MaterialTheme.typography.titleMedium)
@@ -291,27 +291,6 @@ internal fun ParentAssessmentSyncCard(
 }
 
 @Composable
-private fun QuestCard(onOpen: () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface, RoundedCornerShape(28.dp))
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Text(stringResource(R.string.parents_report_quests_title), style = MaterialTheme.typography.titleMedium)
-        Text(
-            stringResource(R.string.parents_report_quests_body),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Button(
-            onClick = onOpen,
-            shape = CircleShape,
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp).heightIn(min = 52.dp),
-        ) { Text(stringResource(R.string.parents_report_create_quest), textAlign = TextAlign.Center) }
-    }
-}
-
-@Composable
 internal fun ParentReportPage(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Box(
         modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).safeDrawingPadding(),
@@ -349,5 +328,37 @@ internal fun ParentReportNote(title: String, body: String) {
     ) {
         Text(title, style = MaterialTheme.typography.titleMedium)
         Text(body, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun QuestCard(onOpenQuest: (ParentQuest) -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface, RoundedCornerShape(28.dp))
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(stringResource(R.string.parents_report_quests_title), style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.parents_report_quests_body), style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
+        ParentQuest.entries.forEach { quest ->
+            Card(
+                onClick = dropUnlessResumed { onOpenQuest(quest) },
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(stringResource(quest.title), style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(quest.summary), style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.parents_quest_meta, quest.steps.size), style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
+                }
+            }
+        }
     }
 }

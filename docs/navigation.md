@@ -534,3 +534,18 @@ PIN, deviceId или игрового снимка. Сериализаторы �
 RESUMED обновляет оценки. Ручное обновление есть в отчёте и карточке навыка.
 Локальные данные и подходящий кеш остаются видны при сетевой ошибке.
 Вопросы и квесты остаются заглушками. PIN/отчёт не выполняют игровые команды.
+
+## Parent quest demo - 2026-09-29
+
+By PARENT-MODE-D-006/008, the report's real-life quests block opens three
+hardcoded demos: Shopping, Weekend and Second life. `parent_quest` carries only
+a serializable ParentQuest identifier. The existing `parent_shopping_quest`
+route still opens Shopping when restoring an older stack, and `parent_quests`
+retains its placeholder for old back-stack restoration only. By PARENT-MODE-D-007,
+the Create quest button and its callback are removed. Skill detail has no quest entry.
+ParentQuestEntry obtains an entry-scoped Hilt ViewModel and collects state while
+RESUMED. Checkbox progress and completion are separate for each quest entry and
+live only in memory. Popping the entry discards them; no progress is serialized
+in the route or saved to the game. All four checks enable local demo completion.
+The accessory image is a placeholder and completion performs no backend request
+or reward delivery. Back returns to the report.

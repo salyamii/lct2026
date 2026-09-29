@@ -1,6 +1,7 @@
 package ru.nksk.lctapp.feature.parents.report
 
 import androidx.compose.runtime.Composable
+import ru.nksk.lctapp.feature.parents.quests.ParentQuest
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -46,7 +47,7 @@ private fun rememberParentRefreshAction(model: ParentReportViewModel): () -> Uni
 @Composable
 fun ParentReportEntry(
     onOpenTopic: (String) -> Unit,
-    onOpenQuests: () -> Unit,
+    onOpenQuest: (ParentQuest) -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -58,14 +59,18 @@ fun ParentReportEntry(
         onRetry = model::retry,
         onRefresh = onRefresh,
         onOpenTopic = onOpenTopic,
-        onOpenQuests = dropUnlessResumed { onOpenQuests() },
+        onOpenQuest = onOpenQuest,
         onClose = dropUnlessResumed { onClose() },
         modifier = modifier,
     )
 }
 
 @Composable
-fun ParentTopicEntry(skillId: String, onBack: () -> Unit, modifier: Modifier = Modifier) {
+fun ParentTopicEntry(
+    skillId: String,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val model: ParentReportViewModel = hiltViewModel()
     val onRefresh = rememberParentRefreshAction(model)
     val state by model.uiState.collectAsStateWithLifecycle(minActiveState = Lifecycle.State.RESUMED)
