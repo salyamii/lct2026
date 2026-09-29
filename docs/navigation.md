@@ -555,3 +555,12 @@ live only in memory. Popping the entry discards them; no progress is serialized
 in the route or saved to the game. All four checks enable local demo completion.
 The accessory image is a placeholder and completion performs no backend request
 or reward delivery. Back returns to the report.
+
+## Main menu tour — 2026-09-29
+
+The app host decorates MainMenu content with the isolated `feature/menutour`.
+Menu and Settings do not import that feature: the menu accepts a content decorator,
+and Settings receives a repeat callback. Repeating the tour returns to the existing
+MainMenu root; it adds no route or game command. Only the resumed, ready menu without
+an active dialog or budget redirect can present guidance. Progress lives in a separate
+device preference rather than navigation keys. See [menu tour](design/menu-tour.md).

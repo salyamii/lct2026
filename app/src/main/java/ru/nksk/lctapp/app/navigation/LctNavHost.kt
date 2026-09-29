@@ -1,5 +1,8 @@
 package ru.nksk.lctapp.app.navigation
 
+import ru.nksk.lctapp.feature.menutour.MenuTourHost
+import ru.nksk.lctapp.feature.menutour.MenuTourViewModel
+
 import ru.nksk.lctapp.core.ui.components.GameLoadingScreen
 import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
 import androidx.compose.animation.core.tween
@@ -91,6 +94,8 @@ fun LctNavHost(
     val navigator = remember(backStack) { AppNavigator(backStack) }
     val snackbarHost = remember { SnackbarHostState() }
     var completion by remember { mutableStateOf<CompletionNotice?>(null) }
+    val tourModel: MenuTourViewModel = hiltViewModel()
+    val tour by tourModel.uiState.collectAsStateWithLifecycle()
     val gateModel: EconomyGateViewModel = hiltViewModel()
     val gate by gateModel.uiState.collectAsStateWithLifecycle()
     var presentedPlanningId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -179,7 +184,10 @@ fun LctNavHost(
                 rememberViewModelStoreNavEntryDecorator(),
             ),
             entryProvider = entryProvider {
-                mainMenuEntry(settingsButton = {
+                mainMenuEntry(decorate = { newPlayer, available, content ->
+                    MenuTourHost(tour, newPlayer, available && !redirectingToBudget && destination == MainMenu,
+                        tourModel, content)
+                }, settingsButton = {
                     val openParents = rememberParentsLauncher()
                     SettingsGearButton(
                         onClick = dropUnlessResumed { navigator.navigate(MainMenu, Settings) },
@@ -201,7 +209,13 @@ fun LctNavHost(
                         },
                     )
                 }
-                settingsEntry(onBack = navigator::goBack, debugButton = debugSettingsButton)
+                settingsEntry(onBack = navigator::goBack, debugButton = debugSettingsButton,
+                    onRepeatTutorial = { source ->
+                        if (backStack.lastOrNull() == source) {
+                            tourModel.restart()
+                            navigator.returnToRoot(source)
+                        }
+                    })
                 gearEntry(onBack = navigator::goBack)
                 tasksEntry(
                     onEvent = { source -> navigator.navigate(source, Day) },

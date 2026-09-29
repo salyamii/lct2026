@@ -25,6 +25,7 @@ data object MainMenu : NavKey
 
 fun EntryProviderScope<NavKey>.mainMenuEntry(
     settingsButton: (@Composable () -> Unit)? = null,
+    decorate: @Composable (newPlayer: Boolean, available: Boolean, content: @Composable () -> Unit) -> Unit = { _, _, content -> content() },
     onTraining: (MainMenu) -> Unit,
     onAction: (MainMenu, MainMenuAction) -> Unit,
 ) {
@@ -59,6 +60,9 @@ fun EntryProviderScope<NavKey>.mainMenuEntry(
                 viewModel.openBudget.collect { onAction(source, MainMenuAction.Coins) }
             }
         }
+        val ready = (state as? MainMenuLoadState.Ready)?.menu
+        decorate(ready != null && ready.dayStatus == null,
+            ready != null && !ready.busy && !ready.showMeals && ready.nameEditor == null) {
         MainMenuContent(
             state = state,
             settingsButton = settingsButton,
@@ -80,5 +84,6 @@ fun EntryProviderScope<NavKey>.mainMenuEntry(
                 }
             },
         )
+        }
     }
 }

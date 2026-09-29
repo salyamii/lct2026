@@ -1,5 +1,7 @@
 package ru.nksk.lctapp.feature.menu.ui
 
+import ru.nksk.lctapp.core.ui.components.tour.spotlightTarget
+
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
@@ -47,6 +49,8 @@ import ru.nksk.lctapp.core.ui.theme.Rubik
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 
+private val ContinueButtonCornerRadius = 30.dp
+
 @Composable
 internal fun MenuActions(onAction: (MainMenuAction) -> Unit, viewport: DpSize, state: MainMenuUiState, backgroundPainter: Painter, modifier: Modifier = Modifier) {
     var panelPosition by remember { mutableStateOf(Offset.Zero) }
@@ -54,7 +58,7 @@ internal fun MenuActions(onAction: (MainMenuAction) -> Unit, viewport: DpSize, s
         state.dayStatus?.let { status ->
             Text(
                 text = status,
-                modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth()
+                modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth().spotlightTarget("menu.status")
                     .shadow(8.dp, RoundedCornerShape(24.dp))
                     .clip(RoundedCornerShape(24.dp))
                     .background(AdventurePanel.copy(alpha = 0.63f))
@@ -70,7 +74,7 @@ internal fun MenuActions(onAction: (MainMenuAction) -> Unit, viewport: DpSize, s
         if (state.canFeed) GameActionButton(
             text = "Выбрать обед",
             onClick = { onAction(MainMenuAction.Feed) },
-            modifier = Modifier.padding(horizontal = 18.dp),
+            modifier = Modifier.padding(horizontal = 18.dp).spotlightTarget("menu.meal"),
             interactionBlocked = state.busy,
             minHeight = ButtonDefaults.MinHeight,
             shape = ButtonDefaults.shape,
@@ -93,17 +97,17 @@ internal fun MenuActions(onAction: (MainMenuAction) -> Unit, viewport: DpSize, s
             ) {
                 QuickAction(
                     R.drawable.menu_gear, R.string.menu_gear,
-                    Modifier.weight(1f), tilt = 1.2f, topPadding = 8,
+                    Modifier.weight(1f).spotlightTarget("menu.gear"), tilt = 1.2f, topPadding = 8,
                     onClick = { onAction(MainMenuAction.Gear) },
                 )
                 QuickAction(
                     R.drawable.menu_tasks, R.string.menu_tasks,
-                    Modifier.weight(1f), tilt = -0.6f, topPadding = 0,
+                    Modifier.weight(1f).spotlightTarget("menu.tasks"), tilt = -0.6f, topPadding = 0,
                     onClick = { onAction(MainMenuAction.Tasks) },
                 )
                 QuickAction(
                     R.drawable.menu_goal, R.string.menu_goal,
-                    Modifier.weight(1f), tilt = -1.2f, topPadding = 5,
+                    Modifier.weight(1f).spotlightTarget("menu.goal"), tilt = -1.2f, topPadding = 5,
                     onClick = { onAction(MainMenuAction.Goal) },
                 )
             }
@@ -113,10 +117,10 @@ internal fun MenuActions(onAction: (MainMenuAction) -> Unit, viewport: DpSize, s
             text = if (state.canRestartCampaign) "Вернуться к началу истории" else state.continueLabel ?: stringResource(R.string.menu_continue),
             onClick = { onAction(if (state.canRestartCampaign) MainMenuAction.CampaignArchive else MainMenuAction.ContinueDay) },
             interactionBlocked = state.busy,
-            modifier = Modifier.padding(horizontal = 18.dp)
-                .shadow(12.dp, RoundedCornerShape(30.dp)),
+            modifier = Modifier.padding(horizontal = 18.dp).spotlightTarget("menu.continue", cornerRadius = ContinueButtonCornerRadius, gap = 4.dp)
+                .shadow(12.dp, RoundedCornerShape(ContinueButtonCornerRadius)),
             minHeight = 60.dp,
-            shape = RoundedCornerShape(30.dp),
+            shape = RoundedCornerShape(ContinueButtonCornerRadius),
             contentPadding = ButtonDefaults.ContentPadding,
             containerColor = AdventureLime, contentColor = AdventureNight,
         )

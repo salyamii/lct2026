@@ -1,5 +1,10 @@
 package ru.nksk.lctapp.feature.menu.ui
 
+import androidx.compose.foundation.verticalScroll
+import ru.nksk.lctapp.core.ui.components.tour.spotlightScrollable
+
+import ru.nksk.lctapp.core.ui.components.tour.spotlightTarget
+
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import ru.nksk.lctapp.core.ui.components.GameArtwork
@@ -68,6 +73,8 @@ import ru.nksk.lctapp.core.ui.components.GamePaper
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
 
 private val MenuBadgeMinHeight = 56.dp
+private val BudgetCornerRadius = 20.dp
+private val BudgetPopupCornerRadius = 24.dp
 
 @Composable
 internal fun MenuHud(
@@ -93,7 +100,7 @@ internal fun MenuHud(
         ) {
             // Progress is informational; the bottom menu owns the goal action.
             Row(
-                Modifier.weight(1f).heightIn(min = 40.dp)
+                Modifier.weight(1f).heightIn(min = 40.dp).spotlightTarget("menu.goal.summary")
                     .shadow(8.dp, RoundedCornerShape(20.dp))
                     .clip(RoundedCornerShape(20.dp))
                     .background(AdventurePanel.copy(alpha = 0.63f))
@@ -116,7 +123,7 @@ internal fun MenuHud(
             }
             settingsButton?.let { button ->
                 Box(
-                    Modifier.size(48.dp)
+                    Modifier.size(48.dp).spotlightTarget("menu.settings")
                         .clip(RoundedCornerShape(50))
                         .background(AdventurePanel.copy(alpha = 0.63f))
                         .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(50)),
@@ -137,7 +144,7 @@ internal fun MenuHud(
             Spacer(Modifier.width(8.dp))
             Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
                 Box(
-                    modifier = Modifier.heightIn(min = MenuBadgeMinHeight)
+                    modifier = Modifier.heightIn(min = MenuBadgeMinHeight).spotlightTarget("menu.name")
                         .clip(RoundedCornerShape(20.dp))
                         .background(AdventurePanel.copy(alpha = 0.85f))
                         .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(20.dp))
@@ -214,10 +221,11 @@ private fun BudgetBadge(
     // so expanding it cannot resize the pet scene or reposition the map/actions.
     Box {
         Row(
-            Modifier.widthIn(min = 164.dp).heightIn(min = MenuBadgeMinHeight)
-                .clip(RoundedCornerShape(20.dp))
+            Modifier.widthIn(min = 164.dp).heightIn(min = MenuBadgeMinHeight).spotlightTarget("menu.budget")
+                .spotlightTarget("menu.coins", cornerRadius = BudgetCornerRadius, gap = 4.dp)
+                .clip(RoundedCornerShape(BudgetCornerRadius))
                 .background(AdventurePanel.copy(alpha = 0.9f))
-                .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(20.dp))
+                .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(BudgetCornerRadius))
                 .clickable(role = Role.Button, onClickLabel = openBudgetLabel, onClick = onClick)
                 .padding(start = 12.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -230,7 +238,7 @@ private fun BudgetBadge(
                     fontWeight = FontWeight.Bold, fontSize = 18.sp, maxLines = 1)
             }
             Spacer(Modifier.width(8.dp))
-            IconButton(onClick = { onExpandedChange(!expanded) }, modifier = Modifier.size(48.dp)) {
+            IconButton(onClick = { onExpandedChange(!expanded) }, modifier = Modifier.size(48.dp).spotlightTarget("menu.budget.arrow", cornerRadius = 24.dp, gap = 4.dp)) {
                 Icon(
                     painter = painterResource(R.drawable.menu_chevron),
                     contentDescription = stringResource(if (expanded) R.string.menu_budget_collapse else R.string.menu_budget_expand),
@@ -243,7 +251,7 @@ private fun BudgetBadge(
             expanded = expanded,
             onDismissRequest = { onExpandedChange(false) },
             modifier = Modifier.width((LocalConfiguration.current.screenWidthDp.dp - 32.dp).coerceIn(0.dp, 280.dp)),
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(BudgetPopupCornerRadius),
             containerColor = GamePaper,
             tonalElevation = 0.dp,
             shadowElevation = 10.dp,
@@ -363,4 +371,22 @@ internal fun VillageMapButton(onClick: () -> Unit, modifier: Modifier = Modifier
         contentScale = ContentScale.Fit,
         modifier = modifier.alpha(0.92f).clickable(role = Role.Button, onClick = onClick),
     )
+}
+
+/** Same content as the budget popup, hosted in-screen so the tour owns all input. */
+@Composable
+internal fun MenuBudgetTourPreview(budget: MenuBudgetUiState, modifier: Modifier = Modifier) {
+    val scroll = androidx.compose.foundation.rememberScrollState()
+    androidx.compose.material3.Surface(modifier
+        .spotlightTarget("menu.budget.details", cornerRadius = BudgetPopupCornerRadius, gap = 4.dp)
+        .spotlightScrollable("menu.budget.details", scroll), shape = RoundedCornerShape(BudgetPopupCornerRadius), color = GamePaper,
+        shadowElevation = 10.dp) {
+        Column(Modifier.verticalScroll(scroll).padding(vertical = 8.dp)) {
+            BudgetPopupSummary(budget)
+            HorizontalDivider(Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
+            listOf("Открыть бюджет", "Открыть копилку", "История приключения").forEach {
+                Text(it, Modifier.padding(horizontal = 16.dp, vertical = 10.dp), color = GameInk, fontFamily = Nunito)
+            }
+        }
+    }
 }

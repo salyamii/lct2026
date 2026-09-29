@@ -37,7 +37,8 @@ import java.util.Locale
 data object Settings : NavKey
 
 @Suppress("DEPRECATION")
-fun EntryProviderScope<NavKey>.settingsEntry(onBack: (Settings) -> Unit, debugButton: (@Composable () -> Unit)? = null) {
+fun EntryProviderScope<NavKey>.settingsEntry(onBack: (Settings) -> Unit, debugButton: (@Composable () -> Unit)? = null,
+    onRepeatTutorial: ((Settings) -> Unit)? = null) {
     entry<Settings> { source ->
         val model = hiltViewModel<SettingsViewModel>()
         val state by model.uiState.collectAsStateWithLifecycle()
@@ -58,6 +59,7 @@ fun EntryProviderScope<NavKey>.settingsEntry(onBack: (Settings) -> Unit, debugBu
             onBack = dropUnlessResumed { onBack(source) },
             onCopyProfile = { id -> if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) clipboard.setText(AnnotatedString(id)) },
             debugButton = debugButton,
+            onRepeatTutorial = onRepeatTutorial?.let { callback -> dropUnlessResumed { callback(source) } },
             sharingCode = sharingCode,
             shareError = shareError,
             pickingDiagnostics = pickingDiagnostics,

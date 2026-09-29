@@ -1,5 +1,11 @@
 package ru.nksk.lctapp.feature.menu.ui
 
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.layout.heightIn
+import ru.nksk.lctapp.core.ui.components.tour.LocalSpotlightTargets
+
+import ru.nksk.lctapp.core.ui.components.tour.spotlightTarget
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -28,6 +34,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
@@ -49,16 +57,19 @@ fun MainMenuScreen(
     settingsButton: (@Composable () -> Unit)? = null,
     onRename: () -> Unit = {},
 ) {
-    val dispatch: (MainMenuAction) -> Unit = { if (!state.busy) onAction(it) }
+    val tourTargets = LocalSpotlightTargets.current
+    val dispatch: (MainMenuAction) -> Unit = { if (!state.busy && tourTargets?.blocking != true) onAction(it) }
     var budgetExpanded by rememberSaveable { mutableStateOf(false) }
     val density = LocalDensity.current
     var screenTop by remember { mutableStateOf(0f) }
+    var screenWindowOrigin by remember { mutableStateOf(Offset.Zero) }
     var hudBottom by remember { mutableStateOf(0f) }
     var characterTop by remember { mutableStateOf<Float?>(null) }
-    val characterPosition = Modifier.onGloballyPositioned { characterTop = it.positionInRoot().y }
+    LaunchedEffect(tourTargets?.blocking) { if (tourTargets?.blocking == true) budgetExpanded = false }
+    val characterPosition = Modifier.spotlightTarget("menu.pet").onGloballyPositioned { characterTop = it.positionInRoot().y }
     GameArtworkScene(state.backgroundRes, modifier.fillMaxSize().background(AdventureNight)) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize().clipToBounds().background(AdventureNight)
-        .onGloballyPositioned { screenTop = it.positionInRoot().y }) {
+        .onGloballyPositioned { screenTop = it.positionInRoot().y; screenWindowOrigin = it.boundsInWindow().topLeft }) {
         val viewport = DpSize(maxWidth, maxHeight)
         val sceneScale = maxOf(maxWidth / 390.dp, maxHeight / 844.dp)
         val scenePainter = rememberScenePainter(state.backgroundRes,
@@ -82,7 +93,7 @@ fun MainMenuScreen(
                     ) {
                         MenuHud(state.pet.name, state.coins, state.completedGoals, state.totalGoals, dispatch, state.goalTitle, budget = state.budget,
                             budgetExpanded = budgetExpanded, onBudgetExpandedChange = { budgetExpanded = it }, settingsButton = settingsButton,
-                            onRename = onRename, renameEnabled = !state.busy)
+                            onRename = { if (tourTargets?.blocking != true) onRename() }, renameEnabled = !state.busy && tourTargets?.blocking != true)
                         MenuActions(dispatch, viewport, state, scenePainter)
                     }
                 }
@@ -93,7 +104,7 @@ fun MainMenuScreen(
                     MenuHud(state.pet.name, state.coins, state.completedGoals, state.totalGoals, dispatch, state.goalTitle,
                         Modifier.onGloballyPositioned { hudBottom = it.positionInRoot().y + it.size.height }, budget = state.budget,
                             budgetExpanded = budgetExpanded, onBudgetExpandedChange = { budgetExpanded = it }, settingsButton = settingsButton,
-                            onRename = onRename, renameEnabled = !state.busy)
+                            onRename = { if (tourTargets?.blocking != true) onRename() }, renameEnabled = !state.busy && tourTargets?.blocking != true)
                     CharacterScene(state.pet, Modifier.weight(1f).fillMaxWidth(), characterPosition)
                     MenuActions(dispatch, viewport, state, scenePainter)
                 }
@@ -108,8 +119,21 @@ fun MainMenuScreen(
                 onClick = { dispatch(MainMenuAction.Village) },
                 modifier = Modifier.align(AbsoluteAlignment.TopRight)
                     .absoluteOffset(x = MapButtonOverflow, y = mapTop)
-                    .size(MapButtonWidth, MapButtonHeight),
+                    .size(MapButtonWidth, MapButtonHeight).spotlightTarget("menu.map"),
             )
+        }
+        if (tourTargets?.expandedTarget == "menu.budget.details") state.budget?.let { budget ->
+            val anchor = tourTargets.bounds["menu.budget"]
+            val panelTop = with(density) { ((anchor?.bottom ?: screenWindowOrigin.y) - screenWindowOrigin.y).toDp() } + 8.dp
+            val panelWidth = (maxWidth - 32.dp).coerceAtMost(280.dp)
+            val panelLeft = with(density) { ((anchor?.left ?: screenWindowOrigin.x) - screenWindowOrigin.x).toDp() }
+                .coerceIn(16.dp, (maxWidth - panelWidth - 16.dp).coerceAtLeast(16.dp))
+            // Reserve space for the tutorial card; the inert preview can be scrolled safely.
+            val panelHeight = (maxHeight - panelTop - 300.dp).coerceIn(100.dp, (maxHeight * .38f).coerceAtLeast(100.dp))
+            MenuBudgetTourPreview(budget,
+                Modifier.align(Alignment.TopStart).absoluteOffset(x = panelLeft, y = panelTop)
+                    .width(panelWidth)
+                    .heightIn(max = panelHeight))
         }
     }
     }

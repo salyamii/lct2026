@@ -20,6 +20,12 @@ historical decisions and migrations live in the design documents.
 | `:feature:debug` | Debug-only controls; release composition has no dependency on them |
 | `:feature:parents` | Parent PIN, local evidence/server assessment presentation and parent materials/unfinished quest screens; app-owned Activity/navigation and report adapter |
 
+The menu tour lives in its own `feature/menutour` package. App composition decorates
+menu content and wires Settings' repeat callback; features do not import one another.
+Generic spotlight geometry/overlay lives in `core/ui/components/tour`, while the
+device preference uses a domain contract and `data/tutorial` adapter. It never
+changes a game snapshot. See [menu tour](design/menu-tour.md).
+
 Most features remain packages inside `:app`; they are not separate Gradle modules.
 Features never import another feature, app wiring or data implementations.
 Screens receive state and callbacks, not repositories or navigation objects.

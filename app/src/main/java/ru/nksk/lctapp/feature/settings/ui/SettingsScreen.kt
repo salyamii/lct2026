@@ -47,7 +47,8 @@ internal fun SettingsGearButton(onClick: () -> Unit, onLongClick: (() -> Unit)? 
 internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -> Unit, onBack: () -> Unit,
     onCopyProfile: (String) -> Unit, debugButton: (@Composable () -> Unit)? = null,
     onShareCode: () -> Unit = {}, sharingCode: Boolean = false, shareError: Boolean = false,
-    onDownloadDiagnostics: () -> Unit = {}, pickingDiagnostics: Boolean = false) {
+    onDownloadDiagnostics: () -> Unit = {}, pickingDiagnostics: Boolean = false,
+    onRepeatTutorial: (() -> Unit)? = null) {
     Column(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding().background(GamePaper)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -58,6 +59,13 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
         }
         Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            onRepeatTutorial?.let { repeat ->
+                SettingsCard {
+                    Text("Обучение", color = GameInk, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    AdventureBody("Подсказки о кнопках и возможностях главного меню.")
+                    AdventurePrimaryButton("Повторить обучение", repeat)
+                }
+            }
             SoundSettingsCard(state.sound, onAction)
             DemoSettingsCard(state.demo, onAction)
             DiagnosticsSettingsCard(state.diagnostics, pickingDiagnostics, onDownloadDiagnostics)
