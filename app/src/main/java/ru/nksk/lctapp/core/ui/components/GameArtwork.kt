@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -53,9 +54,11 @@ internal fun GameArtwork(
     alignment: Alignment = Alignment.Center,
     contentScale: ContentScale = ContentScale.Fit,
     revealWithScene: Boolean = true,
+    colorFilter: ColorFilter? = null,
 ) {
     if (LocalInspectionMode.current) {
-        Image(painterResource(resource), contentDescription, modifier, alignment, contentScale)
+        Image(painterResource(resource), contentDescription, modifier, alignment, contentScale,
+            colorFilter = colorFilter)
     } else {
         var settled by remember(resource) { mutableStateOf(false) }
         // A local replacement keeps its last frame while the next resource is decoded.
@@ -67,7 +70,7 @@ internal fun GameArtwork(
             onLoading = { settled = false },
             onSuccess = { previous = it.painter; settled = true },
             onError = { settled = true },
-            alignment = alignment, contentScale = contentScale)
+            alignment = alignment, contentScale = contentScale, colorFilter = colorFilter)
         ReportGameArtworkLoad(resource, settled)
     }
 }

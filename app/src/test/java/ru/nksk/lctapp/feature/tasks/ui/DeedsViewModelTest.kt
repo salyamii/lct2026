@@ -95,6 +95,8 @@ class DeedsViewModelTest {
         val offer = model.uiState.value.offers.single()
         assertTrue(session.dispatch(EngineRequest("next-proposal", repository.read().engine!!.revision,
             EngineCommand.OpenNextEvent)) is EngineResult.Applied)
+        assertTrue(session.dispatch(EngineRequest("start-current-work", repository.read().engine!!.revision,
+            EngineCommand.AcceptDeedProposal(repository.read().engine!!.currentEvent!!.id))) is EngineResult.Applied)
         runCurrent()
         val before = repository.read()
 
@@ -109,6 +111,94 @@ class DeedsViewModelTest {
         assertNull(model.uiState.value.message)
         assertTrue(model.uiState.value.meals.isEmpty())
         assertEquals(before, repository.read())
+    }
+
+    @Test fun eitherOfTwoOffersCanStartWhileTheLatestProposalIsStillOpen() = runTest(dispatcher) {
+        for (selectedIndex in 0..1) {
+            val (repository, model, session) = fixture()
+            runCurrent()
+            assertTrue(session.dispatch(EngineRequest("next-proposal", repository.read().engine!!.revision,
+                EngineCommand.OpenNextEvent)) is EngineResult.Applied)
+            runCurrent()
+            val offers = model.uiState.value.offers
+            assertEquals(2, offers.size)
+            val before = repository.read()
+            val routes = mutableListOf<String>()
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.openEvent.collect { routes += it } }
+
+            model.start(offers[selectedIndex].id)
+            runCurrent()
+
+            val current = repository.read().engine!!.currentEvent!!
+            assertEquals(offers[selectedIndex].id, current.deedOfferId)
+            assertEquals(listOf(current.id), routes)
+            assertNull(model.uiState.value.message)
+            assertEquals(before.engine!!.deeds, repository.read().engine!!.deeds)
+            assertEquals(before.engine!!.steps, repository.read().engine!!.steps)
+            assertEquals(before.engine!!.energy, repository.read().engine!!.energy)
+            assertEquals(before.economy, repository.read().economy)
+        }
+    }
+
+    @Test fun uncertainSelectionRetainsItsRequestAndCannotStartTheOtherOffer() = runTest(dispatcher) {
+        val (repository, model, session) = fixture()
+        runCurrent()
+        assertTrue(session.dispatch(EngineRequest("next-proposal", repository.read().engine!!.revision,
+            EngineCommand.OpenNextEvent)) is EngineResult.Applied)
+        runCurrent()
+        val offers = model.uiState.value.offers
+        val routes = mutableListOf<String>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.openEvent.collect { routes += it } }
+        repository.failAfterCommit = true
+
+        model.start(offers.first().id)
+        runCurrent()
+        val committed = repository.read()
+        val original = repository.committed.single { it.command is EngineCommand.StartDeed }
+        assertFalse(model.uiState.value.busy)
+        assertNotNull(model.uiState.value.message)
+        assertTrue(routes.isEmpty())
+        model.start(offers.last().id)
+        runCurrent()
+        assertEquals(listOf(original), repository.attempted.filter { it.command is EngineCommand.StartDeed })
+        assertEquals(committed, repository.read())
+
+        repository.failAfterCommit = false
+        model.start(offers.first().id)
+        runCurrent()
+
+        assertEquals(listOf(original, original), repository.attempted.filter { it.command is EngineCommand.StartDeed })
+        assertEquals(listOf(original), repository.committed.filter { it.command is EngineCommand.StartDeed })
+        assertEquals(committed, repository.read())
+        assertEquals(listOf(committed.engine!!.currentEvent!!.id), routes)
+    }
+
+    @Test fun retryDoesNotNavigateToAnotherEventIfTheCommittedWorkWasAlreadyLeft() = runTest(dispatcher) {
+        val (repository, model, session) = fixture()
+        runCurrent()
+        val offer = model.uiState.value.offers.single()
+        val routes = mutableListOf<String>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.openEvent.collect { routes += it } }
+        repository.failAfterCommit = true
+        model.start(offer.id)
+        runCurrent()
+        val original = repository.committed.single { it.command is EngineCommand.StartDeed }
+        repository.failAfterCommit = false
+        assertTrue(session.dispatch(EngineRequest("pause-original", repository.read().engine!!.revision,
+            EngineCommand.PauseEvent(repository.read().engine!!.currentEvent!!.id))) is EngineResult.Applied)
+        assertTrue(session.dispatch(EngineRequest("next-proposal", repository.read().engine!!.revision,
+            EngineCommand.OpenNextEvent)) is EngineResult.Applied)
+        runCurrent()
+        val newer = repository.read()
+
+        model.start(offer.id)
+        runCurrent()
+
+        assertTrue(routes.isEmpty())
+        assertFalse(model.uiState.value.busy)
+        assertEquals("Действие сохранено. Состояние дела уже изменилось.", model.uiState.value.message)
+        assertEquals(newer, repository.read())
+        assertEquals(listOf(original, original), repository.attempted.filter { it.command is EngineCommand.StartDeed })
     }
 
     @Test fun uncertainFreeMealKeepsItsOfferAndRequestAfterDemoModeIsDisabled() = runTest(dispatcher) {

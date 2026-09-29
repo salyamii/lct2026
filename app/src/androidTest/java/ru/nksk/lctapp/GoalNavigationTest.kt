@@ -1,14 +1,20 @@
 package ru.nksk.lctapp
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasScrollToIndexAction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dagger.hilt.android.testing.BindValue
@@ -56,7 +62,36 @@ class GoalNavigationTest {
         compose.runOnIdle { compose.activity.onBackPressedDispatcher.onBackPressed() }
         awaitGoalList()
         compose.runOnIdle { compose.activity.onBackPressedDispatcher.onBackPressed() }
+        awaitText("Цели")
+        compose.onNodeWithText("Ночь наблюдений").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Назад").performClick()
         awaitText("Выбрать цель накопления")
+        assertEquals(before, runBlocking { repository.read() })
+    }
+
+    @Test fun futureGoalPreviewRestoresListPositionAndToolbarBackOpensCurrentGoal() {
+        awaitText("Выбрать цель накопления")
+        val before = runBlocking { repository.read() }
+        compose.onNode(hasText(compose.activity.getString(R.string.menu_goal)) and hasClickAction()).performClick()
+        awaitText("Цели")
+        compose.onNodeWithText("Другие цели").performClick()
+        val list = compose.onNodeWithTag("goal_project_list")
+        list.performScrollToIndex(2)
+        val preview = compose.onNode(hasText("Посмотреть цель") and
+            hasAnyAncestor(hasTestTag("goal_project_campaign-researcher-home-v1")))
+        preview.performScrollTo().assertIsDisplayed()
+        val offset = list.fetchSemanticsNode().config[SemanticsProperties.VerticalScrollAxisRange].value()
+        preview.performClick()
+        awaitText("Цели")
+        compose.activityRule.scenario.recreate()
+        awaitText("Цели")
+        compose.onNodeWithContentDescription("Назад").performClick()
+        list.assertIsDisplayed()
+        assertEquals(offset, list.fetchSemanticsNode().config[SemanticsProperties.VerticalScrollAxisRange].value(), 0.01f)
+        preview.assertIsDisplayed()
+        compose.onNodeWithContentDescription("Назад").performClick()
+        awaitText("Цели")
+        compose.onNodeWithText("Ночь наблюдений").assertIsDisplayed()
         assertEquals(before, runBlocking { repository.read() })
     }
 
