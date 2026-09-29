@@ -12,6 +12,10 @@ import ru.nksk.lctapp.domain.engine.EngineRequest
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.finance.FinancialQuestion
 import ru.nksk.lctapp.domain.backend.ParentRewardApplication
+import java.nio.Buffer
+import java.nio.ByteBuffer
+import java.nio.CharBuffer
+import java.nio.charset.CodingErrorAction
 import java.security.MessageDigest
 
 /** Historical aggregates are separate from the small observable live game state. */
@@ -118,14 +122,8 @@ object HistoryCodec {
     fun encodeFact(fact: AnalyticsFact): String = json.encodeToString(fact.copy(context = normalize(fact.context)))
     fun encodeQuestion(question: FinancialQuestion): String = json.encodeToString(question)
     fun decodeQuestion(value: String): FinancialQuestion = json.decodeFromString(value)
-    fun encodeSnapshot(snapshot: GameSnapshot): String {
-        val value = json.parseToJsonElement(json.encodeToString(snapshot.copy(
-            state = normalize(snapshot.state), history = snapshot.history.map(::normalize), archivedRuns = emptyList()))).jsonObject
-        // Keep old inner wire versions exactly as their own codec emits them. A parent
-        // format5 must not reintroduce new default fields into an archived format1.
-        val encoded = if (snapshot.archivedRuns.isEmpty()) value else
-            JsonObject(value + ("archivedRuns" to archivePayload(snapshot.archivedRuns)))
-        return versioned(encoded.toString(), snapshot.formatVersion)
+    fun encodeSnapshot(snapshot: GameSnapshot): String = buildString {
+        writeSnapshot(snapshot) { append(it) }
     }
     fun decodeSnapshot(value: String): GameSnapshot = json.decodeFromString<GameSnapshot>(value).also(::validate)
 
@@ -171,15 +169,68 @@ object HistoryCodec {
 
     private fun checksum(runId: String, state: GameState, history: List<AuditEntry>, sequence: Long,
         version: Int = SNAPSHOT_FORMAT_VERSION, archivedRuns: List<ArchivedGameRun> = emptyList()): String {
-        val original = "$version\n$runId\n$sequence\n${versioned(encodeState(state), version)}\n${versioned(json.encodeToString(history.map(::normalize)), version)}"
-        return sha256(if (version < 5) original else "$original\n${archivePayload(archivedRuns)}")
+        val digest = Utf8Digest()
+        digest.write("$version\n$runId\n$sequence\n")
+        digest.write(versioned(encodeState(state), version))
+        digest.write("\n")
+        writeHistory(history, version, canonicalJson = false, digest::write)
+        if (version >= 5) {
+            digest.write("\n")
+            writeArchives(archivedRuns, digest::write)
+        }
+        return digest.finish()
     }
 
-    private fun archivePayload(archivedRuns: List<ArchivedGameRun>) = JsonArray(archivedRuns.map { archive -> buildJsonObject {
-            put("restartRequestId", archive.restartRequestId)
-            put("nextRunId", archive.nextRunId)
-            put("snapshot", json.parseToJsonElement(encodeSnapshot(archive.snapshot)))
-        } })
+    /** Emit one checkpoint at a time; never retain JSON for the whole history or all archives. */
+    private fun writeHistory(history: List<AuditEntry>, version: Int, canonicalJson: Boolean,
+        write: (String) -> Unit) {
+        write("[")
+        history.forEachIndexed { index, entry ->
+            if (index > 0) write(",")
+            val encoded = versioned(encode(entry), version)
+            // Snapshot JSON previously passed through JsonElement.toString(), whereas
+            // the signed history for formats 3+ used the serializer output directly.
+            write(if (canonicalJson) json.parseToJsonElement(encoded).toString() else encoded)
+        }
+        write("]")
+    }
+
+    private fun writeSnapshot(snapshot: GameSnapshot, write: (String) -> Unit) {
+        // Let the existing serializer retain field order, defaults and legacy filtering.
+        // Only this single state is materialized; history entries are emitted below.
+        val header = json.parseToJsonElement(versioned(json.encodeToString(snapshot.copy(
+            state = normalize(snapshot.state), history = emptyList(), archivedRuns = emptyList())),
+            snapshot.formatVersion)).jsonObject
+        write("{")
+        header.entries.forEachIndexed { index, (key, value) ->
+            if (index > 0) write(",")
+            write(JsonPrimitive(key).toString())
+            write(":")
+            if (key == "history") writeHistory(snapshot.history, snapshot.formatVersion, canonicalJson = true, write)
+            else write(value.toString())
+        }
+        if (snapshot.archivedRuns.isNotEmpty()) {
+            write(",\"archivedRuns\":")
+            writeArchives(snapshot.archivedRuns, write)
+        }
+        write("}")
+    }
+
+    private fun writeArchives(archivedRuns: List<ArchivedGameRun>, write: (String) -> Unit) {
+        write("[")
+        archivedRuns.forEachIndexed { index, archive ->
+            if (index > 0) write(",")
+            write("{\"restartRequestId\":")
+            write(JsonPrimitive(archive.restartRequestId).toString())
+            write(",\"nextRunId\":")
+            write(JsonPrimitive(archive.nextRunId).toString())
+            write(",\"snapshot\":")
+            // An archived format1/2 keeps its own wire shape inside a format5 parent.
+            writeSnapshot(archive.snapshot, write)
+            write("}")
+        }
+        write("]")
+    }
 
     private fun versioned(encoded: String, version: Int): String {
         if (version >= 3) return encoded
@@ -222,6 +273,42 @@ object HistoryCodec {
         facts = entry.facts.map { it.copy(context = normalize(it.context)) },
     )
 
-    fun sha256(value: String): String = MessageDigest.getInstance("SHA-256")
-        .digest(value.toByteArray(Charsets.UTF_8)).joinToString("") { "%02x".format(it) }
+    fun sha256(value: String): String = Utf8Digest().apply { write(value) }.finish()
+
+    /** String.getBytes(UTF_8) semantics without a byte array proportional to the input. */
+    private class Utf8Digest {
+        private val digest = MessageDigest.getInstance("SHA-256")
+        private val bytes = ByteBuffer.allocate(8 * 1024)
+        // Target Buffer methods, available on older Android, rather than JDK 9+ covariant overrides.
+        private val cursor: Buffer = bytes
+        private val encoder = Charsets.UTF_8.newEncoder()
+            .onMalformedInput(CodingErrorAction.REPLACE)
+            .onUnmappableCharacter(CodingErrorAction.REPLACE)
+            .replaceWith(byteArrayOf('?'.code.toByte()))
+
+        fun write(value: String) {
+            // Fragments are complete JSON tokens/documents or newline-separated fields,
+            // so a surrogate pair never crosses two calls. It may cross buffer fills.
+            val chars = CharBuffer.wrap(value)
+            encoder.reset()
+            do {
+                val result = encoder.encode(chars, bytes, true)
+                drain()
+                if (result.isError) result.throwException()
+            } while (result.isOverflow)
+            do {
+                val result = encoder.flush(bytes)
+                drain()
+                if (result.isError) result.throwException()
+            } while (result.isOverflow)
+        }
+
+        private fun drain() {
+            cursor.flip()
+            digest.update(bytes)
+            cursor.clear()
+        }
+
+        fun finish(): String = digest.digest().joinToString("") { "%02x".format(it) }
+    }
 }
