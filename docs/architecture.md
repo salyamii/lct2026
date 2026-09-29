@@ -18,7 +18,7 @@ historical decisions and migrations live in the design documents.
 | `:app` / `data` | Room, content installation, backend transport and device identity |
 | `:feature:onboarding` | Onboarding UI; app supplies artwork and persistence callbacks |
 | `:feature:debug` | Debug-only controls; release composition has no dependency on them |
-| `:feature:parents` | Parent PIN, local evidence/server assessment presentation and unfinished topic/quest screens; app-owned Activity/navigation and report adapter |
+| `:feature:parents` | Parent PIN, local evidence/server assessment presentation and parent materials/unfinished quest screens; app-owned Activity/navigation and report adapter |
 
 Most features remain packages inside `:app`; they are not separate Gradle modules.
 Features never import another feature, app wiring or data implementations.
@@ -41,6 +41,14 @@ statuses. It does not upload/download world snapshots or deliver rewards. Local
 report observation continues during network work; cached assessments survive
 network failures, and earlier history boundaries are visibly marked. Run,
 restore generation and history guards prevent attaching ratings to another world.
+
+PARENT-MODE-D-004 adds an independent read-only parent-material catalogue. A
+bundled UNPUBLISHED edition represents intentionally unauthored topics. After
+PIN, the report adapter refreshes materials and assessments independently under
+the parent lifecycle. A validated remote catalogue replaces the bundled one in
+memory; failures preserve existing content. Topics map by FIN ID, never by demo
+pet or server demo status. No Room/game writes are introduced. See
+[parent material contract](backend/parent-materials.md).
 
 The PIN gate surrounds the entire parent nav host. Unlock state lives only in
 an Activity ViewModel; returning from the background or recreating the process
@@ -368,6 +376,16 @@ confirmation. Restore validates the archive and guards the local history; its
 durable intent recovers transport bookkeeping after a crash without restoring twice.
 Firebase messaging is excluded. See [backend handoff](backend/README.md) and
 [request triggers](backend/client-sync.md).
+
+## Application updates
+
+By [RUSTORE-D-001](design/decisions.md), `app/updates` integrates RuStore
+In-app Updates 10.5.1 with a flexible download and explicit install confirmation.
+`app/di/AppUpdateModule` provides the application-context SDK manager and platform
+adapter. The app-owned ViewModel exposes immutable StateFlow; the Compose entry
+owns RESUMED collection and cancels checks/listeners when inactive. Single-use
+SDK update info is fetched anew before starting a download. Store failures do not
+block startup or dispatch game commands. See [integration notes](design/rustore-updates.md).
 
 ## Local diagnostics
 

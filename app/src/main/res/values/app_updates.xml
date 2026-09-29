@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_update_ready_title">Обновление готово</string>
+    <string name="app_update_ready_message">Новая версия уже скачана. Установить её сейчас? Приложение перезапустится.</string>
+    <string name="app_update_install">Установить</string>
+    <string name="app_update_later">Позже</string>
+</resources>

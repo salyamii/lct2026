@@ -20,6 +20,29 @@ import ru.nksk.lctapp.domain.analytics.SkillId
 import ru.nksk.lctapp.domain.backend.*
 
 class BackendApiContractTest {
+    @Test fun publicParentMaterialsUseGetWithoutDeviceIdentity() = runTest {
+        val catalogue = ParentMaterialsCatalog("test", (1..12).map {
+            ParentSkillMaterialDto("FIN-%02d".format(it), "Цель", "История", "Пример", List(5) { "Вопрос $it?" },
+                "Вывод", "Основание", listOf("https://example.org/source"))
+        })
+        var captured: Request? = null
+        val mediaType = "application/json".toMediaType()
+        val client = OkHttpClient.Builder().addInterceptor { chain ->
+            captured = chain.request()
+            Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(200).message("OK")
+                .body(BackendJson.encodeToString(catalogue).toResponseBody(mediaType)).build()
+        }.build()
+        val api = Retrofit.Builder().baseUrl("https://backend.example.test/").client(client)
+            .addConverterFactory(BackendJson.asConverterFactory(mediaType)).build().create(BackendApi::class.java)
+        assertEquals(catalogue, api.parentMaterials())
+        val request = checkNotNull(captured)
+        assertEquals("GET", request.method)
+        assertEquals("/v1/parent-materials", request.url.encodedPath)
+        assertNull(request.body)
+        assertNull(request.url.query)
+        assertNull(request.header("Authorization"))
+    }
+
     @Test fun everyCallUsesTheDeviceIdInJsonWithoutIdentityInHeadersUrlOrQuery() = runTest {
         val mediaType = "application/json".toMediaType()
         val captured = mutableListOf<Pair<Request, String>>()

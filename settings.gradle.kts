@@ -27,6 +27,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven("https://nexus-external.rustore.ru/repository/maven-rustore-exposed") {
+            content { includeGroup("ru.rustore.sdk") }
+        }
     }
 }
 

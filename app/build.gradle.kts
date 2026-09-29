@@ -76,6 +76,7 @@ configurations.configureEach {
 }
 
 dependencies {
+    implementation(libs.rustore.appupdate)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(platform(libs.opentelemetry.bom))
     implementation(libs.opentelemetry.api)
