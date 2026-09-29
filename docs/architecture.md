@@ -377,6 +377,16 @@ durable intent recovers transport bookkeeping after a crash without restoring tw
 Firebase messaging is excluded. See [backend handoff](backend/README.md) and
 [request triggers](backend/client-sync.md).
 
+## Application updates
+
+By [RUSTORE-D-001](design/decisions.md), `app/updates` integrates RuStore
+In-app Updates 10.5.1 with a flexible download and explicit install confirmation.
+`app/di/AppUpdateModule` provides the application-context SDK manager and platform
+adapter. The app-owned ViewModel exposes immutable StateFlow; the Compose entry
+owns RESUMED collection and cancels checks/listeners when inactive. Single-use
+SDK update info is fetched anew before starting a download. Store failures do not
+block startup or dispatch game commands. See [integration notes](design/rustore-updates.md).
+
 ## Local diagnostics
 
 The application installs its crash handler after Hilt application initialization.

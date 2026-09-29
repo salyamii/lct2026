@@ -22,6 +22,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.app.diagnostics.DiagnosticsViewModel
+import ru.nksk.lctapp.app.updates.AppUpdateHost
 import ru.nksk.lctapp.app.navigation.AppStartupState
 import ru.nksk.lctapp.app.navigation.AppStartupViewModel
 import ru.nksk.lctapp.app.navigation.LctNavHost
@@ -63,6 +64,10 @@ private fun LctAppContent(debugSettingsButton: (@Composable () -> Unit)?, startu
     LCTAppTheme {
         val startup: AppStartupViewModel = hiltViewModel()
         val state by startup.uiState.collectAsStateWithLifecycle()
+        if (state != AppStartupState.Loading && state != AppStartupState.Error &&
+            state !is AppStartupState.IntroVideo) {
+            AppUpdateHost()
+        }
         val diagnostics: DiagnosticsViewModel = hiltViewModel()
         // The ready host reports its own route; never replace it with a generic startup label.
         val startupScreen = when (state) {
