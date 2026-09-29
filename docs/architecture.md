@@ -157,7 +157,7 @@ own audio keeps that preference; leaving the intro restores the chapter theme.
 This selection does not initialize or mutate the game.
 
 Music loops on its own lane; short cues and voice use a sequential lane which
-ducks the music. Short location clips play twice (MEDIA-D-005); narration and
+ducks the music. Short location clips play once (MEDIA-D-010); narration and
 action effects play once. Scene deduplication records each completed clip/pass,
 not an attempted async preparation. A cancelled or failed clip can play again
 on reopening/unmuting; ordinary recomposition does not restart it, and decoder

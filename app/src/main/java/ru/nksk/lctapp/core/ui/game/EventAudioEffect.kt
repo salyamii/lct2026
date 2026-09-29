@@ -39,9 +39,9 @@ internal fun EventAudioEffect(occurrenceId: String?, media: EventMedia, isCurren
 internal fun canPresentEventAudio(isCurrentEntry: Boolean, lifecycle: Lifecycle.State): Boolean =
     isCurrentEntry && lifecycle.isAtLeast(Lifecycle.State.STARTED)
 
-/** Short location recordings get two passes; speech and appearance sounds stay single. */
+/** Location recordings, speech and appearance sounds each play once. */
 internal fun eventAudioCues(media: EventMedia): List<EventAudioCue> = listOfNotNull(
     media.appearanceCueKey?.let { EventAudioCue(it) },
-    media.ambientCueKey?.let { EventAudioCue(it, repeatCount = 2) },
+    media.ambientCueKey?.let { EventAudioCue(it, repeatCount = 1) },
     media.narrationCueKey?.let { EventAudioCue(it) },
 )

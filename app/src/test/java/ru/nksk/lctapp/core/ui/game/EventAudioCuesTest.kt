@@ -9,11 +9,11 @@ import ru.nksk.lctapp.core.ui.media.EventAudioCue
 import ru.nksk.lctapp.domain.engine.EventMedia
 
 class EventAudioCuesTest {
-    @Test fun repeatsOnlyTheShortLocationClipBetweenAppearanceAndNarration() {
+    @Test fun playsEachClipOnceInAppearanceLocationNarrationOrder() {
         val media = EventMedia(musicCueKey = "story.chapter_1", ambientCueKey = "ambient.port",
             appearanceCueKey = "sound.purchase_appears", narrationCueKey = "narration.story.cargo_journal")
         assertEquals(listOf(EventAudioCue("sound.purchase_appears"),
-            EventAudioCue("ambient.port", repeatCount = 2), EventAudioCue("narration.story.cargo_journal")),
+            EventAudioCue("ambient.port", repeatCount = 1), EventAudioCue("narration.story.cargo_journal")),
             eventAudioCues(media))
     }
 
