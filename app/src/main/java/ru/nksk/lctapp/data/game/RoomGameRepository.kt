@@ -641,18 +641,17 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
             name = "", temperament = "Curious", fur = "Copper", step = "CHARACTER"))
     }
 
-    /** Called inside the restart transaction: no combined history String is ever created. */
+    /** Archive the already committed rows atomically; rebuilding the full export is not part of rewinding. */
     private suspend fun archiveCurrentRun(runId: String, current: GameState, requestId: String, nextRunId: String) {
         val sequence = history.sequence()
-        val header = HistoryCodec.createArchiveHeader(runId, current, sequence) { after, limit ->
-            history.readPage(runId, after, limit).map { row ->
-                // Keep the persisted index and payload in agreement while processing one small page.
-                row.requireMatches(HistoryCodec.decodeEntry(row.payload))
-                row.payload
-            }
-        }
+        check(history.hasCompleteRun(runId, sequence)) { "Incomplete history index while archiving" }
+        // Validate just the current boundary. Past payloads are copied verbatim, never rewritten
+        // or discarded; their complete chain and receipts are checked when the archive is read.
+        check(history.latestCheckpoint()?.decode()?.after == current) { "Archived world differs from history tip" }
+        val header = LocalRunArchiveCodec.create(runId, current, sequence)
         archives.insert(GameRunArchiveEntity(runId, archives.nextPosition(), requestId, nextRunId, header))
         archives.insertActiveHistory(runId)
+        check(archives.historyCount(runId) == sequence) { "Not all history rows were archived" }
     }
 
     override suspend fun restoreCloudWorld(world: WorldSnapshot, expected: RestoreGuard, restoreRequestId: String): GameState {
@@ -901,8 +900,8 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
             }
         }
 
-    private fun GameRunArchiveEntity.decodeHeader(): GameSnapshot {
-        val snapshot = HistoryCodec.decodeArchiveHeader(snapshotPayload)
+    private fun GameRunArchiveEntity.decodeHeader(): LocalRunArchiveCodec.Header {
+        val snapshot = LocalRunArchiveCodec.decode(snapshotPayload)
         check(snapshot.runId == runId) { "Archived snapshot does not match its index" }
         return snapshot
     }
@@ -917,8 +916,7 @@ internal class RoomGameRepository @Inject constructor(private val database: Game
                 "Archived history does not match its index"
             }
         }
-        val snapshot = header.decodeHeader().copy(history = archiveHistory)
-        HistoryCodec.validate(snapshot)
+        val snapshot = header.decodeHeader().snapshot(archiveHistory)
         return ArchivedGameRun(header.restartRequestId, header.nextRunId, snapshot)
     }
 

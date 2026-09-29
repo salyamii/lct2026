@@ -25,6 +25,9 @@ import ru.nksk.lctapp.data.game.content.bundledGameCatalog
 import ru.nksk.lctapp.data.game.content.RING_TOSS
 import ru.nksk.lctapp.domain.content.StoryContent
 import ru.nksk.lctapp.domain.content.StoryContentRepository
+import ru.nksk.lctapp.domain.demo.DemoPreferences
+import ru.nksk.lctapp.domain.demo.DemoPreferencesRepository
+import ru.nksk.lctapp.domain.demo.DisabledDemoPreferencesRepository
 import ru.nksk.lctapp.domain.engine.EngineCommand
 import ru.nksk.lctapp.domain.engine.EngineRequest
 import ru.nksk.lctapp.domain.engine.EngineResult
@@ -621,6 +624,42 @@ class DayViewModelTest {
         assertNull(model.uiState.value.options.last().spending)
     }
 
+    @Test fun demoPurchasesShowFreeAtZeroCoinsAndRestoreOrdinaryAvailabilityOnDisable() = runTest(dispatcher) {
+        for (eventId in listOf("figma-2654-50-purchase-v2", "figma-2654-2-purchase-v2")) {
+            val preferences = MutableStateFlow(DemoPreferences(true))
+            val demo = object : DemoPreferencesRepository {
+                override fun observe() = preferences
+                override suspend fun read() = preferences.value
+                override suspend fun setDemoModeEnabled(enabled: Boolean) { preferences.value = DemoPreferences(enabled) }
+            }
+            val (repository, model) = fixture(eventFirst = eventId, demoPreferences = demo)
+            repository.update { it.copy(economy = EconomyState(BudgetPlan(0, 0, 0, 0))) }
+            runCurrent()
+            val free = model.uiState.value.options.first()
+            assertTrue(free.enabled)
+            assertEquals("Получить бесплатно", free.label)
+            assertEquals("Бесплатно · режим бога", free.spending)
+            assertNull(model.uiState.value.message)
+
+            demo.setDemoModeEnabled(false)
+            runCurrent()
+            assertFalse(model.uiState.value.options.first().enabled)
+            assertEquals("Купить", model.uiState.value.options.first().label)
+
+            demo.setDemoModeEnabled(true)
+            runCurrent()
+            val before = repository.read()
+            model.onAction(DayAction.Choose("$eventId:buy"))
+            runCurrent()
+            val after = repository.read()
+            assertEquals(before.economy, after.economy)
+            assertEquals(PetVisualState.HAPPY, after.pet.visualState)
+            assertTrue(repository.requests.last().demoMode)
+            if (eventId == "figma-2654-2-purchase-v2") assertTrue(after.engine!!.ateToday)
+            else assertTrue(after.ownedItems.any { it.itemId == "cosmetic-explorer-hat-v2" })
+        }
+    }
+
     @Test fun bakeryCardHasTwoClearChoicesWithoutHiddenEvidenceAndPreservesBothOutcomes() = runTest(dispatcher) {
         val eventId = "figma-2654-2-purchase-v2"
         for (buy in listOf(true, false)) {
@@ -980,6 +1019,7 @@ class DayViewModelTest {
 
     private suspend fun fixture(deedFirst: Boolean = false, finishedDay: Int? = null,
         eventFirst: String? = null, storyMiniGame: Boolean = false, priorChoices: List<String> = emptyList(),
+        demoPreferences: DemoPreferencesRepository = DisabledDemoPreferencesRepository,
         catalogTransform: (GameCatalog) -> GameCatalog = { it }): Triple<DayRepository, DayViewModel, GameSession> {
         val original = catalogTransform(bundledGameCatalog())
         val catalog = if (storyMiniGame) original.copy(policies = original.policies +
@@ -999,7 +1039,7 @@ class DayViewModelTest {
             override suspend fun read() = stored
             override suspend fun install(content: StoryContent) { stored = content }
         }
-        val session = GameSession(repository, content, catalog, initial)
+        val session = GameSession(repository, content, catalog, initial, demoPreferences)
         assertTrue(session.dispatch(EngineRequest("begin", null,
             EngineCommand.BeginDay(catalog.storyDayId, when {
                 eventFirst != null -> listOf(eventFirst) + catalog.deedPool.take(3)

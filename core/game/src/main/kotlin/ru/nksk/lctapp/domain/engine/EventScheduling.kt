@@ -36,10 +36,11 @@ data class EventExposure(
 }
 
 object EventScheduling {
-    /** Only an unshown everyday possibility may disappear when its original premise no longer exists. */
+    /** Unshown everyday possibilities yield to a ready goal; presented choices and lore remain intact. */
     internal fun retainOccurrence(occurrence: EventOccurrence, type: EventType, policy: EventPolicy,
         progress: StoryProgress): Boolean = occurrence.origin != EventOrigin.SCHEDULE || type == EventType.STORY ||
-        occurrence.status !in setOf(EventStatus.PENDING, EventStatus.CARRIED) || progress.meets(policy.condition)
+        occurrence.status !in setOf(EventStatus.PENDING, EventStatus.CARRIED) ||
+        (progress.meets(policy.condition) && (!progress.goalReadyForStory || progress.isGoalDeed(occurrence.eventId)))
 
     internal fun retainOccurrence(state: GameState, occurrence: EventOccurrence, factory: EventFactory): Boolean =
         retainOccurrence(occurrence, factory.event(occurrence.eventId).type, factory.policy(occurrence.eventId),
@@ -80,6 +81,18 @@ internal object EventScheduler {
                 EventScheduling.retainOccurrence(it, eventTypes.getValue(it.eventId), catalog.policies.getValue(it.eventId), progress)
         }.map { it.eventId }.take(5)
         val selected = carried.toMutableList()
+        if (progress.goalReadyForStory) {
+            // This is a short story plan, extended after each real choice unlocks the next scene.
+            // Never pad it with unrelated events just to reach the ordinary four-card minimum.
+            if (selected.size < 5) progress.nextEvent(selected.toSet())?.let(selected::add)
+            if (selected.size < 5 && selected.none { catalog.policies[it]?.storyActId != null && progress.eligible(it) }) {
+                val nextDay = (state.engine?.day ?: 0) + 1
+                progress.goalDeedIds().firstOrNull { id -> id !in selected && state.engine?.deeds.orEmpty().none {
+                    family(it.eventId) == family(id) && it.isAvailable(nextDay)
+                } }?.let(selected::add)
+            }
+            return selected
+        }
         val loreCount = carried.count { catalog.policies[it]?.storyActId != null }
         val introductionCompleted = progress.completed(catalog.introductionId)
         val story = if (catalog.storyCampaign != null) progress.nextEvent(carried.toSet())

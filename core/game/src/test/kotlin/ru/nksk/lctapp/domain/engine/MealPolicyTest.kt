@@ -85,6 +85,29 @@ class MealPolicyTest {
         }
     }
 
+    @Test fun demoMealsWaiveThePriceWithoutTurningPaidMealsIntoTheFreeFallback() {
+        val luxury = MealDefinition("luxury", 7, PetVisualState.HAPPY, energyRestore = 1)
+        val feast = MealDefinition("feast", 10, PetVisualState.HAPPY, energyRestore = 2)
+        val meals = MealPolicy(listOf(basic, luxury, feast, free))
+        val before = state(0).let { it.copy(engine = it.engine!!.copy(energy = 1, nextMorningEnergy = 3)) }
+
+        for (meal in listOf(basic, luxury, feast)) {
+            assertEquals(meal.price, meals.effectivePrice(meal.id))
+            assertEquals(0L, meals.effectivePrice(meal.id, demoMode = true))
+            val after = meals.apply(before, meal.id, 5, demoMode = true)
+            assertEquals(before.economy, after.economy)
+            assertTrue(after.engine!!.ateToday)
+            assertEquals(1 + meal.energyRestore, after.engine!!.energy)
+            assertEquals(3, after.engine!!.nextMorningEnergy)
+            assertEquals(meal.visualStateAfter ?: before.pet.visualState, after.pet.visualState)
+            assertFalse(meals.effects(meal.id).exhaustsCurrentEnergy)
+            assertEquals(before.story, after.story)
+            assertEquals(before.ownedItems, after.ownedItems)
+        }
+        assertEquals(listOf(basic, luxury, feast), meals.choices(state(100)))
+        assertEquals(listOf(basic, luxury, feast, free), meals.choices(before))
+    }
+
     @Test fun restoringFoodCannotRaiseTheDailyMaximum() {
         val meal = MealDefinition("feast", 10, PetVisualState.HAPPY, energyRestore = 2)
         val meals = MealPolicy(listOf(basic, meal))

@@ -18,7 +18,9 @@ class StoryGameThemeTest {
             val media = catalog.cards.getValue(eventId).presentation.media
             val theme = checkNotNull(storyGameTheme(media, kind)) { choiceId }
             val instructions = theme.instructions
-            assertTrue(choiceId, instructions.startsWith(checkNotNull(media.game).context))
+            if (kind != DeedGameKind.MEMORY) {
+                assertTrue(choiceId, instructions.startsWith(checkNotNull(media.game).context))
+            }
             when (kind) {
                 DeedGameKind.MEMORY -> {
                     assertTrue(choiceId, instructions.contains("по две карточки"))

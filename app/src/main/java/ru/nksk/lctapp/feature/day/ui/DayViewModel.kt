@@ -257,7 +257,8 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
                 complete = presented && displayed.before == financialPosition(saved) &&
                     displayed.presentationId == presentationId(saved))
         }
-        val pending = PendingAction(GameActionAttempt.prepare(saved, command, context), action, leave, fed, openGame)
+        val pending = PendingAction(GameActionAttempt.prepare(saved, command, context,
+            demoMode = presentation?.demoMode ?: session.demoModeEnabled), action, leave, fed, openGame)
         pendingAction = pending
         submit(pending)
     }
@@ -379,7 +380,8 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
         val policy = catalog.policies.getValue(occurrence.eventId)
         val choices = catalog.content.choices.filter { it.id in choiceIds && it.moneyDelta <= 0 }
         if (choices.none { paid -> choices.any { other ->
-                paid.moneyDelta < other.moneyDelta && policy.energyFor(paid.id) < policy.energyFor(other.id)
+                session.engine.choiceMoneyDelta(paid.id, demoMode) < session.engine.choiceMoneyDelta(other.id, demoMode) &&
+                    policy.energyFor(paid.id) < policy.energyFor(other.id)
             } }) return null
         val outcomes = choices.mapNotNull { choice ->
             (session.engine.previewEventChoice(saved, occurrence.id, choice.id, demoMode) as? EngineResult.Applied)?.state
@@ -394,7 +396,8 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
             effortCost(catalog.policies.getValue(offer.eventId).energyCost, saved.pet.name, demoMode),
             catalog.content.choices.filter { it.eventId == offer.eventId }.maxOf { it.moneyDelta },
             choices.map { choice ->
-                val money = if (choice.moneyDelta == 0L) "без траты монет" else "${Math.negateExact(choice.moneyDelta)} монет"
+                val delta = session.engine.choiceMoneyDelta(choice.id, demoMode)
+                val money = if (delta == 0L) "без траты монет" else "${Math.negateExact(delta)} монет"
                 val action = renderPetText(catalog.displayAction(choice), saved.pet.name).substringBefore('\u00b7').trimEnd()
                 "$action: $money, ${effortCost(policy.energyFor(choice.id), saved.pet.name, demoMode)}"
             }, selected = false)
@@ -523,6 +526,7 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
             it.eventId == event.id && it.id !in catalog.policies.getValue(event.id).disabledChoiceIds
         }.sortedBy { it.position } else emptyList()
         val blocked = choices.associate { it.id to session.engine.blockReason(saved, choiceCommand(saved, it.id), demoMode) }
+        val choiceDeltas = choices.associate { it.id to session.engine.choiceMoneyDelta(it.id, demoMode) }
         val primary = if (story.campaignComplete) null else primaryCommand(saved, demoMode)
         val primaryBlock = primary?.let { session.engine.blockReason(saved, it, demoMode) }
         val restFromCard = primary is EngineCommand.FinishDayFromEvent
@@ -551,7 +555,7 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
         }
         val mealPrice = catalog.mealPolicy.basicMeal.price
         val feedingChoices = event?.let { catalog.policies.getValue(it.id).feedsPetChoiceIds }.orEmpty()
-        val foodWarning = if (day?.ateToday == false && choices.any {
+        val foodWarning = if (!demoMode && day?.ateToday == false && choices.any {
             it.id !in feedingChoices && it.moneyDelta < 0 && blocked[it.id] == null &&
                 saved.economy.availableBalance + it.moneyDelta < mealPrice
         }) "После этой траты на обычный обед не хватит. ${saved.pet.name} ещё не поел сегодня." else null
@@ -612,9 +616,11 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
             scene = variant?.scene ?: card?.scene, character = variant?.character ?: card?.character,
             options = (if (restFromCard) emptyList() else choices).map { DayOption(it.id, if (isDeed(saved)) {
                 if (goalSelected) "Заработать на цель" else "Выполнить дело"
-            } else catalog.displayAction(it).asGameActionLabel().asPetEffortText(saved.pet.name),
+            } else if (it.moneyDelta < 0 && choiceDeltas.getValue(it.id) == 0L) "Получить бесплатно"
+                else catalog.displayAction(it).asGameActionLabel().asPetEffortText(saved.pet.name),
                 blocked[it.id] == BlockReason.MustEat, blocked[it.id] == null || blocked[it.id] == BlockReason.MustEat,
-                if (it.moneyDelta < 0 && blocked[it.id] !is BlockReason.InsufficientMoney)
+                if (it.moneyDelta < 0 && choiceDeltas.getValue(it.id) == 0L) "Бесплатно · режим бога"
+                else if (it.moneyDelta < 0 && blocked[it.id] !is BlockReason.InsufficientMoney)
                     EconomyOperations.quote(saved.economy, Math.negateExact(it.moneyDelta),
                         SpendingKind.forEvent(checkNotNull(event).type)).playerDescription(SpendingKind.forEvent(event.type))
                 else (blocked[it.id] as? BlockReason.InsufficientMoney)?.takeIf { choiceBlock !is BlockReason.InsufficientMoney }
@@ -633,7 +639,10 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
                 else -> "Продолжить день"
             } }, primaryNeedsFood = primaryBlock == BlockReason.MustEat,
             primarySpending = if (occurrence == null && primary != null && primaryBlock != BlockReason.MustEat)
-                session.engine.advanceSpending(saved, primary)?.let { it.quote.playerDescription(it.kind) } else null,
+                session.engine.advanceSpending(saved, primary, demoMode)?.let {
+                    if (demoMode && it.quote.affordable && it.quote.parts.isEmpty()) "Бесплатно · режим бога"
+                    else it.quote.playerDescription(it.kind)
+                } else null,
             message = effectiveMessage, actionNotice = actionNotice,
         )
         return Presentation(saved, demoMode, state, primary, campaignComplete = story.campaignComplete)

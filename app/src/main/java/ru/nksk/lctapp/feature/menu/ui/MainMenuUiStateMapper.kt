@@ -31,7 +31,9 @@ internal fun GameState.toMainMenuUiState(fullEnergy: Int = 5, catalog: GameCatal
         economy.planning != null -> "Распределить монеты"
         it.phase == DayPhase.FINISHED -> "Итоги дня"
         it.currentEvent != null -> "Вернуться к событию"
-        it.phase == DayPhase.READY_TO_END || it.energy == 0 && !demoMode -> "Закончить день"
+        it.energy == 0 && !demoMode -> "Закончить день"
+        catalog?.storyProgress(this)?.goalReadyForStory == true -> "Выполнить цель"
+        it.phase == DayPhase.READY_TO_END -> "Закончить день"
         else -> "Продолжить день"
     } },
     canFeed = economy.planning == null && engine?.let { it.phase != DayPhase.FINISHED && !it.ateToday } == true,

@@ -30,7 +30,7 @@ internal class GameActionAttempt private constructor(
     }
 
     companion object {
-        fun prepare(before: GameState, command: EngineCommand, context: DecisionContext? = null) =
-            GameActionAttempt(before, EngineRequest(UUID.randomUUID().toString(), before.engine?.revision, command, context))
+        fun prepare(before: GameState, command: EngineCommand, context: DecisionContext? = null, demoMode: Boolean = false) =
+            GameActionAttempt(before, EngineRequest(UUID.randomUUID().toString(), before.engine?.revision, command, context, demoMode))
     }
 }

@@ -14,9 +14,9 @@ internal fun storyGameTheme(media: EventMedia, kind: DeedGameKind): StoryGameThe
 
 /** The board and its control instructions must share the same source of truth. */
 internal fun storyGameInstructions(kind: DeedGameKind, context: String? = null): String = listOfNotNull(
-    context?.takeIf(String::isNotBlank),
+    context?.takeIf { kind != DeedGameKind.MEMORY && it.isNotBlank() },
     when (kind) {
-        DeedGameKind.MEMORY -> "Открывай по две карточки и находи одинаковые пары."
+        DeedGameKind.MEMORY -> "Открывай по две карточки. Найди все пары."
         DeedGameKind.PRECISION -> "Останови маркер в зелёной зоне."
         DeedGameKind.COMPARISON -> "Сравни цены и выбери предмет дороже."
         DeedGameKind.LIGHTS -> "Нажимай на фонари: выбранный фонарь и соседи меняют состояние. Погаси их все."

@@ -24,6 +24,13 @@ data class MainMenuUiState(
     val budget: MenuBudgetUiState? = null,
     val spendingPreview: String? = null,
     val canRestartCampaign: Boolean = false,
+    val nameEditor: PetNameEditorUiState? = null,
+)
+
+data class PetNameEditorUiState(
+    val input: String,
+    val error: String? = null,
+    val retryPending: Boolean = false,
 )
 
 /** Last confirmed plan and the two real balances, projected from the same saved economy. */

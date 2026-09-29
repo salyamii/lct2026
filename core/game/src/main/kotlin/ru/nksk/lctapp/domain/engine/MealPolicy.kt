@@ -27,6 +27,10 @@ class MealPolicy(meals: List<MealDefinition>) {
 
     fun meal(id: String): MealDefinition = requireNotNull(byId[id]) { "Unknown meal: $id" }
 
+    /** A demo meal waives only its payment; authored identity and effects remain unchanged. */
+    fun effectivePrice(mealId: String, demoMode: Boolean = false): Long =
+        meal(mealId).let { if (demoMode) 0L else it.price }
+
     /** The food UI keeps paid choices visible when unaffordable so their guarded action can explain why. */
     fun choices(state: GameState): List<MealDefinition> = definitions.filter {
         it.price > 0 || state.economy.availableBalance < basicMeal.price
@@ -43,12 +47,11 @@ class MealPolicy(meals: List<MealDefinition>) {
     }
 
     /** Running-day and command/revision guards remain in GameEngine; this is its pure food outcome. */
-    internal fun apply(state: GameState, mealId: String, fullEnergy: Int): GameState {
+    internal fun apply(state: GameState, mealId: String, fullEnergy: Int, demoMode: Boolean = false): GameState {
         val day = checkNotNull(state.engine)
-        val meal = meal(mealId)
         val effects = effects(mealId)
         require(effects.nextMorningEnergy == null || effects.nextMorningEnergy <= fullEnergy)
-        val economy = EconomyOperations.spend(state.economy, meal.price, SpendingKind.FEEDING)
+        val economy = EconomyOperations.spend(state.economy, effectivePrice(mealId, demoMode), SpendingKind.FEEDING)
         return state.copy(economy = economy,
             pet = effects.visualStateAfter?.let { state.pet.transitionTo(it) } ?: state.pet,
             engine = day.copy(ateToday = true,

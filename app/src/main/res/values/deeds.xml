@@ -24,7 +24,7 @@
     <string name="deeds_target_hint">Нажми «Стоп», когда центр бегунка в зелёной зоне</string>
     <string name="deeds_stop">Стоп!</string>
     <string name="deeds_target_complete">Телескоп настроен!</string>
-    <string name="deeds_memory_prompt">Найди пары предметов</string>
+    <string name="deeds_memory_prompt">Открывай по две карточки. Найди все пары.</string>
     <string name="deeds_moves">Ходы: %1$d</string>
     <string name="deeds_memory_complete">Все пары найдены!</string>
     <string name="deeds_card_hidden">Карта %1$d, закрыта</string>

@@ -88,6 +88,8 @@ internal interface GameRunArchiveDao {
     suspend fun readHistoryPage(runId: String, afterSequence: Long, limit: Int): List<GameRunArchiveAuditEntity>
     @Query("INSERT INTO GAME_RUN_ARCHIVE_AUDIT(archive_run_id, sequence, payload) SELECT run_id, sequence, payload FROM GAME_AUDIT WHERE run_id = :runId")
     suspend fun insertActiveHistory(runId: String)
+    @Query("SELECT COUNT(*) FROM GAME_RUN_ARCHIVE_AUDIT WHERE archive_run_id = :runId")
+    suspend fun historyCount(runId: String): Long
     @Insert suspend fun insertHistory(rows: List<GameRunArchiveAuditEntity>)
     @Query("DELETE FROM GAME_RUN_ARCHIVE") suspend fun clear()
 }

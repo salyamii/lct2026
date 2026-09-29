@@ -61,7 +61,7 @@ fun MemoryGameScreen(
         }
         DeedGameSheet(deed, DeedRewardPreview.fromMemory(state), modifier = Modifier.weight(1f)) {
             Text(
-                deed?.instructions ?: if (deed != null) "Найди одинаковые пары. Чем меньше ошибок, тем больше награда." else stringResource(R.string.deeds_memory_prompt),
+                deed?.instructions ?: stringResource(R.string.deeds_memory_prompt),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = Rubik,

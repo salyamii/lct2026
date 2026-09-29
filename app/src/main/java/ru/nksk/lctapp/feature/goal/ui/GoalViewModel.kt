@@ -312,7 +312,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
                 renderPetText(definition.description, game.pet.name), progress.totalPrice, progress.items.size,
                 progress.boughtCount, status, when (status) {
                     GoalProjectStatus.COMPLETED -> "Задание выполнено"
-                    GoalProjectStatus.ACTIVE -> if (progress.isCollected) "Всё собрано, продолжай историю" else "Для текущей цели куплено ${progress.boughtCount} из ${progress.items.size}"
+                    GoalProjectStatus.ACTIVE -> if (progress.isCollected) "Всё собрано. Пора выполнить цель!" else "Для текущей цели куплено ${progress.boughtCount} из ${progress.items.size}"
                     GoalProjectStatus.AVAILABLE -> if (activeGoal == null) "Выбери, на что будем копить" else "Текущая глава"
                     GoalProjectStatus.LOCKED -> "Откроется после предыдущей главы"
                 }, requirements = progress.items.map { item ->
@@ -373,7 +373,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
                 !story.goalAvailable(goal) -> projects.first { it.id == goal.goalId }.hint
                 !selected && activeGoal != null -> "Сначала заверши текущую главу. Следующая большая цель откроется по сюжету."
                 !selected -> "Можно выбрать новую цель. Прежние события останутся в истории."
-                progress.isCollected -> "Комплект собран! Продолжим приключение и узнаем, что будет дальше."
+                progress.isCollected -> "Снаряжение собрано. Пройдём оставшиеся шаги истории и выполним цель!"
                 else -> "Собери снаряжение для задания Смотрителей. Можно начать с любой части; остальные соберём позже."
             },
         )

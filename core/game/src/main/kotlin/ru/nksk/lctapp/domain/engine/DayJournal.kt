@@ -33,7 +33,8 @@ internal fun recordDayChanges(before: GameState, after: GameState, request: Engi
         if (occurrence.status != EventStatus.ACTIVE ||
             before.engine?.events?.any { it.id == occurrence.id && it.status == EventStatus.PAUSED } == true) return 0
         val event = factory.event(occurrence.eventId)
-        return if (factory.policy(event.id).startEffectsTiming == EffectTiming.OPEN) event.moneyDeltaOnStart else 0
+        return if (factory.policy(event.id).startEffectsTiming == EffectTiming.OPEN)
+            factory.eventMoneyDelta(event.id, request.demoMode) else 0
     }
     if (beganDay) {
         val openingCost = openingEffects()
@@ -51,7 +52,7 @@ internal fun recordDayChanges(before: GameState, after: GameState, request: Engi
             val occurrence = checkNotNull(before.engine?.currentEvent)
             val event = factory.event(occurrence.eventId)
             val startCost = if (factory.policy(event.id).startEffectsTiming == EffectTiming.COMPLETE)
-                event.moneyDeltaOnStart else 0
+                factory.eventMoneyDelta(event.id, request.demoMode) else 0
             record(DayJournalKind.EVENT_START, event.id, startCost)
             val choiceId = after.story.decisions.last().choiceId
             record(if (occurrence.origin == EventOrigin.DEED) DayJournalKind.DEED else DayJournalKind.EVENT_CHOICE,

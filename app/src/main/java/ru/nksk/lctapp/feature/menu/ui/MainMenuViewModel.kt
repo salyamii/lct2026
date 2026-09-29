@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.nksk.lctapp.core.ui.components.MealChoiceUiState
 import ru.nksk.lctapp.domain.game.GameState
+import ru.nksk.lctapp.domain.pet.isValidPetName
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.core.ui.game.playerMessage
 import ru.nksk.lctapp.core.ui.game.playerDescription
@@ -49,6 +50,10 @@ internal class MainMenuViewModel @Inject constructor(
     private var freeMealRequested = false
     private var mealsShown = false
     private var pendingMeal: EngineRequest? = null
+    private var pendingMealChoice: MealChoiceUiState? = null
+    private var nameEditor: PetNameEditorUiState? = null
+    private var originalName: String? = null
+    private var pendingRename: EngineRequest? = null
     private data class Presentation(
         val game: GameState,
         val demoMode: Boolean,
@@ -115,6 +120,73 @@ internal class MainMenuViewModel @Inject constructor(
         }
     }
 
+    fun editName() {
+        val game = saved ?: return
+        if (busy || pendingMeal != null || nameEditor != null) return
+        originalName = game.pet.name
+        nameEditor = PetNameEditorUiState(game.pet.name)
+        render()
+    }
+
+    fun changeName(input: String) {
+        if (busy || pendingRename != null) return
+        nameEditor = nameEditor?.copy(input = input, error = null)
+        render()
+    }
+
+    fun dismissName() {
+        if (busy || pendingRename != null) return
+        nameEditor = null
+        originalName = null
+        render()
+    }
+
+    fun saveName() {
+        val editor = nameEditor ?: return
+        val game = saved ?: return
+        if (busy) return
+        val name = editor.input.trim()
+        if (!isValidPetName(name)) {
+            nameEditor = editor.copy(error = "Введи имя без переносов строк.")
+            render()
+            return
+        }
+        if (pendingRename == null && name == originalName) {
+            dismissName()
+            return
+        }
+        val request = pendingRename ?: EngineRequest(UUID.randomUUID().toString(), game.engine?.revision,
+            EngineCommand.RenamePet(name, checkNotNull(originalName))).also { pendingRename = it }
+        busy = true
+        nameEditor = editor.copy(error = null)
+        render()
+        viewModelScope.launch {
+            try {
+                val result = session.dispatch(request)
+                pendingRename = null
+                when (result) {
+                    is EngineResult.Applied -> {
+                        saved = result.state
+                        nameEditor = null
+                        originalName = null
+                    }
+                    is EngineResult.Blocked -> {
+                        val latest = session.read() ?: game
+                        saved = latest
+                        originalName = latest.pet.name
+                        nameEditor = editor.copy(error = result.reason.playerMessage(latest.pet.name))
+                    }
+                }
+            } catch (cancelled: CancellationException) { throw cancelled
+            } catch (_: Exception) {
+                nameEditor = editor.copy(error = "Не удалось сохранить имя. Попробуй ещё раз.")
+            } finally {
+                busy = false
+                render()
+            }
+        }
+    }
+
     fun feed() {
         val game = saved ?: return
         if (busy) return
@@ -157,16 +229,23 @@ internal class MainMenuViewModel @Inject constructor(
 
     private fun act(game: GameState, command: EngineCommand?, open: Boolean) {
         if (busy) return
+        val demoMode = presentation?.demoMode ?: session.demoModeEnabled
+        val shownMeal = (command as? EngineCommand.Feed)?.let { meal ->
+            presentation?.meals?.firstOrNull { it.id == meal.mealId }
+        }
         busy = true; notice = null; render()
         viewModelScope.launch {
             try {
                 val result = command?.let {
                     val request = if (it is EngineCommand.Feed) pendingMeal ?: EngineRequest(
-                        UUID.randomUUID().toString(), game.engine?.revision, it).also { request -> pendingMeal = request }
-                    else EngineRequest(UUID.randomUUID().toString(), game.engine?.revision, it)
+                        UUID.randomUUID().toString(), game.engine?.revision, it, demoMode = demoMode).also { request ->
+                            pendingMeal = request
+                            pendingMealChoice = shownMeal
+                        }
+                    else EngineRequest(UUID.randomUUID().toString(), game.engine?.revision, it, demoMode = demoMode)
                     session.dispatch(request)
                 }
-                if (command is EngineCommand.Feed) pendingMeal = null
+                if (command is EngineCommand.Feed) { pendingMeal = null; pendingMealChoice = null }
                 when (result) {
                     is EngineResult.Applied -> {
                         saved = result.state; freeMealRequested = false
@@ -239,11 +318,15 @@ internal class MainMenuViewModel @Inject constructor(
         val command = (continuation as? ContinueDayPlan.Day)?.command
         val menu = game.toMainMenuUiState(session.catalog.rules.fullEnergy, session.catalog, demoMode)
         return Presentation(game, demoMode, menu.copy(
-            spendingPreview = session.engine.advanceSpending(game, command)?.let { it.quote.playerDescription(it.kind) },
-            mealPrice = session.catalog.mealPolicy.basicMeal.price,
+            spendingPreview = session.engine.advanceSpending(game, command, demoMode)?.let {
+                if (demoMode && it.quote.affordable && it.quote.parts.isEmpty()) "Бесплатно · режим бога"
+                else it.quote.playerDescription(it.kind)
+            },
+            mealPrice = session.catalog.mealPolicy.effectivePrice(session.catalog.mealPolicy.basicMeal.id, demoMode),
             continueLabel = if (game.engine?.phase == DayPhase.FINISHED) menu.continueLabel else when (command) {
                 EngineCommand.FinishDay -> "Закончить день"
-                EngineCommand.OpenNextEvent -> "Продолжить день"
+                EngineCommand.OpenNextEvent -> if (session.catalog.storyProgress(game).goalReadyForStory)
+                    "Выполнить цель" else "Продолжить день"
                 else -> menu.continueLabel
             },
         ), continuation)
@@ -255,11 +338,13 @@ internal class MainMenuViewModel @Inject constructor(
             canFeed = current.menu.canFeed || pendingMeal != null,
             busy = busy || !ready,
             notice = notice,
+            nameEditor = nameEditor?.copy(retryPending = pendingRename != null),
             showFreeMeal = offersFreeMeal(current.game),
             showMeals = mealsShown && current.meals != null,
             meals = if (!mealsShown) emptyList() else current.meals.orEmpty().map { choice ->
-                if (retryId == null) choice else choice.copy(enabled = choice.id == retryId,
-                    label = if (choice.id == retryId) "Повторить: ${choice.label}" else choice.label)
+                val shown = pendingMealChoice?.takeIf { it.id == choice.id } ?: choice
+                if (retryId == null) choice else shown.copy(enabled = choice.id == retryId,
+                    label = if (choice.id == retryId) "Повторить: ${shown.label}" else shown.label)
             },
         ))
     }

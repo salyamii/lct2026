@@ -21,9 +21,11 @@ import ru.nksk.lctapp.R
 @Composable
 internal fun MainMenuContent(state: MainMenuLoadState, onRetry: () -> Unit, onAction: (MainMenuAction) -> Unit,
     onMeal: (String) -> Unit, onDismissMeal: () -> Unit,
+    onRename: () -> Unit, onNameChange: (String) -> Unit, onSaveName: () -> Unit, onDismissName: () -> Unit,
     settingsButton: (@Composable () -> Unit)? = null) {
     when (state) {
-        is MainMenuLoadState.Ready -> MainMenuScreen(state = state.menu, onAction = onAction, settingsButton = settingsButton)
+        is MainMenuLoadState.Ready -> MainMenuScreen(state = state.menu, onAction = onAction,
+            settingsButton = settingsButton, onRename = onRename)
         MainMenuLoadState.Loading -> GameLoadingScreen()
         else -> Surface(modifier = Modifier.fillMaxSize()) {
             Column(
@@ -35,6 +37,9 @@ internal fun MainMenuContent(state: MainMenuLoadState, onRetry: () -> Unit, onAc
                 Button(onClick = onRetry) { Text(stringResource(R.string.game_retry)) }
             }
         }
+    }
+    if (state is MainMenuLoadState.Ready) state.menu.nameEditor?.let { editor ->
+        PetNameDialog(editor, state.menu.busy, onNameChange, onSaveName, onDismissName)
     }
     if (state is MainMenuLoadState.Ready && state.menu.showMeals) {
         MealSelectionDialog(state.menu.meals, state.menu.busy,

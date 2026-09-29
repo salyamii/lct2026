@@ -11,7 +11,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.yield
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
@@ -63,9 +62,10 @@ class CampaignRestartPersistenceTest {
         assertEquals("CHARACTER", db.onboardingDraftDao().read()!!.step)
         val stored = checkNotNull(db.gameRunArchiveDao().forRestart(request.id))
         val header = Json.parseToJsonElement(stored.snapshotPayload).jsonObject
-        assertTrue(header.getValue("history").jsonArray.isEmpty())
+        assertFalse(header.containsKey("history"))
+        assertEquals(1L, header.getValue("archiveStorageVersion").jsonPrimitive.long)
         assertEquals(original.historySequence, header.getValue("historySequence").jsonPrimitive.long)
-        assertEquals(original.checksum, header.getValue("checksum").jsonPrimitive.content)
+        assertEquals(original.state, LocalRunArchiveCodec.decode(stored.snapshotPayload).state)
         assertTrue("The archive header must not grow with all past checkpoints",
             stored.snapshotPayload.length.toLong() * 20 < sourceBytes)
         val archiveRows = db.gameRunArchiveDao().readHistory(original.runId)
@@ -240,6 +240,24 @@ class CampaignRestartPersistenceTest {
         assertEquals(before, games.exportSnapshot())
         assertTrue(games.archivedRuns().isEmpty())
         assertTrue(db.gameRunArchiveDao().readHistory(before.runId).isEmpty())
+    }
+
+    @Test fun aGapInTheStoredIndexCannotClearTheCurrentWorld() = runBlocking {
+        games.initializeIfAbsent(createInitialGameState())
+        val before = checkNotNull(games.readSnapshotHead())
+        val audit = db.gameHistoryDao()
+        val first = audit.read().single()
+        audit.insert(first.copy(id = "broken-index", sequence = first.sequence + 2))
+        val rows = audit.read()
+        val request = CampaignRestartRequest("gap", before.runId, before.state.engine?.revision, audit.sequence())
+
+        assertTrue(runCatching { games.prepareCampaignRestart(request) { } }.isFailure)
+
+        assertEquals(before.state, games.read())
+        assertEquals(rows, audit.read())
+        assertTrue(games.archivedRuns().isEmpty())
+        assertTrue(db.gameRunArchiveDao().readHistory(before.runId).isEmpty())
+        assertNull(db.onboardingDraftDao().read())
     }
 
     @Test fun staleConfirmationCannotArchiveANewerWorldAndRepeatedCyclesStayFlatAcrossRestore() = runBlocking {
