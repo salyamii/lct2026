@@ -34,6 +34,7 @@ internal data class GoalUiState(
     val completedProject: Boolean = false,
     val completedProjectCount: Int = 0,
     val campaignComplete: Boolean = false,
+    val demoMode: Boolean = false,
 )
 
 internal enum class GoalProjectStatus { AVAILABLE, ACTIVE, LOCKED, COMPLETED }
@@ -56,6 +57,7 @@ internal data class GoalPartUiState(
     val savedCoins: Long = 0,
     val remainingCoins: Long = 0,
     val availableContribution: Long = 0,
+    val demoMode: Boolean = false,
 )
 
 internal data class PurchaseConfirmation(
@@ -70,8 +72,9 @@ internal data class PurchaseConfirmation(
     val remainingSavings: Long,
     val foodNeeded: Long,
     val contextId: String,
+    val demoMode: Boolean = false,
 ) {
-    val foodShortfall: Long get() = (foodNeeded - remainingBalance).coerceAtLeast(0)
+    val foodShortfall: Long get() = if (demoMode) 0 else (foodNeeded - remainingBalance).coerceAtLeast(0)
 }
 
 internal data class GoalPurchaseResult(val itemId: String, val itemTitle: String, val price: Long)

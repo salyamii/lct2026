@@ -33,6 +33,21 @@ class GoalViewModelTest {
     @Before fun setup() { Dispatchers.setMain(dispatcher) }
     @After fun cleanup() { store.clear(); Dispatchers.resetMain() }
 
+    @Test fun hiddenGoalRefreshesItsBalanceOnlyAfterResume() = runTest(dispatcher) {
+        val fixture = Fixture()
+        fixture.start()
+        val model = fixture.model()
+        runCurrent()
+        val original = model.uiState.value.availableBalance
+        model.setActive(false)
+        fixture.repository.update { it.copy(economy = EconomyState(BudgetPlan(35, 0, 0, 40))) }
+        runCurrent()
+        assertEquals(original, model.uiState.value.availableBalance)
+        model.setActive(true)
+        runCurrent()
+        assertEquals(75L, model.uiState.value.availableBalance)
+    }
+
     @Test fun openingWithoutAChosenTargetShowsTheCurrentChapterWithoutSelectingAnything() = runTest(dispatcher) {
         val fixture = Fixture()
         fixture.session.prepare()

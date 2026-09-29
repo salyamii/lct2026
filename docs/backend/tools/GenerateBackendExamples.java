@@ -31,6 +31,9 @@ import ru.nksk.lctapp.domain.game.GameState;
 import ru.nksk.lctapp.domain.history.AuditEntry;
 import ru.nksk.lctapp.domain.history.GameSnapshot;
 import ru.nksk.lctapp.domain.history.HistoryCodec;
+import ru.nksk.lctapp.domain.history.WorldSnapshot;
+import ru.nksk.lctapp.domain.history.WorldSnapshotCodec;
+import ru.nksk.lctapp.domain.history.CloudWorldKt;
 import ru.nksk.lctapp.domain.timemachine.GameCatalogFingerprint;
 
 /** Documentation artifact generator. No Android, repository, network or test runner is involved. */
@@ -69,18 +72,19 @@ public final class GenerateBackendExamples {
             {"id":"%s:initialized","sequence":1,"runId":"%s","type":"INITIALIZED","after":%s}
             """.formatted(RUN_ID, RUN_ID, stateJson));
         GameSnapshot snapshot = HistoryCodec.INSTANCE.snapshot(RUN_ID, state, List.of(initialized), List.of());
-        String archive = HistoryCodec.INSTANCE.encodeSnapshot(snapshot);
-        require(snapshot.equals(HistoryCodec.INSTANCE.decodeSnapshot(archive)), "Snapshot did not round-trip");
+        WorldSnapshot world = CloudWorldKt.toCloudWorldRead(snapshot).getWorld();
+        String archive = WorldSnapshotCodec.INSTANCE.encode(world);
+        require(world.equals(WorldSnapshotCodec.INSTANCE.decode(archive)), "World did not round-trip");
 
         StoryContent content = new StoryContent();
         GameCatalog fixtureCatalog = new GameCatalog(content, Map.of(), Map.of(),
             new EngineRules(RULES_ID, 5, 3, 1, 100L),
-            List.of(new MealDefinition("docs-basic-meal", 5L, null, null)),
+            List.of(new MealDefinition("docs-basic-meal", 5L, null, null, 0)),
             "docs-day", "docs-introduction", List.of(), List.of(), Set.of(), List.of(), null, Map.of());
         String fingerprint = GameCatalogFingerprint.INSTANCE.compute(fixtureCatalog);
-        SnapshotUploadRequest upload = SnapshotContractKt.snapshotUploadRequest(DEVICE_ID, snapshot, UPLOAD_ID, null, fingerprint);
-        SnapshotUploadResponse uploadResponse = new SnapshotUploadResponse(UPLOAD_ID, RUN_ID, 1L, snapshot.getChecksum());
-        SnapshotDownloadResponse download = new SnapshotDownloadResponse(RUN_ID, 1L, fingerprint, archive, 1);
+        SnapshotUploadRequest upload = SnapshotContractKt.snapshotUploadRequest(DEVICE_ID, world, UPLOAD_ID, null, fingerprint);
+        SnapshotUploadResponse uploadResponse = new SnapshotUploadResponse(UPLOAD_ID, RUN_ID, 1L, world.getChecksum());
+        SnapshotDownloadResponse download = new SnapshotDownloadResponse(RUN_ID, 1L, fingerprint, archive, 1, "CURRENT_WORLD");
         AnalyticsUploadRequest analytics = AnalyticsContractKt.analyticsUploadRequest(DEVICE_ID, BATCH_ID, snapshot, content);
         AnalyticsUploadResponse analyticsResponse = new AnalyticsUploadResponse(BATCH_ID, RUN_ID,
             snapshot.getHistorySequence(), analytics.getFacts().stream().map(fact -> fact.getEventId()).toList(), 1);
@@ -93,7 +97,7 @@ public final class GenerateBackendExamples {
         SnapshotDownloadResponse decodedDownload = WIRE.decodeFromString(SnapshotDownloadResponse.Companion.serializer(), downloadJson);
         require(archive.equals(decodedUpload.getSnapshotJson()) && archive.equals(decodedDownload.getSnapshotJson()),
             "Transport serialization changed the opaque archive");
-        require(snapshot.equals(HistoryCodec.INSTANCE.decodeSnapshot(decodedDownload.getSnapshotJson())),
+        require(world.equals(WorldSnapshotCodec.INSTANCE.decode(decodedDownload.getSnapshotJson())),
             "Downloaded archive did not validate");
 
         // No trailing newline: this file is byte-for-byte the UTF-8 value of snapshotJson.
@@ -111,7 +115,7 @@ public final class GenerateBackendExamples {
         validateExample(output, "ack-parent-rewards-request.json", AckParentRewardsRequest.Companion.serializer());
         validateExample(output, "create-parent-reward-coins.json", CreateParentRewardRequest.Companion.serializer());
         validateExample(output, "create-parent-reward-accessory.json", CreateParentRewardRequest.Companion.serializer());
-        System.out.println("Generated six synthetic backend examples; HistoryCodec checksum: " + snapshot.getChecksum());
+        System.out.println("Generated six synthetic backend examples; WorldSnapshot checksum: " + world.getChecksum());
         System.out.println("Validated eight deviceId transport fixtures against current Kotlin serializers.");
         System.out.println("History sequence: " + snapshot.getHistorySequence() + "; skills: " + analytics.getSkills().size());
     }

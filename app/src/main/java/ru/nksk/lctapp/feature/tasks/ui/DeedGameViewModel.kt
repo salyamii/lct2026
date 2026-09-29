@@ -28,7 +28,7 @@ import ru.nksk.lctapp.domain.minigame.*
 enum class DeedGameType { MEMORY, COMPARISON, PRECISION, LIGHTS, SEQUENCE, PIPES, DIFFERENCES, STACKING }
 data class DeedGamePresentation(val title: String, val maximumReward: Long, val canPlay: Boolean,
     val storyAction: Boolean = false, val sceneRes: Int? = null, val instructions: String? = null,
-    val activityArtworkRes: Int? = null, val pairArtwork: List<Int> = emptyList())
+    val activityArtworkRes: Int? = null)
 internal data class DeedGameUiState(
     val loading: Boolean = true,
     val type: DeedGameType? = null,
@@ -38,6 +38,8 @@ internal data class DeedGameUiState(
     val canRetry: Boolean = false,
     val audioOccurrenceId: String? = null,
     val eventMedia: EventMedia = EventMedia(),
+    val canSkipGame: Boolean = false,
+    val demoMode: Boolean = false,
 )
 
 /** Connects an actual offered deed to a transient board and one atomic engine outcome. */
@@ -100,6 +102,13 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
             ?: EngineCommand.CompleteDeed(id, score))
     }
 
+    fun skipGame() {
+        if (busy || pending != null || rejectedAction != null || !session.demoModeEnabled ||
+            !uiState.value.canSkipGame) return
+        val id = occurrenceId ?: return
+        execute(EngineCommand.SkipMiniGame(id, choiceId))
+    }
+
     fun leave() {
         if (busy) return
         if (pending != null) { exit(); return }
@@ -151,21 +160,29 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
             val game = checkNotNull(session.read())
             val occurrence = checkNotNull(game.engine?.events?.find { it.id == id }) { "This comparison belongs to an unavailable deed" }
             check(gameKind(occurrence) == DeedGameKind.COMPARISON)
-            val history = session.history()
-            val runId = checkNotNull(history.lastOrNull()?.runId) { "History is not available" }
-            val existing = history.flatMap { it.facts }.associateBy { it.eventId }
+            val eventIds = batches.flatMap { PriceQuizEvidenceMapper.eventIds(it, id) }.toSet()
+            val recorded = checkNotNull(session.recordedFacts(eventIds)) { "History is not available" }
+            val existing = recorded.facts.associateBy { it.eventId }
             val version = session.contentFingerprint
             val candidates = batches.flatMap { evidence ->
-                PriceQuizEvidenceMapper.facts(evidence, id, runId,
-                    Math.addExact(history.last().sequence, 1), game.engine?.day,
+                PriceQuizEvidenceMapper.facts(evidence, id, recorded.runId,
+                    Math.addExact(recorded.sequence, 1), game.engine?.day,
                     game.financial.currentPeriod?.id, version, session.catalog.rules.id)
             }
             for (fact in candidates) existing[fact.eventId]?.let { stored ->
                 check(stored.episodeId == fact.episodeId && stored.detail == fact.detail) { "Conflicting comparison answer" }
             }
             val missing = candidates.filter { it.eventId !in existing }
-            if (missing.isEmpty()) return@withLock
-            session.recordFacts(missing)
+            if (missing.isEmpty()) {
+                // The indexed read may have suspended while another answer arrived.
+                if (batches == comparisonEvidence.values.toList()) return@withLock
+                continue
+            }
+            if (!session.recordFacts(missing)) {
+                // Demo answers intentionally produce no evidence, so a read-back retry cannot complete.
+                batches.forEach { if (comparisonEvidence[it.seriesId] == it) comparisonEvidence.remove(it.seriesId) }
+                return@withLock
+            }
             // An answer may have arrived during the write; loop before allowing completion or exit.
         }
     }
@@ -186,15 +203,16 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
         busy = true
         message = null
         mutableState.value = mutableState.value.copy(busy = true, message = null,
+            canSkipGame = false,
             presentation = mutableState.value.presentation?.copy(canPlay = false))
         viewModelScope.launch {
             var leaving = false
             try {
-                flushComparisonAnswers()
+                if (command !is EngineCommand.SkipMiniGame) flushComparisonAnswers()
                 comparisonSaveFailed = false
                 val attempt = action.attempt ?: run {
                     val evidence = if (command is EngineCommand.CompleteStoryGame)
-                        eventGameStartEvidence(session.history(), game, command) else null
+                        eventGameStartEvidence(session.latestCommand(), game, command) else null
                     val submitted = if (command is EngineCommand.CompleteStoryGame)
                         command.copy(resourcePriorityOfferId = evidence?.priorityOfferId) else command
                     GameActionAttempt.prepare(game, submitted, evidence?.context).also { action.attempt = it }
@@ -204,7 +222,8 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
                         pending = null
                         latest = result.state
                         leaving = true
-                        val committed = attempt.committedState(session, result.state)
+                        val committed = if (command is EngineCommand.SkipMiniGame) null
+                            else attempt.committedState(session, result.state)
                         exits.send(when (command) {
                             is EngineCommand.CompleteDeed -> committed?.let {
                                 deedCompletionMessage(it.economy.balance - game.economy.balance)
@@ -213,6 +232,7 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
                                 eventCompletionMessage(game, it,
                                     EngineCommand.CompleteEvent(command.occurrenceId, command.choiceId), session.catalog)
                             } ?: "Готово!"
+                            is EngineCommand.SkipMiniGame -> "Игра пропущена · режим бога"
                             else -> null
                         })
                     }
@@ -235,6 +255,7 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
     private fun exit() {
         busy = true
         mutableState.value = mutableState.value.copy(busy = true,
+            canSkipGame = false,
             presentation = mutableState.value.presentation?.copy(canPlay = false))
         exits.trySend(null)
     }
@@ -243,6 +264,7 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
         if (busy) return
         if (pending != null) {
             mutableState.value = mutableState.value.copy(busy = false, message = message, canRetry = true,
+                canSkipGame = false,
                 presentation = mutableState.value.presentation?.copy(canPlay = false))
             return
         }
@@ -266,7 +288,7 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
         val reward = if (choiceId == null) session.catalog.content.choices.single { it.eventId == event.id }.moneyDelta else 0L
         val storyGame = choiceId != null
         val card = session.catalog.cards[event.id]
-        val theme = if (storyGame) card?.presentation?.media?.let { storyGameTheme(it, kind) } else null
+        val theme = card?.presentation?.media?.let { storyGameTheme(it, kind) }
         mutableState.value = DeedGameUiState(
             loading = false,
             type = when (kind) {
@@ -279,16 +301,17 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
                 DeedGameKind.DIFFERENCES -> DeedGameType.DIFFERENCES
                 DeedGameKind.STACKING -> DeedGameType.STACKING
             },
-            presentation = DeedGamePresentation(renderPetText(event.title, game.pet.name), reward, pending == null && message == null,
+            presentation = DeedGamePresentation(renderPetText(session.catalog.displayTitle(event), game.pet.name), reward, pending == null && message == null,
                 storyAction = storyGame,
                 sceneRes = eventSceneBackground(event.id, card?.scene),
-                instructions = theme?.instructions ?: if (storyGame) storyGameInstructions(kind) else null,
-                activityArtworkRes = theme?.objectRes ?: eventSceneArtwork(event.id, card?.character)?.resource,
-                pairArtwork = theme?.pairs.orEmpty()),
+                instructions = theme?.instructions ?: storyGameInstructions(kind),
+                activityArtworkRes = theme?.objectRes ?: eventSceneArtwork(event.id, card?.character)?.resource),
             message = message,
             canRetry = pending != null || rejectedAction != null || comparisonSaveFailed,
             audioOccurrenceId = occurrence.id,
             eventMedia = card?.presentation?.media ?: EventMedia(),
+            canSkipGame = session.demoModeEnabled && rejectedAction == null,
+            demoMode = session.demoModeEnabled,
         )
     }
 

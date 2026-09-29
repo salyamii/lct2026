@@ -1,4 +1,4 @@
-# Outpainting prompts — 2026-09-28
+# Outpainting prompts - 2026-09-28
 
 Built-in imagegen, authorized by APP-ICON-D-002.
 
@@ -13,4 +13,3 @@ Precise outpainting/reframing of the attached APPROVED mobile game icon artwork,
 Input: outpaint-step1.png. Output: adaptive-source.png (final packaged master).
 
 Outpaint this exact image ONE MORE STEP to create a wider framing. The input is the edit target. Uniformly shrink the ENTIRE current image to 78% of the new square canvas width and height, place it exactly centered, then naturally paint new garden scenery in the added 11% border on all four sides. This must visibly ZOOM OUT: the topmost fox ear must be at approximately 22% down from the top of the final square, NOT 14%; both hands and the jar base should be above approximately 75% down. Keep face and jar absolutely identical, sharp, same expression, pose, detailed fur, glass and coins. Do not enlarge the fox again. The central 2/3 will be cropped by Android so all ears, face, hands and jar must be in that middle area. Fill new borders with natural continuous trees, foliage, blue sky, medieval garden stonework and plants, same warm cheerful light. Maintain real environmental details through all corners, no stretched pixels, no mirrored strips, no artificial blur, no frame. Do not change characters or jar or perspective, do not add new characters. Single square opaque full-bleed output.
-

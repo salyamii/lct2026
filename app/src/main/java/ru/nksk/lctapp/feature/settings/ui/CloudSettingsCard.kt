@@ -40,7 +40,7 @@ internal fun CloudSettingsCard(state: CloudSettingsUiState, configured: Boolean,
             val message = state.feedback ?: state.sync.message ?: when (state.sync.phase) {
                 CloudSyncPhase.OFFLINE -> "Сейчас нет связи с облаком. Попробуйте позже."
                 CloudSyncPhase.ERROR -> "Не удалось синхронизировать игру. Попробуйте ещё раз."
-                CloudSyncPhase.CONFLICT -> "В облаке есть другая версия игры. Можно загрузить её для просмотра перед восстановлением."
+                CloudSyncPhase.CONFLICT -> "В облаке есть другая версия игры. Сначала можно посмотреть её, а потом решить, нужно ли восстановление."
                 CloudSyncPhase.IDLE, CloudSyncPhase.SYNCING -> null
             }
             message?.let { AdventureBody(it) }
@@ -66,7 +66,7 @@ internal fun CloudRestoreDialog(preview: CloudRestorePreview, busy: Boolean,
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 AdventureBody(preview.petName)
                 preview.day?.let { AdventureBody("День $it") }
-                AdventureBody("Доступно монет: ${preview.availableCoins}. В копилке: ${preview.savingsCoins}.")
+                AdventureBody("Монеты с собой: ${preview.availableCoins}. В копилке: ${preview.savingsCoins}.")
                 AdventureBody("Сохранение из облака заменит текущий мир, его журнал и прогресс на этом устройстве.")
                 if (busy) {
                     GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)

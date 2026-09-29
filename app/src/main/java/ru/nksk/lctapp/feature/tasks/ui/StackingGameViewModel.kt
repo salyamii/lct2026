@@ -38,6 +38,7 @@ class StackingGameViewModel @Inject constructor(private val savedState: SavedSta
     private var direction = 1f
 
     init {
+        publish(uiState.value)
         runMovement()
     }
 
@@ -47,12 +48,12 @@ class StackingGameViewModel @Inject constructor(private val savedState: SavedSta
                 val before = uiState.value
                 if (before.game.finished) return
                 val after = before.game.dropAt((mutablePosition.value * StackingState.SPACE).toInt())
-                mutableUiState.value = StackingGameUiState(after, missed = !after.won && after.finished)
+                publish(StackingGameUiState(after, missed = !after.won && after.finished))
             }
             StackingGameAction.Restart -> {
                 moveJob?.cancel()
                 direction = 1f
-                mutableUiState.value = StackingGameUiState(StackingState.create())
+                publish(StackingGameUiState(StackingState.create()))
                 mutablePosition.value = 0.5f
                 runMovement()
             }

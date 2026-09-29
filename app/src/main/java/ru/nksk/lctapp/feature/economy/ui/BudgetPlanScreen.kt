@@ -1,5 +1,8 @@
 package ru.nksk.lctapp.feature.economy.ui
 
+import ru.nksk.lctapp.core.ui.game.coinAmount
+import ru.nksk.lctapp.core.ui.game.paymentCoinAmount
+
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -131,8 +134,8 @@ internal fun BudgetPlanScreen(state: BudgetUiState, onAmountChange: (BudgetArtic
                         Text(buildString {
                             append(state.foodAdvice)
                             if (state.isEditing) {
-                                if (state.minimumNeeds > state.knownNeeds) append(" На необходимое оставим хотя бы ${state.minimumNeeds} монет.")
-                                if (state.total < state.knownNeeds && state.total > 0) append(" Пока есть только ${state.total} — сохраним их на еду.")
+                                if (state.minimumNeeds > state.knownNeeds) append(" На необходимое оставим хотя бы ${paymentCoinAmount(state.minimumNeeds)}.")
+                                if (state.total < state.knownNeeds && state.total > 0) append(" Пока есть только ${state.total} - сохраним их на еду.")
                             }
                         }, Modifier.padding(12.dp), color = GameInk, fontFamily = Nunito,
                             fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, lineHeight = 19.sp)
@@ -161,8 +164,8 @@ internal fun BudgetPlanScreen(state: BudgetUiState, onAmountChange: (BudgetArtic
                     verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(when {
                         state.unallocated > 0 -> "Осталось распределить: ${state.unallocated}"
-                        state.isEditing && state.needs < state.minimumNeeds -> "На необходимое нужно ещё ${state.minimumNeeds - state.needs} монет"
-                        else -> "Все ${state.total} монет распределены"
+                        state.isEditing && state.needs < state.minimumNeeds -> "Добавь на необходимое ещё ${paymentCoinAmount(state.minimumNeeds - state.needs)}"
+                        else -> "Распределено: ${coinAmount(state.total)}"
                     },
                         color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold)
                     BudgetAllocationSummary(state)
@@ -207,12 +210,12 @@ private fun BudgetAllocationSummary(state: BudgetUiState) {
     val assigned = (total - unallocated).coerceAtLeast(0)
     Box(Modifier.fillMaxWidth().clearAndSetSemantics {
         contentDescription = "Распределение монет"
-        stateDescription = BudgetArticle.entries.joinToString(". ") { "${it.title}: ${state.amount(it)} монет" } +
-            ". Не распределено: $unallocated монет"
+        stateDescription = BudgetArticle.entries.joinToString(". ") { "${it.title}: ${state.amount(it)}" } +
+            ". Не распределено: $unallocated"
         progressBarRangeInfo = ProgressBarRangeInfo(
             if (total > 0) (assigned.toDouble() / total).toFloat().coerceIn(0f, 1f) else 0f, 0f..1f)
     }) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
             Row(Modifier.fillMaxWidth().height(7.dp).clip(RoundedCornerShape(4.dp))
                 .background(Color(0xFFE4DFD6))) {
                 if (total > 0) {
@@ -226,9 +229,13 @@ private fun BudgetAllocationSummary(state: BudgetUiState) {
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 BudgetArticle.entries.forEach { article ->
-                    Text(article.title, Modifier.weight(1f), color = GameInk.copy(alpha = .72f),
-                        fontFamily = Nunito, fontWeight = FontWeight.SemiBold,
-                        fontSize = 11.sp, lineHeight = 14.sp, textAlign = TextAlign.Center)
+                    Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally)) {
+                        Box(Modifier.size(6.dp).background(article.allocationColor, CircleShape))
+                        Text(article.title, color = GameInk.copy(alpha = .72f),
+                            fontFamily = Nunito, fontWeight = FontWeight.SemiBold,
+                            fontSize = 11.sp, lineHeight = 14.sp, textAlign = TextAlign.Center)
+                    }
                 }
             }
         }
@@ -266,7 +273,7 @@ private fun PlanArticle(article: BudgetArticle, state: BudgetUiState, modifier: 
                     if (adjust != null) adjust(article, false) else change(article, amount - BUDGET_STEP)
                 }
                 Surface(onClick = edit, enabled = state.actionsEnabled && !interactionsBlocked, color = Color.Transparent,
-                    modifier = Modifier.weight(1f).heightIn(min = 48.dp).semantics { contentDescription = "${article.title}: $amount монет. Ввести сумму" }) {
+                    modifier = Modifier.weight(1f).heightIn(min = 48.dp).semantics { contentDescription = "${article.title}: ${coinAmount(amount)}. Ввести сумму" }) {
                     Box(contentAlignment = Alignment.Center) {
                         Text("$amount", color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp,
                             textAlign = TextAlign.Center)

@@ -30,13 +30,16 @@ fun EntryProviderScope<NavKey>.goalEntry(onBack: (Goal) -> Unit, onOpenSavings: 
         val state by model.uiState.collectAsStateWithLifecycle()
         LaunchedEffect(model, lifecycle) {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                model.continueNavigation.collect { destination ->
-                    when (destination) {
-                        GoalContinuationDestination.DAY -> onContinueDay(source)
-                        GoalContinuationDestination.BUDGET -> onBudget(source)
-                        GoalContinuationDestination.TRAINING -> onTraining(source)
+                model.setActive(true)
+                try {
+                    model.continueNavigation.collect { destination ->
+                        when (destination) {
+                            GoalContinuationDestination.DAY -> onContinueDay(source)
+                            GoalContinuationDestination.BUDGET -> onBudget(source)
+                            GoalContinuationDestination.TRAINING -> onTraining(source)
+                        }
                     }
-                }
+                } finally { model.setActive(false) }
             }
         }
         BackHandler(enabled = !state.loading &&

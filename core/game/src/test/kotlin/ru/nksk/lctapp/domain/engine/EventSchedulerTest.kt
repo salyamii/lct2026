@@ -9,6 +9,7 @@ import ru.nksk.lctapp.domain.economy.*
 import ru.nksk.lctapp.domain.game.*
 import ru.nksk.lctapp.domain.pet.*
 import ru.nksk.lctapp.domain.story.StoryState
+import ru.nksk.lctapp.domain.minigame.DeedGameKind
 
 class EventSchedulerTest {
     private val initial = GameState(PetState("PLAIN", PetVisualState.NORMAL), EconomyState(BudgetPlan(100, 0, 0, 0)),
@@ -127,4 +128,214 @@ class EventSchedulerTest {
         send(EngineCommand.CompleteEvent(shown.id, "want1:done"))
         assertEquals(EventExposure("want1", 1, 1, 1, 1), repo.read().eventHistory.last())
     }
+
+    @Test fun recentMechanicDoesNotRepeatUnderAnotherDeedNameWhenAnAlternativeIsEligible() {
+        val varied = catalog.copy(policies = policies.mapValues { (id, policy) ->
+            if (!id.startsWith("job")) policy else policy.copy(deedGameKind =
+                if (id in setOf("job1", "job2")) DeedGameKind.PRECISION else DeedGameKind.MEMORY)
+        })
+        val state = finishedDay(listOf(EventExposure("job1", 4, 4, 1, 1)))
+        val before = state.copy()
+        val plan = varied.plan(state)
+        assertEquals("job3", plan.first { it.startsWith("job") })
+        assertEquals(plan, varied.plan(state))
+        assertEquals(before, state)
+    }
+
+    @Test fun todaysStoryMechanicIsAvoidedEvenWhenBothAlternativesWereOfferedYesterday() {
+        val varied = catalog.copy(deedPool = listOf("job1", "job2", "job3", "job4"),
+            policies = policies.mapValues { (id, policy) -> when (id) {
+                "intro" -> policy.copy(choiceGameKinds = mapOf("intro:done" to DeedGameKind.PRECISION))
+                "job1", "job2" -> policy.copy(deedGameKind = DeedGameKind.PRECISION)
+                "job3", "job4" -> policy.copy(deedGameKind = DeedGameKind.MEMORY)
+                else -> policy
+            } })
+        val state = finishedDay(listOf(EventExposure("job1", 4, 4, 1, 1),
+            EventExposure("job3", 4, 4, 1, 1))).copy(selectedGoalId = "goal")
+
+        val plan = varied.plan(state)
+
+        assertEquals("The authored story keeps its place", "intro", plan.first())
+        assertEquals("A new memory deed avoids today's precision story", "job4", plan.first { it.startsWith("job") })
+        assertEquals(plan, varied.plan(state))
+    }
+
+    @Test fun everySupportedMechanicParticipatesInTodaysVarietyAfterAMixedPreviousDay() {
+        val jobKinds = catalog.deedPool.zip(DeedGameKind.entries).toMap()
+        assertEquals(DeedGameKind.entries.toSet(), jobKinds.values.toSet())
+        val state = finishedDay(catalog.deedPool.map { EventExposure(it, 4, 4, 1, 1) })
+            .copy(selectedGoalId = "goal")
+        for (storyKind in DeedGameKind.entries) {
+            val varied = catalog.copy(policies = policies.mapValues { (id, policy) ->
+                if (id == "intro") policy.copy(choiceGameKinds = mapOf("intro:done" to storyKind))
+                else policy.copy(deedGameKind = jobKinds[id])
+            })
+
+            val plan = varied.plan(state)
+
+            assertEquals("intro", plan.first())
+            val offeredDeed = plan.first { it.startsWith("job") }
+            assertNotEquals("Avoid $storyKind already chosen for the story", storyKind, jobKinds.getValue(offeredDeed))
+            assertEquals(plan, varied.plan(state))
+        }
+    }
+
+    @Test fun oldestFamilyWinsBeforeLifetimeFrequencyAndCatalogOrderBreaksEqualTies() {
+        val state = finishedDay(catalog.deedPool.mapIndexed { index, id ->
+            EventExposure(id, if (index == 1) 1 else 4, null, if (index == 0) 1 else 10)
+        })
+        assertEquals("job2", catalog.plan(state).first { it.startsWith("job") })
+        assertEquals("job1", catalog.plan(initial).first { it.startsWith("job") })
+    }
+
+    @Test fun firstUsefulHintKeepsPriorityButAlreadyOfferedOrCompletedHintDoesNotMonopolizePlans() {
+        val campaign = StoryCampaign(listOf(StoryAct("act", "Act", "day", listOf("intro"), "intro")),
+            deedHints = listOf(StoryDeedHint(StoryCondition.Always, "job8")))
+        val hinted = catalog.copy(storyCampaign = campaign, policies = policies +
+            ("intro" to policies.getValue("intro").copy(storyActId = "act", finishesStoryAct = true)))
+        val first = initial.copy(selectedGoalId = "goal", ownedItems = listOf(OwnedItem("owned", "part")))
+        val firstPlan = hinted.plan(first)
+        assertEquals("intro", firstPlan.first())
+        assertEquals("job8", firstPlan.first { it.startsWith("job") })
+        for (exposure in listOf(EventExposure("job8", 4, null, 1), EventExposure("job8", null, 4, 0, 1))) {
+            val later = finishedDay(listOf(exposure)).copy(selectedGoalId = "goal", ownedItems = first.ownedItems)
+            val plan = hinted.plan(later)
+            assertEquals("intro", plan.first())
+            assertEquals("job1", plan.first { it.startsWith("job") })
+        }
+    }
+
+    @Test fun replacementAndPreviousIdentitiesDoNotMakeAnAlreadySeenFamilyLookNew() {
+        val newWant = content.events.single { it.id == "want1" }.copy(id = "new-want")
+        val newChoice = content.choices.single { it.eventId == "want1" }
+            .copy(id = "new-want:done", eventId = "new-want")
+        for (explicitReplacement in listOf(false, true)) {
+            val varietyCatalog = catalog.copy(
+                content = content.copy(events = content.events + newWant, choices = content.choices + newChoice),
+                policies = policies + ("new-want" to policies.getValue("want1").copy(
+                    scheduling = EventSchedulingPolicy(family = "new-want", kind = EverydayEventKind.WANT))) +
+                    ("want2" to policies.getValue("want2").copy(scheduling = EventSchedulingPolicy(
+                        cooldownDays = 1, family = "old-purchase", kind = EverydayEventKind.WANT,
+                        previousEventIds = if (explicitReplacement) emptySet() else setOf("want1")))),
+                dailyEventPool = listOf("want2", "new-want", "discovery", "fee1"),
+                eventReplacements = if (explicitReplacement) mapOf("want1" to "want2") else emptyMap(),
+            )
+            val plan = varietyCatalog.plan(finishedDay(listOf(EventExposure("want1", 3, 4, 1, 1))))
+            assertTrue("new-want" in plan)
+            assertFalse("want2" in plan)
+        }
+    }
+
+    @Test fun limitedCatalogFallsBackToEligibleRepeatedMechanicsAndKeepsCooldowns() {
+        val precisionOnly = catalog.copy(policies = policies.mapValues { (id, policy) ->
+            if (id.startsWith("job")) policy.copy(deedGameKind = DeedGameKind.PRECISION) else policy
+        })
+        val state = finishedDay(listOf(EventExposure("job1", 4, 4, 1, 1), EventExposure("want1", 4, null, 1)))
+        val plan = precisionOnly.plan(state)
+        assertEquals(4, plan.size)
+        assertEquals("job2", plan.first { it.startsWith("job") })
+        assertFalse("want1" in plan)
+    }
+
+    @Test fun fallbackJobsReconsiderMechanicsAfterEverySelectedSlot() {
+        val deedsOnly = catalog.copy(dailyEventPool = emptyList(), policies = policies.mapValues { (id, policy) ->
+            policy.copy(deedGameKind = when (id) {
+                "job1", "job2" -> DeedGameKind.PRECISION
+                "job3", "job4" -> DeedGameKind.MEMORY
+                "job5", "job6", "job7", "job8" -> DeedGameKind.COMPARISON
+                else -> null
+            })
+        })
+        val plan = deedsOnly.plan(initial)
+        assertEquals(listOf("job1", "job3", "job5"), plan.take(3))
+        assertEquals(4, plan.size)
+    }
+
+    @Test fun carriedOldStoryExcludesItsNewVersionWithoutReplacingTheExistingOccurrence() {
+        val newId = "intro:new-version"
+        val finaleId = "chapter-finale"
+        val oldPolicy = policies.getValue("intro").copy(storyActId = "act")
+        val revised = catalog.copy(
+            content = content.copy(
+                events = content.events + listOf(newId, finaleId).map { id ->
+                    content.events.single { it.id == "intro" }.copy(id = id)
+                },
+                choices = content.choices + listOf(newId, finaleId).map { id ->
+                    content.choices.single { it.eventId == "intro" }.copy(id = "$id:done", eventId = id)
+                },
+            ),
+            policies = policies + ("intro" to oldPolicy) + (newId to oldPolicy.copy(
+                scheduling = oldPolicy.scheduling.copy(family = "intro", previousEventIds = setOf("intro")))) +
+                (finaleId to oldPolicy.copy(finishesStoryAct = true, condition = StoryCondition.EventCompleted(newId),
+                    scheduling = oldPolicy.scheduling.copy(family = finaleId))),
+            introductionId = newId,
+            storyCampaign = StoryCampaign(listOf(StoryAct("act", "Act", "day", listOf(newId, finaleId), finaleId)),
+                completionAliases = mapOf(newId to setOf("intro:done"))),
+        )
+        EventFactory(revised.content, revised.policies, revised.meals, revised.goals, revised.storyCampaign)
+        for (status in listOf(EventStatus.CARRIED, EventStatus.CARRIED_ACTIVE)) {
+            val occurrence = EventOccurrence("existing-story-instance", "intro", EventOrigin.SCHEDULE, status)
+            val state = finishedDay(emptyList()).let { saved -> saved.copy(selectedGoalId = "goal",
+                ownedItems = listOf(OwnedItem("owned", "part")),
+                engine = saved.engine!!.copy(events = listOf(occurrence))) }
+
+            val plan = revised.plan(state)
+
+            assertEquals("intro", plan.first())
+            assertFalse(newId in plan)
+            assertEquals(4, plan.size)
+            assertNull(revised.storyProgress(state).nextEvent(setOf("intro")))
+            assertEquals(listOf(occurrence), state.engine!!.events)
+            assertTrue(state.story.decisions.isEmpty())
+
+            // Completion aliases can also express alternate authored routes. By themselves
+            // they must not make two unresolved event definitions the same scheduling family.
+            val independent = revised.copy(policies = revised.policies + (newId to oldPolicy.copy(
+                scheduling = oldPolicy.scheduling.copy(family = newId, previousEventIds = emptySet()))))
+            assertEquals(newId, independent.storyProgress(state).nextEvent(setOf("intro")))
+        }
+    }
+
+    @Test fun carriedOldRandomExcludesItsNewVersionAndFillsTheDayWithEligibleJobs() {
+        val newId = "discovery:new-version"
+        val revised = catalog.copy(
+            content = content.copy(
+                events = content.events + content.events.single { it.id == "discovery" }.copy(id = newId),
+                choices = content.choices + content.choices.single { it.eventId == "discovery" }
+                    .copy(id = "$newId:done", eventId = newId),
+            ),
+            policies = policies + (newId to policies.getValue("discovery").copy(
+                scheduling = EventSchedulingPolicy(family = "discovery", previousEventIds = setOf("discovery")))),
+            dailyEventPool = listOf(newId),
+        )
+        for (status in listOf(EventStatus.CARRIED, EventStatus.CARRIED_ACTIVE)) {
+            val occurrence = EventOccurrence("existing-random-instance", "discovery", EventOrigin.SCHEDULE, status)
+            val state = finishedDay(emptyList()).let { it.copy(engine = it.engine!!.copy(events = listOf(occurrence))) }
+
+            val plan = revised.plan(state)
+
+            assertEquals("discovery", plan.first())
+            assertFalse(newId in plan)
+            assertEquals(4, plan.size)
+            assertEquals(3, plan.count { it in revised.deedPool })
+            assertEquals(plan, revised.plan(state))
+            assertEquals(listOf(occurrence), state.engine!!.events)
+        }
+    }
+
+    @Test fun twoEverydayVersionsAreNotBothSelectedForAFreshDay() {
+        val sharedFamily = policies.getValue("want1").copy(scheduling = EventSchedulingPolicy(family = "purchase"))
+        val revised = catalog.copy(dailyEventPool = listOf("want1", "want2"),
+            policies = policies + ("want1" to sharedFamily) + ("want2" to sharedFamily))
+
+        val plan = revised.plan(initial)
+
+        assertEquals(1, plan.count { it in revised.dailyEventPool })
+        assertEquals(4, plan.size)
+        assertEquals(3, plan.count { it in revised.deedPool })
+    }
+
+    private fun finishedDay(history: List<EventExposure>) = initial.copy(
+        engine = EngineState("scheduler", 0, 4, DayPhase.FINISHED, 0, 5, true,
+            null, 100, emptyList(), emptyList()), eventHistory = history)
 }

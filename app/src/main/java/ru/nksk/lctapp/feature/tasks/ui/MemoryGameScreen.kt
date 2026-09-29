@@ -16,9 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.Rubik
 import ru.nksk.lctapp.domain.minigame.MemoryState
+import ru.nksk.lctapp.domain.minigame.DeedRewardPreview
 
 /** Shared pair-finding board for training and offered deeds. */
 @Composable
@@ -60,7 +59,7 @@ fun MemoryGameScreen(
                 Modifier.align(Alignment.BottomEnd).size(92.dp).padding(4.dp)) }
             DeedHeader(deed?.title ?: stringResource(R.string.deeds_star_title), onBack = onBack)
         }
-        DeedSheet(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+        DeedGameSheet(deed, DeedRewardPreview.fromMemory(state), modifier = Modifier.weight(1f)) {
             Text(
                 deed?.instructions ?: if (deed != null) "Найди одинаковые пары. Чем меньше ошибок, тем больше награда." else stringResource(R.string.deeds_memory_prompt),
                 fontSize = 18.sp,
@@ -74,8 +73,7 @@ fun MemoryGameScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 DeedChip(stringResource(R.string.deeds_moves, state.moves))
-                if (deed?.storyAction != true) CoinChip(deed?.let { "Награда до ${it.maximumReward} монет" }
-                    ?: stringResource(R.string.deeds_demo_reward, MemoryState.REWARD))
+                if (deed == null) CoinChip(stringResource(R.string.deeds_demo_reward, MemoryState.REWARD))
             }
             Spacer(Modifier.height(12.dp))
             Column(
@@ -89,8 +87,8 @@ fun MemoryGameScreen(
                     ) {
                         rowFaces.forEachIndexed { columnIndex, face ->
                             val index = rowIndex * 4 + columnIndex
-                            val artwork = deed?.pairArtwork?.takeIf { it.size == MemoryState.PAIRS }?.get(face)
-                                ?: defaultMemoryPairArtwork[face]
+                            // The same distinct original finds are used in every story or deed board.
+                            val artwork = defaultMemoryPairArtwork[face]
                             val label = memoryPairNameResource(artwork)?.let { stringResource(it) }
                                 ?: stringResource(R.string.deeds_pair_unknown, face + 1)
                             StarPlateView(

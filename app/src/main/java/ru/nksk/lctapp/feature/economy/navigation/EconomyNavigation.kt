@@ -8,6 +8,7 @@ import ru.nksk.lctapp.domain.economy.BudgetPlanningStage
 import ru.nksk.lctapp.domain.economy.EconomyOperations
 import ru.nksk.lctapp.feature.economy.ui.EconomyAction
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
@@ -18,6 +19,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.awaitCancellation
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.SerialName
@@ -26,6 +28,7 @@ import ru.nksk.lctapp.feature.economy.ui.EconomyScreen
 import ru.nksk.lctapp.feature.economy.ui.EconomyViewModel
 import ru.nksk.lctapp.feature.economy.ui.SavingsScreen
 import ru.nksk.lctapp.feature.economy.ui.savingsBackAction
+import ru.nksk.lctapp.core.ui.game.paymentCoinAmount
 
 @Serializable
 @SerialName("coins") // Preserve the saved route ID of the former placeholder.
@@ -35,12 +38,13 @@ data object Economy : NavKey
 @SerialName("savings")
 data object Savings : NavKey
 
-fun EntryProviderScope<NavKey>.economyEntry(onBack: (Economy) -> Unit, onConfirmed: (Economy) -> Unit,
+fun EntryProviderScope<NavKey>.economyEntry(onBack: (Economy) -> Unit, onConfirmed: (Economy, String?) -> Unit,
     onOpenSavings: (Economy) -> Unit = {}) {
     entry<Economy> { source ->
         val model = hiltViewModel<EconomyViewModel>()
         val state by model.uiState.collectAsStateWithLifecycle()
         val lifecycle = LocalLifecycleOwner.current.lifecycle
+        val currentOnConfirmed by rememberUpdatedState(onConfirmed)
         var exitAfterSave by remember { mutableStateOf(false) }
         var exitMessage by remember { mutableStateOf<String?>(null) }
         val finishExit: () -> Unit = {
@@ -49,9 +53,9 @@ fun EntryProviderScope<NavKey>.economyEntry(onBack: (Economy) -> Unit, onConfirm
                 state.error != null -> Unit
                 economy == null || economy.planning?.stage == BudgetPlanningStage.RECEIPT -> onBack(source)
                 economy.planning == null -> onBack(source)
-                EconomyOperations.allocationRemaining(economy) > 0 -> exitMessage = "Распредели оставшиеся ${EconomyOperations.allocationRemaining(economy)} монет, чтобы продолжить."
+                EconomyOperations.allocationRemaining(economy) > 0 -> exitMessage = "Распредели ещё ${paymentCoinAmount(EconomyOperations.allocationRemaining(economy))}, чтобы продолжить."
                 economy.displayPlan.needs < EconomyOperations.minimumNeeds(economy, state.knownNeeds) ->
-                    exitMessage = "Оставь ещё ${EconomyOperations.minimumNeeds(economy, state.knownNeeds) - economy.displayPlan.needs} монет на необходимое, чтобы на всё хватило."
+                    exitMessage = "Оставь ещё ${paymentCoinAmount(EconomyOperations.minimumNeeds(economy, state.knownNeeds) - economy.displayPlan.needs)} на необходимое."
                 else -> model.onAction(EconomyAction.Confirm)
             }
         }
@@ -69,7 +73,9 @@ fun EntryProviderScope<NavKey>.economyEntry(onBack: (Economy) -> Unit, onConfirm
         }
         LaunchedEffect(model, lifecycle) {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                model.completed.collect { onConfirmed(source) }
+                model.setActive(true)
+                try { model.completed.collect { currentOnConfirmed(source, it.planningId) } }
+                finally { model.setActive(false) }
             }
         }
         exitMessage?.let { message ->
@@ -100,6 +106,12 @@ fun EntryProviderScope<NavKey>.savingsEntry(onBack: (Savings) -> Unit,
         }
         BackHandler { back() }
         val lifecycle = LocalLifecycleOwner.current.lifecycle
+        LaunchedEffect(model, lifecycle) {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                model.setActive(true)
+                try { awaitCancellation() } finally { model.setActive(false) }
+            }
+        }
         SavingsScreen(state, onAction = { action ->
             if (action is EconomyAction.TransferContextPresented || lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) model.onAction(action)
         }, onBack = dropUnlessResumed { back() },

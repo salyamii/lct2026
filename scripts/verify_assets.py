@@ -26,7 +26,7 @@ def catalog_bytes(path):
 
 
 def main():
-    manifest = json.loads((DOCS / "manifest.json").read_text())
+    manifest = json.loads((DOCS / "manifest.json").read_text(encoding="utf-8"))
     assets = manifest["assets"]
     errors = []
     names = [asset["resource"] for asset in assets]
@@ -109,7 +109,7 @@ def main():
         if path.is_file() and str(path) not in catalog_paths:
             errors.append(f"Uncatalogued raster: {path.name}")
     for path in [ROOT / "AGENTS.md", ROOT / "docs/design/README.md", *DOCS.glob("*.md")]:
-        for target in re.findall(r"\]\(([^)]+)\)", path.read_text()):
+        for target in re.findall(r"\]\(([^)]+)\)", path.read_text(encoding="utf-8")):
             if "://" in target or target.startswith("#"):
                 continue
             target = target.split("#", 1)[0]
@@ -136,7 +136,7 @@ def main():
                     rgba = image.convert("RGBA")
                     if rgba.size != (entry["width"], entry["height"]) or sha256(rgba.tobytes()) != entry["rgba_sha256"]:
                         errors.append(f"Launcher canvas/pixel mismatch: {entry['path']}")
-        actual = {str(path.relative_to(ROOT)) for path in (ROOT / "app/src/main/res").glob("mipmap*/ic_launcher*")}
+        actual = {path.relative_to(ROOT).as_posix() for path in (ROOT / "app/src/main/res").glob("mipmap*/ic_launcher*")}
         expected = {e["path"] for e in launcher["outputs"] if "/mipmap" in e["path"]}
         if actual != expected:
             errors.append("Launcher resource files disagree with manifest")

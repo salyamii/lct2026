@@ -62,7 +62,7 @@ private fun AuditEntry.activityRows(catalog: GameCatalog, petName: String, inclu
                 usedReceipts.add(it.operationId)
         }
         return if (fromAvailable != null) {
-            "Потратили ${primary.amount.coinAmount()} из копилки и ${fromAvailable.amount.coinAmount()} из текущих денег"
+            "Потратили ${primary.amount.coinAmount()} из копилки и ${fromAvailable.amount} из денег с собой"
         } else primary.moneyText()
     }
     val rows = mutableListOf<String>()

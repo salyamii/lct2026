@@ -14,9 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,9 +29,10 @@ import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.components.GameArtwork
 import ru.nksk.lctapp.core.ui.theme.Rubik
+import ru.nksk.lctapp.domain.minigame.DeedRewardPreview
 import ru.nksk.lctapp.domain.minigame.DifferencesState
 
-// Полки собираются из находок Смотрителя; отличия — другой предмет в ячейке.
+// Полки собираются из находок Смотрителя; отличия - другой предмет в ячейке.
 private val SHELF_ART = listOf(
     R.drawable.deed_pair_key,
     R.drawable.deed_pair_armillary,
@@ -67,7 +66,7 @@ fun DifferencesGameScreen(
                 Modifier.align(Alignment.BottomEnd).size(92.dp).padding(4.dp)) }
             DeedHeader(deed?.title ?: "Сверка находок", onBack = onBack)
         }
-        DeedSheet(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+        DeedGameSheet(deed, DeedRewardPreview.fromDifferences(state), modifier = Modifier.weight(1f)) {
             Text(
                 deed?.instructions ?: "Сравни полки и найди ${DifferencesState.DIFF_COUNT} отличий на нижней!",
                 fontSize = 18.sp,
@@ -78,8 +77,8 @@ fun DifferencesGameScreen(
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 DeedChip("Найдено: ${state.found.size} из ${DifferencesState.DIFF_COUNT}")
-                if (deed?.storyAction != true) {
-                    CoinChip(deed?.let { "Награда до ${it.maximumReward} монет" } ?: "Награда: 10")
+                if (deed == null) {
+                    CoinChip("Награда: 10")
                 }
             }
             Spacer(Modifier.height(12.dp))

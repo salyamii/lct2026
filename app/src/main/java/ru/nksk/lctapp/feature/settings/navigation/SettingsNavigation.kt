@@ -6,6 +6,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import android.content.Intent
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -24,6 +27,10 @@ import kotlinx.coroutines.launch
 import ru.nksk.lctapp.feature.settings.sharing.createParentCodeShareIntent
 import ru.nksk.lctapp.feature.settings.ui.SettingsScreen
 import ru.nksk.lctapp.feature.settings.ui.SettingsViewModel
+import ru.nksk.lctapp.feature.settings.ui.SettingsAction
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Serializable
 @SerialName("settings")
@@ -40,6 +47,12 @@ fun EntryProviderScope<NavKey>.settingsEntry(onBack: (Settings) -> Unit, debugBu
         val scope = rememberCoroutineScope()
         var sharingCode by remember { mutableStateOf(false) }
         var shareError by remember { mutableStateOf(false) }
+        var pickingDiagnostics by rememberSaveable { mutableStateOf(false) }
+        val diagnosticsFile = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
+            pickingDiagnostics = false
+            // The result can arrive before this entry is RESUMED. The chosen document still belongs to this request.
+            uri?.let { model.onAction(SettingsAction.ExportDiagnostics(it.toString())) }
+        }
         SettingsScreen(state,
             onAction = { if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) model.onAction(it) },
             onBack = dropUnlessResumed { onBack(source) },
@@ -47,6 +60,24 @@ fun EntryProviderScope<NavKey>.settingsEntry(onBack: (Settings) -> Unit, debugBu
             debugButton = debugButton,
             sharingCode = sharingCode,
             shareError = shareError,
+            pickingDiagnostics = pickingDiagnostics,
+            onDownloadDiagnostics = {
+                if (!pickingDiagnostics && !model.uiState.value.diagnostics.saving &&
+                    lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                    pickingDiagnostics = true
+                    model.onAction(SettingsAction.PrepareDiagnosticsExport)
+                    try {
+                        val timestamp = SimpleDateFormat("yyyy-MM-dd-HHmmss", Locale.ROOT).format(Date())
+                        diagnosticsFile.launch("paws-coins-diagnostics-$timestamp.txt")
+                    } catch (cancelled: CancellationException) {
+                        pickingDiagnostics = false
+                        throw cancelled
+                    } catch (_: RuntimeException) {
+                        pickingDiagnostics = false
+                        model.onAction(SettingsAction.DiagnosticsPickerFailed)
+                    }
+                }
+            },
             onShareCode = {
                 val qr = state.qr
                 if (qr != null && !sharingCode && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {

@@ -8,6 +8,43 @@ class AppNavigatorTest {
     private data object Home : NavKey
     private data class Detail(val id: String) : NavKey
 
+    @Test fun budgetConfirmationReturnsToItsChapterReviewAndStoryResumesWithoutMenuHop() {
+        val day = Detail("day")
+        val practice = Detail("chapter-practice")
+        val budget = Detail("budget")
+        val stack = mutableListOf<NavKey>(Home, day, practice, budget)
+        val navigator = AppNavigator(stack)
+        navigator.finishBudget(budget, practice)
+        assertEquals(listOf(Home, day, practice), stack)
+        navigator.returnToOrReplace(practice, day)
+        assertEquals(listOf(Home, day), stack)
+        navigator.finishBudget(budget, practice)
+        assertEquals(listOf(Home, day), stack)
+    }
+
+    @Test fun completedReviewIsReplacedWhenStoryWasOpenedFromTheMenu() {
+        val practice = Detail("chapter-practice")
+        val day = Detail("day")
+        val stack = mutableListOf<NavKey>(Home, practice)
+        AppNavigator(stack).returnToOrReplace(practice, day)
+        assertEquals(listOf(Home, day), stack)
+    }
+
+    @Test fun earlierBudgetMovesAboveTheChapterReviewWithoutDroppingItOrDuplicatingKeys() {
+        val budget = Detail("budget")
+        val savings = Detail("savings")
+        val goal = Detail("goal")
+        val practice = Detail("chapter-practice")
+        val stack = mutableListOf<NavKey>(Home, budget, savings, goal, practice)
+        val navigator = AppNavigator(stack)
+        navigator.moveToTop(practice, budget)
+        assertEquals(listOf(Home, savings, goal, practice, budget), stack)
+        navigator.moveToTop(practice, budget)
+        assertEquals(1, stack.count { it == budget })
+        navigator.finishBudget(budget, practice)
+        assertEquals(listOf(Home, savings, goal, practice), stack)
+    }
+
     @Test fun goalAndSavingsCrossLinksReuseTheOriginalEntry() {
         val goal = Detail("goal")
         val savings = Detail("savings")

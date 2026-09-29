@@ -20,6 +20,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -43,7 +46,8 @@ internal fun SettingsGearButton(onClick: () -> Unit, onLongClick: (() -> Unit)? 
 @Composable
 internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -> Unit, onBack: () -> Unit,
     onCopyProfile: (String) -> Unit, debugButton: (@Composable () -> Unit)? = null,
-    onShareCode: () -> Unit = {}, sharingCode: Boolean = false, shareError: Boolean = false) {
+    onShareCode: () -> Unit = {}, sharingCode: Boolean = false, shareError: Boolean = false,
+    onDownloadDiagnostics: () -> Unit = {}, pickingDiagnostics: Boolean = false) {
     Column(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding().background(GamePaper)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -55,6 +59,8 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
         Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)) {
             SoundSettingsCard(state.sound, onAction)
+            DemoSettingsCard(state.demo, onAction)
+            DiagnosticsSettingsCard(state.diagnostics, pickingDiagnostics, onDownloadDiagnostics)
             SettingsCard {
                 Text("Для родителей", color = GameInk, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 AdventureBody("Покажите код родителю, чтобы он мог видеть прогресс и присылать подарки.")
@@ -96,6 +102,56 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
     }
     state.cloud.restorePreview?.let { preview ->
         CloudRestoreDialog(preview, busy = state.cloud.busy, onAction = onAction)
+    }
+}
+
+@Composable
+private fun DemoSettingsCard(state: DemoSettingsUiState, onAction: (SettingsAction) -> Unit) {
+    SettingsCard {
+        Row(Modifier.fillMaxWidth().heightIn(min = 56.dp)
+            .toggleable(value = state.enabled == true, enabled = state.canChange, role = Role.Switch,
+                onValueChange = { onAction(SettingsAction.SetDemoModeEnabled(it)) }),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text("Режим бога", color = GameInk, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                AdventureBody("Для показа: питомец не устаёт, предметы большой цели бесплатны.")
+            }
+            Switch(checked = state.enabled == true, onCheckedChange = null, enabled = state.canChange,
+                colors = SwitchDefaults.colors(checkedTrackColor = AdventureLime, checkedThumbColor = GameInk,
+                    uncheckedTrackColor = GamePaper, uncheckedThumbColor = GameInk,
+                    uncheckedBorderColor = GameInk.copy(alpha = .35f)))
+        }
+        AdventureBody("Прогресс и полученные предметы остаются в этой игре после выключения режима.")
+        if (state.loading || state.saving) {
+            AdventureBody(if (state.saving) "Сохраняем…" else "Открываем настройку режима…")
+        }
+        state.error?.let { error ->
+            AdventureBody(if (error == DemoSettingsError.READ) "Не удалось прочитать настройку режима. Попробуйте ещё раз."
+                else "Не удалось сохранить настройку режима. Попробуйте ещё раз.")
+            GameActionButton("Повторить", { onAction(SettingsAction.RetryDemoMode) }, enabled = !state.saving,
+                style = GameActionStyle.SECONDARY)
+        }
+    }
+}
+
+@Composable
+private fun DiagnosticsSettingsCard(state: DiagnosticsUiState, picking: Boolean, onDownload: () -> Unit) {
+    SettingsCard {
+        Text("Журнал ошибок", color = GameInk, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        AdventureBody("Сохрани журнал, чтобы передать его для разбора ошибок.")
+        GameActionButton("Скачать журнал", onDownload, enabled = !picking && !state.saving)
+        val message = when {
+            picking -> "Выбираем, куда сохранить журнал…"
+            state.saving -> "Сохраняем журнал…"
+            state.result == DiagnosticsExportResult.SAVED -> "Журнал сохранён."
+            state.result == DiagnosticsExportResult.EXPORT_FAILED -> "Не удалось сохранить журнал. Выбери другое место и попробуй ещё раз."
+            state.result == DiagnosticsExportResult.PICKER_FAILED -> "Не удалось открыть выбор файла. Попробуй ещё раз."
+            else -> null
+        }
+        message?.let {
+            Text(it, Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                color = GameInk, style = MaterialTheme.typography.bodyMedium)
+        }
     }
 }
 
@@ -144,17 +200,17 @@ private fun ParentCodeContent(state: SettingsUiState, onAction: (SettingsAction)
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { ParentLinkQrCode(qr) }
                 AdventurePrimaryButton(if (sharingCode) "Готовим изображение…" else "Поделиться QR-кодом",
                     onShareCode, enabled = !sharingCode)
-                if (shareError) AdventureBody("Не удалось открыть отправку. Попробуйте ещё раз.")
+                if (shareError) AdventureBody("Не удалось поделиться кодом. Попробуйте ещё раз.")
             }
             if (!state.backendConfigured) {
-                AdventureBody("Подключение родителей станет доступно после подключения сервера.")
+                AdventureBody("Родитель сможет подключиться, когда заработает сервер.")
             } else when (state.registrationStatus) {
                 ProfileRegistrationStatus.LOADING -> {
                     GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
                     AdventureBody("Регистрируем профиль на сервере…")
                 }
                 ProfileRegistrationStatus.ERROR -> {
-                    AdventureBody("Не удалось зарегистрировать профиль. Код сохранён — попробуйте ещё раз.")
+                    AdventureBody("Не удалось зарегистрировать профиль. Код сохранён - попробуйте ещё раз.")
                     OutlinedButton(onClick = { onAction(SettingsAction.RetryRegistration) },
                         modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = GameInk)) {

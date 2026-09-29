@@ -27,15 +27,15 @@ import kotlin.math.roundToInt
 @Composable
 internal fun GameBackdrop(@DrawableRes resource: Int, blurred: Boolean, modifier: Modifier = Modifier) {
     if (!blurred || LocalInspectionMode.current) {
-        GameArtwork(resource, null, if (blurred) modifier.blur(12.dp) else modifier,
-            contentScale = ContentScale.Crop)
+        GameArtwork(resource, null, if (blurred) modifier.blur(4.dp) else modifier,
+            contentScale = ContentScale.Crop, revealWithScene = false)
         return
     }
     val context = LocalContext.current
     val request = remember(context, resource) {
         ImageRequest.Builder(context).data(resource)
             // Keep the entire image's aspect ratio. Crop happens only when it is displayed.
-            .size(256, 256).scale(Scale.FIT).precision(Precision.EXACT)
+            .size(BACKDROP_MAX_SIDE, BACKDROP_MAX_SIDE).scale(Scale.FIT).precision(Precision.EXACT)
             .allowHardware(false)
             .transformations(SoftBackdropTransformation)
             .transformationDispatcher(Dispatchers.Default)
@@ -43,26 +43,37 @@ internal fun GameBackdrop(@DrawableRes resource: Int, blurred: Boolean, modifier
     }
     key(request) {
         var settled by remember { mutableStateOf(false) }
-        AsyncImage(request, null, modifier, contentScale = ContentScale.Crop,
-            onSuccess = { settled = true }, onError = { settled = true })
-        ReportGameArtworkLoad(request, settled)
+        var failed by remember { mutableStateOf(false) }
+        if (failed) {
+            // A decorative transform must not leave the scene without its location.
+            // This one fallback has its own load report and cannot retry the blur in a loop.
+            GameArtwork(resource, null, modifier, contentScale = ContentScale.Crop, revealWithScene = false)
+        } else {
+            AsyncImage(request, null, modifier, contentScale = ContentScale.Crop,
+                onSuccess = { settled = true }, onError = { failed = true })
+            ReportGameArtworkLoad(request, settled)
+        }
     }
 }
 
+private const val BACKDROP_MAX_SIDE = 384
+private const val BACKDROP_BLUR_RADIUS = 3
+
 /** A bounded software transform works on API 24+ and shares the existing Coil memory cache. */
 private object SoftBackdropTransformation : Transformation {
-    override val cacheKey = "soft-backdrop-v1:256:radius6:passes3"
+    override val cacheKey = "soft-backdrop-v2:$BACKDROP_MAX_SIDE:radius$BACKDROP_BLUR_RADIUS:passes3"
 
     override suspend fun transform(input: Bitmap, size: Size): Bitmap {
         // Some decoders sample in powers of two. Bound the transform's working set too.
-        val scale = minOf(1f, 256f / maxOf(input.width, input.height))
+        // Preserve enough scenery detail when the portrait image is cropped to a short stage.
+        val scale = minOf(1f, BACKDROP_MAX_SIDE.toFloat() / maxOf(input.width, input.height))
         val small = if (scale < 1f) Bitmap.createScaledBitmap(input,
             (input.width * scale).roundToInt().coerceAtLeast(1),
             (input.height * scale).roundToInt().coerceAtLeast(1), true) else input
         try {
             val pixels = IntArray(small.width * small.height)
             small.getPixels(pixels, 0, small.width, 0, 0, small.width, small.height)
-            val blurred = blurBackdropPixels(pixels, small.width, small.height, radius = 6)
+            val blurred = blurBackdropPixels(pixels, small.width, small.height, radius = BACKDROP_BLUR_RADIUS)
             return Bitmap.createBitmap(blurred, small.width, small.height, Bitmap.Config.ARGB_8888)
         } finally {
             // Never mutate or recycle the input: another request can still own it.

@@ -38,7 +38,7 @@ class PipesGameViewModel @Inject constructor(private val savedState: SavedStateH
         savedState["endpoint_firsts"] = game.endpoints.map { it.first }.toIntArray()
         savedState["endpoint_seconds"] = game.endpoints.map { it.second }.toIntArray()
         savedState["path_colors"] = game.paths.keys.toIntArray()
-        savedState["path_cells"] = game.paths.values.map { it.toIntArray() }
+        savedState["path_cells"] = game.paths.values.map { it.toIntArray() }.toTypedArray()
         savedState["active_color"] = game.activeColor
         savedState["active_path"] = game.activePath.toIntArray()
         mutableUiState.value = PipesGameUiState(game)
@@ -55,7 +55,13 @@ class PipesGameViewModel @Inject constructor(private val savedState: SavedStateH
             )
         }
         val pathColors = savedState.get<IntArray>("path_colors") ?: IntArray(0)
-        val pathCells = savedState.get<Array<IntArray>>("path_cells").orEmpty()
+        // Accept the former in-memory List shape as well as the saved array representation.
+        val pathCells = when (val saved = savedState.get<Any>("path_cells")) {
+            null -> emptyList()
+            is Array<*> -> saved.map { it as IntArray }
+            is List<*> -> saved.map { it as IntArray }
+            else -> error("Unsupported saved pipe path representation")
+        }
         val paths = pathColors.indices.associate { i -> pathColors[i] to pathCells[i].toList() }
         return PipesState(
             endpoints = endpoints,

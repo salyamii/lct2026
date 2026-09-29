@@ -14,20 +14,22 @@ import ru.nksk.lctapp.domain.engine.EventLayout
 import ru.nksk.lctapp.core.ui.components.*
 
 @Composable
-internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit) {
+internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit,
+    onLoadingContinue: () -> Unit = onBack) {
     // Saving overlays the existing card. It must not insert a row, shift the scroll
     // position or recolour every choice immediately before the route disappears.
     BackHandler(enabled = state.busy) {}
     Box(Modifier.fillMaxSize()) {
         DayContent(state.copy(busy = false),
             onAction = { if (!state.busy) onAction(it) },
-            onBack = { if (!state.busy) onBack() })
+            onBack = { if (!state.busy) onBack() },
+            onLoadingContinue = { if (!state.busy) onLoadingContinue() })
         if (state.busy) Box(Modifier.fillMaxSize().pointerInput(Unit) {
             awaitPointerEventScope {
                 while (true) awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() }
             }
         }) {
-            GameLoadingIndicator(Modifier.align(Alignment.Center).safeDrawingPadding())
+            GameLoadingIndicator(Modifier.align(Alignment.Center).safeDrawingPadding(), delayMillis = 300)
         }
         if (state.retryRequired && !state.busy) AlertDialog(
             onDismissRequest = onBack,
@@ -41,9 +43,16 @@ internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
 }
 
 @Composable
-private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit) {
+private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit,
+    onLoadingContinue: () -> Unit) {
     if (state.loading) {
-        GameLoadingScreen()
+        Box(Modifier.fillMaxSize()) {
+            GameLoadingScreen()
+            // Keep the shared coin centered while the existing exit remains reachable.
+            Box(Modifier.align(Alignment.BottomCenter).safeDrawingPadding().padding(24.dp)) {
+                AdventurePrimaryButton("Вперёд", onLoadingContinue)
+            }
+        }
         return
     }
     if (state.failed) {
@@ -102,26 +111,9 @@ private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
             ) { Text(text) }
         }
     }
-    if (state.showMeals) AlertDialog(
-        onDismissRequest = { if (!state.busy) onAction(DayAction.CloseMeals) },
-        containerColor = GamePaper, titleContentColor = GameInk, textContentColor = GameInk,
-        title = { Text("${state.petName} проголодался") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Еда утолит голод, а сон вернёт силы.")
-                state.message?.let { Text(it) }
-                state.meals.forEach { meal ->
-                    meal.spending?.let { Text(it) }
-                    meal.consequence?.let { Text(it) }
-                    GameButton(meal.label, meal.enabled && !state.busy) { onAction(DayAction.Feed(meal.id)) }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton({ onAction(DayAction.CloseMeals) }, enabled = !state.busy,
-                colors = ButtonDefaults.textButtonColors(contentColor = GameInk)) { Text("Вернуться") }
-        },
-    )
+    if (state.showMeals) MealSelectionDialog(state.meals, state.busy,
+        onChoose = { onAction(DayAction.Feed(it)) }, onDismiss = { onAction(DayAction.CloseMeals) },
+        message = state.message)
 }
 
 @Composable

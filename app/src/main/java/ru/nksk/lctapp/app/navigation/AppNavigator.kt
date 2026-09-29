@@ -25,6 +25,14 @@ internal class AppNavigator(private val backStack: MutableList<NavKey>) {
         }
     }
 
+    /** Reuse a lower singleton without discarding the in-progress prerequisite above it. */
+    fun moveToTop(source: NavKey, destination: NavKey) {
+        if (backStack.lastOrNull() != source || source == destination) return
+        val existing = backStack.indexOfLast { it == destination }
+        if (existing >= 0) backStack.removeAt(existing)
+        backStack.add(destination)
+    }
+
     fun goBack(source: NavKey) {
         if (backStack.lastOrNull() == source) {
             goBack()
@@ -35,6 +43,20 @@ internal class AppNavigator(private val backStack: MutableList<NavKey>) {
         if (backStack.lastOrNull() == source && backStack.size > 1) {
             backStack.subList(1, backStack.size).clear()
         }
+    }
+
+    /** A budget opened by a chapter review returns to that review, keeping its accepted answers. */
+    fun finishBudget(source: NavKey, chapterPractice: NavKey) {
+        if (backStack.lastOrNull() != source) return
+        if (backStack.dropLast(1).contains(chapterPractice)) navigateToExisting(source, chapterPractice)
+        else returnToRoot(source)
+    }
+
+    /** Finish a prerequisite screen without leaving it beneath a newly opened story screen. */
+    fun returnToOrReplace(source: NavKey, destination: NavKey) {
+        if (backStack.lastOrNull() != source) return
+        if (backStack.contains(destination)) navigateToExisting(source, destination)
+        else replace(source, destination)
     }
 
     fun replace(source: NavKey, destination: NavKey) {

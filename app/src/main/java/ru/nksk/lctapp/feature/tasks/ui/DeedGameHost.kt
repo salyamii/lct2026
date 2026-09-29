@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 internal fun DeedGameHost(state: DeedGameUiState, onRetry: () -> Unit, onBack: () -> Unit,
+    onSkipGame: () -> Unit = {},
     content: @Composable () -> Unit) {
     if (state.presentation == null) {
         Surface(Modifier.fillMaxSize()) {
@@ -22,16 +23,25 @@ internal fun DeedGameHost(state: DeedGameUiState, onRetry: () -> Unit, onBack: (
             }
         }
     } else {
-        Box(Modifier.fillMaxSize()) {
-            content()
-            if (state.busy || state.message != null) Surface(
-                Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
-                color = DeedColors.Cream,
-            ) {
-                Column(Modifier.navigationBarsPadding().padding(16.dp)) {
-                    if (state.busy) GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
-                    state.message?.let { Text(it, color = DeedColors.Text) }
-                    if (state.canRetry) Button(onRetry, enabled = !state.busy) { Text("Повторить") }
+        Column(Modifier.fillMaxSize().then(if (state.demoMode) Modifier.statusBarsPadding() else Modifier)) {
+            if (state.demoMode) Surface(color = DeedColors.Cream) {
+                Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Режим бога", style = MaterialTheme.typography.labelMedium)
+                    TextButton(onSkipGame, enabled = state.canSkipGame && !state.busy) { Text("Пропустить игру") }
+                }
+            }
+            Box(Modifier.fillMaxWidth().weight(1f)) {
+                content()
+                if (state.busy || state.message != null) Surface(
+                    Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
+                    color = DeedColors.Cream,
+                ) {
+                    Column(Modifier.navigationBarsPadding().padding(16.dp)) {
+                        if (state.busy) GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
+                        state.message?.let { Text(it, color = DeedColors.Text) }
+                        if (state.canRetry) Button(onRetry, enabled = !state.busy) { Text("Повторить") }
+                    }
                 }
             }
         }

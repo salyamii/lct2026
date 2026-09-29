@@ -13,9 +13,12 @@ import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
 import ru.nksk.lctapp.app.LctApp
+import ru.nksk.lctapp.data.diagnostics.AppDiagnostics
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject lateinit var diagnostics: AppDiagnostics
     private var splashVisible by mutableStateOf(true)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,5 +41,15 @@ class MainActivity : ComponentActivity() {
         setContent {
             LctApp(startupAnimationPlaying = !splashVisible)
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        diagnostics.updateContext("lifecycle", "foreground")
+    }
+
+    override fun onStop() {
+        diagnostics.updateContext("lifecycle", "background")
+        super.onStop()
     }
 }

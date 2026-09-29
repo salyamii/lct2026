@@ -58,7 +58,7 @@ data class FinancialPeriod(
     val missingMilestones: List<FinancialMilestone> get() = buildList {
         if (!needsProvided) add(FinancialMilestone.PROVIDE_NEEDS)
         if (savingPractice?.let { FinancialProgressionPolicy.summary(it).ready } != true) add(FinancialMilestone.SAVE_FOR_GOAL)
-        if (!FinancialProgressionPolicy.reviewReady(reviewEvidence)) add(FinancialMilestone.REVIEW_PLAN)
+        if (!FinancialProgressionPolicy.chapterReviewReady(reviewEvidence)) add(FinancialMilestone.REVIEW_PLAN)
     }
 }
 

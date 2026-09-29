@@ -92,7 +92,10 @@ for filename, schema_name in schema_map.items():
     if "profileId" in examples[filename]: assert examples[filename]["profileId"] == DEVICE
 
 archive = (BASE / "examples/world-snapshot.json").read_text(encoding="utf-8")
-assert examples["world-snapshot.json"]["formatVersion"] == 5
+assert examples["world-snapshot.json"]["worldFormatVersion"] == 1
+assert "history" not in examples["world-snapshot.json"]
+assert "archivedRuns" not in examples["world-snapshot.json"]
+assert examples["snapshot-upload.json"]["payloadKind"] == "CURRENT_WORLD"
 assert examples["snapshot-upload.json"]["snapshotJson"] == archive
 assert examples["snapshot-download-response.json"]["snapshotJson"] == archive
 assert examples["snapshot-upload-response.json"]["checksum"] == examples["world-snapshot.json"]["checksum"]

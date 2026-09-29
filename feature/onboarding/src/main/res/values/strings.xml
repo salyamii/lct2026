@@ -4,8 +4,8 @@
     <string name="onboarding_description">Решай, на что потратить монеты, помогай друзьям и исследуй волшебный мир вместе с героями</string>
     <string name="onboarding_start">Начать приключение</string>
     <string name="onboarding_starting">Начинаем…</string>
-    <string name="onboarding_choose_first">Сначала выберите персонажа</string>
-    <string name="onboarding_selection_required">Чтобы начать приключение, выбери персонажа нажав на него</string>
+    <string name="onboarding_choose_first">Сначала выбери персонажа</string>
+    <string name="onboarding_selection_required">Нажми на персонажа, с которым хочешь отправиться в приключение.</string>
     <string name="onboarding_understood">Понятно</string>
     <string name="onboarding_unavailable">Персонаж пока недоступен\nОткроется во время приключения</string>
     <string name="onboarding_owl">Сова. Пока недоступна</string>

@@ -154,7 +154,7 @@ private fun DiaryMoney(summary: DaySummaryUiState) {
         }
         summary.netChange?.let { net ->
             val amount = if (net.signum() > 0) "+${diaryNumber(net)}" else diaryNumber(net)
-            DiaryNote("Изменение за день: $amount монет")
+            DiaryNote("Разница за день: $amount")
         }
     }
 }
@@ -166,7 +166,7 @@ private fun DiaryMoneyCard(label: String, amount: BigInteger?, modifier: Modifie
             Text(label, color = DiarySecondary, fontFamily = Nunito, fontSize = 14.sp, lineHeight = 20.sp)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 GameArtwork(R.drawable.menu_coin, null, Modifier.size(22.dp))
-                Text(amount?.let(::diaryNumber) ?: "—", Modifier.weight(1f), color = GameInk,
+                Text(amount?.let(::diaryNumber) ?: "-", Modifier.weight(1f), color = GameInk,
                     fontFamily = Rubik, fontSize = 22.sp, lineHeight = 28.sp)
             }
         }

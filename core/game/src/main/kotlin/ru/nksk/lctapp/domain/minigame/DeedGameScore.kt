@@ -17,27 +17,24 @@ class DeedGameScore private constructor(
             DeedGameKind.COMPARISON -> attempts == PriceQuizState.QUESTION_COUNT
             DeedGameKind.PRECISION -> attempts == TargetStopState.ROUNDS
             DeedGameKind.LIGHTS -> attempts == 1 && correct == 1
-            DeedGameKind.SEQUENCE -> attempts == SequenceState.ROUNDS
+            DeedGameKind.SEQUENCE -> SequenceState.isSupportedRoundLimit(attempts)
             DeedGameKind.PIPES -> attempts == 1 && correct == 1
             DeedGameKind.DIFFERENCES -> correct == DifferencesState.DIFF_COUNT && attempts >= DifferencesState.DIFF_COUNT
             DeedGameKind.STACKING -> attempts == StackingState.ROUNDS
         }) { "Invalid completed mini-game result" }
     }
     /** Completed paid work earns at least one coin; a zero authored reward stays zero. */
-    fun reward(maximum: Long): Long {
-        require(maximum >= 0)
-        if (maximum == 0L) return 0
-        // Split the multiplication to preserve exact rounding without overflowing a large maximum.
-        return (maximum / attempts * correct + maximum % attempts * correct / attempts).coerceAtLeast(1)
-    }
+    fun reward(maximum: Long): Long = deedReward(maximum, correct, attempts)
 
     companion object {
         fun fromMemory(state: MemoryState): DeedGameScore? =
             if (state.won && state.faces.size == MemoryState.PAIRS * 2 &&
                 state.faces.groupingBy { it }.eachCount().values.all { it == 2 } &&
                 state.matched == state.faces.indices.toSet() && state.pending == null &&
-                state.faceUp.isEmpty() && state.moves >= MemoryState.PAIRS
-            ) DeedGameScore(DeedGameKind.MEMORY, MemoryState.PAIRS, state.moves) else null
+                state.faceUp.isEmpty() && state.moves >= MemoryState.PAIRS &&
+                state.recallMistakes in 0..(state.moves - MemoryState.PAIRS)
+            ) DeedGameScore(DeedGameKind.MEMORY, MemoryState.PAIRS,
+                MemoryState.PAIRS + state.recallMistakes) else null
 
         fun fromComparison(state: PriceQuizState): DeedGameScore? =
             if (state.questions.size == PriceQuizState.QUESTION_COUNT &&
@@ -56,11 +53,8 @@ class DeedGameScore private constructor(
             ) DeedGameScore(DeedGameKind.LIGHTS, 1, 1) else null
 
         fun fromSequence(state: SequenceState): DeedGameScore? =
-            if (state.finished && state.round == SequenceState.ROUNDS && state.lastCorrect != null &&
-                state.correct in 0..SequenceState.ROUNDS &&
-                state.sequence.size in SequenceState.FIRST_ROUND_LENGTH..SequenceState.MAX_ROUND_LENGTH &&
-                state.sequence.all { it in SequenceState.SIGNALS.indices }
-            ) DeedGameScore(DeedGameKind.SEQUENCE, state.correct, SequenceState.ROUNDS) else null
+            if (state.isValid && state.finished && state.lastCorrect != null
+            ) DeedGameScore(DeedGameKind.SEQUENCE, state.correct, state.roundLimit) else null
 
         fun fromPipes(state: PipesState): DeedGameScore? =
             if (state.won && PipesState.isLayoutValid(state.endpoints) &&
@@ -85,10 +79,10 @@ class DeedGameScore private constructor(
             ) DeedGameScore(DeedGameKind.STACKING, state.placed, StackingState.ROUNDS) else null
 
         private fun List<Int>.isValidPipePath(connection: PipeEndpoints): Boolean {
-            // Тропинку можно вести с любого конца пары — важна непрерывность, не направление.
-            val straight = firstOrNull() == connection.first && lastOrNull() == connection.second
-            val reversed = firstOrNull() == connection.second && lastOrNull() == connection.first
-            if (!straight && !reversed) return false
+            // Either endpoint may start the same continuous path.
+            val forward = firstOrNull() == connection.first && lastOrNull() == connection.second
+            val backward = firstOrNull() == connection.second && lastOrNull() == connection.first
+            if (!forward && !backward) return false
             if (size != distinct().size) return false
             return zipWithNext().all { (a, b) ->
                 val distance = kotlin.math.abs(a / PipesState.SIZE - b / PipesState.SIZE) +
@@ -97,4 +91,13 @@ class DeedGameScore private constructor(
             }
         }
     }
+}
+
+/** Shared by completed scores and read-only previews; this calculation never awards coins. */
+internal fun deedReward(maximum: Long, correct: Int, attempts: Int): Long {
+    require(maximum >= 0)
+    require(attempts > 0 && correct in 0..attempts)
+    if (maximum == 0L) return 0
+    // Split the multiplication to preserve exact rounding without overflowing a large maximum.
+    return (maximum / attempts * correct + maximum % attempts * correct / attempts).coerceAtLeast(1)
 }

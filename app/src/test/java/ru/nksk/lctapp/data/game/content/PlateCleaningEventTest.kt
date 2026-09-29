@@ -24,7 +24,7 @@ class PlateCleaningEventTest {
     @Test fun installedV2RemainsImmutableAndInstallationOnlyAppendsV3Definitions() {
         // This frozen installed row must not be reconstructed from the incoming version.
         val installedEvent = EventDefinition(LEGACY, EventType.RANDOM, "Пластина покрылась налётом",
-            "На звёздной пластине выступил плотный налёт. Обычная салфетка его не берёт — нужен очищающий состав.",
+            "На звёздной пластине выступил плотный налёт. Обычная салфетка его не берёт - нужен очищающий состав.",
             null, null, null, 0, null, null)
         val installedChoice = EventChoiceDefinition("$LEGACY:pay", LEGACY, 0, "Оплатить · 3",
             -3, null, null, GoalImpact.NEUTRAL)

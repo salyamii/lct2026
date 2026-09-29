@@ -295,22 +295,27 @@ class BundledCampaignBalanceTest {
             DeedGameKind.COMPARISON -> DeedGameScore.fromComparison(PriceQuizState.create().copy(
                 current = PriceQuizState.QUESTION_COUNT, correctAnswers = PriceQuizState.QUESTION_COUNT * cap / 100))
             DeedGameKind.MEMORY -> DeedGameScore.fromMemory(MemoryState((0 until MemoryState.PAIRS).flatMap { listOf(it, it) })
-                .let { it.copy(matched = it.faces.indices.toSet(), moves = (MemoryState.PAIRS * 100 + cap - 1) / cap) })
+                .let {
+                    val attempts = (MemoryState.PAIRS * 100 + cap - 1) / cap
+                    it.copy(matched = it.faces.indices.toSet(), moves = attempts,
+                        recallMistakes = attempts - MemoryState.PAIRS)
+                })
             // Лампы и концы не делятся на доли: партия либо решена, либо нет.
             DeedGameKind.LIGHTS -> DeedGameScore.fromLights(LightsState(
                 List(LightsState.SIZE * LightsState.SIZE) { false }, moves = 1))
             DeedGameKind.SEQUENCE -> DeedGameScore.fromSequence(SequenceState(
-                sequence = List(SequenceState.FIRST_ROUND_LENGTH) { 0 },
+                sequence = List(SequenceState.MAX_ROUND_LENGTH) { 0 },
                 round = SequenceState.ROUNDS,
                 correct = SequenceState.ROUNDS * cap / 100,
                 lastCorrect = true,
             ))
             DeedGameKind.PIPES -> DeedGameScore.fromPipes(PipesState(PipesState.PUZZLE, paths = solvedPipePaths()))
-            // Отличия всегда ищутся до конца, поэтому их доля всегда полная.
+            // All differences are found, but missed cells lower the completed score.
             DeedGameKind.DIFFERENCES -> DeedGameScore.fromDifferences(DifferencesState.create().let { board ->
                 board.differences.fold(board) { state, cell -> state.tap(cell) }
+                    .copy(taps = (DifferencesState.DIFF_COUNT * 100 + cap - 1) / cap)
             })
-            // Шестираундовая партия округляет долю вниз, как PRECISION выше.
+            // Ограниченное число ящиков округляет долю вниз, как PRECISION выше.
             DeedGameKind.STACKING -> DeedGameScore.fromStacking(StackingState(
                 locked = List(StackingState.ROUNDS * cap / 100) { StackedBlock(0, StackingState.START_WIDTH) },
                 blockWidth = StackingState.START_WIDTH,

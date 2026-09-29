@@ -71,6 +71,31 @@ class MealPolicyTest {
         assertEquals(before.ownedItems, after.ownedItems)
     }
 
+    @Test fun upgradedMealsRestoreCurrentEnergyAndMoodWithoutChangingTheNextMorningLimit() {
+        for ((price, restoration) in listOf(7L to 1, 10L to 2)) {
+            val meal = MealDefinition("upgraded-$price", price, PetVisualState.HAPPY, energyRestore = restoration)
+            val before = state(20).let { it.copy(engine = it.engine!!.copy(energy = 1, nextMorningEnergy = 3)) }
+            val after = MealPolicy(listOf(basic, meal, free)).apply(before, meal.id, 5)
+            assertEquals(20 - price, after.economy.availableBalance)
+            assertEquals(1 + restoration, after.engine!!.energy)
+            assertEquals(3, after.engine!!.nextMorningEnergy)
+            assertEquals(PetVisualState.HAPPY, after.pet.visualState)
+            assertTrue(after.engine!!.ateToday)
+            assertEquals(before.story, after.story)
+        }
+    }
+
+    @Test fun restoringFoodCannotRaiseTheDailyMaximum() {
+        val meal = MealDefinition("feast", 10, PetVisualState.HAPPY, energyRestore = 2)
+        val meals = MealPolicy(listOf(basic, meal))
+        for (energy in listOf(4, 5)) {
+            val before = state(20).let { it.copy(engine = it.engine!!.copy(energy = energy)) }
+            val after = meals.apply(before, meal.id, 5)
+            assertEquals(5, after.engine!!.energy)
+            assertNull(after.engine!!.nextMorningEnergy)
+        }
+    }
+
     private fun state(coins: Long) = GameState(
         PetState("PLAIN", PetVisualState.NORMAL), EconomyState(BudgetPlan(coins, 0, 0, 0)),
         StoryState(null, null, null, emptyList()), 0, 0, emptyList(),

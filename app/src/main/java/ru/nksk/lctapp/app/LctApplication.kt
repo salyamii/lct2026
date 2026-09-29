@@ -7,6 +7,7 @@ import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
 import coil.ImageLoader
 import coil.ImageLoaderFactory
+import ru.nksk.lctapp.data.diagnostics.AppDiagnostics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -20,11 +21,14 @@ import javax.inject.Inject
 class LctApplication : Application(), ImageLoaderFactory, Configuration.Provider {
     @Inject lateinit var artworkImageLoader: ImageLoader
     @Inject lateinit var workerFactory: HiltWorkerFactory
+    @Inject lateinit var diagnostics: AppDiagnostics
     @Inject internal lateinit var identities: ParentIdentityStore
 
     override fun onCreate() {
         super.onCreate()
         Telemetry.init(this, BuildConfig.OTEL_EXPORTER_ENDPOINT)
+        // Record locally first, then delegate to telemetry/system crash handlers.
+        diagnostics.install()
         // Link telemetry to the persisted device identity as soon as DataStore provides it.
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             runCatching { Telemetry.attachDeviceId(identities.getOrCreate().deviceId) }

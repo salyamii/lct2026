@@ -1,6 +1,7 @@
 package ru.nksk.lctapp.feature.tasks.ui
 
 import ru.nksk.lctapp.core.ui.components.GameLoadingIndicator
+import ru.nksk.lctapp.core.ui.components.MealChoices
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -106,13 +107,9 @@ private fun DeedsContent(onTraining: () -> Unit, onExit: () -> Unit,
                         }
                         state.message?.let { Text(it, color = DeedColors.Text) }
                         if (state.hasCurrentEvent) OutlinedButton(onCurrentEvent, enabled = !state.busy) { Text("Вернуться к событию") }
-                        state.meals.forEach { meal ->
-                            meal.spending?.let { Text(it) }
-                            meal.consequence?.let { Text(it, color = DeedColors.Text) }
-                            Button({ onFeed(meal.id) }, enabled = meal.enabled && !state.busy) { Text(meal.label) }
-                        }
+                        MealChoices(state.meals, state.busy, onFeed)
                         if (!state.loading && !state.failed && state.offers.isEmpty()) {
-                            Text("Пока нет предложенных дел. Продолжи день, чтобы встретить новые поручения.", color = DeedColors.TextSoft)
+                            Text("Пока нет новых дел. Продолжи день, чтобы узнать, кому нужна помощь.", color = DeedColors.TextSoft)
                         }
                     }
                 }

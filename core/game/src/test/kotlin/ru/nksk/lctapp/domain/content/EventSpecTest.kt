@@ -9,6 +9,15 @@ import ru.nksk.lctapp.domain.location.GameLocation
 import ru.nksk.lctapp.domain.pet.PetVisualState
 
 class EventSpecTest {
+    @Test fun leisureRecoveryIsExplicitAndHasOneAuthoredSource() {
+        val play = EventChoiceSpec("play", "Сыграть", gameKind = DeedGameKind.PRECISION, energyRestore = 1)
+        val result = spec(listOf(play, EventChoiceSpec("pass", "Пройти мимо"))).compile()
+        assertEquals(mapOf("event:play" to 1), result.policy.choiceEnergyRestores)
+        assertTrue(runCatching { spec(listOf(play.copy(energyRestore = -1))).compile() }.isFailure)
+        assertTrue(runCatching { spec(listOf(play)).copy(policy = EventPolicy(0,
+            choiceEnergyRestores = mapOf("event:play" to 1))).compile() }.isFailure)
+    }
+
     @Test fun destinationBelongsToTheChosenActionAndDoesNotComeFromTheCardScene() {
         val result = spec(listOf(
             EventChoiceSpec("return", "Вернуться", destination = GameLocation.OBSERVATORY),

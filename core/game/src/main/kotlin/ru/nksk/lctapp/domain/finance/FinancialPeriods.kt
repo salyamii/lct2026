@@ -133,15 +133,22 @@ object FinancialPeriods {
         val options = listOf(expense, Math.addExact(expense, maxOf(1L, period.deposited)),
             Math.addExact(expense, maxOf(2L, Math.addExact(period.deposited, 1))))
         return FinancialQuestion(id, kind,
-            "Из текущих денег потратили ${period.spentAvailable} монет, а из копилки — ${period.spentSavings}. " +
-                "В копилку положили ${period.deposited} монет, а обратно взяли ${period.withdrawn}. Сколько всего потратили на покупки?",
+            "Посчитаем расходы за время подготовки к этой цели.\n" +
+                "Заплатили монетами с собой: ${period.spentAvailable}.\n" +
+                "Взяли на покупки из копилки: ${period.spentSavings}.\n" +
+                ifNotZero(period.deposited, "Отдельно положили в копилку") +
+                ifNotZero(period.withdrawn, "Взяли из копилки обратно") +
+                "Сколько монет ушло именно на покупки?",
             // Rotate the position using a stable ID; the correct answer is not always the first button.
-            options.map { FinancialAnswerOption(it.toString(), "$it монет") }.let { values ->
+            options.map { FinancialAnswerOption(it.toString(), coinAmount(it)) }.let { values ->
                 val rotation = (id.hashCode().toLong().and(0x7fffffff) % values.size).toInt()
                 values.drop(rotation) + values.take(rotation)
             }, expense.toString(),
-            "Потратили ${period.spentAvailable} + ${period.spentSavings} = $expense монет. " +
-                "Монеты, которые перекладываем в копилку и обратно, остаются нашими — это не трата.",
+            "Складываем две суммы, которыми оплатили покупки: ${period.spentAvailable} + ${period.spentSavings} = $expense. " +
+                "Всего потратили ${coinAmount(expense, accusative = true)}. " +
+                if (period.deposited > 0 || period.withdrawn > 0)
+                    "Когда просто кладём монеты в копилку или берём обратно, они остаются у нас. Это не покупки."
+                else "Это монеты, которые отдали за покупки и услуги.",
             sourceActionIds = listOf(period.id), ledgerTask = task)
     }
 
@@ -150,11 +157,11 @@ object FinancialPeriods {
         val comparison = comparisons.lastOrNull { it.actual.availableExpenses > 0 || it.actual.deposited > 0 || it.actual.withdrawn > 0 }
             ?: comparisons.lastOrNull()
         if (comparison == null) return FinancialQuestion(id, FinancialQuestionKind.PLAN_REVIEW,
-            "Представь: на ремонт рюкзака ушло больше монет, чем собирались. Что делать с бюджетом?",
-            listOf(FinancialAnswerOption("compare", "Проверить траты и распределить оставшиеся монеты заново"),
-                FinancialAnswerOption("erase", "Оставить прежние цифры и не учитывать ремонт"),
-                FinancialAnswerOption("money", "Увеличить цифры, чтобы потраченные монеты вернулись")),
-            "compare", "Ремонт уже оплачен. Считаем оставшиеся монеты и сначала оставляем на еду.",
+            "Представь: ты отложил 5 монет на ремонт рюкзака, а заплатить пришлось 8. Что теперь сделать с планом расходов?",
+            listOf(FinancialAnswerOption("compare", "Учесть ремонт и заново распределить остаток"),
+                FinancialAnswerOption("erase", "Не учитывать ремонт в расходах"),
+                FinancialAnswerOption("money", "Записать больше монет, чем осталось")),
+            "compare", "Ремонт обошёлся на 8 − 5 = 3 монеты дороже. Посчитай, сколько осталось, сначала оставь на еду, а затем обнови остальные суммы в плане.",
             sourceActionIds = listOf(period.id), reviewEvidence = PeriodReviewEvidence(id, null, false, false, guidedRecovery = true))
         val actual = comparison.actual
         val section = when {
@@ -174,23 +181,25 @@ object FinancialPeriods {
         }
         val correct = when { spent > planned -> "more"; spent < planned -> "less"; else -> "equal" }
         val prompt = if (section == BudgetSection.SAVINGS)
-            "Хотели добавить в копилку $planned монет. Положили ${actual.deposited}, а взяли обратно ${actual.withdrawn}. " +
-                "Удалось сберечь больше, меньше или столько же, сколько собирались?"
-        else "На $label оставили $planned монет, а потратили $spent. " +
-            "Потратили больше, меньше или столько же, сколько собирались?"
+            "Мы планировали добавить в копилку ${coinAmount(planned, accusative = true)}.\n" +
+                "Положили: ${actual.deposited}. Взяли обратно: ${actual.withdrawn}.\n" +
+                "Если вычесть то, что взяли обратно, получилось отложить больше, меньше или столько же, сколько планировали?"
+        else "Мы выделили на $label ${coinAmount(planned, accusative = true)}, а потратили $spent.\n" +
+            "Сравни траты с планом: потратили больше, меньше или столько же?"
         val explanation = if (section == BudgetSection.SAVINGS && spent < 0) {
             val taken = Math.negateExact(spent)
-            "Взяли на $taken монет больше, чем положили: ${actual.withdrawn} − ${actual.deposited} = $taken. " +
-                "Копилка стала меньше, хотя мы хотели добавить $planned монет."
+            "Взяли из копилки больше, чем положили: ${actual.withdrawn} − ${actual.deposited} = $taken. " +
+                "Накопления уменьшились на ${coinAmount(taken, accusative = true)}. " +
+                "Мы планировали добавить $planned, поэтому результат меньше плана."
         } else {
             val difference = when {
-                spent > planned -> "На ${Math.subtractExact(spent, planned)} монет больше: $spent − $planned = ${Math.subtractExact(spent, planned)}."
-                spent < planned -> "На ${Math.subtractExact(planned, spent)} монет меньше: $planned − $spent = ${Math.subtractExact(planned, spent)}."
-                else -> "Столько же, сколько собирались: $planned монет."
+                spent > planned -> "Это на ${coinAmount(Math.subtractExact(spent, planned), accusative = true)} больше плана: $spent − $planned = ${Math.subtractExact(spent, planned)}."
+                spent < planned -> "Это на ${coinAmount(Math.subtractExact(planned, spent), accusative = true)} меньше плана: $planned − $spent = ${Math.subtractExact(planned, spent)}."
+                else -> "Это ровно столько, сколько планировали: $spent = $planned."
             }
             if (section == BudgetSection.SAVINGS)
-                "Всего сберегли ${actual.deposited} − ${actual.withdrawn} = $spent монет. $difference"
-            else difference
+                "Из того, что положили в копилку, вычитаем снятое: ${actual.deposited} − ${actual.withdrawn} = $spent. $difference"
+            else "Мы выделили на $label ${coinAmount(planned, accusative = true)}, а потратили $spent. $difference"
         }
         val recoveryPlan = comparisons.lastOrNull { candidate ->
             candidate.revision.ordinal > comparison.revision.ordinal && candidate.managedPlan == true &&
@@ -198,8 +207,8 @@ object FinancialPeriods {
         }?.revision?.id
         return FinancialQuestion(id, FinancialQuestionKind.PLAN_REVIEW,
             prompt,
-            listOf(FinancialAnswerOption("more", "Больше, чем собирались"), FinancialAnswerOption("less", "Меньше, чем собирались"),
-                FinancialAnswerOption("equal", "Столько же")), correct, explanation,
+            listOf(FinancialAnswerOption("more", "Больше, чем планировали"), FinancialAnswerOption("less", "Меньше, чем планировали"),
+                FinancialAnswerOption("equal", "Ровно столько, сколько планировали")), correct, explanation,
             sourceActionIds = listOf(period.id) + comparison.sourceActionIds,
             reviewEvidence = PeriodReviewEvidence(id, comparison.revision.id, true, false,
                 managedPlan = comparison.managedPlan, recoveryPlanRevisionId = recoveryPlan))
@@ -207,11 +216,13 @@ object FinancialPeriods {
 
     private fun savingPracticeQuestion(period: FinancialPeriod, id: String): FinancialQuestion =
         FinancialQuestion(id, FinancialQuestionKind.SAVING_PRACTICE,
-            "Как копить на снаряжение и не забывать о еде?",
-            listOf(FinancialAnswerOption("repeat", "Каждый раз оставлять на еду, а часть новых монет откладывать"),
-                FinancialAnswerOption("split", "Разделить одно пополнение на много маленьких"),
-                FinancialAnswerOption("circle", "Взять монеты из копилки и вернуть — тогда их станет больше")),
-            "repeat", "Каждый раз бережём часть новых монет. Так копилка растёт, а на еду остаётся.", sourceActionIds = listOf(period.id))
+            "Мы копим на снаряжение. Как пополнять копилку каждую неделю, чтобы монет хватало и на еду?",
+            listOf(FinancialAnswerOption("repeat", "Оставлять на еду, потом откладывать часть остатка"),
+                FinancialAnswerOption("split", "Разделить прежний взнос и больше не добавлять"),
+                FinancialAnswerOption("circle", "Вынимать и возвращать одни и те же монеты")),
+            "repeat", "Когда получаем деньги, сначала оставляем на еду, а часть остатка кладём в копилку. " +
+                "Если 10 монет внести один раз или дважды по 5, добавится всё равно 10. Чтобы накопления росли дальше, нужны новые пополнения.",
+            sourceActionIds = listOf(period.id))
 
     /** A teaching situation uses current balances and a real catalog price, without purchasing anything. */
     private fun consequenceQuestion(state: GameState, period: FinancialPeriod, id: String,
@@ -228,34 +239,43 @@ object FinancialPeriods {
         if (!affordable) {
             correctId = "not_affordable"
             options = listOf(
-                FinancialAnswerOption(correctId, "Нет, не хватает ${price - available} монет"),
-                FinancialAnswerOption("automatic_savings", "Да, недостающее само возьмётся из копилки"),
-                FinancialAnswerOption("plan_pays", "Да, если записать покупку в бюджет"),
+                FinancialAnswerOption(correctId, "Нет, монет с собой не хватает"),
+                FinancialAnswerOption("automatic_savings", "Да, можно посчитать и монеты в копилке"),
+                FinancialAnswerOption("plan_pays", "Да, достаточно добавить покупку в план"),
             )
-            explanation = "Не хватает $price − $available = ${price - available} монет. " +
-                "Копилка не оплачивает покупку сама. Деньги из неё берём отдельным действием."
+            explanation = "У нас с собой ${coinAmount(available)}, а покупка стоит $price. " +
+                "Не хватает $price − $available = ${price - available}. " +
+                "Здесь мы платим только тем, что есть с собой. Копилку не трогаем, а запись в плане не добавляет денег."
         } else {
             correctId = if (covered) "needs_covered" else "needs_uncovered"
-            val uncovered = if (available < knownNeeds)
-                "Нет, на еду не хватало и раньше, а теперь останется ещё меньше"
-            else "Нет, после покупки на еду не хватит"
+            val uncovered = "Нет, на еду не хватит"
             options = listOf(
-                FinancialAnswerOption("needs_covered", "Да, на еду останется достаточно"),
+                FinancialAnswerOption("needs_covered", "Да, оставшихся монет хватит на еду"),
                 FinancialAnswerOption("needs_uncovered", uncovered),
-                FinancialAnswerOption("automatic_savings", "Да, покупку сама оплатит копилка"),
+                FinancialAnswerOption("automatic_savings", "После покупки с собой останется столько же"),
             )
-            explanation = "После покупки останется $available − $price = $remainder монет. " +
-                if (covered) "На еду нужно $knownNeeds — хватает."
-                else if (available < knownNeeds) "На еду не хватало и раньше, а теперь не хватит ${knownNeeds - checkNotNull(remainder)} монет."
-                else "На еду нужно $knownNeeds, не хватает ${knownNeeds - checkNotNull(remainder)} монет."
+            explanation = "После покупки останется $available − $price = $remainder. " +
+                if (covered) "На еду нужно $knownNeeds, а осталось $remainder. Этой суммы достаточно."
+                else if (available < knownNeeds) "На еду не хватало и раньше. " +
+                    "Теперь нужно $knownNeeds, а осталось $remainder: не хватает $knownNeeds − $remainder = ${knownNeeds - checkNotNull(remainder)}."
+                else "На еду нужно $knownNeeds, а осталось $remainder: не хватает $knownNeeds − $remainder = ${knownNeeds - checkNotNull(remainder)}."
         }
         val rotation = (id.hashCode().toLong().and(0x7fffffff) % options.size).toInt()
         return FinancialQuestion(id, FinancialQuestionKind.CONSEQUENCE,
-            if (!affordable) "У нас $available монет, а «$title» стоит $price. В копилке $savings. " +
-                "Можем оплатить покупку, не открывая копилку?"
-            else "У нас $available монет. На еду до следующей недели нужно $knownNeeds. " +
-                "Если купим «$title» за $price, хватит ли после этого на еду?",
+            if (!affordable) "У нас с собой ${coinAmount(available)}, а в копилке - $savings.\n«$title» стоит $price. " +
+                "Сможем купить, если копилку не трогать?"
+            else "У нас с собой ${coinAmount(available)}. На еду до следующей недели нужно $knownNeeds.\n" +
+                "Купим «$title» за $price, не трогая копилку. Хватит ли остатка на еду?",
             options.drop(rotation) + options.take(rotation), correctId, explanation,
             sourceActionIds = listOf(period.id), comparisonFamily = "optional_purchase")
     }
+
+    private fun ifNotZero(amount: Long, label: String): String = if (amount > 0) "$label: $amount.\n" else ""
+
+    private fun coinAmount(amount: Long, accusative: Boolean = false): String = "$amount ${when {
+        amount % 100 in 11L..14L -> "монет"
+        amount % 10 == 1L -> if (accusative) "монету" else "монета"
+        amount % 10 in 2L..4L -> "монеты"
+        else -> "монет"
+    }}"
 }

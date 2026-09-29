@@ -441,7 +441,7 @@ class EconomyViewModelTest {
         assertTrue(belowMinimum.canConfirm)
         model.onAction(EconomyAction.Confirm)
         advanceUntilIdle()
-        assertEquals(Unit, model.completed.first())
+        assertEquals(BudgetCompletion(null), model.completed.first())
         assertEquals(original, repo.state.value)
         assertTrue(repo.attemptedRequests.isEmpty())
 
@@ -453,7 +453,7 @@ class EconomyViewModelTest {
         assertTrue(reopened.uiState.value.budgetScreenState().budget.canConfirm)
         reopened.onAction(EconomyAction.Confirm)
         advanceUntilIdle()
-        assertEquals(Unit, reopened.completed.first())
+        assertEquals(BudgetCompletion(null), reopened.completed.first())
         assertNull(reopened.uiState.value.error)
         assertEquals(empty, repo.state.value)
         assertNull(repo.state.value!!.economy.planning)
@@ -765,6 +765,30 @@ class EconomyViewModelTest {
         assertEquals(FinancialPosition(110, 20, 35), context.before)
     }
 
+    @Test fun uncertainTransferRetryShowsItsOwnReceiptAfterOtherIncomeWithoutReadingFullHistory() = runTest(dispatcher) {
+        val repo = BudgetRepository(planned())
+        val model = model(repo)
+        advanceUntilIdle()
+        model.onAction(EconomyAction.Withdraw(10))
+        repo.failReplyAfterCommit = true
+        model.onAction(EconomyAction.ConfirmWithdrawal)
+        advanceUntilIdle()
+        assertNotNull(model.uiState.value.error)
+        val original = repo.attemptedRequests.last()
+        val committed = checkNotNull(repo.state.value)
+        repo.state.value = committed.copy(economy = EconomyOperations.earn(committed.economy, 50))
+        advanceUntilIdle()
+        repo.forbidFullHistoryRead = true
+        model.onAction(EconomyAction.Retry)
+        advanceUntilIdle()
+        assertNull(model.uiState.value.error)
+        assertEquals(original, repo.attemptedRequests.last())
+        assertEquals(1, repo.requests.count { it.id == original.id })
+        assertEquals(160L, model.uiState.value.economy!!.availableBalance)
+        assertEquals(SavingsReceipt(10, true, 100, 30, 110, 20), model.uiState.value.transferReceipt)
+        assertEquals(listOf(original.id), repo.receiptReads)
+    }
+
     @Test fun tappingTheAlreadySelectedDirectionKeepsItsVisibleContext() = runTest(dispatcher) {
         val repo = BudgetRepository(planned())
         val model = model(repo)
@@ -946,6 +970,10 @@ private class BudgetRepository(initial: GameState, var history: List<AuditEntry>
     val requests = mutableListOf<EngineRequest>()
     val attemptedRequests = mutableListOf<EngineRequest>()
     var failNext = false
+    var failReplyAfterCommit = false
+    var forbidFullHistoryRead = false
+    val receiptReads = mutableListOf<String>()
+    private val committedReceipts = mutableMapOf<String, AuditEntry>()
     var failHistory = false
     var historyReads = 0
     var historyLoader: (suspend () -> List<AuditEntry>)? = null
@@ -953,14 +981,29 @@ private class BudgetRepository(initial: GameState, var history: List<AuditEntry>
     override suspend fun read() = state.value
     override suspend fun initializeIfAbsent(initial: GameState) = state.value ?: initial.also { state.value = it }
     override suspend fun readHistory(): List<AuditEntry> {
+        check(!forbidFullHistoryRead) { "Transfer feedback must not load the full history" }
         historyReads++
         if (failHistory) error("History unavailable")
         return historyLoader?.invoke() ?: history
     }
+    override suspend fun readCommandReceipt(requestId: String): AuditEntry? {
+        receiptReads += requestId
+        return committedReceipts[requestId]
+    }
     override suspend fun commit(request: EngineRequest, context: DecisionContext?, contentFingerprint: String?,
         facts: (GameState, GameState, String, Long) -> List<AnalyticsFact>, transform: (GameState) -> GameState): GameState {
         attemptedRequests += request
-        return update(transform).also { requests += request }
+        committedReceipts[request.id]?.let {
+            check(it.request == request)
+            return checkNotNull(state.value)
+        }
+        val before = checkNotNull(state.value)
+        return update(transform).also { after ->
+            requests += request
+            committedReceipts[request.id] = AuditEntry("command:run:${request.id}", requests.size.toLong(), "run",
+                AuditType.COMMAND, request = request, before = before, after = after)
+            if (failReplyAfterCommit) { failReplyAfterCommit = false; error("Reply lost after commit") }
+        }
     }
     override suspend fun update(transform: (GameState) -> GameState): GameState {
         if (failNext) { failNext = false; error("Disk full") }

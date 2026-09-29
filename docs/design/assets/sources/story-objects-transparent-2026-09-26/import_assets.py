@@ -7,7 +7,7 @@ from PIL import Image
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[4]
 MANIFEST = ROOT / "docs/design/assets/manifest.json"
-CATEGORY = "Transparent story objects — 2026-09-26"
+CATEGORY = "Transparent story objects - 2026-09-26"
 manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
 entries = []
 for source in json.loads((HERE / "provenance.json").read_text(encoding="utf-8")):

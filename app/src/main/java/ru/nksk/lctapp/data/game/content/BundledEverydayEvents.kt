@@ -14,7 +14,7 @@ internal fun GameCatalog.withLegacyEverydayEvents(): GameCatalog {
     val resin = "figma-2313-2-v1"
     val item = "figma-2164-2-explorer-cap-v1"
     val events = listOf(
-        EventDefinition(cap, EventType.WANT, "Кепка — только сегодня",
+        EventDefinition(cap, EventType.WANT, "Кепка - только сегодня",
             "Кепка исследователя исчезнет с витрины завтра. Купить сейчас или сохранить деньги на путь?",
             null, null, null, 0, null, null),
         EventDefinition(resin, EventType.RANDOM, "Рюкзак испачкан смолой",

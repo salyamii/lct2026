@@ -24,7 +24,7 @@ class SettingsScreenTest {
         compose.setContent { LCTAppTheme {
             SettingsScreen(SettingsUiState(loading = false, profileId = ProfileId), { action = it }, {}, {})
         } }
-        compose.onNodeWithText("Показать код для родителей").assertIsEnabled().performClick()
+        compose.onNodeWithText("Показать код для родителей").performScrollTo().assertIsEnabled().performClick()
         compose.runOnIdle { assertEquals(SettingsAction.CreateParentCode, action) }
         compose.onNodeWithText("Инструменты разработчика").assertDoesNotExist()
     }
@@ -34,7 +34,7 @@ class SettingsScreenTest {
             SettingsScreen(readyState(), {}, {}, {})
         } }
         compose.onNodeWithContentDescription("Код для подключения родителя").performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText("Подключение родителей станет доступно после подключения сервера.")
+        compose.onNodeWithText("Родитель сможет подключиться, когда заработает сервер.")
             .performScrollTo().assertIsDisplayed()
     }
 
@@ -120,6 +120,40 @@ class SettingsScreenTest {
         } }
         compose.onNodeWithText("Восстановить эту игру").assertIsNotEnabled()
         compose.onNodeWithText("Оставить текущую игру").assertIsNotEnabled()
+    }
+
+    @Test fun diagnosticsCanBeSavedBeforeProfileLoadsWithoutCloudSetup() {
+        var requests = 0
+        compose.setContent { LCTAppTheme {
+            SettingsScreen(SettingsUiState(), {}, {}, {}, onDownloadDiagnostics = { requests++ })
+        } }
+        compose.onNodeWithText("Скачать журнал").performScrollTo().assertIsEnabled().performClick()
+        compose.runOnIdle { assertEquals(1, requests) }
+    }
+
+    @Test fun diagnosticsPickerPreventsRepeatedDownloadTaps() {
+        compose.setContent { LCTAppTheme {
+            SettingsScreen(SettingsUiState(), {}, {}, {}, pickingDiagnostics = true,
+                onDownloadDiagnostics = { error("The picker is already open") })
+        } }
+        compose.onNodeWithText("Скачать журнал").performScrollTo().assertIsNotEnabled()
+    }
+
+    @Test fun diagnosticsWritePreventsRepeatedDownloadAndShowsItsProgress() {
+        compose.setContent { LCTAppTheme {
+            SettingsScreen(SettingsUiState(diagnostics = DiagnosticsUiState(saving = true)), {}, {}, {},
+                onDownloadDiagnostics = { error("The export is already running") })
+        } }
+        compose.onNodeWithText("Скачать журнал").performScrollTo().assertIsNotEnabled()
+        compose.onNodeWithText("Сохраняем журнал…").performScrollTo().assertIsDisplayed()
+    }
+
+    @Test fun completedDiagnosticsExportShowsConfirmation() {
+        compose.setContent { LCTAppTheme {
+            SettingsScreen(SettingsUiState(diagnostics = DiagnosticsUiState(result = DiagnosticsExportResult.SAVED)), {}, {}, {})
+        } }
+        compose.onNodeWithText("Журнал сохранён.").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Скачать журнал").assertIsEnabled()
     }
 
     private fun readyState() = SettingsUiState(loading = false, profileId = ProfileId,

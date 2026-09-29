@@ -35,6 +35,10 @@ import ru.nksk.lctapp.domain.analytics.SkillEvaluator
 import ru.nksk.lctapp.domain.history.AuditEntry
 import ru.nksk.lctapp.domain.history.AuditType
 import ru.nksk.lctapp.domain.history.HistorySourceGuard
+import ru.nksk.lctapp.domain.history.HistoryFactLookup
+import ru.nksk.lctapp.domain.demo.DemoPreferences
+import ru.nksk.lctapp.domain.demo.DemoPreferencesRepository
+import ru.nksk.lctapp.domain.demo.DisabledDemoPreferencesRepository
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DeedGameViewModelTest {
@@ -42,6 +46,70 @@ class DeedGameViewModelTest {
     private val store = ViewModelStore()
     @Before fun setup() { Dispatchers.setMain(dispatcher) }
     @After fun cleanup() { store.clear(); Dispatchers.resetMain() }
+
+    @Test fun ordinarySessionsNeverOfferOrSubmitASkip() = runTest(dispatcher) {
+        val f = fixture()
+        runCurrent()
+        val before = f.repo.read()
+        assertFalse(f.model.uiState.value.canSkipGame)
+        assertFalse(f.model.uiState.value.demoMode)
+        f.model.skipGame()
+        runCurrent()
+        assertEquals(before, f.repo.read())
+        assertEquals(0, f.repo.writes)
+    }
+
+    @Test fun demoSkipsStoryBoardWithoutPlayingOrReadingHistoricalAnswerEvidence() = runTest(dispatcher) {
+        val f = fixture(storyGame = true, demoPreferences = MutableDemoPreferences(true))
+        runCurrent()
+        assertTrue(f.model.uiState.value.canSkipGame)
+        f.repo.forbidFullHistoryRead = true
+        f.repo.beforeFactRead = { error("Skipping must not look up quiz answers") }
+        val before = f.repo.read()
+        f.model.skipGame()
+        runCurrent()
+        val request = f.repo.committed.last()
+        assertTrue(request.demoMode)
+        assertTrue(request.command is EngineCommand.SkipMiniGame)
+        val skipped = request.command as EngineCommand.SkipMiniGame
+        assertEquals(f.id, skipped.occurrenceId)
+        assertNotNull(skipped.choiceId)
+        assertEquals(1, f.repo.writes)
+        assertEquals(before.economy, f.repo.read().economy)
+        assertEquals(before.story.decisions.size + 1, f.repo.read().story.decisions.size)
+        assertEquals(EventStatus.COMPLETED, f.repo.read().engine!!.events.single { it.id == f.id }.status)
+    }
+
+    @Test fun lostSkipReplyKeepsOneDemoIntentAfterThePreferenceIsDisabled() = runTest(dispatcher) {
+        val preferences = MutableDemoPreferences(true)
+        val f = fixture(demoPreferences = preferences)
+        runCurrent()
+        val before = f.repo.read()
+        val maximum = f.model.uiState.value.presentation!!.maximumReward
+        val exits = mutableListOf<String?>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { f.model.exit.collect { exits += it } }
+        f.repo.afterWrite = { throw IOException("Committed reply was lost") }
+        f.model.skipGame()
+        f.model.skipGame()
+        runCurrent()
+        val original = f.repo.attempted.last()
+        val committed = f.repo.read()
+        assertTrue(original.demoMode)
+        assertTrue(original.command is EngineCommand.SkipMiniGame)
+        assertEquals(before.economy.balance + maximum, committed.economy.balance)
+        assertTrue(f.model.uiState.value.canRetry)
+        assertFalse(f.model.uiState.value.canSkipGame)
+        assertTrue(exits.isEmpty())
+        preferences.setDemoModeEnabled(false)
+        f.repo.afterWrite = {}
+        runCurrent()
+        f.model.retry()
+        runCurrent()
+        assertEquals(original, f.repo.attempted.last())
+        assertEquals(committed, f.repo.read())
+        assertEquals(1, f.repo.writes)
+        assertEquals(listOf("Игра пропущена · режим бога"), exits)
+    }
 
     @Test fun activeDeedKeepsItsOwnLocationAudioAndOccurrenceIdentity() = runTest(dispatcher) {
         val f = fixture()
@@ -80,7 +148,6 @@ class DeedGameViewModelTest {
             assertTrue(presentation.instructions!!.contains(contextWord))
             assertTrue(presentation.instructions.contains("по две карточки"))
             assertFalse(presentation.instructions.contains("маркер"))
-            assertEquals(8, presentation.pairArtwork.distinct().size)
             assertEquals(before, repo.read())
             assertTrue(repo.attempted.isEmpty())
         }
@@ -249,11 +316,67 @@ class DeedGameViewModelTest {
         assertEquals(1, f.repo.writes)
     }
 
+    @Test fun newAnswerDuringFactWriteUsesOnlyIndexedLookupsAndRetriesWithoutDuplicates() = runTest(dispatcher) {
+        val f = fixture()
+        runCurrent()
+        val before = f.repo.read()
+        f.repo.forbidFullHistoryRead = true
+        val gate = CompletableDeferred<Unit>()
+        f.repo.beforeFacts = { gate.await() }
+        val first = PriceQuizEvidence("bounded-series", listOf(PriceQuizAnswerEvidence(0, 80, 20, true, true, false)))
+        val second = first.copy(answers = first.answers + PriceQuizAnswerEvidence(1, 10, 60, false, true, false))
+        f.model.recordComparisonAnswers(first)
+        runCurrent()
+        f.model.recordComparisonAnswers(second)
+        runCurrent()
+        assertTrue(f.repo.recordedFacts.isEmpty())
+        gate.complete(Unit)
+        runCurrent()
+        assertEquals(PriceQuizEvidenceMapper.eventIds(second, f.id), f.repo.recordedFacts.map { it.eventId }.toSet())
+        assertEquals(2, f.repo.recordedFacts.size)
+        assertTrue(f.repo.factReadRequests.all { it.size <= 2 && it.all(PriceQuizEvidenceMapper.eventIds(second, f.id)::contains) })
+        assertEquals(before, f.repo.read())
+        assertNull(f.model.uiState.value.message)
+        f.model.recordComparisonAnswers(second)
+        runCurrent()
+        assertEquals(2, f.repo.recordedFacts.size)
+        assertEquals(0, f.repo.writes)
+        assertNull(f.model.uiState.value.message)
+    }
+
+    @Test fun newAnswerDuringAnAlreadySavedAnswerLookupIsNotLost() = runTest(dispatcher) {
+        val f = fixture()
+        runCurrent()
+        f.repo.forbidFullHistoryRead = true
+        val first = PriceQuizEvidence("lookup-series", listOf(PriceQuizAnswerEvidence(0, 80, 20, true, true, false)))
+        f.model.recordComparisonAnswers(first)
+        runCurrent()
+        assertEquals(1, f.repo.recordedFacts.size)
+        val gate = CompletableDeferred<Unit>()
+        f.repo.beforeFactRead = { gate.await() }
+        f.model.recordComparisonAnswers(first)
+        runCurrent()
+        val second = first.copy(answers = first.answers + PriceQuizAnswerEvidence(1, 10, 60, false, true, false))
+        f.model.recordComparisonAnswers(second)
+        gate.complete(Unit)
+        runCurrent()
+        assertEquals(2, f.repo.recordedFacts.size)
+        assertEquals(PriceQuizEvidenceMapper.eventIds(second, f.id), f.repo.recordedFacts.map { it.eventId }.toSet())
+        assertNull(f.model.uiState.value.message)
+
+        f.model.recordComparisonAnswers(second.copy(answers = second.answers.map { it.copy(pickedLeft = !it.pickedLeft) }))
+        runCurrent()
+        assertEquals(2, f.repo.recordedFacts.size)
+        assertTrue(f.model.uiState.value.canRetry)
+        assertNotNull(f.model.uiState.value.message)
+    }
+
     @Test fun storyCompletionRetryRetainsTheOriginalFinancialExposureEvidence() = runTest(dispatcher) {
         val context = DecisionContext(presentationId = "shown-before-story-work",
             informationPresented = true, complete = true)
         val f = fixture(storyGame = true, storyContext = context)
         runCurrent()
+        f.repo.forbidFullHistoryRead = true
         f.repo.failure = IOException("Write unavailable")
         f.model.finishPrecision(ru.nksk.lctapp.domain.minigame.TargetStopState.create().copy(round = 5, hits = 2, lastHit = true))
         runCurrent()
@@ -266,6 +389,7 @@ class DeedGameViewModelTest {
         assertEquals(original, f.repo.attempted.last())
         assertEquals(context, f.repo.committed.last().context)
         assertEquals(1, f.repo.committed.count { it.id == original.id })
+        assertEquals(1, f.repo.latestCommandReads)
     }
 
     @Test fun payoutCommittedBeforeReplyFailureSurvivesObservationAndRetriesExactlyOnce() = runTest(dispatcher) {
@@ -316,6 +440,7 @@ class DeedGameViewModelTest {
         runCurrent()
         val changed = f.repo.read()
         val writesBeforeRetry = f.repo.writes
+        f.repo.forbidFullHistoryRead = true
         assertTrue(exits.isEmpty())
         assertTrue(f.model.uiState.value.canRetry)
         f.model.retry()
@@ -325,6 +450,7 @@ class DeedGameViewModelTest {
         assertEquals(writesBeforeRetry, f.repo.writes)
         assertEquals(listOf("Дело выполнено! Награда: 4 монеты"), exits)
         assertEquals(1, f.repo.committed.count { it.id == original.id })
+        assertEquals(listOf(original.id), f.repo.commandReceiptReads)
     }
 
     @Test fun failedDeedCompletionKeepsItsRequestUntilStaleRejectionThenExplicitRetrySavesTheOriginalScore() = runTest(dispatcher) {
@@ -384,7 +510,8 @@ class DeedGameViewModelTest {
         assertEquals(1, exits.size)
     }
 
-    private suspend fun fixture(storyGame: Boolean = false, storyContext: DecisionContext? = null): Fixture {
+    private suspend fun fixture(storyGame: Boolean = false, storyContext: DecisionContext? = null,
+        demoPreferences: DemoPreferencesRepository = DisabledDemoPreferencesRepository): Fixture {
         val initial = createInitialGameState().let { it.copy(economy = EconomyState(plan = BudgetPlan(35, 20, 20, 25), unallocated = 0, planning = null)) }
         val repo = DeedRepository(initial)
         val original = bundledGameCatalog()
@@ -397,7 +524,7 @@ class DeedGameViewModelTest {
             override suspend fun read() = stored
             override suspend fun install(content: StoryContent) { stored = content }
         }
-        val session = GameSession(repo, content, catalog, initial)
+        val session = GameSession(repo, content, catalog, initial, demoPreferences)
         assertTrue(session.dispatch(EngineRequest("begin", null, EngineCommand.BeginDay(
             catalog.storyDayId, if (storyGame) listOf(catalog.introductionId) + catalog.deedPool.take(3) else catalog.deedPool.take(4), openFirst = true))) is EngineResult.Applied)
         assertTrue(session.dispatch(EngineRequest("accept", repo.read().engine!!.revision,
@@ -412,6 +539,13 @@ class DeedGameViewModelTest {
     }
 
     private data class Fixture(val repo: DeedRepository, val session: GameSession, val model: DeedGameViewModel, val id: String)
+
+    private class MutableDemoPreferences(enabled: Boolean) : DemoPreferencesRepository {
+        private val state = MutableStateFlow(DemoPreferences(enabled))
+        override fun observe() = state
+        override suspend fun read() = state.value
+        override suspend fun setDemoModeEnabled(enabled: Boolean) { state.value = DemoPreferences(enabled) }
+    }
 }
 
 private class DeedRepository(initial: GameState) : GameRepository {
@@ -420,6 +554,12 @@ private class DeedRepository(initial: GameState) : GameRepository {
     var afterWrite: suspend () -> Unit = {}
     var writes = 0
     var beforeFacts: suspend () -> Unit = {}
+    var beforeFactRead: suspend () -> Unit = {}
+    var forbidFullHistoryRead = false
+    val commandReceiptReads = mutableListOf<String>()
+    var latestCommandReads = 0
+    val factReadRequests = mutableListOf<Set<String>>()
+    val recordedFacts: List<AnalyticsFact> get() = history.flatMap { it.facts }
     val attempted = mutableListOf<EngineRequest>()
     val committed = mutableListOf<EngineRequest>()
     private data class Receipt(val request: EngineRequest, val context: DecisionContext?, val fingerprint: String?)
@@ -428,7 +568,24 @@ private class DeedRepository(initial: GameState) : GameRepository {
     override fun observe() = state
     override suspend fun read() = state.value
     override suspend fun initializeIfAbsent(initial: GameState) = state.value
-    override suspend fun readHistory() = history.toList()
+    override suspend fun readHistory(): List<AuditEntry> {
+        check(!forbidFullHistoryRead) { "Comparison answers must not read all checkpoints" }
+        return history.toList()
+    }
+    override suspend fun readCommandReceipt(requestId: String): AuditEntry? {
+        commandReceiptReads += requestId
+        return history.lastOrNull { it.type == AuditType.COMMAND && it.request?.id == requestId }
+    }
+    override suspend fun readLatestCommand(): AuditEntry? {
+        latestCommandReads++
+        return history.lastOrNull { it.type == AuditType.COMMAND }
+    }
+    override suspend fun readFacts(eventIds: Set<String>): HistoryFactLookup {
+        factReadRequests += eventIds
+        beforeFactRead()
+        return HistoryFactLookup(history.last().runId, history.last().sequence,
+            recordedFacts.filter { it.eventId in eventIds })
+    }
     override suspend fun recordFacts(facts: List<AnalyticsFact>, sourceGuard: HistorySourceGuard?) {
         failure?.let { throw it }
         beforeFacts()

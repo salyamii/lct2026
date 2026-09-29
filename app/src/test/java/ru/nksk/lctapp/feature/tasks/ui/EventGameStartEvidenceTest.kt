@@ -18,17 +18,24 @@ class EventGameStartEvidenceTest {
     private val completion = EngineCommand.CompleteStoryGame("occurrence", "work", score)
 
     @Test fun shownContextAndDeclaredPriorityComeOnlyFromTheMatchingCommittedStart() {
-        val evidence = checkNotNull(eventGameStartEvidence(listOf(receipt), state, completion))
+        val evidence = checkNotNull(eventGameStartEvidence(receipt, state, completion))
         assertEquals(context, evidence.context)
         assertEquals("urgent-deed", evidence.priorityOfferId)
-        assertNull(eventGameStartEvidence(emptyList(), state, completion))
-        assertNull(eventGameStartEvidence(listOf(receipt), state, completion.copy(choiceId = "another-choice")))
+        assertNull(eventGameStartEvidence(null, state, completion))
+        assertNull(eventGameStartEvidence(receipt, state, completion.copy(choiceId = "another-choice")))
     }
 
     @Test fun changedMoneyOrAnyGameRevisionCannotReuseOldPresentation() {
-        assertNull(eventGameStartEvidence(listOf(receipt), state.copy(economy = state.economy.copy(availableBalance = 90)), completion))
-        assertNull(eventGameStartEvidence(listOf(receipt), state.copy(pet = state.pet.copy(name = "Другой")), completion))
+        assertNull(eventGameStartEvidence(receipt, state.copy(economy = state.economy.copy(availableBalance = 90)), completion))
+        assertNull(eventGameStartEvidence(receipt, state.copy(pet = state.pet.copy(name = "Другой")), completion))
         val unseen = receipt.copy(request = start.copy(context = null))
-        assertNull(eventGameStartEvidence(listOf(unseen), state, completion)!!.context)
+        assertNull(eventGameStartEvidence(unseen, state, completion)!!.context)
+    }
+
+    @Test fun latestCommandMustItselfBeTheMatchingStartEvenIfItsWorldMatches() {
+        assertNull(eventGameStartEvidence(receipt.copy(request = start.copy(command = EngineCommand.OpenNextEvent)), state, completion))
+        assertNull(eventGameStartEvidence(receipt.copy(type = AuditType.REJECTED, before = null, after = null), state, completion))
+        assertNull(eventGameStartEvidence(receipt.copy(request = start.copy(
+            command = EngineCommand.StartStoryGame("another-occurrence", "work"))), state, completion))
     }
 }

@@ -27,10 +27,10 @@ internal fun BudgetAmountDialog(
         title = { Text(article.title, fontFamily = Rubik) },
         text = {
             OutlinedTextField(value = input, onValueChange = { if (it.all { char -> char in '0'..'9' } && it.length <= 19) input = it },
-                label = { Text("Монет в статье") }, singleLine = true, isError = !valid,
+                label = { Text("Сколько монет выделим?") }, singleLine = true, isError = !valid,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 supportingText = { Text(if (maximum < minimum)
-                    "Для минимума ${minimum} монет сначала освободи ${minimum - maximum} из другой статьи"
+                    "Здесь нужно хотя бы $minimum. Сначала уменьши другую часть бюджета на ${minimum - maximum}."
                     else "Можно распределить от ${minimum} до $maximum") },
                 colors = OutlinedTextFieldDefaults.colors(focusedTextColor = GameInk, unfocusedTextColor = GameInk,
                     disabledTextColor = BudgetMuted, errorTextColor = BudgetDanger,

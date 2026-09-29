@@ -78,6 +78,12 @@ class BundledAudioCoverageTest {
                 check(versions.add(replacement)) { "Cyclic event replacement: $originalId" }
                 current = replacement
             }
+            // New game identities preserve old active games instead of replacing their occurrences.
+            do {
+                val added = versions.addAll(catalog.policies.filterValues { policy ->
+                    policy.scheduling.previousEventIds.any { it in versions }
+                }.keys)
+            } while (added)
             versions.forEach { eventId ->
                 assertEquals(eventId, entry.text("cue_key"), catalog.cards.getValue(eventId).presentation.media.narrationCueKey)
             }
@@ -86,10 +92,14 @@ class BundledAudioCoverageTest {
 
     @Test fun currentDeedsPreserveTheirAuthoredAudioAndLegacyIntroductionHasItsVoice() {
         catalog.deedPool.forEach { eventId ->
-            val originalId = eventId.removeSuffix(":balance-v2")
+            val originalId = eventId.removeSuffix(":game-v3").removeSuffix(":balance-v2")
             assertNotEquals("Expected a rebalanced deed: $eventId", originalId, eventId)
-            assertEquals(eventId, catalog.cards.getValue(originalId).presentation.media,
-                catalog.cards.getValue(eventId).presentation.media)
+            val originalMedia = catalog.cards.getValue(originalId).presentation.media
+            val currentMedia = catalog.cards.getValue(eventId).presentation.media
+            assertEquals(eventId, originalMedia.copy(game = null, actionAudio = emptyMap()),
+                currentMedia.copy(game = null, actionAudio = emptyMap()))
+            assertEquals(eventId, originalMedia.actionAudio.mapKeys { it.key.removePrefix("$originalId:") },
+                currentMedia.actionAudio.mapKeys { it.key.removePrefix("$eventId:") })
         }
         assertEquals("narration.story.night_observation",
             catalog.cards.getValue("figma-2363-4-v1").presentation.media.narrationCueKey)

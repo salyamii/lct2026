@@ -5,12 +5,12 @@
     <string name="parents_report_local">Игра на этом устройстве</string>
     <string name="parents_report_balance">Баланс монет</string>
     <string name="parents_report_mastered_skills">Освоено навыков</string>
-    <string name="parents_report_unknown_count">—</string>
+    <string name="parents_report_unknown_count">-</string>
     <string name="parents_report_assessed_count">Оценки получены для %1$d из %2$d навыков. Для остальных оценки пока не получены.</string>
     <string name="parents_report_skill_count">%1$d из %2$d</string>
     <string name="parents_report_money_breakdown">Доступно: %1$d · В копилке: %2$d</string>
     <string name="parents_report_skills">Финансовые навыки</string>
-    <string name="parents_report_evidence_note">Оценки навыков обновляются через интернет. Наблюдения ниже — из текущего прохождения на этом устройстве.</string>
+    <string name="parents_report_evidence_note">Оценки навыков обновляются через интернет. Наблюдения ниже - из текущего прохождения на этом устройстве.</string>
     <string name="parents_report_no_observations">Наблюдений пока нет</string>
     <string name="parents_report_observations">Наблюдений: %1$d</string>
     <string name="parents_report_quests_title">Квесты из реальной жизни</string>

@@ -82,6 +82,7 @@ class PriceQuizEvidenceTest {
         val retry = facts(evidence).single()
         assertEquals(first, retry)
         assertEquals("comparison:deed:series:answer:0", first.eventId)
+        assertEquals(setOf(first.eventId), PriceQuizEvidenceMapper.eventIds(evidence, "deed"))
         assertEquals(AssessmentTask.CompareAmounts(11, 73, ComparisonSide.RIGHT), (first.detail as FactDetail.QuestionAnswer).task)
         assertFalse((first.detail as FactDetail.QuestionAnswer).answerWasRevealed)
         assertEquals(setOf(Assistance.INFORMATION_ONLY), first.context.assistance)

@@ -149,7 +149,7 @@ internal fun GoalScreen(
                 }
                 if (state.selected && target != null) {
                     GoalSavingProgress(target, state.balance, Modifier.bringIntoViewRequester(selectedGoalAnchor)) {
-                        AdventurePrimaryButton("Купить за ${goalPaymentCoins(target.price)}", {
+                        AdventurePrimaryButton(if (state.demoMode) "Получить бесплатно" else "Купить за ${goalPaymentCoins(target.price)}", {
                             onAction(GoalAction.Buy(checkNotNull(state.goalId), target.id))
                         }, enabled = target.canBuy && !state.busy)
                         target.blockedMessage?.let { GoalCaption(it) }
@@ -161,7 +161,7 @@ internal fun GoalScreen(
                 GoalRequirementChoices(state.parts.filterNot { state.selected && it.id == target?.id }, state.selected, !state.busy) { item ->
                     onAction(GoalAction.SelectSavingGoal(checkNotNull(state.goalId), item.id))
                 }
-                if (state.selected && !state.transfersEnabled && !ready) GoalCaption("Сначала заверши план монет.")
+                if (state.selected && !state.transfersEnabled && !ready) GoalCaption("Сначала распредели бюджет.")
             }
         }
         if (state.confirmation == null) state.message?.let { AdventureBody(it) }
@@ -202,7 +202,7 @@ private fun GoalRequirementChoice(item: GoalPartUiState, currentChapter: Boolean
             item.owned -> "Уже есть"
             target -> "Выбранная цель"
             canChoose -> "Выбрать цель"
-            currentChapter -> "Сначала заверши план монет"
+            currentChapter -> "Сначала распредели бюджет"
             else -> "Пока недоступно"
         }
     }, color = if (target) Color(0xFFF0F7DE) else Color.White, shape = shape,
@@ -211,7 +211,8 @@ private fun GoalRequirementChoice(item: GoalPartUiState, currentChapter: Boolean
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 GoalItemIllustration(item.id, Modifier.size(46.dp))
-                Text(goalCoins(item.price), color = GoalMuted, fontFamily = Nunito, fontSize = 14.sp, lineHeight = 18.sp)
+                Text(if (item.demoMode) "Бесплатно" else goalCoins(item.price), color = GoalMuted,
+                    fontFamily = Nunito, fontSize = 14.sp, lineHeight = 18.sp)
             }
             Text(item.title, Modifier.weight(1f), color = GameInk, fontFamily = Nunito,
                 fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, lineHeight = 21.sp)
@@ -224,8 +225,8 @@ private fun GoalRequirementChoice(item: GoalPartUiState, currentChapter: Boolean
                     item.owned -> "✓ Уже есть"
                     target -> "✓ Выбрано"
                     canChoose -> "Выбрать цель"
-                    currentChapter -> "Сначала план монет"
-                    else -> "Позже по истории"
+                    currentChapter -> "Сначала распредели бюджет"
+                    else -> "Откроется по ходу истории"
                 }, Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp), color = GameInk,
                     fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
             }
@@ -243,21 +244,22 @@ private fun GoalSavingProgress(part: GoalPartUiState, savings: Long, anchor: Mod
                 GoalCaption("Сейчас собираем")
                 Text(part.title, color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold,
                     fontSize = 20.sp, lineHeight = 25.sp)
-                GoalCaption("Цена ${goalCoins(part.price)}")
+                GoalCaption(if (part.demoMode) "Бесплатно · режим бога" else "Цена ${goalCoins(part.price)}")
             }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             GoalCaption("В копилке")
             Text(goalCoins(savings), color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
         }
-        LinearProgressIndicator(progress = { if (part.price == 0L) 1f else part.savedCoins.toFloat() / part.price },
+        if (!part.demoMode) LinearProgressIndicator(progress = { if (part.price == 0L) 1f else part.savedCoins.toFloat() / part.price },
             modifier = Modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(8.dp)).semantics {
                 contentDescription = "Для покупки ${part.savedCoins} из ${part.price} монет"
             },
             color = AdventureLime, trackColor = Color(0xFFE3E3CE), drawStopIndicator = {})
         Text(when {
-            part.missingCoins != null -> "Для покупки не хватает ${goalMissingCoins(part.missingCoins)}."
-            part.availableContribution > 0 -> "Для покупки добавим ${goalPaymentCoins(part.availableContribution)} из бюджета."
+            part.demoMode -> "Предмет можно получить без траты монет."
+            part.missingCoins != null -> "Не хватает ${goalMissingCoins(part.missingCoins)}."
+            part.availableContribution > 0 -> "Добавим ${goalPaymentCoins(part.availableContribution)} из бюджета."
             part.remainingCoins > 0 -> "Можно оплатить накоплениями и текущими деньгами."
             else -> "На покупку уже хватает"
         },
@@ -300,19 +302,20 @@ private fun GoalPurchaseDialog(confirmation: PurchaseConfirmation, busy: Boolean
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 GoalItemIllustration(confirmation.itemId, Modifier.size(76.dp).align(Alignment.CenterHorizontally))
-                Text(confirmation.paymentDescription(), exposure("sources"), color = GameInk,
+                Text(if (confirmation.demoMode) "Режим бога: предмет бесплатный, монеты останутся у тебя."
+                    else confirmation.paymentDescription(), exposure("sources"), color = GameInk,
                     fontFamily = Nunito, fontSize = 15.sp, lineHeight = 21.sp)
                 if (confirmation.fromSavings > 0) Text(
                     "В копилке: ${confirmation.savingsBefore} → ${confirmation.remainingSavings}.", exposure("savings"),
                     color = GoalMuted, fontFamily = Nunito, fontSize = 14.sp, lineHeight = 20.sp)
                 Text(if (confirmation.availableBefore != confirmation.remainingBalance)
-                    "С собой: ${confirmation.availableBefore} → ${goalCoins(confirmation.remainingBalance)}."
-                    else "С собой останется ${goalCoins(confirmation.remainingBalance)}.", exposure("available"),
+                    "С собой: ${confirmation.availableBefore} → ${confirmation.remainingBalance}."
+                    else "С собой останется: ${confirmation.remainingBalance}.", exposure("available"),
                     color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 15.sp, lineHeight = 21.sp)
-                Text("На еду до следующей недели нужно ${goalPaymentCoins(confirmation.foodNeeded)}.", exposure("food"),
+                if (!confirmation.demoMode) Text("На еду до следующей недели нужно: ${confirmation.foodNeeded}.", exposure("food"),
                     color = GameInk, fontFamily = Nunito, fontSize = 15.sp, lineHeight = 21.sp)
                 if (confirmation.foodShortfall > 0) Text(
-                    "После покупки на еду не хватит ${goalMissingCoins(confirmation.foodShortfall)}. Всё равно купить?",
+                    "После покупки на еду не хватит ещё ${confirmation.foodShortfall}. Всё равно купить?",
                     color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, lineHeight = 22.sp)
                 message?.let { AdventureBody(it) }
             }
@@ -320,7 +323,7 @@ private fun GoalPurchaseDialog(confirmation: PurchaseConfirmation, busy: Boolean
         confirmButton = {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 listOf("Отмена" to GoalAction.CancelPurchase,
-                    (if (message == null) "Купить" else "Повторить") to GoalAction.ConfirmPurchase).forEach { (label, action) ->
+                    (when { message != null -> "Повторить"; confirmation.demoMode -> "Получить"; else -> "Купить" }) to GoalAction.ConfirmPurchase).forEach { (label, action) ->
                     OutlinedButton(onClick = { onAction(action) }, enabled = !busy,
                         modifier = Modifier.weight(1f).heightIn(min = 52.dp), shape = RoundedCornerShape(20.dp),
                         border = BorderStroke(1.dp, GoalMuted),

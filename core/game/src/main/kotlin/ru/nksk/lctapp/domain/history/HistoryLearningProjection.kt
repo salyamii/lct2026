@@ -6,6 +6,11 @@ import ru.nksk.lctapp.domain.engine.DayPhase
 import ru.nksk.lctapp.domain.engine.DayJournalKind
 import ru.nksk.lctapp.domain.engine.EngineCommand
 import ru.nksk.lctapp.domain.engine.EventStatus
+import ru.nksk.lctapp.domain.engine.EventOccurrence
+import ru.nksk.lctapp.domain.engine.EngineRequest
+import ru.nksk.lctapp.domain.engine.DayJournalEntry
+import ru.nksk.lctapp.domain.economy.EconomyState
+import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.content.StoryContent
 import ru.nksk.lctapp.domain.content.EventType
 
@@ -14,11 +19,7 @@ object HistoryLearningProjection {
     const val VERSION = 4
 
     fun facts(history: List<AuditEntry>, content: StoryContent? = null): List<AnalyticsFact> {
-        val entries = history.groupBy { it.id }.map { (_, copies) ->
-            require(copies.all { HistoryCodec.encode(it) == HistoryCodec.encode(copies.first()) }) { "Conflicting history identity" }
-            copies.first()
-        }.sortedWith(compareBy<AuditEntry> { it.runId }.thenBy { it.sequence })
-        require(entries.map { it.runId to it.sequence }.distinct().size == entries.size) { "Conflicting history order" }
+        val entries = projectEntries(history)
         val raw = entries.flatMap { it.facts }
         val derived = mutableListOf<AnalyticsFact>()
         entries.groupBy { it.runId }.values.forEach { run ->
@@ -31,7 +32,59 @@ object HistoryLearningProjection {
         return (raw + derived).sortedWith(compareBy<AnalyticsFact> { it.gameRunId }.thenBy { it.sequence }.thenBy { it.eventId })
     }
 
-    private fun windows(run: List<AuditEntry>, real: List<AnalyticsFact>, out: MutableList<AnalyticsFact>) {
+    /** Only the fields used by interval evidence survive this pass, never all historical worlds. */
+    private data class EvidenceWorld(val economy: EconomyState, val engine: EvidenceDay?)
+    private data class EvidenceDay(val day: Int, val phase: DayPhase, val ateToday: Boolean,
+        val events: List<EventOccurrence>, val currentEvent: EventOccurrence?, val journal: List<DayJournalEntry>)
+    private data class EvidenceEntry(val id: String, val runId: String, val sequence: Long, val type: AuditType,
+        val request: EngineRequest?, val facts: List<AnalyticsFact>, val operations: List<LedgerEntry>,
+        val before: EvidenceWorld?, val after: EvidenceWorld?, val ledgerValid: Boolean,
+        val previousChangeId: String?, val connectedToPrevious: Boolean,
+        val meals: List<Triple<Int, Long, Long>>)
+    private data class EntryIndex(val index: Int, val runId: String, val sequence: Long)
+
+    private fun projectEntries(history: List<AuditEntry>): List<EvidenceEntry> {
+        val identities = linkedMapOf<String, EntryIndex>()
+        history.forEachIndexed { index, entry ->
+            val previous = identities[entry.id]
+            if (previous == null) identities[entry.id] = EntryIndex(index, entry.runId, entry.sequence)
+            else require(HistoryCodec.encode(entry) == HistoryCodec.encode(history[previous.index])) {
+                "Conflicting history identity"
+            }
+        }
+        val ordered = identities.values.sortedWith(compareBy<EntryIndex> { it.runId }.thenBy { it.sequence })
+        require(ordered.map { it.runId to it.sequence }.distinct().size == ordered.size) { "Conflicting history order" }
+        var previousRun: String? = null
+        var previousChangeId: String? = null
+        var previousAfter: GameState? = null
+        return ordered.map { index ->
+            val entry = history[index.index]
+            if (previousRun != entry.runId) {
+                previousRun = entry.runId
+                previousChangeId = null
+                previousAfter = null
+            }
+            val before = entry.before
+            val after = entry.after
+            val ledgerValid = before != null && after != null &&
+                runCatching { CanonicalLedger.validate(before, after, entry.operations) }.isSuccess
+            val receiptIds = entry.operations.mapTo(hashSetOf()) { it.operationId }
+            val compact = EvidenceEntry(entry.id, entry.runId, entry.sequence, entry.type, entry.request,
+                entry.facts, entry.operations, before?.evidenceWorld(), after?.evidenceWorld(receiptIds), ledgerValid,
+                previousChangeId, previousAfter == before, paidOrFallbackMeals(entry))
+            if (entry.type != AuditType.FACTS && entry.type != AuditType.REJECTED) {
+                previousChangeId = entry.id
+                previousAfter = after
+            }
+            compact
+        }
+    }
+
+    private fun GameState.evidenceWorld(receiptIds: Set<String> = emptySet()) = EvidenceWorld(economy,
+        engine?.let { day -> EvidenceDay(day.day, day.phase, day.ateToday, day.events, day.currentEvent,
+            day.journal.filter { it.id in receiptIds }) })
+
+    private fun windows(run: List<EvidenceEntry>, real: List<AnalyticsFact>, out: MutableList<AnalyticsFact>) {
         val starts = run.filter { entry ->
             val day = entry.after?.engine?.day
             entry.type == AuditType.COMMAND && day != null && (day - 1) % 7 == 0 && entry.before?.engine?.day != day &&
@@ -51,7 +104,7 @@ object HistoryLearningProjection {
                     entry.request?.command is EngineCommand.FinishDayFromEvent)
             } }.associateBy { it.day }
             val allDays = (startDay until startDay + 7).toList()
-            val meals = interval.flatMap(::paidOrFallbackMeals)
+            val meals = interval.flatMap { it.meals }
             val paidDays = meals.filter { it.third < 0 }.map { it.first }.toSet()
             val fallbackOnly = meals.filter { it.third == 0L && it.first !in paidDays }
             val feedingKnown = allDays.all { finished[it]?.ateToday != true || meals.any { meal -> meal.first == it } }
@@ -113,15 +166,14 @@ object HistoryLearningProjection {
     }
 
     /** A gap in snapshots is not repaired by consecutive sequence numbers or matching net balances. */
-    private fun connectedSnapshots(entries: List<AuditEntry>): Boolean {
+    private fun connectedSnapshots(entries: List<EvidenceEntry>): Boolean {
         val changes = entries.filter { it.type != AuditType.FACTS && it.type != AuditType.REJECTED }
-        return changes.all { entry -> entry.before != null && entry.after != null &&
-            runCatching { CanonicalLedger.validate(entry.before, entry.after, entry.operations) }.isSuccess } &&
-            changes.zipWithNext().all { (a, b) -> a.after == b.before }
+        return changes.all { it.ledgerValid } &&
+            changes.zipWithNext().all { (a, b) -> b.previousChangeId == a.id && b.connectedToPrevious }
     }
 
     /** Tracks an explicit intention through actual receipts; new income does not resurrect a spent reserve. */
-    private fun reserves(run: List<AuditEntry>, real: List<AnalyticsFact>, out: MutableList<AnalyticsFact>, content: StoryContent?) {
+    private fun reserves(run: List<EvidenceEntry>, real: List<AnalyticsFact>, out: MutableList<AnalyticsFact>, content: StoryContent?) {
         val intentions = real.filter { it.detail is ReserveDecision }
         intentions.forEachIndexed { index, source ->
             val intention = source.detail as ReserveDecision
@@ -143,7 +195,7 @@ object HistoryLearningProjection {
                 if (entry.type == AuditType.FACTS || entry.type == AuditType.REJECTED) continue
                 val before = entry.before ?: continue
                 val after = entry.after ?: continue
-                if (runCatching { CanonicalLedger.validate(before, after, entry.operations) }.isFailure) complete = false
+                if (!entry.ledgerValid) complete = false
                 val context = entry.facts.firstOrNull { it.mode == AnalyticsMode.REAL && it.learningContext == LearningContext.GAME &&
                     it.context.before?.available == before.economy.availableBalance &&
                     it.context.after?.available == after.economy.availableBalance }?.context
@@ -186,7 +238,7 @@ object HistoryLearningProjection {
     }
 
     /** Original presentation of this occurrence survives pause, carry and reopening. */
-    private fun firstExpensePresentation(run: List<AuditEntry>, expense: AuditEntry): Long? {
+    private fun firstExpensePresentation(run: List<EvidenceEntry>, expense: EvidenceEntry): Long? {
         val command = expense.request?.command
         val occurrenceId = when (command) {
             is EngineCommand.Choose -> command.occurrenceId
@@ -214,7 +266,7 @@ object HistoryLearningProjection {
         return first.sequence
     }
 
-    private fun reserveCategory(entry: AuditEntry, operationId: String, unexpected: Boolean, content: StoryContent?): Boolean? {
+    private fun reserveCategory(entry: EvidenceEntry, operationId: String, unexpected: Boolean, content: StoryContent?): Boolean? {
         // A direct goal payment is known spending, including its split wallet receipt.
         // It may reduce coverage but is never an unexpected expense paid from a reserve.
         if (entry.request?.command is EngineCommand.BuyGoalItem) return false
@@ -234,7 +286,7 @@ object HistoryLearningProjection {
         }
     }
 
-    private fun earnings(run: List<AuditEntry>, real: List<AnalyticsFact>, out: MutableList<AnalyticsFact>) {
+    private fun earnings(run: List<EvidenceEntry>, real: List<AnalyticsFact>, out: MutableList<AnalyticsFact>) {
         real.filter { it.detail is EarningCompleted && !it.detail.actualRewardAccountedFor }.forEach { completion ->
             val result = completion.detail as EarningCompleted
             val consumer = run.firstOrNull { entry ->
@@ -290,7 +342,8 @@ object HistoryLearningProjection {
 
     private fun isManaged(d: FactDetail) = d is BudgetConfirmed || d is OptionalPurchase || d is SavingMovement || d is ResourceChoice
     private fun DecisionContext.hasPresentation() = complete && informationPresented && presentationId != null
-    private fun discontinuous(entry: AuditEntry): Boolean = entry.type == AuditType.RESTORED || entry.type == AuditType.IMPORTED_BASELINE ||
+    private fun discontinuous(entry: EvidenceEntry): Boolean = entry.request?.demoMode == true ||
+        entry.type == AuditType.RESTORED || entry.type == AuditType.IMPORTED_BASELINE ||
         (entry.type == AuditType.TECHNICAL_UPDATE && (entry.before?.economy != entry.after?.economy || entry.before?.engine?.day != entry.after?.engine?.day))
 
     private fun positionAtEnd(real: List<AnalyticsFact>, beforeSequence: Long, available: Long, savings: Long): FinancialPosition? =

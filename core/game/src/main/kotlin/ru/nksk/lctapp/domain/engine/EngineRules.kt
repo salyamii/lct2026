@@ -38,7 +38,7 @@ data class EventPolicy(
     val scheduling: EventSchedulingPolicy = EventSchedulingPolicy(),
     /** Authored food purchases satisfy the daily meal, without restoring energy. */
     val feedsPetChoiceIds: Set<String> = emptySet(),
-    /** Practical STORY/RANDOM actions complete only after this choice's mini-game. */
+    /** Practical STORY/RANDOM actions and WANT activities complete only after this choice's mini-game. */
     val choiceGameKinds: Map<String, DeedGameKind> = emptyMap(),
     /** Retired actions remain in immutable content for saved decisions, but cannot be chosen again. */
     val disabledChoiceIds: Set<String> = emptySet(),
@@ -46,10 +46,13 @@ data class EventPolicy(
     val requiresPetHelp: Boolean = false,
     /** Confirmed travel changes the saved menu location, never inferred from presentation. */
     val choiceDestinations: Map<String, GameLocation> = emptyMap(),
+    /** Completed leisure games restore this authored amount, capped by the normal full energy. */
+    val choiceEnergyRestores: Map<String, Int> = emptyMap(),
 ) {
     init {
         require(energyCost in 0..3)
         require(choiceEnergyCosts.values.all { it in 0..3 })
+        require(choiceEnergyRestores.values.all { it > 0 })
     }
 
     fun energyFor(choiceId: String): Int = choiceEnergyCosts[choiceId] ?: energyCost
@@ -62,10 +65,14 @@ data class MealDefinition(
     val price: Long,
     val visualStateAfter: PetVisualState?,
     val nextMorningEnergy: Int? = null,
+    /** Restores today's remaining effort, capped by the ordinary daily maximum. */
+    val energyRestore: Int = 0,
 ) {
     init {
         require(id.isNotBlank() && price >= 0)
         require(nextMorningEnergy == null || nextMorningEnergy >= 0)
         require(nextMorningEnergy == null || price == 0L)
+        require(energyRestore >= 0)
+        require(energyRestore == 0 || price > 0L)
     }
 }

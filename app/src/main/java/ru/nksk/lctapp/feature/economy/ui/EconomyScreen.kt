@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.core.ui.components.GamePaper
 import ru.nksk.lctapp.core.ui.components.GameInk
+import ru.nksk.lctapp.core.ui.game.coinAmount
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 import ru.nksk.lctapp.domain.economy.BudgetPlanningReason
@@ -76,7 +77,7 @@ internal fun EconomyFeedback(state: EconomyUiState, onAction: (EconomyAction) ->
             containerColor = GamePaper, titleContentColor = GameInk, textContentColor = GameInk, iconContentColor = GameInk,
             title = { Text("На еду может не хватить", fontFamily = Rubik, fontWeight = FontWeight.Bold,
                 fontSize = 22.sp, lineHeight = 28.sp) },
-            text = { Text("После перевода доступно ${warning.remainingBalance}, а на еду до следующей недели нужно ${warning.neededForFood} монет. Всё равно отложить монеты?",
+            text = { Text("После перевода останется ${coinAmount(warning.remainingBalance)}, а на еду до следующей недели нужно ${warning.neededForFood}. Всё равно отложить?",
                 fontFamily = Nunito, fontSize = 16.sp, lineHeight = 24.sp) },
             confirmButton = {
                 TextButton(onClick = { onAction(EconomyAction.ConfirmDepositRisk) }, enabled = !state.saving,

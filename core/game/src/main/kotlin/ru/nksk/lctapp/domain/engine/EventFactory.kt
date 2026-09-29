@@ -86,10 +86,22 @@ class EventFactory(
             require(policy.choiceDestinations.keys.all { choice -> eventChoices.any { it.id == choice } }) {
                 "A destination must belong to a choice of this event: $id"
             }
-            require(policy.storyActId == null || campaign?.acts?.any { it.id == policy.storyActId && id in it.eventIds } == true)
+            require(policy.storyActId == null || campaign?.acts?.any { act ->
+                act.id == policy.storyActId && (id in act.eventIds || act.eventIds.any { currentId ->
+                    val current = policies.getValue(currentId).scheduling
+                    // Historical cards keep their policy and choices after an authored revision.
+                    // Only a declared predecessor of a current card in this same act is accepted.
+                    id in current.previousEventIds &&
+                        (current.family ?: currentId) == (policy.scheduling.family ?: id)
+                })
+            } == true)
             require(!policy.finishesStoryAct || campaign?.acts?.any { it.finaleId == id } == true)
             require(policy.choiceEnergyCosts.keys.all { choice -> eventChoices.any { it.id == choice } }) {
                 "Energy override must belong to this event: $id"
+            }
+            require(policy.choiceEnergyRestores.isEmpty() || definition.type == EventType.WANT &&
+                policy.choiceEnergyRestores.keys.all { choice -> choice in policy.choiceGameKinds }) {
+                "Restored energy must belong to a leisure mini-game choice: $id"
             }
             require(definition.minSatiety == null && definition.maxFatigue == null) {
                 "Translate legacy satiety/fatigue thresholds to the selected rules before activating $id"
@@ -102,9 +114,9 @@ class EventFactory(
                 require(reward != null && reward.moneyDelta >= 0) { "A mini-game needs one maximum reward: $id" }
             }
             if (policy.choiceGameKinds.isNotEmpty()) {
-                require(definition.type in setOf(EventType.STORY, EventType.RANDOM) && policy.deedGameKind == null)
+                require(definition.type in setOf(EventType.STORY, EventType.RANDOM, EventType.WANT) && policy.deedGameKind == null)
                 require(policy.choiceGameKinds.keys.all { choice -> eventChoices.any { it.id == choice } }) {
-                    "A story mini-game must name an existing choice: $id"
+                    "An event mini-game must name an existing choice: $id"
                 }
             }
             val startItems = content.eventItemEffects.filter { it.eventId == id }

@@ -49,7 +49,7 @@ class MiniGameScreensTest {
         }
         compose.onNodeWithText("80 монет").assertIsSelected()
         compose.onNodeWithText("20 монет").assertIsNotSelected()
-        compose.onNodeWithText("Верно! Счета сходятся 🎉").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Правильно").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Завершить").performScrollTo().assertIsDisplayed().performClick()
         compose.runOnIdle { assertEquals(listOf(PriceQuizAction.Next(0)), actions) }
     }
@@ -65,6 +65,7 @@ class MiniGameScreensTest {
                     MemoryGameScreen(
                         MemoryGameUiState(MemoryState(faces = (0..7).toList() + (0..7).toList())),
                         onAction = actions::add, onBack = {},
+                        deed = DeedGamePresentation("Найди пару", maximumReward = 12, canPlay = true),
                     )
                 }
             }
@@ -89,7 +90,7 @@ class MiniGameScreensTest {
         compose.onNodeWithContentDescription("Карта 3, закрыта").assertExists()
     }
 
-    @Test fun themedMemoryCardsAnnounceTheirActualArtworkInsteadOfTheDefaultSet() {
+    @Test fun themedMemoryKeepsOriginalDistinctArtworkAndItsAccessibleNames() {
         compose.setContent {
             LCTAppTheme {
                 MemoryGameScreen(
@@ -97,14 +98,13 @@ class MiniGameScreensTest {
                         faceUp = setOf(0), matched = setOf(1, 9))),
                     onAction = {}, onBack = {},
                     deed = DeedGamePresentation("Архив", 0, true, storyAction = true,
-                        pairArtwork = listOf(R.drawable.story_cargo_journal, R.drawable.story_observation_journal,
-                            R.drawable.story_letter, R.drawable.story_old_photograph, R.drawable.story_instruction_journal,
-                            R.drawable.story_route_map, R.drawable.story_map_missing_region, R.drawable.story_assembled_map)),
+                        sceneRes = R.drawable.location_workshop,
+                        activityArtworkRes = R.drawable.story_cargo_journal),
                 )
             }
         }
-        compose.onNodeWithContentDescription("Карта 1, журнал грузов").assertExists()
-        compose.onNodeWithContentDescription("Карта 2, журнал наблюдений, пара найдена").assertExists()
+        compose.onNodeWithContentDescription("Карта 1, ключ").assertExists()
+        compose.onNodeWithContentDescription("Карта 2, армиллярная сфера, пара найдена").assertExists()
         compose.onNodeWithContentDescription("Карта 3, закрыта").assertExists()
     }
 
@@ -116,7 +116,8 @@ class MiniGameScreensTest {
                     DeviceConfigurationOverride.FontScale(2f),
             ) {
                 LCTAppTheme {
-                    TargetStopScreen(TargetStopUiState(TargetStopState(zoneStart = 40)), actions::add, {})
+                    TargetStopScreen(TargetStopUiState(TargetStopState(zoneStart = 40)), actions::add, {},
+                        deed = DeedGamePresentation("Настрой телескоп", maximumReward = 5, canPlay = true))
                 }
             }
         }

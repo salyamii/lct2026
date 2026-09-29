@@ -1,4 +1,4 @@
-# Неиспользуемый черновик булочки — 2026-09-26
+# Неиспользуемый черновик булочки - 2026-09-26
 
 **Status: unused draft, excluded from Android runtime.** The user requested the
 existing Figma artwork, so this generated alternative was superseded on

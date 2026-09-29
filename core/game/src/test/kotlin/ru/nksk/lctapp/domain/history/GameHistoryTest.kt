@@ -20,6 +20,42 @@ import ru.nksk.lctapp.domain.analytics.FactDetail
 import ru.nksk.lctapp.domain.analytics.ReserveApplication
 
 class GameHistoryTest {
+    @Test fun encodedHistoryKeepsCanonicalBytesAndDecodesOnlyTheRequestedCheckpoint() {
+        val entries = List(5) { index ->
+            AuditEntry("entry-$index", index + 1L, "run", AuditType.TECHNICAL_UPDATE,
+                before = state, after = state)
+        }
+        var decoded = 0
+        val lazy = HistoryCodec.encodedHistory(entries.map(HistoryCodec::encode)) { _, _ -> decoded++ }
+        assertEquals(0, decoded)
+        assertEquals(entries[2], lazy[2])
+        assertSame(lazy[2], lazy[2])
+        assertEquals(1, decoded)
+        assertEquals(entries[3], lazy[3])
+        assertEquals(entries[2], lazy[2])
+        assertEquals(3, decoded)
+        val eagerSnapshot = HistoryCodec.snapshot("run", state, entries)
+        val lazySnapshot = HistoryCodec.snapshot("run", state, lazy)
+        assertEquals(eagerSnapshot.checksum, lazySnapshot.checksum)
+        assertEquals(HistoryCodec.encodeSnapshot(eagerSnapshot), HistoryCodec.encodeSnapshot(lazySnapshot))
+    }
+
+    @Test fun slicedSnapshotHandlesQuotedDelimitersUnicodeAndArchivesWithoutChangingBytes() {
+        val unusual = state.copy(pet = state.pet.copy(name = "[герой] {\"путь\"} \\ 🦊\nновый"))
+        val old = HistoryCodec.snapshot("old", unusual, listOf(
+            AuditEntry("init-old", 1, "old", AuditType.INITIALIZED, after = unusual)))
+        val snapshot = HistoryCodec.snapshot("current", unusual, listOf(
+            AuditEntry("init-current", 1, "current", AuditType.INITIALIZED, after = unusual)),
+            listOf(ArchivedGameRun("restart", "current", old)))
+        val encoded = HistoryCodec.encodeSnapshot(snapshot)
+        val restored = HistoryCodec.decodeSnapshot(encoded)
+        assertEquals(snapshot, restored)
+        assertEquals(encoded, HistoryCodec.encodeSnapshot(restored))
+        expectFailure { HistoryCodec.decodeSnapshot(encoded.dropLast(1)) }
+        expectFailure { HistoryCodec.decodeSnapshot(encoded.replaceFirst("{", "{\"runId\":\"duplicate\",")) }
+        expectFailure { HistoryCodec.decodeSnapshot(encoded.replaceFirst("init-current", "changed")) }
+    }
+
     private val state = GameState(PetState("PLAIN", PetVisualState.NORMAL),
         EconomyState(BudgetPlan(0, 0, 0, 0), availableBalance = 81, savingsBalance = 19),
         StoryState(null, null, null, emptyList()), 72, 13,

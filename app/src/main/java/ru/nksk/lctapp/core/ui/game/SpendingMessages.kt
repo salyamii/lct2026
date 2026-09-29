@@ -11,7 +11,7 @@ internal fun SpendingQuote.playerDescription(kind: SpendingKind): String? {
     if (missing > 0) {
         return if (kind == SpendingKind.WANT) {
             val price = Math.addExact(parts.sumOf { it.amount }, missing)
-            "Для оплаты нужно $price ${priceCoins(price)}. Не хватает ещё $missing ${missingCoins(missing)}."
+            "Цена - ${coinAmount(price)}. Не хватает ещё $missing."
         } else "Не хватает $missing ${missingCoins(missing)}. Деньги не будут списаны."
     }
     if (parts.isEmpty()) return null
@@ -35,10 +35,11 @@ internal fun paymentSourcesDescription(fromSavings: Long, parts: List<SpendPart>
             val source = when (part.section) {
                 BudgetSection.NEEDS -> "из денег на необходимое"
                 BudgetSection.WANTS -> "из денег на желания"
-                BudgetSection.SAVINGS -> "из монет, которые собирались отложить"
+                BudgetSection.SAVINGS -> "из суммы, которую собирались отложить"
                 BudgetSection.RESERVE -> "из запаса"
             }
-            add("${paymentCoinAmount(part.amount)} $source")
+            val amount = if (isEmpty()) paymentCoinAmount(part.amount) else part.amount.toString()
+            add("$amount $source")
         }
     }
     if (sources.isEmpty()) return null
@@ -48,6 +49,7 @@ internal fun paymentSourcesDescription(fromSavings: Long, parts: List<SpendPart>
 
 internal fun paymentCoinAmount(amount: Long): String = "$amount ${paymentCoins(amount)}"
 internal fun missingCoinAmount(amount: Long): String = "$amount ${missingCoins(amount)}"
+internal fun coinAmount(amount: Long): String = "$amount ${priceCoins(amount)}"
 
 private fun paymentCoins(amount: Long): String = when {
     amount % 100 in 11..14 -> "монет"

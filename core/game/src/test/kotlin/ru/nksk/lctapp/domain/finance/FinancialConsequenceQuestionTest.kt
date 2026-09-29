@@ -33,7 +33,7 @@ class FinancialConsequenceQuestionTest {
         val before = state(35)
         val task = question(before)
         assertEquals("needs_covered", task.correctAnswerId)
-        assertTrue(task.prompt.contains("У нас 35 монет"))
+        assertTrue(task.prompt.contains("У нас с собой 35 монет"))
         assertTrue(task.prompt.contains("На еду до следующей недели нужно 20"))
         assertTrue(task.explanation.contains("35 − 10 = 25"))
         assertEquals("optional_purchase", task.comparisonFamily)
@@ -46,21 +46,22 @@ class FinancialConsequenceQuestionTest {
         val task = question(state(25))
         assertEquals("needs_uncovered", task.correctAnswerId)
         assertTrue(task.explanation.contains("25 − 10 = 15"))
-        assertTrue(task.explanation.contains("На еду нужно 20, не хватает 5"))
+        assertTrue(task.explanation.contains("не хватает 20 − 15 = 5"))
     }
 
     @Test fun existingShortageIsNotAttributedEntirelyToTheOptionalPurchase() {
         val task = question(state(15))
         assertEquals("needs_uncovered", task.correctAnswerId)
         assertTrue(task.explanation.contains("На еду не хватало и раньше"))
-        assertTrue(task.options.single { it.id == task.correctAnswerId }.text.contains("не хватало и раньше"))
+        assertTrue(task.options.single { it.id == task.correctAnswerId }.text.contains("на еду не хватит"))
     }
 
     @Test fun savingsAndBudgetIntentionsCannotPayAnUnaffordablePurchase() {
         val task = question(state(5, savings = 200))
         assertEquals("not_affordable", task.correctAnswerId)
         assertTrue(task.explanation.contains("Не хватает 10 − 5 = 5"))
-        assertTrue(task.explanation.contains("Деньги из неё берём отдельным действием"))
+        assertTrue(task.prompt.contains("если копилку не трогать"))
+        assertTrue(task.explanation.contains("Копилку не трогаем"))
     }
 
     @Test fun onlyPlanReviewCanCompleteThePeriodReviewMilestone() {

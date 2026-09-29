@@ -1,6 +1,8 @@
 package ru.nksk.lctapp.feature.tasks.ui
 
 import ru.nksk.lctapp.domain.pet.renderPetText
+import ru.nksk.lctapp.core.ui.game.mealChoices
+import ru.nksk.lctapp.core.ui.components.MealChoiceUiState
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,22 +14,20 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import ru.nksk.lctapp.core.ui.game.playerDescription
-import ru.nksk.lctapp.domain.economy.EconomyOperations
-import ru.nksk.lctapp.domain.economy.SpendingKind
 import ru.nksk.lctapp.core.ui.game.playerMessage
 import ru.nksk.lctapp.core.ui.game.asGameUiText
+import ru.nksk.lctapp.core.ui.game.asPetEffortText
 import ru.nksk.lctapp.core.ui.game.deedDeadline
+import ru.nksk.lctapp.core.ui.game.missingCoinAmount
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
 
 data class OfferedDeedUiState(val id: String, val title: String, val description: String, val reward: String,
     val effort: String, val deadline: String, val scene: String)
-data class DeedsMealUiState(val id: String, val label: String, val enabled: Boolean, val spending: String? = null, val consequence: String? = null)
 data class DeedsUiState(
     val loading: Boolean = true, val failed: Boolean = false, val busy: Boolean = false,
     val offers: List<OfferedDeedUiState> = emptyList(), val message: String? = null,
-    val meals: List<DeedsMealUiState> = emptyList(), val hasCurrentEvent: Boolean = false,
+    val meals: List<MealChoiceUiState> = emptyList(), val hasCurrentEvent: Boolean = false,
     val petName: String = "",
 )
 
@@ -114,16 +114,11 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
                 val card = catalog.cards.getValue(event.id)
                 val reward = catalog.content.choices.single { it.eventId == event.id }.moneyDelta
                 OfferedDeedUiState(offer.id, renderPetText(event.title, saved.pet.name).asGameUiText(),
-                    renderPetText(event.description, saved.pet.name).asGameUiText(), "До $reward монет",
-                    renderPetText(card.effort, saved.pet.name).asGameUiText(),
+                    renderPetText(event.description, saved.pet.name).asGameUiText(), "До ${missingCoinAmount(reward)}",
+                    if (session.demoModeEnabled) "Без усталости · режим бога" else card.effort.asPetEffortText(saved.pet.name),
                     deedDeadline(saved.engine!!.day, offer.expiresDay), card.scene)
             },
-            meals = if (!needsFood) emptyList() else catalog.mealPolicy.choices(saved).map {
-                DeedsMealUiState(it.id, if (it.price == 0L) "Поесть бесплатно" else "Поесть за ${it.price} монет",
-                    session.engine.blockReason(saved, EngineCommand.Feed(it.id)) == null,
-                    EconomyOperations.quote(saved.economy, it.price, SpendingKind.FEEDING).playerDescription(SpendingKind.FEEDING),
-                    "После еды сегодня понадобится отдых. Утром будем немного уставшими.".takeIf { _ -> catalog.mealPolicy.effects(it.id).exhaustsCurrentEnergy })
-            },
+            meals = if (!needsFood) emptyList() else mealChoices(saved, catalog, session.engine, session.demoModeEnabled),
         )
     }
 }

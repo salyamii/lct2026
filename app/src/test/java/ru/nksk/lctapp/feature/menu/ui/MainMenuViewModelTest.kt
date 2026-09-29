@@ -34,10 +34,27 @@ class MainMenuViewModelTest {
     @Before fun setup() { Dispatchers.setMain(dispatcher) }
     @After fun cleanup() { Dispatchers.resetMain() }
 
+    private fun model(session: GameSession) = MainMenuViewModel(session, dispatcher).also { it.setActive(true) }
+
+    @Test fun pausedMenuWaitsUntilResumeToProjectTheLatestSave() = runTest(dispatcher) {
+        val initial = createInitialGameState()
+        val repository = MenuRepository(initial.copy(economy = EconomyState(BudgetPlan(0, 0, 0, 42))))
+        val model = model(session(repository, initial))
+        advanceUntilIdle()
+        model.setActive(false)
+        repository.update { it.copy(economy = EconomyState(BudgetPlan(0, 0, 0, 73))) }
+        advanceUntilIdle()
+        assertEquals(42L, (model.uiState.value as MainMenuLoadState.Ready).menu.coins)
+        model.setActive(true)
+        advanceUntilIdle()
+        assertEquals(73L, (model.uiState.value as MainMenuLoadState.Ready).menu.coins)
+        assertFalse((model.uiState.value as MainMenuLoadState.Ready).menu.busy)
+    }
+
     @Test fun persistedStateAndLaterChangesDriveTheMenu() = runTest(dispatcher) {
         val initial = createInitialGameState()
         val repository = MenuRepository(initial.copy(economy = EconomyState(BudgetPlan(0, 0, 0, 42))))
-        val model = MainMenuViewModel(session(repository, initial))
+        val model = model(session(repository, initial))
         assertEquals(MainMenuLoadState.Loading, model.uiState.value)
         advanceUntilIdle()
         assertEquals(42L, (model.uiState.value as MainMenuLoadState.Ready).menu.coins)
@@ -51,7 +68,7 @@ class MainMenuViewModelTest {
         val initial = createInitialGameState()
         val repository = MenuRepository(initial.copy(economy = EconomyState(BudgetPlan(0, 0, 0, 77))))
         repository.failure = IllegalStateException("Storage unavailable")
-        val model = MainMenuViewModel(session(repository, initial))
+        val model = model(session(repository, initial))
         advanceUntilIdle()
         assertTrue(model.uiState.value is MainMenuLoadState.Error)
         repository.failure = null
@@ -63,7 +80,7 @@ class MainMenuViewModelTest {
     @Test fun observationFailureDoesNotDisplayStartingFixture() = runTest(dispatcher) {
         val initial = createInitialGameState()
         val repository = MenuRepository(initial).apply { observationFailure = IllegalStateException("Invalid stored code") }
-        val model = MainMenuViewModel(session(repository, initial))
+        val model = model(session(repository, initial))
         advanceUntilIdle()
         assertTrue(model.uiState.value is MainMenuLoadState.Error)
     }
@@ -76,7 +93,7 @@ class MainMenuViewModelTest {
             session.catalog.storyDayId, session.catalog.plan(initial),
         ))) is EngineResult.Applied)
         repository.update { it.copy(engine = it.engine!!.copy(steps = 3)) }
-        val model = MainMenuViewModel(session)
+        val model = model(session)
         advanceUntilIdle()
 
         model.continueDay()
@@ -102,7 +119,7 @@ class MainMenuViewModelTest {
     @Test fun unallocatedMoneyWithoutAnOpenPlanRoutesToBudgetWithoutAdvancingTheWorld() = runTest(dispatcher) {
         val initial = createInitialGameState().copy(economy = EconomyState(BudgetPlan(35, 0, 0, 0), unallocated = 1))
         val repository = MenuRepository(initial)
-        val model = MainMenuViewModel(session(repository, initial))
+        val model = model(session(repository, initial))
         var openedBudget = 0
         var openedDay = 0
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.openBudget.collect { openedBudget++ } }
@@ -147,7 +164,7 @@ class MainMenuViewModelTest {
                 listOf(EventOccurrence("final-occurrence", "final", EventOrigin.SCHEDULE, EventStatus.PENDING)), emptyList()),
         )
         val repository = MenuRepository(initial)
-        val model = MainMenuViewModel(session(repository, initial, catalog))
+        val model = model(session(repository, initial, catalog))
         var openedTraining = 0
         var openedDay = 0
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.openTraining.collect { openedTraining++ } }
@@ -164,6 +181,35 @@ class MainMenuViewModelTest {
         assertTrue((model.uiState.value as MainMenuLoadState.Ready).menu.notice!!.contains("практику"))
     }
 
+    @Test fun mealSelectorDoesNotSpendUntilAChoiceAndOffersTheThreePaidMeals() = runTest(dispatcher) {
+        val initial = createInitialGameState().copy(economy = EconomyState(BudgetPlan(20, 0, 0, 0)))
+        val repository = MenuRepository(initial)
+        val session = session(repository, initial)
+        assertTrue(session.dispatch(EngineRequest("begin", null, EngineCommand.BeginDay(
+            session.catalog.storyDayId, session.catalog.plan(initial),
+        ))) is EngineResult.Applied)
+        repository.update { it.copy(engine = it.engine!!.copy(energy = 2), pet = it.pet.transitionTo(PetVisualState.TIRED)) }
+        val model = model(session)
+        advanceUntilIdle()
+        val before = repository.read()!!
+
+        model.feed()
+        advanceUntilIdle()
+        val choosing = (model.uiState.value as MainMenuLoadState.Ready).menu
+        assertTrue(choosing.showMeals)
+        assertEquals(listOf("basic-v1", "luxury-v1", "feast-v1"), choosing.meals.map { it.id })
+        assertEquals(before, repository.read())
+
+        model.selectMeal("luxury-v1")
+        advanceUntilIdle()
+        val after = repository.read()!!
+        assertEquals(before.economy.availableBalance - 7, after.economy.availableBalance)
+        assertEquals(3, after.engine!!.energy)
+        assertEquals(PetVisualState.HAPPY, after.pet.visualState)
+        assertTrue(after.engine!!.ateToday)
+        assertFalse((model.uiState.value as MainMenuLoadState.Ready).menu.showMeals)
+    }
+
     @Test fun proactiveFeedingWithoutMoneyOffersTheFreeMealOnTheMenu() = runTest(dispatcher) {
         val initial = createInitialGameState().let { it.copy(economy = EconomyState(BudgetPlan(0, 0, 0, 0))) }
         val repository = MenuRepository(initial)
@@ -172,7 +218,7 @@ class MainMenuViewModelTest {
             session.catalog.storyDayId, session.catalog.plan(initial),
         ))) is EngineResult.Applied)
         repository.update { it.copy(engine = it.engine!!.copy(steps = 1)) }
-        val model = MainMenuViewModel(session)
+        val model = model(session)
         var openedDay = 0
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.openDay.collect { openedDay++ } }
         advanceUntilIdle()

@@ -16,9 +16,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -36,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.components.GameArtwork
 import ru.nksk.lctapp.core.ui.theme.Rubik
+import ru.nksk.lctapp.domain.minigame.DeedRewardPreview
 import kotlin.math.roundToInt
 import ru.nksk.lctapp.domain.minigame.StackingState
 
@@ -46,7 +45,7 @@ fun StackingGameScreen(
     onAction: (StackingGameAction) -> Unit,
     onBack: () -> Unit,
     deed: DeedGamePresentation? = null,
-    position: Float,
+    position: () -> Float,
 ) {
     val state = uiState.game
     Column(
@@ -62,7 +61,7 @@ fun StackingGameScreen(
                 Modifier.align(Alignment.BottomEnd).size(92.dp).padding(4.dp)) }
             DeedHeader(deed?.title ?: "Ящики на причале", onBack = onBack)
         }
-        DeedSheet(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+        DeedGameSheet(deed, DeedRewardPreview.fromStacking(state), modifier = Modifier.weight(1f)) {
             Text(
                 deed?.instructions ?: "Опусти бегущий ящик на предыдущий.",
                 fontSize = 18.sp,
@@ -79,8 +78,8 @@ fun StackingGameScreen(
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 DeedChip("Уложено: ${state.placed} из ${StackingState.ROUNDS}")
-                if (deed?.storyAction != true) {
-                    CoinChip(deed?.let { "Награда до ${it.maximumReward} монет" } ?: "Награда: 8")
+                if (deed == null) {
+                    CoinChip("Награда: 8")
                 }
             }
             Spacer(Modifier.height(12.dp))
@@ -155,10 +154,10 @@ fun StackingGameScreen(
 
 /** Бегущий ящик: плавная дробная позиция над штабелем, рамка подсветки. */
 @Composable
-private fun MovingCrateRow(position: Float, crateCells: Int, cell: Dp, boardWidth: Dp) {
+private fun MovingCrateRow(position: () -> Float, crateCells: Int, cell: Dp, boardWidth: Dp) {
     val headWidth = cell * crateCells
     Row(Modifier.fillMaxWidth()) {
-        Spacer(Modifier.width((boardWidth * position).coerceIn(0.dp, boardWidth - headWidth)))
+        Spacer(Modifier.width((boardWidth * position()).coerceIn(0.dp, boardWidth - headWidth)))
         Row(
             modifier = Modifier
                 .border(2.dp, DeedColors.White.copy(alpha = 0.85f), RoundedCornerShape(10.dp))

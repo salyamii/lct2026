@@ -12,7 +12,7 @@ import ru.nksk.lctapp.domain.content.StoryContentRepository
 internal class RoomStoryContentRepository @Inject constructor(private val database: GameDatabase) : StoryContentRepository {
     private val dao = database.storyContentDao()
 
-    override suspend fun read(): StoryContent = database.withReadTransaction { readInTransaction() }
+    override suspend fun read(): StoryContent = database.withReadTransaction { readInTransaction().withCurrentTypography() }
 
     override suspend fun install(content: StoryContent) {
         database.withWriteTransaction {

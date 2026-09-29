@@ -51,9 +51,8 @@ class PriceQuizViewModel @Inject constructor(private val savedState: SavedStateH
                 }
             }
             is PriceQuizAction.Next -> {
-                val game = uiState.value.game
-                if (action.questionIndex != game.current) return
-                publish(game.next())
+                val before = uiState.value.game
+                if (action.questionIndex == before.current) publish(before.next())
             }
             PriceQuizAction.Restart -> {
                 val fresh = PriceQuizState.create()

@@ -94,8 +94,8 @@ fun AdventureIntroductionScreen(
 private data class MoneyConcept(val title: String, val detail: String, val icon: String, val tint: Color)
 private val concepts = listOf(
     MoneyConcept("Нужно", "Еда, уход и всё, без чего питомцу не обойтись.", "basket", Color(0xffedf4d8)),
-    MoneyConcept("Хочу", "Игрушки, книги и развлечения — покупки, которые можно отложить.", "diamond", Color(0xffeeebf8)),
-    MoneyConcept("В копилку", "Решаем, сколько сберечь для цели. В копилку положим отдельно.", "goal", Color(0xffedf4d8)),
+    MoneyConcept("Хочу", "Игрушки, книги и развлечения - покупки, которые можно отложить.", "diamond", Color(0xffeeebf8)),
+    MoneyConcept("В копилку", "Планируем, сколько сберечь для цели. Затем откроем копилку и положим туда эту сумму.", "goal", Color(0xffedf4d8)),
     MoneyConcept("Запас", "Поможет, если в дороге понадобится ремонт или лечение.", "reserve", Color(0xffeeebf8)),
 )
 
@@ -118,10 +118,10 @@ private fun IntroductionContent(
             Column(Modifier.align(Alignment.TopCenter).widthIn(max = 680.dp).fillMaxWidth()
                 .heightIn(min = if (centerContent) availableHeight else 0.dp),
                 verticalArrangement = if (centerContent) Arrangement.Center else Arrangement.Top) {
-                Text("Впереди — приключения!", fontFamily = artwork.titleFont, fontWeight = FontWeight.ExtraBold,
+                Text("Впереди - приключения!", fontFamily = artwork.titleFont, fontWeight = FontWeight.ExtraBold,
                     color = IntroInk, fontSize = 24.sp, lineHeight = 29.sp)
                 Spacer(Modifier.height(8.dp))
-                Text("Вместе со спутником исследуй мир, помогай друзьям и собирай снаряжение. Решай, какие покупки нужны сейчас, а на что будем копить.",
+                Text("Вместе со спутником исследуй мир, помогай друзьям и собирай снаряжение. Решай, что купить сейчас, а на что копить.",
                     color = IntroMuted, fontSize = 14.sp, lineHeight = 20.sp)
                 Spacer(Modifier.height(18.dp))
                 if (grid) {

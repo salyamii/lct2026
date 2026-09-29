@@ -74,6 +74,27 @@ class FinancialBudgetProjectionTest {
         }
     }
 
+    @Test fun targetedPeriodReportMatchesTheWholeHistoryReportIncludingIncompleteEvidence() {
+        val f = Fixture()
+        f.plan("original", BudgetPlan(35, 25, 25, 15))
+        f.operation(LedgerKind.AVAILABLE_EXPENSE, 5, DayJournalKind.MEAL, "basic")
+        f.plan("revised", BudgetPlan(30, 25, 25, 15))
+        f.operation(LedgerKind.AVAILABLE_EXPENSE, 7, DayJournalKind.EVENT_CHOICE, "buy")
+        f.operation(LedgerKind.DEPOSIT, 20)
+        val current = checkNotNull(f.state.financial.currentPeriod)
+        val prior = current.copy(id = "previous", closedDay = 1)
+        val state = f.state.copy(financial = f.state.financial.copy(periods = listOf(prior, current)))
+        for (history in listOf(f.history.toList(), f.history.filterNot { it.sequence == 3L }, emptyList())) {
+            val all = FinancialBudgetProjection.report(state, history, content)
+            for (period in state.financial.periods) {
+                assertEquals(all.first { it.periodId == period.id },
+                    FinancialBudgetProjection.reportPeriod(state, period.id, history, content))
+            }
+        }
+        assertNull(FinancialBudgetProjection.reportPeriod(state, "unknown", f.history, content))
+        assertNull(FinancialBudgetProjection.reportPeriod(state, null, f.history, content))
+    }
+
     @Test fun categoriesAndTransfersAreSeparatedAndGoalPurchaseIsNotAnotherDeposit() {
         val f = Fixture()
         f.plan("plan", BudgetPlan(35, 25, 25, 15))
@@ -167,7 +188,8 @@ class FinancialBudgetProjectionTest {
         val report = FinancialBudgetProjection.report(f.state, f.history, content).single()
         val question = FinancialPeriods.question(before, "review", FinancialQuestionKind.PLAN_REVIEW, budgetReport = report)
         assertEquals("less", question.correctAnswerId)
-        assertTrue(question.prompt.contains("На еду и нужные покупки оставили 35 монет, а потратили 15"))
+        assertTrue(question.prompt.contains("выделили на еду и нужные покупки 35 монет"))
+        assertTrue(question.prompt.contains("потратили 15"))
         assertTrue(question.explanation.contains("35 − 15 = 20"))
         assertEquals("plan", question.reviewEvidence!!.planRevisionId)
         assertEquals(listOf("period") + report.comparisons.single().sourceActionIds, question.sourceActionIds)
@@ -185,12 +207,12 @@ class FinancialBudgetProjectionTest {
                     sourceActionIds = listOf("deposit", "withdraw"))))
             val question = FinancialPeriods.question(f.state, "review", FinancialQuestionKind.PLAN_REVIEW, budgetReport = report)
             assertEquals(answer, question.correctAnswerId)
-            assertTrue(question.prompt.contains("Положили $deposit, а взяли обратно 10"))
+            assertTrue(question.prompt.contains("Положили: $deposit. Взяли обратно: 10."))
             assertFalse(question.prompt.contains("потратили", ignoreCase = true))
             assertFalse(question.explanation.contains("покуп", ignoreCase = true))
             if (deposit < 10) {
                 assertTrue(question.explanation.contains("10 − $deposit = ${10 - deposit}"))
-                assertTrue(question.explanation.contains("Копилка стала меньше"))
+                assertTrue(question.explanation.contains("Накопления уменьшились"))
             } else assertTrue(question.explanation.contains("$deposit − 10 = ${deposit - 10}"))
             assertEquals(listOf("period", "deposit", "withdraw"), question.sourceActionIds)
             assertEquals("plan", question.reviewEvidence!!.planRevisionId)

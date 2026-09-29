@@ -62,9 +62,21 @@ class FinancialTrainingTest {
             assertEquals(4, questions.map { it.prompt }.distinct().size)
             assertTrue(questions.all { it.sourceActionIds.single().startsWith("training:") && it.reviewEvidence == null })
             questions.forEach { question ->
+                assertTrue(question.prompt.startsWith("Представь:"))
+                assertEquals(1, question.prompt.count { it == '?' })
+                assertEquals(question.options.size, question.options.map { it.text }.distinct().size)
                 question.ledgerTask?.let { assertEquals(it.expectedAnswer().toString(), question.correctAnswerId) }
             }
         }
+    }
+
+    @Test fun incomeQuestionDistinguishesNewMoneyFromTheBalanceAfterLunch() {
+        val first = FinancialTraining.standalone(FinancialQuestionKind.TRANSACTION_ACCOUNTING, "clear-income")
+        val income = first.series!!.remainingQuestions.first()
+        val ledger = checkNotNull(income.ledgerTask)
+        assertTrue(income.prompt.contains("от работы и подарка вместе"))
+        assertTrue(income.explanation.contains("цену обеда не вычитаем"))
+        assertEquals(ledger.expectedAnswer().toString(), income.correctAnswerId)
     }
 
     @Test fun legacyQuestionAndCommandKeepTheirOriginalWireShapeAndSnapshotChecksum() {

@@ -138,7 +138,7 @@ internal fun chronoscopeDifferences(original: ChronoscopePath, alternative: Chro
         }
         if (before.energy != after.energy) {
             fun effort(own: Int, other: Int) = when {
-                own == 0 -> "Силы закончились — нужен отдых"
+                own == 0 -> "Силы закончились - нужен отдых"
                 other == 0 -> "Силы ещё остались"
                 own > other -> "Устал меньше"
                 else -> "Устал больше"
@@ -176,8 +176,8 @@ internal fun chronoscopeHorizon(result: TimeMachineResult, day: Int?): String {
     val shownDay = day ?: result.baseline?.state?.engine?.day ?: 1
     return when {
         result.status == TimeMachineStatus.DIVERGED -> "День $shownDay. Посмотрим, что успело бы произойти."
-        result.baseline?.state?.engine?.phase == DayPhase.FINISHED -> "Что изменилось бы к концу дня $shownDay"
-        else -> "Что изменилось бы в день $shownDay к этому моменту"
+        result.baseline?.state?.engine?.phase == DayPhase.FINISHED -> "Что изменилось бы к концу $shownDay-го дня"
+        else -> "День $shownDay. Что изменилось бы к этому моменту?"
     }
 }
 

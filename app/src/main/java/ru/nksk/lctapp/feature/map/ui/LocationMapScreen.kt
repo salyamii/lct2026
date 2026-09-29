@@ -19,8 +19,8 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -72,8 +72,13 @@ fun LocationMapScreen(
                 val canvasHeight = size.height.dp
                 val canvasWidth = size.width.dp
                 val scroll = rememberScrollState()
-                val showScrollHint by remember(size.scrollable, scroll) {
-                    derivedStateOf { size.scrollable && scroll.canScrollForward }
+                val canScrollUp by remember(size.scrollable, scroll) {
+                    derivedStateOf { size.scrollable && scroll.canScrollBackward }
+                }
+                val canScrollDown by remember(size.scrollable, scroll) {
+                    derivedStateOf {
+                        size.scrollable && scroll.maxValue != Int.MAX_VALUE && scroll.canScrollForward
+                    }
                 }
                 Box(
                     Modifier.fillMaxSize().then(if (size.scrollable) Modifier.verticalScroll(scroll) else Modifier),
@@ -86,28 +91,47 @@ fun LocationMapScreen(
                             val targetWidth = (canvasWidth * bounds.width)
                                 .coerceAtLeast((canvasWidth * .43f).coerceAtMost(170.dp))
                             key(location.id) {
-                            LocationTarget(
-                                location, location.id == currentLocationId,
-                                artworkHeight = canvasHeight * bounds.height,
-                                enabled = interactionEnabled,
-                                onClick = { onLocationClick(location.id) },
-                                modifier = Modifier.offset(
-                                    x = (canvasWidth * bounds.center.x - targetWidth / 2)
-                                        .coerceIn(0.dp, canvasWidth - targetWidth),
-                                    y = canvasHeight * bounds.top,
-                                ).width(targetWidth),
-                            )
+                                LocationTarget(
+                                    location, location.id == currentLocationId,
+                                    artworkHeight = canvasHeight * bounds.height,
+                                    enabled = interactionEnabled,
+                                    onClick = { onLocationClick(location.id) },
+                                    modifier = Modifier.offset(
+                                        x = (canvasWidth * bounds.center.x - targetWidth / 2)
+                                            .coerceIn(0.dp, canvasWidth - targetWidth),
+                                        y = canvasHeight * bounds.top,
+                                    ).width(targetWidth),
+                                )
                             }
                         }
                     }
                 }
-                if (showScrollHint) MapScrollHint(Modifier.align(Alignment.BottomEnd).padding(16.dp))
+                if (canScrollDown) MapScrollHint(up = false,
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp))
                 // Overlay the actual image bounds, including letterboxing on tall/wide windows.
                 val headerTop = if (size.scrollable) 0.dp else ((maxHeight - canvasHeight) / 2).coerceAtLeast(0.dp)
-                MapHeader(onBack, interactionEnabled,
-                    Modifier.align(Alignment.TopCenter).offset(y = headerTop).width(canvasWidth))
+                Column(Modifier.align(Alignment.TopCenter).offset(y = headerTop).width(canvasWidth)) {
+                    MapHeader(onBack, interactionEnabled)
+                    if (canScrollUp) MapScrollHint(up = true,
+                        modifier = Modifier.align(Alignment.End).padding(horizontal = 16.dp, vertical = 8.dp))
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun MapScrollHint(up: Boolean, modifier: Modifier = Modifier) {
+    Box(modifier.size(48.dp).shadow(6.dp, CircleShape).clip(CircleShape)
+        .background(AdventurePanel)
+        .border(1.dp, AdventureLabel.copy(alpha = .45f), CircleShape)
+        .semantics {
+            contentDescription = if (up) "Выше есть ещё локации. Прокрути карту вверх."
+                else "Ниже есть ещё локации. Прокрути карту вниз."
+        },
+        contentAlignment = Alignment.Center) {
+        Icon(androidx.compose.ui.res.painterResource(R.drawable.menu_chevron), null,
+            Modifier.size(22.dp).rotate(if (up) -90f else 90f), tint = AdventureLabel)
     }
 }
 
@@ -134,21 +158,6 @@ private fun MapHeader(onBack: () -> Unit, interactionEnabled: Boolean, modifier:
             modifier = Modifier.weight(1f).clip(RoundedCornerShape(24.dp))
                 .background(AdventureNight).padding(horizontal = 12.dp, vertical = 10.dp))
         MapInformationButton()
-    }
-}
-
-@Composable
-private fun MapScrollHint(modifier: Modifier = Modifier) {
-    Box(
-        modifier.size(48.dp)
-            .shadow(6.dp, CircleShape)
-            .background(AdventurePanel, CircleShape)
-            .border(1.dp, AdventureLavender.copy(alpha = .6f), CircleShape)
-            .semantics { contentDescription = "Ниже есть ещё локации. Прокрути карту вниз." },
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(androidx.compose.ui.res.painterResource(R.drawable.menu_chevron), null,
-            Modifier.size(22.dp).rotate(90f), tint = AdventureLabel)
     }
 }
 
@@ -185,7 +194,7 @@ private fun MapInformationButton() {
                 properties = PopupProperties(focusable = true),
             ) {
                 Text(
-                    "Нажми на локацию, чтобы перейти в неё",
+                    "Выбери место на карте, куда отправимся",
                     modifier = Modifier.widthIn(max = 260.dp)
                         .shadow(8.dp, RoundedCornerShape(16.dp))
                         .clip(RoundedCornerShape(16.dp))
@@ -223,7 +232,7 @@ private fun LocationTarget(
             .clickable(
                 enabled = enabled,
                 role = Role.Button,
-                onClickLabel = if (location.isUnlocked) "Перейти в локацию" else "Узнать, как открыть",
+                onClickLabel = if (location.isUnlocked) "Отправиться сюда" else "Узнать, как открыть",
             ) {
                 if (location.isUnlocked) onClick() else showLockedInfo = true
             }
@@ -260,7 +269,7 @@ private fun LocationTarget(
         AlertDialog(
             onDismissRequest = { showLockedInfo = false },
             title = { Text(location.title) },
-            text = { Text("Локация откроется после её прохождения в сюжете.") },
+            text = { Text("Это место откроется по ходу истории.") },
             confirmButton = {
                 TextButton(onClick = { showLockedInfo = false }) { Text("Понятно") }
             },

@@ -173,7 +173,7 @@ fun DeedSheet(modifier: Modifier = Modifier, content: @Composable ColumnScope.()
 
 /**
  * Карточка дела в списке: арт-сцена сверху, кремовый лист с описанием,
- * чипами и лаймовой кнопкой — как event-карточки в макетах.
+ * чипами и лаймовой кнопкой - как event-карточки в макетах.
  */
 @Composable
 fun DeedCard(

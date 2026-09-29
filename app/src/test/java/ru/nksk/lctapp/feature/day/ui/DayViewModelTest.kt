@@ -22,6 +22,7 @@ import ru.nksk.lctapp.R
 import ru.nksk.lctapp.domain.economy.BudgetPlan
 import ru.nksk.lctapp.domain.economy.EconomyState
 import ru.nksk.lctapp.data.game.content.bundledGameCatalog
+import ru.nksk.lctapp.data.game.content.RING_TOSS
 import ru.nksk.lctapp.domain.content.StoryContent
 import ru.nksk.lctapp.domain.content.StoryContentRepository
 import ru.nksk.lctapp.domain.engine.EngineCommand
@@ -43,6 +44,8 @@ import ru.nksk.lctapp.domain.pet.PetVisualState
 import ru.nksk.lctapp.domain.story.StoryDecision
 import ru.nksk.lctapp.domain.history.AuditEntry
 import ru.nksk.lctapp.domain.history.AuditType
+import ru.nksk.lctapp.domain.history.CampaignRestartRequest
+import ru.nksk.lctapp.domain.history.GameSnapshotHead
 import ru.nksk.lctapp.domain.minigame.DeedGameScore
 import ru.nksk.lctapp.domain.minigame.PriceQuizState
 import ru.nksk.lctapp.domain.minigame.TargetStopState
@@ -54,6 +57,55 @@ class DayViewModelTest {
 
     @Before fun setup() { Dispatchers.setMain(dispatcher) }
     @After fun cleanup() { store.clear(); Dispatchers.resetMain() }
+
+    @Test fun finalChoicePreparesCharacterSetupAndLostReplyRetriesOnlyTheSameRestart() = runTest(dispatcher) {
+        val (repository, model, session) = fixture(catalogTransform = { catalog ->
+            val campaign = checkNotNull(catalog.storyCampaign)
+            catalog.copy(storyCampaign = campaign.copy(acts = listOf(campaign.acts.first().copy(
+                eventIds = listOf(catalog.introductionId), finaleId = catalog.introductionId))))
+        })
+        runCurrent()
+        var setups = 0
+        var menuExits = 0
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.restarted.collect { setups++ } }
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.exit.collect { menuExits++ } }
+        repository.afterRestart = { throw IOException("Reply lost after archive commit") }
+        model.onAction(DayAction.Choose(model.uiState.value.options.single().id))
+        runCurrent()
+        assertTrue(session.canRestartCampaign(repository.read()))
+        assertEquals(1, repository.writes)
+        assertEquals(1, repository.restartWrites)
+        assertEquals(0, setups)
+        assertEquals("Воспользоваться силой", model.uiState.value.primary)
+        val original = repository.restartAttempts.single()
+        repository.afterRestart = {}
+        model.onAction(DayAction.Primary)
+        runCurrent()
+        assertEquals(listOf(original, original), repository.restartAttempts)
+        assertEquals(1, repository.restartWrites)
+        assertEquals(1, repository.writes)
+        assertEquals(1, setups)
+        assertEquals(0, menuExits)
+    }
+
+    @Test fun hiddenDayStopsProjectingAndUsesTheFreshRevisionWhenResumed() = runTest(dispatcher) {
+        val (repository, model) = fixture()
+        runCurrent()
+        val before = model.uiState.value
+        model.setActive(false)
+        repository.update { it.copy(pet = it.pet.copy(name = "Тоша"),
+            engine = it.engine!!.copy(revision = it.engine!!.revision + 1)) }
+        runCurrent()
+        assertEquals(before, model.uiState.value)
+        val current = repository.read()
+        model.setActive(true)
+        runCurrent()
+        assertEquals("Тоша", model.uiState.value.petName)
+        assertTrue(model.uiState.value.meals.isEmpty())
+        model.onAction(DayAction.Choose(model.uiState.value.options.single().id))
+        runCurrent()
+        assertEquals(current.engine!!.revision, repository.attempted.last().expectedRevision)
+    }
 
     @Test fun exhaustedCardOffersOneFeedThenRestAndWakesInMenuWithoutOpeningAnEvent() = runTest(dispatcher) {
         val (repository, model) = fixture()
@@ -70,6 +122,7 @@ class DayViewModelTest {
         assertTrue(model.uiState.value.actionNotice!!.startsWith("Рыжик устал."))
         assertTrue(model.uiState.value.actionNotice!!.contains("нужно поесть"))
         model.onAction(DayAction.ShowMeals)
+        runCurrent()
         assertTrue(model.uiState.value.showMeals)
         val freeMeal = model.uiState.value.meals.single { it.label.startsWith("Бесплатная") }
         model.onAction(DayAction.Feed(freeMeal.id))
@@ -257,6 +310,7 @@ class DayViewModelTest {
         val hungerNotice = model.uiState.value.actionNotice
         assertTrue(hungerNotice!!.startsWith("Рыжик проголодался."))
         model.onAction(DayAction.ShowMeals)
+        runCurrent()
         assertTrue(model.uiState.value.showMeals)
         repository.failure = IOException("Write unavailable")
         model.onAction(DayAction.Feed(session.catalog.meals.first { it.price > 0 }.id))
@@ -313,6 +367,26 @@ class DayViewModelTest {
         assertEquals(morning.engine!!.events.first().id, repository.read().engine!!.currentEvent!!.id)
     }
 
+    @Test fun weeklyBudgetRedirectFreezesTheExistingSummaryUntilNavigationRemovesIt() = runTest(dispatcher) {
+        val (repository, model) = fixture(finishedDay = 7)
+        runCurrent()
+        val summary = model.uiState.value
+        val exits = mutableListOf<String?>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.exit.collect { exits += it } }
+        model.onAction(DayAction.Primary)
+        runCurrent()
+        val committed = repository.read()
+        assertNotNull(committed.economy.planning)
+        assertEquals(8, committed.engine!!.day)
+        assertEquals(summary.copy(busy = true), model.uiState.value)
+        assertTrue(exits.isEmpty())
+        model.onAction(DayAction.Primary)
+        runCurrent()
+        assertEquals(committed, repository.read())
+        assertEquals(1, repository.writes)
+        assertEquals(summary.copy(busy = true), model.uiState.value)
+    }
+
     @Test fun failedMorningCanRetryWithoutDuplicatingWeeklyIncomeOrOpeningAnEvent() = runTest(dispatcher) {
         val (repository, model, session) = fixture(finishedDay = 7)
         runCurrent()
@@ -340,7 +414,7 @@ class DayViewModelTest {
         assertNull(morning.engine!!.currentEvent)
         assertEquals(0, morning.engine!!.steps)
         assertTrue(exits.isEmpty())
-        val restored = DayViewModel(session)
+        val restored = DayViewModel(session, dispatcher)
         store.put("restored-day", restored)
         runCurrent()
         assertEquals(morning, repository.read())
@@ -529,6 +603,7 @@ class DayViewModelTest {
         assertTrue(model.uiState.value.actionNotice!!.startsWith("Тоша проголодался."))
         assertTrue(model.uiState.value.body.startsWith("Тоша прислонился"))
         model.onAction(DayAction.ShowMeals)
+        runCurrent()
         assertTrue(model.uiState.value.showMeals)
         assertFalse(model.uiState.value.body.contains("Рыжик"))
     }
@@ -591,7 +666,7 @@ class DayViewModelTest {
         val expected = listOf(
             "figma-2164-2-v1" to R.drawable.gear_explorer_hat,
             "figma-2654-50-purchase-v2" to R.drawable.prop_fair_explorer_hat,
-            "figma-2654-98-purchase-v2" to R.drawable.prop_fair_ring_toss,
+            RING_TOSS to R.drawable.prop_fair_ring_toss,
             "figma-56-55-purchase-v2" to R.drawable.gear_pilot_goggles,
             "figma-56-49-purchase-v2" to R.drawable.gear_route_patch,
             "figma-2654-146-purchase-v2" to R.drawable.prop_fair_compass_keychain,
@@ -611,7 +686,7 @@ class DayViewModelTest {
             assertTrue(shown.impact.isEmpty())
             assertFalse(shown.title.any(Char::isDigit))
             assertFalse(shown.body.any(Char::isDigit))
-            assertEquals(if (event == "figma-2654-98-purchase-v2") "Сыграть" else "Купить", shown.options.first().label)
+            assertEquals(if (event == RING_TOSS) "Сыграть" else "Купить", shown.options.first().label)
             assertEquals("Пройти мимо", shown.options.last().label)
             assertEquals(1, shown.options.count { it.spending != null })
             assertEquals(2, shown.options.size)
@@ -629,7 +704,7 @@ class DayViewModelTest {
     }
 
     @Test fun missingIllustrationDoesNotChangeThePurchaseLayoutOrItsActions() = runTest(dispatcher) {
-        val id = "figma-2654-98-purchase-v2"
+        val id = RING_TOSS
         val (repository, model) = fixture(eventFirst = id, catalogTransform = { catalog ->
             val card = catalog.cards.getValue(id)
             catalog.copy(cards = catalog.cards + (id to card.copy(presentation = card.presentation.copy(
@@ -643,6 +718,26 @@ class DayViewModelTest {
         assertEquals("Ярмарка", shown.locationTitle)
         assertEquals(listOf("Сыграть", "Пройти мимо"), shown.options.map { it.label })
         assertEquals(0, repository.writes)
+    }
+
+    @Test fun ringTossOpensItsPrecisionGameWithoutBuyingTheActivityImmediately() = runTest(dispatcher) {
+        val (repository, model) = fixture(eventFirst = RING_TOSS)
+        runCurrent()
+        val before = repository.read()
+        val games = mutableListOf<StoryGameRequest>()
+        val exits = mutableListOf<String?>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.openStoryGame.collect { games += it } }
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.exit.collect { exits += it } }
+        val play = model.uiState.value.options.first()
+        assertEquals("Сыграть", play.label)
+        model.onAction(DayAction.Choose(play.id))
+        runCurrent()
+        assertEquals(listOf(StoryGameRequest(before.engine!!.currentEvent!!.id, "$RING_TOSS:buy")), games)
+        assertTrue(repository.requests.last().command is EngineCommand.StartStoryGame)
+        assertEquals(before.economy, repository.read().economy)
+        assertEquals(before.engine!!.energy, repository.read().engine!!.energy)
+        assertEquals(before.story.decisions, repository.read().story.decisions)
+        assertTrue(exits.isEmpty())
     }
 
     @Test fun ordinaryRefusalWithoutPresentedNumbersDoesNotClaimFinancialEvidenceOrPriority() = runTest(dispatcher) {
@@ -920,7 +1015,7 @@ class DayViewModelTest {
             })
         }
         repository.writes = 0
-        val model = DayViewModel(session)
+        val model = DayViewModel(session, dispatcher)
         store.put("day", model)
         return Triple(repository, model, session)
     }
@@ -931,6 +1026,10 @@ private class DayRepository(initial: GameState) : GameRepository {
     var afterWrite: suspend () -> Unit = {}
     var failure: Exception? = null
     var writes = 0
+    var restartWrites = 0
+    var afterRestart: suspend () -> Unit = {}
+    val restartAttempts = mutableListOf<CampaignRestartRequest>()
+    private var committedRestart: CampaignRestartRequest? = null
     val requests = mutableListOf<EngineRequest>()
     val attempted = mutableListOf<EngineRequest>()
     private data class Receipt(val request: EngineRequest, val context: DecisionContext?, val fingerprint: String?)
@@ -939,6 +1038,17 @@ private class DayRepository(initial: GameState) : GameRepository {
     override fun observe() = state
     override suspend fun read() = state.value
     override suspend fun readHistory() = history.toList()
+    override suspend fun readSnapshotHead() = GameSnapshotHead("run", state.value, history.last().sequence)
+    override suspend fun prepareCampaignRestart(request: CampaignRestartRequest, validateCurrent: (GameState) -> Unit) {
+        restartAttempts += request
+        committedRestart?.let { check(it == request); return }
+        validateCurrent(state.value)
+        check(request == request.copy(expectedRunId = "run", expectedEngineRevision = state.value.engine?.revision,
+            expectedHistorySequence = history.last().sequence))
+        committedRestart = request
+        restartWrites++
+        afterRestart()
+    }
     override suspend fun initializeIfAbsent(initial: GameState) = state.value
     override suspend fun commit(request: EngineRequest, context: DecisionContext?, contentFingerprint: String?,
         facts: (GameState, GameState, String, Long) -> List<AnalyticsFact>, transform: (GameState) -> GameState): GameState {

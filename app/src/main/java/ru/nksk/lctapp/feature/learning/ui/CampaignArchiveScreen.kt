@@ -25,15 +25,16 @@ internal fun CampaignArchiveScreen(state: CampaignArchiveUiState, onRestart: () 
     LearningPage("Хроноскоп", onBack, backEnabled = !state.busy) {
         learningStatus(state.loading, false, state.error, onRetry = onRetry)
         if (!state.loading && state.canRestart) item {
-            LearningCard("Вернёмся к началу?") {
+            LearningCard("Другие пути ещё ждут") {
                 state.pet?.artworkRes?.let { image ->
                     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                         MovingPetArtwork(image, state.pet.name, modifier = Modifier.size(180.dp))
                     }
                 }
-                AdventureBody("Хроноскоп вернёт ${state.pet?.name.orEmpty()} в детство. Ещё раз пройдём знакомую историю и попробуем другие решения.")
-                AdventureBody("Монеты, покупки и задания начнутся заново. Всё прошлое приключение останется здесь — его можно будет перечитать.")
-                PracticeButton(if (state.error == null) "Вернуться в начало" else "Повторить возвращение", !state.busy, primary = true, onClick = onRestart)
+                AdventureBody("Мы открыли часть тайн Смотрителей, но ещё не прошли все пути. Их сила вернёт нас к выбору героя: начнём знакомое приключение заново и попробуем другие решения.")
+                AdventureBody("Монеты и снаряжение начнутся с обычного стартового набора. История этого приключения останется в архиве - её можно будет перечитать.")
+                PracticeButton(if (state.error == null) "Воспользоваться силой" else "Повторить возвращение", true,
+                    interactionBlocked = state.busy, onClick = onRestart)
             }
         }
         if (!state.loading && state.archives.isEmpty()) item {
@@ -44,7 +45,7 @@ internal fun CampaignArchiveScreen(state: CampaignArchiveUiState, onRestart: () 
         itemsIndexed(state.archives, key = { _, archive -> archive.runId }) { index, archive ->
             LearningCard("Приключение ${index + 1}") {
                 AdventureBody("${archive.petName} · ${archive.finalDay?.let { "до $it-го дня" } ?: "история завершена"}")
-                PracticeButton("Открыть историю", !state.busy, primary = false) { onArchive(archive.runId) }
+                PracticeButton("Открыть историю", true, primary = false, interactionBlocked = state.busy) { onArchive(archive.runId) }
             }
         }
     }

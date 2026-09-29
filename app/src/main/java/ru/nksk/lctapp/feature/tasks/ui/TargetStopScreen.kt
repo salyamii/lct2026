@@ -24,9 +24,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -46,6 +44,7 @@ import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 import ru.nksk.lctapp.domain.minigame.TargetStopState
+import ru.nksk.lctapp.domain.minigame.DeedRewardPreview
 
 private const val MARKER_SIZE_DP = 26
 
@@ -96,7 +95,7 @@ fun TargetStopScreen(
                     Modifier.align(Alignment.BottomEnd).size(92.dp)) }
                 DeedHeader(deed?.title ?: stringResource(R.string.deeds_target_title), onBack = onBack)
             }
-            DeedSheet(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+            DeedGameSheet(deed, DeedRewardPreview.fromPrecision(state), modifier = Modifier.weight(1f)) {
                 Text(
                     deed?.instructions ?: if (deed != null) "Останови маркер в зелёной зоне. Ошибки уменьшают награду." else stringResource(R.string.deeds_target_prompt),
                     fontSize = 18.sp,
@@ -110,8 +109,7 @@ fun TargetStopScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     DeedChip(stringResource(R.string.deeds_round, uiState.roundNumber, TargetStopState.ROUNDS))
-                    if (deed?.storyAction != true) CoinChip(deed?.let { "Награда до ${it.maximumReward} монет" }
-                        ?: stringResource(R.string.deeds_demo_reward, state.reward))
+                    if (deed == null) CoinChip(stringResource(R.string.deeds_demo_reward, state.reward))
                 }
                 Spacer(Modifier.height(18.dp))
                 Track(

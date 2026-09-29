@@ -94,11 +94,11 @@ internal fun SavingsScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
                 if (!state.saving) { focus.clearFocus(); onAction(EconomyAction.OpenTransfer(it)) }
             })
             if (planningRequired) {
-                AdventureBody("Сначала распределим монеты в бюджете. Копилка останется на месте.")
+                AdventureBody("Сначала распределим бюджет. Потом можно будет пополнить копилку или взять из неё монеты.")
                 AdventurePrimaryButton("К бюджету", { if (!state.saving) onOpenBudget() })
             } else {
                 SavingsCaption(if (withdrawing) "Добавим эти монеты к запасу на неожиданности"
-                    else "Собираемся сберечь ${savingsCoins(economy.plan.savings, true)}")
+                    else "По плану отложим ${savingsCoins(economy.plan.savings, true)}")
                 SavingsAmountInput(state.transferInput, maximum, readOnly = confirming,
                     onChange = { if (!state.saving) onAction(EconomyAction.UpdateTransferInput(it)) })
                 // Confirmation and receipt stay in this form; neither opens another page.
@@ -128,10 +128,10 @@ internal fun SavingsScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
                         }
                         val warning = state.depositWarning
                         if (warning != null) Text(
-                            "На еду до следующей недели может не хватить: останется ${warning.remainingBalance}, нужно ${warning.neededForFood} монет.",
+                            "После перевода останется ${savingsCoins(warning.remainingBalance)}, а на еду до следующей недели нужно ${warning.neededForFood}.",
                             color = Color(0xFF934113), fontFamily = Nunito, fontWeight = FontWeight.Bold,
                             fontSize = 14.sp, lineHeight = 20.sp)
-                        else SavingsCaption("На еду до следующей недели нужно ${savingsCoins(state.knownNeeds, true)}.")
+                        else SavingsCaption("На еду до следующей недели нужно оставить ${savingsCoins(state.knownNeeds, true)}.")
                     }
                 } else {
                     SavingsCaption(when {
@@ -139,7 +139,7 @@ internal fun SavingsScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
                             else "Пока нет доступных монет. Их можно заработать в делах."
                         state.transferInput.isNotEmpty() && amount == null -> "Введи сумму от 1 до $maximum."
                         amount != null && amount > maximum -> "Доступно для перевода: ${savingsCoins(maximum)}."
-                        else -> "Выбери сумму — ниже увидишь, сколько монет останется."
+                        else -> "Выбери сумму - ниже увидишь, сколько монет останется."
                     })
                 }
                 if (confirming) AdventureQuietButton("Изменить сумму", {

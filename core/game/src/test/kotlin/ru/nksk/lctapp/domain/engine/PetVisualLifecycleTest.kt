@@ -78,6 +78,18 @@ class PetVisualLifecycleTest {
         assertEquals("BANDANA", f.state.pet.selectedLookId)
     }
 
+    @Test fun restoringMealResolvesExhaustionAndShowsItsAuthoredMood() = runTest {
+        val f = Fixture()
+        f.begin("quiet", "quiet", "quiet", "quiet")
+        f.repo.update { it.copy(pet = it.pet.transitionTo(PetVisualState.TIRED), engine = it.engine!!.copy(energy = 0)) }
+        f.apply(EngineCommand.Feed("restoring"))
+        assertEquals(1, f.state.engine!!.energy)
+        assertTrue(f.state.engine!!.ateToday)
+        assertEquals(1, f.state.engine!!.journal.last().energyDelta)
+        assertEquals(-7L, f.state.engine!!.journal.last().moneyDelta)
+        f.pose(PetVisualState.HAPPY)
+    }
+
     @Test fun nextMorningClearsYesterdayReactionAndCanOpenANewDecisionAtomically() = runTest {
         for (openFirst in listOf(false, true)) {
             val f = Fixture()
@@ -299,7 +311,8 @@ class PetVisualLifecycleTest {
         val repo = Memory(GameState(PetState("BANDANA", PetVisualState.NORMAL), EconomyState(BudgetPlan(35, 20, 20, 25)),
             StoryState(null, null, null, emptyList()), 0, 0, emptyList()))
         val engine = GameEngine(repo, EventFactory(content, policies,
-            listOf(MealDefinition("basic", 5, null), MealDefinition("luxury", 8, PetVisualState.HAPPY))),
+            listOf(MealDefinition("basic", 5, null), MealDefinition("luxury", 8, PetVisualState.HAPPY),
+                MealDefinition("restoring", 7, PetVisualState.HAPPY, energyRestore = 1))),
             EngineRules("rules", energy, hunger, 1))
         val state get() = repo.state.value
         val receipts = mutableListOf<Triple<GameState, EngineRequest, GameState>>()

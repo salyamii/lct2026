@@ -63,18 +63,25 @@ class MemoryGameViewModel @Inject constructor(private val savedState: SavedState
         savedState["face_up"] = game.faceUp.toIntArray()
         savedState["matched"] = game.matched.toIntArray()
         savedState["moves"] = game.moves
+        savedState["seen"] = game.seen.toIntArray()
+        savedState["recall_mistakes"] = game.recallMistakes
         mutableUiState.value = MemoryGameUiState(game)
     }
 
     private fun restore(): MemoryState {
         val faces = savedState.get<IntArray>("faces") ?: return MemoryState.deal()
         val open = savedState.get<IntArray>("face_up")?.toList().orEmpty()
+        val matched = savedState.get<IntArray>("matched")?.toSet().orEmpty()
         return MemoryState(
             faces = faces.toList(),
             faceUp = open.toSet(),
-            matched = savedState.get<IntArray>("matched")?.toSet().orEmpty(),
+            matched = matched,
             pending = if (open.size == 2) PendingPair(open[0], open[1]) else null,
             moves = savedState["moves"] ?: 0,
+            // Older transient saves contain no reveal history: retain known visible cards only,
+            // and never infer penalties from their move count.
+            seen = savedState.get<IntArray>("seen")?.toSet() ?: (matched + open),
+            recallMistakes = savedState["recall_mistakes"] ?: 0,
         )
     }
 }

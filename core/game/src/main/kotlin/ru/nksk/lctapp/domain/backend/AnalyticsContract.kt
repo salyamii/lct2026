@@ -1,6 +1,8 @@
 package ru.nksk.lctapp.domain.backend
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import ru.nksk.lctapp.domain.analytics.AnalyticsFact
 import ru.nksk.lctapp.domain.analytics.SkillEvaluator
 import ru.nksk.lctapp.domain.analytics.SkillId
@@ -17,6 +19,7 @@ enum class SkillStatus { MASTERED, PRACTICING, NO_DATA, HAS_PROBLEM }
 
 /** Versioned, complete evidence projection for one run at a committed history boundary. */
 @Serializable
+@OptIn(ExperimentalSerializationApi::class)
 data class AnalyticsUploadRequest(
     val deviceId: String,
     val batchId: String,
@@ -27,10 +30,14 @@ data class AnalyticsUploadRequest(
     val schemaVersion: Int = 1,
     val projectionVersion: Int = HistoryLearningProjection.VERSION,
     val evaluatorVersion: Int = 1,
+    /** Earlier evidence is absent after a current-world restore; the server retains prior accepted facts. */
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
+    val historyStartSequence: Long = 0,
 ) {
     init {
         require(deviceId.isNotBlank() && batchId.isNotBlank() && gameRunId.isNotBlank())
         require(throughHistorySequence >= 0)
+        require(historyStartSequence in 0..throughHistorySequence)
         require(schemaVersion > 0 && projectionVersion > 0 && evaluatorVersion > 0)
         require(facts.all { it.gameRunId == gameRunId && it.sequence <= throughHistorySequence })
         require(facts.map { it.eventId }.distinct().size == facts.size)

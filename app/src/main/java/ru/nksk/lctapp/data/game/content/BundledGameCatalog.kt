@@ -10,7 +10,7 @@ internal fun bundledGameCatalog(): GameCatalog {
         Entry(
             id = "figma-2363-4-v1", type = EventType.STORY,
             title = "Ночь наблюдений",
-            body = "Через несколько недель откроется старый небесный зал. Но телескоп пока не готов. Соберём комплект постепенно — это наша большая цель.",
+            body = "Через несколько недель откроется старый небесный зал. Но телескоп пока не готов. Соберём комплект постепенно - это наша большая цель.",
             action = "Начать собирать комплект", reward = 0L, effort = 0,
             card = EventCardCopy("Большая цель", "Цель: 180 монет", "Без траты", "Вернуться позже", "Глава 1 · Обсерватория", "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2363-4", "observatory", null,
                 presentation = EventPresentation(media = EventMedia(narrationCueKey = "narration.story.night_observation"))),
@@ -18,7 +18,7 @@ internal fun bundledGameCatalog(): GameCatalog {
         Entry(
             id = "figma-2163-2-v1", type = EventType.EARNING,
             title = "Смотритель просит помочь",
-            body = "Перед отплытием нужно пересчитать ящики и подтянуть крепления у лодки. Небольшое дело — и немного монет.",
+            body = "Перед отплытием нужно пересчитать ящики и подтянуть крепления у лодки. Небольшое дело - и немного монет.",
             action = "Выполнить · +8", reward = 8L, effort = 1,
             card = EventCardCopy("Короткое дело", "+8 монет", "{petName} немного устанет", "Не сейчас", "Короткое дело · Причал", "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2163-2", "pier", "caretaker",
                 presentation = EventPresentation(media = EventMedia(ambientCueKey = "ambient.port"))),
@@ -76,7 +76,7 @@ internal fun bundledGameCatalog(): GameCatalog {
         Entry(
             id = "figma-2289-2-v1", type = EventType.EARNING,
             title = "Заказы на подносе",
-            body = "Медведь подготовил колбаски и свёрток с мясом. Просит отнести деревянный поднос к прилавку — покупатель уже ждёт.",
+            body = "Медведь подготовил колбаски и свёрток с мясом. Просит отнести деревянный поднос к прилавку - покупатель уже ждёт.",
             action = "Отнести +6", reward = 6L, effort = 1,
             card = EventCardCopy("Короткое дело", "+6 монет", "Немного устанет", "Не сейчас", "Короткое дело · Мясная лавка", "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2289-2", "fair", null, presentation = EventPresentation(media = EventMedia(ambientCueKey = "ambient.butcher_shop"))),
         ),
@@ -97,7 +97,7 @@ internal fun bundledGameCatalog(): GameCatalog {
         Entry(
             id = "figma-2289-164-v1", type = EventType.EARNING,
             title = "Ни одного забытого заказа",
-            body = "В лавке много покупателей. Медведь протягивает планшет с листами и карандаш — помоги записать, кому и что приготовить.",
+            body = "В лавке много покупателей. Медведь протягивает планшет с листами и карандаш - помоги записать, кому и что приготовить.",
             action = "Записать +8", reward = 8L, effort = 2,
             card = EventCardCopy("Короткое дело", "+8 монет", "Средне устанет", "Не сейчас", "Короткое дело · Мясная лавка", "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2289-164", "fair", null, presentation = EventPresentation(media = EventMedia(ambientCueKey = "ambient.butcher_shop"))),
         ),
@@ -140,11 +140,13 @@ internal fun bundledGameCatalog(): GameCatalog {
         rules = EngineRules("ryzhik-2026-09-19-v1", fullEnergy = 5, hungerBlocksAtStep = 3, shortDeedMaxEnergy = 1, weeklyIncome = 100),
         meals = listOf(
             MealDefinition("basic-v1", price = 5, visualStateAfter = null),
+            MealDefinition("luxury-v1", price = 7, visualStateAfter = ru.nksk.lctapp.domain.pet.PetVisualState.HAPPY, energyRestore = 1),
+            MealDefinition("feast-v1", price = 10, visualStateAfter = ru.nksk.lctapp.domain.pet.PetVisualState.HAPPY, energyRestore = 2),
             MealDefinition("community-v1", price = 0, visualStateAfter = null, nextMorningEnergy = 3),
         ),
         storyDayId = day, introductionId = entries.first().id,
         deedPool = entries.filter { it.type == EventType.EARNING }.map { it.id },
-    ).withEverydayEvents().withPlateCleaningChoice().withFirstGoal().withGoalProjects().withStoryCampaign().withDayRecapCopy().withLorePlateCleaningChoice().withRebalancedDeeds().withStarterAccessories()
+    ).withEverydayEvents().withRingTossGame().withPlateCleaningChoice().withFirstGoal().withGoalProjects().withStoryCampaign().withDayRecapCopy().withLorePlateCleaningChoice().withRebalancedDeeds().withActivityGameVersions().withStarterAccessories()
 }
 
 private data class Entry(

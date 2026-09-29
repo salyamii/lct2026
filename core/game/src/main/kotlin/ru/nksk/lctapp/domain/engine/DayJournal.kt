@@ -21,7 +21,8 @@ internal fun recordDayChanges(before: GameState, after: GameState, request: Engi
     val day = after.engine ?: return after
     val entries = mutableListOf<DayJournalEntry>()
     fun record(kind: DayJournalKind, source: String, money: Long, energy: Int = 0) {
-        if (money != 0L || energy != 0 || kind == DayJournalKind.MEAL || kind == DayJournalKind.ITEM_RECEIVED) {
+        if (money != 0L || energy != 0 || kind == DayJournalKind.MEAL || kind == DayJournalKind.ITEM_RECEIVED ||
+            request.demoMode && kind == DayJournalKind.ITEM_PURCHASE) {
             entries += DayJournalEntry("${request.id}:journal:${entries.size}", kind, source, money, energy)
         }
     }
@@ -45,7 +46,8 @@ internal fun recordDayChanges(before: GameState, after: GameState, request: Engi
         EngineCommand.OpenNextEvent -> day.currentEvent?.let {
             record(DayJournalKind.EVENT_START, it.eventId, moneyDelta)
         }
-        is EngineCommand.Choose, is EngineCommand.CompleteEvent, is EngineCommand.CompleteDeed, is EngineCommand.CompleteStoryGame -> {
+        is EngineCommand.Choose, is EngineCommand.CompleteEvent, is EngineCommand.CompleteDeed,
+        is EngineCommand.CompleteStoryGame, is EngineCommand.SkipMiniGame -> {
             val occurrence = checkNotNull(before.engine?.currentEvent)
             val event = factory.event(occurrence.eventId)
             val startCost = if (factory.policy(event.id).startEffectsTiming == EffectTiming.COMPLETE)

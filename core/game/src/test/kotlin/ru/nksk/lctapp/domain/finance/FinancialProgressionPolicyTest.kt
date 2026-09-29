@@ -48,7 +48,22 @@ class FinancialProgressionPolicyTest {
         assertFalse(policy.summary(recovered).complete)
     }
 
-    @Test fun reviewRequiresAnAnswerAndKnownComparisonOrExplicitRecovery() {
+    @Test fun completedChapterQuizDoesNotForceAnotherBudgetOrInventManagedPlanEvidence() {
+        assertFalse(policy.chapterReviewReady(null))
+        assertFalse(policy.chapterReviewReady(PeriodReviewEvidence("q", "plan", true, false)))
+        val recovery = PeriodReviewEvidence("catch-up", null, false, true, guidedRecovery = true)
+        assertTrue(policy.chapterReviewReady(recovery))
+        assertFalse(policy.reviewReady(recovery))
+        assertNull(recovery.recoveryPlanRevisionId)
+        val period = FinancialPeriod("period", "goal", 1, 1, 100, 0,
+            needsProvided = true, savingPractice = policy.completeSavingRecovery(policy.opening("period", 0), "saving"),
+            reviewEvidence = recovery)
+        assertTrue(period.missingMilestones.isEmpty())
+        assertEquals(listOf(FinancialMilestone.REVIEW_PLAN),
+            period.copy(reviewEvidence = recovery.copy(answerCorrect = false)).missingMilestones)
+    }
+
+    @Test fun managedPlanEvidenceRequiresKnownComparisonOrRealRevision() {
         assertFalse(policy.reviewReady(null))
         assertFalse(policy.reviewReady(PeriodReviewEvidence("q", "plan", true, false)))
         assertFalse(policy.reviewReady(PeriodReviewEvidence("q", null, false, true)))

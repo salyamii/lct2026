@@ -81,7 +81,7 @@ private fun ColumnScope.BudgetIntroductionContent(
             .padding(horizontal = 22.dp, vertical = 20.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        GoalHeading("На что оставим монеты?", artwork)
+        GoalHeading("На что пойдут монеты?", artwork)
         BudgetIntroBody("Гильдия Смотрителей каждую неделю даёт нам 100 монет " +
             "на исследования и всё необходимое. То, что не потратим, останется у нас.", artwork)
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -98,7 +98,7 @@ private fun ColumnScope.BudgetIntroductionContent(
                 "Пригодится, если в пути что-нибудь сломается.",
                 Color(0xffeee6f7), artwork, categoryArtwork)
         }
-        BudgetIntroBody("Когда решишь отложить монеты, переложи их в копилку.", artwork)
+        BudgetIntroBody("Чтобы начать копить, открой копилку и положи в неё выбранную сумму.", artwork)
     }
     if (saveFailed) {
         Text("Не удалось сохранить игру. Попробуй ещё раз.", Modifier.padding(horizontal = 22.dp),

@@ -1,5 +1,7 @@
 package ru.nksk.lctapp.feature.learning.ui
 
+import ru.nksk.lctapp.core.ui.game.paymentCoinAmount
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -70,30 +72,30 @@ internal fun historyPresentation(game: GameState, shownHistory: List<AuditEntry>
     val periods = game.financial.periods.reversed().map { period ->
         val report = reports.getValue(period.id)
         PeriodUi("Период ${period.ordinal}: ${catalog.content.goals.find { it.id == period.goalId }?.title ?: "Большая цель"}",
-            "Получили ${period.income} монет, потратили ${period.spentAvailable + period.spentSavings}. " +
+            "Получили ${paymentCoinAmount(period.income)}, потратили ${period.spentAvailable + period.spentSavings}. " +
                 "В копилку положили ${period.deposited}, обратно взяли ${period.withdrawn}.", plan = "",
             actual = with(report.actual) { buildList {
-                add("На необходимое потратили $needs монет")
-                add("На приятные покупки потратили $wants монет")
-                add("На неожиданности и другие покупки потратили $reserve монет")
-                add("Пополнения копилки за вычетом снятого: $netSaved монет")
-                add("Из копилки потратили $goalPurchases монет на снаряжение для цели")
-                if (goalPurchasesAvailable > 0) add("На предметы цели из текущих денег потратили $goalPurchasesAvailable монет")
-                if (unknownExpenses > 0) add("Назначение старых трат неизвестно: $unknownExpenses монет")
+                add("На необходимое: $needs")
+                add("На приятные покупки: $wants")
+                add("На неожиданности и другие покупки: $reserve")
+                add("Пополнение копилки минус снятие: $netSaved")
+                add("На снаряжение для цели из копилки: $goalPurchases")
+                if (goalPurchasesAvailable > 0) add("На снаряжение для цели из денег с собой: $goalPurchasesAvailable")
+                if (unknownExpenses > 0) add("Старые траты без описания: $unknownExpenses")
             } },
             comparisons = report.comparisons.map { comparison ->
                 val revision = comparison.revision
                 val reason = when (revision.reason) {
                     BudgetRevisionReason.INITIAL -> "Начальный план."
                     BudgetRevisionReason.KNOWN_NEED_OMITTED -> "Вспомнили, что ещё понадобится."
-                    BudgetRevisionReason.UNEXPECTED_EXPENSE -> "Пересмотрели после неожиданной траты."
+                    BudgetRevisionReason.UNEXPECTED_EXPENSE -> "Изменили план после неожиданной траты."
                     BudgetRevisionReason.NEW_INCOME -> "Получили новые монеты."
                     BudgetRevisionReason.CHANGED_PRIORITY -> "Решили, что сейчас важнее."
                     BudgetRevisionReason.UNSPECIFIED -> "Причина изменения не указана."
                 }
-                val interval = if (comparison.nextRevisionId != null) "Здесь все действия до следующего изменения плана."
-                    else if (comparison.finalised) "Здесь все действия после этого плана до конца главы."
-                    else "Глава ещё идёт. Здесь всё, что произошло после этого плана к текущему моменту."
+                val interval = if (comparison.nextRevisionId != null) "Учитываем события до следующего изменения плана."
+                    else if (comparison.finalised) "Учитываем события с момента составления плана до конца главы."
+                    else "Глава ещё идёт. Учитываем события с момента составления плана до сегодняшнего дня."
                 BudgetComparisonUi(if (revision.ordinal == 1) "Первоначальный план, день ${revision.day}"
                     else "План ${revision.ordinal}, день ${revision.day}",
                     BudgetSection.entries.map { section ->

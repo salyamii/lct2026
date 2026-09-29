@@ -5,7 +5,9 @@ import ru.nksk.lctapp.core.ui.components.GameLoadingScreen
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -19,6 +21,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import ru.nksk.lctapp.R
+import ru.nksk.lctapp.app.diagnostics.DiagnosticsViewModel
 import ru.nksk.lctapp.app.navigation.AppStartupState
 import ru.nksk.lctapp.app.navigation.AppStartupViewModel
 import ru.nksk.lctapp.app.navigation.LctNavHost
@@ -60,6 +63,21 @@ private fun LctAppContent(debugSettingsButton: (@Composable () -> Unit)?, startu
     LCTAppTheme {
         val startup: AppStartupViewModel = hiltViewModel()
         val state by startup.uiState.collectAsStateWithLifecycle()
+        val diagnostics: DiagnosticsViewModel = hiltViewModel()
+        // The ready host reports its own route; never replace it with a generic startup label.
+        val startupScreen = when (state) {
+            AppStartupState.Loading -> "StartupLoading"
+            AppStartupState.Error -> "StartupError"
+            is AppStartupState.Choose -> "ChooseCharacter"
+            is AppStartupState.IntroVideo -> "IntroVideo"
+            is AppStartupState.Customize -> "CustomizeCharacter"
+            is AppStartupState.Accessories -> "ChooseAccessory"
+            is AppStartupState.GoalBriefing -> "GoalBriefing"
+            is AppStartupState.GoalSelection -> "GoalSelection"
+            is AppStartupState.Introduction -> "BudgetIntroduction"
+            AppStartupState.Ready -> null
+        }
+        SideEffect { startupScreen?.let(diagnostics::screenShown) }
         val media: MediaPlaybackViewModel = hiltViewModel()
         val mediaState by media.uiState.collectAsStateWithLifecycle()
         MediaPlaybackHost(soundEnabled = mediaState.soundEnabled, factory = media.playerFactory,
@@ -81,7 +99,11 @@ private fun LctAppContent(debugSettingsButton: (@Composable () -> Unit)?, startu
                     val reactions: PetReactionViewModel = hiltViewModel()
                     val reaction by reactions.uiState.collectAsStateWithLifecycle()
                     CompositionLocalProvider(LocalLivePetReaction provides reaction) {
-                        LctNavHost(debugSettingsButton = debugSettingsButton)
+                        key(startup.navigationRunId) {
+                            LctNavHost(debugSettingsButton = debugSettingsButton,
+                                onScreenShown = diagnostics::screenShown,
+                                onNewCampaignSetup = startup::showNewCampaignSetup)
+                        }
                     }
                 }
                 is AppStartupState.Choose -> OnboardingEntry(

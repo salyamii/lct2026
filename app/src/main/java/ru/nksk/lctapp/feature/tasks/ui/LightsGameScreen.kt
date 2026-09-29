@@ -14,9 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.components.GameArtwork
 import ru.nksk.lctapp.core.ui.theme.Rubik
+import ru.nksk.lctapp.domain.minigame.DeedRewardPreview
 import ru.nksk.lctapp.domain.minigame.LightsState
 
 /** Shared lights-out board for offered deeds. */
@@ -55,7 +54,7 @@ fun LightsGameScreen(
                 Modifier.align(Alignment.BottomEnd).size(92.dp).padding(4.dp)) }
             DeedHeader(deed?.title ?: "Фонари обсерватории", onBack = onBack)
         }
-        DeedSheet(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+        DeedGameSheet(deed, DeedRewardPreview.fromLights(state), modifier = Modifier.weight(1f)) {
             Text(
                 deed?.instructions ?: "Нажимай на фонари: гаснут сам фонарь и соседи. Погаси все к ночным наблюдениям!",
                 fontSize = 18.sp,
@@ -66,8 +65,8 @@ fun LightsGameScreen(
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 DeedChip("Ходов: ${state.moves}")
-                if (deed?.storyAction != true) {
-                    CoinChip(deed?.let { "Награда до ${it.maximumReward} монет" } ?: "Награда: ${LightsState.REWARD}")
+                if (deed == null) {
+                    CoinChip("Награда: ${LightsState.REWARD}")
                 }
             }
             Spacer(Modifier.height(12.dp))
@@ -116,4 +115,3 @@ fun LightsGameScreen(
         )
     }
 }
-

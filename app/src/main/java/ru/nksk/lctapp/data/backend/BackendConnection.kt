@@ -34,6 +34,7 @@ internal fun createBackendApi(url: String): BackendApi {
         .followRedirects(false).followSslRedirects(false)
         .build()
     return Retrofit.Builder().baseUrl(url).client(client)
+        .addConverterFactory(StreamingUploadConverter("application/json".toMediaType()))
         .addConverterFactory(BackendJson.asConverterFactory("application/json".toMediaType()))
         .build().create(BackendApi::class.java)
 }

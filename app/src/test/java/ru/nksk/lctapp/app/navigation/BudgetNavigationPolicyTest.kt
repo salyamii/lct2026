@@ -41,4 +41,10 @@ class BudgetNavigationPolicyTest {
         assertFalse(shouldPresentBudget(null, Day, null))
         assertFalse(shouldPresentBudget(initial.copy(reason = BudgetPlanningReason.WEEKLY), MainMenu, initial.id))
     }
+
+    @Test fun confirmedBudgetDoesNotReopenFromADelayedGateSnapshot() {
+        val pending = initial.copy(stage = BudgetPlanningStage.ALLOCATION)
+        assertFalse(shouldPresentBudget(pending, Day, pending.id, pending.id))
+        assertTrue(shouldPresentBudget(pending.copy(id = "next-budget"), Day, pending.id, pending.id))
+    }
 }

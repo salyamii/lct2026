@@ -67,7 +67,7 @@ internal fun LazyListScope.learningStatus(loading: Boolean, busy: Boolean, error
 internal fun BudgetReminder(needsPlan: Boolean, enabled: Boolean, onOpenBudget: () -> Unit) {
     LearningCard(if (needsPlan) "Сначала завершим план" else "Теперь уточним план") {
         AdventureBody(if (needsPlan) "Мы ещё не закончили распределять монеты. Подтверди план, чтобы продолжить разбор."
-            else "Разницу уже разобрали. Распредели оставшиеся монеты с учётом ближайших нужд и подтверди новый план.")
+            else "Мы выяснили, что изменилось. Распредели оставшиеся монеты на то, что понадобится дальше, и подтверди план.")
         PracticeButton(if (needsPlan) "Завершить план" else "Изменить план", enabled, onClick = onOpenBudget)
     }
 }

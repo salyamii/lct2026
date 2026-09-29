@@ -1,4 +1,4 @@
-# Inventory collection — tower and map chapters
+# Inventory collection - tower and map chapters
 
 Nine original illustrations generated on 2026-09-26 with built-in
 `image_gen.imagegen`, one call per item. These are user-requested collection
