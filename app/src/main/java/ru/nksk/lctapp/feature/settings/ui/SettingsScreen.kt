@@ -114,7 +114,7 @@ private fun DemoSettingsCard(state: DemoSettingsUiState, onAction: (SettingsActi
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text("Режим бога", color = GameInk, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                AdventureBody("Для показа: питомец не устаёт, предметы большой цели бесплатны.")
+                AdventureBody("Для показа: питомец не устаёт, все предметы и еда бесплатны.")
             }
             Switch(checked = state.enabled == true, onCheckedChange = null, enabled = state.canChange,
                 colors = SwitchDefaults.colors(checkedTrackColor = AdventureLime, checkedThumbColor = GameInk,

@@ -59,14 +59,17 @@ class DemoMiniGameSkipTest {
         assertEquals(before, f.repository.value)
         assertTrue(f.engine.dispatch(request) is EngineResult.Applied)
         val completed = f.repository.value
-        assertEquals(before.economy.balance - 3, completed.economy.balance)
+        assertEquals(before.economy, completed.economy)
         assertEquals(listOf("tool"), completed.ownedItems.map { it.itemId })
         assertEquals("choice", completed.story.decisions.single().choiceId)
         assertEquals(EventStatus.COMPLETED, completed.engine!!.events.single().status)
         assertEquals(5, completed.engine!!.energy)
         assertTrue(f.repository.facts.isEmpty())
 
-        val blocked = Fixture(DeedGameKind.SEQUENCE, deed = false, coins = 0)
+        val freeItem = Fixture(DeedGameKind.SEQUENCE, deed = false, coins = 0)
+        assertTrue(freeItem.engine.dispatch(request) is EngineResult.Applied)
+        assertEquals(listOf("tool"), freeItem.repository.value.ownedItems.map { it.itemId })
+        val blocked = Fixture(DeedGameKind.SEQUENCE, deed = false, coins = 0, grantsItem = false)
         assertEquals(EngineResult.Blocked(BlockReason.InsufficientMoney(3)), blocked.engine.dispatch(request))
         assertTrue(blocked.repository.value.ownedItems.isEmpty())
         assertTrue(blocked.repository.value.story.decisions.isEmpty())
@@ -84,14 +87,14 @@ class DemoMiniGameSkipTest {
         assertEquals(before, f.repository.value)
     }
 
-    private class Fixture(kind: DeedGameKind?, deed: Boolean, coins: Long = 20) {
+    private class Fixture(kind: DeedGameKind?, deed: Boolean, coins: Long = 20, grantsItem: Boolean = true) {
         private val content = StoryContent(
             events = listOf(EventDefinition("event", if (deed) EventType.EARNING else EventType.STORY,
                 "Activity", "", null, null, null, 0, null, null)),
             choices = listOf(EventChoiceDefinition("choice", "event", 0, "Finish", if (deed) 7 else -3,
                 null, PetVisualState.HAPPY, GoalImpact.NEUTRAL)),
             items = listOf(ItemDefinition("tool", "Tool", "")),
-            choiceItemEffects = if (deed) emptyList() else listOf(ChoiceItemEffect("effect", "choice", 0, "tool", ItemOperation.ADD)),
+            choiceItemEffects = if (deed || !grantsItem) emptyList() else listOf(ChoiceItemEffect("effect", "choice", 0, "tool", ItemOperation.ADD)),
         )
         val repository = Repository(GameState(
             PetState("NONE", PetVisualState.TIRED), EconomyState(BudgetPlan(coins, 0, 0, 0)),

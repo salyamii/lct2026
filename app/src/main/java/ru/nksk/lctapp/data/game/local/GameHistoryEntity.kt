@@ -100,6 +100,12 @@ internal interface GameHistoryDao {
     suspend fun firstParentReward(runId: String): GameAuditEntity?
     @Query("SELECT COALESCE(MAX(sequence), 0) FROM GAME_AUDIT")
     suspend fun sequence(): Long
+    /** Check the saved index without decoding every before/after world during a rewind. */
+    @Query("""SELECT COUNT(*) = :sequence
+        AND COUNT(CASE WHEN run_id != :runId THEN 1 END) = 0
+        AND COALESCE(MIN(sequence), 1) = 1 AND COALESCE(MAX(sequence), 0) = :sequence
+        FROM GAME_AUDIT""")
+    suspend fun hasCompleteRun(runId: String, sequence: Long): Boolean
     @Insert suspend fun insert(row: GameAuditEntity)
     @Insert suspend fun insertFacts(rows: List<AuditFactIdEntity>)
     @Query("SELECT audit_id FROM AUDIT_FACT_ID WHERE fact_id = :id")

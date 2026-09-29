@@ -36,6 +36,87 @@ class MainMenuViewModelTest {
 
     private fun model(session: GameSession) = MainMenuViewModel(session, dispatcher).also { it.setActive(true) }
 
+    @Test fun editingNameRequiresConfirmationAndOnlyChangesThePetName() = runTest(dispatcher) {
+        val initial = createInitialGameState()
+        val repository = MenuRepository(initial)
+        val model = model(session(repository, initial))
+        advanceUntilIdle()
+        val before = repository.read()!!
+
+        model.editName()
+        model.changeName("  Тоша  ")
+        assertEquals(before, repository.read())
+        model.saveName()
+        advanceUntilIdle()
+
+        assertEquals(before.copy(pet = before.pet.copy(name = "Тоша")), repository.read())
+        val menu = (model.uiState.value as MainMenuLoadState.Ready).menu
+        assertEquals("Тоша", menu.pet.name)
+        assertNull(menu.nameEditor)
+    }
+
+    @Test fun invalidNameAndCancelledDraftPreserveTheSavedName() = runTest(dispatcher) {
+        val initial = createInitialGameState()
+        val repository = MenuRepository(initial)
+        val model = model(session(repository, initial))
+        advanceUntilIdle()
+        val before = repository.read()
+
+        model.editName()
+        model.changeName("   ")
+        model.saveName()
+        advanceUntilIdle()
+        assertNotNull((model.uiState.value as MainMenuLoadState.Ready).menu.nameEditor!!.error)
+        assertEquals(before, repository.read())
+        model.changeName("Новое имя")
+        model.dismissName()
+        assertNull((model.uiState.value as MainMenuLoadState.Ready).menu.nameEditor)
+        assertEquals(before, repository.read())
+    }
+
+    @Test fun failedRenameRetriesTheOriginalRequestWithoutChangingItsDraft() = runTest(dispatcher) {
+        val initial = createInitialGameState()
+        val repository = MenuRepository(initial)
+        val model = model(session(repository, initial))
+        advanceUntilIdle()
+        val before = repository.read()
+        model.editName()
+        model.changeName("Тоша")
+        repository.failure = IllegalStateException("Write failed")
+        model.saveName()
+        advanceUntilIdle()
+        val pending = repository.requests.single()
+        assertEquals(before, repository.read())
+        assertTrue((model.uiState.value as MainMenuLoadState.Ready).menu.nameEditor!!.retryPending)
+        model.changeName("Другое имя")
+        model.dismissName()
+        assertEquals("Тоша", (model.uiState.value as MainMenuLoadState.Ready).menu.nameEditor!!.input)
+
+        repository.failure = null
+        model.saveName()
+        advanceUntilIdle()
+        assertEquals(listOf(pending, pending), repository.requests)
+        assertEquals("Тоша", repository.read()!!.pet.name)
+        assertNull((model.uiState.value as MainMenuLoadState.Ready).menu.nameEditor)
+    }
+
+    @Test fun staleNameEditorDoesNotOverwriteAnotherRename() = runTest(dispatcher) {
+        val initial = createInitialGameState()
+        val repository = MenuRepository(initial)
+        val model = model(session(repository, initial))
+        advanceUntilIdle()
+        model.editName()
+        model.changeName("Тоша")
+        repository.update { it.copy(pet = it.pet.copy(name = "Лис")) }
+        advanceUntilIdle()
+        model.saveName()
+        advanceUntilIdle()
+
+        assertEquals("Лис", repository.read()!!.pet.name)
+        assertNotNull((model.uiState.value as MainMenuLoadState.Ready).menu.nameEditor!!.error)
+        assertFalse((model.uiState.value as MainMenuLoadState.Ready).menu.nameEditor!!.retryPending)
+    }
+
     @Test fun pausedMenuWaitsUntilResumeToProjectTheLatestSave() = runTest(dispatcher) {
         val initial = createInitialGameState()
         val repository = MenuRepository(initial.copy(economy = EconomyState(BudgetPlan(0, 0, 0, 42))))
@@ -258,6 +339,7 @@ class MainMenuViewModelTest {
 
 private class MenuRepository(initial: GameState?) : GameRepository {
     private val state = MutableStateFlow(initial)
+    val requests = mutableListOf<EngineRequest>()
     var failure: Exception? = null
     var observationFailure: Exception? = null
     override fun observe(): Flow<GameState?> = observationFailure?.let { error -> flow { throw error } } ?: state
@@ -269,5 +351,12 @@ private class MenuRepository(initial: GameState?) : GameRepository {
     override suspend fun update(transform: (GameState) -> GameState): GameState {
         failure?.let { throw it }
         return transform(checkNotNull(state.value)).also { state.value = it }
+    }
+    override suspend fun commit(request: EngineRequest, context: ru.nksk.lctapp.domain.analytics.DecisionContext?,
+        contentFingerprint: String?,
+        facts: (GameState, GameState, String, Long) -> List<ru.nksk.lctapp.domain.analytics.AnalyticsFact>,
+        transform: (GameState) -> GameState): GameState {
+        requests += request
+        return update(transform)
     }
 }

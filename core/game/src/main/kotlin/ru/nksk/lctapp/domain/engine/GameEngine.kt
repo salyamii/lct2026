@@ -264,9 +264,9 @@ class GameEngine(
                 }
                 is EngineCommand.DismissDeedProposal -> dismissProposal(current, command.occurrenceId)
                 is EngineCommand.PauseEvent -> pause(current, command.occurrenceId)
-                is EngineCommand.Feed -> feed(current, command.mealId)
-                is EngineCommand.FinishDayFromEvent -> finishDayFromEvent(current, command.occurrenceId)
-                EngineCommand.FinishDay -> finishDay(current)
+                is EngineCommand.Feed -> feed(current, command.mealId, request.demoMode)
+                is EngineCommand.FinishDayFromEvent -> finishDayFromEvent(current, command.occurrenceId, request.demoMode)
+                EngineCommand.FinishDay -> finishDay(current, request.demoMode)
             }
             val outcome = if (request.demoMode) withDemoEnergy(next) else next
             val visualOutcome = PetVisualLifecycle.afterTransition(current, outcome, request.command, factory, rules)
@@ -339,7 +339,10 @@ class GameEngine(
         require(previous != null || (state.story.currentDayId == null && state.story.decisions.isEmpty())) {
             "Existing story progress needs an explicit engine adoption policy"
         }
-        require(command.eventIds.size in 4..5) { "Provide an authored plan of four or five events" }
+        val focusedStory = factory.storyProgress(state).goalReadyForStory
+        require(command.eventIds.size in (if (focusedStory) 0..5 else 4..5)) {
+            "Provide an authored day plan; only a ready chapter goal permits a short story plan"
+        }
         val nextStoryDay = requireNotNull(factory.content.days.find { it.id == command.storyDayId })
         state.story.currentDayId?.let { currentDayId ->
             val currentDay = requireNotNull(factory.content.days.find { it.id == currentDayId })
@@ -384,7 +387,12 @@ class GameEngine(
         val state = prepareIntroduction(current, requestId)
         val day = running(state)
         ensure(day.currentEvent == null, BlockReason.EventInProgress)
-        val occurrence = nextOccurrence(state)
+        val occurrence = nextOccurrenceOrNull(state) ?: run {
+            // A story prerequisite may already be in Deeds. Resume its original offer, without
+            // offering it twice, spending another proposal step, or granting its facts for free.
+            val offer = nextGoalDeedOffer(state) ?: reject(BlockReason.NoNextEvent)
+            return startDeed(state, offer.id, requestId, demoMode)
+        }
         val event = factory.event(occurrence.eventId)
         entryGuard(state, occurrence.eventId, demoMode)
         if (event.type == EventType.EARNING) {
@@ -396,32 +404,52 @@ class GameEngine(
             }
         }
         val canEatHere = factory.policy(event.id).feedsPetChoiceIds.any { choiceId ->
-            factory.choices(event.id).any { it.id == choiceId && state.economy.availableBalance >= -it.moneyDelta }
+            factory.choices(event.id).any { it.id == choiceId &&
+                state.economy.availableBalance >= -choiceMoneyDelta(it.id, demoMode) }
         }
-        if (!canEatHere) actionGuard(day, minimumEnergy(state, occurrence))
+        if (!canEatHere) actionGuard(day, minimumEnergy(state, occurrence, demoMode))
         val next = replaceEvent(state, occurrence.copy(status = EventStatus.ACTIVE))
         return if (occurrence.status != EventStatus.PAUSED && factory.policy(event.id).startEffectsTiming == EffectTiming.OPEN) {
-            eventEffects(next, occurrence)
+            eventEffects(next, occurrence, demoMode)
         } else next
     }
 
-    private fun nextOccurrence(state: GameState): EventOccurrence {
+    private fun nextOccurrence(state: GameState): EventOccurrence = nextOccurrenceOrNull(state)
+        ?: reject(BlockReason.NoNextEvent)
+
+    private fun nextOccurrenceOrNull(state: GameState): EventOccurrence? {
         val day = running(state)
         val introduction = factory.goals.selectedGoal(state)?.introductionEventId
         val progress = factory.storyProgress(state)
+        if (progress.goalReadyForStory) {
+            val waiting = day.events.filter { it.origin == EventOrigin.SCHEDULE &&
+                it.status in setOf(EventStatus.PENDING, EventStatus.PAUSED) && progress.eligible(it.eventId) }
+            return waiting.firstOrNull { factory.policy(it.eventId).storyActId == progress.currentAct?.id }
+                ?: waiting.firstOrNull { it.status == EventStatus.PAUSED }
+                ?: waiting.firstOrNull { progress.isGoalDeed(it.eventId) }
+        }
         val paused = day.events.firstOrNull { it.status == EventStatus.PAUSED &&
             it.origin == EventOrigin.SCHEDULE && progress.eligible(it.eventId) }
         return day.events.firstOrNull { it.eventId == introduction && progress.eligible(it.eventId) &&
             (it.status == EventStatus.PENDING || it.status == EventStatus.PAUSED) }
             ?: paused?.takeIf { progress.eligible(it.eventId) }
             ?: day.events.firstOrNull { it.status == EventStatus.PENDING && progress.eligible(it.eventId) }
-            ?: reject(BlockReason.NoNextEvent)
+    }
+
+    private fun nextGoalDeedOffer(state: GameState): DeedOffer? {
+        val progress = factory.storyProgress(state)
+        val day = state.engine ?: return null
+        return day.deeds.firstOrNull { progress.isGoalDeed(it.eventId) && it.isAvailable(day.day) }
     }
 
     /** Cost of opening the next scheduled card, before Continue applies its entry effects. */
     fun nextEventSpending(state: GameState): SpendingQuote? = nextEventSpendingPreview(state)?.quote
 
-    fun nextEventSpendingPreview(state: GameState): EventSpendingPreview? = try {
+    /** The same authored purchase/food classification drives payment, admission and displayed quotes. */
+    fun choiceMoneyDelta(choiceId: String, demoMode: Boolean = previewDemoMode()): Long =
+        factory.choiceMoneyDelta(choiceId, demoMode)
+
+    fun nextEventSpendingPreview(state: GameState, demoMode: Boolean = previewDemoMode()): EventSpendingPreview? = try {
         if (state.economy.planning != null || state.engine == null || state.engine.phase == DayPhase.FINISHED ||
             state.engine.currentEvent != null) null
         else {
@@ -432,18 +460,19 @@ class GameEngine(
                 event.moneyDeltaOnStart >= 0) null
             else {
                 val kind = SpendingKind.forEvent(event.type)
-                EventSpendingPreview(EconomyOperations.quote(state.economy, Math.negateExact(event.moneyDeltaOnStart), kind), kind)
+                EventSpendingPreview(EconomyOperations.quote(state.economy,
+                    Math.negateExact(factory.eventMoneyDelta(event.id, demoMode)), kind), kind)
             }
         }
     } catch (_: Rejected) { null }
 
     /** Simulate only day preparation, never its first event or any repository write. */
-    fun advanceSpending(state: GameState, command: EngineCommand?): EventSpendingPreview? = try {
+    fun advanceSpending(state: GameState, command: EngineCommand?, demoMode: Boolean = previewDemoMode()): EventSpendingPreview? = try {
         if (state.economy.planning != null || state.economy.unallocated != 0L) null
         else when (command) {
-            EngineCommand.OpenNextEvent -> nextEventSpendingPreview(state)
+            EngineCommand.OpenNextEvent -> nextEventSpendingPreview(state, demoMode)
             is EngineCommand.BeginDay -> if (command.openFirst)
-                nextEventSpendingPreview(beginDay(state, command.copy(openFirst = false), "quote:day")) else null
+                nextEventSpendingPreview(beginDay(state, command.copy(openFirst = false), "quote:day"), demoMode) else null
             else -> null
         }
     } catch (_: Rejected) { null }
@@ -541,6 +570,7 @@ class GameEngine(
 
     private fun prepareStoryEvent(state: GameState, requestId: String): GameState {
         val day = running(state)
+        if (factory.storyProgress(state).goalReadyForStory) return prepareGoalStory(state, requestId)
         if (day.phase == DayPhase.READY_TO_END || factory.goals.selectedGoal(state) == null) return state
         // Preserve an old already scheduled introduction until its actual outcome is committed.
         val legacyIntroductions = factory.goals.filter { it.legacyAcceptanceChoiceIds.isNotEmpty() }.map { it.introductionEventId }
@@ -559,6 +589,26 @@ class GameEngine(
             events[postponed] = events[postponed].copy(status = EventStatus.CARRIED)
         }
         return state.copy(engine = day.copy(events = events))
+    }
+
+    private fun prepareGoalStory(state: GameState, requestId: String): GameState {
+        val day = running(state)
+        val progress = factory.storyProgress(state)
+        val events = day.events.filter { EventScheduling.retainOccurrence(it, factory.event(it.eventId).type,
+            factory.policy(it.eventId), progress) }.toMutableList()
+        val waiting = events.filter { it.status in setOf(EventStatus.PENDING, EventStatus.PAUSED) }
+        val hasStory = waiting.any { factory.policy(it.eventId).storyActId == progress.currentAct?.id && progress.eligible(it.eventId) }
+        if (!hasStory) {
+            val next = progress.nextEvent(events.map { it.eventId }.toSet())
+                ?: progress.goalDeedIds().firstOrNull { id ->
+                    events.none { it.eventId == id && it.status != EventStatus.COMPLETED } &&
+                        nextGoalDeedOffer(state) == null
+                }
+            if (next != null) events += factory.create(next, "$requestId:goal-story")
+        }
+        // A drained ordinary plan is not the end of a ready goal's story. Keep the day open,
+        // including when an existing prerequisite offer must be resumed; normal care guards apply.
+        return state.copy(engine = day.copy(phase = DayPhase.RUNNING, events = events))
     }
 
     private fun choose(current: GameState, command: EngineCommand.Choose, score: DeedGameScore? = null,
@@ -593,8 +643,9 @@ class GameEngine(
             (remainingEnergy.toLong() + energyRestore).coerceAtMost(rules.fullEnergy.toLong()).toInt()
         if (choice.id in policy.feedsPetChoiceIds) ensure(day.energy > 0 || energyCost == 0, BlockReason.MustSleep)
         else actionGuard(day, energyCost)
-        var next = if (policy.startEffectsTiming == EffectTiming.COMPLETE) eventEffects(state, occurrence) else state
-        val reward = if (event.type == EventType.EARNING) score?.reward(choice.moneyDelta) ?: choice.moneyDelta else choice.moneyDelta
+        var next = if (policy.startEffectsTiming == EffectTiming.COMPLETE) eventEffects(state, occurrence, demoMode) else state
+        val delta = choiceMoneyDelta(choice.id, demoMode)
+        val reward = if (event.type == EventType.EARNING) score?.reward(delta) ?: delta else delta
         next = money(next, reward, SpendingKind.forEvent(event.type))
         choice.petStateAfter?.let { next = next.copy(pet = next.pet.transitionTo(it)) }
         factory.content.choiceItemEffects.filter { it.choiceId == choice.id }.sortedBy { it.position }.forEach {
@@ -669,8 +720,8 @@ class GameEngine(
         entryGuard(state, event.id, demoMode)
         actionGuard(day, policy.energyFor(choice.id))
         // Quote admission using pure transformations; opening the board commits no effects.
-        val beforeChoice = if (policy.startEffectsTiming == EffectTiming.COMPLETE) eventEffects(state, occurrence) else state
-        money(beforeChoice, choice.moneyDelta, SpendingKind.forEvent(event.type))
+        val beforeChoice = if (policy.startEffectsTiming == EffectTiming.COMPLETE) eventEffects(state, occurrence, demoMode) else state
+        money(beforeChoice, choiceMoneyDelta(choice.id, demoMode), SpendingKind.forEvent(event.type))
         return state
     }
 
@@ -742,12 +793,12 @@ class GameEngine(
         )
     }
 
-    private fun feed(state: GameState, mealId: String): GameState {
+    private fun feed(state: GameState, mealId: String, demoMode: Boolean): GameState {
         running(state)
-        return factory.mealPolicy.apply(state, mealId, rules.fullEnergy)
+        return factory.mealPolicy.apply(state, mealId, rules.fullEnergy, demoMode)
     }
 
-    private fun finishDayFromEvent(state: GameState, occurrenceId: String): GameState {
+    private fun finishDayFromEvent(state: GameState, occurrenceId: String, demoMode: Boolean): GameState {
         val day = running(state)
         val occurrence = day.currentEvent
         ensure(occurrence?.id == occurrenceId, BlockReason.InvalidEventAction)
@@ -756,24 +807,33 @@ class GameEngine(
             factory.event(occurrence.eventId).type == EventType.EARNING
         ensure(occurrence.status == EventStatus.ACTIVE || proposal, BlockReason.InvalidEventAction)
         // Check energy before food: an unfed pet with a viable choice does not need early sleep.
-        ensure(day.energy == 0 || minimumEnergy(state, occurrence) > day.energy, BlockReason.UnfinishedEvents)
+        ensure(day.energy == 0 || minimumEnergy(state, occurrence, demoMode) > day.energy, BlockReason.UnfinishedEvents)
         ensure(day.ateToday, BlockReason.MustEat)
         // A proposal already spent its step. Keep its offer/deadline; do not offer it again tomorrow.
         val deferred = if (proposal) acknowledge(state, occurrenceId) else pause(state, occurrenceId)
         return carryRemainingPlan(deferred)
     }
 
-    private fun finishDay(current: GameState): GameState {
+    private fun finishDay(current: GameState, demoMode: Boolean): GameState {
         val state = prepareIntroduction(current, "finish:${current.engine?.revision}")
         val day = running(state)
         ensure(day.currentEvent == null, BlockReason.EventInProgress)
         ensure(day.ateToday, BlockReason.MustEat)
+        if (factory.storyProgress(state).goalReadyForStory) {
+            // Rest uses the same priority as Continue. A paused optional card must not prevent
+            // sleeping when the next story action is too tiring.
+            val next = nextOccurrenceOrNull(state)
+            val cost = next?.let { minimumEnergy(state, it, demoMode) }
+                ?: nextGoalDeedOffer(state)?.let { factory.policy(it.eventId).energyCost }
+            ensure(cost == null || day.energy == 0 || cost > day.energy, BlockReason.UnfinishedEvents)
+            return carryRemainingPlan(state)
+        }
         val pending = day.events.filter { it.status == EventStatus.PENDING ||
             (it.status == EventStatus.PAUSED && it.origin == EventOrigin.SCHEDULE) }
         val eligible = pending.filter { factory.storyProgress(state).eligible(it.eventId) }
         if (eligible.isNotEmpty()) {
             val next = eligible.firstOrNull { it.status == EventStatus.PAUSED } ?: eligible.first()
-            ensure(day.energy == 0 || minimumEnergy(state, next) > day.energy, BlockReason.UnfinishedEvents)
+            ensure(day.energy == 0 || minimumEnergy(state, next, demoMode) > day.energy, BlockReason.UnfinishedEvents)
         }
         return carryRemainingPlan(state)
     }
@@ -792,7 +852,7 @@ class GameEngine(
     }
 
     /** The paid option cannot prevent rest when only the work alternative is affordable. */
-    private fun minimumEnergy(state: GameState, occurrence: EventOccurrence): Int {
+    private fun minimumEnergy(state: GameState, occurrence: EventOccurrence, demoMode: Boolean = false): Int {
         val policy = factory.policy(occurrence.eventId)
         if (policy.choiceEnergyCosts.isEmpty()) return policy.energyCost
         val event = factory.event(occurrence.eventId)
@@ -801,9 +861,10 @@ class GameEngine(
             try {
                 val priceOnStart = if (policy.startEffectsTiming == EffectTiming.COMPLETE ||
                     (policy.startEffectsTiming == EffectTiming.OPEN && occurrence.status == EventStatus.PENDING)) {
-                    event.moneyDeltaOnStart
+                    factory.eventMoneyDelta(event.id, demoMode)
                 } else 0L
-                money(money(state, priceOnStart, SpendingKind.forEvent(event.type)), choice.moneyDelta, SpendingKind.forEvent(event.type))
+                money(money(state, priceOnStart, SpendingKind.forEvent(event.type)),
+                    choiceMoneyDelta(choice.id, demoMode), SpendingKind.forEvent(event.type))
                 true
             } catch (blocked: EconomyViolation) {
                 if (blocked.reason != EconomyFailure.INSUFFICIENT_MONEY) throw blocked
@@ -854,9 +915,9 @@ class GameEngine(
         return goal.itemIds.toSet()
     }
 
-    private fun eventEffects(state: GameState, occurrence: EventOccurrence): GameState {
+    private fun eventEffects(state: GameState, occurrence: EventOccurrence, demoMode: Boolean): GameState {
         val event = factory.event(occurrence.eventId)
-        var next = money(state, event.moneyDeltaOnStart, SpendingKind.forEvent(event.type))
+        var next = money(state, factory.eventMoneyDelta(event.id, demoMode), SpendingKind.forEvent(event.type))
         event.petStateOnStart?.let { next = next.copy(pet = next.pet.transitionTo(it)) }
         factory.content.eventItemEffects.filter { it.eventId == event.id }.sortedBy { it.position }.forEach {
             next = item(next, it.itemId, it.operation, "${occurrence.id}:event-item:${it.id}")

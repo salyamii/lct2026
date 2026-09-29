@@ -112,14 +112,14 @@ internal fun GoalScreen(
             when {
                 state.loading -> Unit
                 state.failed -> AdventurePrimaryButton("Повторить", { onAction(GoalAction.Retry) })
-                result != null -> AdventurePrimaryButton(if (ready) "Продолжить историю" else "К целям", {
+                result != null -> AdventurePrimaryButton(if (ready) "Выполнить цель" else "К целям", {
                     onAction(if (ready) GoalAction.ContinueStory else GoalAction.DismissPurchaseResult)
                 }, enabled = !state.busy)
                 state.showList -> Unit
-                state.canSelect -> AdventurePrimaryButton("Продолжить историю", {
+                state.canSelect -> AdventurePrimaryButton("Выполнить цель", {
                     onAction(GoalAction.ContinueStory)
                 }, enabled = !state.busy)
-                ready || state.completedProject -> AdventurePrimaryButton("Продолжить историю", {
+                ready || state.completedProject -> AdventurePrimaryButton(if (state.completedProject) "Продолжить историю" else "Выполнить цель", {
                     onAction(GoalAction.ContinueStory)
                 }, enabled = !state.busy)
                 state.selected && target != null -> Unit
@@ -137,14 +137,14 @@ internal fun GoalScreen(
                 GoalItemIllustration(result.itemId, Modifier.size(88.dp).align(Alignment.CenterHorizontally))
                 AdventureHeading("${result.itemTitle} теперь у нас!")
                 AdventureBody("Предмет останется в инвентаре.")
-                AdventureBody(if (ready) "Всё подготовлено. Продолжим историю!" else "Выбери, на что будем копить дальше.")
+                AdventureBody(if (ready) "Всё собрано! Отправимся выполнять цель." else "Выбери, на что будем копить дальше.")
             }
             else -> {
                 AdventureHeading(state.title)
                 AdventureBody(goalPreviewText(state.goalId, state.description))
                 when {
                     state.completedProject -> GoalStatus("Цель выполнена")
-                    ready -> GoalStatus("Всё подготовлено для продолжения истории")
+                    ready -> GoalStatus("Снаряжение собрано. Пора выполнить цель!")
                     !state.selected -> GoalCaption("Откроется после предыдущей главы")
                 }
                 if (state.selected && target != null) {

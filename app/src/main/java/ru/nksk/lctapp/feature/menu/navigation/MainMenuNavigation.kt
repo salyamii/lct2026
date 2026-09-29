@@ -65,6 +65,10 @@ fun EntryProviderScope<NavKey>.mainMenuEntry(
             onRetry = viewModel::retry,
             onMeal = { if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) viewModel.selectMeal(it) },
             onDismissMeal = dropUnlessResumed { viewModel.dismissFreeMeal() },
+            onRename = dropUnlessResumed { viewModel.editName() },
+            onNameChange = { if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) viewModel.changeName(it) },
+            onSaveName = dropUnlessResumed { viewModel.saveName() },
+            onDismissName = dropUnlessResumed { viewModel.dismissName() },
             onAction = { action ->
                 // Ignore events from an outgoing entry while a transition is in progress.
                 if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {

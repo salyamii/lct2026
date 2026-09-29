@@ -74,6 +74,8 @@ internal fun MenuHud(
     budgetExpanded: Boolean = false,
     onBudgetExpandedChange: (Boolean) -> Unit = {},
     settingsButton: (@Composable () -> Unit)? = null,
+    onRename: () -> Unit = {},
+    renameEnabled: Boolean = true,
 ) {
     Column(modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Row(
@@ -131,6 +133,8 @@ internal fun MenuHud(
                         .clip(RoundedCornerShape(20.dp))
                         .background(AdventurePanel.copy(alpha = 0.85f))
                         .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(20.dp))
+                        .clickable(enabled = renameEnabled, role = Role.Button,
+                            onClickLabel = "Изменить имя", onClick = onRename)
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     contentAlignment = Alignment.Center,
                 ) {

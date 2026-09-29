@@ -61,7 +61,8 @@ class LoadingScreenAlignmentTest(private val width: Int, private val height: Int
                             // Android's no-background splash icon occupies a 288 dp square.
                             Image(painterResource(R.drawable.loading_coin_splash), null,
                                 Modifier.size(288.dp).testTag("system_splash_icon"))
-                            MainMenuContent(MainMenuLoadState.Loading, {}, {}, {}, {})
+                            MainMenuContent(MainMenuLoadState.Loading, {}, {}, {}, {},
+                                onRename = {}, onNameChange = {}, onSaveName = {}, onDismissName = {})
                         }
                     }
                 }

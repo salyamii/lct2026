@@ -80,6 +80,103 @@ class DemoModeTest {
             EngineRequest("duplicate-purchase", after.engine!!.revision, command, demoMode = true)))
     }
 
+    @Test fun demoAccessoryAtZeroFundsKeepsOwnershipAndMoodWithoutExpenseEvidence() = runTest {
+        val fixture = Fixture(coins = 0, choiceCost = 25, grantsItem = true)
+        val before = fixture.repository.value
+        val command = EngineCommand.CompleteEvent("occurrence", "work-choice")
+        assertTrue(fixture.engine.blockReason(before, command, demoMode = false) is BlockReason.InsufficientMoney)
+        assertNull(fixture.engine.blockReason(before, command, demoMode = true))
+        assertEquals(-25L, fixture.engine.choiceMoneyDelta("work-choice", false))
+        assertEquals(0L, fixture.engine.choiceMoneyDelta("work-choice", true))
+
+        val request = EngineRequest("accessory", 0, command, demoMode = true)
+        assertTrue(fixture.engine.dispatch(request) is EngineResult.Applied)
+        val after = fixture.repository.value
+        assertEquals(before.economy, after.economy)
+        assertEquals(listOf("accessory"), after.ownedItems.map { it.itemId })
+        assertEquals(PetVisualState.HAPPY, after.pet.visualState)
+        assertTrue(CanonicalLedger.fromTransition(before, after, request).isEmpty())
+        assertTrue(fixture.repository.commits.getValue(request.id).facts.isEmpty())
+    }
+
+    @Test fun demoFoodChoiceCanOpenAndFeedHungryPetWithoutMoneyButServicesStillCostMoney() = runTest {
+        val fixture = Fixture(coins = 0, choiceCost = 6, feedsPet = true)
+        fixture.repository.update { it.copy(engine = it.engine!!.copy(ateToday = false, steps = 50,
+            events = it.engine!!.events.map { event -> event.copy(status = EventStatus.PENDING) })) }
+        val before = fixture.repository.value
+        assertEquals(EngineResult.Blocked(BlockReason.MustEat), fixture.engine.dispatch(
+            EngineRequest("ordinary-open", 0, EngineCommand.OpenNextEvent)))
+        assertTrue(fixture.engine.dispatch(EngineRequest("demo-open", 0,
+            EngineCommand.OpenNextEvent, demoMode = true)) is EngineResult.Applied)
+        assertTrue(fixture.engine.dispatch(EngineRequest("demo-bun", fixture.repository.value.engine!!.revision,
+            EngineCommand.CompleteEvent("occurrence", "work-choice"), demoMode = true)) is EngineResult.Applied)
+        assertTrue(fixture.repository.value.engine!!.ateToday)
+        assertEquals(before.economy, fixture.repository.value.economy)
+
+        val service = Fixture(coins = 0, choiceCost = 7)
+        assertEquals(-7L, service.engine.choiceMoneyDelta("work-choice", true))
+        assertTrue(service.engine.blockReason(service.repository.value,
+            EngineCommand.CompleteEvent("occurrence", "work-choice"), demoMode = true) is BlockReason.InsufficientMoney)
+    }
+
+    @Test fun demoItemPaidOnOpenUsesZeroPreviewAndAppliesTheSameItemEffect() = runTest {
+        val fixture = Fixture(coins = 0, openingCost = 12, openingItem = true)
+        fixture.repository.update { it.copy(story = it.story.copy(activeEventId = null), engine = it.engine!!.copy(
+            events = it.engine!!.events.map { event -> event.copy(status = EventStatus.PENDING) })) }
+        val before = fixture.repository.value
+        assertFalse(fixture.engine.nextEventSpendingPreview(before, false)!!.quote.affordable)
+        val free = fixture.engine.nextEventSpendingPreview(before, true)!!.quote
+        assertTrue(free.affordable)
+        assertTrue(free.parts.isEmpty())
+        val request = EngineRequest("open-item", 0, EngineCommand.OpenNextEvent, demoMode = true)
+        assertTrue(fixture.engine.dispatch(request) is EngineResult.Applied)
+        assertEquals(before.economy, fixture.repository.value.economy)
+        assertEquals(listOf("accessory"), fixture.repository.value.ownedItems.map { it.itemId })
+        assertTrue(CanonicalLedger.fromTransition(before, fixture.repository.value, request).isEmpty())
+    }
+
+    @Test fun uncertainFreeMealKeepsCapturedModeAndNextOrdinaryMealRestoresPrice() = runTest {
+        val fixture = Fixture(coins = 20, activeEvent = false)
+        val preferences = MutablePreferences(true)
+        val session = fixture.session(preferences)
+        val before = fixture.repository.value
+        val request = EngineRequest("free-feast", 0, EngineCommand.Feed("feast"), demoMode = true)
+        fixture.repository.failAfterSave = true
+        expectStorageFailure { session.dispatch(request) }
+        val committed = fixture.repository.value
+        assertEquals(before.economy, committed.economy)
+        assertEquals(PetVisualState.HAPPY, committed.pet.visualState)
+        assertEquals(5, committed.engine!!.energy)
+
+        preferences.setDemoModeEnabled(false)
+        fixture.repository.failAfterSave = false
+        assertTrue(session.dispatch(request) is EngineResult.Applied)
+        assertEquals(committed, fixture.repository.value)
+        assertEquals(1, fixture.repository.commits.size)
+        assertTrue(session.dispatch(EngineRequest("ordinary-feast", committed.engine!!.revision,
+            EngineCommand.Feed("feast"))) is EngineResult.Applied)
+        assertEquals(10L, fixture.repository.value.economy.availableBalance)
+        assertFalse(fixture.repository.commits.getValue("ordinary-feast").request.demoMode)
+    }
+
+    @Test fun waivedEventCostsNeverBecomeOffsettingFictitiousExpensesAndIncome() = runTest {
+        for (timing in EffectTiming.entries) {
+            val fixture = Fixture(coins = 0, openingCost = 12, openingItem = true, openingTiming = timing)
+            val command = if (timing == EffectTiming.OPEN) {
+                fixture.repository.update { it.copy(engine = null, story = StoryState(null, null, null, emptyList())) }
+                EngineCommand.BeginDay("day", List(4) { "work" }, openFirst = true)
+            } else EngineCommand.CompleteEvent("occurrence", "work-choice")
+            val before = fixture.repository.value
+            val request = EngineRequest("free-event-$timing", before.engine?.revision, command, demoMode = true)
+            assertTrue(fixture.engine.dispatch(request) is EngineResult.Applied)
+            val after = fixture.repository.value
+            assertEquals(before.economy, after.economy)
+            assertTrue(after.engine!!.journal.all { it.moneyDelta == 0L })
+            assertTrue(CanonicalLedger.fromTransition(before, after, request).isEmpty())
+            assertEquals(listOf("accessory"), after.ownedItems.map { it.itemId })
+        }
+    }
+
     @Test fun lostCommittedReplyRetainsCapturedDemoRulesWhenPreferenceIsDisabled() = runTest {
         val fixture = Fixture(energy = 0, coins = 0, activeEvent = false)
         val preferences = MutablePreferences(true)
@@ -138,20 +235,31 @@ class DemoModeTest {
         override suspend fun setDemoModeEnabled(enabled: Boolean) { state.value = DemoPreferences(enabled) }
     }
 
-    private class Fixture(energy: Int = 5, coins: Long = 20, activeEvent: Boolean = true) {
+    private class Fixture(energy: Int = 5, coins: Long = 20, activeEvent: Boolean = true,
+        choiceCost: Long = 0, grantsItem: Boolean = false, feedsPet: Boolean = false,
+        openingCost: Long = 0, openingItem: Boolean = false, openingTiming: EffectTiming = EffectTiming.OPEN) {
         val catalog = GameCatalog(
             content = StoryContent(
                 chapters = listOf(ChapterDefinition("chapter", "Chapter", "goal")),
                 days = listOf(GameDayDefinition("day", "chapter", 1)),
                 goals = listOf(GoalDefinition("goal", "Goal", "")),
-                items = listOf(ItemDefinition("part", "Part", "", priceCoins = 50)),
+                items = listOf(ItemDefinition("part", "Part", "", priceCoins = 50),
+                    ItemDefinition("accessory", "Accessory", "", ItemCategory.ACCESSORY, 25)),
                 requiredItems = listOf(GoalRequiredItem("goal", "part")),
-                events = listOf(EventDefinition("work", EventType.STORY, "Work", "", null, null, null, 0, null, null)),
-                choices = listOf(EventChoiceDefinition("work-choice", "work", 0, "Complete", 0, null, null, GoalImpact.NEUTRAL)),
+                events = listOf(EventDefinition("work", EventType.STORY, "Work", "", null, null, null, -openingCost, null, null)),
+                choices = listOf(EventChoiceDefinition("work-choice", "work", 0, "Complete", -choiceCost, null,
+                    PetVisualState.HAPPY.takeIf { grantsItem }, GoalImpact.NEUTRAL)),
+                choiceItemEffects = if (grantsItem) listOf(ChoiceItemEffect("buy", "work-choice", 0,
+                    "accessory", ItemOperation.ADD)) else emptyList(),
+                eventItemEffects = if (openingItem) listOf(EventItemEffect("open-buy", "work", 0,
+                    "accessory", ItemOperation.ADD)) else emptyList(),
             ),
-            policies = mapOf("work" to EventPolicy(1)), cards = emptyMap(),
+            policies = mapOf("work" to EventPolicy(if (feedsPet) 0 else 1,
+                startEffectsTiming = if (openingItem) openingTiming else EffectTiming.COMPLETE,
+                feedsPetChoiceIds = if (feedsPet) setOf("work-choice") else emptySet())), cards = emptyMap(),
             rules = EngineRules("demo-tests", 5, 50, 1),
-            meals = listOf(MealDefinition("basic", 5, null), MealDefinition("free", 0, null, nextMorningEnergy = 3)),
+            meals = listOf(MealDefinition("basic", 5, null), MealDefinition("free", 0, null, nextMorningEnergy = 3),
+                MealDefinition("feast", 10, PetVisualState.HAPPY, energyRestore = 2)),
             storyDayId = "day", introductionId = "work", deedPool = emptyList(),
             goals = listOf(GoalCampaign("goal", "work", listOf("part"))),
         )

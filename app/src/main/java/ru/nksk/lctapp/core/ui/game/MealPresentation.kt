@@ -11,6 +11,7 @@ internal fun mealChoices(state: GameState, catalog: GameCatalog, engine: GameEng
     demoMode: Boolean = false): List<MealChoiceUiState> =
     catalog.mealPolicy.choices(state).map { meal ->
         val effect = catalog.mealPolicy.effects(meal.id)
+        val price = catalog.mealPolicy.effectivePrice(meal.id, demoMode)
         val blocked = engine.blockReason(state, EngineCommand.Feed(meal.id), demoMode)
         val label = when {
             meal.price == 0L -> "Бесплатная столовая"
@@ -25,5 +26,5 @@ internal fun mealChoices(state: GameState, catalog: GameCatalog, engine: GameEng
             else -> "Утолит голод."
         }
         MealChoiceUiState(meal.id, label, enabled = blocked == null, consequence = description,
-            priceLabel = if (meal.price == 0L) "Бесплатно" else paymentCoinAmount(meal.price))
+            priceLabel = if (price == 0L) "Бесплатно" else paymentCoinAmount(price))
     }

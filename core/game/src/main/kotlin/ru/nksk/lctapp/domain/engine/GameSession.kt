@@ -268,7 +268,7 @@ class GameSession(
             EngineCommand.BeginDay(catalog.dayId(state), catalog.plan(state), openFirst = state.engine == null)
         state.engine.currentEvent != null -> null
         state.engine.energy == 0 && !demoMode -> EngineCommand.FinishDay
-        state.engine.phase == DayPhase.READY_TO_END -> EngineCommand.FinishDay
+        state.engine.phase == DayPhase.READY_TO_END && !catalog.storyProgress(state).goalReadyForStory -> EngineCommand.FinishDay
         catalog.storyCampaign == null && awaitsIntroduction(state) -> EngineCommand.OpenNextEvent
         engine.blockReason(state, EngineCommand.OpenNextEvent, demoMode) in setOf(BlockReason.MustSleep, BlockReason.NoNextEvent) -> EngineCommand.FinishDay
         else -> EngineCommand.OpenNextEvent

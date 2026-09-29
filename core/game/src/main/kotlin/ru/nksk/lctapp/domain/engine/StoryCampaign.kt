@@ -71,6 +71,11 @@ class StoryProgress(
 
     val requiredGoal: GoalCampaign? get() = currentAct?.goalId?.let { id -> goals.first { it.goalId == id } }
 
+    /** The current kit leads to its own finale; a completed previous kit never accelerates another act. */
+    val goalReadyForStory: Boolean get() = requiredGoal?.let {
+        goals.selectedGoal(state)?.goalId == it.goalId && it.progress(state, content).isCollected
+    } == true
+
     fun goalAvailable(goal: GoalCampaign): Boolean = if (campaign?.acts?.any { it.goalId != null } == true)
         requiredGoal?.goalId == goal.goalId else goal.isAvailable(state)
 
@@ -96,7 +101,8 @@ class StoryProgress(
         is StoryCondition.EquippedLook -> state.pet.selectedLookId == condition.lookId
         is StoryCondition.GoalCollected -> goals.firstOrNull { it.goalId == condition.goalId }?.progress(state, content)?.isCollected == true
         is StoryCondition.FactsAtLeast -> condition.factIds.count { it in facts } >= condition.minimum
-        is StoryCondition.DayStepsAtLeast -> (state.engine?.steps ?: 0) >= condition.minimum
+        // With the kit ready, waiting for unrelated daily actions no longer paces the story.
+        is StoryCondition.DayStepsAtLeast -> goalReadyForStory || (state.engine?.steps ?: 0) >= condition.minimum
         is StoryCondition.SelectedGoal -> goals.selectedGoal(state)?.goalId == condition.goalId
         StoryCondition.SelectedGoalCollected -> goals.selectedGoal(state)?.progress(state, content)?.isCollected == true
     }
@@ -127,6 +133,13 @@ class StoryProgress(
             families.family(it) !in excludedFamilies && !completed(it) && eligible(it)
         }
     }
+
+    /** Authored jobs that supply missing story facts, rather than unrelated earning offers. */
+    fun goalDeedIds(): List<String> = if (!goalReadyForStory) emptyList() else
+        campaign?.deedHints.orEmpty().filter { meets(it.condition) && eligible(it.eventId) }
+            .map { it.eventId }.distinct()
+
+    fun isGoalDeed(eventId: String): Boolean = goalDeedIds().any { families.family(it) == families.family(eventId) }
 }
 
 data class EventCardVariant(val condition: StoryCondition, val body: String, val scene: String? = null, val character: String? = null)

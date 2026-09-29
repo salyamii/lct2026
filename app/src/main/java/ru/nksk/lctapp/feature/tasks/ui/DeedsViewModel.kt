@@ -44,6 +44,9 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
     private var navigationHasLeft = false
     private var message: String? = null
     private var needsFood = false
+    private var pendingRequest: EngineRequest? = null
+    private var pendingMeal: MealChoiceUiState? = null
+    private var shownDemoMode = false
 
     init { retry() }
 
@@ -54,7 +57,7 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
             try {
                 session.prepare()
                 session.observe().collect {
-                    if (game != it) { message = null; needsFood = false }
+                    if (game != it && pendingRequest == null) { message = null; needsFood = false }
                     game = checkNotNull(it)
                     render()
                 }
@@ -65,6 +68,13 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
 
     fun start(offerId: String) = execute(EngineCommand.StartDeed(offerId), navigate = true)
     fun feed(mealId: String) = execute(EngineCommand.Feed(mealId), navigate = false)
+
+    fun dismissMessage() {
+        if (busy) return
+        message = null
+        needsFood = false
+        render()
+    }
 
     fun onScreenResumed() {
         if (navigating && navigationHasLeft) {
@@ -82,11 +92,27 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
     private fun execute(command: EngineCommand, navigate: Boolean) {
         val saved = game ?: return
         if (busy) return
+        val request = pendingRequest?.also {
+            if (it.command != command) {
+                message = "Сначала повтори сохранение выбранного действия."
+                render()
+                return
+            }
+        } ?: EngineRequest(UUID.randomUUID().toString(), saved.engine?.revision, command,
+            demoMode = shownDemoMode).also {
+                pendingRequest = it
+                pendingMeal = (command as? EngineCommand.Feed)?.let { feed ->
+                    mealChoices(saved, session.catalog, session.engine, shownDemoMode).firstOrNull { meal -> meal.id == feed.mealId }
+                }
+            }
         busy = true; message = null
         mutableState.value = mutableState.value.copy(busy = true)
         viewModelScope.launch {
             try {
-                when (val result = session.dispatch(EngineRequest(UUID.randomUUID().toString(), saved.engine?.revision, command))) {
+                val result = session.dispatch(request)
+                pendingRequest = null
+                pendingMeal = null
+                when (result) {
                     is EngineResult.Applied -> {
                         game = result.state; needsFood = false
                         if (navigate) {
@@ -106,6 +132,7 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
         if (busy) return
         val saved = game ?: return
         val catalog = session.catalog
+        shownDemoMode = session.demoModeEnabled
         mutableState.value = DeedsUiState(
             loading = false, busy = busy, message = message, petName = saved.pet.name,
             hasCurrentEvent = saved.engine?.currentEvent != null,
@@ -118,7 +145,8 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
                     if (session.demoModeEnabled) "Без усталости · режим бога" else card.effort.asPetEffortText(saved.pet.name),
                     deedDeadline(saved.engine!!.day, offer.expiresDay), card.scene)
             },
-            meals = if (!needsFood) emptyList() else mealChoices(saved, catalog, session.engine, session.demoModeEnabled),
+            meals = pendingMeal?.let { listOf(it.copy(enabled = true)) }
+                ?: if (!needsFood) emptyList() else mealChoices(saved, catalog, session.engine, shownDemoMode),
         )
     }
 }

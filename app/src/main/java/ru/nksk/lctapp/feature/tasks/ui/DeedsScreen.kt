@@ -4,12 +4,15 @@ import ru.nksk.lctapp.core.ui.components.GameLoadingIndicator
 import ru.nksk.lctapp.core.ui.components.MealChoices
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Surface
+import androidx.compose.material3.AlertDialog
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -40,11 +43,17 @@ import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
+import ru.nksk.lctapp.core.ui.components.AdventureBody
+import ru.nksk.lctapp.core.ui.components.AdventureHeading
+import ru.nksk.lctapp.core.ui.components.AdventurePrimaryButton
+import ru.nksk.lctapp.core.ui.components.AdventureQuietButton
+import ru.nksk.lctapp.core.ui.components.GamePaper
 
 @Composable
 fun DeedsScreen(onTraining: () -> Unit, onExit: () -> Unit,
     state: DeedsUiState = DeedsUiState(), onStart: (String) -> Unit = {}, onRetry: () -> Unit = {},
     onFeed: (String) -> Unit = {}, onCurrentEvent: () -> Unit = {},
+    onDismissMessage: () -> Unit = {},
 ) {
     BackHandler(enabled = state.busy) {}
     Box(Modifier.fillMaxSize()) {
@@ -54,7 +63,6 @@ fun DeedsScreen(onTraining: () -> Unit, onExit: () -> Unit,
             onExit = { if (!state.busy) onExit() },
             onStart = { if (!state.busy) onStart(it) },
             onRetry = { if (!state.busy) onRetry() },
-            onFeed = { if (!state.busy) onFeed(it) },
             onCurrentEvent = { if (!state.busy) onCurrentEvent() },
         )
         if (state.busy) Box(Modifier.fillMaxSize().pointerInput(Unit) {
@@ -65,12 +73,34 @@ fun DeedsScreen(onTraining: () -> Unit, onExit: () -> Unit,
             GameLoadingIndicator(Modifier.align(Alignment.Center).safeDrawingPadding())
         }
     }
+    // The selected card can be far below the list heading. Always show the
+    // rejected action beside the player, without resetting their scroll position.
+    if (state.message != null && !state.busy) AlertDialog(
+        onDismissRequest = onDismissMessage,
+        containerColor = GamePaper,
+        title = { AdventureHeading("Пока не можем начать дело") },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                AdventureBody(state.message)
+                MealChoices(state.meals, false, onFeed)
+            }
+        },
+        confirmButton = {
+            if (state.hasCurrentEvent) AdventurePrimaryButton("Вернуться к событию", {
+                onDismissMessage()
+                onCurrentEvent()
+            }) else AdventureQuietButton("Понятно", onDismissMessage)
+        },
+        dismissButton = {
+            if (state.hasCurrentEvent) AdventureQuietButton("Остаться в делах", onDismissMessage)
+        },
+    )
 }
 
 @Composable
 private fun DeedsContent(onTraining: () -> Unit, onExit: () -> Unit,
     state: DeedsUiState, onStart: (String) -> Unit, onRetry: () -> Unit,
-    onFeed: (String) -> Unit, onCurrentEvent: () -> Unit,
+    onCurrentEvent: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -105,9 +135,7 @@ private fun DeedsContent(onTraining: () -> Unit, onExit: () -> Unit,
                             Text("Не удалось загрузить дела.", color = DeedColors.Text)
                             Button(onRetry) { Text("Повторить") }
                         }
-                        state.message?.let { Text(it, color = DeedColors.Text) }
                         if (state.hasCurrentEvent) OutlinedButton(onCurrentEvent, enabled = !state.busy) { Text("Вернуться к событию") }
-                        MealChoices(state.meals, state.busy, onFeed)
                         if (!state.loading && !state.failed && state.offers.isEmpty()) {
                             Text("Пока нет новых дел. Продолжи день, чтобы узнать, кому нужна помощь.", color = DeedColors.TextSoft)
                         }

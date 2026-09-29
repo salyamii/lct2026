@@ -62,6 +62,7 @@ fun EntryProviderScope<NavKey>.tasksEntry(
             onStart = { if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) viewModel.start(it) },
             onFeed = { if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) viewModel.feed(it) },
             onRetry = viewModel::retry,
+            onDismissMessage = viewModel::dismissMessage,
             onCurrentEvent = dropUnlessResumed { onEvent(source) },
             onTraining = dropUnlessResumed { onTraining(source) },
             onExit = dropUnlessResumed { onBack(source) },
