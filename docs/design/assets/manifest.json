@@ -1174,24 +1174,26 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_node_export",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 82014,
-      "sha256": "2d4da74913b87f58b5173236d3d29b53c20202a3618f791e37cba9b69245e688",
-      "rgba_sha256": "6c6c24c1fc2d2fbc63d9c0521bb1bea64b062c11c97a4d9a15a7cea6eb052439",
+      "bytes": 91296,
+      "sha256": "cdc377b5115f0c6710065361c048d5a5ddd002140c3a79a649bc4eeb83c3be09",
+      "rgba_sha256": "31f9367a8c0975bfd2da0c49aa57b04feb6e6f9c3ca157294927866d93c0195d",
       "alpha_bounds": [
-        148,
-        56,
-        432,
-        456
+        147,
+        45,
+        434,
+        459
       ],
-      "source_sha256": "54bfe7a477293e1e05a8c580c8c0f47d13082c0c45acd19b3b166978a6aa5db2",
-      "source_bytes": 126682,
+      "source_sha256": "7c44c5d2bb0c7ce2dd11cf84baa550db5fbd29e8915806fb2d09f8b1eef91864",
+      "source_bytes": 132252,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_hat.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_hat.webp",
+      "source_path": "docs/design/assets/sources/teen-hat-refresh-2026-09-29/ryzhik_teen_body_accessory_hat.png",
+      "refreshed_on": "2026-09-29"
     },
     {
       "resource": "ryzhik_teen_body_accessory_goggles",
@@ -1684,24 +1686,26 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 81002,
-      "sha256": "5433b4633351f6f9c4ba45b59f8a24e04153e7489335220a6a06feffd45df05b",
-      "rgba_sha256": "a1104e16b389d76b875014c356e7759f8b8bed0be1bad863842257e1bf784ba2",
+      "bytes": 85300,
+      "sha256": "ea6d4dc28fe9406dd9b2e2411f908d944a432cf7a9ec3568abc754e813022018",
+      "rgba_sha256": "097a85f80b8aecacba619a89f9b09f7b46ba2051eff5f043ac3bcdf3f33eaca0",
       "alpha_bounds": [
-        148,
-        56,
-        432,
-        456
+        42,
+        46,
+        435,
+        483
       ],
-      "source_sha256": "50bc50afdeddf60eb8157742303a05619ab06b761562f7596af9103c1e7c6f18",
-      "source_bytes": 126686,
+      "source_sha256": "43d34c39043cbe32df099025e3062024af5db4a5a08f786f2eaaa7a03e3dd770",
+      "source_bytes": 130582,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_hat_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_hat_sand.webp",
+      "source_path": "docs/design/assets/sources/teen-hat-refresh-2026-09-29/ryzhik_teen_body_accessory_hat_sand.png",
+      "refreshed_on": "2026-09-29"
     },
     {
       "resource": "ryzhik_teen_body_accessory_goggles_sand",
@@ -1956,24 +1960,26 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 80496,
-      "sha256": "163c3f0c82d566ec55afb1fa35af341687a3ee34fe591dd8105953ba7c4613cc",
-      "rgba_sha256": "73231526f1d01a3560cf21a760682ca116010ed9b42f1b0c3b42f0b716cf8e6d",
+      "bytes": 87260,
+      "sha256": "f47cf234d7470ca420b508111a476604bdf6c92c115f45e8564aad5efff6deff",
+      "rgba_sha256": "7ac984ee1be88b0da60734fec1f92bf7b06035db25f32871c5d0611bf48a4480",
       "alpha_bounds": [
-        148,
-        56,
-        432,
-        456
+        42,
+        46,
+        435,
+        482
       ],
-      "source_sha256": "62c40b1f9ee52f5e57208fc51e6a3969cecd6c802d04519066e69e9cadfdd33b",
-      "source_bytes": 126825,
+      "source_sha256": "62d129412035fbe4733aa7115393088268507cbcc907fb3d58904cb601ab9c28",
+      "source_bytes": 133299,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_hat_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_hat_dark_russet.webp",
+      "source_path": "docs/design/assets/sources/teen-hat-refresh-2026-09-29/ryzhik_teen_body_accessory_hat_dark_russet.png",
+      "refreshed_on": "2026-09-29"
     },
     {
       "resource": "ryzhik_teen_body_accessory_goggles_dark_russet",
@@ -3045,24 +3051,26 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 125344,
-      "sha256": "c6e4674ea9fb5f8d802b4e21bc50c240c6a37d5296c7f9d4fd17b1a13bb36777",
-      "rgba_sha256": "392e7353ae557167a645a7db244b88307c8619fdced6c1a15d25d3f9d6141d59",
+      "bytes": 131228,
+      "sha256": "519f24aabbd2dfacf165d79017a0ceb7183f6af4156ae78b2ca47b9cb6015bee",
+      "rgba_sha256": "b22d76344b883e973a27af27b5e22178248d790ded753b526ce7ee7a6d0fc82f",
       "alpha_bounds": [
-        97,
-        36,
-        448,
-        482
+        42,
+        34,
+        477,
+        485
       ],
-      "source_sha256": "88c07039207f8b6091d5c1708e828556243883cfc21cd4cc983ee53195e85e93",
-      "source_bytes": 197635,
+      "source_sha256": "defed8b8b14ceaffb8432256985273f33ba548f40a30053ffca713d706631a0f",
+      "source_bytes": 200531,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_hat.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_hat.webp",
+      "source_path": "docs/design/assets/sources/other-ages-hat-refresh-2026-09-29/ryzhik_cub_body_accessory_hat.png",
+      "refreshed_on": "2026-09-29"
     },
     {
       "resource": "ryzhik_cub_body_accessory_goggles",
@@ -3556,7 +3564,7 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
@@ -3569,11 +3577,13 @@
         447,
         482
       ],
-      "source_sha256": "3b6e80597e863e5cbb1370850a5c8e0e201b9b71f959b710e06b9d030c3bfb56",
-      "source_bytes": 195566,
+      "source_sha256": "6a249ff855dfb794f9f6b0a07fcf72a3b9b9949d8a468d5343f66bbc79641fc0",
+      "source_bytes": 195955,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_hat_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_hat_sand.webp",
+      "source_path": "docs/design/assets/sources/other-ages-hat-refresh-2026-09-29/ryzhik_cub_body_accessory_hat_sand.png",
+      "refreshed_on": "2026-09-29"
     },
     {
       "resource": "ryzhik_cub_body_accessory_goggles_sand",
@@ -3828,7 +3838,7 @@
         512
       ],
       "export_scale": 1,
-      "source_method": "figma_isolated_screenshot",
+      "source_method": "figma_export",
       "format": "webp",
       "width": 512,
       "height": 512,
@@ -3841,11 +3851,13 @@
         447,
         482
       ],
-      "source_sha256": "ab705e1724d25adcd5406993322e6a10eceddd87583290786a5a9bc24efc5307",
-      "source_bytes": 190868,
+      "source_sha256": "c19c1aa0772e7e6ef9e3c2965bd92731dd1af464dd9e49856212565de008c79d",
+      "source_bytes": 190708,
       "source_format": "png",
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_hat_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_hat_dark_russet.webp",
+      "source_path": "docs/design/assets/sources/other-ages-hat-refresh-2026-09-29/ryzhik_cub_body_accessory_hat_dark_russet.png",
+      "refreshed_on": "2026-09-29"
     },
     {
       "resource": "ryzhik_cub_body_accessory_goggles_dark_russet",
@@ -4968,7 +4980,8 @@
       "source_format": "png",
       "lossless_rgba_verified": true,
       "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_hat.webp",
-      "refreshed_on": "2026-09-29"
+      "refreshed_on": "2026-09-29",
+      "source_path": "docs/design/assets/sources/other-ages-hat-refresh-2026-09-29/ryzhik_adult_body_accessory_hat.png"
     },
     {
       "resource": "ryzhik_adult_body_accessory_goggles",
@@ -5516,21 +5529,22 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 88432,
-      "sha256": "c610eafe295ce02ef9f7e8e48edad43b4d2fa180c26862470e1ed991c2242138",
-      "rgba_sha256": "112710faffb5818c9e37d10cadf31677a66f3cbe091dba212af1da22b471705a",
+      "bytes": 88914,
+      "sha256": "ecb1b9186605be45c5c01c1029987bc8fc379a637ad3f3ad35e4f3d73e2b8b2d",
+      "rgba_sha256": "73727a3c8e50f9310f5070b7162035900b0a323af383ab3b195a228dc934cba7",
       "alpha_bounds": [
-        155,
-        20,
-        434,
-        494
+        92,
+        21,
+        436,
+        495
       ],
-      "source_sha256": "28c50fb869e773743e29019c90e82eb3a4c568314e9d7cc02b21066407ba3303",
-      "source_bytes": 135715,
+      "source_sha256": "f5fd6fa6376f39d92d6db5e4e6200aff61e125cbb38bf3a51036a5e999da57b5",
+      "source_bytes": 136541,
       "source_format": "png",
       "lossless_rgba_verified": true,
       "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_hat_sand.webp",
-      "refreshed_on": "2026-09-29"
+      "refreshed_on": "2026-09-29",
+      "source_path": "docs/design/assets/sources/other-ages-hat-refresh-2026-09-29/ryzhik_adult_body_accessory_hat_sand.png"
     },
     {
       "resource": "ryzhik_adult_body_accessory_goggles_sand",
@@ -5839,21 +5853,22 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 92038,
-      "sha256": "5b07b991f6dd930cc336a3c6a12a17d7e56a6c3c07f314815333cb74fcc62bdc",
-      "rgba_sha256": "ffd1cd1e30646f4a70aa46ff6dc5a31f1ad8389cddcb5f5cb9aca0ff18539879",
+      "bytes": 92134,
+      "sha256": "e39d69ad3b554f6f6c7405af174779a421ed696ffea5a9056483d75ce8ab8745",
+      "rgba_sha256": "034a0a357deb8494f435b3bd0f1ffa78a53c9b7264eff39cee9a46ed3cad4c8d",
       "alpha_bounds": [
         47,
         21,
-        438,
+        445,
         494
       ],
-      "source_sha256": "cf2d35b4d3b965030d800c88753c7c39bc4bc8e218f93cf727d250d639d78cde",
-      "source_bytes": 137511,
+      "source_sha256": "a512d50b0df53059f2a53e5e9f725d70e2e9429cd04a466bb90440966c28b724",
+      "source_bytes": 138230,
       "source_format": "png",
       "lossless_rgba_verified": true,
       "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_hat_dark_russet.webp",
-      "refreshed_on": "2026-09-29"
+      "refreshed_on": "2026-09-29",
+      "source_path": "docs/design/assets/sources/other-ages-hat-refresh-2026-09-29/ryzhik_adult_body_accessory_hat_dark_russet.png"
     },
     {
       "resource": "ryzhik_adult_body_accessory_goggles_dark_russet",
@@ -7167,7 +7182,8 @@
         "method": 6,
         "pillow_version": "12.3.0"
       },
-      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching.",
+      "source_path": "docs/design/assets/sources/other-ages-hat-refresh-2026-09-29/ryzhik_senior_body_accessory_hat.png"
     },
     {
       "resource": "ryzhik_senior_body_accessory_goggles",
@@ -7735,7 +7751,8 @@
         "method": 6,
         "pillow_version": "12.3.0"
       },
-      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching.",
+      "source_path": "docs/design/assets/sources/other-ages-hat-refresh-2026-09-29/ryzhik_senior_body_accessory_hat_sand.png"
     },
     {
       "resource": "ryzhik_senior_body_accessory_goggles_sand",
@@ -8065,7 +8082,8 @@
         "method": 6,
         "pillow_version": "12.3.0"
       },
-      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
+      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching.",
+      "source_path": "docs/design/assets/sources/other-ages-hat-refresh-2026-09-29/ryzhik_senior_body_accessory_hat_dark_russet.png"
     },
     {
       "resource": "ryzhik_senior_body_accessory_goggles_dark_russet",

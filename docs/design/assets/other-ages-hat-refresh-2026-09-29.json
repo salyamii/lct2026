@@ -1,0 +1,97 @@
+{
+  "audited_on": "2026-09-29",
+  "figma_file_key": "bAod1cKtTX9Q8omQ067q3q",
+  "method": "Full individual Figma frame PNG export at 1x; no crop, recentering or manual painting. Pillow 12.3.0 WebP lossless=True, exact=True, method=6.",
+  "assets": [
+    {
+      "resource": "ryzhik_cub_body_accessory_hat",
+      "figma_node_id": "87:38",
+      "pixels_changed": true,
+      "previous_rgba_sha256": "392e7353ae557167a645a7db244b88307c8619fdced6c1a15d25d3f9d6141d59",
+      "rgba_sha256": "b22d76344b883e973a27af27b5e22178248d790ded753b526ce7ee7a6d0fc82f",
+      "source_path": "docs/design/assets/sources/other-ages-hat-refresh-2026-09-29/ryzhik_cub_body_accessory_hat.png",
+      "source_sha256": "defed8b8b14ceaffb8432256985273f33ba548f40a30053ffca713d706631a0f",
+      "rgba_exact": true
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_hat_sand",
+      "figma_node_id": "87:122",
+      "pixels_changed": false,
+      "previous_rgba_sha256": "01db1097261d9675d4ef81381c8c784718d81673061dfd71e6d2d62e77c5f81e",
+      "rgba_sha256": "01db1097261d9675d4ef81381c8c784718d81673061dfd71e6d2d62e77c5f81e",
+      "source_path": "docs/design/assets/sources/other-ages-hat-refresh-2026-09-29/ryzhik_cub_body_accessory_hat_sand.png",
+      "source_sha256": "6a249ff855dfb794f9f6b0a07fcf72a3b9b9949d8a468d5343f66bbc79641fc0",
+      "rgba_exact": true
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_hat_dark_russet",
+      "figma_node_id": "87:155",
+      "pixels_changed": false,
+      "previous_rgba_sha256": "28c41966953837ba0f03622618bdfef056f20702b9a5c21d89408dfca195a24b",
+      "rgba_sha256": "28c41966953837ba0f03622618bdfef056f20702b9a5c21d89408dfca195a24b",
+      "source_path": "docs/design/assets/sources/other-ages-hat-refresh-2026-09-29/ryzhik_cub_body_accessory_hat_dark_russet.png",
+      "source_sha256": "c19c1aa0772e7e6ef9e3c2965bd92731dd1af464dd9e49856212565de008c79d",
+      "rgba_exact": true
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_hat",
+      "figma_node_id": "89:38",
+      "pixels_changed": false,
+      "previous_rgba_sha256": "08e88074be8a0b9152bd9dcc50a5e1285c20b2d0fab2b9e9d20720097f0e6bdb",
+      "rgba_sha256": "08e88074be8a0b9152bd9dcc50a5e1285c20b2d0fab2b9e9d20720097f0e6bdb",
+      "source_path": "docs/design/assets/sources/other-ages-hat-refresh-2026-09-29/ryzhik_adult_body_accessory_hat.png",
+      "source_sha256": "4d78c368b12a66058665f57e9b4f59232692299ed3f13fbe9f016c930b1821ce",
+      "rgba_exact": true
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_hat_sand",
+      "figma_node_id": "89:121",
+      "pixels_changed": true,
+      "previous_rgba_sha256": "112710faffb5818c9e37d10cadf31677a66f3cbe091dba212af1da22b471705a",
+      "rgba_sha256": "73727a3c8e50f9310f5070b7162035900b0a323af383ab3b195a228dc934cba7",
+      "source_path": "docs/design/assets/sources/other-ages-hat-refresh-2026-09-29/ryzhik_adult_body_accessory_hat_sand.png",
+      "source_sha256": "f5fd6fa6376f39d92d6db5e4e6200aff61e125cbb38bf3a51036a5e999da57b5",
+      "rgba_exact": true
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_hat_dark_russet",
+      "figma_node_id": "89:154",
+      "pixels_changed": true,
+      "previous_rgba_sha256": "ffd1cd1e30646f4a70aa46ff6dc5a31f1ad8389cddcb5f5cb9aca0ff18539879",
+      "rgba_sha256": "034a0a357deb8494f435b3bd0f1ffa78a53c9b7264eff39cee9a46ed3cad4c8d",
+      "source_path": "docs/design/assets/sources/other-ages-hat-refresh-2026-09-29/ryzhik_adult_body_accessory_hat_dark_russet.png",
+      "source_sha256": "a512d50b0df53059f2a53e5e9f725d70e2e9429cd04a466bb90440966c28b724",
+      "rgba_exact": true
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_hat",
+      "figma_node_id": "89:221",
+      "pixels_changed": false,
+      "previous_rgba_sha256": "af30de486e9e11df30a59407631c337df62ecb64c8d7a45a5d3d328e8c85ffea",
+      "rgba_sha256": "af30de486e9e11df30a59407631c337df62ecb64c8d7a45a5d3d328e8c85ffea",
+      "source_path": "docs/design/assets/sources/other-ages-hat-refresh-2026-09-29/ryzhik_senior_body_accessory_hat.png",
+      "source_sha256": "daae91c147045a63bc2d66dd277c2b1d0bb20b6bac939dd736a2b853ed38b6f8",
+      "rgba_exact": true
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_hat_sand",
+      "figma_node_id": "89:304",
+      "pixels_changed": false,
+      "previous_rgba_sha256": "b1a260c8fc427496f081b921de2562843cb519bc8fb1b0c036658fc24f11c378",
+      "rgba_sha256": "b1a260c8fc427496f081b921de2562843cb519bc8fb1b0c036658fc24f11c378",
+      "source_path": "docs/design/assets/sources/other-ages-hat-refresh-2026-09-29/ryzhik_senior_body_accessory_hat_sand.png",
+      "source_sha256": "83c244865a0bdc32de11eb4b4dcfbb32c16a7863996623fc6e9794e20dd835fd",
+      "rgba_exact": true
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_hat_dark_russet",
+      "figma_node_id": "89:337",
+      "pixels_changed": false,
+      "previous_rgba_sha256": "63aa52765a334a2192bcbee222a1be5f777379e96e5708c46e5119768ad5ee5e",
+      "rgba_sha256": "63aa52765a334a2192bcbee222a1be5f777379e96e5708c46e5119768ad5ee5e",
+      "source_path": "docs/design/assets/sources/other-ages-hat-refresh-2026-09-29/ryzhik_senior_body_accessory_hat_dark_russet.png",
+      "source_sha256": "99d3196dc10562ecc90d8a0325abf68a1badd43268fe462bdc3b4d2bb4198b39",
+      "rgba_exact": true
+    }
+  ]
+}

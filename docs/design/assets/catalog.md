@@ -830,6 +830,34 @@ RGBA-хеш с префиксом размеров, границы прозра�
 Для фонарей, канатов и сигналов отдельный автор/поставщик источника в каталоге
 не указан. Совместные координаты возрастных персонажей этими импортами не затронуты.
 
+## Cub, adult and senior hat refresh — 2026-09-29
+
+По HAT-D-002 сверены все девять вариантов шляпы для лисёнка, взрослого и
+старшего возраста: по три расцветки из коллекций 87:2, 89:2 и 89:185.
+Заменены отличающиеся от Figma `ryzhik_cub_body_accessory_hat`,
+`ryzhik_adult_body_accessory_hat_sand` и `ryzhik_adult_body_accessory_hat_dark_russet`.
+Остальные шесть ресурсов уже совпадали с актуальными экспортами по всем RGBA-пикселям.
+
+Все девять [исходных PNG](sources/other-ages-hat-refresh-2026-09-29) сохранены;
+[отчёт сверки](other-ages-hat-refresh-2026-09-29.json) содержит ID узлов и хеши.
+Экспорт отдельных фреймов PNG 1× сохраняет прозрачный холст 512 × 512,
+включая заданные Figma смещения и масштаб внутренних слоёв взрослого персонажа.
+Скрытые старые заливки не включаются. Конвертация Pillow 12.3.0:
+WebP `lossless=True`, `exact=True`, `method=6`; полное совпадение RGBA проверено.
+
+## Teen hat refresh — 2026-09-29
+
+Заменены три подростковых спрайта со шляпой: `ryzhik_teen_body_accessory_hat`,
+`ryzhik_teen_body_accessory_hat_sand`, `ryzhik_teen_body_accessory_hat_dark_russet`.
+Исходники — отдельные фреймы [65:35](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=65-35),
+[69:33](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=69-33)
+и [69:66](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=69-66).
+Полные PNG 512 × 512 сохранены в [sources](sources/teen-hat-refresh-2026-09-29).
+Экспорт Figma PNG 1× с прозрачностью, без подписи и фона карточки; конвертация
+Pillow 12.3.0 в WebP `lossless=True`, `exact=True`, `method=6`.
+Все RGBA-пиксели совпадают с экспортом; холст, прозрачные поля и координаты
+сохранены без обрезки и перемещения. Хеши и границы alpha — в manifest.
+
 ## Night bedroom - 2026-09-29
 
 SLEEP-D-001: фон в момент засыпания на итогах дня. Исходная иллюстрация без
