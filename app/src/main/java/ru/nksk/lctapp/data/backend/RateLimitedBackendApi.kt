@@ -8,6 +8,9 @@ internal class RateLimitedBackendApi(
     private val limits: BackendRateLimit,
     private val backendUrl: String,
 ) : BackendApi {
+    override suspend fun parentMaterials() =
+        limits.execute(backendUrl) { delegate.parentMaterials() }
+
     override suspend fun registerProfile(requestId: String, body: RegisterProfileRequest) =
         limits.execute(backendUrl) { delegate.registerProfile(requestId, body) }
 

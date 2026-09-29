@@ -49,5 +49,16 @@
     <string name="parents_report_no_hints">Успешно без игровых подсказок</string>
     <string name="parents_report_assisted">Эпизоды с помощью</string>
     <string name="parents_report_questions_title">Вопросы по теме</string>
-    <string name="parents_report_questions_placeholder">Вопросы по этой теме скоро появятся.</string>
+    <string name="parents_materials_goal">Зачем обсуждать эту тему</string>
+    <string name="parents_materials_story">История для разговора</string>
+    <string name="parents_materials_own_story">Расскажите свой пример</string>
+    <string name="parents_materials_takeaway">Что важно для родителя</string>
+    <string name="parents_materials_research">Основание материалов</string>
+    <string name="parents_materials_sources">Источники</string>
+    <string name="parents_materials_loading">Обновляем материалы…</string>
+    <string name="parents_materials_unpublished">Материалы по темам пока не опубликованы. Наблюдения и оценки навыков доступны отдельно.</string>
+    <string name="parents_materials_check_failed">Не удалось проверить обновления материалов. Попробуйте позже.</string>
+    <string name="parents_materials_error">Не удалось загрузить материалы. Попробуйте обновить их.</string>
+    <string name="parents_materials_cached">Не удалось обновить материалы. Показана доступная версия.</string>
+    <string name="parents_materials_refresh">Обновить материалы</string>
 </resources>

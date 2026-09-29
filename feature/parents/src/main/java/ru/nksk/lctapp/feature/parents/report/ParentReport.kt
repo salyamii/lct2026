@@ -16,6 +16,9 @@ data class ParentReport(
     val pet: ParentPet? = null,
     val skills: List<ParentSkill> = emptyList(),
     val assessmentSync: ParentAssessmentSync = ParentAssessmentSync(),
+    val materialsUnpublished: Boolean = false,
+    val materialsRefreshing: Boolean = false,
+    val materialsRefreshFailed: Boolean = false,
 )
 
 enum class ParentSyncPhase { IDLE, SYNCING, UNAVAILABLE, OFFLINE, ERROR }
@@ -52,6 +55,7 @@ data class ParentSkill(
     val assistedEpisodes: Int = 0,
     /** Null means no server assessment was received, distinct from the server's NO_DATA. */
     val assessment: ParentSkillAssessment? = null,
+    val material: ParentTopicMaterial? = null,
 )
 
 @Immutable
@@ -60,3 +64,14 @@ sealed interface ParentReportUiState {
     data class Ready(val report: ParentReport) : ParentReportUiState
     data object Error : ParentReportUiState
 }
+
+@Immutable
+data class ParentTopicMaterial(
+    val learningGoal: String,
+    val story: String,
+    val replaceWithParentStory: String,
+    val conversationStarters: List<String>,
+    val parentTakeaway: String,
+    val researchBasis: String,
+    val researchSources: List<String>,
+)

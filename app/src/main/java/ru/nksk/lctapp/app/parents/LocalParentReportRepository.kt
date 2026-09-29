@@ -2,6 +2,12 @@ package ru.nksk.lctapp.app.parents
 
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import ru.nksk.lctapp.domain.backend.ParentMaterialsRepository
+import ru.nksk.lctapp.domain.backend.ParentMaterialsState
+import ru.nksk.lctapp.domain.backend.ParentMaterialsPublicationStatus
+import ru.nksk.lctapp.feature.parents.report.ParentTopicMaterial
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -37,6 +43,7 @@ internal class LocalParentReportRepository @Inject constructor(
     private val games: GameRepository,
     private val content: StoryContentRepository,
     private val cloud: CloudSyncRepository,
+    private val materials: ParentMaterialsRepository,
 ) : ParentReportRepository {
     override fun observeReport(): Flow<ParentReport> = flow {
         val installedContent = content.read()
@@ -45,16 +52,27 @@ internal class LocalParentReportRepository @Inject constructor(
                 val runId = history.lastOrNull()?.runId
                 val generation = runId?.let { id -> localGameGeneration(id,
                     history.lastOrNull { it.runId == id && it.type == AuditType.RESTORED }?.id) }
-                LocalReportSnapshot(report, runId, history.lastOrNull()?.sequence ?: 0, generation)
+                val localSequence = history.lastOrNull()?.sequence ?: 0
+                val baseline = history.lastOrNull { it.runId == runId && it.worldRestore != null }
+                // Match CloudWorldRead.transportSequence: server assessments use the restored
+                // source cursor, while the retained Room journal keeps its local numbering.
+                val serverSequence = baseline?.let {
+                    Math.addExact(checkNotNull(it.worldRestore).sourceHistorySequence, localSequence - it.sequence)
+                } ?: localSequence
+                LocalReportSnapshot(report, runId, serverSequence, generation)
             }
         }.filterNotNull().distinctUntilChanged()
         // A network progress change never reruns the expensive local history projection.
-        emitAll(combine(local, cloud.state) { snapshot, sync ->
-            withServerAssessments(snapshot.report, snapshot.runId, snapshot.historySequence, snapshot.generation, sync)
+        emitAll(combine(local, cloud.state, materials.observe()) { snapshot, sync, topics ->
+            withParentMaterials(withServerAssessments(snapshot.report, snapshot.runId, snapshot.historySequence, snapshot.generation, sync), topics)
         }.distinctUntilChanged())
     }.flowOn(Dispatchers.Default)
 
-    override suspend fun refreshAssessments() { cloud.refreshSkills() }
+    override suspend fun refreshAssessments() = coroutineScope {
+        launch { cloud.refreshSkills() }
+        launch { materials.refresh() }
+        Unit
+    }
 }
 
 private data class LocalReportSnapshot(
@@ -146,4 +164,17 @@ private fun SkillId.parentTitle(): String = when (this) {
     SkillId.PLAN_EXTRA_INCOME -> "Планирует дополнительный заработок"
     SkillId.RECONSIDER_DECISION -> "Разбирает финансовые последствия и меняет решение"
     SkillId.UNDERSTAND_INCOME_AND_EXPENSES -> "Понимает свои доходы и расходы"
+}
+
+internal fun withParentMaterials(report: ParentReport, materials: ParentMaterialsState): ParentReport {
+    val bySkill = materials.catalog?.skills?.associateBy { it.skillId }.orEmpty()
+    return report.copy(
+        skills = report.skills.map { skill -> skill.copy(material = bySkill[skill.id]?.let {
+            ParentTopicMaterial(it.learningGoal, it.story, it.replaceWithParentStory,
+                it.conversationStarters, it.parentTakeaway, it.researchBasis, it.researchSources)
+        }) },
+        materialsUnpublished = materials.catalog?.publicationStatus == ParentMaterialsPublicationStatus.UNPUBLISHED,
+        materialsRefreshing = materials.isRefreshing,
+        materialsRefreshFailed = materials.refreshFailed,
+    )
 }

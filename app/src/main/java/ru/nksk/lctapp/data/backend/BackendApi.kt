@@ -2,12 +2,16 @@ package ru.nksk.lctapp.data.backend
 
 import retrofit2.http.Body
 import retrofit2.http.Header
+import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import ru.nksk.lctapp.domain.backend.*
 
 /** Device identity is part of each JSON body. Operation keys only deduplicate writes. */
 internal interface BackendApi {
+    @GET("v1/parent-materials")
+    suspend fun parentMaterials(): ParentMaterialsCatalog
+
     @POST("api/pets")
     suspend fun registerProfile(@Header("Idempotency-Key") requestId: String,
         @Body body: RegisterProfileRequest): RegisterProfileResponse

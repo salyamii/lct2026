@@ -63,11 +63,37 @@ fun ParentTopicScreen(
                             )
                         }
                         item { SkillEvidence(skill) }
+                        val material = skill.material
+                        if (state.report.materialsRefreshing) {
+                            item { Text(stringResource(R.string.parents_materials_loading), style = MaterialTheme.typography.bodySmall) }
+                        }
+                        if (state.report.materialsRefreshFailed) {
+                            item { Text(stringResource(when {
+                                material != null -> R.string.parents_materials_cached
+                                state.report.materialsUnpublished -> R.string.parents_materials_check_failed
+                                else -> R.string.parents_materials_error
+                            }), style = MaterialTheme.typography.bodySmall) }
+                        }
+                        if (material != null) {
+                            item { ParentMaterialCard(stringResource(R.string.parents_materials_goal), material.learningGoal) }
+                            item { ParentMaterialCard(stringResource(R.string.parents_materials_story), material.story) }
+                            item { ParentMaterialCard(stringResource(R.string.parents_materials_own_story), material.replaceWithParentStory) }
+                            item { ParentMaterialCard(stringResource(R.string.parents_report_questions_title),
+                                material.conversationStarters.mapIndexed { index, question -> "${index + 1}. $question" }.joinToString("\n\n")) }
+                            item { ParentMaterialCard(stringResource(R.string.parents_materials_takeaway), material.parentTakeaway) }
+                            item { ParentMaterialCard(stringResource(R.string.parents_materials_research), material.researchBasis) }
+                            item { ParentMaterialCard(stringResource(R.string.parents_materials_sources), material.researchSources.joinToString("\n\n")) }
+                        } else if (state.report.materialsUnpublished) {
+                            item { ParentReportNote(stringResource(R.string.parents_report_questions_title),
+                                stringResource(R.string.parents_materials_unpublished)) }
+                        } else if (!state.report.materialsRefreshing && !state.report.materialsRefreshFailed) {
+                            item { Text(stringResource(R.string.parents_materials_error)) }
+                        }
                         item {
-                            ParentReportNote(
-                                stringResource(R.string.parents_report_questions_title),
-                                stringResource(R.string.parents_report_questions_placeholder),
-                            )
+                            androidx.compose.material3.TextButton(onClick = onRefresh,
+                                enabled = !state.report.materialsRefreshing) {
+                                Text(stringResource(R.string.parents_materials_refresh))
+                            }
                         }
                     }
                 }
@@ -107,5 +133,12 @@ private fun EvidenceRow(label: String, count: Int) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
         Text(count.toString(), style = MaterialTheme.typography.titleMedium)
+    }
+}
+
+@Composable
+private fun ParentMaterialCard(title: String, body: String) {
+    androidx.compose.foundation.text.selection.SelectionContainer {
+        ParentReportNote(title, body)
     }
 }
