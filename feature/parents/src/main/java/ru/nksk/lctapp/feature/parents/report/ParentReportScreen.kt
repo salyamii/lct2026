@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
@@ -321,6 +322,11 @@ internal fun ParentReportError(onRetry: () -> Unit) {
 
 @Composable
 internal fun ParentReportNote(title: String, body: String) {
+    ParentReportNote(title, AnnotatedString(body))
+}
+
+@Composable
+internal fun ParentReportNote(title: String, body: AnnotatedString) {
     Column(
         modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface, RoundedCornerShape(20.dp))
             .padding(20.dp),

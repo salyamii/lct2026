@@ -19,6 +19,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import ru.nksk.lctapp.feature.parents.R
 
@@ -82,7 +89,7 @@ fun ParentTopicScreen(
                                 material.conversationStarters.mapIndexed { index, question -> "${index + 1}. $question" }.joinToString("\n\n")) }
                             item { ParentMaterialCard(stringResource(R.string.parents_materials_takeaway), material.parentTakeaway) }
                             item { ParentMaterialCard(stringResource(R.string.parents_materials_research), material.researchBasis) }
-                            item { ParentMaterialCard(stringResource(R.string.parents_materials_sources), material.researchSources.joinToString("\n\n")) }
+                            item { ParentMaterialCard(stringResource(R.string.parents_materials_sources), researchSourceLinks(material.researchSources)) }
                         } else if (state.report.materialsUnpublished) {
                             item { ParentReportNote(stringResource(R.string.parents_report_questions_title),
                                 stringResource(R.string.parents_materials_unpublished)) }
@@ -138,7 +145,26 @@ private fun EvidenceRow(label: String, count: Int) {
 
 @Composable
 private fun ParentMaterialCard(title: String, body: String) {
+    ParentMaterialCard(title, AnnotatedString(body))
+}
+
+@Composable
+private fun ParentMaterialCard(title: String, body: AnnotatedString) {
     androidx.compose.foundation.text.selection.SelectionContainer {
         ParentReportNote(title, body)
+    }
+}
+
+@Composable
+private fun researchSourceLinks(sources: List<String>): AnnotatedString {
+    val styles = TextLinkStyles(SpanStyle(
+        color = MaterialTheme.colorScheme.primary,
+        textDecoration = TextDecoration.Underline,
+    ))
+    return buildAnnotatedString {
+        sources.forEachIndexed { index, source ->
+            if (index > 0) append("\n\n")
+            withLink(LinkAnnotation.Url(source, styles)) { append(source) }
+        }
     }
 }
