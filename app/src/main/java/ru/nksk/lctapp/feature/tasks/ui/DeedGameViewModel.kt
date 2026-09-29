@@ -270,7 +270,7 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
         val reward = if (choiceId == null) session.catalog.content.choices.single { it.eventId == event.id }.moneyDelta else 0L
         val storyGame = choiceId != null
         val card = session.catalog.cards[event.id]
-        val theme = if (storyGame) card?.presentation?.media?.let { storyGameTheme(it, kind) } else null
+        val theme = card?.presentation?.media?.let { storyGameTheme(it, kind) }
         mutableState.value = DeedGameUiState(
             loading = false,
             type = when (kind) {
@@ -283,10 +283,10 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
                 DeedGameKind.DIFFERENCES -> DeedGameType.DIFFERENCES
                 DeedGameKind.STACKING -> DeedGameType.STACKING
             },
-            presentation = DeedGamePresentation(renderPetText(event.title, game.pet.name), reward, pending == null && message == null,
+            presentation = DeedGamePresentation(renderPetText(session.catalog.displayTitle(event), game.pet.name), reward, pending == null && message == null,
                 storyAction = storyGame,
                 sceneRes = eventSceneBackground(event.id, card?.scene),
-                instructions = theme?.instructions ?: if (storyGame) storyGameInstructions(kind) else null,
+                instructions = theme?.instructions ?: storyGameInstructions(kind),
                 activityArtworkRes = theme?.objectRes ?: eventSceneArtwork(event.id, card?.character)?.resource),
             message = message,
             canRetry = pending != null || rejectedAction != null || comparisonSaveFailed,

@@ -10,10 +10,14 @@ class DeedBalanceTest {
         EventFactory(catalog.content, catalog.policies, catalog.meals, catalog.goals, catalog.storyCampaign)
         assertEquals(13, catalog.deedPool.size)
         for (id in catalog.deedPool) {
-            assertTrue(id.endsWith(":balance-v2"))
-            val originalId = id.removeSuffix(":balance-v2")
+            val balancedId = id.removeSuffix(":game-v3")
+            assertTrue(balancedId.endsWith(":balance-v2"))
+            val originalId = balancedId.removeSuffix(":balance-v2")
             assertTrue(catalog.content.events.any { it.id == originalId })
             val amount = catalog.content.choices.single { it.eventId == id }.moneyDelta
+            assertEquals("A new board must keep its authored reward: $id", amount,
+                catalog.content.choices.single { it.eventId == balancedId }.moneyDelta)
+            assertEquals(catalog.policies.getValue(balancedId).energyCost, catalog.policies.getValue(id).energyCost)
             val range = when (catalog.policies.getValue(id).energyCost) {
                 1 -> 4L..5L
                 2 -> 6L..8L
@@ -21,7 +25,8 @@ class DeedBalanceTest {
                 else -> error("Unexpected deed effort")
             }
             assertTrue("$id should reward effort", amount in range)
-            assertEquals(catalog.policies.getValue(originalId).deedGameKind, catalog.policies.getValue(id).deedGameKind)
+            assertEquals("Rebalancing must not change an installed board: $balancedId",
+                catalog.policies.getValue(originalId).deedGameKind, catalog.policies.getValue(balancedId).deedGameKind)
             assertNotNull("Every offered deed must remain playable: $id", catalog.policies.getValue(id).deedGameKind)
             assertTrue(originalId in catalog.policies.getValue(id).scheduling.previousEventIds)
         }
@@ -35,7 +40,7 @@ class DeedBalanceTest {
         val catalog = bundledGameCatalog()
         val mapped = catalog.policies.values.flatMap { it.choiceGameKinds.keys }.toSet()
         assertEquals(13, mapped.count { it.startsWith("campaign-choice-v1:") })
-        assertEquals(15, mapped.count { it.startsWith("figma-") }) // Includes the legacy resin card and manual plate cleaning.
+        assertEquals(17, mapped.count { it.startsWith("figma-") }) // Includes both historical and current repair boards.
         assertTrue("${storyEventId("N1.WHEEL")}:continue" in mapped)
         assertTrue("${storyEventId("G5.08")}:continue" in mapped)
         assertTrue("${storyEventId("G2.03")}:repair" in mapped)

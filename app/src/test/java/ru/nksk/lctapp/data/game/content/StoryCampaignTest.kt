@@ -46,7 +46,9 @@ class StoryCampaignTest {
 
     @Test fun genericLoreSkipsAreRetiredWithoutRemovingHistoricalDefinitionsOrRealBranches() {
         val catalog = bundledGameCatalog()
-        val genericSkips = sourceLoreCards.filter { it.optional && it.id != "G5.02" }.map { "${storyEventId(it.id)}:skip" }.toSet()
+        val genericSkips = sourceLoreCards.filter { it.optional && it.id != "G5.02" }
+            .flatMap { listOf(storyEventId(it.id), currentStoryEventId(catalog, it.id)) }
+            .map { "$it:skip" }.toSet()
         val retired = catalog.policies.values.flatMap { it.disabledChoiceIds }.toSet()
         assertEquals(genericSkips, retired)
         assertTrue(catalog.content.choices.map { it.id }.containsAll(retired))
@@ -129,10 +131,7 @@ class StoryCampaignTest {
         for (order in orders) {
             val f = Fixture(offerOptionalScenes = false)
             f.finishCampaign(order + EXPEDITION_GOAL)
-            val expected = sourceLoreCards.filterNot { it.optional }.map { source ->
-                val originalId = storyEventId(source.id)
-                f.catalog.eventReplacements[originalId] ?: originalId
-            }
+            val expected = sourceLoreCards.filterNot { it.optional }.map { currentStoryEventId(f.catalog, it.id) }
             val actual = f.state.story.decisions.map { decision -> f.catalog.content.choices.single { it.id == decision.choiceId }.eventId }
                 .filter { it in expected }
             assertEquals(order.toString(), expected, actual)
@@ -228,7 +227,8 @@ class StoryCampaignTest {
         // Optional scenes may never be offered by the scheduler. This scenario
         // verifies the core-only path without executing a retired generic skip.
         val catalog = bundledGameCatalog().let { original ->
-            val optionalIds = sourceLoreCards.filter { it.optional }.map { storyEventId(it.id) }.toSet()
+            val optionalIds = sourceLoreCards.filter { it.optional }
+                .flatMap { listOf(storyEventId(it.id), currentStoryEventId(original, it.id)) }.toSet()
             if (offerOptionalScenes) original else original.copy(policies = original.policies.mapValues { (id, policy) ->
                 if (id in optionalIds) policy.copy(condition = StoryCondition.Not(StoryCondition.Always)) else policy
             })
@@ -375,6 +375,15 @@ class StoryCampaignTest {
     }
 
     private companion object {
+        fun currentStoryEventId(catalog: GameCatalog, sourceId: String): String {
+            val originalId = storyEventId(sourceId)
+            val originalChoices = catalog.content.choices.filter { it.eventId == originalId }.map { it.id }.toSet()
+            val campaign = checkNotNull(catalog.storyCampaign)
+            return campaign.acts.flatMap { it.eventIds }.single { id ->
+                id == originalId || campaign.completionAliases[id].orEmpty().any { it in originalChoices }
+            }
+        }
+
         fun permutations(values: List<String>): List<List<String>> = if (values.isEmpty()) listOf(emptyList())
             else values.flatMap { first -> permutations(values - first).map { listOf(first) + it } }
         fun perfectScore(kind: DeedGameKind): DeedGameScore = checkNotNull(when (kind) {

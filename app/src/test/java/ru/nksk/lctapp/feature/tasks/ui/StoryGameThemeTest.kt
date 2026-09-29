@@ -13,7 +13,7 @@ class StoryGameThemeTest {
         val assignments = catalog.policies.flatMap { (eventId, policy) ->
             policy.choiceGameKinds.map { (choiceId, kind) -> Triple(eventId, choiceId, kind) }
         }
-        assertEquals(28, assignments.size)
+        assertEquals(35, assignments.size)
         for ((eventId, choiceId, kind) in assignments) {
             val media = catalog.cards.getValue(eventId).presentation.media
             val theme = checkNotNull(storyGameTheme(media, kind)) { choiceId }
@@ -29,11 +29,11 @@ class StoryGameThemeTest {
                     assertFalse(choiceId, instructions.contains("по две карточки"))
                 }
                 DeedGameKind.COMPARISON -> {
-                    assertTrue(choiceId, instructions.contains("выбери большее"))
+                    assertTrue(choiceId, instructions.contains("выбери предмет дороже"))
                     assertFalse(choiceId, instructions.contains("маркер"))
                 }
                 DeedGameKind.LIGHTS -> assertTrue(choiceId, instructions.contains("фонарь и соседи"))
-                DeedGameKind.SEQUENCE -> assertTrue(choiceId, instructions.contains("вспышки башни"))
+                DeedGameKind.SEQUENCE -> assertTrue(choiceId, instructions.contains("вспышки по памяти"))
                 DeedGameKind.PIPES -> assertTrue(choiceId, instructions.contains("концы одного цвета"))
                 DeedGameKind.DIFFERENCES -> assertTrue(choiceId, instructions.contains("отличия между полками"))
                 DeedGameKind.STACKING -> assertTrue(choiceId, instructions.contains("ящик на предыдущий"))
@@ -50,7 +50,20 @@ class StoryGameThemeTest {
         assertFalse(memory.contains("маркер"))
         assertTrue(precision.contains("маркер в зелёной зоне"))
         assertFalse(precision.contains("по две карточки"))
-        assertTrue(comparison.contains("выбери большее"))
+        assertTrue(comparison.contains("выбери предмет дороже"))
         assertFalse(comparison.contains("маркер"))
+    }
+
+    @Test fun everyCurrentPaidDeedHasContextAndControlsForItsRealBoard() {
+        val catalog = bundledGameCatalog()
+        for (id in catalog.deedPool) {
+            val kind = checkNotNull(catalog.policies.getValue(id).deedGameKind)
+            val media = catalog.cards.getValue(id).presentation.media
+            val theme = checkNotNull(storyGameTheme(media, kind)) { id }
+            assertFalse(id, checkNotNull(media.game).context.isBlank())
+            assertTrue(id, theme.instructions.endsWith(storyGameInstructions(kind)))
+        }
+        val relay = catalog.cards.getValue("campaign-choice-v2:G5.08").presentation.media
+        assertTrue(checkNotNull(storyGameTheme(relay, DeedGameKind.LIGHTS)).instructions.contains("погасить все контрольные огни"))
     }
 }

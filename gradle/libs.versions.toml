@@ -24,7 +24,11 @@ lottie = "6.7.1"
 coreSplashscreen = "1.2.0"
 qrcodegen = "1.8.0"
 retrofit = "3.0.0"
-okhttp = "4.12.0"
+# Must match the okhttp that opentelemetry-exporter-sender-okhttp (android-agent) resolves.
+okhttp = "5.4.0"
+opentelemetryAndroidAgent = "1.7.0"
+opentelemetryJava = "1.65.0"
+desugarJdkLibs = "2.1.5"
 datastore = "1.2.1"
 work = "2.12.0"
 
@@ -35,6 +39,12 @@ qrcodegen = { module = "io.nayuki:qrcodegen", version.ref = "qrcodegen" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit-kotlinx-serialization = { module = "com.squareup.retrofit2:converter-kotlinx-serialization", version.ref = "retrofit" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
+android-agent = { module = "io.opentelemetry.android:android-agent", version.ref = "opentelemetryAndroidAgent" }
+opentelemetry-bom = { module = "io.opentelemetry:opentelemetry-bom", version.ref = "opentelemetryJava" }
+opentelemetry-api = { module = "io.opentelemetry:opentelemetry-api" }
+opentelemetry-sdk-testing = { module = "io.opentelemetry:opentelemetry-sdk-testing" }
+desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdkLibs" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "work" }
 androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "androidxHilt" }

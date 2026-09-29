@@ -86,7 +86,15 @@ class EventFactory(
             require(policy.choiceDestinations.keys.all { choice -> eventChoices.any { it.id == choice } }) {
                 "A destination must belong to a choice of this event: $id"
             }
-            require(policy.storyActId == null || campaign?.acts?.any { it.id == policy.storyActId && id in it.eventIds } == true)
+            require(policy.storyActId == null || campaign?.acts?.any { act ->
+                act.id == policy.storyActId && (id in act.eventIds || act.eventIds.any { currentId ->
+                    val current = policies.getValue(currentId).scheduling
+                    // Historical cards keep their policy and choices after an authored revision.
+                    // Only a declared predecessor of a current card in this same act is accepted.
+                    id in current.previousEventIds &&
+                        (current.family ?: currentId) == (policy.scheduling.family ?: id)
+                })
+            } == true)
             require(!policy.finishesStoryAct || campaign?.acts?.any { it.finaleId == id } == true)
             require(policy.choiceEnergyCosts.keys.all { choice -> eventChoices.any { it.id == choice } }) {
                 "Energy override must belong to this event: $id"

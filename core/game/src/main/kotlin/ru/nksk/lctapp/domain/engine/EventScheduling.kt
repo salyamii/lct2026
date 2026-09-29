@@ -72,6 +72,8 @@ object EventScheduling {
 internal object EventScheduler {
     fun plan(catalog: GameCatalog, state: GameState): List<String> {
         val progress = catalog.storyProgress(state)
+        val variety = EventVariety(catalog, state.eventHistory)
+        fun family(id: String) = variety.family(id)
         val eventTypes = catalog.content.events.associate { it.id to it.type }
         val carried = state.engine?.events.orEmpty().filter {
             (it.status == EventStatus.CARRIED || it.status == EventStatus.CARRIED_ACTIVE) &&
@@ -81,20 +83,19 @@ internal object EventScheduler {
         val loreCount = carried.count { catalog.policies[it]?.storyActId != null }
         val introductionCompleted = progress.completed(catalog.introductionId)
         val story = if (catalog.storyCampaign != null) progress.nextEvent(carried.toSet())
-            else catalog.introductionId.takeUnless {
-                introductionCompleted || it in carried || (catalog.goals.isNotEmpty() && catalog.goals.selectedGoal(state) == null)
+            else catalog.introductionId.takeUnless { candidate ->
+                introductionCompleted || carried.any { family(it) == family(candidate) } ||
+                    (catalog.goals.isNotEmpty() && catalog.goals.selectedGoal(state) == null)
             }
         if (selected.size < 5 && loreCount < 2 && story != null) selected += story
         val target = maxOf(4, selected.size)
         val nextDay = (state.engine?.day ?: 0) + 1
-        val variety = EventVariety(catalog, state.eventHistory)
-        fun family(id: String) = variety.family(id)
         val lastMandatory = state.eventHistory.filter {
             catalog.policies[it.eventId]?.scheduling?.mandatoryUnexpected == true
         }.mapNotNull { it.lastOfferedDay }.maxOrNull()
         val completedChoices = state.story.decisions.map { it.choiceId }.toSet()
         fun allowed(id: String): Boolean {
-            if (id in selected || !progress.eligible(id)) return false
+            if (selected.any { family(it) == family(id) } || !progress.eligible(id)) return false
             if (!state.ownedItems.map { it.itemId }.toSet().containsAll(catalog.policies.getValue(id).requiredItemIds)) return false
             if (id in catalog.oneTimeEventIds && catalog.content.choices.any { it.eventId == id && it.id in completedChoices }) return false
             val scheduling = catalog.policies.getValue(id).scheduling
@@ -140,16 +141,7 @@ internal object EventScheduler {
 
 /** Read-only variety preferences. Eligibility, authored lore, carried work and cooldowns remain separate. */
 private class EventVariety(private val catalog: GameCatalog, history: List<EventExposure>) {
-    private val families = catalog.policies.mapValuesTo(mutableMapOf()) { (id, policy) ->
-        policy.scheduling.family ?: id
-    }.apply {
-        catalog.policies.forEach { (id, policy) ->
-            policy.scheduling.previousEventIds.forEach { previous -> this[previous] = getValue(id) }
-        }
-        catalog.eventReplacements.forEach { (previous, current) ->
-            this[previous] = getValue(current)
-        }
-    }
+    private val families = EventFamilyIndex(catalog.policies, catalog.eventReplacements)
     private val historyByFamily = history.groupBy { family(it.eventId) }
     private val familyLastDays = historyByFamily.mapValues { (_, events) -> events.maxOf(::lastEncounter) }
     private val familyCounts = historyByFamily.mapValues { (_, events) ->
@@ -163,7 +155,7 @@ private class EventVariety(private val catalog: GameCatalog, history: List<Event
     private val recentGames = history.filter { lastEncounter(it) == latestGameDay && latestGameDay > 0 }
         .flatMap { gameKinds(it.eventId) }.toSet()
 
-    fun family(id: String): String = families[id] ?: id
+    fun family(id: String): String = families.family(id)
 
     fun wasShown(id: String): Boolean = historyByFamily[family(id)].orEmpty().any {
         it.offerCount > 0 || it.completionCount > 0 || it.lastOfferedDay != null || it.lastCompletedDay != null
@@ -171,13 +163,16 @@ private class EventVariety(private val catalog: GameCatalog, history: List<Event
 
     fun ranked(ids: List<String>, selected: List<String>): List<String> {
         val selectedFamilies = selected.map(::family).toSet()
-        val avoidGames = recentGames + selected.flatMap(::gameKinds)
+        val selectedGames = selected.flatMap(::gameKinds).toSet()
         val selectedKinds = selected.mapNotNull { catalog.policies[it]?.scheduling?.kind }.toSet()
         val candidates = ids.distinct()
         val positions = candidates.withIndex().associate { it.value to it.index }
         return candidates.sortedWith(
             compareBy<String> { family(it) in selectedFamilies }
-                .thenBy { gameKinds(it).any(avoidGames::contains) }
+                // Yesterday may contain both candidates' mechanics. It must not hide
+                // that only one of them would repeat a card already in today's plan.
+                .thenBy { gameKinds(it).any(selectedGames::contains) }
+                .thenBy { gameKinds(it).any(recentGames::contains) }
                 .thenBy { familyLastDays[family(it)] ?: 0 }
                 .thenBy { familyCounts[family(it)] ?: 0L }
                 .thenBy { catalog.policies[it]?.scheduling?.kind in selectedKinds }

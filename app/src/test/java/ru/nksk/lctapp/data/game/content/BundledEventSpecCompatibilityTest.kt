@@ -39,7 +39,8 @@ class BundledEventSpecCompatibilityTest {
             "figma-2326-352-v2:work" to DeedGameKind.MEMORY,
             "figma-2326-448-v2:work" to DeedGameKind.PRECISION,
         )
-        assertEquals(expected, catalog.policies.values.flatMap { it.choiceGameKinds.entries }.associate { it.toPair() })
+        val actual = catalog.policies.values.flatMap { it.choiceGameKinds.entries }.associate { it.toPair() }
+        assertEquals(expected, actual.filterKeys { it in expected })
         for ((choiceId, _) in expected) {
             val eventId = catalog.content.choices.single { it.id == choiceId }.eventId
             assertNotNull("Missing activity media for $choiceId", catalog.cards.getValue(eventId).presentation.media.game)

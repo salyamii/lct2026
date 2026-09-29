@@ -82,6 +82,7 @@ class DeedGameScore private constructor(
             ) DeedGameScore(DeedGameKind.STACKING, state.placed, StackingState.ROUNDS) else null
 
         private fun List<Int>.isValidPipePath(connection: PipeEndpoints): Boolean {
+            // Either endpoint may start the same continuous path.
             val forward = firstOrNull() == connection.first && lastOrNull() == connection.second
             val backward = firstOrNull() == connection.second && lastOrNull() == connection.first
             if (!forward && !backward) return false

@@ -56,6 +56,7 @@ class StoryProgress(
     private val campaign: StoryCampaign?,
     private val state: GameState,
 ) {
+    private val families = EventFamilyIndex(policies)
     private val choiceIds = state.story.decisions.map { it.choiceId }.toSet()
     private val completedEvents = content.choices.filter { it.id in choiceIds }.map { it.eventId }.toSet()
     val facts: Set<String> = policies.values.flatMap { policy ->
@@ -119,9 +120,12 @@ class StoryProgress(
         it.eventId == eventId && it.status in setOf(EventStatus.ACTIVE, EventStatus.RESULT, EventStatus.PAUSED, EventStatus.CARRIED_ACTIVE)
     }
 
-    /** Only eligible content is scheduled; missing clues never occupy a blocking slot in an ordinary day. */
-    fun nextEvent(excluded: Set<String> = emptySet()): String? = currentAct?.eventIds?.firstOrNull {
-        it !in excluded && !completed(it) && eligible(it)
+    /** An existing occurrence also excludes its explicitly declared newer scheduling version. */
+    fun nextEvent(excluded: Set<String> = emptySet()): String? {
+        val excludedFamilies = excluded.map(families::family).toSet()
+        return currentAct?.eventIds?.firstOrNull {
+            families.family(it) !in excludedFamilies && !completed(it) && eligible(it)
+        }
     }
 }
 

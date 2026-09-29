@@ -45,7 +45,7 @@ fun StackingGameScreen(
     onAction: (StackingGameAction) -> Unit,
     onBack: () -> Unit,
     deed: DeedGamePresentation? = null,
-    position: () -> Float = { 0.5f },
+    position: () -> Float,
 ) {
     val state = uiState.game
     Column(

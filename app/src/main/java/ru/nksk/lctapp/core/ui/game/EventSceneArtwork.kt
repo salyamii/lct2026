@@ -18,7 +18,7 @@ private fun item(@DrawableRes resource: Int, name: String) = EventSceneArtwork(r
  * New event art is authored through EventCardCopy.presentation.media and resolved first by sceneArtwork.
  */
 internal fun eventSceneArtwork(eventId: String?, characterKey: String? = null): EventSceneArtwork? {
-    val id = eventId?.removeSuffix(":balance-v2")
+    val id = legacyArtworkId(eventId)
     return eventIllustrations[id] ?: when (characterKey) {
         "caretaker" -> npc(R.drawable.npc_caretaker_explaining, "Смотритель")
         "caretaker_lens" -> npc(R.drawable.npc_caretaker_cleaning_lens, "Смотритель чистит линзу")
@@ -31,7 +31,7 @@ internal fun eventSceneArtwork(eventId: String?, characterKey: String? = null): 
 
 @DrawableRes
 internal fun eventSceneBackground(eventId: String?, scene: String?): Int = when {
-    eventId?.removeSuffix(":balance-v2") in butcherEvents -> R.drawable.location_butcher_shop
+    legacyArtworkId(eventId) in butcherEvents -> R.drawable.location_butcher_shop
     else -> when (scene) {
         "observatory" -> R.drawable.location_observatory_stage
         "pier" -> R.drawable.location_pier_day
@@ -45,13 +45,27 @@ internal fun eventSceneBackground(eventId: String?, scene: String?): Int = when 
         else -> when {
             // These cards have no authored location key. Keep the chapter illustration visible
             // instead of the old empty black stage; it is context, not a new interior asset.
-            eventId?.startsWith("campaign-choice-v1:G2.") == true -> R.drawable.goal_preview_tower
-            eventId?.startsWith("campaign-choice-v1:G4.") == true ||
-                eventId?.startsWith("campaign-choice-v1:G5.") == true -> R.drawable.location_trail_day
+            legacyArtworkId(eventId)?.startsWith("campaign-choice-v1:G2.") == true -> R.drawable.goal_preview_tower
+            legacyArtworkId(eventId)?.startsWith("campaign-choice-v1:G4.") == true ||
+                legacyArtworkId(eventId)?.startsWith("campaign-choice-v1:G5.") == true -> R.drawable.location_trail_day
             else -> R.drawable.menu_village
         }
     }
 }
+
+/** Board revisions keep their original illustration; this is not a gameplay identity rewrite. */
+private val activityArtworkAliases = buildMap {
+    listOf("2238-120", "2270-54", "2270-106", "2289-2", "2289-110", "2289-164", "2289-218").forEach {
+        put("figma-$it-v1:balance-v2:game-v3", "figma-$it-v1:balance-v2")
+    }
+    listOf("G2.03", "G3.06", "G3.09", "G3.11", "G5.08").forEach {
+        put("campaign-choice-v2:$it", "campaign-choice-v1:$it")
+    }
+    listOf("2326-112", "2326-352").forEach { put("figma-$it-v3", "figma-$it-v2") }
+}
+
+private fun legacyArtworkId(eventId: String?): String? =
+    (activityArtworkAliases[eventId] ?: eventId)?.removeSuffix(":balance-v2")
 
 private val butcherEvents = setOf("figma-2289-2-v1", "figma-2289-56-v1", "figma-2289-110-v1",
     "figma-2289-164-v1", "figma-2289-218-v1")
