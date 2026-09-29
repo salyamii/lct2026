@@ -4899,7 +4899,8 @@
         "node_id": "89:34",
         "node_name": "adult_body_accessory_route_patch_512",
         "collection_id": "89:2",
-        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-34"
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-34",
+        "image_hash": "0dc592c9e5f2bd950b5f6a56de66f236bbdaeaf1"
       },
       "design_canvas": [
         512,
@@ -4910,17 +4911,17 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 89220,
-      "sha256": "657805da60ff5ecde5ed67e9072bd0be53954852989d6fa24bce4cf9f2cb5255",
-      "rgba_sha256": "4ff8ce2efba111e74b04589fd446f8e30388370fa0d37fdf722abf7a3221817c",
+      "bytes": 89342,
+      "sha256": "e7c011bee7e7289934de5ad44c8c8757fb6894d5898f944b71bc718dbae56a8b",
+      "rgba_sha256": "b018f3da8ca072a382b0a27013cec74c7974049e723dee4aa2fdb72f33cd9dbc",
       "alpha_bounds": [
         44,
         20,
         434,
         494
       ],
-      "source_sha256": "03cad28c79590ab14bd85611d8e57757fd4c55f0617ce0b6bdba319783688e50",
-      "source_bytes": 133290,
+      "source_sha256": "207b88607b94e3bdd7e1c6141e82ea64b5ae396a35c9155dbc35457e9fcfbf0d",
+      "source_bytes": 133345,
       "source_format": "png",
       "lossless_rgba_verified": true,
       "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_route_patch.webp",
@@ -4931,7 +4932,8 @@
         "method": 6,
         "pillow_version": "12.3.0"
       },
-      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
+      "notes": "FIGMA-SYNC-D-003: refreshed route-patch appearance from the current configured 1x PNG export of the individual runtime frame. Full transparent 512-square canvas and original character placement retained without crop, recentering or resizing; preview card excluded.",
+      "source_path": "docs/design/assets/sources/ryzhik_adult_body_accessory_route_patch.png"
     },
     {
       "resource": "ryzhik_adult_body_accessory_hat",
@@ -5459,7 +5461,8 @@
         "node_id": "89:117",
         "node_name": "adult_body_accessory_route_patch_sand_512",
         "collection_id": "89:2",
-        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-117"
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-117",
+        "image_hash": "7ee12a9c6d67294c99c8a96296e85596b993a20a"
       },
       "design_canvas": [
         512,
@@ -5470,17 +5473,17 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 88812,
-      "sha256": "dcdbb185272e1ea97eda04b1f34d16113bea1a9b8a59b552be70ed6b728d2f08",
-      "rgba_sha256": "98827088146a9b50e1db10a929ac91c4434f30540f2f2b0afb4acd819ff3b8be",
+      "bytes": 88806,
+      "sha256": "dd15bfb9bf042eaa9fa4a34b10a8c89868ec3387b40012b237ce69bab052d748",
+      "rgba_sha256": "811345a27b4cc35f2d04d73b6dff31891f31fe9abe06fac7a66ce663b424e30f",
       "alpha_bounds": [
         159,
         20,
         430,
         494
       ],
-      "source_sha256": "f6f303d48f295c7c12b1c021546fc7ee037495cdcaa9d71e825edcf36940fbd8",
-      "source_bytes": 134978,
+      "source_sha256": "958e33661dc24bf78ab2efdac520ecd5173ed2aa6060daec4ecabcb148ccf5df",
+      "source_bytes": 135113,
       "source_format": "png",
       "lossless_rgba_verified": true,
       "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_route_patch_sand.webp",
@@ -5491,7 +5494,8 @@
         "method": 6,
         "pillow_version": "12.3.0"
       },
-      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
+      "notes": "FIGMA-SYNC-D-003: refreshed route-patch appearance from the current configured 1x PNG export of the individual runtime frame. Full transparent 512-square canvas and original character placement retained without crop, recentering or resizing; preview card excluded.",
+      "source_path": "docs/design/assets/sources/ryzhik_adult_body_accessory_route_patch_sand.png"
     },
     {
       "resource": "ryzhik_adult_body_accessory_hat_sand",
@@ -5780,7 +5784,8 @@
         "node_id": "89:150",
         "node_name": "adult_body_accessory_route_patch_dark_russet_512",
         "collection_id": "89:2",
-        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-150"
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-150",
+        "image_hash": "3fae1cc15ffe0a009b6d7e3ae42a1a7b3ec2a935"
       },
       "design_canvas": [
         512,
@@ -5791,17 +5796,17 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 90598,
-      "sha256": "cf2546c742704b27bd7aef80785133ff9698f2b7032e631c5be6555359b3ba65",
-      "rgba_sha256": "80fef465e3a6aa6465973cece80bcb12c19ef09cb16ae90ccf6de0b613a1d86e",
+      "bytes": 90768,
+      "sha256": "816756d03bc94382acf0f64a8406ad67a94ba4a684748b1ff7bb80436b94d6c7",
+      "rgba_sha256": "cc5bd46b494303f943ede2fe7e16747f054f7e8ad4aef9bcd7f8e61fb4b38c62",
       "alpha_bounds": [
         51,
         20,
         438,
         494
       ],
-      "source_sha256": "4ca5a8299378d877cc2c4eac1d08e1b2b9764f9db00e43ff7666b8bef68a0ae1",
-      "source_bytes": 136451,
+      "source_sha256": "70593010547cd2a3d9c3435e830db1a0a44b72485037c6075ff9b3e49f76941f",
+      "source_bytes": 136447,
       "source_format": "png",
       "lossless_rgba_verified": true,
       "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_route_patch_dark_russet.webp",
@@ -5812,7 +5817,8 @@
         "method": 6,
         "pillow_version": "12.3.0"
       },
-      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
+      "notes": "FIGMA-SYNC-D-003: refreshed route-patch appearance from the current configured 1x PNG export of the individual runtime frame. Full transparent 512-square canvas and original character placement retained without crop, recentering or resizing; preview card excluded.",
+      "source_path": "docs/design/assets/sources/ryzhik_adult_body_accessory_route_patch_dark_russet.png"
     },
     {
       "resource": "ryzhik_adult_body_accessory_hat_dark_russet",
@@ -7085,7 +7091,8 @@
         "node_id": "89:217",
         "node_name": "senior_body_accessory_route_patch_512",
         "collection_id": "89:185",
-        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-217"
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-217",
+        "image_hash": "8de463c9d8a3c6f172e1e4d8f05374a6d8538cf8"
       },
       "design_canvas": [
         512,
@@ -7096,17 +7103,17 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 94818,
-      "sha256": "0f63691e977debb6ab853acbea41797492a98072f8b3ae579a2a31a02d22374c",
-      "rgba_sha256": "a732b7abd8a3e3bf92bfe34466ab23b09481ce85dc7cdc66a6235c92bdd6667b",
+      "bytes": 94894,
+      "sha256": "0b765c45e141f99f3b1bda22ce7d9492abb1a86cfa39ec27211b02dcf367bb7a",
+      "rgba_sha256": "b5d893ae4b893305d7b22dd5c0fef53e1b96f2ce4e106853e1be5f63b63a674e",
       "alpha_bounds": [
         42,
         22,
         416,
         488
       ],
-      "source_sha256": "3ad2277bc053886d4d26a5957e8dbd3d1433795329b8407f458b602076c5d9ea",
-      "source_bytes": 141976,
+      "source_sha256": "ee42e3fb68ca01cb288d24904f6934699681229abb4955176ca2076717c7c145",
+      "source_bytes": 141970,
       "source_format": "png",
       "lossless_rgba_verified": true,
       "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_route_patch.webp",
@@ -7117,7 +7124,8 @@
         "method": 6,
         "pillow_version": "12.3.0"
       },
-      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
+      "notes": "FIGMA-SYNC-D-003: refreshed route-patch appearance from the current configured 1x PNG export of the individual runtime frame. Full transparent 512-square canvas and original character placement retained without crop, recentering or resizing; preview card excluded.",
+      "source_path": "docs/design/assets/sources/ryzhik_senior_body_accessory_route_patch.png"
     },
     {
       "resource": "ryzhik_senior_body_accessory_hat",
@@ -7651,7 +7659,8 @@
         "node_id": "89:300",
         "node_name": "senior_body_accessory_route_patch_sand_512",
         "collection_id": "89:185",
-        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-300"
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-300",
+        "image_hash": "c64b083535a7b4fa4b2c38e36fcdbb4268d43b2e"
       },
       "design_canvas": [
         512,
@@ -7662,17 +7671,17 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 88042,
-      "sha256": "58d055aaacae6bcc14fcb8afdce3c374f01769461966452ac8a6f1d5b193c23c",
-      "rgba_sha256": "62372af8b0f7a50cc4997eb083a7292a053fd580d439455ffb8ad5d22b857819",
+      "bytes": 87800,
+      "sha256": "873620b0faa35b54acea8717c28509ef2c16f0b962d1e6bed6aba06e48584da9",
+      "rgba_sha256": "24db5ab350116f5511af4d23aa564e6a5c0a7d34ce1c5f770fe6b5b72bcc0359",
       "alpha_bounds": [
         46,
         21,
         429,
         486
       ],
-      "source_sha256": "903c9c93f6dff7cf04dc20a8d9165dd23036289afb7252f21065d5971fe29e9a",
-      "source_bytes": 133225,
+      "source_sha256": "a3a2961973cd221ef4930f3d36a7101e9656008ed58b376f2b156cc36d98f014",
+      "source_bytes": 133163,
       "source_format": "png",
       "lossless_rgba_verified": true,
       "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_route_patch_sand.webp",
@@ -7683,7 +7692,8 @@
         "method": 6,
         "pillow_version": "12.3.0"
       },
-      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
+      "notes": "FIGMA-SYNC-D-003: refreshed route-patch appearance from the current configured 1x PNG export of the individual runtime frame. Full transparent 512-square canvas and original character placement retained without crop, recentering or resizing; preview card excluded.",
+      "source_path": "docs/design/assets/sources/ryzhik_senior_body_accessory_route_patch_sand.png"
     },
     {
       "resource": "ryzhik_senior_body_accessory_hat_sand",
@@ -7979,7 +7989,8 @@
         "node_id": "89:333",
         "node_name": "senior_body_accessory_route_patch_dark_russet_512",
         "collection_id": "89:185",
-        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-333"
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=89-333",
+        "image_hash": "4ac1465a3b45b7c24622e357d8ea0596644e7b2e"
       },
       "design_canvas": [
         512,
@@ -7990,17 +8001,17 @@
       "format": "webp",
       "width": 512,
       "height": 512,
-      "bytes": 93216,
-      "sha256": "363eefe65d514b3cab2e70aa60324dbaf12976470b4836afb4ec4c7573ace07d",
-      "rgba_sha256": "53516a0bfb8be438df507f23e20fdf3e5b49be2b44d5099a95c631f8e99d1bab",
+      "bytes": 91994,
+      "sha256": "a7c7a3c51d7d215f879e75649b0df8503c908d3ec69f5d2c6a74817f114f475d",
+      "rgba_sha256": "df81e44559eb0b0049bde2818e36f442e58233c6f714b207414aa35042844590",
       "alpha_bounds": [
         160,
         21,
         420,
         478
       ],
-      "source_sha256": "db2186459a2d3951f211877371488101431db0f8d9329e328996d3910c0e50f7",
-      "source_bytes": 139324,
+      "source_sha256": "ff45cf6ab6f9f88e1fdfcde56139caca8110ecdfcd67997cfbdc2815276bdbaa",
+      "source_bytes": 139233,
       "source_format": "png",
       "lossless_rgba_verified": true,
       "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_route_patch_dark_russet.webp",
@@ -8011,7 +8022,8 @@
         "method": 6,
         "pillow_version": "12.3.0"
       },
-      "notes": "Refreshed from the current visible individual runtime frame; full 512 canvas, source placement and alpha retained without crop, recentering or stretching."
+      "notes": "FIGMA-SYNC-D-003: refreshed route-patch appearance from the current configured 1x PNG export of the individual runtime frame. Full transparent 512-square canvas and original character placement retained without crop, recentering or resizing; preview card excluded.",
+      "source_path": "docs/design/assets/sources/ryzhik_senior_body_accessory_route_patch_dark_russet.png"
     },
     {
       "resource": "ryzhik_senior_body_accessory_hat_dark_russet",
@@ -10514,44 +10526,45 @@
         "node_id": "2736:33",
         "node_name": "adult_state_sleep_copper_512",
         "collection_id": "89:2",
-        "image_hash": "926567de6a4e9b72e6bbd6318255754e2b692adc",
+        "image_hash": "7953ce23b99e67bdf4d8cbe90b1722a6128f14de",
         "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-33"
       },
       "design_canvas": [
-        1024,
-        1024
+        1254,
+        1254
       ],
       "figma_node_canvas": [
         512,
         512
       ],
-      "export_scale": 2,
+      "export_scale": 2.44921875,
       "source_method": "figma_active_original_image_fill",
-      "imported_on": "2026-09-20",
-      "notes": "Original active transparent PNG, SHA-1 matched to visible Figma fill. Full 1024 canvas maps to the 512-square frame; no trimming, recentering or resizing. Hidden opaque source and preview background excluded.",
+      "imported_on": "2026-09-29",
+      "notes": "SLEEP-D-002: refreshed adult/senior bed artwork from the active transparent original PNG. SHA-1 matched to visible Figma fill. Full 1254-square canvas maps to the 512-square frame (2.44921875x); no trimming, recentering or resizing. Preview background excluded.",
       "format": "webp",
-      "width": 1024,
-      "height": 1024,
-      "bytes": 336234,
-      "sha256": "f1afb21fc393fcffa5269f706ed551ce9431be75fac5c07b22a713fa751394b7",
-      "rgba_sha256": "6df775488705069456a70bed9472a246781e8d857048eef9710fda0be2541295",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 778424,
+      "sha256": "8d2c264a32ac382a30d492b35eb8e19e9758f2391a5339d5eb26d05a4d6a0532",
+      "rgba_sha256": "1829363a9e534e744c9079ebe301e6b598a2bfa69fc31ea70031cfc44a0e42eb",
       "alpha_bounds": [
-        113,
-        226,
-        915,
-        890
+        54,
+        21,
+        1224,
+        1223
       ],
-      "source_sha256": "954a9214b4fe6ca2ce219cc63afe67a94b63106eb5dc5191ee8976ca1febf28c",
-      "source_bytes": 523168,
+      "source_sha256": "a544ca5a8df3d4220b7393bfe4874a600fe7e59e36321693f6ef58bc64b08f70",
+      "source_bytes": 1191407,
       "source_format": "png",
       "conversion": {
         "lossless": true,
         "exact": true,
         "method": 6,
-        "pillow_version": "10.2.0"
+        "pillow_version": "12.3.0"
       },
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sleep_copper.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sleep_copper.webp",
+      "source_path": "docs/design/assets/sources/ryzhik_adult_state_sleep_copper.png"
     },
     {
       "resource": "ryzhik_adult_state_sleep_sand",
@@ -10561,44 +10574,45 @@
         "node_id": "2736:37",
         "node_name": "adult_state_sleep_sand_512",
         "collection_id": "89:2",
-        "image_hash": "0237178803a9bab4c1a7970b100f9dbb5e254039",
+        "image_hash": "b7938972b23343a6daab006dc50040912ac31913",
         "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-37"
       },
       "design_canvas": [
-        1024,
-        1024
+        1254,
+        1254
       ],
       "figma_node_canvas": [
         512,
         512
       ],
-      "export_scale": 2,
+      "export_scale": 2.44921875,
       "source_method": "figma_active_original_image_fill",
-      "imported_on": "2026-09-20",
-      "notes": "Original active transparent PNG, SHA-1 matched to visible Figma fill. Full 1024 canvas maps to the 512-square frame; no trimming, recentering or resizing. Hidden opaque source and preview background excluded.",
+      "imported_on": "2026-09-29",
+      "notes": "SLEEP-D-002: refreshed adult/senior bed artwork from the active transparent original PNG. SHA-1 matched to visible Figma fill. Full 1254-square canvas maps to the 512-square frame (2.44921875x); no trimming, recentering or resizing. Preview background excluded.",
       "format": "webp",
-      "width": 1024,
-      "height": 1024,
-      "bytes": 338940,
-      "sha256": "24f164ef807d6f4749c7ac5e5ff7e896e28e8f5cefb3c026f9ff3163de1b36b5",
-      "rgba_sha256": "cadd54334213099098d47dae0835f4c3bdfad2306a2ff050fe0aae80c1db11bd",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 735594,
+      "sha256": "76ae97ea7b4bd4596822882afe82a66bf269c69ed4f96a3519dc6f479dcce29f",
+      "rgba_sha256": "c8dc2a0b59e98812967d13e16c0a6133efcae2fafa2f202f0a6eb04d72031704",
       "alpha_bounds": [
-        82,
-        241,
-        907,
-        834
+        48,
+        25,
+        1224,
+        1223
       ],
-      "source_sha256": "9db2d6e3c2f9bd0df9f0fda6cadccecc8116b718057a93fd92a8d9d9d67ae3fb",
-      "source_bytes": 497393,
+      "source_sha256": "89e5d76e8cf2bbfcdc1d9f0eda58bde116e2400209044d6986a5457cf5ec45f5",
+      "source_bytes": 1137258,
       "source_format": "png",
       "conversion": {
         "lossless": true,
         "exact": true,
         "method": 6,
-        "pillow_version": "10.2.0"
+        "pillow_version": "12.3.0"
       },
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sleep_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sleep_sand.webp",
+      "source_path": "docs/design/assets/sources/ryzhik_adult_state_sleep_sand.png"
     },
     {
       "resource": "ryzhik_adult_state_sleep_dark_russet",
@@ -10608,44 +10622,45 @@
         "node_id": "2736:41",
         "node_name": "adult_state_sleep_dark_russet_512",
         "collection_id": "89:2",
-        "image_hash": "b2129cbe466c49b9a7f88b8a9b98f749301e93f0",
+        "image_hash": "3e8727f3208a6b07bdd13fed49c3624a094ba68a",
         "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-41"
       },
       "design_canvas": [
-        1024,
-        1024
+        1254,
+        1254
       ],
       "figma_node_canvas": [
         512,
         512
       ],
-      "export_scale": 2,
+      "export_scale": 2.44921875,
       "source_method": "figma_active_original_image_fill",
-      "imported_on": "2026-09-20",
-      "notes": "Original active transparent PNG, SHA-1 matched to visible Figma fill. Full 1024 canvas maps to the 512-square frame; no trimming, recentering or resizing. Hidden opaque source and preview background excluded.",
+      "imported_on": "2026-09-29",
+      "notes": "SLEEP-D-002: refreshed adult/senior bed artwork from the active transparent original PNG. SHA-1 matched to visible Figma fill. Full 1254-square canvas maps to the 512-square frame (2.44921875x); no trimming, recentering or resizing. Preview background excluded.",
       "format": "webp",
-      "width": 1024,
-      "height": 1024,
-      "bytes": 425718,
-      "sha256": "aeb0bcfaa2821dc5f6de6d10bdf13efd6424bd7f989822586449da175270ca80",
-      "rgba_sha256": "a7e27103b66b6214a990d84b2cbf60b8004ce86e5c64c6bc3f6ddb050862a34c",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 738832,
+      "sha256": "63a67edd363db9d0ddb9e8ab6ce5282b50560fbcdc976ebf9acfb4d56b465d9c",
+      "rgba_sha256": "974c1d4a1970bca56454f96294434132345e55bc5aecf5c8ed0a4a109266bc93",
       "alpha_bounds": [
-        127,
-        123,
-        954,
-        942
+        0,
+        21,
+        1226,
+        1228
       ],
-      "source_sha256": "9070e8407431c06e97cea745cdbf6b966815209405a8262d331047d122c979c8",
-      "source_bytes": 633735,
+      "source_sha256": "bacf452da9f5ba4931efcf46a48fe5950334bf124f5eea5885cad37fa469ffe7",
+      "source_bytes": 1143251,
       "source_format": "png",
       "conversion": {
         "lossless": true,
         "exact": true,
         "method": 6,
-        "pillow_version": "10.2.0"
+        "pillow_version": "12.3.0"
       },
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sleep_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_state_sleep_dark_russet.webp",
+      "source_path": "docs/design/assets/sources/ryzhik_adult_state_sleep_dark_russet.png"
     },
     {
       "resource": "ryzhik_senior_state_sleep_copper",
@@ -10655,44 +10670,45 @@
         "node_id": "2736:47",
         "node_name": "senior_state_sleep_copper_512",
         "collection_id": "89:185",
-        "image_hash": "7af9054176f70bfe54e7ddf45246cf200bc6fc6f",
+        "image_hash": "c4ab4e9f4c133744e0a88385ab781c5fb08c00a3",
         "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-47"
       },
       "design_canvas": [
-        1024,
-        1024
+        1254,
+        1254
       ],
       "figma_node_canvas": [
         512,
         512
       ],
-      "export_scale": 2,
+      "export_scale": 2.44921875,
       "source_method": "figma_active_original_image_fill",
-      "imported_on": "2026-09-20",
-      "notes": "Original active transparent PNG, SHA-1 matched to visible Figma fill. Full 1024 canvas maps to the 512-square frame; no trimming, recentering or resizing. Hidden opaque source and preview background excluded.",
+      "imported_on": "2026-09-29",
+      "notes": "SLEEP-D-002: refreshed adult/senior bed artwork from the active transparent original PNG. SHA-1 matched to visible Figma fill. Full 1254-square canvas maps to the 512-square frame (2.44921875x); no trimming, recentering or resizing. Preview background excluded.",
       "format": "webp",
-      "width": 1024,
-      "height": 1024,
-      "bytes": 244560,
-      "sha256": "33b8320829f339468b012f6ae4767bc0d76bdbcdfe330d652904ae1ae6dafd54",
-      "rgba_sha256": "5cddf209025cb7172897eb915caf085ea50cdf747442e1626517cdff7453b74d",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 814010,
+      "sha256": "e5bb364dbe76f6b999ce59c8a7ff272623bfa60ee28018b6201ac42570359b4b",
+      "rgba_sha256": "a68de3dd164d7100448b854da29e6e88d792242648bd81926eec2863acfe3f36",
       "alpha_bounds": [
-        221,
-        257,
-        804,
-        790
+        0,
+        21,
+        1253,
+        1228
       ],
-      "source_sha256": "befc8954c462d9773d16a3765a92b6e5dd8ab5966de056dbe6e14eab70735de7",
-      "source_bytes": 369124,
+      "source_sha256": "ae2027bc0b011daad2b0924ddc5eab6479248fafdc72b0e7a6ef1a7a874bf4ee",
+      "source_bytes": 1252070,
       "source_format": "png",
       "conversion": {
         "lossless": true,
         "exact": true,
         "method": 6,
-        "pillow_version": "10.2.0"
+        "pillow_version": "12.3.0"
       },
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sleep_copper.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sleep_copper.webp",
+      "source_path": "docs/design/assets/sources/ryzhik_senior_state_sleep_copper.png"
     },
     {
       "resource": "ryzhik_senior_state_sleep_sand",
@@ -10702,44 +10718,45 @@
         "node_id": "2736:51",
         "node_name": "senior_state_sleep_sand_512",
         "collection_id": "89:185",
-        "image_hash": "babba01d3fe97c39ca5e9f37665d966674a7c9df",
+        "image_hash": "d19da1420b1b7f41bee571c3e88f3aa1db029369",
         "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-51"
       },
       "design_canvas": [
-        1024,
-        1024
+        1254,
+        1254
       ],
       "figma_node_canvas": [
         512,
         512
       ],
-      "export_scale": 2,
+      "export_scale": 2.44921875,
       "source_method": "figma_active_original_image_fill",
-      "imported_on": "2026-09-20",
-      "notes": "Original active transparent PNG, SHA-1 matched to visible Figma fill. Full 1024 canvas maps to the 512-square frame; no trimming, recentering or resizing. Hidden opaque source and preview background excluded.",
+      "imported_on": "2026-09-29",
+      "notes": "SLEEP-D-002: refreshed adult/senior bed artwork from the active transparent original PNG. SHA-1 matched to visible Figma fill. Full 1254-square canvas maps to the 512-square frame (2.44921875x); no trimming, recentering or resizing. Preview background excluded.",
       "format": "webp",
-      "width": 1024,
-      "height": 1024,
-      "bytes": 355216,
-      "sha256": "49f61edabf717b3c4a43fa0ce47cc20304f2af43f96addfb4a8d2a48ef958548",
-      "rgba_sha256": "47261ec85b9a01722f790c759b03a628655dc424fde88c9775b499581d6aef75",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 810712,
+      "sha256": "941ab33b70acdf5c31389d1078d563aafe59dea9f98dc02c967ac72ac19f3aa9",
+      "rgba_sha256": "1c60ad05eb0f8d59a55b646ae838294eb7af9cc24c53b656793cb307d02f730e",
       "alpha_bounds": [
-        137,
-        183,
-        900,
-        881
+        0,
+        21,
+        1240,
+        1228
       ],
-      "source_sha256": "bdad5cfc8695408653fc17de2c3c825579402aa87bb015a49491391074164f03",
-      "source_bytes": 540329,
+      "source_sha256": "083ccadc8473aba36c9447316231ef39567f7e94047abbf9f99bf178115bef15",
+      "source_bytes": 1246621,
       "source_format": "png",
       "conversion": {
         "lossless": true,
         "exact": true,
         "method": 6,
-        "pillow_version": "10.2.0"
+        "pillow_version": "12.3.0"
       },
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sleep_sand.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sleep_sand.webp",
+      "source_path": "docs/design/assets/sources/ryzhik_senior_state_sleep_sand.png"
     },
     {
       "resource": "ryzhik_senior_state_sleep_dark_russet",
@@ -10749,44 +10766,45 @@
         "node_id": "2736:55",
         "node_name": "senior_state_sleep_dark_russet_512",
         "collection_id": "89:185",
-        "image_hash": "7a7b7cb7e8a23db4fb15019d319512b36ab97bad",
+        "image_hash": "76941c707a6c81b21863cf8cdd8ace655d8f3862",
         "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2736-55"
       },
       "design_canvas": [
-        1024,
-        1024
+        1254,
+        1254
       ],
       "figma_node_canvas": [
         512,
         512
       ],
-      "export_scale": 2,
+      "export_scale": 2.44921875,
       "source_method": "figma_active_original_image_fill",
-      "imported_on": "2026-09-20",
-      "notes": "Original active transparent PNG, SHA-1 matched to visible Figma fill. Full 1024 canvas maps to the 512-square frame; no trimming, recentering or resizing. Hidden opaque source and preview background excluded.",
+      "imported_on": "2026-09-29",
+      "notes": "SLEEP-D-002: refreshed adult/senior bed artwork from the active transparent original PNG. SHA-1 matched to visible Figma fill. Full 1254-square canvas maps to the 512-square frame (2.44921875x); no trimming, recentering or resizing. Preview background excluded.",
       "format": "webp",
-      "width": 1024,
-      "height": 1024,
-      "bytes": 383206,
-      "sha256": "0bb7f20e1f8916cf20165ca3bf185993d8e5651c709077a1b23293c960bd8985",
-      "rgba_sha256": "7fb12014986d656a99d75304a649843a87a48b5af17f21a3dbd86c565054c93f",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 847406,
+      "sha256": "100b27c7ccfdfa11d7bdeb240515da29d3c4c930f08ad3cfb90119dc56d17b57",
+      "rgba_sha256": "fa4adb8681022dfc45e92d2473a9be1562555d5f5d8bf308a1e7dc4c485c2403",
       "alpha_bounds": [
-        180,
-        134,
-        887,
-        965
+        0,
+        53,
+        1254,
+        1228
       ],
-      "source_sha256": "01ff05edc14fc1bf3d72a572b03eae9481a5cbff4af0e1cd830e29c82015d993",
-      "source_bytes": 585091,
+      "source_sha256": "9221084701588b21a3487db33e6162ccfc0a493909f651e1e9542e5a85ad5849",
+      "source_bytes": 1310967,
       "source_format": "png",
       "conversion": {
         "lossless": true,
         "exact": true,
         "method": 6,
-        "pillow_version": "10.2.0"
+        "pillow_version": "12.3.0"
       },
       "lossless_rgba_verified": true,
-      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sleep_dark_russet.webp"
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_state_sleep_dark_russet.webp",
+      "source_path": "docs/design/assets/sources/ryzhik_senior_state_sleep_dark_russet.png"
     },
     {
       "resource": "deed_pair_armillary",
