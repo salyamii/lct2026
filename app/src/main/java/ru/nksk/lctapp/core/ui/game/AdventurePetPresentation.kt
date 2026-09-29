@@ -43,7 +43,9 @@ internal fun PetState.toAdventurePetPresentation(showReaction: Boolean = true): 
             "ROUTE_PATCH" -> AdventurePetPresentation(art.routePatch, R.string.menu_pet_route_patch)
             "COMPASS" -> AdventurePetPresentation(art.compass, R.string.menu_pet_compass)
             "BINOCULARS" -> AdventurePetPresentation(art.binoculars, R.string.menu_pet_binoculars)
-            else -> AdventurePetPresentation(null, R.string.menu_pet_look_unavailable)
+            else -> rewardCapArtwork(appearance.lookId, age, color)?.let {
+                AdventurePetPresentation(it, R.string.menu_pet_cap)
+            } ?: AdventurePetPresentation(null, R.string.menu_pet_look_unavailable)
         }
         is PetAppearance.SpecialState -> when (appearance.state) {
             PetVisualState.NEEDS_HELP -> AdventurePetPresentation(art.sick, R.string.menu_pet_needs_help)

@@ -35,7 +35,10 @@ class StoryGameThemeTest {
                     assertFalse(choiceId, instructions.contains("маркер"))
                 }
                 DeedGameKind.LIGHTS -> assertTrue(choiceId, instructions.contains("фонарь и соседи"))
-                DeedGameKind.SEQUENCE -> assertTrue(choiceId, instructions.contains("вспышки по памяти"))
+                DeedGameKind.SEQUENCE -> {
+                    assertEquals(choiceId, checkNotNull(media.game).context, instructions)
+                    assertTrue(choiceId, instructions.contains("порядок вспышек"))
+                }
                 DeedGameKind.PIPES -> assertTrue(choiceId, instructions.contains("концы одного цвета"))
                 DeedGameKind.DIFFERENCES -> assertTrue(choiceId, instructions.contains("отличия между полками"))
                 DeedGameKind.STACKING -> assertTrue(choiceId, instructions.contains("ящик на предыдущий"))
@@ -63,7 +66,11 @@ class StoryGameThemeTest {
             val media = catalog.cards.getValue(id).presentation.media
             val theme = checkNotNull(storyGameTheme(media, kind)) { id }
             assertFalse(id, checkNotNull(media.game).context.isBlank())
-            assertTrue(id, theme.instructions.endsWith(storyGameInstructions(kind)))
+            if (kind == DeedGameKind.SEQUENCE) {
+                assertEquals(id, media.game?.context, theme.instructions)
+            } else {
+                assertTrue(id, theme.instructions.endsWith(storyGameInstructions(kind)))
+            }
         }
         val relay = catalog.cards.getValue("campaign-choice-v2:G5.08").presentation.media
         assertTrue(checkNotNull(storyGameTheme(relay, DeedGameKind.LIGHTS)).instructions.contains("погасить все контрольные огни"))

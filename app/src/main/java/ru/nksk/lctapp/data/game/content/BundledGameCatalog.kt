@@ -146,7 +146,7 @@ internal fun bundledGameCatalog(): GameCatalog {
         ),
         storyDayId = day, introductionId = entries.first().id,
         deedPool = entries.filter { it.type == EventType.EARNING }.map { it.id },
-    ).withEverydayEvents().withRingTossGame().withPlateCleaningChoice().withFirstGoal().withGoalProjects().withStoryCampaign().withDayRecapCopy().withLorePlateCleaningChoice().withRebalancedDeeds().withActivityGameVersions().withStarterAccessories()
+    ).withEverydayEvents().withRingTossGame().withPlateCleaningChoice().withFirstGoal().withGoalProjects().withStoryCampaign().withDayRecapCopy().withLorePlateCleaningChoice().withRebalancedDeeds().withActivityGameVersions().withStarterAccessories().withParentRewardAccessories()
 }
 
 private data class Entry(
