@@ -21,6 +21,7 @@ local.properties
 !/docs/backend/
 !/docs/navigation.md
 !/docs/architecture.md
+!/docs/player-guide.md
 .pdf
 /*.pdf
 /tmp/*

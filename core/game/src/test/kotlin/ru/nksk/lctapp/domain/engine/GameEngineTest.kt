@@ -436,6 +436,107 @@ class GameEngineTest {
         assertEquals(BlockReason.DeedUnavailable, f.blocked(EngineCommand.StartDeed(offer.id)))
     }
 
+    @Test fun selectingEitherDeedClosesOnlyTheOpenProposalAndKeepsBothOffers() = runTest {
+        for (selectedIndex in 0..1) {
+            val f = Fixture()
+            f.begin(listOf("small", "medium", "quiet", "quiet"))
+            f.completeOne()
+            f.apply(EngineCommand.OpenNextEvent)
+            val before = f.state
+            val proposal = f.day.currentEvent!!
+            val offers = f.day.deeds
+            val selected = offers[selectedIndex]
+
+            f.apply(EngineCommand.StartDeed(selected.id))
+
+            assertEquals(offers, f.day.deeds)
+            assertEquals(selected.id, f.day.currentEvent!!.deedOfferId)
+            assertEquals(EventStatus.COMPLETED, f.day.events.single { it.id == proposal.id }.status)
+            assertEquals(before.engine!!.steps, f.day.steps)
+            assertEquals(before.engine.energy, f.day.energy)
+            assertEquals(before.engine.journal, f.day.journal)
+            assertEquals(before.economy, f.state.economy)
+            assertEquals(before.story.decisions, f.state.story.decisions)
+
+            f.choose(); f.ack()
+            assertEquals(110L, f.state.economy.balance)
+            assertEquals(before.engine.steps + 1, f.day.steps)
+            assertTrue(f.day.deeds.single { it.id == selected.id }.completed)
+            val remaining = offers[1 - selectedIndex]
+            assertEquals(remaining, f.day.deeds.single { it.id == remaining.id })
+            f.apply(EngineCommand.StartDeed(remaining.id))
+            assertEquals(remaining.id, f.day.currentEvent!!.deedOfferId)
+            assertEquals(110L, f.state.economy.balance)
+        }
+    }
+
+    @Test fun rejectedDeedSelectionDoesNotAcknowledgeTheShownProposal() = runTest {
+        for (reason in listOf(BlockReason.MustEat, BlockReason.MustSleep, BlockReason.DeedUnavailable)) {
+            val f = Fixture()
+            f.begin(listOf("small", "medium", "quiet", "quiet"))
+            f.completeOne()
+            f.apply(EngineCommand.OpenNextEvent)
+            val selected = f.day.deeds.first()
+            f.repo.update { state -> state.copy(engine = state.engine!!.let { day -> when (reason) {
+                BlockReason.MustEat -> day.copy(steps = f.rules.hungerBlocksAtStep)
+                BlockReason.MustSleep -> day.copy(energy = 0)
+                else -> day.copy(deeds = day.deeds.map { if (it.id == selected.id) it.copy(completed = true) else it })
+            } }) }
+            val before = f.state
+
+            assertEquals(reason, f.blocked(EngineCommand.StartDeed(selected.id)))
+            assertEquals(before, f.state)
+            assertEquals(EventStatus.RESULT, f.day.currentEvent!!.status)
+        }
+    }
+
+    @Test fun deedSelectionCannotHideAnUnresolvedEventOrItsActualResult() = runTest {
+        for (withResult in listOf(false, true)) {
+            val f = Fixture()
+            f.begin(listOf("small", "medium", "lore", "quiet"))
+            f.completeOne(); f.completeOne()
+            f.apply(EngineCommand.OpenNextEvent)
+            if (withResult) f.choose()
+            val before = f.state
+
+            for (offer in f.day.deeds) {
+                assertEquals(BlockReason.EventInProgress, f.blocked(EngineCommand.StartDeed(offer.id)))
+                assertEquals(before, f.state)
+            }
+        }
+    }
+
+    @Test fun failedDeedSelectionRollsBackProposalAcknowledgementAndStartTogether() = runTest {
+        val f = Fixture()
+        f.begin(listOf("small", "medium", "quiet", "quiet"))
+        f.completeOne()
+        f.apply(EngineCommand.OpenNextEvent)
+        val before = f.state
+        f.repo.failCommit = true
+
+        try {
+            f.engine.dispatch(f.request(EngineCommand.StartDeed(f.day.deeds.first().id)))
+            fail("The simulated storage failure must propagate")
+        } catch (_: IOException) { }
+
+        assertEquals(before, f.state)
+    }
+
+    @Test fun acknowledgingTheLastProposalDoesNotBypassTheShortWorkLimit() = runTest {
+        val f = Fixture()
+        f.begin(listOf("large", "quiet", "quiet", "small"))
+        repeat(3) { f.completeOne() }
+        f.apply(EngineCommand.OpenNextEvent)
+        val before = f.state
+
+        assertEquals(BlockReason.OnlyShortDeedsAfterSchedule,
+            f.blocked(EngineCommand.StartDeed(f.day.deeds.first().id)))
+        assertEquals(before, f.state)
+        f.apply(EngineCommand.StartDeed(f.day.deeds.last().id))
+        assertEquals(DayPhase.READY_TO_END, f.day.phase)
+        assertEquals("small", f.day.currentEvent!!.eventId)
+    }
+
     @Test fun weeklyIncomeIsGrantedOnceOnBeginningDayEightAndNotOnReadingSummary() = runTest {
         val f = Fixture()
         f.begin()

@@ -1,7 +1,6 @@
 package ru.nksk.lctapp.feature.goal.navigation
 
 import androidx.lifecycle.compose.dropUnlessResumed
-import androidx.activity.compose.BackHandler
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.SerialName
@@ -15,7 +14,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.nksk.lctapp.feature.goal.ui.GoalScreen
 import ru.nksk.lctapp.feature.goal.ui.GoalViewModel
-import ru.nksk.lctapp.feature.goal.ui.GoalAction
 import ru.nksk.lctapp.feature.goal.ui.GoalContinuationDestination
 
 @Serializable
@@ -41,10 +39,6 @@ fun EntryProviderScope<NavKey>.goalEntry(onBack: (Goal) -> Unit, onOpenSavings: 
                     }
                 } finally { model.setActive(false) }
             }
-        }
-        BackHandler(enabled = !state.loading &&
-            (state.purchaseResult != null || (!state.showList && state.returnToList))) {
-            model.onAction(if (state.purchaseResult != null) GoalAction.DismissPurchaseResult else GoalAction.ShowList)
         }
         GoalScreen(
             state = state,

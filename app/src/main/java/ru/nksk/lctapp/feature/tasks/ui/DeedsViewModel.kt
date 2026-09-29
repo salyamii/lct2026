@@ -116,8 +116,14 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
                     is EngineResult.Applied -> {
                         game = result.state; needsFood = false
                         if (navigate) {
-                            navigating = true
-                            eventNavigation.send(checkNotNull(result.state.engine?.currentEvent).id)
+                            val current = result.state.engine?.currentEvent
+                            // A retry can return a newer world. Open only the work
+                            // chosen by this request, never another current event.
+                            if (command is EngineCommand.StartDeed && current?.origin == EventOrigin.DEED &&
+                                current.deedOfferId == command.offerId && current.status == EventStatus.ACTIVE) {
+                                navigating = true
+                                eventNavigation.send(current.id)
+                            } else message = "Действие сохранено. Состояние дела уже изменилось."
                         }
                     }
                     is EngineResult.Blocked -> { message = result.reason.playerMessage(saved.pet.name); needsFood = result.reason == BlockReason.MustEat }

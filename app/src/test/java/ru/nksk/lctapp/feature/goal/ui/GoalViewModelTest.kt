@@ -126,6 +126,45 @@ class GoalViewModelTest {
         assertEquals(before, fixture.state.economy)
     }
 
+    @Test fun backFromFuturePreviewGoesToListThenCurrentGoalWithoutChangingTheGame() = runTest(dispatcher) {
+        val fixture = Fixture()
+        fixture.start()
+        val before = fixture.state
+        val handle = SavedStateHandle()
+        val model = fixture.model(handle)
+        runCurrent()
+        model.onAction(GoalAction.ShowList)
+        model.onAction(GoalAction.View(fixture.catalog.goals[2].goalId))
+        assertEquals(GoalAction.ShowList, model.uiState.value.backAction)
+        model.onAction(checkNotNull(model.uiState.value.backAction))
+        assertTrue(model.uiState.value.showList)
+        assertEquals(GoalAction.ShowCurrentGoal, model.uiState.value.backAction)
+
+        val recreated = fixture.model(handle)
+        runCurrent()
+        recreated.onAction(checkNotNull(recreated.uiState.value.backAction))
+        assertFalse(recreated.uiState.value.showList)
+        assertFalse(recreated.uiState.value.returnToList)
+        assertEquals(fixture.goal.goalId, recreated.uiState.value.goalId)
+        assertNull(recreated.uiState.value.backAction)
+        assertEquals(before, fixture.state)
+    }
+
+    @Test fun listReturnsToCurrentChapterEvenBeforeASavingTargetIsChosen() = runTest(dispatcher) {
+        val fixture = Fixture()
+        fixture.session.prepare()
+        val before = fixture.state
+        val model = fixture.model()
+        runCurrent()
+        model.onAction(GoalAction.ShowList)
+        assertEquals(GoalAction.ShowCurrentGoal, model.uiState.value.backAction)
+        model.onAction(checkNotNull(model.uiState.value.backAction))
+        assertEquals(fixture.goal.goalId, model.uiState.value.goalId)
+        assertFalse(model.uiState.value.showList)
+        assertNull(model.uiState.value.backAction)
+        assertEquals(before, fixture.state)
+    }
+
     @Test fun targetProgressReflectsTheSharedSavingsAfterDepositAndWithdrawal() = runTest(dispatcher) {
         val fixture = Fixture(savings = 40)
         fixture.start(item = 2)

@@ -26,12 +26,20 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -96,7 +104,7 @@ internal fun MenuHud(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 MenuText(stringResource(R.string.menu_goal_label), 11, color = AdventureLavender, letterSpacing = 0.44f)
-                MenuText(goalTitle, 13, modifier = Modifier.weight(1f))
+                GoalTitle(goalTitle, Modifier.weight(1f))
                 if (totalGoals > 0) MenuText(
                     stringResource(R.string.menu_goal_progress, completedGoals, totalGoals),
                     size = 11,
@@ -151,6 +159,40 @@ internal fun MenuHud(
             }
         }
     }
+}
+
+@Composable
+private fun GoalTitle(text: String, modifier: Modifier = Modifier) {
+    var overflows by remember(text) { mutableStateOf(false) }
+    Text(
+        text = text,
+        modifier = modifier
+            .graphicsLayer {
+                // Mask only the letters, keeping the translucent panel and counter intact.
+                compositingStrategy = if (overflows) CompositingStrategy.Offscreen else CompositingStrategy.Auto
+            }
+            .drawWithCache {
+                val fade = if (overflows && size.width > 0f) Brush.horizontalGradient(
+                    colors = listOf(Color.Black, Color.Transparent),
+                    startX = size.width - minOf(24.dp.toPx(), size.width / 2f),
+                    endX = size.width,
+                ) else null
+                onDrawWithContent {
+                    drawContent()
+                    if (fade != null) drawRect(fade, blendMode = BlendMode.DstIn)
+                }
+            },
+        color = Color.White,
+        fontFamily = Nunito,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 13.sp,
+        lineHeight = 17.sp,
+        letterSpacing = 0.sp,
+        maxLines = 1,
+        softWrap = false,
+        overflow = TextOverflow.Clip,
+        onTextLayout = { overflows = it.didOverflowWidth },
+    )
 }
 
 @Composable

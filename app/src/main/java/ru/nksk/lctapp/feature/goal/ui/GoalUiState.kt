@@ -29,6 +29,7 @@ internal data class GoalUiState(
     val projects: List<GoalProjectUiState> = emptyList(),
     val showList: Boolean = false,
     val returnToList: Boolean = false,
+    val currentGoalId: String? = null,
     val goalId: String? = null,
     val canSelect: Boolean = false,
     val completedProject: Boolean = false,
@@ -36,6 +37,14 @@ internal data class GoalUiState(
     val campaignComplete: Boolean = false,
     val demoMode: Boolean = false,
 )
+
+internal val GoalUiState.backAction: GoalAction?
+    get() = when {
+        purchaseResult != null -> GoalAction.DismissPurchaseResult
+        showList && currentGoalId != null -> GoalAction.ShowCurrentGoal
+        !showList && returnToList -> GoalAction.ShowList
+        else -> null
+    }
 
 internal enum class GoalProjectStatus { AVAILABLE, ACTIVE, LOCKED, COMPLETED }
 internal data class GoalProjectUiState(
@@ -86,6 +95,7 @@ internal sealed interface GoalAction {
     data object Retry : GoalAction
     data class View(val goalId: String) : GoalAction
     data object ShowList : GoalAction
+    data object ShowCurrentGoal : GoalAction
     data object DismissPurchaseResult : GoalAction
     data object ContinueStory : GoalAction
     data class Select(val goalId: String) : GoalAction

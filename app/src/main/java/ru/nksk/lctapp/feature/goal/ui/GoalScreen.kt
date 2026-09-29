@@ -9,7 +9,9 @@ import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
@@ -28,11 +30,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -61,6 +66,9 @@ internal fun GoalScreen(
     val result = state.purchaseResult
     val ready = state.parts.isNotEmpty() && state.parts.all { it.owned }
     val detailsScroll = rememberScrollState()
+    // Keep the catalogue's scroll outside its conditional composition so previews
+    // and Activity recreation return to the same card and offset.
+    val projectsScroll = rememberLazyListState()
     val selectedGoalAnchor = remember { BringIntoViewRequester() }
     val selectionKey = state.goalId to target?.id
     var previousSelection by remember { mutableStateOf(selectionKey) }
@@ -75,16 +83,14 @@ internal fun GoalScreen(
         previousSelection = selectionKey
     }
     val back = {
-        when {
-            result != null -> onAction(GoalAction.DismissPurchaseResult)
-            !state.showList && state.returnToList -> onAction(GoalAction.ShowList)
-            else -> onBack()
+        if (!state.busy) {
+            state.backAction?.let(onAction) ?: onBack()
         }
     }
-    BackHandler(enabled = result != null) { back() }
+    BackHandler(enabled = state.busy || state.backAction != null) { back() }
 
     if (state.showList && !state.loading && !state.failed && result == null) {
-        GoalProjectList(state, onBack) { onAction(GoalAction.View(it)) }
+        GoalProjectList(state, projectsScroll, back) { onAction(GoalAction.View(it)) }
         return
     }
 
@@ -342,10 +348,24 @@ private fun GoalItemIllustration(itemId: String, modifier: Modifier) {
 
 @Composable
 private fun GoalProjectCard(project: GoalProjectUiState, enabled: Boolean, onClick: () -> Unit) {
-    Surface(color = Color.White, shape = RoundedCornerShape(22.dp), border = BorderStroke(1.dp, GoalLine)) {
+    val locked = project.status == GoalProjectStatus.LOCKED
+    val lockedArtwork = remember { ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }) }
+    Surface(modifier = Modifier.testTag("goal_project_${project.id}"),
+        color = Color.White, shape = RoundedCornerShape(22.dp), border = BorderStroke(1.dp, GoalLine)) {
         Column(Modifier.fillMaxWidth()) {
-            GameArtwork(goalPreviewArtwork(project.id), null, Modifier.fillMaxWidth().aspectRatio(1.5f)
-                .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)), contentScale = ContentScale.Crop)
+            Box(Modifier.fillMaxWidth()) {
+                GameArtwork(goalPreviewArtwork(project.id), null, Modifier.fillMaxWidth().aspectRatio(1.5f)
+                    .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)), contentScale = ContentScale.Crop,
+                    colorFilter = if (locked) lockedArtwork else null)
+                if (locked) Surface(
+                    modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
+                    color = Color(0xFFF0EFEA), shape = RoundedCornerShape(12.dp),
+                ) {
+                    Text("Пока недоступно", Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        color = GoalMuted, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold,
+                        fontSize = 13.sp)
+                }
+            }
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 AdventureHeading(project.title)
                 AdventureBody(goalPreviewText(project.id, project.description))
@@ -356,16 +376,28 @@ private fun GoalProjectCard(project: GoalProjectUiState, enabled: Boolean, onCli
                         Text(if (item.owned) "Есть ✓" else goalCoins(item.price), color = GoalMuted, fontFamily = Nunito, fontSize = 14.sp)
                     }
                 }
-                if (project.status == GoalProjectStatus.LOCKED) GoalCaption("Откроется после предыдущей главы")
+                if (locked) GoalCaption("Откроется после предыдущей главы")
                 if (project.status == GoalProjectStatus.COMPLETED) GoalStatus("Цель выполнена")
-                AdventurePrimaryButton("Открыть цель", onClick, enabled = enabled)
+                if (locked) {
+                    OutlinedButton(onClick = onClick, enabled = enabled,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+                        shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, GoalLine),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = Color(0xFFF0EFEA), contentColor = GoalMuted,
+                        )) {
+                        Text("Посмотреть цель", fontFamily = Nunito, fontWeight = FontWeight.ExtraBold,
+                            fontSize = 16.sp)
+                    }
+                } else {
+                    AdventurePrimaryButton("Открыть цель", onClick, enabled = enabled)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun GoalProjectList(state: GoalUiState, onBack: () -> Unit, onView: (String) -> Unit) {
+private fun GoalProjectList(state: GoalUiState, scrollState: LazyListState, onBack: () -> Unit, onView: (String) -> Unit) {
     Column(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -376,7 +408,8 @@ private fun GoalProjectList(state: GoalUiState, onBack: () -> Unit, onView: (Str
                 fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
         }
         LazyColumn(Modifier.weight(1f).fillMaxWidth().clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
-            .background(GamePaper), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            .background(GamePaper).testTag("goal_project_list"), state = scrollState,
+            contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
             items(state.projects, key = { it.id }) { project ->
                 GoalProjectCard(project, !state.busy) { onView(project.id) }
             }

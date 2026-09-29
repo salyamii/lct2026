@@ -55,6 +55,12 @@ with two sections, owned items only, and an entry-scoped Hilt ViewModel. Its sav
 route ID remains `gear`; Back returns to the menu without changing game state.
 Tasks displays current offered deeds and a Skill Training entry. The app host
 maps its training callback to `SkillTraining`.
+Goal owns read-only nested views inside its existing entry. Both toolbar and
+system Back return from a preview to the catalogue, then to the current goal,
+then to the menu. After the campaign, a catalogue with no current goal exits to
+the menu. The catalogue's saveable list position remains mounted while details
+are shown and survives Activity recreation. These view changes never select a
+gameplay goal or purchase an item; pending writes block Back.
 `ChapterPractice` (`chapter_practice`) is the separate finite catch-up route used
 by blocked chapter continuations from MainMenu, Goal and Day (LEARNING-D-005).
 It uses its own entry-scoped TrainingViewModel and the current saved milestones;

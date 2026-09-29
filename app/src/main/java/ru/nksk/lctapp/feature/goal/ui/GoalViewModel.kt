@@ -105,6 +105,14 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
                 handle["return_to_list"] = false
                 clearPurchase(); message = null; render()
             }
+            GoalAction.ShowCurrentGoal -> {
+                val currentGoalId = mutableState.value.currentGoalId ?: return
+                handle["viewed_goal"] = currentGoalId
+                handle["show_list"] = false
+                handle["return_to_list"] = false
+                handle.remove<String>("purchase_result_item")
+                clearPurchase(); message = null; render()
+            }
             GoalAction.DismissPurchaseResult -> { handle.remove<String>("purchase_result_item"); render() }
             GoalAction.ContinueStory -> continueStory(game)
             is GoalAction.Select -> execute(request(game, session.selectGoalCommand(game, action.goalId)))
@@ -320,7 +328,8 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
                         checkNotNull(item.priceCoins), item.id in progress.ownedItemIds)
                 })
         }
-        val goal = catalog.goals.firstOrNull { it.goalId == handle.get<String>("viewed_goal") } ?: activeGoal ?: story.requiredGoal
+        val currentGoal = activeGoal ?: story.requiredGoal
+        val goal = catalog.goals.firstOrNull { it.goalId == handle.get<String>("viewed_goal") } ?: currentGoal
         val showList = handle.get<Boolean>("show_list") ?: false
         val common = GoalUiState(loading = false, busy = busy, petName = game.pet.name,
             demoMode = session.demoModeEnabled,
@@ -330,6 +339,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
             knownNeeds = knownNeeds(game),
             transfersEnabled = game.economy.planning == null && game.economy.unallocated == 0L,
             projects = projects, showList = showList || goal == null,
+            currentGoalId = currentGoal?.goalId,
             returnToList = !showList && goal != null && handle.get<Boolean>("return_to_list") == true,
             completedProjectCount = catalog.goals.count { story.goalCompleted(it) },
             campaignComplete = catalog.storyProgress(game).campaignComplete,

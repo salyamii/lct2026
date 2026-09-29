@@ -771,7 +771,15 @@ class GameEngine(
         } else next
     }
 
-    private fun startDeed(state: GameState, offerId: String, requestId: String, demoMode: Boolean = false): GameState {
+    private fun startDeed(current: GameState, offerId: String, requestId: String, demoMode: Boolean = false): GameState {
+        val proposal = running(current).currentEvent?.takeIf {
+            it.origin == EventOrigin.SCHEDULE && it.status == EventStatus.RESULT &&
+                factory.event(it.eventId).type == EventType.EARNING
+        }
+        // Choosing work from Deeds also closes an already shown offer card. Keep
+        // that offer and its deadline: acknowledging a proposal does not do the
+        // work or decline it. Admission and this acknowledgement commit together.
+        val state = if (proposal != null) acknowledge(current, proposal.id) else current
         val day = running(state)
         val active = day.currentEvent
         ensure(active == null || (active.origin == EventOrigin.DEED && active.deedOfferId == offerId &&
