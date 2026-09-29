@@ -84,6 +84,8 @@ class RemoteParentLinkRepositoryTest {
     }
 
     private class FakeApi : BackendApi {
+        override suspend fun parentMaterials(): ru.nksk.lctapp.domain.backend.ParentMaterialsCatalog = error("Unexpected material request")
+
         var failRegistration = false
         val registrationKeys = mutableListOf<String>()
         val registrationBodies = mutableListOf<RegisterProfileRequest>()

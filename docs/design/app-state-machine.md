@@ -5,11 +5,18 @@
 > Успешная проверка открывает отчёт текущей игры. По PARENT-MODE-D-003
 > (2026-09-29) при входе обновляются серверные оценки: локальный отчёт доступен
 > сразу, затем отправляются свидетельства и запрашиваются статусы навыков.
+> По ANALYTICS-MVP-D-001 от 2026-09-29 серверный расчёт `skills-mvp-v1`
+> реализован в [слитом backend PR #10](https://github.com/OptikRUS/hackaton-fin-department/pull/10).
+> Пользователь подтвердил получение данных по навыкам в игре.
+> Численные пороги - выбор реализации MVP; [политика](../backend/analytics.md#политика-mvp)
+> не меняет переходы игры. После world restore отчёт проверяет границу оценки
+> по серверному курсору, а не по локальному номеру Room.
 > Ошибка сети сохраняет подходящий кеш с пояснением; неполученная оценка
 > отличается от серверного NO_DATA. Выход,
 > фон и новый процесс закрывают доступ; поворот сохраняет сессию ViewModel.
-> PIN-gate проверяется перед восстановленным родительским стеком. Вопросы
-> и квесты остаются заглушками. Обновление отчёта не выполняет игровых команд, не
+> PIN-gate проверяется перед восстановленным родительским стеком. По PARENT-MODE-D-004
+> вопросы подключены через отдельный каталог, который пока разрешено оставить
+> ненаполненным (UNPUBLISHED); это не блокирует отчёт. Квесты остаются заглушками. Обновление отчёта не выполняет игровых команд, не
 > создаёт сохранение, не начисляет наград и не загружает чужую сессию.
 > [Правила и границы реализации](decisions.md#встроенный-режим---2026-09-28).
 
@@ -677,10 +684,12 @@ provisional.
 - Detailed restoration boundaries for uncommitted UI input. Preservation of the
   current game, every pet state including HAPPY/UPSET, and owned gear is decided;
   cloud/device restore policy is a separate future concern.
-- Prices/rewards beyond the approved temporary catalog, precise pedagogical
+- Prices/rewards beyond the approved temporary catalog, pedagogically validated
   thresholds of mastery, and event-specific interpretations not covered by the
-  current financial contract. Financial periods, editable plans and savings
-  payment rules are already resolved by FINANCE-D-001–FINANCE-D-008.
+  current financial contract. ANALYTICS-MVP-D-001 authorizes a working backend
+  MVP; its `skills-mvp-v1` thresholds are an implementation choice, not a validated
+  teaching standard. Financial periods, editable plans and savings payment rules
+  are already resolved by FINANCE-D-001–FINANCE-D-008.
 - Exact story-event identities and fatigue-clearing events, explicitly deferred
   to future story design. Their absence must not be filled by a generic rule.
 - Asset files for each state; the board has labeled placeholders only.
@@ -2128,7 +2137,10 @@ WEEKLY сохраняет остатки статей в черновике; н�
 по последовательности CUB → TEEN → TEEN → ADULT → SENIOR.
 
 Это технические условия игрового продвижения, **не численные пороги освоения
-12 навыков**. Родительские уровни и достаточность повторений не утверждены.
+12 навыков**. Серверные статусы MVP рассчитываются отдельно по
+[ANALYTICS-MVP-D-001](decisions.md#серверный-mvp-навыков---2026-09-29):
+точные пороги выбраны при реализации `skills-mvp-v1`; педагогическая
+достаточность повторений и возрастные нормы остаются открытыми.
 Правила наблюдений описаны в
 [контракте FIN-01–FIN-12](requirements/financial-analytics-coverage-2026-09-24.md).
 

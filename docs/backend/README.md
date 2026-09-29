@@ -1,8 +1,16 @@
 # Android ↔ backend: профиль устройства, сохранение и награды
 
 Контракт v1, **2026-09-29**. Сервер команды: `https://fin-api.mortypython.ru/`.
-Backend реализует JSON из этого пакета. Наличие клиентского кода не подтверждает
-совместимость текущего развёртывания: успешный обмен с живым сервером ещё не проверен.
+Backend реализует JSON из этого пакета. Совместимость и MVP навыков слиты в
+backend; CI прошёл. Пользователь подтвердил получение данных по навыкам в игре.
+Полные сценарии сохранения/восстановления и доставки подарков на рабочем сервере
+ещё требуют сквозной проверки.
+
+По **BACKEND-CONTRACT-D-001 · Принято пользователем · 2026-09-29** источником
+истины служат контракты игрового Android-приложения: его DTO, фактические
+вызовы и проверки ответов. Backend адаптируется к ним. Контракты отдельного
+родительского приложения не переопределяют поведение игры.
+[Конкретные расхождения backend с игровым клиентом](android-compatibility-gaps-2026-09-29.md).
 
 - [OpenAPI](openapi.yaml) и [схемы аналитики](analytics.openapi.yaml).
 - [Готовые запросы и ответы](implementation-handoff.md).
@@ -184,3 +192,5 @@ curl --fail-with-body -X PUT "${BASE_URL}v1/profiles/snapshot" \
 curl --fail-with-body "${BASE_URL}v1/profiles/snapshot/download" \
   -H 'Content-Type: application/json' --data-binary @examples/snapshot-download-request.json
 ```
+
+Материалы родительских тем: [контракт и штатное UNPUBLISHED](parent-materials.md).

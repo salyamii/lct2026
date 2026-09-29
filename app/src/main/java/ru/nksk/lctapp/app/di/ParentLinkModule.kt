@@ -16,6 +16,8 @@ import ru.nksk.lctapp.data.backend.RemoteCloudSyncRepository
 import ru.nksk.lctapp.data.backend.BackendRateLimit
 import ru.nksk.lctapp.data.backend.RateLimitedBackendApi
 import ru.nksk.lctapp.data.backend.createBackendApi
+import ru.nksk.lctapp.domain.backend.ParentMaterialsRepository
+import ru.nksk.lctapp.data.backend.RemoteParentMaterialsRepository
 import ru.nksk.lctapp.domain.backend.CloudSyncRepository
 import ru.nksk.lctapp.domain.parentlink.ParentLinkRepository
 import javax.inject.Singleton
@@ -23,6 +25,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 internal abstract class ParentLinkModule {
+    @Binds @Singleton abstract fun materials(value: RemoteParentMaterialsRepository): ParentMaterialsRepository
     @Binds @Singleton abstract fun identities(value: DeviceParentIdentityStore): ParentIdentityStore
     @Binds @Singleton abstract fun parentLink(value: RemoteParentLinkRepository): ParentLinkRepository
     @Binds @Singleton abstract fun cloud(value: RemoteCloudSyncRepository): CloudSyncRepository
