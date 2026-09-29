@@ -18,8 +18,18 @@ object PetCosmetics {
         PetCosmetic("COMPASS", "Походный компас", setOf("cosmetic-compass-v1")),
         PetCosmetic("BINOCULARS", "Бинокль исследователя", setOf("cosmetic-binoculars-v1")),
     )
-    fun forItem(itemId: String): PetCosmetic? = (starter + purchased).find { itemId in it.itemIds }
+    /** Separate gift identities: the design series and cap color belong to the item, not the fox. */
+    val parentRewards = listOf(
+        PetCosmetic("CAP_MOSCOW_BLUE", "Кепка с гербом Москвы - синяя", setOf("cosmetic-cap-moscow-blue-v1")),
+        PetCosmetic("CAP_MOSCOW_EMERALD", "Кепка с гербом Москвы - изумрудная", setOf("cosmetic-cap-moscow-emerald-v1")),
+        PetCosmetic("CAP_MOSCOW_BURGUNDY", "Кепка с гербом Москвы - бордовая", setOf("cosmetic-cap-moscow-burgundy-v1")),
+        PetCosmetic("CAP_LCT2026_BLUE", "Кепка ЛЦТ 2026 - синяя", setOf("cosmetic-cap-lct2026-blue-v1")),
+        PetCosmetic("CAP_LCT2026_EMERALD", "Кепка ЛЦТ 2026 - изумрудная", setOf("cosmetic-cap-lct2026-emerald-v1")),
+        PetCosmetic("CAP_LCT2026_BURGUNDY", "Кепка ЛЦТ 2026 - бордовая", setOf("cosmetic-cap-lct2026-burgundy-v1")),
+    )
+    private val all = starter + purchased + parentRewards
+    fun forItem(itemId: String): PetCosmetic? = all.find { itemId in it.itemIds }
     fun canEquip(state: GameState, lookId: String): Boolean = lookId == "PLAIN" ||
-        (starter + purchased).any { it.lookId == lookId && state.ownedItems.any { owned -> owned.itemId in it.itemIds } }
+        all.any { it.lookId == lookId && state.ownedItems.any { owned -> owned.itemId in it.itemIds } }
     fun owns(state: GameState, lookId: String): Boolean = canEquip(state, lookId)
 }

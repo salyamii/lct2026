@@ -18,6 +18,7 @@
     <string name="menu_pet_bandana">%1$s - питомец в бандане</string>
     <string name="menu_pet_glasses">%1$s - питомец в очках</string>
     <string name="menu_pet_hat">%1$s - питомец в шляпе</string>
+    <string name="menu_pet_cap">%1$s - питомец в кепке</string>
     <string name="menu_pet_needs_help">%1$s просит помощи</string>
     <string name="menu_pet_hungry">%1$s голоден</string>
     <string name="menu_pet_tired">%1$s устал</string>

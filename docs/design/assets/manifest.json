@@ -75,6 +75,11 @@
       "id": "3785:705",
       "name": "Night bedroom - 2026-09-29",
       "expected_assets": 1
+    },
+    {
+      "id": null,
+      "name": "Moscow and LCT 2026 caps",
+      "expected_assets": 78
     }
   ],
   "scope": "Five character/equipment packs (252 layers including 12 sleeping foxes), all 14 locations, additional NPC/event art, and existing menu/font assets, onboarding artwork and the debug settings vector. Design mockup screens and hidden RAW work areas are excluded. Includes five generated chapter preview illustrations for the goal screen.",
@@ -16566,6 +16571,3204 @@
       "encoding_lossless": true,
       "conversion": "Legacy runtime derivative: source 480 x 480, runtime 512 x 512; original resize pipeline not recorded. VP8L lossless WebP stream verified, but runtime pixels are not an exact copy of the original PNG. Both files retained byte-for-byte during the 2026-09-29 merge.",
       "catalog_verified_on": "2026-09-29"
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_cap_moscow_blue",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_cap_moscow_blue.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 116926,
+      "sha256": "cc6c7b245111bbc913659f25d16c6a53b172dcdaa539ab9f43e702902c700036",
+      "rgba_sha256": "112051deff97a02596fd208395a61359eaba605e5d9d7f15b689d3d49495d50b",
+      "alpha_bounds": [
+        124,
+        22,
+        461,
+        485
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_teen_body_accessory_cap_moscow_blue.png",
+      "source_sha256": "a6e6cb7c95b4a1256c33d3f435e5cbeccfe6a8eb18f68b159a032e96fd3a8bd9",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3853:724",
+        "node_name": "teen_body_accessory_cap_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_cap_moscow_emerald",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_cap_moscow_emerald.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 120546,
+      "sha256": "df509f9a1e58ea335bcd646176f03dda3b72ef5ece5f11130d431d1bdcc3639e",
+      "rgba_sha256": "ebf3d246f0a4e96700948a719b862d8a4de9b81ea27166d2b1ec20ee6b54571e",
+      "alpha_bounds": [
+        42,
+        22,
+        461,
+        485
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_teen_body_accessory_cap_moscow_emerald.png",
+      "source_sha256": "8908868e965cf71469f5b68c3393ca2c6f2934aa6c1bbfcc00fbe9e06779519f",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3853:728",
+        "node_name": "teen_body_accessory_cap_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_cap_moscow_burgundy",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_cap_moscow_burgundy.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 119818,
+      "sha256": "0617873c25d07fead64b142af54f8c4de5547380d493dcc9a6e4ce13c598763e",
+      "rgba_sha256": "ce426daf9cfdee3df1524987d183e5f54d4f7db6df220dbdd013693ec9c7c710",
+      "alpha_bounds": [
+        42,
+        21,
+        477,
+        486
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_teen_body_accessory_cap_moscow_burgundy.png",
+      "source_sha256": "f1546bf8c2d2431b3632797cd30aeffa25d6a33d3022d794de2e937aae7ca19c",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3853:732",
+        "node_name": "teen_body_accessory_cap_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_cap_lct2026_blue",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_cap_lct2026_blue.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 123588,
+      "sha256": "deb2e18d12c69cd0660c38f2652bd9e9a5d6c52104f938aac00c1bf082af3a68",
+      "rgba_sha256": "54494a99159e789a3336ce09b5977bdaffbf947b4240e0b3bca4cee410c8e97e",
+      "alpha_bounds": [
+        124,
+        22,
+        462,
+        486
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_teen_body_accessory_cap_lct2026_blue.png",
+      "source_sha256": "d9890122d170555f5af7d59d4964197414076e743034ce93debb3672c36bbaf9",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3864:724",
+        "node_name": "teen_body_accessory_cap_lct2026_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_cap_lct2026_emerald",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_cap_lct2026_emerald.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 124094,
+      "sha256": "faf7bbbff01ff99d766bd8db51379a90034706f5e704b60f21ee2b4b80484122",
+      "rgba_sha256": "17a0ca215f69aba6d00335b8ebc4d84e330533a4e84ec54917f31170e680ed6d",
+      "alpha_bounds": [
+        42,
+        22,
+        477,
+        486
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_teen_body_accessory_cap_lct2026_emerald.png",
+      "source_sha256": "51678a26ee621e85cfb56c5fdf0bc9bb56e92860b4f1eddebb8b8cb681da6ec1",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3864:728",
+        "node_name": "teen_body_accessory_cap_lct2026_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_cap_lct2026_burgundy",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_cap_lct2026_burgundy.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 123250,
+      "sha256": "8e7c87083bab27cf9b4ffe97087acacce284c36e369cb84081eb3550974fe25d",
+      "rgba_sha256": "906d581f010d8b20aea7d4439dc17381d22b1d450ebc8b82bb87253878018362",
+      "alpha_bounds": [
+        141,
+        22,
+        462,
+        486
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_teen_body_accessory_cap_lct2026_burgundy.png",
+      "source_sha256": "bee381882d3f391c47e0803fba7a1a6d31870d5ca91730dc20f696e79efa8be2",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3864:732",
+        "node_name": "teen_body_accessory_cap_lct2026_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_cap_moscow_blue_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_cap_moscow_blue_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 116374,
+      "sha256": "4a885102f87b239edf2b3a984aa7946b5762a3e0b529e2f925d824ec70930dfb",
+      "rgba_sha256": "308db4f50e738c2ec23724fe6e0bbd0b935ce6f6152b47524020104d0e7efd66",
+      "alpha_bounds": [
+        142,
+        22,
+        466,
+        487
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_teen_body_accessory_cap_moscow_blue_sand.png",
+      "source_sha256": "46e81d86127d1038ca3fca38d6bab4a32c29119ad07fd07dd1d069004c9d3f7c",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:769",
+        "node_name": "teen_body_accessory_cap_moscow_sand_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_cap_moscow_emerald_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_cap_moscow_emerald_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 116330,
+      "sha256": "6461369a57e8c4d2f74ad7f794a7ba6912959109b038f8bd9107f735e106e512",
+      "rgba_sha256": "79575bb171d5687fdead4c24d8699efe1b44823505c37b051a925b49c6a694c3",
+      "alpha_bounds": [
+        139,
+        22,
+        466,
+        485
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_teen_body_accessory_cap_moscow_emerald_sand.png",
+      "source_sha256": "88b783a269ae7028617cd436ce8b5ae1ae1a862ec5fd8c4075707e20b38eaa4b",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:773",
+        "node_name": "teen_body_accessory_cap_moscow_sand_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_cap_moscow_burgundy_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_cap_moscow_burgundy_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 122300,
+      "sha256": "093ac91bd1b6b840faccfa9f7bcc9819c5531e9876d3056330797e6c8ea100cb",
+      "rgba_sha256": "c0a9918b935a94f2f76506f0a89e37a7fef2cce027c8aa01fcb95538f0f08cc0",
+      "alpha_bounds": [
+        141,
+        23,
+        473,
+        486
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_teen_body_accessory_cap_moscow_burgundy_sand.png",
+      "source_sha256": "e4649c7baea62c8812deef43d652d2ca73546ffbbdb01a3ce6218841677bd2b1",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:777",
+        "node_name": "teen_body_accessory_cap_moscow_sand_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_cap_lct2026_blue_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_cap_lct2026_blue_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 119458,
+      "sha256": "96edf71d7e4d0eeda68578f484248c2ff675a043f597a14e92f7029400c94915",
+      "rgba_sha256": "602c80aafc8c12e1ad3f61efabdd61c7ad7f29f47ef9397f963d608448336670",
+      "alpha_bounds": [
+        139,
+        22,
+        466,
+        486
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_teen_body_accessory_cap_lct2026_blue_sand.png",
+      "source_sha256": "02dffb02b7e26e9c54861d4a0d95696bdf9eb726992acd29e0230f3170b6c854",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:784",
+        "node_name": "teen_body_accessory_cap_lct2026_sand_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_cap_lct2026_emerald_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_cap_lct2026_emerald_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 125472,
+      "sha256": "305fa78819dce3ac5cded666a6b04d07c21e390deb22d44bbd85d195174ef639",
+      "rgba_sha256": "78cd0956da8fbc8bf0f6157a08ab8efeac947de34127dd483d000aa64687964b",
+      "alpha_bounds": [
+        42,
+        21,
+        472,
+        497
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_teen_body_accessory_cap_lct2026_emerald_sand.png",
+      "source_sha256": "365bd7c639020d1da1b4e8d0ba520accca0f1268dc5320a06440ee95cd78dfc6",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:788",
+        "node_name": "teen_body_accessory_cap_lct2026_sand_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_cap_lct2026_burgundy_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_cap_lct2026_burgundy_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 114968,
+      "sha256": "df0bd33edbd9808802fb31db4c052bfcb64e5f97c18f6ed18a101b346ab29502",
+      "rgba_sha256": "dd02dc5ae529072ba655cd49cff7941592eef6685cae200d38bd1bc6fa434bf3",
+      "alpha_bounds": [
+        141,
+        21,
+        464,
+        486
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_teen_body_accessory_cap_lct2026_burgundy_sand.png",
+      "source_sha256": "058ffdeeb0b216204288aa70aa18b2ae8440dc3ea2f07d8f265a8154387be20d",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:792",
+        "node_name": "teen_body_accessory_cap_lct2026_sand_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_cap_moscow_blue_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_cap_moscow_blue_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 124330,
+      "sha256": "aad47a44bb14e524dac1cbb2874926080bf4dd98d5b286a66e8d3ed818891730",
+      "rgba_sha256": "9e9ca93ead2b5b2585918a20452dbaa375843ee674af151183f9627647ab9452",
+      "alpha_bounds": [
+        136,
+        25,
+        489,
+        505
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_teen_body_accessory_cap_moscow_blue_dark_russet.png",
+      "source_sha256": "88f231b334edbdef1ccb668abef87eca48fd49f0d0eafa50b0e2e2082308a012",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:799",
+        "node_name": "teen_body_accessory_cap_moscow_dark_russet_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_cap_moscow_emerald_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_cap_moscow_emerald_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 124386,
+      "sha256": "bc703249e7f4e233644569965c437f9e0f7823510c24cb0895f18f0e7dffd1d3",
+      "rgba_sha256": "3e7ee38e05d6085fe9bd46305d3c66f95d4dae7428585920403d60fa3b5d6d52",
+      "alpha_bounds": [
+        46,
+        22,
+        473,
+        494
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_teen_body_accessory_cap_moscow_emerald_dark_russet.png",
+      "source_sha256": "5c38ce3f9b406759fa72482142a1985b703f05cba02abcd4ca4fed3f2c92709f",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:803",
+        "node_name": "teen_body_accessory_cap_moscow_dark_russet_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_cap_moscow_burgundy_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_cap_moscow_burgundy_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 122846,
+      "sha256": "b90b548c37b52daaaa999f4c8e86a304a46da29ec98005aea843da5777d6affe",
+      "rgba_sha256": "63b4d1bda0a70949abdf5dd3256cf4f5e1e9ad65b9dd3a68ecda2ac1497d570f",
+      "alpha_bounds": [
+        138,
+        24,
+        473,
+        499
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_teen_body_accessory_cap_moscow_burgundy_dark_russet.png",
+      "source_sha256": "c5ddfa0b18044d6bd31c1f6754a3e626f9034734fbc9a00678ad25b75ade15a1",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:807",
+        "node_name": "teen_body_accessory_cap_moscow_dark_russet_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_cap_lct2026_blue_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_cap_lct2026_blue_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 120336,
+      "sha256": "310381f03fcb61c462c06aba575179f0dd36199f12a8b8dedeb6b5d462ccf425",
+      "rgba_sha256": "0a20b4684e2581d0a548dad9666626356232c07326ac5af11db3d30a602fcaea",
+      "alpha_bounds": [
+        42,
+        24,
+        468,
+        489
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_teen_body_accessory_cap_lct2026_blue_dark_russet.png",
+      "source_sha256": "ab22bde0e1f4d76c55c06ee9991cf0f9ed1d510cda087417d8772d34aa671fc6",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:814",
+        "node_name": "teen_body_accessory_cap_lct2026_dark_russet_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_cap_lct2026_emerald_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_cap_lct2026_emerald_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 125626,
+      "sha256": "663598abd63d97def1c12dbd12bfa9552400708186bdb48e5eb597e1f457482d",
+      "rgba_sha256": "7c2e97c289c869cc5ee34338f07b2b8214c3b1b6d1763fe69a4067ba0b5d49e0",
+      "alpha_bounds": [
+        138,
+        24,
+        473,
+        498
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_teen_body_accessory_cap_lct2026_emerald_dark_russet.png",
+      "source_sha256": "ad75d82a56c4091f3a7528b59bbb497d2330d72ae86ce79f9b5f7349bd4d9c0d",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:818",
+        "node_name": "teen_body_accessory_cap_lct2026_dark_russet_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_teen_body_accessory_cap_lct2026_burgundy_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_teen_body_accessory_cap_lct2026_burgundy_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 125738,
+      "sha256": "d19bad34112eed6133c1ea1ee7b1ff9ca1280f6d29cce11c1562427969ffab88",
+      "rgba_sha256": "cceab1417066ff75aa9a62665161d7b7da974a54f183817dc91dea34029f8493",
+      "alpha_bounds": [
+        42,
+        22,
+        469,
+        499
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_teen_body_accessory_cap_lct2026_burgundy_dark_russet.png",
+      "source_sha256": "ba3675cf57d8bf3d254f41a5fac32adcea1daad36aea94a2668afdc4fee771db",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:822",
+        "node_name": "teen_body_accessory_cap_lct2026_dark_russet_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_cap_moscow_blue",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_cap_moscow_blue.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 146204,
+      "sha256": "4b4940d79401f8928d1538f83cadcc3155d001f4f61c3d6767289a1d6b6052ae",
+      "rgba_sha256": "e55ea170a6fbfdaa986083b218f883d8b71068194ec9c07121967935757d310d",
+      "alpha_bounds": [
+        111,
+        33,
+        477,
+        486
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_cub_body_accessory_cap_moscow_blue.png",
+      "source_sha256": "1ba9bae3196ebc7d4fe092c7417c188a0177619959df22b59bcd55c88227bd51",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3853:709",
+        "node_name": "cub_body_accessory_cap_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_cap_moscow_emerald",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_cap_moscow_emerald.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 147402,
+      "sha256": "5015d4c4bc1d6f6c6f3671c84b3236dae6dba30d14d5c56567515ec326344cb4",
+      "rgba_sha256": "2a54a379fce110620123e49c87a4953549e54eb4e031ce2affe5857eaa12652e",
+      "alpha_bounds": [
+        111,
+        33,
+        453,
+        486
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_cub_body_accessory_cap_moscow_emerald.png",
+      "source_sha256": "8ae02e8580720bd5a2afb68c2db9a398a86249808c0e663f2d27551e0e8c618c",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3853:713",
+        "node_name": "cub_body_accessory_cap_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_cap_moscow_burgundy",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_cap_moscow_burgundy.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 151880,
+      "sha256": "3ba11819d5530b6e1af115676283bbf771561b06aadcb3ea6d600cbf50b3c117",
+      "rgba_sha256": "230555670394e8fb56403fa36b102ce09b2963e685ef78aa622fc0e6aef65c9b",
+      "alpha_bounds": [
+        111,
+        33,
+        453,
+        486
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_cub_body_accessory_cap_moscow_burgundy.png",
+      "source_sha256": "f3c3dba82badc4d889be0dc345e4c87669f7ddbaeb690126a22862f4a01ce088",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3853:717",
+        "node_name": "cub_body_accessory_cap_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_cap_lct2026_blue",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_cap_lct2026_blue.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 152048,
+      "sha256": "852d6b01fca4f332f1d4a191a258e7f8c5cc2555e4383532ce8eea849321eada",
+      "rgba_sha256": "02be6e868ec85253df28a71ff5b8ed1184132252df45f06e5410fd2d3a32b240",
+      "alpha_bounds": [
+        42,
+        33,
+        453,
+        486
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_cub_body_accessory_cap_lct2026_blue.png",
+      "source_sha256": "6ef25d9d16b39d31afe2e71847dc44a016dcd9ce63d52c3b46da6d032219a56e",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3864:709",
+        "node_name": "cub_body_accessory_cap_lct2026_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_cap_lct2026_emerald",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_cap_lct2026_emerald.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 147232,
+      "sha256": "4fe2ddfd429c275d0dd2e45024a5182e069b73e3e884d46e163172501e692a77",
+      "rgba_sha256": "bb5bfa4d88913d0313879df20a1a81a390c9c1303248ff7cab5e75b5f0e6f4d2",
+      "alpha_bounds": [
+        110,
+        33,
+        495,
+        486
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_cub_body_accessory_cap_lct2026_emerald.png",
+      "source_sha256": "93cd3679bea8a0f62696d6bce4cfbf44f27194f327a2294260c57ac799af93c7",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3864:713",
+        "node_name": "cub_body_accessory_cap_lct2026_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_cap_lct2026_burgundy",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_cap_lct2026_burgundy.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 151676,
+      "sha256": "963b208e67ff7d0f90532dc5b745dc5db38ac47020dc4bf0ab7346b3bed7fc6d",
+      "rgba_sha256": "fc1f8cfaf163206592e9e335b442d6bd425072fbf74b4e412b329eaea64825c8",
+      "alpha_bounds": [
+        110,
+        33,
+        452,
+        486
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_cub_body_accessory_cap_lct2026_burgundy.png",
+      "source_sha256": "f1d5b202b050ddd199818a581c8dfdac1a4eeff23a4ab4785448f667e389aa9e",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3864:717",
+        "node_name": "cub_body_accessory_cap_lct2026_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_cap_moscow_blue_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_cap_moscow_blue_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 142396,
+      "sha256": "133e1bb58eea2331e49fb620167a7bf38cdf3439671987c3be19a477f943da7f",
+      "rgba_sha256": "677fc9d3661742333631df66eb9b5e0977ad218cbe3c7a523705581b2dbddff8",
+      "alpha_bounds": [
+        42,
+        37,
+        491,
+        491
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_cub_body_accessory_cap_moscow_blue_sand.png",
+      "source_sha256": "f265e8a1ecd387ecf09df6f7406f1ab8db13ae72cd1df1596ff0c390c26e3317",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:709",
+        "node_name": "cub_body_accessory_cap_moscow_sand_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_cap_moscow_emerald_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_cap_moscow_emerald_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 148720,
+      "sha256": "e0e3cb510aa32da14ef82eb40db7aa0565fd010fbf2780a9cc41a6d93be2f4bc",
+      "rgba_sha256": "fb0e93f0eb073d946528ea939adab92017405dfd56615a299b5c28034310e7b7",
+      "alpha_bounds": [
+        42,
+        15,
+        453,
+        487
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_cub_body_accessory_cap_moscow_emerald_sand.png",
+      "source_sha256": "6d293c4b7d8315343b527b126b2d6f584d9b06734b62fc251febf847e0ed3f05",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:713",
+        "node_name": "cub_body_accessory_cap_moscow_sand_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_cap_moscow_burgundy_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_cap_moscow_burgundy_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 151368,
+      "sha256": "26720bc0923ef63dc4fc869f532081694f1cd929d3ee53348aba182d24215636",
+      "rgba_sha256": "74f88dcd09c10c3ad2febadb35fdea8bc11d54225d2adca2acd0bf5a1dda1de7",
+      "alpha_bounds": [
+        111,
+        35,
+        458,
+        494
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_cub_body_accessory_cap_moscow_burgundy_sand.png",
+      "source_sha256": "94972f225cc2f50042e99413ebc97fedf17599bc2527b87a6fe31ae99dd8ed09",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:717",
+        "node_name": "cub_body_accessory_cap_moscow_sand_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_cap_lct2026_blue_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_cap_lct2026_blue_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 147058,
+      "sha256": "160e8d10a362762f1bb486fbbec9d913151e3453196b2c9eb58cdd76a93644ce",
+      "rgba_sha256": "b0b223a0d2917665f37fb9ab9461b9e03b969c5f1627c73be7e002079ec2c60a",
+      "alpha_bounds": [
+        107,
+        33,
+        453,
+        492
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_cub_body_accessory_cap_lct2026_blue_sand.png",
+      "source_sha256": "55ce80db3121e2547a4921b9cf8d5864d605e273cc300c74f96b5f08f2429fd4",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:724",
+        "node_name": "cub_body_accessory_cap_lct2026_sand_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_cap_lct2026_emerald_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_cap_lct2026_emerald_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 156658,
+      "sha256": "5a964c6ddeba8bbce9ebbddafff6efb8e491b554255757e6fb5b54eb6a279a85",
+      "rgba_sha256": "fa632846e13a4de7ac2816528994d4ca3c8a19e5049257de65945d36045db404",
+      "alpha_bounds": [
+        105,
+        34,
+        459,
+        498
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_cub_body_accessory_cap_lct2026_emerald_sand.png",
+      "source_sha256": "10a951ab852bcc24ff479846c48e38cf693cd249fa2271bec164413b40fa2d52",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:728",
+        "node_name": "cub_body_accessory_cap_lct2026_sand_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_cap_lct2026_burgundy_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_cap_lct2026_burgundy_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 146776,
+      "sha256": "f09eb5e19abc2685c2f66284752aa564805cde05e369954fdfe6ec809ba04587",
+      "rgba_sha256": "135a16ceeee306f4a2c8bdac04fc9b1a6e5d6b3efb9af050aa4dd22d594e19e2",
+      "alpha_bounds": [
+        106,
+        33,
+        458,
+        488
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_cub_body_accessory_cap_lct2026_burgundy_sand.png",
+      "source_sha256": "bc55e61393a9609f6b754aa886d9a63025578045c5aca3b757217096fb914063",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:732",
+        "node_name": "cub_body_accessory_cap_lct2026_sand_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_cap_moscow_blue_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_cap_moscow_blue_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 150424,
+      "sha256": "3984464c200afd18b70027cb7992e9c89e1c94a68e7c136070fba57e5c572004",
+      "rgba_sha256": "40b95afb6d594e1a2b9073bdc7f40d6fb772b145cefa60ce6f7bda0de6d01f60",
+      "alpha_bounds": [
+        110,
+        34,
+        459,
+        494
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_cub_body_accessory_cap_moscow_blue_dark_russet.png",
+      "source_sha256": "20fb2e59c7b4b5e78e4c71d2d50364fb10c8c20fec2606b5b47f37eef50feb12",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:739",
+        "node_name": "cub_body_accessory_cap_moscow_dark_russet_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_cap_moscow_emerald_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_cap_moscow_emerald_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 150530,
+      "sha256": "2d7b7a7e471f6b7bf4e81e1c41c06ec1d853006de59a08f0c772c4b6a70f9776",
+      "rgba_sha256": "e8238b441bd7b1066ddbe301e0f0aeabd49cd48f44aa1ba2b4ac304132a1e095",
+      "alpha_bounds": [
+        106,
+        38,
+        454,
+        492
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_cub_body_accessory_cap_moscow_emerald_dark_russet.png",
+      "source_sha256": "4177482060a670566558552bcb6a9de98bdffe9863a7d190ef84025a21301e4b",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:743",
+        "node_name": "cub_body_accessory_cap_moscow_dark_russet_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_cap_moscow_burgundy_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_cap_moscow_burgundy_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 147688,
+      "sha256": "7e78fdf37933ec5efd2198a9b87d4f03f71a56885266f818a70a6bb74c438e5f",
+      "rgba_sha256": "a0fa5f7a256ee7c005f7eace6be408f6bb453304fa83f652c24b1a00c5e60e02",
+      "alpha_bounds": [
+        106,
+        32,
+        477,
+        488
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_cub_body_accessory_cap_moscow_burgundy_dark_russet.png",
+      "source_sha256": "466ace2dbe0ff4dc4030870ed086e117dbaf36c6864295a65a6032980c3b0792",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:747",
+        "node_name": "cub_body_accessory_cap_moscow_dark_russet_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_cap_lct2026_blue_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_cap_lct2026_blue_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 147888,
+      "sha256": "59ab21dd09be907946f8f3e4b7d7737bf1b284e871dfdf95ba83398a21bd8700",
+      "rgba_sha256": "a8da947b7d6ff2f80bab2be4a99b64dea9b9f0fd31668a0e81a5d4fd662d67f2",
+      "alpha_bounds": [
+        106,
+        37,
+        455,
+        498
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_cub_body_accessory_cap_lct2026_blue_dark_russet.png",
+      "source_sha256": "f25ecd8d8724516ed5447cc8c54555613253e46d3e4ac7cd7ab607e35e22e4b9",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:754",
+        "node_name": "cub_body_accessory_cap_lct2026_dark_russet_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_cap_lct2026_emerald_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_cap_lct2026_emerald_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 150954,
+      "sha256": "647bd2756a3f5d9439461ee8c34f30b85ee777c95b9135026d89f7be6a32224b",
+      "rgba_sha256": "bb09ccd80cb3eb714e42768fbd3ecd90994879d8e9fd51958bcc1da48083ddbe",
+      "alpha_bounds": [
+        107,
+        34,
+        452,
+        487
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_cub_body_accessory_cap_lct2026_emerald_dark_russet.png",
+      "source_sha256": "10699a3dc0a8407ea1868c07be984fc99669ba32caa3e80940ac3b307adf6468",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:758",
+        "node_name": "cub_body_accessory_cap_lct2026_dark_russet_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_cub_body_accessory_cap_lct2026_burgundy_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_cub_body_accessory_cap_lct2026_burgundy_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 152676,
+      "sha256": "75bc09e8fd7c3e3a8a28275ddd3e1814664e2335073c909d5ea9f8421753378b",
+      "rgba_sha256": "d068fc5fdd1e49467a68eb1a39c39243ded6cebcf42d7409e37a05d9c425c7be",
+      "alpha_bounds": [
+        109,
+        34,
+        477,
+        491
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_cub_body_accessory_cap_lct2026_burgundy_dark_russet.png",
+      "source_sha256": "7c12193a5afc1cf96d2e6d7d90edf14b190cc1ae92cf32424df732322f7a23bf",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:762",
+        "node_name": "cub_body_accessory_cap_lct2026_dark_russet_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_cap_moscow_blue",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_cap_moscow_blue.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 103976,
+      "sha256": "0b45e3cf9e257bf30d23b9273a153bc159daa29c3dfd8d917152aaf1d48071d6",
+      "rgba_sha256": "133698e691ab863589a732ca35f672c6bf4b21afd41682f4021e2c7efb559d4c",
+      "alpha_bounds": [
+        152,
+        11,
+        438,
+        499
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_adult_body_accessory_cap_moscow_blue.png",
+      "source_sha256": "66c110d5f61c46593c996593fd36c7bf48b6aa26b21ad509a14150f8b496dcb0",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3853:739",
+        "node_name": "adult_body_accessory_cap_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_cap_moscow_emerald",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_cap_moscow_emerald.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 103718,
+      "sha256": "3c39a12f0a9b7aa838e33e8241254b908c6f64ea6d49ec5c278a8e7cebe5291f",
+      "rgba_sha256": "d6226927a00274f603e1b97733bd5530ef42e656335084c1cbb5a7b14224b834",
+      "alpha_bounds": [
+        42,
+        12,
+        503,
+        498
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_adult_body_accessory_cap_moscow_emerald.png",
+      "source_sha256": "d5c32e3a382aaf85c42a2819aafbc8a76cfd1a5cc6585ece9a41cf09b3d5de89",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3853:743",
+        "node_name": "adult_body_accessory_cap_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_cap_moscow_burgundy",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_cap_moscow_burgundy.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 105192,
+      "sha256": "3d2a48c25a717742493f4976164140b5f3813972418fc7fe88753740cd4049e6",
+      "rgba_sha256": "b444d18432300f0ee1f4ee85d757b7e784205186ae7873cefc09a47972e1a5eb",
+      "alpha_bounds": [
+        151,
+        11,
+        439,
+        499
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_adult_body_accessory_cap_moscow_burgundy.png",
+      "source_sha256": "5b18cdc20280d47655913aff471edc17b91e098f847ea650952210d93fee0492",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3853:747",
+        "node_name": "adult_body_accessory_cap_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_cap_lct2026_blue",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_cap_lct2026_blue.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 105340,
+      "sha256": "268f96d3c2515cfebdbc2f00088dc4212b79a596ad9b3e9c51e62f6b2e59c536",
+      "rgba_sha256": "f84927e7e57b409b2b131811f0b710865b528645496d83a39af11963c2da061d",
+      "alpha_bounds": [
+        87,
+        11,
+        440,
+        499
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_adult_body_accessory_cap_lct2026_blue.png",
+      "source_sha256": "1ee536860208938d55d65f900b569237fa304b1da9bff03640b2e0d236a1cad7",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3864:739",
+        "node_name": "adult_body_accessory_cap_lct2026_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_cap_lct2026_emerald",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_cap_lct2026_emerald.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 103404,
+      "sha256": "fd859ab97afc63f5ef8a090cc6a614719abbb93d7e02c8f1a0f62b3c02d93eec",
+      "rgba_sha256": "1effa9f3206ec3bde61a63ec4f1b6fef86ed28bcb11b48ee4f76ca9902e92c31",
+      "alpha_bounds": [
+        42,
+        11,
+        439,
+        499
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_adult_body_accessory_cap_lct2026_emerald.png",
+      "source_sha256": "e48d747541641925fde7e9a57e97e6da500c97983358c49cd7f4c79bf4d37da1",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3864:743",
+        "node_name": "adult_body_accessory_cap_lct2026_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_cap_lct2026_burgundy",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_cap_lct2026_burgundy.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 104704,
+      "sha256": "9593762613465aeccd68e2d28c67dcc8dc45b90a41eb52da8e0247da72a8f15a",
+      "rgba_sha256": "161e7b44de3cad8d7c29bab08ea3ad19b9c0c90faa4b12f17ac962b6e7e8d4ce",
+      "alpha_bounds": [
+        151,
+        11,
+        439,
+        499
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_adult_body_accessory_cap_lct2026_burgundy.png",
+      "source_sha256": "f980b2fcecd8e85301358c3ec01df95b55ab82a84669b8fb66cbc81362124b13",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3864:747",
+        "node_name": "adult_body_accessory_cap_lct2026_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_cap_moscow_blue_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_cap_moscow_blue_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 108622,
+      "sha256": "93424afeb8ba20dd9fc4ba9297835e5848be59d985b33845699218806da638bd",
+      "rgba_sha256": "83a9b09bdf7224f4cdc34e07ea805473dde998e164349d54a813f64ca4f3fd98",
+      "alpha_bounds": [
+        42,
+        13,
+        448,
+        512
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_adult_body_accessory_cap_moscow_blue_sand.png",
+      "source_sha256": "51fb7169d12695fa53602b16440c013fcf337fdbb59ed09abe23a21a612929ad",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:829",
+        "node_name": "adult_body_accessory_cap_moscow_sand_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_cap_moscow_emerald_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_cap_moscow_emerald_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 103608,
+      "sha256": "c2297673cc1c0ba1b92b3ee6ae649d29ac84b1471323d910f6287c24bf80789b",
+      "rgba_sha256": "c71f62405fb42f78a42f637bb6cbee905d6dd3ccab55881dfa0683f43c4451b7",
+      "alpha_bounds": [
+        151,
+        12,
+        440,
+        499
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_adult_body_accessory_cap_moscow_emerald_sand.png",
+      "source_sha256": "08326e265b79ae5e1f6779cb58d24a9c212fd73f98b3454cc6e14be2e4e63bcb",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:833",
+        "node_name": "adult_body_accessory_cap_moscow_sand_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_cap_moscow_burgundy_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_cap_moscow_burgundy_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 103214,
+      "sha256": "6d52975e08c87c39c9370875e2d06f35d858f96509d8ab2bad08f3baa53ffb23",
+      "rgba_sha256": "7a8bf525971c9e4ccff35f53aa0daa4dbc21a87acab73d75e1f568ac3f3b4d00",
+      "alpha_bounds": [
+        151,
+        12,
+        444,
+        503
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_adult_body_accessory_cap_moscow_burgundy_sand.png",
+      "source_sha256": "189286f56041865584b0ca44e60896893074d8a1a449793e1904f8eb87935d3a",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:837",
+        "node_name": "adult_body_accessory_cap_moscow_sand_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_cap_lct2026_blue_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_cap_lct2026_blue_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 104118,
+      "sha256": "508c7f425d095853ae0c4ff560d7b2299d7cd394685b84f6d33b184f76e3b5e6",
+      "rgba_sha256": "74cf5c2b3196d1abd4db3b8f3335bbdab76c59cf9efb51f8127d58e8064ba783",
+      "alpha_bounds": [
+        87,
+        13,
+        449,
+        505
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_adult_body_accessory_cap_lct2026_blue_sand.png",
+      "source_sha256": "3c9b0901ee3ba43fe1d30b5ce92bd86d855978791b8681005b0474cdc07f74da",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:844",
+        "node_name": "adult_body_accessory_cap_lct2026_sand_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_cap_lct2026_emerald_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_cap_lct2026_emerald_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 105028,
+      "sha256": "1c719515ca6f95befd7a9ee175aaab78acb98824b0ff2b51737598762975d7a8",
+      "rgba_sha256": "bae744d4c11f7bdb046647f8474bd424183bee981b815edffc732b34c14bfbb5",
+      "alpha_bounds": [
+        148,
+        11,
+        446,
+        507
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_adult_body_accessory_cap_lct2026_emerald_sand.png",
+      "source_sha256": "55074b8093fdd560229701735c6c70c21c4a04c0b3201f051f81a1e0c271bc50",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:848",
+        "node_name": "adult_body_accessory_cap_lct2026_sand_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_cap_lct2026_burgundy_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_cap_lct2026_burgundy_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 102294,
+      "sha256": "cab1bc3e7b83bd2776b07a20e3599a643d67fbe57fb6a9406c2426d5de418735",
+      "rgba_sha256": "9d0aa2b2e5ed94065ca21f10de975be6686056b24cb4ab4137b46c43659c6167",
+      "alpha_bounds": [
+        42,
+        11,
+        444,
+        499
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_adult_body_accessory_cap_lct2026_burgundy_sand.png",
+      "source_sha256": "96d7f6c2bbe0a641fd3365ac34411f8da7484efe29aed5283ff7bd8cb7b6b902",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:852",
+        "node_name": "adult_body_accessory_cap_lct2026_sand_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_cap_moscow_blue_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_cap_moscow_blue_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 107300,
+      "sha256": "22391abc372fa8fb30660604b46b6a38fd237b0b5225cf8644a6566486dda126",
+      "rgba_sha256": "b38a447974c1a81b661f1fec2b5b8d4be2b3f575c6c180ebd7a313be1fe50f6f",
+      "alpha_bounds": [
+        150,
+        12,
+        449,
+        512
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_adult_body_accessory_cap_moscow_blue_dark_russet.png",
+      "source_sha256": "fa91a99c1bfe92cee71539ebf4bda57f3646e565622bb0dc621dbf4f5dc4d35b",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:859",
+        "node_name": "adult_body_accessory_cap_moscow_dark_russet_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_cap_moscow_emerald_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_cap_moscow_emerald_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 109680,
+      "sha256": "0e3c6d7aaaa14f35fc9edbc693af900f181c8bf519cb50d9bc99912de50bbbf9",
+      "rgba_sha256": "e85159dfab21bf41bf8c109ea0feae8bf1c5a794a47ef451bdaa3404d4585aca",
+      "alpha_bounds": [
+        42,
+        12,
+        452,
+        512
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_adult_body_accessory_cap_moscow_emerald_dark_russet.png",
+      "source_sha256": "01662f36f483eab4b6b300f31756e301f227cb7c1d1445e6d149b8fb42dc2f5d",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:863",
+        "node_name": "adult_body_accessory_cap_moscow_dark_russet_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_cap_moscow_burgundy_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_cap_moscow_burgundy_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 101724,
+      "sha256": "4321db7c38cedf35ff0c3807f6c2eda3e41e87706ef8c5bc415c9a323f24f7b2",
+      "rgba_sha256": "3922c90cbfb651014018e046eb9458ddc9fbf9cbe6eb4f532279bbef594de4cf",
+      "alpha_bounds": [
+        152,
+        11,
+        446,
+        504
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_adult_body_accessory_cap_moscow_burgundy_dark_russet.png",
+      "source_sha256": "ab74612ae9b78e263b637ec74d172665fd78b1668597cad9fcebcfb0429e536b",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:867",
+        "node_name": "adult_body_accessory_cap_moscow_dark_russet_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_cap_lct2026_blue_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_cap_lct2026_blue_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 106830,
+      "sha256": "6cea23920ad82d5fb538a220078a9b31c1d06a89e2f638417c2f17855350a5c5",
+      "rgba_sha256": "40f56b7b79f1af6f0f846051f757f97810685799ea388d32c4ac89ab3634912d",
+      "alpha_bounds": [
+        146,
+        11,
+        446,
+        507
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_adult_body_accessory_cap_lct2026_blue_dark_russet.png",
+      "source_sha256": "a57b1eb797c372595ea0d46b6b9941384b84abe7d8d8b5574582813f27e0ab26",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:874",
+        "node_name": "adult_body_accessory_cap_lct2026_dark_russet_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_cap_lct2026_emerald_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_cap_lct2026_emerald_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 106646,
+      "sha256": "83c5cd70cfdca3af08936945d0e3484c9494c691b3db22f8aa7f23d9728450e1",
+      "rgba_sha256": "0a385f748da7d8bf581f93792b9991fb13904e0fa7f25ee6cb9066b21d7c6665",
+      "alpha_bounds": [
+        145,
+        11,
+        446,
+        510
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_adult_body_accessory_cap_lct2026_emerald_dark_russet.png",
+      "source_sha256": "9ce4475c9242d83095ab1bed083464c4a49c8379a134034de2e0cb1497532b02",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:878",
+        "node_name": "adult_body_accessory_cap_lct2026_dark_russet_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_adult_body_accessory_cap_lct2026_burgundy_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_adult_body_accessory_cap_lct2026_burgundy_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 109658,
+      "sha256": "e6d9b2c7755813dcf083d1db245ef0f43337cf16657bc7bf659f2f8146baad43",
+      "rgba_sha256": "220366e98a37098ff4c4153fcd677289d105e6f6dab0bb1d8ffb338e78bb6002",
+      "alpha_bounds": [
+        151,
+        13,
+        454,
+        512
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_adult_body_accessory_cap_lct2026_burgundy_dark_russet.png",
+      "source_sha256": "8080513d9982a45201446037841a932837b65767f9c323b9b4f944060c8e0f6a",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:882",
+        "node_name": "adult_body_accessory_cap_lct2026_dark_russet_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_cap_moscow_blue",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_cap_moscow_blue.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 102758,
+      "sha256": "eabb647d365b690c8ba1e8cf4c54c5c2e4d3f29926f6469c743084a9c3544262",
+      "rgba_sha256": "2886fb78aee02d651190b2117cd269a581ab054b50045a59233a017905c008fd",
+      "alpha_bounds": [
+        42,
+        19,
+        429,
+        493
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_senior_body_accessory_cap_moscow_blue.png",
+      "source_sha256": "89163115ca24c5ee456edcfd232b9a00f6e7e92e953396eee2132654907ce6a7",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3853:754",
+        "node_name": "senior_body_accessory_cap_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_cap_moscow_emerald",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_cap_moscow_emerald.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 105650,
+      "sha256": "8db15756b18124032cdb2655268441690277b52c99524d125e9b4b5865756f0e",
+      "rgba_sha256": "4fe95f7c2fb04f73295705d3c3d7c99d7dabe94eb96cacb1e486f026dd0fcf7a",
+      "alpha_bounds": [
+        42,
+        19,
+        429,
+        494
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_senior_body_accessory_cap_moscow_emerald.png",
+      "source_sha256": "b7afe404f93b9905e85a51c554ee13e3dd8535bdb87d7bf7bfb2ceabadc73f28",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3853:758",
+        "node_name": "senior_body_accessory_cap_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_cap_moscow_burgundy",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_cap_moscow_burgundy.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 106488,
+      "sha256": "4cb458e19fe45a66e2ff66d758f447336e97f58337b47ca56d1c29b3cadbe11a",
+      "rgba_sha256": "e05e6f79bf99b0cc2cd978f3002c61fff7fa8f03e35915bdc657c5f127384616",
+      "alpha_bounds": [
+        42,
+        18,
+        430,
+        494
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_senior_body_accessory_cap_moscow_burgundy.png",
+      "source_sha256": "6731393cd4e5b5e3a1c05ac758ef3df521fb68557e028061a72e5012c1c32392",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3853:762",
+        "node_name": "senior_body_accessory_cap_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_cap_lct2026_blue",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_cap_lct2026_blue.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 106152,
+      "sha256": "2e60ab2deda5672773cd9c2e4ee58f8052c473bd9041f17960d7ce802df9ad46",
+      "rgba_sha256": "895b390a1b00ede764dd5a452ae59cbae0caf656b80349c797b95b51060f77e0",
+      "alpha_bounds": [
+        42,
+        19,
+        429,
+        494
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_senior_body_accessory_cap_lct2026_blue.png",
+      "source_sha256": "dfbd6df2db2709d306a4e8d3dce6a658f000f293af23c2fac7a5ff99ead0cbfa",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3864:754",
+        "node_name": "senior_body_accessory_cap_lct2026_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_cap_lct2026_emerald",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_cap_lct2026_emerald.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 105656,
+      "sha256": "abca02ad5487a4c3d5b387c6d7025611497902cac966b9ccc550d3cf52ba08a0",
+      "rgba_sha256": "5b20aa757df4fdaeed495af87795e59179b1bcceacaf0424e271d60f1e39fcb6",
+      "alpha_bounds": [
+        42,
+        19,
+        429,
+        493
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_senior_body_accessory_cap_lct2026_emerald.png",
+      "source_sha256": "6fd4198b61d997df81b9e2ccdd87d17c8441af7346a7620053908c50d467c4cd",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3864:758",
+        "node_name": "senior_body_accessory_cap_lct2026_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_cap_lct2026_burgundy",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_cap_lct2026_burgundy.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 106860,
+      "sha256": "c8616bcfb9b79d9d80183ed1c0b527528c2ddf5e0d29008f0bf99d5a6592b871",
+      "rgba_sha256": "2f7c94e685576646fbdb9aa3763888b4aacfb588af6c76ec57c4009aba16200e",
+      "alpha_bounds": [
+        42,
+        19,
+        429,
+        493
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_senior_body_accessory_cap_lct2026_burgundy.png",
+      "source_sha256": "3fba29c5111c0778c3843a8f943e4508ea040ffb1fc8a40d9717c53f798aa584",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3864:762",
+        "node_name": "senior_body_accessory_cap_lct2026_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_cap_moscow_blue_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_cap_moscow_blue_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 103756,
+      "sha256": "8d3f3d09fbb09ecab94f1864fc10fbf644bc530a575eb2e712e9273e2520f5a8",
+      "rgba_sha256": "5885074aee14fe08422cd83ee2dc9407705f117b221fdec8d439b1a031cedd59",
+      "alpha_bounds": [
+        42,
+        20,
+        433,
+        495
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_senior_body_accessory_cap_moscow_blue_sand.png",
+      "source_sha256": "b47587f7bf0b66fe85bf68b96f56357d94e155444683d41b777a58e6841c9f41",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:889",
+        "node_name": "senior_body_accessory_cap_moscow_sand_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_cap_moscow_emerald_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_cap_moscow_emerald_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 105816,
+      "sha256": "6afdc94fc6f098bc5582993db44ed755e4f7ae0f0d78594a43d0c1c5fb3c2b5e",
+      "rgba_sha256": "84732b2718f05e952373aedd2e45ae64a92640f44d4882e7ad21355e823e9a78",
+      "alpha_bounds": [
+        42,
+        20,
+        433,
+        499
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_senior_body_accessory_cap_moscow_emerald_sand.png",
+      "source_sha256": "daa2aa78f1c31d9f012658b3d2499b21652b24201d7ad07012e6486b0e5be232",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:893",
+        "node_name": "senior_body_accessory_cap_moscow_sand_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_cap_moscow_burgundy_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_cap_moscow_burgundy_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 104836,
+      "sha256": "5eb004d6d13fcebe363bc3b3dabf0ac1933ac7371f0ab9ad5ed0169eb7c6a815",
+      "rgba_sha256": "c74e5c672a33bd625700680200d09012c0f70edc69680350a961fa36bd08e169",
+      "alpha_bounds": [
+        156,
+        20,
+        435,
+        499
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_senior_body_accessory_cap_moscow_burgundy_sand.png",
+      "source_sha256": "fe7f465f1bd5c973bd4b4941253beeb82c0af4e5c937928e3173b1398f72ae22",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:897",
+        "node_name": "senior_body_accessory_cap_moscow_sand_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_cap_lct2026_blue_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_cap_lct2026_blue_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 112054,
+      "sha256": "7048199c4c0d1acdf0d898ca6a9c94fea8d0673f38976368cf520a2f8f834136",
+      "rgba_sha256": "fdf36c8553a11f9bd9c7b6350aa16896546178cd7db0fa7327482922427063f0",
+      "alpha_bounds": [
+        42,
+        20,
+        436,
+        510
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_senior_body_accessory_cap_lct2026_blue_sand.png",
+      "source_sha256": "f7b5d9c9a119be79558f4443ba0c10b30348d0b5ffb4edbfd5962e0cc152af3d",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:904",
+        "node_name": "senior_body_accessory_cap_lct2026_sand_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_cap_lct2026_emerald_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_cap_lct2026_emerald_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 104560,
+      "sha256": "2638295bfa1f4db426b3836bdab78a649408e0ebc9c8f8a2451bd0b2ba96164c",
+      "rgba_sha256": "9a0261ba47ebc3c169b21cda18f2dbec893dfdae6ebd6db1bd4322c28634db7c",
+      "alpha_bounds": [
+        30,
+        18,
+        429,
+        495
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_senior_body_accessory_cap_lct2026_emerald_sand.png",
+      "source_sha256": "c187d531409220ebd5c05f7b52189b3035978b33d5f301a1d3e06f69ab601958",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:908",
+        "node_name": "senior_body_accessory_cap_lct2026_sand_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_cap_lct2026_burgundy_sand",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_cap_lct2026_burgundy_sand.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 108282,
+      "sha256": "d1c5f0738ad8aea26e6502a6a8ca2328c34b6aa0416325bd883b183114e99612",
+      "rgba_sha256": "c2f353574c90ddba1879005ae5bfbcc14b9785428bec6e19d4c6b8d4fdebcdd7",
+      "alpha_bounds": [
+        46,
+        18,
+        434,
+        499
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_senior_body_accessory_cap_lct2026_burgundy_sand.png",
+      "source_sha256": "f897992f113f812b196618ca11d388278c96b445cadccf76f2d4adeb96f9b479",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:912",
+        "node_name": "senior_body_accessory_cap_lct2026_sand_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_cap_moscow_blue_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_cap_moscow_blue_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 107960,
+      "sha256": "f20e08d5fdedd4bb818b04ed845a95b333dd2cddaa885625484de557a3f0d4bb",
+      "rgba_sha256": "6abeb4caf69d45e983cc57f5d56ede5d34cd552d47f3e0ef2bf227dee3aff6a7",
+      "alpha_bounds": [
+        42,
+        20,
+        429,
+        496
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_senior_body_accessory_cap_moscow_blue_dark_russet.png",
+      "source_sha256": "c8999e5aefecd9e7c8af32ee91af16e497c71aeebd07c9b66556aebd91a4c638",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:919",
+        "node_name": "senior_body_accessory_cap_moscow_dark_russet_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_cap_moscow_emerald_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_cap_moscow_emerald_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 113592,
+      "sha256": "8b6532dba6d4a3c10bfcb54b97fc2e23487aa102eb7066fc7e8a41db346d5fee",
+      "rgba_sha256": "a64cbad7f12a634607e8dad72954790da995a1f9e7cc5e2c53e7e61f8be8ef70",
+      "alpha_bounds": [
+        155,
+        20,
+        440,
+        506
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_senior_body_accessory_cap_moscow_emerald_dark_russet.png",
+      "source_sha256": "d968a9f5600f2c9910f127ffd96c80541eecbb9e08c4affbebd109d826b3b2e7",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:923",
+        "node_name": "senior_body_accessory_cap_moscow_dark_russet_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_cap_moscow_burgundy_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_cap_moscow_burgundy_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 115044,
+      "sha256": "a05bcec72f1a9b3adb2f7f3a571a5e3596e4190ddd0305946d2e83587b1a9783",
+      "rgba_sha256": "ed7c0b3db5a7adbe7be94ec6fc3ffd3ad304faf8d6c6152b5125aed000d15ecc",
+      "alpha_bounds": [
+        42,
+        19,
+        440,
+        509
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_senior_body_accessory_cap_moscow_burgundy_dark_russet.png",
+      "source_sha256": "0d44ee4f3b375b3c7ed2554b7e46e7ec06be06f7aba5d926c72e0a440a800aeb",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:927",
+        "node_name": "senior_body_accessory_cap_moscow_dark_russet_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_cap_lct2026_blue_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_cap_lct2026_blue_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 114178,
+      "sha256": "d9cf233776d8a7eb3cbe57e2b7c4e2351a8b80c3eb9dfaa7534a808ea1d3fafe",
+      "rgba_sha256": "462a364645114b84260ab1b39e03557102359f171a0494c44de33d3cb2a51c77",
+      "alpha_bounds": [
+        155,
+        19,
+        440,
+        504
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_senior_body_accessory_cap_lct2026_blue_dark_russet.png",
+      "source_sha256": "0cc3389fc828c61f2be55b116b04c3e46379573b47e78628a3f9f0c3cf528764",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:934",
+        "node_name": "senior_body_accessory_cap_lct2026_dark_russet_blue_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_cap_lct2026_emerald_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_cap_lct2026_emerald_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 110858,
+      "sha256": "887ddf9a7f13c55d07c25783623d1c499504c3ea417fb6f029111dd76ff495e7",
+      "rgba_sha256": "e50d9727e34175ec69956d5bc49c232be2804cc5f8a240621dfbccff76f7f9e3",
+      "alpha_bounds": [
+        154,
+        19,
+        435,
+        498
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_senior_body_accessory_cap_lct2026_emerald_dark_russet.png",
+      "source_sha256": "f886f88d2db7ed5050fc554b2fad3b6f87f35649af962aa8a7e365071f984c37",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:938",
+        "node_name": "senior_body_accessory_cap_lct2026_dark_russet_emerald_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "ryzhik_senior_body_accessory_cap_lct2026_burgundy_dark_russet",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/ryzhik_senior_body_accessory_cap_lct2026_burgundy_dark_russet.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 111916,
+      "sha256": "6c2f22ce24a4110fac69dcfaf0d3d6bcfaa9a737e1bc5b96e526dfe32b5392f7",
+      "rgba_sha256": "ff9cafe852a79fb3bc6f71d859078200109ed5b58e58b00d50135f30ef434f65",
+      "alpha_bounds": [
+        42,
+        20,
+        434,
+        504
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/ryzhik_senior_body_accessory_cap_lct2026_burgundy_dark_russet.png",
+      "source_sha256": "4754c608d4407db24d01de3809696bc6cd7d8b3173d6ca8b5b8974c2152422dc",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3873:942",
+        "node_name": "senior_body_accessory_cap_lct2026_dark_russet_burgundy_512",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "gear_cap_moscow_blue",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/gear_cap_moscow_blue.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 165386,
+      "sha256": "8273dc37d84eb31754dd7fdb817bb573f0ac0ba93d881b249649c6564ac395f6",
+      "rgba_sha256": "61e6ca21111b66c1cc00dd1a9581643830778edaa6329c07b2a161f4bd61bb1c",
+      "alpha_bounds": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/gear_cap_moscow_blue.png",
+      "source_sha256": "7819f5675ddd8568aee3b94a2c22ba1adb531a69341b379975480c1ee92fa541",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3860:705",
+        "node_name": "Предмет · Кепка с гербом Москвы · синяя · без ремешка",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "gear_cap_moscow_emerald",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/gear_cap_moscow_emerald.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 158878,
+      "sha256": "5bee508d1d8072ae51fbddd1dd211a1bb1f3b0e513049e6573bdbad8353656ac",
+      "rgba_sha256": "0721260a757636a5b0dfb202a033ff62b72b3530b935b84bfc02b48600590b20",
+      "alpha_bounds": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/gear_cap_moscow_emerald.png",
+      "source_sha256": "9ff2ea416d48706af036677c5930aa59ede967d83233f4987bf4dce7fbf33e3e",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3860:706",
+        "node_name": "Предмет · Кепка с гербом Москвы · изумрудная · без ремешка",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "gear_cap_moscow_burgundy",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/gear_cap_moscow_burgundy.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 162918,
+      "sha256": "09d84548084b19bdb0b73b7f7da25f588407cac78ae8bc09511f445ec9d8c4a5",
+      "rgba_sha256": "1e22d4f681a0540492194f19e9263ec6c9b117600f75785ba66806224bc62f8e",
+      "alpha_bounds": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/gear_cap_moscow_burgundy.png",
+      "source_sha256": "c468f352495f36faddf9cc79ea9b5473c8dc812c71f3f17447af69be0434ce5e",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3860:707",
+        "node_name": "Предмет · Кепка с гербом Москвы · бордовая · без ремешка",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "gear_cap_lct2026_blue",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/gear_cap_lct2026_blue.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 170362,
+      "sha256": "5955132bf18fe99d1b40a9a9bfa7ae7fbe4971e777100d72b4b740936c84df0f",
+      "rgba_sha256": "20d0ce5f2b3933706e02272796150d6fa2900544de1f103f0941d1c362a828b5",
+      "alpha_bounds": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/gear_cap_lct2026_blue.png",
+      "source_sha256": "854322114c194deeab7d5a4ef758143a83c6fe87a2b272bb1b165c5cf017399a",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3857:711",
+        "node_name": "Предмет · Кепка ЛЦТ 2026 · синяя · без ремешка",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "gear_cap_lct2026_emerald",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/gear_cap_lct2026_emerald.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 163318,
+      "sha256": "b66cb77e1d9b771f4a1170e17717fc274cd70c31a77e01c5eac562fd15f70630",
+      "rgba_sha256": "de12f73f712a440baeb668e3d925c959fbf41ba5ce727ab2faab0225fa415e6d",
+      "alpha_bounds": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/gear_cap_lct2026_emerald.png",
+      "source_sha256": "eccc5baa3e502eb48220422cf6f79b3dcbb77ee18f4f230efb3338e52f673467",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3857:716",
+        "node_name": "Предмет · Кепка ЛЦТ 2026 · изумрудная · без ремешка",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "gear_cap_lct2026_burgundy",
+      "category": "Moscow and LCT 2026 caps",
+      "path": "app/src/main/res/drawable-nodpi/gear_cap_lct2026_burgundy.webp",
+      "format": "webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 165128,
+      "sha256": "51799d688b12a921781f97ee2b892514cb499a00efd3861fe03588913b44fa98",
+      "rgba_sha256": "8a73491ac990276326b93ae84d44c8e3e4570e1011f6d69b22b8d30d93142063",
+      "alpha_bounds": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "source_path": "docs/design/assets/sources/caps-2026-09-29/gear_cap_lct2026_burgundy.png",
+      "source_sha256": "db63366b6fb366b74c4d3594c5f106c3c4bdc87c6070a8da196255d7eccea1fd",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "3857:721",
+        "node_name": "Предмет · Кепка ЛЦТ 2026 · бордовая · без ремешка",
+        "export_scale": 1
+      },
+      "design_canvas": [
+        512,
+        512
+      ],
+      "provenance": {
+        "type": "figma-node-export",
+        "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
     }
   ],
   "missing": [],

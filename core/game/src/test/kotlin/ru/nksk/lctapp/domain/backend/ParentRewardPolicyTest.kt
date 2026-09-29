@@ -63,6 +63,34 @@ class ParentRewardPolicyTest {
         assertNull(pending.apply(owned, reward(ParentRewardPayload.Accessory(hat)), "duplicate", setOf(hat)))
     }
 
+    @Test fun eachNamedCapIsASeparateGiftAndDoesNotReplaceTheExplorerHatOrEquipItself() {
+        val caps = PetCosmetics.parentRewards
+        val installed = caps.flatMap { it.itemIds }.toSet()
+        assertEquals(6, installed.size)
+        assertEquals(6, caps.map { it.lookId }.distinct().size)
+        var current = initial.copy(ownedItems = listOf(OwnedItem("explorer", hat)))
+        for ((index, cap) in caps.withIndex()) {
+            val itemId = cap.itemIds.single()
+            assertFalse(PetCosmetics.canEquip(current, cap.lookId))
+            val gift = reward(ParentRewardPayload.Accessory(itemId)).copy(rewardId = "cap-$index")
+            assertNull(ParentRewardPolicy().apply(current, gift, "missing-$index", emptySet()))
+            val applied = ParentRewardPolicy().apply(current, gift, "cap-$index", installed)!!
+            assertEquals(ParentRewardOutcome.APPLIED, applied.outcome)
+            assertEquals(current.ownedItems + OwnedItem("cap-$index:item", itemId), applied.state.ownedItems)
+            assertEquals(initial.pet, applied.state.pet)
+            assertEquals(initial.economy, applied.state.economy)
+            for (age in PetAge.entries) for (color in PetColor.entries) {
+                val appearance = applied.state.copy(pet = applied.state.pet.copy(age = age, color = color))
+                assertTrue(PetCosmetics.canEquip(appearance, cap.lookId))
+            }
+            assertTrue(PetCosmetics.canEquip(applied.state, "HAT"))
+            // A genuine repeat retains the existing pending policy; another cap is not a repeat.
+            assertNull(ParentRewardPolicy().apply(applied.state, gift, "again-$index", installed))
+            current = applied.state
+        }
+        assertEquals(7, current.ownedItems.size)
+    }
+
     @Test fun absentRewardMetadataKeepsTheLegacyAuditShapeAndSnapshotChecksum() {
         val entry = AuditEntry("initialize:run", 1, "run", AuditType.INITIALIZED, after = initial)
         val encoded = HistoryCodec.encode(entry)
