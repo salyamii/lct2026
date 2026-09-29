@@ -34,11 +34,6 @@
   - [Родительская часть](#родительская-часть-на-игровом-телефоне-и-в-отдельном-приложении)
   - [Как показать игру жюри](#как-показать-игру-жюри)
   - [Если игра «не идёт дальше»](#если-непонятно-почему-игра-не-идёт-дальше)
-- [Исследования и дизайн](#исследования-и-дизайн)
-  - [Дизайн](#дизайн)
-  - [Исследования](#исследования)
-  - [Аудио](#аудио)
-  - [Подходы на основе исследований](#подходы-на-основе-исследований)
 - [Архитектура приложения](#архитектура-приложения)
   - [Общая схема](#общая-схема)
   - [lct2026 — детское приложение](#lct2026--детское-приложение)
@@ -129,6 +124,8 @@
 | Сборка родительского приложения (APK) | [Google Drive, папка «Лцт 2026»](https://drive.google.com/drive/folders/1HkfSwS1XoJB-eHxlJwF0qJw_2d_R331Y) |
 | Презентация проекта | [Google Drive, папка «Лцт 2026»](https://drive.google.com/drive/folders/1HkfSwS1XoJB-eHxlJwF0qJw_2d_R331Y) |
 | Дашборды с метриками | [Grafana](https://grafana.mortypython.ru/) — логин `userlct`, пароль `userlct` |
+| Аудио-пак (озвучка событий, эффекты оплаты и покупок) | [Google Drive](https://drive.google.com/drive/folders/1LEU5RhyiwvKXKCfZvLElC2FSSrU9Jkkp?usp=sharing) |
+| Гайд и каталог арт-ассетов | [docs/design/assets/README.md](docs/design/assets/README.md), [catalog.md](docs/design/assets/catalog.md) |
 | Код проекта (четыре репозитория) | см. [Репозитории](#репозитории) ниже |
 
 Дашборды Grafana:
@@ -547,36 +544,6 @@
 | [lct26-parentsapp](https://github.com/HighlyLoadedEgo/lct26-parentsapp) | Родительское Android-приложение-компаньон |
 | [hackaton-fin-department](https://github.com/OptikRUS/hackaton-fin-department) | HTTP-бэкенд: профиль устройства, облачные снапшоты, аналитика, награды |
 | [fin-department-k8s](https://github.com/HighlyLoadedEgo/fin-department-k8s) | GitOps (Flux) для single-node k3s-кластера, где живёт бэкенд |
-
-## Исследования и дизайн
-
-### Дизайн
-
-Макеты всех экранов игры — Figma-файл
-[«Питомец. Дизайн»](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/%D0%9F%D0%B8%D1%82%D0%BE%D0%BC%D0%B5%D1%86-%D0%94%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD).
-
-Правила работы с арт-ассетами, их происхождение и доступность описаны в
-[гайде по artwork](docs/design/assets/README.md) и
-[каталоге ассетов](docs/design/assets/catalog.md).
-
-### Исследования
-
-Доска исследований команды (интервью, ЦА, гипотезы, игровые механики) —
-FigJam
-[«2026 фин. питомец»](https://www.figma.com/board/mlTEA1hlLJPYf1yRX5a739/2026-%D1%84%D0%B8%D0%BD-%D0%BF%D0%B8%D1%82%D0%BE%D0%BC%D0%B5%D1%86).
-
-### Аудио
-
-Аудио-пак (озвучка событий, короткие эффекты оплаты и появления покупок) —
-[Google Drive](https://drive.google.com/drive/folders/1LEU5RhyiwvKXKCfZvLElC2FSSrU9Jkkp?usp=sharing).
-Имена файлов задают соответствующие сюжетные события и неожиданные траты;
-архив и точные повторы учитываются в media manifest приложения.
-
-### Подходы на основе исследований
-
-> TODO: описать, какие подходы и механики взяты из исследований и как они
-> воплощены в продукте — набор навыков FIN-01…FIN-12, экономика и бюджет,
-> сюжетные сценарии, родительская обратная связь.
 
 ## Архитектура приложения
 
