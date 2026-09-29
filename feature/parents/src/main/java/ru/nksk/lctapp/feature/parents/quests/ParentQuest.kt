@@ -3,7 +3,7 @@ package ru.nksk.lctapp.feature.parents.quests
 import kotlinx.serialization.Serializable
 import ru.nksk.lctapp.feature.parents.R
 
-/** Authored presentation-only demos; these are not gameplay or backend quest IDs. */
+/** Authored local quests; identifiers scope reward retries, not backend gameplay events. */
 @Serializable
 enum class ParentQuest(
     val title: Int,

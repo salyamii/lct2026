@@ -2,14 +2,12 @@ package ru.nksk.lctapp.feature.parents.quests
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,7 +22,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import ru.nksk.lctapp.core.ui.components.ItemCarousel
+import ru.nksk.lctapp.domain.pet.ParentRewardCaps
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,13 +47,18 @@ import ru.nksk.lctapp.feature.parents.R
 import ru.nksk.lctapp.feature.parents.report.ParentReportPage
 
 @Composable
-fun ParentQuestEntry(quest: ParentQuest, onBack: () -> Unit) {
+fun ParentQuestEntry(quest: ParentQuest, onBack: () -> Unit,
+    rewardArtwork: @Composable (String, Modifier) -> Unit) {
     val model: ParentQuestViewModel = hiltViewModel()
+    LaunchedEffect(quest) { model.load(quest) }
     val state by model.uiState.collectAsStateWithLifecycle(minActiveState = Lifecycle.State.RESUMED)
     ParentQuestScreen(
         quest = quest,
         state = state,
         onStepChecked = model::setStepChecked,
+        onSelectReward = model::selectItem,
+        onRetryLoad = { model.load(quest) },
+        rewardArtwork = rewardArtwork,
         onComplete = dropUnlessResumed { model.complete() },
         onBack = dropUnlessResumed { onBack() },
     )
@@ -57,6 +69,9 @@ fun ParentQuestScreen(
     quest: ParentQuest,
     state: ParentQuestUiState,
     onStepChecked: (Int, Boolean) -> Unit,
+    onSelectReward: (String) -> Unit,
+    onRetryLoad: () -> Unit,
+    rewardArtwork: @Composable (String, Modifier) -> Unit,
     onComplete: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
@@ -95,14 +110,14 @@ fun ParentQuestScreen(
                     Row(
                         Modifier.fillMaxWidth().heightIn(min = 48.dp).toggleable(
                             value = state.checkedSteps[index],
-                            enabled = !state.completed,
+                            enabled = !state.selectionLocked,
                             role = Role.Checkbox,
                             onValueChange = { onStepChecked(index, it) },
                         ).padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        Checkbox(checked = state.checkedSteps[index], onCheckedChange = null, enabled = !state.completed)
+                        Checkbox(checked = state.checkedSteps[index], onCheckedChange = null, enabled = !state.selectionLocked)
                         Text(stringResource(label), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
                     }
                 }
@@ -112,16 +127,37 @@ fun ParentQuestScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text(stringResource(R.string.parents_quest_reward), style = MaterialTheme.typography.titleMedium)
-                Box(
-                    Modifier.size(96.dp).background(MaterialTheme.colorScheme.surface.copy(alpha = 0.65f), RoundedCornerShape(20.dp))
-                        .align(Alignment.CenterHorizontally).padding(8.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(stringResource(R.string.parents_quest_reward_placeholder),
-                        style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center)
+                val caps = ParentRewardCaps.all
+                Text("Листайте и выберите кепку для питомца", style = MaterialTheme.typography.bodyMedium)
+                ItemCarousel(
+                    items = caps,
+                    selectedIndex = caps.indexOfFirst { it.itemId == state.selectedItemId }.coerceAtLeast(0),
+                    onSelect = { onSelectReward(caps[it].itemId) }, enabled = !state.selectionLocked,
+                    modifier = Modifier.fillMaxWidth().height(270.dp * LocalDensity.current.fontScale.coerceAtLeast(1f)),
+                ) { cap, selected, cardModifier, imageSize ->
+                    val owned = cap.itemId in state.ownedItemIds
+                    Column(cardModifier.clip(RoundedCornerShape(18.dp))
+                        .background(if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)
+                        .border(if (selected) 2.dp else 1.dp,
+                            if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                            RoundedCornerShape(18.dp))
+                        .semantics { if (owned) stateDescription = "Уже есть в инвентаре" }
+                        .padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        rewardArtwork(cap.itemId, Modifier.fillMaxWidth().height(imageSize))
+                        Text(cap.title, style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center)
+                        if (owned) Text("Уже есть", style = MaterialTheme.typography.labelSmall)
+                    }
                 }
-                Text(stringResource(R.string.parents_quest_accessory), style = MaterialTheme.typography.titleMedium)
-                Text(stringResource(R.string.parents_quest_reward_demo), style = MaterialTheme.typography.bodyMedium)
+                Text(when {
+                    state.completed -> "Кепка добавлена в снаряжение. Ребёнок может надеть её сам."
+                    state.pending != null -> "Повтор продолжит выдачу выбранной кепки без дубликата."
+                    state.selectedOwned -> "Эта кепка уже есть в инвентаре. Выберите другую."
+                    else -> "После завершения квеста кепка появится в снаряжении."
+                }, style = MaterialTheme.typography.bodyMedium)
+            }
+            state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            if (!state.ready && !state.busy) {
+                Button(onClick = onRetryLoad) { Text("Обновить инвентарь") }
             }
             if (state.completed) {
                 Text(stringResource(quest.completionMessage), style = MaterialTheme.typography.titleMedium)
@@ -131,7 +167,7 @@ fun ParentQuestScreen(
             } else {
                 Button(onClick = onComplete, enabled = state.canComplete, shape = CircleShape,
                     modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
-                    Text(stringResource(R.string.parents_quest_complete))
+                    Text(if (state.busy) "Выдаём кепку…" else if (state.pending != null) "Повторить выдачу" else "Завершить и выдать кепку")
                 }
             }
         }

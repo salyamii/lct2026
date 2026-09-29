@@ -1,6 +1,10 @@
 package ru.nksk.lctapp.app.parents
 
+import androidx.compose.ui.Modifier
 import androidx.compose.runtime.Composable
+import ru.nksk.lctapp.core.ui.components.GameArtwork
+import ru.nksk.lctapp.core.ui.game.cosmeticArtwork
+import ru.nksk.lctapp.domain.pet.ParentRewardCaps
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -66,14 +70,21 @@ internal fun ParentsNavHost(onClose: () -> Unit) {
                 )
             }
             entry<ParentQuestRoute> { source ->
-                ParentQuestEntry(source.quest, onBack = dropUnlessResumed { navigator.goBack(source) })
+                ParentQuestEntry(source.quest, onBack = dropUnlessResumed { navigator.goBack(source) }, rewardArtwork = ::ParentCapImage)
             }
             entry<ParentShoppingQuestRoute> { source ->
-                ParentQuestEntry(ParentQuest.SHOPPING, onBack = dropUnlessResumed { navigator.goBack(source) })
+                ParentQuestEntry(ParentQuest.SHOPPING, onBack = dropUnlessResumed { navigator.goBack(source) }, rewardArtwork = ::ParentCapImage)
             }
             entry<ParentQuestsRoute> { source ->
                 ParentsQuestsScreen(onBack = dropUnlessResumed { navigator.goBack(source) })
             }
         },
     )
+}
+
+@Composable
+private fun ParentCapImage(itemId: String, modifier: Modifier) {
+    val cap = ParentRewardCaps.forItem(itemId) ?: return
+    val resource = cosmeticArtwork(cap.lookId) ?: return
+    GameArtwork(resource, null, modifier, revealWithScene = false)
 }

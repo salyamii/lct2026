@@ -1051,6 +1051,7 @@ class RemoteCloudSyncRepositoryTest {
     }
 
     private class MemoryApi : BackendApi {
+        override suspend fun createParentReward(requestId: String, body: ru.nksk.lctapp.domain.backend.CreateParentRewardRequest): ru.nksk.lctapp.domain.backend.ParentRewardDto = error("Not used")
         override suspend fun parentMaterials(): ru.nksk.lctapp.domain.backend.ParentMaterialsCatalog = error("Unexpected material request")
 
         val calls = mutableListOf<String>()

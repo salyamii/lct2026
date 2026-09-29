@@ -8,6 +8,9 @@ internal class RateLimitedBackendApi(
     private val limits: BackendRateLimit,
     private val backendUrl: String,
 ) : BackendApi {
+    override suspend fun createParentReward(requestId: String, body: CreateParentRewardRequest) =
+        limits.execute(backendUrl) { delegate.createParentReward(requestId, body) }
+
     override suspend fun parentMaterials() =
         limits.execute(backendUrl) { delegate.parentMaterials() }
 

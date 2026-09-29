@@ -39,7 +39,8 @@ data class ParentRewardPolicy(
                 if (payload.itemId !in installedAccessoryIds) return null
                 val cosmetic = PetCosmetics.forItem(payload.itemId) ?: return null
                 if (current.ownedItems.any { it.itemId in cosmetic.itemIds }) {
-                    val outcome = duplicateAccessoryOutcome ?: return null
+                    val outcome = if (ru.nksk.lctapp.domain.pet.ParentRewardCaps.forItem(payload.itemId) != null)
+                        ParentRewardOutcome.ALREADY_OWNED else duplicateAccessoryOutcome ?: return null
                     ParentRewardChange(current, outcome, emptyList())
                 } else ParentRewardChange(current.copy(ownedItems = current.ownedItems +
                     OwnedItem("$applicationId:item", payload.itemId),

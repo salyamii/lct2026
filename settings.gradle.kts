@@ -39,3 +39,5 @@ include(":core:game")
 include(":feature:onboarding")
 include(":feature:debug")
 include(":feature:parents")
+
+include(":core:ui")

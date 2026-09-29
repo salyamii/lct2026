@@ -553,8 +553,9 @@ ParentQuestEntry obtains an entry-scoped Hilt ViewModel and collects state while
 RESUMED. Checkbox progress and completion are separate for each quest entry and
 live only in memory. Popping the entry discards them; no progress is serialized
 in the route or saved to the game. All four checks enable local demo completion.
-The accessory image is a placeholder and completion performs no backend request
-or reward delivery. Back returns to the report.
+PARENT-MODE-D-009–011 replaces the reward placeholder with the shared item
+carousel and real server issuance followed by immediate local inventory application.
+Uncertain requests persist in Room; route keys still carry only the quest identifier. Back returns to the report.
 
 ## Main menu tour — 2026-09-29
 

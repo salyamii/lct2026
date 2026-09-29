@@ -20,6 +20,32 @@ import ru.nksk.lctapp.domain.analytics.SkillId
 import ru.nksk.lctapp.domain.backend.*
 
 class BackendApiContractTest {
+    @Test fun parentCapIssuanceUsesStableKeyAndTheTypeDiscriminator() = runTest {
+        val cap = "cosmetic-cap-lct2026-emerald-v1"
+        val payload = ParentRewardPayload.Accessory(cap)
+        val grant = ParentRewardDto("reward", DeviceId, "run", 1, payload, "2026-09-29T12:00:00Z")
+        var captured: Request? = null
+        var json = ""
+        val mediaType = "application/json".toMediaType()
+        val client = OkHttpClient.Builder().addInterceptor { chain ->
+            captured = chain.request()
+            json = Buffer().also { chain.request().body!!.writeTo(it) }.readUtf8()
+            Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(201).message("Created")
+                .body(BackendJson.encodeToString(grant).toResponseBody(mediaType)).build()
+        }.build()
+        val api = Retrofit.Builder().baseUrl("https://backend.example.test/").client(client)
+            .addConverterFactory(BackendJson.asConverterFactory(mediaType)).build().create(BackendApi::class.java)
+        assertEquals(grant, api.createParentReward("stable-key", CreateParentRewardRequest(DeviceId, "run", payload)))
+        assertEquals("/v1/parent-profiles/rewards", captured!!.url.encodedPath)
+        assertEquals("POST", captured!!.method)
+        assertEquals("stable-key", captured!!.header("Idempotency-Key"))
+        val body = BackendJson.parseToJsonElement(json).jsonObject
+        assertEquals(DeviceId, body.getValue("deviceId").jsonPrimitive.content)
+        assertEquals("ACCESSORY", body.getValue("reward").jsonObject.getValue("type").jsonPrimitive.content)
+        assertEquals(cap, body.getValue("reward").jsonObject.getValue("itemId").jsonPrimitive.content)
+        assertFalse(json.contains("_type"))
+    }
+
     @Test fun publicParentMaterialsUseGetWithoutDeviceIdentity() = runTest {
         val catalogue = ParentMaterialsCatalog("test", (1..12).map {
             ParentSkillMaterialDto("FIN-%02d".format(it), "Цель", "История", "Пример", List(5) { "Вопрос $it?" },

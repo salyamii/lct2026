@@ -30,6 +30,29 @@ class ParentRewardCapsTest {
         }
     }
 
+    @Test fun previousQuestBuildCapDefinitionsRemainCompatibleWithoutRewritingStoredItems() {
+        val current = bundledGameCatalog().content
+        val ids = PetCosmetics.parentRewards.flatMap { it.itemIds }.toSet()
+        val oldDescription = "Награда за квест с родителем. Можно надеть в снаряжении."
+        val saved = current.copy(items = current.items.map { item ->
+            if (item.id in ids) item.copy(name = item.name.replace(" - ", " — "), description = oldDescription)
+            else item
+        })
+        assertEquals(ru.nksk.lctapp.domain.content.StoryContent(), current.newDefinitionsComparedTo(saved))
+        assertTrue(saved.items.filter { it.id in ids }.all { it.description == oldDescription })
+        val cap = saved.items.first { it.id in ids }
+        for (invalid in listOf(cap.copy(priceCoins = 1), cap.copy(category = ItemCategory.STORY),
+            cap.copy(description = "Другая награда"), cap.copy(name = "Другой предмет"))) {
+            val changed = saved.copy(items = saved.items.map { if (it.id == cap.id) invalid else it })
+            assertThrows(IllegalArgumentException::class.java) { current.newDefinitionsComparedTo(changed) }
+        }
+        val ordinary = saved.items.first { it.id !in ids }
+        val changed = saved.copy(items = saved.items.map {
+            if (it.id == ordinary.id) it.copy(description = oldDescription) else it
+        })
+        assertThrows(IllegalArgumentException::class.java) { current.newDefinitionsComparedTo(changed) }
+    }
+
     @Test fun eachGiftHasAnIconAndAllTwelveFoxVariantsReturnAfterEveryReaction() {
         val bodies = mutableSetOf<Int>()
         val icons = mutableSetOf<Int>()

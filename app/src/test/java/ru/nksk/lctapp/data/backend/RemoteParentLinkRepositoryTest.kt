@@ -84,6 +84,7 @@ class RemoteParentLinkRepositoryTest {
     }
 
     private class FakeApi : BackendApi {
+        override suspend fun createParentReward(requestId: String, body: CreateParentRewardRequest): ParentRewardDto = error("Not used")
         override suspend fun parentMaterials(): ru.nksk.lctapp.domain.backend.ParentMaterialsCatalog = error("Unexpected material request")
 
         var failRegistration = false

@@ -18,6 +18,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:ui"))
+    implementation(project(":core:game"))
     constraints {
         implementation(libs.androidx.core.ktx)
         implementation(libs.androidx.activity.runtime)

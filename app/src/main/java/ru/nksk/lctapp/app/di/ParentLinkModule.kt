@@ -25,6 +25,8 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 internal abstract class ParentLinkModule {
+    @Binds @Singleton abstract fun questRewards(value: ru.nksk.lctapp.data.backend.RemoteParentQuestRewardsRepository):
+        ru.nksk.lctapp.domain.backend.ParentQuestRewardsRepository
     @Binds @Singleton abstract fun materials(value: RemoteParentMaterialsRepository): ParentMaterialsRepository
     @Binds @Singleton abstract fun identities(value: DeviceParentIdentityStore): ParentIdentityStore
     @Binds @Singleton abstract fun parentLink(value: RemoteParentLinkRepository): ParentLinkRepository

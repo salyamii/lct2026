@@ -17,6 +17,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:ui"))
     constraints {
         implementation(libs.androidx.core.ktx) {
             because("Use the app's Core version when compiling this feature independently.")

@@ -23,7 +23,7 @@ sealed interface ParentRewardPayload {
     }
 }
 
-/** Sent by the parent client; the child transport cannot issue rewards. */
+/** Sent only after explicit completion in the unlocked parent flow. */
 @Serializable
 data class CreateParentRewardRequest(
     val deviceId: String,

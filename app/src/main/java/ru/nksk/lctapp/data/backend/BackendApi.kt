@@ -9,6 +9,10 @@ import ru.nksk.lctapp.domain.backend.*
 
 /** Device identity is part of each JSON body. Operation keys only deduplicate writes. */
 internal interface BackendApi {
+    @POST("v1/parent-profiles/rewards")
+    suspend fun createParentReward(@Header("Idempotency-Key") requestId: String,
+        @Body body: CreateParentRewardRequest): ParentRewardDto
+
     @GET("v1/parent-materials")
     suspend fun parentMaterials(): ParentMaterialsCatalog
 

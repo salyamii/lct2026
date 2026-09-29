@@ -8,6 +8,7 @@ historical decisions and migrations live in the design documents.
 
 | Module / package | Responsibility |
 | --- | --- |
+| `:core:ui` | Shared domain-independent Compose item carousel used by onboarding and parents |
 | `:core:game` | Pure Kotlin domain: game aggregate, commands, rules, content, history, financial projections, snapshot/backend contracts |
 | `:app` / `app` | Android composition, Hilt graph, startup and cross-feature navigation |
 | `:app` / `feature/<name>` | Feature UI, immutable screen state, ViewModels, actions and navigation entries |
@@ -357,7 +358,7 @@ the final change check reads only that ID, not the full audit. Full backup and r
 still carry the complete world, journal and completed-run archives.
 The aggregate repository applies supported rewards against the latest local world,
 atomically with their audit receipt. Only committed receipts are acknowledged.
-Known new accessories apply now; coin allocation and duplicate accessory handling
+Known new accessories apply now; coin allocation and duplicate handling outside the six parent caps
 remain gated by the unresolved product policy in the reward contract.
 
 An explicit `409 STALE_ANALYTICS` can retire only the rejected analytics request
@@ -426,3 +427,20 @@ request identity on retry, stale revision rejection, and presentation independen
 from gameplay. UI coverage should include large fonts, disabled/loading, restoration,
 and lifecycle. Device timing/FPS measurements require the user to change the current
 verification preference.
+
+### Parent quest cap issuance — 2026-09-29
+
+`RemoteParentQuestRewardsRepository` implements the domain reward interface.
+The unlocked parent quest ViewModel observes current inventory, disables owned
+caps and submits an explicit completion. The existing Room transport table holds
+an immutable request per quest/run, including backend URL, deviceId and itemId.
+The create endpoint uses the shared rate-limit gate. A definite unregistered-run
+response prepares synchronization and retries the same request; a definite
+unsupported-item rejection unlocks selection. Lost replies keep the request.
+A validated server grant is immediately applied through `applyParentRewards`
+using the captured restore generation. The inventory Flow sees the commit;
+WorkManager schedules the ordinary pull/ACK lane. Other parent clients need
+only issue the grant. Quest choices derive from `PetCosmetics.parentRewards`;
+the existing `BundledParentRewardAccessories`, `cosmeticArtwork` and
+`RewardCapArtwork` supply the catalog and all twelve age/fur variants per cap.
+The quest flow adds no separate artwork set or duplicate item definitions.

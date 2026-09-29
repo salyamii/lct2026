@@ -16,6 +16,7 @@ age or character without an explicit design decision.
 
 | Collection | Figma | Artwork entries |
 | --- | --- | --- |
+| Parent reward caps: six items and 72 age/fur models | [caps](caps.md) | 78 |
 | MVP poses, colors and standalone equipment | [56:2](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-2) | 20 |
 | Teen runtime layers | [56:65](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=56-65) | 58 |
 | Cub runtime layers | [87:2](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=87-2) | 58 |

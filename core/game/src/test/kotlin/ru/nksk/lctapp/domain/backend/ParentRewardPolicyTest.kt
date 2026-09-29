@@ -11,6 +11,21 @@ import ru.nksk.lctapp.domain.pet.*
 import ru.nksk.lctapp.domain.story.StoryState
 
 class ParentRewardPolicyTest {
+    @Test fun contractCapsApplyWithoutEquippingAndDuplicatesAreAcknowledgedWithoutAnotherItem() {
+        ParentRewardCaps.all.forEach { cap ->
+            val grant = reward(ParentRewardPayload.Accessory(cap.itemId))
+            val applied = ParentRewardPolicy().apply(initial, grant, "first", setOf(cap.itemId))!!
+            assertEquals(ParentRewardOutcome.APPLIED, applied.outcome)
+            assertEquals(initial.pet, applied.state.pet)
+            assertTrue(PetCosmetics.canEquip(applied.state, cap.lookId))
+            val duplicate = ParentRewardPolicy().apply(applied.state, grant.copy(rewardId = "another"),
+                "second", setOf(cap.itemId))!!
+            assertEquals(ParentRewardOutcome.ALREADY_OWNED, duplicate.outcome)
+            assertSame(applied.state, duplicate.state)
+            assertEquals(1, duplicate.state.ownedItems.size)
+        }
+    }
+
     private val policy = ParentRewardPolicy(ParentCoinAllocation.RESERVE, ParentRewardOutcome.ALREADY_OWNED)
     private val initial = GameState(PetState("PLAIN", PetVisualState.NORMAL),
         EconomyState(BudgetPlan(5, 7, 0, 18), availableBalance = 30, savingsBalance = 8),
@@ -84,8 +99,10 @@ class ParentRewardPolicyTest {
                 assertTrue(PetCosmetics.canEquip(appearance, cap.lookId))
             }
             assertTrue(PetCosmetics.canEquip(applied.state, "HAT"))
-            // A genuine repeat retains the existing pending policy; another cap is not a repeat.
-            assertNull(ParentRewardPolicy().apply(applied.state, gift, "again-$index", installed))
+            // PARENT-MODE-D-011: duplicate caps are acknowledged without adding another item.
+            val duplicate = ParentRewardPolicy().apply(applied.state, gift, "again-$index", installed)!!
+            assertEquals(ParentRewardOutcome.ALREADY_OWNED, duplicate.outcome)
+            assertSame(applied.state, duplicate.state)
             current = applied.state
         }
         assertEquals(7, current.ownedItems.size)

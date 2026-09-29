@@ -6,9 +6,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.pager.PageSize
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -17,8 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
@@ -30,9 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
@@ -46,7 +38,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import kotlin.math.absoluteValue
 import androidx.compose.ui.unit.sp
 
 
@@ -234,74 +225,24 @@ private fun AccessoryCarousel(
     saving: Boolean,
 ) {
     val items = OnboardingAccessory.entries
-    val pager = rememberPagerState(initialPage = items.indexOf(state.accessory), pageCount = { items.size })
-    val latestOnSelect = rememberUpdatedState(onSelect)
-    LaunchedEffect(pager.currentPage) {
-        latestOnSelect.value(items[pager.currentPage])
-    }
-    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        // Measure both messages so their longest wrapping reserves space before swiping.
-        Box(Modifier.fillMaxWidth().testTag("accessory_hint").padding(bottom = 4.dp), contentAlignment = Alignment.TopCenter) {
-            listOf(
-                true to "Листай, чтобы примерить аксессуар",
-                false to "Этот предмет пока недоступен. Ты сможешь получить его во время приключения.",
-            ).forEach { (available, message) ->
-                val visible = items[pager.currentPage].available == available
-                Text(message, color = AccessoryMuted, fontSize = 12.sp, lineHeight = 17.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().then(
-                        if (visible) Modifier else Modifier.alpha(0f).clearAndSetSemantics { }))
+    ru.nksk.lctapp.core.ui.components.ItemCarousel(
+        items = items, selectedIndex = items.indexOf(state.accessory),
+        onSelect = { onSelect(items[it]) }, modifier = modifier, enabled = !saving,
+        hint = {
+            Box(Modifier.fillMaxWidth().testTag("accessory_hint").padding(bottom = 4.dp),
+                contentAlignment = Alignment.TopCenter) {
+                listOf(true to "Листай, чтобы примерить аксессуар",
+                    false to "Этот предмет пока недоступен. Ты сможешь получить его во время приключения.")
+                    .forEach { (available, message) ->
+                        Text(message, color = AccessoryMuted, fontSize = 12.sp, lineHeight = 17.sp,
+                            textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().then(
+                                if (state.accessory.available == available) Modifier else
+                                    Modifier.alpha(0f).clearAndSetSemantics { }))
+                    }
             }
-        }
-        BoxWithConstraints(Modifier.fillMaxWidth().weight(1f)) {
-            // Center one page while fitting whole neighbours, including their shadow margins.
-            val visiblePages = when {
-                maxWidth >= 592.dp -> 5
-                maxWidth >= 328.dp -> 3
-                else -> 1
-            }
-            val pageWidth = if (visiblePages == 1) minOf(maxWidth, 208.dp)
-                else (maxWidth - 8.dp * (visiblePages - 1)) / visiblePages
-            val artworkSize = minOf(144.dp, pageWidth - 32.dp, maxHeight - 70.dp)
-                .coerceAtLeast(64.dp)
-            HorizontalPager(
-                state = pager,
-                userScrollEnabled = !saving,
-                modifier = Modifier.fillMaxSize().testTag("accessory_pager"),
-                pageSize = PageSize.Fixed(pageWidth),
-                contentPadding = PaddingValues(horizontal = (maxWidth - pageWidth) / 2),
-                pageSpacing = 8.dp,
-                verticalAlignment = Alignment.CenterVertically,
-            ) { page ->
-                val item = items[page]
-                // Transform the card and its shadow together, with room for the shadow.
-                // Availability alone controls dimming; side pages keep their original colors.
-                Box(Modifier.fillMaxWidth().graphicsLayer {
-                    val offset = ((pager.currentPage - page) + pager.currentPageOffsetFraction).coerceIn(-1f, 1f)
-                    val distance = offset.absoluteValue
-                    scaleX = 1f - .14f * distance
-                    scaleY = 1f - .14f * distance
-                    translationY = 10.dp.toPx() * distance
-                    rotationY = offset * 8f
-                    cameraDistance = 12f * density
-                    compositingStrategy = CompositingStrategy.Offscreen
-                }.padding(8.dp)) {
-                    AccessoryTile(item, item == state.accessory, artwork, accessories,
-                        modifier = Modifier.fillMaxWidth().shadow(4.dp, AccessoryCardShape, clip = false),
-                        imageSize = artworkSize)
-                }
-            }
-        }
-        Row(Modifier.padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically) {
-            repeat(items.size) { index ->
-                Box(Modifier.size(if (index == pager.currentPage) 8.dp else 6.dp)
-                    .align(Alignment.CenterVertically)
-                    .background(if (index == pager.currentPage) AccessoryInk else Color(0xffd3cfdd), CircleShape))
-            }
-            Text("${pager.currentPage + 1} из ${items.size}", color = AccessoryMuted, fontSize = 12.sp,
-                modifier = Modifier.padding(start = 6.dp))
-        }
+        },
+    ) { item, selected, tileModifier, imageSize ->
+        AccessoryTile(item, selected, artwork, accessories, tileModifier, imageSize)
     }
 }
 

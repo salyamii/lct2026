@@ -3,10 +3,13 @@ package ru.nksk.lctapp.data.game
 import ru.nksk.lctapp.domain.content.EventType
 import ru.nksk.lctapp.domain.content.ItemOperation
 import ru.nksk.lctapp.domain.content.StoryContent
+import ru.nksk.lctapp.domain.pet.PetCosmetics
 
 /** Append-only definition identity protects the meaning of historical decision JOINs. */
 internal fun StoryContent.newDefinitionsComparedTo(old: StoryContent): StoryContent =
-    withCurrentTypography().newDefinitionsComparedToNormalized(old.withCurrentTypography())
+    withCurrentTypography().newDefinitionsComparedToNormalized(
+        old.withCurrentTypography().withLegacyParentCapDescriptions(),
+    )
 
 /** Display-only compatibility; never changes IDs, gameplay fields, stored rows or audit documents. */
 internal fun StoryContent.withCurrentTypography(): StoryContent = copy(
@@ -18,6 +21,16 @@ internal fun StoryContent.withCurrentTypography(): StoryContent = copy(
 )
 
 private fun String.currentTypography(): String = replace('\u2014', '-')
+
+/** Compare the pre-main cap wording without rewriting saved definitions or relaxing other fields. */
+private fun StoryContent.withLegacyParentCapDescriptions(): StoryContent {
+    val capIds = PetCosmetics.parentRewards.flatMap { it.itemIds }.toSet()
+    return copy(items = items.map { item ->
+        if (item.id in capIds && item.description == "Награда за квест с родителем. Можно надеть в снаряжении.")
+            item.copy(description = "Подарок от родителя. Можно надеть в разделе «Снаряжение».")
+        else item
+    })
+}
 
 private fun StoryContent.newDefinitionsComparedToNormalized(old: StoryContent): StoryContent {
     val added = StoryContent(
