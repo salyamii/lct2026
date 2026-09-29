@@ -3,6 +3,7 @@
 .gradle
 .kotlin/
 /local.properties
+/person.jks
 /.idea/caches
 /.idea/libraries
 /.idea/modules.xml
