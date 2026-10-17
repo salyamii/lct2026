@@ -14,7 +14,7 @@ import ru.nksk.lctapp.domain.minigame.DeedGameKind
 class EventSchedulerTest {
     private val initial = GameState(PetState("PLAIN", PetVisualState.NORMAL), EconomyState(BudgetPlan(100, 0, 0, 0)),
         StoryState(null, null, null, emptyList()), 0, 0, emptyList())
-    private val ids = (1..8).map { "job$it" } + listOf("want1", "want2", "discovery", "resin", "fee1", "fee2")
+    private val ids = (1..14).map { "job$it" } + listOf("want1", "want2", "discovery", "resin", "fee1", "fee2")
     private val content = StoryContent(
         chapters = listOf(ChapterDefinition("chapter", "Chapter", "goal")),
         days = listOf(GameDayDefinition("day", "chapter", 1)), goals = listOf(GoalDefinition("goal", "Goal", "")),

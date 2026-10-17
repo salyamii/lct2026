@@ -109,6 +109,48 @@ fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> 
                     StackingGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
                         leave, state.presentation, position = { position.value })
                 }
+                DeedGameType.BARGAIN -> {
+                    val game = hiltViewModel<BargainViewModel>()
+                    val board by game.uiState.collectAsStateWithLifecycle()
+                    LaunchedEffect(board.game) { model.finishBargain(board.game) }
+                    BargainGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
+                        leave, state.presentation)
+                }
+                DeedGameType.NEED_WANT -> {
+                    val game = hiltViewModel<NeedWantViewModel>()
+                    val board by game.uiState.collectAsStateWithLifecycle()
+                    LaunchedEffect(board.game) { model.finishNeedWant(board.game) }
+                    NeedWantGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
+                        leave, state.presentation)
+                }
+                DeedGameType.DISCOUNT -> {
+                    val game = hiltViewModel<DiscountViewModel>()
+                    val board by game.uiState.collectAsStateWithLifecycle()
+                    LaunchedEffect(board.game) { model.finishDiscount(board.game) }
+                    DiscountGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
+                        leave, state.presentation)
+                }
+                DeedGameType.BALANCE -> {
+                    val game = hiltViewModel<BalanceViewModel>()
+                    val board by game.uiState.collectAsStateWithLifecycle()
+                    LaunchedEffect(board.game) { model.finishBalance(board.game) }
+                    BalanceGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
+                        leave, state.presentation)
+                }
+                DeedGameType.LOAN -> {
+                    val game = hiltViewModel<LoanViewModel>()
+                    val board by game.uiState.collectAsStateWithLifecycle()
+                    LaunchedEffect(board.game) { model.finishLoan(board.game) }
+                    LoanGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
+                        leave, state.presentation)
+                }
+                DeedGameType.PACKING -> {
+                    val game = hiltViewModel<PackingViewModel>()
+                    val board by game.uiState.collectAsStateWithLifecycle()
+                    LaunchedEffect(board.game) { model.finishPacking(board.game) }
+                    PackingGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
+                        leave, state.presentation)
+                }
                 null -> Unit
             }
         }

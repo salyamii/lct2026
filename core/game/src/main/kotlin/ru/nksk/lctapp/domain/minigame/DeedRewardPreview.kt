@@ -78,5 +78,37 @@ class DeedRewardPreview private constructor(
             val missed = if (state.finished) StackingState.ROUNDS - state.placed else 0
             return DeedRewardPreview(missed, StackingState.ROUNDS - missed, StackingState.ROUNDS)
         }
+
+        /** Раундовые игры: попытка - завершённый (показанный) раунд, ошибка - неверный раунд. */
+        private fun roundBased(totalRounds: Int, shownRounds: Int, correctRounds: Int): DeedRewardPreview {
+            require(shownRounds in 0..totalRounds && correctRounds in 0..shownRounds)
+            return DeedRewardPreview(shownRounds - correctRounds, totalRounds - (shownRounds - correctRounds),
+                totalRounds)
+        }
+
+        fun fromBargain(state: BargainState): DeedRewardPreview =
+            roundBased(BargainState.ROUNDS, state.current + if (state.lastCorrect != null) 1 else 0,
+                state.correctAnswers)
+
+        fun fromNeedWant(state: NeedWantState): DeedRewardPreview =
+            roundBased(NeedWantState.ITEM_COUNT, state.current + if (state.lastCorrect != null) 1 else 0,
+                state.correctAnswers)
+
+        fun fromDiscount(state: DiscountState): DeedRewardPreview =
+            roundBased(DiscountState.ROUNDS, state.current + if (state.lastCorrect != null) 1 else 0,
+                state.correctAnswers)
+
+        fun fromBalance(state: BalanceState): DeedRewardPreview =
+            roundBased(BalanceState.ROUNDS, state.current + if (state.lastCorrect != null) 1 else 0,
+                state.correctRounds)
+
+        fun fromLoan(state: LoanState): DeedRewardPreview =
+            roundBased(LoanState.SCENARIO_COUNT, state.current + if (state.lastCorrect != null) 1 else 0,
+                state.correctAnswers)
+
+        fun fromPacking(state: PackingState): DeedRewardPreview =
+            roundBased(PackingState.ROUNDS, state.current + if (state.lastCorrect != null) 1 else 0,
+                state.correctRounds)
+
     }
 }

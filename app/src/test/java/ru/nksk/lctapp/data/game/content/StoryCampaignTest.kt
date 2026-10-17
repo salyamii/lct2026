@@ -413,6 +413,18 @@ class StoryCampaignTest {
                 placed = StackingState.ROUNDS,
                 finished = true,
             ))
+            DeedGameKind.BARGAIN -> DeedGameScore.fromBargain(BargainState.create().copy(
+                current = BargainState.ROUNDS, correctAnswers = BargainState.ROUNDS))
+            DeedGameKind.NEED_WANT -> DeedGameScore.fromNeedWant(NeedWantState.create().copy(
+                current = NeedWantState.ITEM_COUNT, correctAnswers = NeedWantState.ITEM_COUNT))
+            DeedGameKind.DISCOUNT -> DeedGameScore.fromDiscount(DiscountState.create().copy(
+                current = DiscountState.ROUNDS, correctAnswers = DiscountState.ROUNDS))
+            DeedGameKind.BALANCE -> DeedGameScore.fromBalance(BalanceState.create().copy(
+                current = BalanceState.ROUNDS, correctRounds = BalanceState.ROUNDS))
+            DeedGameKind.LOAN -> DeedGameScore.fromLoan(LoanState.create().copy(
+                current = LoanState.SCENARIO_COUNT, correctAnswers = LoanState.SCENARIO_COUNT))
+            DeedGameKind.PACKING -> DeedGameScore.fromPacking(PackingState.create().copy(
+                current = PackingState.ROUNDS, correctRounds = PackingState.ROUNDS))
         })
     }
 }

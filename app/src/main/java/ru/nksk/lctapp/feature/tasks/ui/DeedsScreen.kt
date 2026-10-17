@@ -49,11 +49,21 @@ import ru.nksk.lctapp.core.ui.components.AdventurePrimaryButton
 import ru.nksk.lctapp.core.ui.components.AdventureQuietButton
 import ru.nksk.lctapp.core.ui.components.GamePaper
 
+/** Тестовые входы финансовых мини-игр (FINMINI-D-002): демо-монеты, баланс игры не меняют. */
+private val financialDemoGames = listOf(
+    "Выгодно или нет?" to "Чьё предложение дешевле за штуку?",
+    "Нужда или желание?" to "Разложи вещи по полкам",
+    "Настоящая скидка" to "Честный ли ярлык на витрине?",
+    "Монетный баланс" to "Расходы не должны перевешивать доходы",
+    "Финансовая ловушка" to "Занять сейчас или накопить самому?",
+    "Лишняя покупка" to "Убери предмет, не нужный для цели",
+)
+
 @Composable
 fun DeedsScreen(onTraining: () -> Unit, onExit: () -> Unit,
     state: DeedsUiState = DeedsUiState(), onStart: (String) -> Unit = {}, onRetry: () -> Unit = {},
     onFeed: (String) -> Unit = {}, onCurrentEvent: () -> Unit = {},
-    onDismissMessage: () -> Unit = {},
+    onDismissMessage: () -> Unit = {}, onFinGame: (Int) -> Unit = {},
 ) {
     BackHandler(enabled = state.busy) {}
     Box(Modifier.fillMaxSize()) {
@@ -64,6 +74,7 @@ fun DeedsScreen(onTraining: () -> Unit, onExit: () -> Unit,
             onStart = { if (!state.busy) onStart(it) },
             onRetry = { if (!state.busy) onRetry() },
             onCurrentEvent = { if (!state.busy) onCurrentEvent() },
+            onFinGame = { if (!state.busy) onFinGame(it) },
         )
         if (state.busy) Box(Modifier.fillMaxSize().pointerInput(Unit) {
             awaitPointerEventScope {
@@ -100,7 +111,7 @@ fun DeedsScreen(onTraining: () -> Unit, onExit: () -> Unit,
 @Composable
 private fun DeedsContent(onTraining: () -> Unit, onExit: () -> Unit,
     state: DeedsUiState, onStart: (String) -> Unit, onRetry: () -> Unit,
-    onCurrentEvent: () -> Unit,
+    onCurrentEvent: () -> Unit, onFinGame: (Int) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -156,6 +167,29 @@ private fun DeedsContent(onTraining: () -> Unit, onExit: () -> Unit,
                                     fontFamily = Nunito, fontSize = 14.sp)
                             }
                             Text("›", color = DeedColors.Text, fontSize = 28.sp)
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                }
+                item(key = "fin-games-heading", contentType = "heading") {
+                    Spacer(Modifier.height(16.dp))
+                    Text("Финансовые игры · тест", color = DeedColors.Text, fontFamily = Rubik,
+                        fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                    Spacer(Modifier.height(8.dp))
+                }
+                items(financialDemoGames.size, key = { "fin-game-$it" }, contentType = { "fin-game" }) { index ->
+                    val (title, hint) = financialDemoGames[index]
+                    Surface(onClick = { onFinGame(index) },
+                        modifier = Modifier.fillMaxWidth(), color = DeedColors.CreamCard,
+                        shape = RoundedCornerShape(22.dp), border = BorderStroke(1.dp, DeedColors.Border)) {
+                        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Column(Modifier.weight(1f)) {
+                                Text(title, color = DeedColors.Text, fontFamily = Rubik,
+                                    fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Text(hint, color = DeedColors.TextSoft, fontFamily = Nunito, fontSize = 13.sp)
+                            }
+                            Text("›", color = DeedColors.Text, fontSize = 24.sp)
                         }
                     }
                     Spacer(Modifier.height(8.dp))

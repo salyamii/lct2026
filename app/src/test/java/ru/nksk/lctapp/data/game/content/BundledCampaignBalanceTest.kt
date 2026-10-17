@@ -322,6 +322,19 @@ class BundledCampaignBalanceTest {
                 placed = StackingState.ROUNDS * cap / 100,
                 finished = true,
             ))
+            // Раундовые финансовые механики: попытка - раунд, верные раунды считаются как в SEQUENCE.
+            DeedGameKind.BARGAIN -> DeedGameScore.fromBargain(BargainState.create().copy(
+                current = BargainState.ROUNDS, correctAnswers = BargainState.ROUNDS * cap / 100))
+            DeedGameKind.NEED_WANT -> DeedGameScore.fromNeedWant(NeedWantState.create().copy(
+                current = NeedWantState.ITEM_COUNT, correctAnswers = NeedWantState.ITEM_COUNT * cap / 100))
+            DeedGameKind.DISCOUNT -> DeedGameScore.fromDiscount(DiscountState.create().copy(
+                current = DiscountState.ROUNDS, correctAnswers = DiscountState.ROUNDS * cap / 100))
+            DeedGameKind.BALANCE -> DeedGameScore.fromBalance(BalanceState.create().copy(
+                current = BalanceState.ROUNDS, correctRounds = BalanceState.ROUNDS * cap / 100))
+            DeedGameKind.LOAN -> DeedGameScore.fromLoan(LoanState.create().copy(
+                current = LoanState.SCENARIO_COUNT, correctAnswers = LoanState.SCENARIO_COUNT * cap / 100))
+            DeedGameKind.PACKING -> DeedGameScore.fromPacking(PackingState.create().copy(
+                current = PackingState.ROUNDS, correctRounds = PackingState.ROUNDS * cap / 100))
         })
 
         private fun solvedPipePaths(): Map<Int, List<Int>> = mapOf(

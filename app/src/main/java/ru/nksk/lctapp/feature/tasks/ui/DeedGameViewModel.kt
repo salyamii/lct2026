@@ -25,7 +25,10 @@ import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.minigame.*
 
-enum class DeedGameType { MEMORY, COMPARISON, PRECISION, LIGHTS, SEQUENCE, PIPES, DIFFERENCES, STACKING }
+enum class DeedGameType {
+    MEMORY, COMPARISON, PRECISION, LIGHTS, SEQUENCE, PIPES, DIFFERENCES, STACKING,
+    BARGAIN, NEED_WANT, DISCOUNT, BALANCE, LOAN, PACKING,
+}
 data class DeedGamePresentation(val title: String, val maximumReward: Long, val canPlay: Boolean,
     val storyAction: Boolean = false, val sceneRes: Int? = null, val instructions: String? = null,
     val activityArtworkRes: Int? = null)
@@ -94,6 +97,12 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
     fun finishPipes(state: PipesState) { DeedGameScore.fromPipes(state)?.let(::finish) }
     fun finishDifferences(state: DifferencesState) { DeedGameScore.fromDifferences(state)?.let(::finish) }
     fun finishStacking(state: StackingState) { DeedGameScore.fromStacking(state)?.let(::finish) }
+    fun finishBargain(state: BargainState) { DeedGameScore.fromBargain(state)?.let(::finish) }
+    fun finishNeedWant(state: NeedWantState) { DeedGameScore.fromNeedWant(state)?.let(::finish) }
+    fun finishDiscount(state: DiscountState) { DeedGameScore.fromDiscount(state)?.let(::finish) }
+    fun finishBalance(state: BalanceState) { DeedGameScore.fromBalance(state)?.let(::finish) }
+    fun finishLoan(state: LoanState) { DeedGameScore.fromLoan(state)?.let(::finish) }
+    fun finishPacking(state: PackingState) { DeedGameScore.fromPacking(state)?.let(::finish) }
 
     private fun finish(score: DeedGameScore) {
         if (busy || pending != null || rejectedAction != null) return
@@ -300,6 +309,12 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
                 DeedGameKind.PIPES -> DeedGameType.PIPES
                 DeedGameKind.DIFFERENCES -> DeedGameType.DIFFERENCES
                 DeedGameKind.STACKING -> DeedGameType.STACKING
+                DeedGameKind.BARGAIN -> DeedGameType.BARGAIN
+                DeedGameKind.NEED_WANT -> DeedGameType.NEED_WANT
+                DeedGameKind.DISCOUNT -> DeedGameType.DISCOUNT
+                DeedGameKind.BALANCE -> DeedGameType.BALANCE
+                DeedGameKind.LOAN -> DeedGameType.LOAN
+                DeedGameKind.PACKING -> DeedGameType.PACKING
             },
             presentation = DeedGamePresentation(renderPetText(session.catalog.displayTitle(event), game.pet.name), reward, pending == null && message == null,
                 storyAction = storyGame,

@@ -1,7 +1,10 @@
 package ru.nksk.lctapp.domain.minigame
 
 /** Supported mechanics, not a closed list of authored deeds or content IDs. */
-enum class DeedGameKind { MEMORY, COMPARISON, PRECISION, LIGHTS, SEQUENCE, PIPES, DIFFERENCES, STACKING }
+enum class DeedGameKind {
+    MEMORY, COMPARISON, PRECISION, LIGHTS, SEQUENCE, PIPES, DIFFERENCES, STACKING,
+    BARGAIN, NEED_WANT, DISCOUNT, BALANCE, LOAN, PACKING,
+}
 
 /** A completed round set; incomplete boards cannot be submitted for payment. */
 @kotlinx.serialization.Serializable
@@ -21,6 +24,12 @@ class DeedGameScore private constructor(
             DeedGameKind.PIPES -> attempts == 1 && correct == 1
             DeedGameKind.DIFFERENCES -> correct == DifferencesState.DIFF_COUNT && attempts >= DifferencesState.DIFF_COUNT
             DeedGameKind.STACKING -> attempts == StackingState.ROUNDS
+            DeedGameKind.BARGAIN -> attempts == BargainState.ROUNDS
+            DeedGameKind.NEED_WANT -> attempts == NeedWantState.ITEM_COUNT
+            DeedGameKind.DISCOUNT -> attempts == DiscountState.ROUNDS
+            DeedGameKind.BALANCE -> attempts == BalanceState.ROUNDS
+            DeedGameKind.LOAN -> attempts == LoanState.SCENARIO_COUNT
+            DeedGameKind.PACKING -> attempts == PackingState.ROUNDS
         }) { "Invalid completed mini-game result" }
     }
     /** Completed paid work earns at least one coin; a zero authored reward stays zero. */
@@ -77,6 +86,37 @@ class DeedGameScore private constructor(
                 state.locked.all { it.width > 0 && it.x >= 0 && it.x + it.width <= StackingState.SPACE } &&
                 state.blockWidth > 0
             ) DeedGameScore(DeedGameKind.STACKING, state.placed, StackingState.ROUNDS) else null
+
+        fun fromBargain(state: BargainState): DeedGameScore? =
+            if (state.questions.size == BargainState.ROUNDS && state.finished &&
+                state.correctAnswers in 0..BargainState.ROUNDS
+            ) DeedGameScore(DeedGameKind.BARGAIN, state.correctAnswers, BargainState.ROUNDS) else null
+
+        fun fromNeedWant(state: NeedWantState): DeedGameScore? =
+            if (state.items.size == NeedWantState.ITEM_COUNT && state.finished &&
+                state.correctAnswers in 0..NeedWantState.ITEM_COUNT
+            ) DeedGameScore(DeedGameKind.NEED_WANT, state.correctAnswers, NeedWantState.ITEM_COUNT) else null
+
+        fun fromDiscount(state: DiscountState): DeedGameScore? =
+            if (state.questions.size == DiscountState.ROUNDS && state.finished &&
+                state.correctAnswers in 0..DiscountState.ROUNDS
+            ) DeedGameScore(DeedGameKind.DISCOUNT, state.correctAnswers, DiscountState.ROUNDS) else null
+
+        fun fromBalance(state: BalanceState): DeedGameScore? =
+            if (state.income.size == BalanceState.ROUNDS && state.finished &&
+                state.correctRounds in 0..BalanceState.ROUNDS &&
+                state.removed.isEmpty()
+            ) DeedGameScore(DeedGameKind.BALANCE, state.correctRounds, BalanceState.ROUNDS) else null
+
+        fun fromLoan(state: LoanState): DeedGameScore? =
+            if (state.scenarios.size == LoanState.SCENARIO_COUNT && state.finished &&
+                state.correctAnswers in 0..LoanState.SCENARIO_COUNT
+            ) DeedGameScore(DeedGameKind.LOAN, state.correctAnswers, LoanState.SCENARIO_COUNT) else null
+
+        fun fromPacking(state: PackingState): DeedGameScore? =
+            if (state.rounds.size == PackingState.ROUNDS && state.finished &&
+                state.correctRounds in 0..PackingState.ROUNDS
+            ) DeedGameScore(DeedGameKind.PACKING, state.correctRounds, PackingState.ROUNDS) else null
 
         private fun List<Int>.isValidPipePath(connection: PipeEndpoints): Boolean {
             // Either endpoint may start the same continuous path.

@@ -42,6 +42,12 @@ class StoryGameThemeTest {
                 DeedGameKind.PIPES -> assertTrue(choiceId, instructions.contains("концы одного цвета"))
                 DeedGameKind.DIFFERENCES -> assertTrue(choiceId, instructions.contains("отличия между полками"))
                 DeedGameKind.STACKING -> assertTrue(choiceId, instructions.contains("ящик на предыдущий"))
+                DeedGameKind.BARGAIN -> assertTrue(choiceId, instructions.contains("цена за штуку меньше"))
+                DeedGameKind.NEED_WANT -> assertTrue(choiceId, instructions.contains("необходимое или простое желание"))
+                DeedGameKind.DISCOUNT -> assertTrue(choiceId, instructions.contains("настоящей прежней цены"))
+                DeedGameKind.BALANCE -> assertTrue(choiceId, instructions.contains("расходы не превышали доходы"))
+                DeedGameKind.LOAN -> assertTrue(choiceId, instructions.contains("оставит больше монет"))
+                DeedGameKind.PACKING -> assertTrue(choiceId, instructions.contains("не нужен для цели"))
             }
         }
     }

@@ -24,5 +24,11 @@ internal fun storyGameInstructions(kind: DeedGameKind, context: String? = null):
         DeedGameKind.PIPES -> "Соедини концы одного цвета линией."
         DeedGameKind.DIFFERENCES -> "Найди отличия между полками."
         DeedGameKind.STACKING -> "Опусти бегущий ящик на предыдущий."
+        DeedGameKind.BARGAIN -> "Сравни предложения и выбери, где цена за штуку меньше."
+        DeedGameKind.NEED_WANT -> "Отнеси предмет: необходимое или простое желание."
+        DeedGameKind.DISCOUNT -> "Скидка честная, только если новая цена ниже настоящей прежней цены."
+        DeedGameKind.BALANCE -> "Сними необязательные траты, чтобы расходы не превышали доходы. Обязательное снимать нельзя."
+        DeedGameKind.LOAN -> "Прочитай оба пути и выбери тот, что оставит больше монет."
+        DeedGameKind.PACKING -> "Убери предмет, который не нужен для цели."
     },
 ).joinToString(" ")

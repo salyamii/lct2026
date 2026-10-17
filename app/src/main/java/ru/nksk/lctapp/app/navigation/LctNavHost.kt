@@ -62,6 +62,7 @@ import ru.nksk.lctapp.feature.menu.ui.MainMenuAction
 import ru.nksk.lctapp.feature.tasks.navigation.Tasks
 import ru.nksk.lctapp.feature.tasks.navigation.DeedGame
 import ru.nksk.lctapp.feature.tasks.navigation.deedGameEntry
+import ru.nksk.lctapp.feature.tasks.navigation.financialDemoEntries
 import ru.nksk.lctapp.feature.tasks.navigation.tasksEntry
 import ru.nksk.lctapp.feature.map.navigation.GameMap
 import ru.nksk.lctapp.feature.map.navigation.mapEntry
@@ -221,6 +222,8 @@ fun LctNavHost(
                     onEvent = { source -> navigator.navigate(source, Day) },
                     onGame = { source, id -> navigator.navigate(source, DeedGame(id)) },
                     onTraining = { source -> navigator.navigate(source, SkillTraining) },
+                    onFinGame = { source, index -> financialDemoEntries.getOrNull(index)
+                        ?.let { route -> navigator.navigate(source, route) } },
                     onBack = navigator::goBack,
                 )
                 goalEntry(onBack = navigator::goBack,

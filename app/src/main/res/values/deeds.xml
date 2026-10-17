@@ -64,4 +64,47 @@
     <string name="deeds_save_error">Не удалось сохранить результат. Попробуй ещё раз.</string>
     <string name="deeds_cost_applied">Голод и усталость увеличены</string>
     <string name="deeds_no_cost">Голод и усталость не изменились</string>
+
+    <string name="deeds_bargain_title">Выгодно или нет?</string>
+    <string name="deeds_bargain_hint">Сравни предложения и выбери, где цена за штуку меньше</string>
+    <string name="deeds_bargain_pieces">%1$d шт.</string>
+    <string name="deeds_bargain_complete">Выгодное предложение найдено!</string>
+
+
+    <string name="deeds_needwant_title">Нужда или желание?</string>
+    <string name="deeds_needwant_hint">Отнеси предмет: необходимое или простое желание</string>
+    <string name="deeds_needwant_need">Необходимое</string>
+    <string name="deeds_needwant_want">Желание</string>
+    <string name="deeds_needwant_complete">Вещи разобраны!</string>
+
+    <string name="deeds_discount_title">Настоящая скидка</string>
+    <string name="deeds_discount_hint">Скидка честная, только если новая цена ниже настоящей прежней цены</string>
+    <string name="deeds_discount_real">Скидка настоящая</string>
+    <string name="deeds_discount_fake">Скидка хитрая</string>
+    <string name="deeds_discount_was">Настоящая прежняя цена: %1$d монет</string>
+    <string name="deeds_discount_complete">Ярлыки проверены!</string>
+
+    <string name="deeds_balance_title">Монетный баланс</string>
+    <string name="deeds_balance_hint">Сними необязательные траты, чтобы расходы не превышали доходы. Обязательное снимать нельзя</string>
+    <string name="deeds_balance_income">Доходы</string>
+    <string name="deeds_balance_expenses">Расходы</string>
+    <string name="deeds_balance_confirm">Проверить баланс</string>
+    <string name="deeds_balance_expense_essential">Обязательная трата</string>
+    <string name="deeds_balance_correct">Баланс сошёлся</string>
+    <string name="deeds_balance_wrong_dropped">Обязательную трату снимать нельзя</string>
+    <string name="deeds_balance_wrong_over">Расходы всё ещё больше доходов</string>
+    <string name="deeds_balance_complete">Баланс выровнен!</string>
+
+    <string name="deeds_loan_title">Финансовая ловушка</string>
+    <string name="deeds_loan_hint">Прочитай оба пути и выбери выгодный</string>
+    <string name="deeds_loan_complete">Решения приняты!</string>
+
+
+    <string name="deeds_packing_title">Лишняя покупка</string>
+    <string name="deeds_packing_hint">Убери предмет, который не нужен для цели</string>
+    <string name="deeds_packing_goal">Цель: %1$s</string>
+    <string name="deeds_packing_correct">Лишний предмет убран</string>
+    <string name="deeds_packing_wrong">Этот предмет пригодится. Лишний - другой</string>
+    <string name="deeds_packing_complete">Сборы закончены!</string>
+
 </resources>
