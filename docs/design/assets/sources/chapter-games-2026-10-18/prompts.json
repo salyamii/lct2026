@@ -1,0 +1,40 @@
+[
+  {
+    "name": "story_game_telescope_tripod",
+    "prompt": "Use case: stylized-concept. Create one transparent game sprite, isolated antique telescope wooden tripod ONLY, with brass fork mount at its top. Match the warm painterly dimensional wood, rich brass, rounded friendly adventure-game rendering of the reference, but no telescope tube, no box or scroll. View: three quarter, camera at tripod middle height, front two legs spread, third behind; mount accepts a tube pointing from lower-left to upper-right. Center the entire tripod in a square canvas with 8% transparent margin, no shadows outside the object, no floor, no text. Clear silhouette at small size. This is a separate assembly-game part for children.",
+    "refs": [
+      "C:/Users/User/StudioProjects/lct2026/app/src/main/res/drawable-nodpi/story_telescope_parts.webp"
+    ],
+    "source": "C:\\Users\\User\\.codex\\generated_images\\01a0d50c-9a86-79c1-a183-61990ad4f8f2\\exec-9ac4fd11-87c3-4e3c-87f4-af0ab63fd746.png"
+  },
+  {
+    "name": "story_game_telescope_tube",
+    "prompt": "Use case: stylized-concept. Create one transparent game sprite, isolated antique telescope main tube ONLY. Match reference rich navy leather and brass bands, warm painterly dimensional adventure-game look. Three-quarter view tube runs diagonally from lower-left rear opening to upper-right large front lens. The mount, tripod, rear eyepiece, box, scroll are completely absent. Large front blue glass lens faces upper-right. A small brass attachment bracket at middle bottom may remain. Entire tube in square canvas with generous 10% transparent margin. No text, no floor, no outside glow/shadow. Sharp readable playful asset used as assembly part for ages7–11.",
+    "refs": [
+      "C:/Users/User/StudioProjects/lct2026/app/src/main/res/drawable-nodpi/story_telescope_parts.webp"
+    ],
+    "source": "C:\\Users\\User\\.codex\\generated_images\\01a0d50c-9a86-79c1-a183-61990ad4f8f2\\exec-fda42a86-eb5e-4787-854d-8219e486c2a5.png"
+  },
+  {
+    "name": "story_game_telescope_lens",
+    "prompt": "Use case: stylized-concept. One isolated removable telescope eyepiece game sprite on truly transparent background. Match reference warm dimensional brass and navy leather painterly adventure style. Short compact brass cylindrical eyepiece with deep blue circular glass, dark navy grip ring. Axis runs lower-left to upper-right in same three-quarter viewpoint as reference telescope, lens visible on lower-left end, attachment threaded end upper-right. NO main tube, NO tripod, NO box, no text. Object centered fills65% of square canvas with full transparent margins, crisp readable small-game sprite.",
+    "refs": [
+      "C:/Users/User/StudioProjects/lct2026/app/src/main/res/drawable-nodpi/story_telescope_parts.webp"
+    ],
+    "source": "C:\\Users\\User\\.codex\\generated_images\\01a0d50c-9a86-79c1-a183-61990ad4f8f2\\exec-2846c1a2-2a43-4785-bbbb-fec23449f0a2.png"
+  },
+  {
+    "name": "story_game_wheel",
+    "prompt": "Use case: stylized-concept. Create a repaired intact wooden wagon wheel game sprite matching the reference painterly adventure-game dimensional oak and dark iron materials. Precisely circular head-on FRONT VIEW, no perspective ellipse, 8 evenly spaced radial spokes, circular central hub with round hole, continuous complete wooden rim with a dark iron tire and a few metal bolts. Everything straight and sound, no cracks, NO missing sections. Centered in square canvas, whole wheel within 8% transparent margin. True transparent background, transparent gaps between spokes. No text, ground, cast shadow, other objects. Small friendly game asset for assembly and rotation puzzle.",
+    "refs": [
+      "C:/Users/User/StudioProjects/lct2026/app/src/main/res/drawable-nodpi/event_broken_wheel.webp"
+    ],
+    "source": "C:\\Users\\User\\.codex\\generated_images\\01a0d50c-9a86-79c1-a183-61990ad4f8f2\\exec-c0383b82-2229-440f-810d-12ffcdfe6faf.png"
+  },
+  {
+    "name": "story_game_boat",
+    "prompt": "Use case: stylized-concept. Transparent game sprite for a top-down river adventure. A small warm honey-brown wooden rowboat, pointed bow pointing straight UP, rounded stern down, two short oars extending to left/right. Strict overhead view, readable boat silhouette; in the middle sits a tiny orange fox cub seen from above/back with a little tan explorer hat, orange ears and cream tail; no frontal human face. Dimensional hand-painted polished children's adventure mobile-game art, warm carved wood and brass, soft coherent shading, rich colors. Entire boat and oars centered, fills80% of square canvas, generous transparent margins. No water, landscape, wake, UI, text, shadows outside object. One single isolated sprite.",
+    "refs": null,
+    "source": "C:\\Users\\User\\.codex\\generated_images\\01a0d50c-9a86-79c1-a183-61990ad4f8f2\\exec-9e3a5749-adeb-4fe6-ac23-9a05fab366de.png"
+  }
+]

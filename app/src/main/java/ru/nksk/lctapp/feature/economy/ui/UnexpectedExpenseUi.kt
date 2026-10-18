@@ -30,12 +30,13 @@ internal fun unexpectedExpenseOptions(history: List<AuditEntry>, catalog: GameCa
                 operation.amount != expense.amount || operation.amount <= 0) return@facts null
             val journal = entry.after?.engine?.journal?.find { it.id == expense.operationId }
             val eventId = when (journal?.kind) {
-                DayJournalKind.EVENT_START -> journal.sourceId
+                DayJournalKind.EVENT_START, DayJournalKind.BOAT_REPAIR -> journal.sourceId
                 DayJournalKind.EVENT_CHOICE -> catalog.content.choices.find { it.id == journal.sourceId }?.eventId
                 else -> null
             }
             UnexpectedExpenseUi(expense.operationId,
-                catalog.content.events.find { it.id == eventId }?.title ?: "Неожиданная трата",
+                if (journal?.kind == DayJournalKind.BOAT_REPAIR) "Ремонт лодки"
+                else catalog.content.events.find { it.id == eventId }?.title ?: "Неожиданная трата",
                 operation.amount, entry.after?.engine?.day ?: fact.context.day)
         }
     }.distinctBy { it.operationId }

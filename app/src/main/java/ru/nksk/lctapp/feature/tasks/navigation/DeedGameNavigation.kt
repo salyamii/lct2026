@@ -2,6 +2,7 @@ package ru.nksk.lctapp.feature.tasks.navigation
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -15,13 +16,15 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import ru.nksk.lctapp.core.ui.game.EventAudioEffect
 import ru.nksk.lctapp.feature.tasks.ui.*
+import ru.nksk.lctapp.domain.minigame.DeedGameKind
 
 @Serializable
 @SerialName("deed_game")
 data class DeedGame(val occurrenceId: String, val choiceId: String? = null) : NavKey
 
 fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> Unit,
-    isCurrentEntry: (DeedGame) -> Boolean = { true }) {
+    isCurrentEntry: (DeedGame) -> Boolean = { true },
+    chapterContent: @Composable (ChapterDeedContent) -> Unit = {}) {
     entry<DeedGame> { source ->
         val model = hiltViewModel<DeedGameViewModel>()
         val state by model.uiState.collectAsStateWithLifecycle()
@@ -112,6 +115,17 @@ fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> 
                     LaunchedEffect(board.game) { model.finishStacking(board.game) }
                     StackingGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
                         leave, state.presentation, position = { position.value })
+                }
+                DeedGameType.TELESCOPE, DeedGameType.MARK, DeedGameType.WHEEL,
+                DeedGameType.STRAP, DeedGameType.SIGNAL, DeedGameType.ROUTE_MAP, DeedGameType.BOAT -> {
+                    chapterContent(ChapterDeedContent(
+                        kind = DeedGameKind.valueOf(checkNotNull(state.type).name),
+                        interactionBlocked = !resumed || state.busy || state.presentation?.canPlay != true,
+                        repairCoins = state.repairCoins,
+                        onCompleted = { if (resumed) model.finishChapterGame(it) },
+                        onPayRepair = { id, rock -> model.payBoatRepair(id, rock) },
+                        onExit = leave,
+                    ))
                 }
                 null -> Unit
             }

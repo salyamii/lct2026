@@ -148,7 +148,7 @@ private fun MenuPlaqueButton(
             shape = RoundedCornerShape(ContinueButtonCornerRadius),
             textStyle = TextStyle(fontFamily = Rubik, fontWeight = FontWeight.ExtraBold,
                 fontSize = 16.sp, lineHeight = 18.sp),
-            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 18.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
             containerColor = Color.Transparent,
             contentColor = GameInk,
             artwork = false,

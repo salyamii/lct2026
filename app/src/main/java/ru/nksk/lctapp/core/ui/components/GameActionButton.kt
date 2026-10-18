@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
-import ru.nksk.lctapp.core.ui.theme.GameTextWrapping
+import ru.nksk.lctapp.core.ui.theme.GameLabelTextWrapping
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 
@@ -61,7 +61,7 @@ internal fun GameActionButton(
     minHeight: Dp = 56.dp,
     shape: Shape = RoundedCornerShape(28.dp),
     textStyle: TextStyle = GameActionButtonDefaults.PrimaryText,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
     containerColor: Color = when (style) {
         GameActionStyle.PRIMARY -> AdventureLime
         GameActionStyle.SECONDARY -> Color.White
@@ -96,17 +96,17 @@ internal fun GameActionButton(
     val content: @Composable () -> Unit = {
         Box(contentAlignment = Alignment.Center) {
             Text(text, modifier = Modifier.alpha(if (loading) 0f else 1f),
-                style = GameTextWrapping.merge(textStyle), textAlign = TextAlign.Center)
+                style = textStyle.merge(GameLabelTextWrapping), textAlign = TextAlign.Center)
             if (loading) GameLoadingIndicator(Modifier.size(24.dp).clearAndSetSemantics {}, size = 24.dp)
         }
     }
     if (artwork) {
         val direction = LocalLayoutDirection.current
         val inset = PaddingValues(
-            start = maxOf(contentPadding.calculateStartPadding(direction), 32.dp),
-            end = maxOf(contentPadding.calculateEndPadding(direction), 32.dp),
-            top = maxOf(contentPadding.calculateTopPadding(), 18.dp),
-            bottom = maxOf(contentPadding.calculateBottomPadding(), 18.dp),
+            start = maxOf(contentPadding.calculateStartPadding(direction), 16.dp),
+            end = maxOf(contentPadding.calculateEndPadding(direction), 16.dp),
+            top = maxOf(contentPadding.calculateTopPadding(), 12.dp),
+            bottom = maxOf(contentPadding.calculateBottomPadding(), 12.dp),
         )
         Box(buttonModifier.semantics(mergeDescendants = true) {}, contentAlignment = Alignment.Center) {
             GamePlaque(

@@ -50,6 +50,14 @@ internal class BackendSyncScheduler @Inject constructor(
         workManager.enqueueUniqueWork(REQUESTED_WORK, ExistingWorkPolicy.KEEP, request)
     }
 
+    fun isConnected(): Boolean {
+        if (!backend.configured) return false
+        val connectivity = context.getSystemService(ConnectivityManager::class.java)
+        val capabilities = connectivity.getNetworkCapabilities(connectivity.activeNetwork) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+    }
+
     /** Subscribe only while the UI is resumed; WorkManager owns background network constraints. */
     fun networkReturns(): Flow<Unit> = callbackFlow {
         if (!backend.configured) {

@@ -78,7 +78,7 @@ class SkillExplanationContexts private constructor(
                     return SkillEventContext(checkNotNull(day), rendered)
                 }
                 fun journalEvent(kind: DayJournalKind, source: String): String? = when (kind) {
-                    DayJournalKind.EVENT_START -> source
+                    DayJournalKind.EVENT_START, DayJournalKind.BOAT_REPAIR -> source
                     DayJournalKind.EVENT_CHOICE, DayJournalKind.DEED -> choices[source]?.eventId
                     else -> null
                 }
@@ -86,6 +86,7 @@ class SkillExplanationContexts private constructor(
                     is EngineCommand.Choose -> command.occurrenceId
                     is EngineCommand.CompleteEvent -> command.occurrenceId
                     is EngineCommand.CompleteStoryGame -> command.occurrenceId
+                    is EngineCommand.PayBoatRepair -> command.occurrenceId
                     is EngineCommand.CompleteDeed -> command.occurrenceId
                     is EngineCommand.AcceptDeedProposal -> command.occurrenceId
                     else -> null
@@ -94,7 +95,7 @@ class SkillExplanationContexts private constructor(
                     (before?.engine?.events.orEmpty() + after?.engine?.events.orEmpty())
                         .filter { it.id == occurrenceId }.map { it.eventId }.distinct()
                 val eventJournal = journal.filter { it.kind in setOf(
-                    DayJournalKind.EVENT_START, DayJournalKind.EVENT_CHOICE, DayJournalKind.DEED) }
+                    DayJournalKind.EVENT_START, DayJournalKind.EVENT_CHOICE, DayJournalKind.DEED, DayJournalKind.BOAT_REPAIR) }
                 val journalEvents = eventJournal.map { journalEvent(it.kind, it.sourceId) }
                 val explicitChoice = when (val command = request?.command) {
                     is EngineCommand.Choose -> command.choiceId

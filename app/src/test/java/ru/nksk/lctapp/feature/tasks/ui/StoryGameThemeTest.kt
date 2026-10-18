@@ -13,7 +13,7 @@ class StoryGameThemeTest {
         val assignments = catalog.policies.flatMap { (eventId, policy) ->
             policy.choiceGameKinds.map { (choiceId, kind) -> Triple(eventId, choiceId, kind) }
         }
-        assertEquals(35, assignments.size)
+        assertEquals(41, assignments.size)
         for ((eventId, choiceId, kind) in assignments) {
             val media = catalog.cards.getValue(eventId).presentation.media
             val theme = checkNotNull(storyGameTheme(media, kind)) { choiceId }
@@ -42,6 +42,11 @@ class StoryGameThemeTest {
                 DeedGameKind.PIPES -> assertTrue(choiceId, instructions.contains("концы одного цвета"))
                 DeedGameKind.DIFFERENCES -> assertTrue(choiceId, instructions.contains("отличия между полками"))
                 DeedGameKind.STACKING -> assertTrue(choiceId, instructions.contains("ящик на предыдущий"))
+                DeedGameKind.TELESCOPE, DeedGameKind.MARK, DeedGameKind.WHEEL, DeedGameKind.STRAP,
+                DeedGameKind.SIGNAL, DeedGameKind.ROUTE_MAP, DeedGameKind.BOAT -> {
+                    assertFalse(choiceId, instructions.contains("маркер в зелёной зоне"))
+                    assertFalse(choiceId, instructions.contains("по две карточки"))
+                }
             }
         }
     }

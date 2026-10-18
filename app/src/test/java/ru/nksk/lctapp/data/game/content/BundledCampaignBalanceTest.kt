@@ -295,6 +295,8 @@ class BundledCampaignBalanceTest {
         fun Long?.orZero() = this ?: 0L
 
         fun score(kind: DeedGameKind, cap: Int): DeedGameScore = checkNotNull(when (kind) {
+            DeedGameKind.TELESCOPE, DeedGameKind.MARK, DeedGameKind.WHEEL, DeedGameKind.STRAP,
+            DeedGameKind.SIGNAL, DeedGameKind.ROUTE_MAP, DeedGameKind.BOAT -> completedChapterGameScore(kind)
             // Five-round games cannot represent exactly 50%; round down to 2/5, never up to 3/5.
             DeedGameKind.PRECISION -> DeedGameScore.fromPrecision(TargetStopState(10,
                 round = TargetStopState.ROUNDS, hits = TargetStopState.ROUNDS * cap / 100, lastHit = true))

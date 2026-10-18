@@ -24,5 +24,12 @@ internal fun storyGameInstructions(kind: DeedGameKind, context: String? = null):
         DeedGameKind.PIPES -> "Соедини концы одного цвета линией."
         DeedGameKind.DIFFERENCES -> "Найди отличия между полками."
         DeedGameKind.STACKING -> "Опусти бегущий ящик на предыдущий."
+        DeedGameKind.TELESCOPE -> "Собери телескоп и наведи резкость."
+        DeedGameKind.MARK -> "Очисти знак и обведи его линии."
+        DeedGameKind.WHEEL -> "Соедини части колеса и закрепи их."
+        DeedGameKind.STRAP -> "Пришей лямку и закрепи нить."
+        DeedGameKind.SIGNAL -> "Передай башне три сигнала."
+        DeedGameKind.ROUTE_MAP -> "Соедини отметки на карте."
+        DeedGameKind.BOAT -> "Веди лодку пальцем до причала."
     },
 ).joinToString(" ")

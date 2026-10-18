@@ -14,6 +14,8 @@ import ru.nksk.lctapp.feature.tasks.navigation.StarPlates
 import ru.nksk.lctapp.feature.tasks.navigation.PriceCheck
 import ru.nksk.lctapp.feature.tasks.navigation.Telescope
 import ru.nksk.lctapp.feature.tasks.navigation.Tasks
+import ru.nksk.lctapp.feature.storygames.navigation.ChapterTestGames
+import ru.nksk.lctapp.feature.storygames.navigation.ChapterTestGameSession
 import ru.nksk.lctapp.feature.tasks.navigation.DeedGame
 import ru.nksk.lctapp.feature.map.navigation.GameMap
 import ru.nksk.lctapp.feature.learning.navigation.Learning
@@ -34,6 +36,8 @@ internal val AppNavigationSavedStateConfiguration = SavedStateConfiguration {
             subclass(Gear::class, Gear.serializer())
             subclass(Goal::class, Goal.serializer())
             subclass(Tasks::class, Tasks.serializer())
+            subclass(ChapterTestGames::class, ChapterTestGames.serializer())
+            subclass(ChapterTestGameSession::class, ChapterTestGameSession.serializer())
             subclass(DeedGame::class, DeedGame.serializer())
             subclass(StarPlates::class, StarPlates.serializer())
             subclass(PriceCheck::class, PriceCheck.serializer())

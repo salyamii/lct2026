@@ -11,8 +11,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.nksk.lctapp.domain.content.StoryContentRepository
+import ru.nksk.lctapp.domain.content.ItemDefinition
 import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.domain.game.GameState
+import ru.nksk.lctapp.domain.game.OwnedItem
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.R
 import java.util.UUID
@@ -36,13 +38,20 @@ internal class GearViewModel @Inject constructor(
         observation = viewModelScope.launch {
             mutableState.value = GearLoadState.Loading
             try {
+                var projected: InventoryInput? = null
+                var definitions: List<ItemDefinition>? = null
                 games.observe().collect { saved ->
                     val game = checkNotNull(saved) { "Inventory requires an existing save" }
-                    // Read after ownership: newly acquired definitions must already be installed.
-                    val catalog = content.read()
+                    // Keep command guards fresh even when only a wallet/day changed.
                     latest = game
-                    mutableState.value = GearLoadState.Ready(gearUiState(game.ownedItems, catalog.items,
-                        game.pet.name, game.pet.selectedLookId), busy = changing)
+                    val input = InventoryInput(game.ownedItems, game.pet.name, game.pet.selectedLookId)
+                    if (input == projected) return@collect
+                    // Definitions are immutable. New ownership must read after its catalog install;
+                    // changing an outfit or name can reuse the already validated definitions.
+                    if (definitions == null || projected?.owned != input.owned) definitions = content.read().items
+                    val inventory = gearUiState(input.owned, checkNotNull(definitions), input.name, input.look)
+                    projected = input
+                    mutableState.value = GearLoadState.Ready(inventory, busy = changing)
                 }
             } catch (cancelled: CancellationException) {
                 throw cancelled
@@ -75,3 +84,5 @@ internal class GearViewModel @Inject constructor(
         }
     }
 }
+
+private data class InventoryInput(val owned: List<OwnedItem>, val name: String, val look: String)

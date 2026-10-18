@@ -55,5 +55,6 @@ internal fun eventMediaArtwork(key: String?): Int? = when (key) {
     "story.route_token" -> R.drawable.story_route_token
     "story.signal_lens" -> R.drawable.story_signal_lens
     "story.tower_token" -> R.drawable.story_tower_token
+    "story.boat_journey" -> R.drawable.story_game_boat
     else -> null
 }

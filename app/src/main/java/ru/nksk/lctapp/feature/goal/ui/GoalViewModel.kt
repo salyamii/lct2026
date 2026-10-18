@@ -342,7 +342,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
             currentGoalId = currentGoal?.goalId,
             returnToList = !showList && goal != null && handle.get<Boolean>("return_to_list") == true,
             completedProjectCount = catalog.goals.count { story.goalCompleted(it) },
-            campaignComplete = catalog.storyProgress(game).campaignComplete,
+            campaignComplete = story.campaignComplete,
             message = message, confirmation = confirmation, celebration = celebration,
             purchaseResult = handle.get<String>("purchase_result_item")?.let { id ->
                 catalog.content.items.firstOrNull { it.id == id && game.ownedItems.any { owned -> owned.itemId == id } }

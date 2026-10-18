@@ -1,0 +1,24 @@
+[
+  {
+    "name": "story_game_workbench_surface",
+    "transparent": false,
+    "refs": [
+      "C:/Users/User/StudioProjects/lct2026/app/src/main/res/drawable-nodpi/story_cleaning_worktable.webp"
+    ],
+    "prompt": "Use case: stylized-concept. Asset type: portrait 2:3 background surface for an interactive children's adventure workshop game. Reference is for rich warm carved wood and illustrated dimensional finish ONLY. Create a clean empty craftsman's tabletop viewed from overhead with slight depth along its outer bevel, filling the whole image. Warm walnut/honey wood, subtle fine grain and broad plank joins, small mellow brass corner fasteners at the extreme edges. Bright enough to see navy telescope and blue backpack pieces placed on it later. Clear spacious EMPTY center 85 percent; restrained natural wear, warm lamplight from upper left. No tools, no telescope, no cloth, no lamp, no characters, no text, no holes in center, no interface, no environment or horizon. Opaque background, rectangular surface to the image edges, portrait 2:3. Polished hand-painted dimensional style matching reference game props, not photoreal.",
+    "source": "C:\\Users\\User\\.codex\\generated_images\\01a0d50c-9a86-79c1-a183-61990ad4f8f2\\exec-0a7c1ad0-04d9-4a07-8964-2854f384e171.png"
+  },
+  {
+    "name": "story_game_strap_patch",
+    "transparent": true,
+    "refs": [
+      "C:/Users/User/StudioProjects/lct2026/app/src/main/res/drawable-nodpi/event_backpack_torn.webp"
+    ],
+    "prompt": "Use case: stylized-concept. Transparent portrait 2:3 game sprite atlas with TWO disconnected pieces of the reference blue canvas explorer backpack, strictly FLAT OVERHEAD view. This is a sewing minigame asset; each piece will move independently. TOP: a wide slightly rounded rectangle of deep navy woven backpack canvas with caramel leather bound outer sides, centered within x18%-82%, y6%-56% of full canvas. Keep its bottom central area unadorned navy cloth, no stitching there. BOTTOM: a separate narrower sturdy navy canvas shoulder strap with subtle caramel binding on its two long sides, centered within x34%-66%, y64%-96% of full canvas, top edge slightly frayed with a few short cream fibers. There MUST be a clear transparent horizontal gap y57%-63% so code can split the image. The lower strap will slide upward over upper fabric by26% of full height for sewing. Consistent scale/lighting, flat not rolled, warm tactile painterly dimensional game art, matching reference materials. NO backpack body, no buckles, NO premade seam, no stitch holes, no dots, no thread, no needle, no tools, no labels, no background, no ground shadow. Preserve fully transparent margins. Exactly two isolated pieces aligned to the described coordinates, both viewed from overhead.",
+    "source": "C:\\Users\\User\\.codex\\generated_images\\01a0d50c-9a86-79c1-a183-61990ad4f8f2\\exec-9f1dd3cf-d302-4c27-b9a3-a050eab57913.png",
+    "refinement": {
+      "prompt": "Edit this sprite atlas ONLY to remove the background. Keep the exact two blue fabric pieces and their caramel leather edges and frayed fibers, their positions and shapes, the full 1024x1536 canvas unchanged. Remove EVERY part of the black/brown/blue blurred background, glow and cast shadow outside the fabric and leather silhouettes. Outside the two physical pieces must be genuinely fully transparent alpha=0, including all margins and the horizontal gap. There must be NO opaque black rectangle, no blur or colored haze outside the objects, no checkerboard painted into the image. Crisp antialiased silhouette with real alpha transparency. Keep the material colors and rendering unchanged. No additions.",
+      "original": "C:\\Users\\User\\.codex\\generated_images\\01a0d50c-9a86-79c1-a183-61990ad4f8f2\\exec-9613e8da-ed0b-46b4-bf5f-7c68751f00ba.png"
+    }
+  }
+]

@@ -252,6 +252,23 @@ allocating a scrolling body. When both cannot fit, the panel scrolls as one colu
 Onboarding uses the same principle: a scrollable card must not receive only the
 leftover height via weight. Safe system/keyboard insets apply to controls; compact
 windows and large text retain accessible actions through scrolling (ARCH-D-008).
+By FINANCE-UI-D-028, the budget screen sets a body-height threshold large enough
+for an allocation card at the current font scale. The adviser and footer measure
+at natural height, with whole-panel scrolling when required. The food reminder
+is separate and disappears once the draft covers the known requirement. Its
+actual exposure can carry across draft edits only for the same planning ID,
+requirement and real balances; a hidden reminder never invents learning evidence.
+
+The main menu reserves system-bar/cutout insets without IME insets. Its rename
+dialog owns keyboard avoidance in its separate window; while open, it temporarily
+disables resizing of the background Activity window and restores the previous
+soft-input mode on disposal (PET-NAME-D-002).
+
+Inventory presentation compares only ownership (including order and occurrences),
+pet name and equipped look. Other committed game updates still refresh command
+guards but do not rebuild its cards. Immutable item definitions can be reused
+for name/outfit updates; changed ownership reads the installed catalog again,
+and retries start a fresh read. This cache never grants items or changes storage.
 
 Use `interactionBlocked` for a short write that must retain the button's label,
 color and size without a spinner. It disables pointer, keyboard and accessibility
@@ -412,10 +429,14 @@ Until that deadline, callers receive a retryable failure without an HTTP request
 WorkManager keeps ownership of durable scheduling. This preference is outside
 the game snapshot and does not alter Room's game schema.
 
-App composition schedules connected WorkManager requests after history changes
-(five-second debounce), on foreground/network return, every minute in foreground,
-and periodically every fifteen minutes subject to Android scheduling. This observes
-only the history sequence; serialization and network work stay off the main thread.
+By AUTO-SYNC-D-001, app composition calls the same repository directly on
+foreground/network return and every fifteen seconds while RESUMED and online.
+One foreground collector coalesces triggers during a slow pass; the repository's
+mutex also serializes manual and Worker calls. Foreground cancellation hands
+durable work back to WorkManager. Connected WorkManager requests remain queued
+after history changes (two-second debounce), on retryable failures and periodically
+every fifteen minutes subject to Android scheduling. This observes only the
+history sequence; serialization and network work stay off the main thread.
 The local world remains available offline and cloud conflicts never overwrite it.
 Debug and jury Settings also offer explicit local-authoritative cloud replacement
 (CLOUD-LOCAL-D-001). Room v24 retains the selected transport lineage together with

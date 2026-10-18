@@ -20,7 +20,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -89,8 +93,10 @@ fun MainMenuScreen(
         val scenePainter = rememberScenePainter(state.backgroundRes,
             DpSize((483f * sceneScale).dp, (858f * sceneScale).dp))
         VillageBackdrop(scenePainter)
-        // Only the foreground observes insets: the village extends behind native system bars.
-        BoxWithConstraints(Modifier.fillMaxSize().safeDrawingPadding().padding(vertical = 12.dp)) {
+        // A separate name dialog owns keyboard avoidance; the village must retain its framing.
+        BoxWithConstraints(Modifier.fillMaxSize()
+            .windowInsetsPadding(WindowInsets.systemBars.union(WindowInsets.displayCutout))
+            .padding(vertical = 12.dp)) {
             val useSideBySide = maxWidth > maxHeight || maxWidth >= 840.dp
             val sidePanelWidth = 360.dp.coerceAtMost(maxWidth * 0.52f)
             if (useSideBySide) {

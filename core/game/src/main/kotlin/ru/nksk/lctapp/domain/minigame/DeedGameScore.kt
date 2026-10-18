@@ -1,7 +1,12 @@
 package ru.nksk.lctapp.domain.minigame
 
+import ru.nksk.lctapp.domain.minigame.chapterone.*
+
 /** Supported mechanics, not a closed list of authored deeds or content IDs. */
-enum class DeedGameKind { MEMORY, COMPARISON, PRECISION, LIGHTS, SEQUENCE, PIPES, DIFFERENCES, STACKING }
+enum class DeedGameKind {
+    MEMORY, COMPARISON, PRECISION, LIGHTS, SEQUENCE, PIPES, DIFFERENCES, STACKING,
+    TELESCOPE, MARK, WHEEL, STRAP, SIGNAL, ROUTE_MAP, BOAT,
+}
 
 /** A completed round set; incomplete boards cannot be submitted for payment. */
 @kotlinx.serialization.Serializable
@@ -21,12 +26,53 @@ class DeedGameScore private constructor(
             DeedGameKind.PIPES -> attempts == 1 && correct == 1
             DeedGameKind.DIFFERENCES -> correct == DifferencesState.DIFF_COUNT && attempts >= DifferencesState.DIFF_COUNT
             DeedGameKind.STACKING -> attempts == StackingState.ROUNDS
+            DeedGameKind.TELESCOPE, DeedGameKind.MARK, DeedGameKind.WHEEL,
+            DeedGameKind.STRAP, DeedGameKind.SIGNAL, DeedGameKind.ROUTE_MAP, DeedGameKind.BOAT -> correct == 1 && attempts == 1
         }) { "Invalid completed mini-game result" }
     }
     /** Completed paid work earns at least one coin; a zero authored reward stays zero. */
     fun reward(maximum: Long): Long = deedReward(maximum, correct, attempts)
 
     companion object {
+        fun fromBoat(state: BoatJourney): DeedGameScore? =
+            if (state.phase == BoatPhase.ARRIVED && state.plan != null && state.distance == 1f &&
+                state.x.isFinite() && state.x in 0.18f..0.82f && state.targetX.isFinite() &&
+                state.targetX in 0.18f..0.82f && state.activeRock == null && state.knotPoints in 0..3 &&
+                state.touchedRocks.all { it in BoatJourney.rocks.indices } &&
+                state.paidRepairs >= 0 && state.manualRepairs >= 0 &&
+                state.paidRepairs + state.manualRepairs == state.touchedRocks.size &&
+                state.practiceCoinsSpent in 0..BoatJourney.REPAIR_PRICE
+            ) DeedGameScore(DeedGameKind.BOAT, 1, 1) else null
+
+        fun fromTelescope(state: TelescopeAssembly): DeedGameScore? =
+            if (state.completed && state.assembled && state.inFocus && state.selectedPart == null &&
+                state.focus.isFinite() && state.focus in 0f..1f && state.selectedFastener in 0..1 &&
+                state.firstFastener == TelescopeAssembly.MOUNT_TURN &&
+                state.secondFastener == TelescopeAssembly.MOUNT_TURN &&
+                state.eyepieceTurn == TelescopeAssembly.EYEPIECE_TURN
+            ) DeedGameScore(DeedGameKind.TELESCOPE, 1, 1) else null
+
+        fun fromMark(state: MarkState): DeedGameScore? =
+            if (state.complete && state.cleaned == MarkGame.dust.indices.toSet() && state.point == 0
+            ) DeedGameScore(DeedGameKind.MARK, 1, 1) else null
+
+        fun fromWheel(state: WheelRepair): DeedGameScore? =
+            if (state.completed && state.selectedSection in 0 until WheelRepair.SECTION_COUNT && state.angle.isFinite()
+            ) DeedGameScore(DeedGameKind.WHEEL, 1, 1) else null
+
+        fun fromStrap(state: StrapRepair): DeedGameScore? =
+            if (state.phase == StrapPhase.DONE && state.aligned &&
+                state.stitchedPoints == StrapRepair.STITCH_COUNT && state.knotTightened
+            ) DeedGameScore(DeedGameKind.STRAP, 1, 1) else null
+
+        fun fromSignal(state: SignalState): DeedGameScore? =
+            if (state.complete && state.checked && state.entered == SignalGame.code
+            ) DeedGameScore(DeedGameKind.SIGNAL, 1, 1) else null
+
+        fun fromRouteMap(state: StarChartState): DeedGameScore? =
+            if (state.joined == RouteMapGame.edges.indices.toSet() && state.selected == null
+            ) DeedGameScore(DeedGameKind.ROUTE_MAP, 1, 1) else null
+
         fun fromMemory(state: MemoryState): DeedGameScore? =
             if (state.won && state.faces.size == MemoryState.PAIRS * 2 &&
                 state.faces.groupingBy { it }.eachCount().values.all { it == 2 } &&

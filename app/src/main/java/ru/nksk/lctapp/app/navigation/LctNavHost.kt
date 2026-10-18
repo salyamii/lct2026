@@ -63,6 +63,8 @@ import ru.nksk.lctapp.feature.tasks.navigation.Tasks
 import ru.nksk.lctapp.feature.tasks.navigation.DeedGame
 import ru.nksk.lctapp.feature.tasks.navigation.deedGameEntry
 import ru.nksk.lctapp.feature.tasks.navigation.tasksEntry
+import ru.nksk.lctapp.feature.storygames.navigation.ChapterTestGameSession
+import ru.nksk.lctapp.feature.storygames.navigation.storyGamesEntry
 import ru.nksk.lctapp.feature.map.navigation.GameMap
 import ru.nksk.lctapp.feature.map.navigation.mapEntry
 import ru.nksk.lctapp.feature.learning.navigation.Learning
@@ -228,6 +230,10 @@ fun LctNavHost(
                     onTraining = { source -> navigator.navigate(source, SkillTraining) },
                     onBack = navigator::goBack,
                 )
+                storyGamesEntry(
+                    onOpen = { source, id -> navigator.navigate(source, ChapterTestGameSession(id)) },
+                    onBack = navigator::goBack,
+                )
                 goalEntry(onBack = navigator::goBack,
                     onOpenSavings = { source -> navigator.navigateToExisting(source, Savings) },
                     onContinueDay = { source -> navigator.replace(source, Day) },
@@ -271,7 +277,8 @@ fun LctNavHost(
                     onStoryGame = { source, id, choice -> navigator.replace(source, DeedGame(id, choice)) },
                     onLearning = { source -> navigator.navigate(source, ChapterPractice) },
                     onReflection = { source, day -> navigator.navigate(source, OtherPaths(day)) })
-                deedGameEntry(onFinished = finish, isCurrentEntry = { destination == it })
+                deedGameEntry(onFinished = finish, isCurrentEntry = { destination == it },
+                    chapterContent = { ChapterStoryGameContent(it) })
             },
         )
         if (redirectingToBudget) Box(Modifier.matchParentSize().pointerInput(Unit) {

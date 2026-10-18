@@ -376,7 +376,7 @@ private fun CoinsBadge(coins: Long, onClick: () -> Unit) {
 
 @Composable
 internal fun VillageMapButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
-    GameArtwork(R.drawable.menu_map,
+    GameArtwork(R.drawable.menu_map_v2,
         contentDescription = stringResource(R.string.menu_village),
         contentScale = ContentScale.Fit,
         modifier = modifier.alpha(0.92f).clickable(role = Role.Button, onClick = onClick),

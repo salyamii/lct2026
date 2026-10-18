@@ -86,6 +86,8 @@ sealed interface EngineCommand {
     /** Validate admission without applying the chosen story action. */
     @Serializable data class StartStoryGame(val occurrenceId: String, val choiceId: String,
         val resourcePriorityOfferId: String? = null) : EngineCommand
+    /** Pays only for the stopped boat; completing the trip remains a separate story outcome. */
+    @Serializable data class PayBoatRepair(val occurrenceId: String, val rockIndex: Int) : EngineCommand
     /** Also used for manual RANDOM repairs; wire identity is kept stable. */
     @Serializable data class CompleteStoryGame(val occurrenceId: String, val choiceId: String, val score: DeedGameScore,
         val resourcePriorityOfferId: String? = null) : EngineCommand

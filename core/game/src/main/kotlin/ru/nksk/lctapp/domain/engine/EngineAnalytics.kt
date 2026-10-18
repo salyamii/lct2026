@@ -182,7 +182,8 @@ internal class EngineAnalytics(private val factory: EventFactory, private val ru
                 DayJournalKind.EVENT_CHOICE -> factory.content.choices.find { it.id == entry.sourceId }?.eventId
                 else -> null
             }
-            if (eventId != null && factory.event(eventId).type == EventType.RANDOM) {
+            if (entry.kind == DayJournalKind.BOAT_REPAIR ||
+                eventId != null && factory.event(eventId).type == EventType.RANDOM) {
                 add(FactDetail.UnexpectedExpense(entry.id, -entry.moneyDelta, false), "recovery:${entry.id}",
                     "unexpected_expense", AnalyticsActor.SYSTEM)
             }

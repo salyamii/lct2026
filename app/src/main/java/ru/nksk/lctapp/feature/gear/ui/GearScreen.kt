@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -79,7 +80,7 @@ internal fun GearScreen(state: GearLoadState, onBack: () -> Unit, onRetry: () ->
             ) {
                 // Loading/error content scrolls too, including in landscape and at large font sizes.
                 LazyVerticalGrid(
-                    columns = GridCells.Adaptive(152.dp),
+                    columns = GridCells.Adaptive(152.dp * LocalDensity.current.fontScale.coerceAtLeast(1f)),
                     state = gridState,
                     contentPadding = PaddingValues(20.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),

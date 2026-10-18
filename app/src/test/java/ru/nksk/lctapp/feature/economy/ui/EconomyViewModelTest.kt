@@ -154,16 +154,20 @@ class EconomyViewModelTest {
         assertNull(repo.state.value!!.economy.planning)
     }
 
-    @Test fun adviserPrioritizesTheFullFoodRequirementBeforeTheFocusedCategory() {
+    @Test fun foodReminderIsSeparateFromTheFocusedCategoryAndUsesTheFullRequirement() {
         val shown = BudgetUiState(needs = 5, wants = 0, savings = 0, reserve = 0,
             unallocated = 0, weeklyIncome = 100, minimumNeeds = 5, knownNeeds = 35,
             focusedArticle = BudgetArticle.RESERVE)
-        assertTrue(shown.adviser.text.contains("не хватает ещё 30 монет"))
-        assertTrue(shown.foodContextText.contains("35 монет"))
+        assertTrue(checkNotNull(shown.foodReminderText).contains("ещё 30 монет"))
+        assertTrue(checkNotNull(shown.foodReminderText).contains("35 монет"))
+        assertTrue(shown.adviser.text.contains("Запас"))
+        assertFalse(shown.adviser.text.contains("не хватает"))
         val funded = shown.copy(needs = 35)
-        assertTrue(funded.adviser.text.contains("В запасе пока ничего нет"))
+        assertNull(funded.foodReminderText)
+        assertNull(shown.copy(knownNeeds = 0).foodReminderText)
+        assertTrue(funded.adviser.text.contains("Пока он пуст"))
         assertNotEquals(funded.adviser.id, funded.copy(focusedArticle = BudgetArticle.WANTS).adviser.id)
-        assertTrue(funded.copy(reserve = 5).adviser.text.contains("в конце недели их можно переложить в копилку"))
+        assertTrue(funded.copy(reserve = 5).adviser.text.contains("в копилку в конце недели"))
     }
 
     @Test fun budgetHintRequiresExposureAndSurvivesDraftEdits() = runTest(dispatcher) {
