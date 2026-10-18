@@ -2,7 +2,7 @@ package ru.nksk.lctapp.domain.minigame
 
 import kotlin.random.Random
 
-/** Пара открытых карт, ожидающая сверки. */
+/** Пара открытых карт, ожидающая закрытия; совпадение возможно в старой сохранённой партии. */
 data class PendingPair(val first: Int, val second: Int)
 
 /**
@@ -21,15 +21,17 @@ data class MemoryState(
     val recallMistakes: Int = 0,
 ) {
     val won: Boolean get() = matched.size == faces.size
+    val pendingMatches: Boolean get() = pending?.let { faces[it.first] == faces[it.second] } == true
 
     /**
-     * Открыть карту. Пока открыта неразобранная пара, клики игнорируются -
-     * UI должен сначала вызвать [resolvePending].
+     * Открыть карту. Совпадение засчитывается сразу. Новая закрытая карта
+     * завершает показ несовпавшей пары и начинает следующий ход одним нажатием.
      */
     fun tap(index: Int): MemoryState {
-        if (won || pending != null) return this
+        if (won) return this
         if (index !in faces.indices) return this
         if (index in faceUp || index in matched) return this
+        if (pending != null) return resolvePending().tap(index)
         val open = faceUp.singleOrNull()
         return if (open == null) {
             copy(faceUp = faceUp + index, seen = seen + index)
@@ -39,8 +41,9 @@ data class MemoryState(
             val missedKnownPair = faces[open] != faces[index] && seen.any { known ->
                 known != open && known !in matched && known in faces.indices && faces[known] == faces[open]
             }
-            copy(faceUp = faceUp + index, pending = PendingPair(open, index), moves = moves + 1,
+            val revealed = copy(faceUp = faceUp + index, pending = PendingPair(open, index), moves = moves + 1,
                 seen = seen + index, recallMistakes = recallMistakes + if (missedKnownPair) 1 else 0)
+            if (revealed.pendingMatches) revealed.resolvePending() else revealed
         }
     }
 

@@ -4,8 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -94,25 +96,29 @@ class MiniGameViewModelsTest {
         assertArrayEquals(booleanArrayOf(true, true), saved.get<BooleanArray>("comparison_pick_larger"))
     }
 
-    @Test fun memoryRestoresOpenCardsAndResolvesThePendingPairOnce() = runTest(dispatcher) {
+    @Test fun memoryMatchesImmediatelyAndAcceptsTheNextCardWithoutAdvancingTime() = runTest(dispatcher) {
         val saved = SavedStateHandle(mapOf("faces" to intArrayOf(0, 0, 1, 1)))
         val model = MemoryGameViewModel(saved)
         model.onAction(MemoryGameAction.Tap(0))
         model.onAction(MemoryGameAction.Tap(1))
-        model.onAction(MemoryGameAction.Tap(2)) // Ignore input while feedback is visible.
+        assertEquals(setOf(0, 1), model.uiState.value.game.matched)
+        assertNull(model.uiState.value.game.pending)
+        model.onAction(MemoryGameAction.Tap(2))
         val restored = MemoryGameViewModel(copyOf(saved))
-        assertEquals(setOf(0, 1), restored.uiState.value.game.faceUp)
+        assertEquals(setOf(2), restored.uiState.value.game.faceUp)
         assertEquals(1, restored.uiState.value.game.moves)
         advanceUntilIdle()
         assertEquals(setOf(0, 1), restored.uiState.value.game.matched)
+        assertEquals(setOf(2), restored.uiState.value.game.faceUp)
         assertNull(restored.uiState.value.game.pending)
         assertEquals(1, restored.uiState.value.game.moves)
     }
 
     @Test fun memoryRestartCancelsPendingFeedback() = runTest(dispatcher) {
-        val model = MemoryGameViewModel(SavedStateHandle(mapOf("faces" to intArrayOf(0, 0))))
+        val model = MemoryGameViewModel(SavedStateHandle(mapOf("faces" to intArrayOf(0, 0, 1, 1))))
         model.onAction(MemoryGameAction.Tap(0))
-        model.onAction(MemoryGameAction.Tap(1))
+        model.onAction(MemoryGameAction.Tap(2))
+        runCurrent()
         model.onAction(MemoryGameAction.Restart)
         val fresh = model.uiState.value
         advanceUntilIdle()
@@ -121,6 +127,68 @@ class MiniGameViewModelsTest {
         assertFalse(fresh.game.won)
         assertTrue(fresh.game.seen.isEmpty())
         assertEquals(0, fresh.game.recallMistakes)
+    }
+
+    @Test fun memoryMismatchStaysVisibleFor700msWhenThePlayerDoesNotContinue() = runTest(dispatcher) {
+        val saved = SavedStateHandle(mapOf("faces" to intArrayOf(0, 0, 1, 1),
+            "face_up" to intArrayOf(0, 2), "moves" to 1))
+        val restored = MemoryGameViewModel(saved)
+        runCurrent()
+        advanceTimeBy(699)
+        runCurrent()
+        assertEquals(setOf(0, 2), restored.uiState.value.game.faceUp)
+        advanceTimeBy(1)
+        runCurrent()
+        assertTrue(restored.uiState.value.game.faceUp.isEmpty())
+        assertNull(restored.uiState.value.game.pending)
+        assertEquals(1, restored.uiState.value.game.moves)
+    }
+
+    @Test fun memoryNewTapCancelsTheOldTimerAndKeepsTheNextCardOpen() = runTest(dispatcher) {
+        val model = MemoryGameViewModel(SavedStateHandle(mapOf("faces" to intArrayOf(0, 0, 1, 1))))
+        model.onAction(MemoryGameAction.Tap(0))
+        model.onAction(MemoryGameAction.Tap(2))
+        runCurrent()
+        advanceTimeBy(200)
+        model.onAction(MemoryGameAction.Tap(1))
+        advanceUntilIdle()
+        assertEquals(setOf(1), model.uiState.value.game.faceUp)
+        assertNull(model.uiState.value.game.pending)
+        assertEquals(1, model.uiState.value.game.moves)
+        model.onAction(MemoryGameAction.Tap(0))
+        assertEquals(setOf(0, 1), model.uiState.value.game.matched)
+        assertEquals(0, model.uiState.value.game.recallMistakes)
+    }
+
+    @Test fun memoryOldTimerCannotCloseANewerMismatchOrChargeTheMistakeAgain() = runTest(dispatcher) {
+        val model = MemoryGameViewModel(SavedStateHandle(mapOf("faces" to intArrayOf(0, 0, 1, 1))))
+        model.onAction(MemoryGameAction.Tap(0))
+        model.onAction(MemoryGameAction.Tap(2))
+        runCurrent()
+        advanceTimeBy(200)
+        model.onAction(MemoryGameAction.Tap(1))
+        model.onAction(MemoryGameAction.Tap(3))
+        runCurrent()
+        advanceTimeBy(500)
+        runCurrent()
+        assertEquals(setOf(1, 3), model.uiState.value.game.faceUp)
+        advanceTimeBy(200)
+        runCurrent()
+        assertTrue(model.uiState.value.game.faceUp.isEmpty())
+        assertEquals(2, model.uiState.value.game.moves)
+        assertEquals(1, model.uiState.value.game.recallMistakes)
+    }
+
+    @Test fun memoryRestoresALegacyMatchingPairWithoutTheOldDelayOrAnExtraMove() = runTest(dispatcher) {
+        val model = MemoryGameViewModel(SavedStateHandle(mapOf("faces" to intArrayOf(0, 0, 1, 1),
+            "face_up" to intArrayOf(0, 1), "moves" to 1)))
+        assertEquals(setOf(0, 1), model.uiState.value.game.matched)
+        assertNull(model.uiState.value.game.pending)
+        model.onAction(MemoryGameAction.Tap(2))
+        advanceUntilIdle()
+        assertEquals(setOf(2), model.uiState.value.game.faceUp)
+        assertEquals(1, model.uiState.value.game.moves)
+        assertEquals(0, model.uiState.value.game.recallMistakes)
     }
 
     @Test fun memoryRestoresKnowledgeAndCountsAMissedKnownPairOnlyOnce() = runTest(dispatcher) {

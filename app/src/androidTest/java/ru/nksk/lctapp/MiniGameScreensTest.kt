@@ -85,6 +85,32 @@ class MiniGameScreensTest {
         compose.runOnIdle { assertEquals(1, state.value.correctAnswers) }
     }
 
+    @Test fun memoryAllowsContinuingDuringMismatchAndImmediatelyAfterAMatch() {
+        val state = mutableStateOf(MemoryState(listOf(0, 0, 1, 1)))
+        compose.setContent {
+            LCTAppTheme {
+                MemoryGameScreen(MemoryGameUiState(state.value), onAction = { action ->
+                    if (action is MemoryGameAction.Tap) state.value = state.value.tap(action.index)
+                }, onBack = {}, deed = DeedGamePresentation("Найди пару", 12, true))
+            }
+        }
+        compose.onNodeWithContentDescription("Карта 1, закрыта").performScrollTo().performClick()
+        compose.onNodeWithContentDescription("Карта 3, закрыта").performScrollTo().performClick()
+        compose.onNodeWithContentDescription("Карта 1, ключ").assertExists()
+        compose.onNodeWithContentDescription("Карта 3, армиллярная сфера").assertExists()
+        compose.onNodeWithContentDescription("Карта 4, закрыта").performScrollTo().performClick()
+        compose.onNodeWithContentDescription("Карта 1, закрыта").assertExists()
+        compose.onNodeWithContentDescription("Карта 3, закрыта").performScrollTo().performClick()
+        compose.onNodeWithContentDescription("Карта 4, армиллярная сфера, пара найдена").assertExists()
+        compose.onNodeWithContentDescription("Карта 1, закрыта").performScrollTo().performClick()
+        compose.onNodeWithContentDescription("Карта 2, закрыта").performScrollTo().performClick()
+        compose.runOnIdle {
+            assertTrue(state.value.won)
+            assertEquals(3, state.value.moves)
+            assertEquals(0, state.value.recallMistakes)
+        }
+    }
+
     @Test fun compactLandscapeKeepsTheLastMemoryCardReachable() {
         val actions = mutableListOf<MemoryGameAction>()
         compose.setContent {
