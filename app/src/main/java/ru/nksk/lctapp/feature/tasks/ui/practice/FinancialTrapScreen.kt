@@ -57,7 +57,7 @@ fun FinancialTrapScreen(
                     }
                     val artwork = when (scenario) {
                         TrapScenario.TICKET, TrapScenario.URGENT_TICKET -> R.drawable.prop_practice_ticket
-                        TrapScenario.BORROWED_LANTERN -> if (first) R.drawable.story_letter else R.drawable.gear_lantern
+                        TrapScenario.BORROWED_LANTERN -> if (first) R.drawable.story_letter else R.drawable.prop_practice_lantern
                         TrapScenario.DELIVERY_FEE -> R.drawable.story_supply_bag
                     }
                     PracticeOption(stringResource(title), details, Modifier.weight(1f), artwork,

@@ -37,7 +37,7 @@ internal val PracticeItem.artwork: Int
         PracticeItem.MAP -> R.drawable.story_route_map
         PracticeItem.WATER -> R.drawable.icon_practice_water
         PracticeItem.BUN -> R.drawable.prop_bakery_bun
-        PracticeItem.LANTERN -> R.drawable.gear_lantern
+        PracticeItem.LANTERN -> R.drawable.prop_practice_lantern
         PracticeItem.RINGS -> R.drawable.prop_fair_ring_toss
         PracticeItem.TOY_BOAT -> R.drawable.prop_fair_toy_boat
         PracticeItem.KEYCHAIN -> R.drawable.prop_fair_compass_keychain
