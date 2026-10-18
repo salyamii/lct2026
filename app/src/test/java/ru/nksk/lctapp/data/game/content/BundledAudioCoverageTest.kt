@@ -91,7 +91,7 @@ class BundledAudioCoverageTest {
     }
 
     @Test fun currentDeedsPreserveTheirAuthoredAudioAndLegacyIntroductionHasItsVoice() {
-        catalog.deedPool.forEach { eventId ->
+        catalog.deedPool.filter { it.startsWith("figma-") }.forEach { eventId ->
             val originalId = eventId.removeSuffix(":game-v3").removeSuffix(":balance-v2")
             assertNotEquals("Expected a rebalanced deed: $eventId", originalId, eventId)
             val originalMedia = catalog.cards.getValue(originalId).presentation.media

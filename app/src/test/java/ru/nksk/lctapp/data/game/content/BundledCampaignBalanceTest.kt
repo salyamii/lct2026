@@ -295,6 +295,8 @@ class BundledCampaignBalanceTest {
         fun Long?.orZero() = this ?: 0L
 
         fun score(kind: DeedGameKind, cap: Int): DeedGameScore = checkNotNull(when (kind) {
+            DeedGameKind.NEED_WANT, DeedGameKind.REAL_DISCOUNT, DeedGameKind.COIN_BALANCE,
+            DeedGameKind.FINANCIAL_TRAP, DeedGameKind.EXTRA_PURCHASE -> completedFinancialGameScore(kind, cap)
             DeedGameKind.TELESCOPE, DeedGameKind.MARK, DeedGameKind.WHEEL, DeedGameKind.STRAP,
             DeedGameKind.SIGNAL, DeedGameKind.ROUTE_MAP, DeedGameKind.BOAT -> completedChapterGameScore(kind)
             // Five-round games cannot represent exactly 50%; round down to 2/5, never up to 3/5.

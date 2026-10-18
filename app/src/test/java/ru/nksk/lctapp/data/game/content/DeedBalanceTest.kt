@@ -8,8 +8,9 @@ class DeedBalanceTest {
     @Test fun newRewardsFollowEffortAndOldInstalledDefinitionsRemainAvailable() {
         val catalog = bundledGameCatalog()
         EventFactory(catalog.content, catalog.policies, catalog.meals, catalog.goals, catalog.storyCampaign)
-        assertEquals(13, catalog.deedPool.size)
-        for (id in catalog.deedPool) {
+        val revisedDeeds = catalog.deedPool.filter { it.startsWith("figma-") }
+        assertEquals(13, revisedDeeds.size)
+        for (id in revisedDeeds) {
             val balancedId = id.removeSuffix(":game-v3")
             assertTrue(balancedId.endsWith(":balance-v2"))
             val originalId = balancedId.removeSuffix(":balance-v2")

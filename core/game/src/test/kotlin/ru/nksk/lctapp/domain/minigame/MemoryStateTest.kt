@@ -42,19 +42,30 @@ class MemoryStateTest {
     }
 
     @Test
-    fun tap_whilePending_isIgnored() {
-        val state = MemoryState(faces = listOf(0, 1, 1)).tap(0).tap(1)
-        assertEquals(state, state.tap(2))
+    fun tap_closedCardDuringMismatch_startsNextMoveImmediately() {
+        val state = MemoryState(faces = listOf(0, 0, 1, 1)).tap(0).tap(2)
+        val next = state.tap(1)
+        assertEquals(setOf(1), next.faceUp)
+        assertNull(next.pending)
+        assertEquals(1, next.moves)
+        assertEquals(0, next.recallMistakes)
+        assertEquals(setOf(0, 1, 2), next.seen)
+        val matched = next.tap(0)
+        assertEquals(setOf(0, 1), matched.matched)
+        assertNull(matched.pending)
+        assertEquals(2, matched.moves)
+        assertEquals(0, matched.recallMistakes)
     }
 
     @Test
-    fun resolvePending_matchingPair_marksMatched() {
+    fun tap_matchingPair_marksMatchedWithoutWaiting() {
         val state = MemoryState(faces = listOf(0, 0)).tap(0).tap(1)
-        val resolved = state.resolvePending()
-        assertEquals(setOf(0, 1), resolved.matched)
-        assertTrue(resolved.won)
-        assertNull(resolved.pending)
-        assertTrue(resolved.faceUp.isEmpty())
+        assertEquals(setOf(0, 1), state.matched)
+        assertTrue(state.won)
+        assertNull(state.pending)
+        assertTrue(state.faceUp.isEmpty())
+        assertEquals(1, state.moves)
+        assertEquals(state, state.resolvePending())
     }
 
     @Test
@@ -73,10 +84,12 @@ class MemoryStateTest {
         for (first in faces.indices) {
             if (first in state.matched) continue
             val second = faces.withIndex().first { it.index != first && it.value == faces[first] && it.index !in state.matched }.index
-            state = state.tap(first).tap(second).resolvePending()
+            state = state.tap(first).tap(second)
         }
         assertTrue(state.won)
         assertEquals(faces.size, state.matched.size)
+        assertEquals(4, state.moves)
+        assertEquals(0, state.recallMistakes)
     }
 
     @Test
@@ -141,7 +154,10 @@ class MemoryStateTest {
         assertEquals(first, first.tap(-1))
         assertEquals(first, first.tap(4))
         val pending = first.tap(2)
-        assertEquals(pending, pending.tap(3))
+        assertEquals(pending, pending.tap(0))
+        assertEquals(pending, pending.tap(2))
+        assertEquals(pending, pending.tap(-1))
+        assertEquals(pending, pending.tap(4))
         val resolved = pending.resolvePending()
         assertEquals(resolved, resolved.resolvePending())
         val matched = resolved.tap(0).tap(1).resolvePending()

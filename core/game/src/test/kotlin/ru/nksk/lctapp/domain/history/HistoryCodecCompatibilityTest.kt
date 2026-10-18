@@ -6,7 +6,9 @@ import kotlinx.serialization.json.*
 import org.junit.Assert.*
 import org.junit.Test
 import ru.nksk.lctapp.domain.analytics.AnalyticsFact
+import ru.nksk.lctapp.domain.analytics.AssessmentTask
 import ru.nksk.lctapp.domain.analytics.Assistance
+import ru.nksk.lctapp.domain.analytics.ComparisonSide
 import ru.nksk.lctapp.domain.analytics.DecisionContext
 import ru.nksk.lctapp.domain.analytics.FactDetail
 import ru.nksk.lctapp.domain.analytics.ReserveApplication
@@ -28,6 +30,20 @@ import ru.nksk.lctapp.domain.story.StoryDecision
 import ru.nksk.lctapp.domain.story.StoryState
 
 class HistoryCodecCompatibilityTest {
+    @Test fun legacyComparisonFactsKeepTheirWireFormatAndSnapshotChecksum() {
+        val state = state(5)
+        val fact = AnalyticsFact("compare", "run", "quiz", "answer", 1,
+            FactDetail.QuestionAnswer("q", 1, AssessmentTask.CompareAmounts(80, 20, ComparisonSide.LEFT)), context())
+        val history = listOf(AuditEntry("init", 1, "run", AuditType.INITIALIZED, after = state, facts = listOf(fact)))
+        val snapshot = oldSnapshot(5, "run", state, history)
+        assertFalse(OldCodec.encodeSnapshot(snapshot).contains("\"pickLarger\""))
+        val decoded = assertCompatible(snapshot)
+        assertEquals(snapshot.checksum, HistoryCodec.snapshot("run", decoded.state, decoded.history).checksum)
+        val task = (decoded.history.single().facts.single().detail as FactDetail.QuestionAnswer).task
+        assertTrue((task as AssessmentTask.CompareAmounts).pickLarger)
+        assertTrue(task.isCorrect())
+    }
+
     @Test fun emptyHistoryAndArchivesKeepTheExactOriginalWireAndSignatureForEveryVersion() {
         for (version in 1..5) {
             val snapshot = oldSnapshot(version, "empty-$version", state(version), emptyList())

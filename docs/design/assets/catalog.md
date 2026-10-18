@@ -231,7 +231,7 @@ the two 64 × 64 SVG illustrations retain their viewport in Android vectors.
 | `location_observatory_stage` | [2990:226](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=2990-226) | [PNG](../figma/financial-adventure-2026-09-25/observatory-stage.png) |
 | `prop_chronoscope_workbench` | [3023:313](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3023-313) | [PNG](../figma/financial-adventure-2026-09-25/chronoscope-workbench.png) |
 | `location_fair_hat_stall` | [3023:318](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3023-318) | [PNG](../figma/financial-adventure-2026-09-25/fair-hat-stall.png) |
-| `gear_star_map` | [3052:285](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3052-285) | [SVG](sources/financial-goals/goal_star_map.svg) |
+| `gear_star_map` | Generated replacement · 2026-10-19 | [WebP](../../../app/src/main/res/drawable-nodpi/gear_star_map.webp), [source and prompt](sources/practice-scarf-stars-2026-10-19/README.md) |
 | `gear_tripod` | [3052:298](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3052-298) | [SVG](sources/financial-goals/goal_tripod.svg) |
 | `gear_goal_telescope` | [3052:308](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3052-308) | [PNG](sources/financial-goals/goal_telescope.png) |
 | `gear_stargazing_trip` | [3052:314](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=3052-314) | [PNG](sources/financial-goals/goal_trip.png) |
@@ -1002,3 +1002,45 @@ SLEEP-D-001: фон в момент засыпания на итогах дня.
 [Исходный PNG](sources/location_bedroom_night.png) сохранён целиком. Конвертация:
 Pillow 12.3.0, WebP `lossless=True`, `exact=True`, `method=6`; размеры и все RGBA
 пиксели проверены на точное совпадение. Хеши и параметры - в [manifest.json](manifest.json).
+
+## Standalone mini-games — 2026-10-18
+
+Original PNG fills, full canvas and alpha preserved; lossless exact WebP, RGBA verified.
+Existing matching NPCs, locations, map, bun, fair goods and compass are reused.
+
+| Resource | Canvas | Figma source |
+| --- | --- | --- |
+| `npc_luna_explaining` | 1107 × 1421 | [4153:928](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-928) |
+| `prop_practice_backpack` | 1024 × 1024 | [4153:1046](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1046) |
+| `prop_coin_balance_scales` | 1536 × 1024 | [4211:705](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4211-705) |
+| `prop_practice_medicine` | 128 × 85 | [4153:1193](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1193) |
+| `prop_practice_bread` | 128 × 85 | [4153:1213](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1213) |
+| `prop_practice_candy` | 128 × 118 | [4153:1217](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1217) |
+| `npc_tiko_workbench` | 1254 × 1254 | [4153:1729](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1729) |
+| `prop_practice_workbench` | 1024 × 1536 | [4153:1730](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1730) |
+| `prop_practice_plank` | 128 × 85 | [4153:1734](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1734) |
+| `prop_practice_candles` | 1254 × 1254 | [Generated household candle: source and prompt](sources/practice-candle-2026-10-19/README.md) |
+| `prop_practice_nails` | 128 × 99 | [4153:1740](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1740) |
+| `prop_practice_hammer` | 128 × 85 | [4153:1743](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1743) |
+| `prop_practice_ticket` | 128 × 85 | [4153:1543](https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1543) |
+
+### Practice illustrations
+
+The teddy bear retains an authored vector illustration. Water, scarf and fishing
+supplies use generated transparent artwork added on 2026-10-19. These are
+implementation illustrations, not Figma bitmap exports.
+
+| Resource | Canvas | Source |
+| --- | --- | --- |
+| `icon_practice_water` | 1254 × 1254 | [Generated transparent WebP](../../../app/src/main/res/drawable-nodpi/icon_practice_water.webp), [source and prompt](sources/practice-water-2026-10-19/README.md) |
+| `icon_practice_scarf` | 1254 × 1254 | [Generated WebP](../../../app/src/main/res/drawable-nodpi/icon_practice_scarf.webp), [source and prompt](sources/practice-scarf-stars-2026-10-19/README.md) |
+| `icon_practice_teddy` | 96 × 96 | Authored SVG → Android vector |
+| `icon_practice_fishing_rod` | 1254 × 1254 | [Generated WebP](../../../app/src/main/res/drawable-nodpi/icon_practice_fishing_rod.webp), [source and prompt](sources/practice-fishing-2026-10-19/README.md) |
+| `icon_practice_bait` | 1254 × 1254 | [Generated WebP](../../../app/src/main/res/drawable-nodpi/icon_practice_bait.webp), [source and prompt](sources/practice-fishing-2026-10-19/README.md) |
+| `icon_practice_bucket` | 1254 × 1254 | [Generated WebP](../../../app/src/main/res/drawable-nodpi/icon_practice_bucket.webp), [source and prompt](sources/practice-fishing-2026-10-19/README.md) |
+
+### Целый фонарь для практических игр — 2026-10-19
+
+| Resource | Canvas | Source |
+| --- | --- | --- |
+| `prop_practice_lantern` | 1254 × 1254 | [WebP](../../../app/src/main/res/drawable-nodpi/prop_practice_lantern.webp), [source and prompt](sources/practice-lantern-2026-10-19/README.md) |

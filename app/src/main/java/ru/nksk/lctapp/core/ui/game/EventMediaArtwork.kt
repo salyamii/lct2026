@@ -12,6 +12,7 @@ internal fun EventMedia.sceneArtwork(description: String): EventSceneArtwork? =
 /** Platform resource bindings contain semantic keys, never event identities. */
 @DrawableRes
 internal fun eventMediaArtwork(key: String?): Int? = when (key) {
+    "npc.butcher.orders" -> R.drawable.npc_butcher_orders
     "purchase.bakery_bun" -> R.drawable.prop_bakery_bun
     "purchase.explorer_hat" -> R.drawable.prop_fair_explorer_hat
     "purchase.ring_toss" -> R.drawable.prop_fair_ring_toss

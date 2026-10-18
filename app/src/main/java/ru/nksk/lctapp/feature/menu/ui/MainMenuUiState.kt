@@ -30,6 +30,7 @@ data class MainMenuUiState(
     val spendingPreview: String? = null,
     val canRestartCampaign: Boolean = false,
     val nameEditor: PetNameEditorUiState? = null,
+    val availableDeedsCount: Int = 0,
 )
 
 /** A selected, unowned item and money already in the piggy bank, never a draft allocation. */
@@ -64,6 +65,7 @@ internal val MainMenuPreviewState = MainMenuUiState(
     savings = MainMenuSavingsUiState("preview-tripod", "Штатив", saved = 12, total = 36),
     completedGoals = 0,
     totalGoals = 4,
+    availableDeedsCount = 3,
     pet = PetState("PLAIN", PetVisualState.NORMAL).toMainMenuPetUiState(),
     dayStatus = "День 2",
     indicators = PetIndicatorsUiState(3, 5, "Устал", "Дела расходуют энергию. Отдых помогает её восстановить.",

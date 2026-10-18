@@ -8,10 +8,12 @@
     <string name="deeds_back_to_list">К списку дел</string>
     <string name="deeds_demo_reward">Демо: +%1$d монет</string>
     <string name="deeds_price_prompt">Какая покупка дороже?</string>
+    <string name="deeds_price_cheaper_prompt">Какая покупка дешевле?</string>
     <string name="deeds_question">Счёт %1$d из %2$d</string>
     <string name="deeds_correct">Правильно</string>
     <string name="deeds_incorrect">Неправильно</string>
     <string name="deeds_price_hint">Выбери более дорогой товар</string>
+    <string name="deeds_price_cheaper_hint">Выбери более дешёвый товар</string>
     <string name="deeds_price_next">Дальше</string>
     <string name="deeds_price_finish">Завершить</string>
     <string name="deeds_price_complete">Счета сверены!</string>
