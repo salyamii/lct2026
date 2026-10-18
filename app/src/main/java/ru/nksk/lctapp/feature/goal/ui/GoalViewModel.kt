@@ -155,7 +155,7 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
         confirmation = PurchaseConfirmation(item.id, renderPetText(item.name, game.pet.name).asGameUiText(), price,
             quote.fromSavings, quote.fromAvailable.parts, game.economy.availableBalance, game.economy.savingsBalance,
             remaining, game.economy.savingsBalance - quote.fromSavings, food, "goal-purchase:${prepared.id}",
-            demoMode = session.demoModeEnabled)
+            demoMode = session.demoModeEnabled, reserveBefore = game.economy.plan.reserve)
         message = null
         render()
     }

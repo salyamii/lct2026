@@ -1,6 +1,7 @@
 package ru.nksk.lctapp.feature.tasks.ui
 
 import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.SavedStateHandle
 import java.io.IOException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -238,7 +239,7 @@ class DeedGameViewModelTest {
     private fun completedQuiz() = PriceQuizState.create().copy(current = 5, correctAnswers = 3)
 
     @Test fun aStoryBoardCompletesItsChoiceWithoutPretendingToBePaidWork() = runTest(dispatcher) {
-        val f = fixture(storyGame = true)
+        val f = fixture(storyGame = true, withSavingsGoal = true)
         runCurrent()
         val before = f.repo.read()
         val exits = mutableListOf<String?>()
@@ -256,6 +257,7 @@ class DeedGameViewModelTest {
         assertEquals(EventStatus.COMPLETED, f.repo.read().engine!!.events.single { it.id == f.id }.status)
         assertEquals(1, exits.size)
         assertFalse(exits.single().orEmpty().contains("Награда"))
+        assertNull(f.model.uiState.value.reward)
     }
 
     @Test fun backDuringInitialLoadingWaitsForTheSnapshotAndPersistsPause() = runTest(dispatcher) {
@@ -510,11 +512,247 @@ class DeedGameViewModelTest {
         assertEquals(1, exits.size)
     }
 
+    @Test fun realRewardOffersOnlyEarnedCoinsAndTransferKeepsNeedsAndWants() = runTest(dispatcher) {
+        val f = fixture(withSavingsGoal = true)
+        runCurrent()
+        val before = f.repo.read()
+        val exits = mutableListOf<String?>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { f.model.exit.collect { exits += it } }
+        f.repo.forbidFullHistoryRead = true
+        f.model.finishComparison(completedQuiz())
+        runCurrent()
+        val reward = checkNotNull(f.model.uiState.value.reward)
+        assertEquals(4L, reward.earned)
+        assertEquals(4L, reward.maximum)
+        assertTrue(exits.isEmpty())
+        f.model.openRewardTransfer()
+        f.model.changeRewardTransferInput("5")
+        f.model.confirmRewardTransfer()
+        runCurrent()
+        assertEquals(1, f.repo.writes)
+        f.model.changeRewardTransferInput("2")
+        f.model.confirmRewardTransfer()
+        f.model.confirmRewardTransfer()
+        runCurrent()
+        val after = f.repo.read()
+        assertEquals(before.economy.plan.needs, after.economy.plan.needs)
+        assertEquals(before.economy.plan.wants, after.economy.plan.wants)
+        assertEquals(before.economy.plan.reserve + 2, after.economy.plan.reserve)
+        assertEquals(before.economy.savingsBalance + 2, after.economy.savingsBalance)
+        assertEquals(before.economy.balance + 4, after.economy.balance)
+        assertEquals(2L, f.model.uiState.value.reward!!.deposited)
+        f.model.openRewardTransfer()
+        f.model.confirmRewardTransfer()
+        f.model.finishComparison(completedQuiz())
+        runCurrent()
+        assertEquals(1, f.repo.committed.count { it.command is EngineCommand.DepositSavings })
+        f.model.leave()
+        runCurrent()
+        assertEquals(listOf<String?>(null), exits)
+    }
+
+    @Test fun rewardCanBeDeclinedWithoutAnyTransfer() = runTest(dispatcher) {
+        val f = fixture(withSavingsGoal = true)
+        runCurrent()
+        f.model.finishComparison(completedQuiz())
+        runCurrent()
+        val earned = f.repo.read()
+        f.model.openRewardTransfer()
+        f.model.changeRewardTransferInput("2")
+        f.model.cancelRewardTransfer()
+        f.model.leave()
+        runCurrent()
+        assertEquals(earned, f.repo.read())
+        assertEquals(0, f.repo.committed.count { it.command is EngineCommand.DepositSavings })
+    }
+
+    @Test fun earnedRewardDoesNotIncludeLaterIncomeAfterLostCompletionReply() = runTest(dispatcher) {
+        val f = fixture(withSavingsGoal = true)
+        runCurrent()
+        f.repo.afterWrite = { throw IOException("Completion reply lost") }
+        f.model.finishComparison(completedQuiz())
+        runCurrent()
+        val original = f.repo.attempted.last()
+        f.repo.afterWrite = {}
+        f.repo.update { game -> game.copy(economy = game.economy.copy(
+            availableBalance = game.economy.availableBalance + 50,
+            plan = game.economy.plan.copy(reserve = game.economy.plan.reserve + 50)),
+            engine = game.engine!!.copy(revision = game.engine!!.revision + 1)) }
+        runCurrent()
+        f.model.retry()
+        runCurrent()
+        assertEquals(original, f.repo.attempted.last())
+        assertEquals(4L, f.model.uiState.value.reward!!.earned)
+        assertEquals(4L, f.model.uiState.value.reward!!.maximum)
+        assertEquals(1, f.repo.committed.count { it.command is EngineCommand.CompleteDeed })
+    }
+
+    @Test fun rewardTransferMaximumPreservesKnownFoodAndChangedTargetDisablesIt() = runTest(dispatcher) {
+        val f = fixture(withSavingsGoal = true)
+        runCurrent()
+        f.model.finishComparison(completedQuiz())
+        runCurrent()
+        val food = f.session.catalog.mealPolicy.foodRequirement(f.repo.read())
+        f.repo.update { game -> game.copy(economy = game.economy.copy(
+            plan = BudgetPlan(0, food - 1, 0, 3), availableBalance = food + 2)) }
+        runCurrent()
+        assertEquals(2L, f.model.uiState.value.reward!!.maximum)
+        f.model.openRewardTransfer()
+        f.model.changeRewardTransferInput("3")
+        f.model.confirmRewardTransfer()
+        runCurrent()
+        assertEquals(0, f.repo.committed.count { it.command is EngineCommand.DepositSavings })
+        f.repo.update { it.copy(selectedSavingItemId = null) }
+        runCurrent()
+        assertEquals(0L, f.model.uiState.value.reward!!.maximum)
+        f.model.changeRewardTransferInput("1")
+        f.model.confirmRewardTransfer()
+        runCurrent()
+        assertEquals(0, f.repo.committed.count { it.command is EngineCommand.DepositSavings })
+    }
+
+    @Test fun recreationAfterLostTransferReplyReadsReceiptAndNeverTransfersTwice() = runTest(dispatcher) {
+        val saved = SavedStateHandle()
+        val f = fixture(withSavingsGoal = true, savedState = saved)
+        runCurrent()
+        f.model.finishComparison(completedQuiz())
+        runCurrent()
+        f.model.openRewardTransfer()
+        f.model.changeRewardTransferInput("2")
+        f.repo.afterWrite = { throw IOException("Transfer reply lost") }
+        f.model.confirmRewardTransfer()
+        runCurrent()
+        val transfer = f.repo.attempted.last()
+        assertTrue(f.model.uiState.value.canRetry)
+        f.repo.afterWrite = {}
+        f.repo.forbidFullHistoryRead = true
+        val recreated = DeedGameViewModel(f.session, SavedStateHandle(saved.keys().associateWith { saved.get<Any?>(it) }))
+        store.put("game", recreated)
+        recreated.load(f.id)
+        runCurrent()
+        assertEquals(2L, recreated.uiState.value.reward!!.deposited)
+        assertFalse(recreated.uiState.value.reward!!.editing)
+        assertFalse(recreated.uiState.value.canRetry)
+        recreated.confirmRewardTransfer()
+        recreated.openRewardTransfer()
+        recreated.finishComparison(completedQuiz())
+        runCurrent()
+        assertEquals(1, f.repo.committed.count { it.id == transfer.id })
+        assertEquals(1, f.repo.committed.count { it.command is EngineCommand.DepositSavings })
+        assertEquals(2L, f.repo.read().economy.savingsBalance)
+    }
+
+    @Test fun recreationBeforeTransferCommitRetriesTheExactOriginalRequest() = runTest(dispatcher) {
+        val saved = SavedStateHandle()
+        val f = fixture(withSavingsGoal = true, savedState = saved)
+        runCurrent()
+        f.model.finishComparison(completedQuiz())
+        runCurrent()
+        f.model.openRewardTransfer()
+        f.model.changeRewardTransferInput("2")
+        f.repo.failure = IOException("No write")
+        f.model.confirmRewardTransfer()
+        runCurrent()
+        val original = f.repo.attempted.last()
+        f.repo.failure = null
+        val recreated = DeedGameViewModel(f.session, SavedStateHandle(saved.keys().associateWith { saved.get<Any?>(it) }))
+        store.put("game", recreated)
+        recreated.load(f.id)
+        runCurrent()
+        assertTrue(recreated.uiState.value.canRetry)
+        assertEquals(0, f.repo.committed.count { it.command is EngineCommand.DepositSavings })
+        recreated.retry()
+        recreated.retry()
+        runCurrent()
+        assertEquals(original, f.repo.attempted.last())
+        assertEquals(1, f.repo.committed.count { it.id == original.id })
+        assertEquals(2L, recreated.uiState.value.reward!!.deposited)
+    }
+
+    @Test fun failedRewardReadRetriesPresentationWithoutReplayingCompletion() = runTest(dispatcher) {
+        val f = fixture(withSavingsGoal = true)
+        runCurrent()
+        f.repo.receiptFailure = IOException("Receipt read unavailable")
+        f.model.finishComparison(completedQuiz())
+        runCurrent()
+        assertTrue(f.model.uiState.value.canRetry)
+        assertTrue(f.model.uiState.value.message!!.contains("показать награду"))
+        f.repo.receiptFailure = null
+        f.model.retry()
+        runCurrent()
+        assertEquals(4L, f.model.uiState.value.reward!!.earned)
+        assertNull(f.model.uiState.value.message)
+        assertEquals(1, f.repo.committed.count { it.command is EngineCommand.CompleteDeed })
+    }
+
+    @Test fun failedTransferReceiptReadDoesNotAllowANewDepositBeforeRecovery() = runTest(dispatcher) {
+        val f = fixture(withSavingsGoal = true)
+        runCurrent()
+        f.model.finishComparison(completedQuiz())
+        runCurrent()
+        f.model.openRewardTransfer()
+        f.model.changeRewardTransferInput("2")
+        f.repo.receiptFailure = IOException("Cannot read committed transfer")
+        f.model.confirmRewardTransfer()
+        runCurrent()
+        assertTrue(f.model.uiState.value.canRetry)
+        f.model.confirmRewardTransfer()
+        runCurrent()
+        assertEquals(1, f.repo.committed.count { it.command is EngineCommand.DepositSavings })
+        f.repo.receiptFailure = null
+        f.model.retry()
+        runCurrent()
+        assertEquals(2L, f.model.uiState.value.reward!!.deposited)
+        assertEquals(1, f.repo.committed.count { it.command is EngineCommand.DepositSavings })
+    }
+
+    @Test fun staleCompletionRestoresExplicitRetryInsteadOfAnEndlessOldRequest() = runTest(dispatcher) {
+        val saved = SavedStateHandle()
+        val f = fixture(withSavingsGoal = true, savedState = saved)
+        runCurrent()
+        f.repo.failure = IOException("Write unavailable")
+        f.model.finishComparison(completedQuiz())
+        runCurrent()
+        val original = f.repo.attempted.last()
+        f.repo.failure = null
+        f.repo.update { game -> game.copy(engine = game.engine!!.copy(revision = game.engine!!.revision + 1)) }
+        runCurrent()
+        f.model.retry()
+        runCurrent()
+        assertEquals(original, f.repo.attempted.last())
+        val recreated = DeedGameViewModel(f.session, SavedStateHandle(saved.keys().associateWith { saved.get<Any?>(it) }))
+        store.put("game", recreated)
+        recreated.load(f.id)
+        runCurrent()
+        assertFalse(recreated.uiState.value.loading)
+        assertTrue(recreated.uiState.value.canRetry)
+        assertEquals(0, f.repo.committed.count { it.command is EngineCommand.CompleteDeed })
+        recreated.retry()
+        runCurrent()
+        assertNotEquals(original.id, f.repo.attempted.last().id)
+        assertEquals(4L, recreated.uiState.value.reward!!.earned)
+        assertEquals(1, f.repo.committed.count { it.command is EngineCommand.CompleteDeed })
+    }
+
+    @Test fun demoCompletionNeverOffersSavingsFromDemoReward() = runTest(dispatcher) {
+        val f = fixture(withSavingsGoal = true, demoPreferences = MutableDemoPreferences(true))
+        runCurrent()
+        f.model.finishComparison(completedQuiz())
+        runCurrent()
+        assertNull(f.model.uiState.value.reward)
+        assertEquals(0, f.repo.committed.count { it.command is EngineCommand.DepositSavings })
+    }
+
     private suspend fun fixture(storyGame: Boolean = false, storyContext: DecisionContext? = null,
-        demoPreferences: DemoPreferencesRepository = DisabledDemoPreferencesRepository): Fixture {
-        val initial = createInitialGameState().let { it.copy(economy = EconomyState(plan = BudgetPlan(35, 20, 20, 25), unallocated = 0, planning = null)) }
-        val repo = DeedRepository(initial)
+        demoPreferences: DemoPreferencesRepository = DisabledDemoPreferencesRepository,
+        withSavingsGoal: Boolean = false, savedState: SavedStateHandle = SavedStateHandle()): Fixture {
         val original = bundledGameCatalog()
+        val goal = original.goals.first()
+        val initial = createInitialGameState().let { it.copy(
+            economy = EconomyState(plan = if (withSavingsGoal) BudgetPlan(35, 20, 0, 45) else BudgetPlan(35, 20, 20, 25), unallocated = 0, planning = null),
+            selectedGoalId = if (withSavingsGoal) goal.goalId else it.selectedGoalId,
+            selectedSavingItemId = if (withSavingsGoal) goal.itemIds.first() else it.selectedSavingItemId) }
+        val repo = DeedRepository(initial)
         val storyChoice = original.content.choices.single { it.eventId == original.introductionId }.id
         val catalog = if (storyGame) original.copy(policies = original.policies +
             (original.introductionId to original.policies.getValue(original.introductionId).copy(
@@ -531,7 +769,7 @@ class DeedGameViewModelTest {
             if (storyGame) EngineCommand.StartStoryGame(repo.read().engine!!.currentEvent!!.id, storyChoice)
             else EngineCommand.AcceptDeedProposal(repo.read().engine!!.currentEvent!!.id), context = storyContext)) is EngineResult.Applied)
         val id = repo.read().engine!!.currentEvent!!.id
-        val model = DeedGameViewModel(session)
+        val model = DeedGameViewModel(session, savedState)
         store.put("game", model)
         model.load(id, storyChoice.takeIf { storyGame })
         repo.writes = 0
@@ -551,6 +789,7 @@ class DeedGameViewModelTest {
 private class DeedRepository(initial: GameState) : GameRepository {
     private val state = MutableStateFlow(initial)
     var failure: Exception? = null
+    var receiptFailure: Exception? = null
     var afterWrite: suspend () -> Unit = {}
     var writes = 0
     var beforeFacts: suspend () -> Unit = {}
@@ -574,6 +813,7 @@ private class DeedRepository(initial: GameState) : GameRepository {
     }
     override suspend fun readCommandReceipt(requestId: String): AuditEntry? {
         commandReceiptReads += requestId
+        receiptFailure?.let { throw it }
         return history.lastOrNull { it.type == AuditType.COMMAND && it.request?.id == requestId }
     }
     override suspend fun readLatestCommand(): AuditEntry? {

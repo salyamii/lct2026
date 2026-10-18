@@ -26,6 +26,9 @@ data class CloudRestorePreview(
     val savingsCoins: Long,
 )
 
+data class CloudLocalUploadPreview(val id: String, val petName: String, val cloudPetName: String?)
+class CloudLocalUploadException(message: String) : IllegalStateException(message)
+
 interface CloudSyncRepository {
     val state: StateFlow<CloudSyncState>
     suspend fun synchronize(): CloudSyncResult
@@ -34,4 +37,7 @@ interface CloudSyncRepository {
     suspend fun prepareRestore(): CloudRestorePreview
     suspend fun restore(previewId: String)
     fun dismissRestore(previewId: String)
+    suspend fun prepareLocalUpload(): CloudLocalUploadPreview = error("Local cloud replacement is unavailable")
+    suspend fun uploadLocal(previewId: String) { error("Local cloud replacement is unavailable") }
+    fun dismissLocalUpload(previewId: String) = Unit
 }

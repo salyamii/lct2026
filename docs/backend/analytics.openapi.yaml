@@ -1355,6 +1355,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SkillObservation'
+        explanation:
+          anyOf:
+          - $ref: '#/components/schemas/SkillExplanation'
+          - type: 'null'
+          default: null
+          description: Optional parent copy for these observations. Omitted when absent, including retries of old batches.
       required:
       - skillId
       - completedEpisodes
@@ -1367,7 +1373,66 @@ components:
       - assistedEpisodes
       - observations
       description: All observations must belong to skillId. The backend verifies counters against evidence and applies
-        a separate versioned status policy.
+        a separate versioned status policy. Every explanation example must reference an observation of this skill
+        with the same episodeId and exactly the same complete sourceEventIds set.
+    SkillExplanation:
+      type: object
+      additionalProperties: false
+      properties:
+        version:
+          type: integer
+          format: int32
+          const: 1
+        description:
+          type: string
+          minLength: 1
+          maxLength: 400
+          pattern: \S
+        summary:
+          type: string
+          minLength: 1
+          maxLength: 600
+          pattern: \S
+        evidence:
+          type: array
+          maxItems: 2
+          items:
+            $ref: '#/components/schemas/SkillExplanationEvidence'
+      required:
+      - version
+      - description
+      - summary
+      - evidence
+      description: Shared wording for observed game episodes, not a client-assigned skill status. Evidence episodeId
+        values must be distinct. NUL characters are rejected. The server returns the block verbatim only when all
+        observations of the latest projection match those used for the merged skill assessment.
+    SkillExplanationEvidence:
+      type: object
+      additionalProperties: false
+      properties:
+        episodeId:
+          type: string
+          minLength: 1
+          pattern: \S
+        sourceEventIds:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+            pattern: \S
+        text:
+          type: string
+          minLength: 1
+          maxLength: 400
+          pattern: \S
+      required:
+      - episodeId
+      - sourceEventIds
+      - text
+      description: Exact source set of one observation, not a subset. No separate maximum length or count of IDs
+        is introduced; existing request size limits apply. NUL characters are rejected.
     SkillAssessmentDto:
       type: object
       additionalProperties: false
@@ -1379,6 +1444,13 @@ components:
         policyVersion:
           type: string
           pattern: \S
+        explanation:
+          anyOf:
+          - $ref: '#/components/schemas/SkillExplanation'
+          - type: 'null'
+          default: null
+          description: Optional unchanged parent copy from the latest matching projection; absent for incomplete
+            restored history, unsupported stored blocks or projections without an explanation.
       required:
       - skillId
       - status

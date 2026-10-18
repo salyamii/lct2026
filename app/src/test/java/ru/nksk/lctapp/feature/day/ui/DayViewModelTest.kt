@@ -643,7 +643,8 @@ class DayViewModelTest {
         assertTrue(paid.enabled)
         val explanation = checkNotNull(paid.spending)
         assertTrue(explanation.contains("3 монеты из денег на желания"))
-        assertTrue(explanation.contains("22 монеты из запаса"))
+        assertEquals("Возьмём для оплаты 3 монеты из денег на желания.\nИз запаса: 22. Останется: 0.", explanation)
+        assertEquals(22L, repository.read().economy.plan.reserve)
         assertEquals(20L, repository.read().economy.savingsBalance)
         assertNull(model.uiState.value.options.last().spending)
     }

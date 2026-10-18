@@ -26,6 +26,7 @@ import ru.nksk.lctapp.domain.backend.AnalyticsUploadRequest
 import ru.nksk.lctapp.domain.backend.AnalyticsUploadResponse
 import ru.nksk.lctapp.domain.backend.CloudSyncPhase
 import ru.nksk.lctapp.domain.backend.CloudSyncResult
+import ru.nksk.lctapp.domain.backend.CloudLocalUploadException
 import ru.nksk.lctapp.domain.backend.ParentCoinAllocation
 import ru.nksk.lctapp.domain.backend.ParentRewardApplication
 import ru.nksk.lctapp.domain.backend.ParentRewardDto
@@ -47,6 +48,7 @@ import ru.nksk.lctapp.domain.backend.SnapshotUploadRequest
 import ru.nksk.lctapp.domain.backend.SnapshotUploadResponse
 import ru.nksk.lctapp.domain.backend.worldSnapshot
 import ru.nksk.lctapp.domain.history.CloudWorldRead
+import ru.nksk.lctapp.domain.history.CloudWorldAncestor
 import ru.nksk.lctapp.domain.history.CloudEvidenceRead
 import ru.nksk.lctapp.domain.history.CloudRestoreReceipt
 import ru.nksk.lctapp.domain.history.WorldSnapshot
@@ -848,6 +850,123 @@ class RemoteCloudSyncRepositoryTest {
         return fixture
     }
 
+    @Test fun explicitLocalUploadReplacesAnUnrelatedCloudRunAndKeepsTheGameAndLineageOnLaterSync() = runTest {
+        val fixture = Fixture()
+        fixture.api.enforceLineage = true
+        val old = MemoryGames("old-server-run").readCloudWorld().world
+        fixture.api.remote = SnapshotDownloadResponse(old.runId, 7, "old-content", WorldSnapshotCodec.encode(old), payloadKind = "CURRENT_WORLD")
+        val before = fixture.games.exportSnapshot()
+        val preview = fixture.repository.prepareLocalUpload()
+        assertTrue(fixture.api.snapshotUploads.isEmpty())
+        fixture.repository.uploadLocal(preview.id)
+        assertEquals(before, fixture.games.exportSnapshot())
+        assertEquals(0, fixture.games.restoreAttempts)
+        val accepted = checkNotNull(fixture.api.remote).worldSnapshot()
+        assertEquals(before.runId, accepted.runId)
+        assertEquals(before.state, accepted.state)
+        assertTrue(accepted.predecessors.contains(CloudWorldAncestor(old.runId, old.generation, old.historySequence)))
+        assertNotNull(fixture.store.read(ProfileId)?.cloudLineagePayload)
+        fixture.games.rename("Продолженная локальная игра")
+        assertEquals(CloudSyncResult.SUCCESS, fixture.newRepository().synchronize())
+        assertEquals(accepted.predecessors, checkNotNull(fixture.api.remote).worldSnapshot().predecessors)
+        assertEquals("Продолженная локальная игра", checkNotNull(fixture.api.remote).worldSnapshot().state.pet.name)
+        fixture.games.restart("after-replacement")
+        assertEquals(CloudSyncResult.SUCCESS, fixture.newRepository().synchronize())
+        assertTrue(checkNotNull(fixture.api.remote).worldSnapshot().predecessors.any { it.runId == old.runId })
+    }
+
+    @Test fun aCapForTheNewRunIsDeliveredOnceAfterExplicitLocalReplacement() = runTest {
+        val fixture = Fixture()
+        fixture.api.enforceLineage = true
+        val old = MemoryGames("old-server-run").readCloudWorld().world
+        fixture.api.remote = SnapshotDownloadResponse(old.runId, 1, "old", WorldSnapshotCodec.encode(old), payloadKind = "CURRENT_WORLD")
+        val before = fixture.games.read()
+        val preview = fixture.repository.prepareLocalUpload()
+        fixture.repository.uploadLocal(preview.id)
+        val cap = "cosmetic-cap-lct2026-blue-v1"
+        fixture.games.installedAccessoryIds = setOf(cap)
+        fixture.api.rewards = listOf(ParentRewardDto("survey-gift", ProfileId, fixture.games.runId, 1,
+            ParentRewardPayload.Accessory(cap), "2026-10-18T12:00:00Z"))
+        repeat(2) { assertEquals(CloudSyncResult.SUCCESS, fixture.newRepository().synchronize()) }
+        assertEquals(before.economy, fixture.games.read().economy)
+        assertEquals(before.story, fixture.games.read().story)
+        assertEquals(1, fixture.games.read().ownedItems.count { it.itemId == cap })
+        assertEquals(1, fixture.games.readHistory().count { it.parentReward?.reward?.rewardId == "survey-gift" })
+        assertEquals(0, fixture.games.restoreAttempts)
+    }
+
+    @Test fun lostLocalUploadReplyRecoversTheSameRequestAndKeepsSubsequentLocalProgress() = runTest {
+        val fixture = Fixture()
+        val preview = fixture.repository.prepareLocalUpload()
+        fixture.api.loseNextSnapshotResponse = true
+        try { fixture.repository.uploadLocal(preview.id); fail("Reply must be uncertain") } catch (_: IOException) { }
+        val pending = checkNotNull(fixture.store.pending(ProfileId, "snapshot"))
+        fixture.games.rename("После потери ответа")
+        assertEquals(CloudSyncResult.SUCCESS, fixture.newRepository().synchronize())
+        assertEquals(fixture.api.snapshotUploads[0], fixture.api.snapshotUploads[1])
+        assertEquals(pending.requestId, fixture.api.snapshotUploads[1].first)
+        assertEquals("После потери ответа", checkNotNull(fixture.api.remote).worldSnapshot().state.pet.name)
+        assertNull(fixture.store.pending(ProfileId, "snapshot"))
+    }
+
+    @Test fun localOrRemoteChangesAfterPreviewPreventLocalReplacement() = runTest {
+        for (changeLocal in listOf(true, false)) {
+            val fixture = Fixture()
+            assertEquals(CloudSyncResult.SUCCESS, fixture.repository.synchronize())
+            val preview = fixture.repository.prepareLocalUpload()
+            if (changeLocal) fixture.games.rename("Новый локальный прогресс")
+            else fixture.api.remote = checkNotNull(fixture.api.remote).copy(serverRevision = 20)
+            val local = fixture.games.exportSnapshot()
+            val cloud = fixture.api.remote
+            val count = fixture.api.snapshotUploads.size
+            try { fixture.repository.uploadLocal(preview.id); fail("Changed source must reject the preview") }
+            catch (_: CloudLocalUploadException) { }
+            assertEquals(count, fixture.api.snapshotUploads.size)
+            assertEquals(local, fixture.games.exportSnapshot())
+            assertEquals(cloud, fixture.api.remote)
+        }
+    }
+
+    @Test fun localReplacementRetiresOnlyADefinitelyRejectedSnapshotAndUsesANewRequest() = runTest {
+        val fixture = Fixture()
+        fixture.api.failSnapshotRequests = true
+        assertEquals(CloudSyncResult.RETRY, fixture.repository.synchronize())
+        val pending = checkNotNull(fixture.store.pending(ProfileId, "snapshot"))
+        val old = MemoryGames("cloud-run").readCloudWorld().world
+        fixture.api.remote = SnapshotDownloadResponse(old.runId, 3, "old", WorldSnapshotCodec.encode(old), payloadKind = "CURRENT_WORLD")
+        fixture.api.failSnapshotRequests = false
+        val preview = fixture.repository.prepareLocalUpload()
+        fixture.repository.uploadLocal(preview.id)
+        assertEquals(pending.requestId, fixture.api.snapshotUploads[1].first)
+        assertNotEquals(pending.requestId, fixture.api.snapshotUploads.last().first)
+        assertEquals(3L, fixture.api.snapshotUploads.last().second.expectedServerRevision)
+        assertEquals(fixture.games.runId, fixture.api.remote?.gameRunId)
+    }
+
+    @Test fun uncertainPreviousWritePreventsReplacementAndKeepsItsOriginalBytes() = runTest {
+        val fixture = Fixture()
+        fixture.api.failSnapshotRequests = true
+        assertEquals(CloudSyncResult.RETRY, fixture.repository.synchronize())
+        val pending = fixture.store.pending(ProfileId, "snapshot")
+        val preview = fixture.repository.prepareLocalUpload()
+        try { fixture.repository.uploadLocal(preview.id); fail("Unknown write cannot be discarded") } catch (_: IOException) { }
+        assertEquals(pending, fixture.store.pending(ProfileId, "snapshot"))
+        assertNull(fixture.store.read(ProfileId)?.cloudLineagePayload)
+        assertEquals(1, fixture.api.snapshotUploads.map { it.first }.distinct().size)
+    }
+
+    @Test fun replacementCannotTurnALocalAncestorIntoItsOwnCloudPredecessor() = runTest {
+        val fixture = Fixture()
+        val local = fixture.games.readCloudWorld().world
+        val remote = WorldSnapshotCodec.create("successor", local.state, 1, "successor-generation",
+            predecessors = listOf(CloudWorldAncestor(local.runId, local.generation, local.historySequence)))
+        fixture.api.remote = SnapshotDownloadResponse(remote.runId, 1, "old", WorldSnapshotCodec.encode(remote), payloadKind = "CURRENT_WORLD")
+        try { fixture.repository.prepareLocalUpload(); fail("A cyclic replacement is not supported") }
+        catch (_: CloudLocalUploadException) { }
+        assertTrue(fixture.api.snapshotUploads.isEmpty())
+        assertEquals(local, fixture.games.readCloudWorld().world)
+    }
+
     private class Fixture {
         val games = MemoryGames()
         val identities = MemoryIdentities()
@@ -880,6 +999,12 @@ class RemoteCloudSyncRepositoryTest {
         var failNextSave = false
         val pendingRequests = mutableMapOf<Pair<String, String>, PendingBackendRequestEntity>()
         override suspend fun read(profileId: String) = metadata?.takeIf { it.profileId == profileId }
+        override suspend fun stageLocalUpload(state: BackendSyncStateEntity, request: PendingBackendRequestEntity) {
+            check(listOf("snapshot", "analytics", "ack").all { pending(state.profileId, it) == null })
+            pendingRequests.remove(state.profileId to "restore")
+            save(state)
+            stage(request)
+        }
         override suspend fun save(state: BackendSyncStateEntity) {
             if (failNextSave) { failNextSave = false; throw IOException("Cache write failed") }
             metadata = state
@@ -912,6 +1037,7 @@ class RemoteCloudSyncRepositoryTest {
 
     /** In-memory atomic checkpoint fixture. Reward arithmetic delegates to the existing domain policy. */
     private class MemoryGames(var runId: String = "local-run") : GameRepository {
+        var installedAccessoryIds: Set<String> = emptySet()
         var snapshotExports = 0
         var historyReads = 0
         val value = MutableStateFlow(createInitialGameState().copy(
@@ -1018,7 +1144,7 @@ class RemoteCloudSyncRepositoryTest {
                         val applicationId = "apply:${reward.rewardId}"
                         val before = value.value
                         val change = checkNotNull(ParentRewardPolicy(coinAllocation = ParentCoinAllocation.RESERVE)
-                            .apply(before, reward, applicationId, emptySet()))
+                            .apply(before, reward, applicationId, installedAccessoryIds))
                         val sequence = history.last().sequence + 1
                         val receipt = ParentRewardReceiptDto(reward.rewardId, applicationId, "receipt:$applicationId",
                             sequence, change.outcome)
@@ -1065,6 +1191,7 @@ class RemoteCloudSyncRepositoryTest {
         var loseNextAnalyticsResponse = false
         var loseNextAckResponse = false
         var failSnapshotRequests = false
+        var enforceLineage = false
         var rejectRegressingAnalytics = false
         var beforeAnalytics: suspend () -> Unit = {}
         var beforeSkills: suspend () -> Unit = {}
@@ -1095,7 +1222,15 @@ class RemoteCloudSyncRepositoryTest {
             beforeSnapshot(body)
             if (failSnapshotRequests) throw IOException("Offline")
             snapshotReceipts[requestId]?.let { (original, response) -> check(original == body); return response }
-            check(body.expectedServerRevision == remote?.serverRevision)
+            if (body.expectedServerRevision != remote?.serverRevision) throw httpFailure(409, "{\"code\":\"SNAPSHOT_REVISION_CONFLICT\"}")
+            val incoming = SnapshotDownloadResponse(body.gameRunId, (remote?.serverRevision ?: 0) + 1,
+                body.currentContentFingerprint, body.snapshotJson, payloadKind = body.payloadKind).worldSnapshot()
+            remote?.worldSnapshot()?.takeIf { enforceLineage }?.let { previous ->
+                check(previous.predecessors.all { incoming.predecessors.contains(it) })
+                if (incoming.runId != previous.runId) check(incoming.predecessors.any {
+                    it.runId == previous.runId && it.historySequence >= previous.historySequence
+                })
+            }
             val response = SnapshotUploadResponse(body.uploadId, body.gameRunId, (remote?.serverRevision ?: 0) + 1, body.checksum)
             remote = SnapshotDownloadResponse(body.gameRunId, response.serverRevision, body.currentContentFingerprint, body.snapshotJson, payloadKind = body.payloadKind)
             snapshotReceipts[requestId] = body to response

@@ -41,6 +41,7 @@ data class MealChoiceUiState(
     val consequence: String? = null,
     val priceLabel: String? = null,
     val petEffects: List<PetIndicatorEffectUiState> = emptyList(),
+    val reserveSpending: String? = null,
 )
 
 /** Shared food choices; screens supply already projected effects and guarded callbacks. */
@@ -72,6 +73,10 @@ internal fun MealChoices(choices: List<MealChoiceUiState>, busy: Boolean, onChoo
                         meal.consequence?.let {
                             Text(it, color = GameInk.copy(alpha = .76f), fontFamily = Nunito,
                                 fontSize = 15.sp, lineHeight = 21.sp)
+                        }
+                        meal.reserveSpending?.let {
+                            Text(it, color = GameInk, fontFamily = Nunito,
+                                fontSize = 14.sp, lineHeight = 20.sp)
                         }
                     }
                     Icon(painterResource(R.drawable.menu_chevron), contentDescription = null,

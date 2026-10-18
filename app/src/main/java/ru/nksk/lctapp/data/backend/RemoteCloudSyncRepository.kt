@@ -23,6 +23,8 @@ import ru.nksk.lctapp.domain.backend.AckParentRewardsRequest
 import ru.nksk.lctapp.domain.backend.AnalyticsUploadRequest
 import ru.nksk.lctapp.domain.backend.BackendError
 import ru.nksk.lctapp.domain.backend.CloudRestorePreview
+import ru.nksk.lctapp.domain.backend.CloudLocalUploadPreview
+import ru.nksk.lctapp.domain.backend.CloudLocalUploadException
 import ru.nksk.lctapp.domain.backend.CloudSyncPhase
 import ru.nksk.lctapp.domain.backend.CloudSyncRepository
 import ru.nksk.lctapp.domain.backend.CloudSyncResult
@@ -35,6 +37,7 @@ import ru.nksk.lctapp.domain.backend.SnapshotDownloadRequest
 import ru.nksk.lctapp.domain.backend.SnapshotDownloadResponse
 import ru.nksk.lctapp.domain.backend.SnapshotUploadRequest
 import ru.nksk.lctapp.domain.backend.analyticsUploadRequest
+import ru.nksk.lctapp.domain.history.SkillExplanationContexts
 import ru.nksk.lctapp.domain.backend.snapshotUploadRequest
 import ru.nksk.lctapp.domain.engine.GameSession
 import ru.nksk.lctapp.domain.game.GameRepository
@@ -69,6 +72,7 @@ internal class RemoteCloudSyncRepository @Inject constructor(
     private val mutableState = MutableStateFlow(CloudSyncState())
     override val state = mutableState.asStateFlow()
     @Volatile private var restoreCandidate: RestoreCandidate? = null
+    @Volatile private var localUploadCandidate: LocalUploadCandidate? = null
 
     override suspend fun synchronize(): CloudSyncResult = mutex.withLock {
         withContext(Dispatchers.IO) {
@@ -260,7 +264,7 @@ internal class RemoteCloudSyncRepository @Inject constructor(
                 val world = remote.worldSnapshot()
                 // A coherent targeted checkpoint check replaces exporting every local audit world.
                 if (!games.cloudContains(world)) {
-                    throw CloudConflict("На сервере другая история. Откройте облачную копию в настройках.")
+                    throw CloudConflict("На сервере другая история.")
                 }
                 metadata = metadata.copy(serverRevision = remote.serverRevision)
                 store.save(metadata)
@@ -526,7 +530,109 @@ internal class RemoteCloudSyncRepository @Inject constructor(
             rewardFetchCursor = null, skillsPayload = null, lastSyncedAtEpochMs = null).also { store.replaceAfterRestore(it) }
     }
 
-    private suspend fun readWorld(): CloudWorldRead = checkNotNull(games.readCloudWorld()) { "No saved game" }
+    private suspend fun readWorld(): CloudWorldRead {
+        val local = checkNotNull(games.readCloudWorld()) { "No saved game" }
+        val identity = identities.getOrCreate()
+        val saved = store.read(identity.profileId)
+        val payload = saved?.takeIf { it.backendUrl == connection.baseUrl }?.cloudLineagePayload ?: return local
+        return BackendJson.decodeFromString<CloudUploadLineage>(payload).applyTo(local)
+    }
+
+    override suspend fun prepareLocalUpload(): CloudLocalUploadPreview = mutex.withLock {
+        withContext(Dispatchers.IO) {
+            localUploadCandidate = null
+            parents.registerProfile()
+            val identity = identity()
+            val local = readWorld()
+            val remote = downloadOptional(identity)
+            val lineage = CloudUploadLineage.replacing(local, remote?.worldSnapshot())
+            val id = newId()
+            localUploadCandidate = LocalUploadCandidate(id, identity, local, remote, lineage)
+            CloudLocalUploadPreview(id, local.world.state.pet.name, remote?.worldSnapshot()?.state?.pet?.name)
+        }
+    }
+
+    override fun dismissLocalUpload(previewId: String) {
+        if (localUploadCandidate?.id == previewId) localUploadCandidate = null
+    }
+
+    override suspend fun uploadLocal(previewId: String) = mutex.withLock {
+        withContext(Dispatchers.IO) {
+            val candidate = localUploadCandidate?.takeIf { it.id == previewId }
+                ?: throw CloudLocalUploadException("Подтверждение устарело. Подготовьте замену облачной копии ещё раз.")
+            val identity = identity()
+            if (identity != candidate.identity) throw CloudLocalUploadException("Профиль изменился. Подготовьте замену ещё раз.")
+            requireLocalUploadSource(candidate)
+            settleBeforeLocalUpload(identity)
+            val remote = downloadOptional(identity)
+            if (remote != candidate.remote) throw CloudLocalUploadException("Облачная копия изменилась. Подготовьте замену ещё раз.")
+            requireLocalUploadSource(candidate)
+            val snapshot = candidate.lineage.applyTo(candidate.local)
+            val body = snapshotUploadRequest(identity.profileId, snapshot.world, newId(), remote?.serverRevision, session.contentFingerprint)
+            val saved = metadata(identity, candidate.local).copy(
+                serverRevision = remote?.serverRevision, lastSnapshotChecksum = null, lastAnalyticsSequence = 0,
+                gameRunId = snapshot.runId, localGeneration = snapshot.generation,
+                rewardFetchCursor = null, skillsPayload = null,
+                cloudLineagePayload = BackendJson.encodeToString(candidate.lineage))
+            val request = PendingBackendRequestEntity(identity.profileId, SNAPSHOT, body.uploadId, encodeSnapshotUpload(body))
+            // Persist the chosen lineage and exact request together; a lost reply uses the same ID and bytes.
+            store.stageLocalUpload(saved, request)
+            restoreCandidate = null
+            uploadWorld(identity, saved, snapshot)
+            localUploadCandidate = null
+            mutableState.value = mutableState.value.copy(phase = CloudSyncPhase.IDLE,
+                skills = null, skillsGeneration = null, message = null)
+        }
+    }
+
+    private suspend fun requireLocalUploadSource(candidate: LocalUploadCandidate) {
+        val current = readWorld()
+        if (current.world != candidate.local.world || current.latestHistoryId != candidate.local.latestHistoryId) {
+            throw CloudLocalUploadException("Игра изменилась после предпросмотра. Подготовьте замену ещё раз.")
+        }
+    }
+
+    private suspend fun downloadOptional(identity: ParentIdentity): SnapshotDownloadResponse? = try {
+        connection.api.downloadSnapshot(SnapshotDownloadRequest(identity.profileId)).also { response ->
+            if (response.worldSnapshot().parentRewards.any { it.reward.profileId != identity.profileId }) {
+                throw CloudLocalUploadException("Сервер вернул сохранение с наградами другого устройства. Замена не выполнена.")
+            }
+        }
+    } catch (failure: HttpException) { if (failure.code() == 404) null else throw failure }
+
+    /** Replay uncertain writes first. Only explicit, known rejections can retire their immutable request. */
+    private suspend fun settleBeforeLocalUpload(identity: ParentIdentity) {
+        suspend fun settle(kind: String, rejectedCodes: Set<String>, replay: suspend (PendingBackendRequestEntity) -> Unit) {
+            val pending = store.pending(identity.profileId, kind) ?: return
+            try { replay(pending) } catch (failure: HttpException) {
+                val code = if (failure.code() == 409) try {
+                    failure.response()?.errorBody()?.string()?.let { BackendJson.decodeFromString<BackendError>(it).code }
+                } catch (_: Exception) { null } else null
+                if (code !in rejectedCodes) throw failure
+            }
+            store.clear(identity.profileId, kind, pending.requestId)
+        }
+        settle(SNAPSHOT, setOf("SNAPSHOT_REVISION_CONFLICT", "GAME_RUN_CONFLICT")) { pending ->
+            val body = pending.forDevice<SnapshotUploadRequest>(identity.profileId)
+            check(body.uploadId == pending.requestId)
+            val result = connection.api.uploadSnapshot(pending.requestId, body)
+            check(result.uploadId == body.uploadId && result.gameRunId == body.gameRunId && result.checksum == body.checksum &&
+                result.serverRevision == (body.expectedServerRevision ?: 0) + 1) { "Invalid snapshot acknowledgement" }
+            val saved = checkNotNull(store.read(identity.profileId))
+            store.complete(saved.copy(serverRevision = result.serverRevision, lastSnapshotChecksum = body.checksum), SNAPSHOT, pending.requestId)
+        }
+        settle(ANALYTICS, setOf("GAME_RUN_CONFLICT", "GAME_RUN_NOT_REGISTERED", "STALE_ANALYTICS")) { pending ->
+            val body = pending.forDevice<AnalyticsUploadRequest>(identity.profileId)
+            check(body.batchId == pending.requestId)
+            validateAnalyticsReply(body, connection.api.uploadAnalytics(pending.requestId, body))
+        }
+        settle(ACK, setOf("GAME_RUN_CONFLICT", "GAME_RUN_NOT_REGISTERED")) { pending ->
+            val body = pending.forDevice<AckParentRewardsRequest>(identity.profileId)
+            val result = connection.api.acknowledgeParentRewards(pending.requestId, body)
+            check(result.schemaVersion == 1 && result.gameRunId == body.gameRunId &&
+                result.acceptedApplicationIds.toSet() == body.receipts.map { it.applicationId }.toSet())
+        }
+    }
     private val CloudWorldRead.runId get() = world.runId
     private val CloudWorldRead.state get() = world.state
     private val CloudWorldRead.historySequence get() = world.historySequence
@@ -547,12 +653,15 @@ internal class RemoteCloudSyncRepository @Inject constructor(
             override val size = end - first
             override fun get(index: Int) = history[first + index]
         }
-        val facts = withContext(Dispatchers.Default) {
-            HistoryLearningProjection.facts(clipped, session.catalog.content).map { fact ->
+        val request = withContext(Dispatchers.Default) {
+            val projected = HistoryLearningProjection.facts(clipped, session.catalog.content)
+            val contexts = SkillExplanationContexts.from(clipped, projected, session.catalog.content)
+            val facts = projected.map { fact ->
                 fact.copy(sequence = expected.transportSequence(fact.sequence))
             }
+            analyticsUploadRequest(deviceId, newId(), expected.runId, expected.historySequence, facts, contexts::contextFor)
         }
-        return analyticsUploadRequest(deviceId, newId(), expected.runId, expected.historySequence, facts)
+        return request
             .copy(historyStartSequence = if (expected.baselineSequence != null) expected.sourceHistorySequence else 0)
     }
 
@@ -579,7 +688,7 @@ internal class RemoteCloudSyncRepository @Inject constructor(
             phase = when { retryable -> CloudSyncPhase.OFFLINE; conflict -> CloudSyncPhase.CONFLICT; else -> CloudSyncPhase.ERROR },
             message = when {
                 retryable -> "Сервер пока недоступен. Игра сохранена на устройстве; попробуем отправить позже."
-                conflict -> "Облачная копия отличается. Локальный мир сохранён; откройте облачную копию в настройках."
+                conflict -> "Облачная копия отличается. Текущая игра сохранена на устройстве."
                 else -> "Не удалось завершить обмен с сервером. Локальная игра сохранена."
             })
         return if (retryable) CloudSyncResult.RETRY else CloudSyncResult.NEEDS_ATTENTION
@@ -600,6 +709,8 @@ internal class RemoteCloudSyncRepository @Inject constructor(
     private data class RestoreCandidate(val id: String, val response: SnapshotDownloadResponse,
         val world: WorldSnapshot, val guard: RestoreGuard, val generation: String)
     @Serializable private data class RestoreIntent(val response: SnapshotDownloadResponse, val previousGeneration: String)
+    private data class LocalUploadCandidate(val id: String, val identity: ParentIdentity, val local: CloudWorldRead,
+        val remote: SnapshotDownloadResponse?, val lineage: CloudUploadLineage)
     private class CloudConflict(message: String) : IllegalStateException(message)
     private class SkillsAwaitingWorldTransition : IllegalStateException("Skill refresh awaits the current game generation")
     /** Adapt old frozen bodies at the transport boundary without changing their intent or receipt IDs. */

@@ -241,6 +241,7 @@ class GoalViewModelTest {
         val quote = checkNotNull(model.uiState.value.confirmation)
         assertEquals(20L, quote.fromSavings)
         assertEquals(listOf(SpendPart(BudgetSection.RESERVE, 4L)), quote.availableParts)
+        assertEquals("Для оплаты возьмём 20 монет из копилки.\nИз запаса: 4. Останется: 36.", quote.paymentDescription())
         assertEquals(96L, quote.remainingBalance)
         assertEquals(0L, quote.remainingSavings)
         assertEquals(before, fixture.state)

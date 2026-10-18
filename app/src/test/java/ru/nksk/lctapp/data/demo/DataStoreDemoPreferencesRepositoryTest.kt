@@ -21,7 +21,7 @@ import ru.nksk.lctapp.BuildConfig
 class DataStoreDemoPreferencesRepositoryTest {
     @get:Rule val temporary = TemporaryFolder()
 
-    @Test fun newInstallationDefaultsOffAndOnlyJuryCanEnableIt() = runTest {
+    @Test fun newInstallationDefaultsOffAndDebugOrJuryCanEnableIt() = runTest {
         val file = File(temporary.root, "new.preferences_pb")
         val scope = CoroutineScope(SupervisorJob() + StandardTestDispatcher(testScheduler))
         val repository = DataStoreDemoPreferencesRepository(PreferenceDataStoreFactory.create(
@@ -29,14 +29,14 @@ class DataStoreDemoPreferencesRepositoryTest {
         try {
             assertFalse(repository.read().demoModeEnabled)
             repository.setDemoModeEnabled(true)
-            assertEquals(BuildConfig.JURY_TOOLS, repository.read().demoModeEnabled)
-            assertEquals(BuildConfig.JURY_TOOLS, repository.observe().first().demoModeEnabled)
+            assertEquals(BuildConfig.DEBUG || BuildConfig.JURY_TOOLS, repository.read().demoModeEnabled)
+            assertEquals(BuildConfig.DEBUG || BuildConfig.JURY_TOOLS, repository.observe().first().demoModeEnabled)
             repository.setDemoModeEnabled(false)
             assertFalse(repository.read().demoModeEnabled)
         } finally { scope.coroutineContext.job.cancelAndJoin() }
     }
 
-    @Test fun reopenedLegacyEnabledPreferenceIsNeverEnabledForChildren() = runTest {
+    @Test fun reopenedLegacyEnabledPreferenceIsNeverEnabledForChildrenRelease() = runTest {
         val file = File(temporary.root, "legacy.preferences_pb")
         val oldScope = CoroutineScope(SupervisorJob() + StandardTestDispatcher(testScheduler))
         val old = PreferenceDataStoreFactory.create(scope = oldScope, produceFile = { file })
@@ -47,14 +47,14 @@ class DataStoreDemoPreferencesRepositoryTest {
         val repository = DataStoreDemoPreferencesRepository(PreferenceDataStoreFactory.create(
             scope = scope, produceFile = { file }))
         try {
-            assertEquals(BuildConfig.JURY_TOOLS, repository.read().demoModeEnabled)
-            assertEquals(BuildConfig.JURY_TOOLS, repository.observe().first().demoModeEnabled)
+            assertEquals(BuildConfig.DEBUG || BuildConfig.JURY_TOOLS, repository.read().demoModeEnabled)
+            assertEquals(BuildConfig.DEBUG || BuildConfig.JURY_TOOLS, repository.observe().first().demoModeEnabled)
             repository.setDemoModeEnabled(true)
-            assertEquals(BuildConfig.JURY_TOOLS, repository.read().demoModeEnabled)
+            assertEquals(BuildConfig.DEBUG || BuildConfig.JURY_TOOLS, repository.read().demoModeEnabled)
         } finally { scope.coroutineContext.job.cancelAndJoin() }
     }
 
-    @Test fun irrelevantLegacyFileCannotBlockChildrenAndJuryReadErrorsRemainVisible() = runTest {
+    @Test fun irrelevantLegacyFileCannotBlockChildrenReleaseAndEnabledBuildReadErrorsRemainVisible() = runTest {
         val file = File(temporary.root, "corrupt.preferences_pb")
         val invalid = byteArrayOf(0xff.toByte())
         file.writeBytes(invalid)
@@ -62,10 +62,10 @@ class DataStoreDemoPreferencesRepositoryTest {
         val repository = DataStoreDemoPreferencesRepository(PreferenceDataStoreFactory.create(
             scope = scope, produceFile = { file }))
         try {
-            if (BuildConfig.JURY_TOOLS) {
+            if (BuildConfig.DEBUG || BuildConfig.JURY_TOOLS) {
                 try {
                     repository.read()
-                    fail("A jury preference read failure must remain visible")
+                    fail("A demo preference read failure must remain visible")
                 } catch (_: CorruptionException) { /* The settings screen can offer a retry. */ }
             } else {
                 assertFalse(repository.read().demoModeEnabled)

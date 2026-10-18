@@ -33,7 +33,18 @@ data class ParentAssessmentSync(
 enum class ParentSkillStatus { MASTERED, PRACTICING, NO_DATA, HAS_PROBLEM }
 
 @Immutable
-data class ParentSkillAssessment(val status: ParentSkillStatus, val policyVersion: String)
+data class ParentSkillAssessment(
+    val status: ParentSkillStatus,
+    val policyVersion: String,
+    val explanation: ParentSkillExplanation? = null,
+)
+
+@Immutable
+data class ParentSkillExplanation(
+    val description: String,
+    val summary: String,
+    val evidence: List<String>,
+)
 
 @Immutable
 data class ParentPet(val name: String, val availableCoins: Long, val savingsCoins: Long) {
@@ -56,6 +67,8 @@ data class ParentSkill(
     /** Null means no server assessment was received, distinct from the server's NO_DATA. */
     val assessment: ParentSkillAssessment? = null,
     val material: ParentTopicMaterial? = null,
+    /** Current local observations, kept separate from the server assessment's history boundary. */
+    val localExplanation: ParentSkillExplanation? = null,
 )
 
 @Immutable

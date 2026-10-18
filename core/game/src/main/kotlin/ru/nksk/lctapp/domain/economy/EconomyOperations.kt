@@ -117,22 +117,22 @@ object EconomyOperations {
                 draft = state.plan, baseAmount = amount))
     }
 
-    /** New weekly income stays unallocated; this explicit transfer uses only the old reserve. */
+    /** New weekly income stays unallocated; the player chooses how much of the old reserve to transfer. */
     fun depositWeeklyReserve(state: EconomyState, id: String, revision: Long, amount: Long): EconomyState {
         val session = session(state, id, revision)
         if (session.reason != BudgetPlanningReason.WEEKLY || session.stage != BudgetPlanningStage.RECEIPT)
             fail(EconomyFailure.STALE_SESSION)
         if (amount <= 0) fail(EconomyFailure.INVALID_ALLOCATION)
-        if (amount != state.plan.reserve) fail(EconomyFailure.STALE_SESSION)
+        if (amount > state.plan.reserve) fail(EconomyFailure.STALE_SESSION)
         val draft = state.displayPlan
         val basis = planningAmount(state)
         if (draft != state.plan || basis != state.availableBalance ||
             Math.addExact(draft.total, state.unallocated) != basis) fail(EconomyFailure.INVALID_ALLOCATION)
         val remaining = Math.subtractExact(state.availableBalance, amount)
-        return state.copy(plan = state.plan.copy(reserve = 0),
+        return state.copy(plan = state.plan.copy(reserve = state.plan.reserve - amount),
             availableBalance = remaining, savingsBalance = Math.addExact(state.savingsBalance, amount),
             planning = session.copy(revision = Math.addExact(session.revision, 1),
-                draft = draft.copy(reserve = 0), baseAmount = remaining))
+                draft = draft.copy(reserve = draft.reserve - amount), baseAmount = remaining))
     }
 
     fun earn(state: EconomyState, income: Long): EconomyState {

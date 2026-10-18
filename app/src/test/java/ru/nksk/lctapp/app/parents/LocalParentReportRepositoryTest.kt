@@ -14,6 +14,8 @@ import ru.nksk.lctapp.domain.analytics.AnalyticsMode
 import ru.nksk.lctapp.domain.analytics.DecisionContext
 import ru.nksk.lctapp.domain.analytics.FactDetail
 import ru.nksk.lctapp.domain.analytics.FinancialPosition
+import ru.nksk.lctapp.domain.analytics.SkillExplanation
+import ru.nksk.lctapp.domain.analytics.SkillExplanationEvidence
 import ru.nksk.lctapp.domain.content.StoryContent
 import ru.nksk.lctapp.domain.content.StoryContentRepository
 import ru.nksk.lctapp.domain.economy.EconomyState
@@ -52,6 +54,10 @@ class LocalParentReportRepositoryTest {
         assertEquals(27L, report.pet?.savingsCoins)
         assertEquals(12, report.skills.size)
         assertTrue(report.skills.all { it.observedEpisodes == 0 })
+        assertTrue(report.skills.all { it.localExplanation?.description?.isNotBlank() == true })
+        assertEquals(12, report.skills.map { it.localExplanation?.description }.distinct().size)
+        assertTrue(report.skills.all { it.localExplanation?.summary?.isNotBlank() == true })
+        assertTrue(report.skills.all { it.localExplanation?.evidence == emptyList<String>() })
         assertEquals(game, games.state.value)
     }
 
@@ -80,6 +86,10 @@ class LocalParentReportRepositoryTest {
         assertEquals(1, needs.observedEpisodes)
         assertEquals(1, needs.supportedEpisodes)
         assertEquals(0, needs.difficultyEpisodes)
+        assertEquals(
+            listOf("После решения о покупке денег на необходимое осталось достаточно."),
+            needs.localExplanation?.evidence,
+        )
         assertEquals(0, report.skills.single { it.id == "FIN-01" }.observedEpisodes)
     }
 
@@ -149,6 +159,58 @@ class LocalParentReportRepositoryTest {
         assertEquals(ParentSkillStatus.MASTERED, report.skills.first().assessment?.status)
         assertTrue(report.assessmentSync.isStale)
         assertEquals(ParentSyncPhase.OFFLINE, report.assessmentSync.phase)
+    }
+
+    @Test fun serverExplanationKeepsItsOriginalBoundaryAndWording() {
+        val game = createInitialGameState()
+        val history = listOf(
+            AuditEntry("start", 1, "current", AuditType.INITIALIZED, after = game),
+            factEntry(purchaseFact("current", 2, "current-purchase")),
+        )
+        val local = checkNotNull(localParentReport(game, history, StoryContent()))
+        val generation = localGameGeneration("current", null)
+        val shared = serverExplanation()
+        val report = withServerAssessments(local, "current", 2, generation,
+            CloudSyncState(skills = assessments("current", 1, shared), skillsGeneration = generation))
+        val skill = report.skills.single { it.id == "FIN-03" }
+        val explanation = checkNotNull(skill.assessment?.explanation)
+
+        assertTrue(report.assessmentSync.isStale)
+        assertEquals(shared.description, explanation.description)
+        assertEquals(shared.summary, explanation.summary)
+        assertEquals(shared.evidence.map { it.text }, explanation.evidence)
+        assertEquals(local.skills.single { it.id == "FIN-03" }.localExplanation, skill.localExplanation)
+        assertTrue(explanation != skill.localExplanation)
+    }
+
+    @Test fun explanationFromAnotherRunGenerationOrFutureIsNotAttached() {
+        val local = checkNotNull(localParentReport(createInitialGameState(), emptyList(), StoryContent()))
+        val generation = localGameGeneration("current", null)
+        val invalidStates = listOf(
+            CloudSyncState(skills = assessments("previous", 1, serverExplanation()), skillsGeneration = generation),
+            CloudSyncState(skills = assessments("current", 2, serverExplanation()), skillsGeneration = generation),
+            CloudSyncState(skills = assessments("current", 1, serverExplanation()),
+                skillsGeneration = localGameGeneration("current", "old-restore")),
+        )
+
+        invalidStates.forEach { sync ->
+            val report = withServerAssessments(local, "current", 1, generation, sync)
+            assertTrue(report.skills.all { it.assessment == null })
+            assertEquals(local.skills.map { it.localExplanation }, report.skills.map { it.localExplanation })
+        }
+    }
+
+    @Test fun missingOrUnsupportedExplanationLeavesAssessmentAndLocalDetailsAvailable() {
+        val local = checkNotNull(localParentReport(createInitialGameState(), emptyList(), StoryContent()))
+        val generation = localGameGeneration("current", null)
+        listOf(null, serverExplanation().copy(version = 2), serverExplanation().copy(summary = " "))
+            .forEach { explanation ->
+                val report = withServerAssessments(local, "current", 1, generation,
+                    CloudSyncState(skills = assessments("current", 1, explanation), skillsGeneration = generation))
+                assertTrue(report.skills.all { it.assessment?.status == ParentSkillStatus.MASTERED })
+                assertTrue(report.skills.all { it.assessment?.explanation == null })
+                assertEquals(local.skills.map { it.localExplanation }, report.skills.map { it.localExplanation })
+            }
     }
 
     @Test fun restoringTheSameRunHidesRatingsFromTheReplacedWorld() {
@@ -225,8 +287,18 @@ class LocalParentReportRepositoryTest {
         assertEquals(local.pet, report.pet)
     }
 
-    private fun assessments(runId: String, sequence: Long) = SkillAssessmentsResponse(
-        runId, sequence, SkillId.entries.map { SkillAssessmentDto(it, SkillStatus.MASTERED, "server-policy-v1") },
+    private fun assessments(runId: String, sequence: Long, explanation: SkillExplanation? = null) = SkillAssessmentsResponse(
+        runId, sequence, SkillId.entries.map { SkillAssessmentDto(it, SkillStatus.MASTERED, "server-policy-v1", explanation) },
+    )
+
+    private fun serverExplanation() = SkillExplanation(
+        description = "Учится учитывать необходимые расходы.",
+        summary = "В полученной истории есть один завершённый выбор.",
+        evidence = listOf(SkillExplanationEvidence(
+            episodeId = "server-episode",
+            sourceEventIds = listOf("server-event"),
+            text = "После покупки денег на необходимое осталось достаточно.",
+        )),
     )
 
     private suspend fun restoredReport(sourceSequence: Long, baselineSequence: Long, assessmentSequence: Long):

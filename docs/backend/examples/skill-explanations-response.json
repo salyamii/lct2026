@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "gameRunId": "73d831fd-cf83-4a8c-9e99-973fe16fef4e",
+  "basedOnHistorySequence": 0,
+  "skills": [
+    {
+      "skillId": "FIN-01",
+      "status": "NO_DATA",
+      "policyVersion": "skills-mvp-v1",
+      "explanation": {
+        "version": 1,
+        "description": "Учится сравнивать суммы: где больше, меньше или поровну.",
+        "summary": "Пока мало данных о том, как ребёнок сравнивает суммы.",
+        "evidence": []
+      }
+    },
+    {
+      "skillId": "FIN-02",
+      "status": "NO_DATA",
+      "policyVersion": "skills-mvp-v1",
+      "explanation": {
+        "version": 1,
+        "description": "Учится распределять деньги, чтобы хватало на нужное и выбранные цели.",
+        "summary": "Пока мало данных о том, как ребёнок распределяет деньги.",
+        "evidence": []
+      }
+    },
+    {
+      "skillId": "FIN-03",
+      "status": "NO_DATA",
+      "policyVersion": "skills-mvp-v1",
+      "explanation": {
+        "version": 1,
+        "description": "Учится проверять, останутся ли деньги на необходимое после желанной покупки.",
+        "summary": "Пока не видно, как ребёнок выбирает между желанной покупкой и необходимым.",
+        "evidence": []
+      }
+    },
+    {
+      "skillId": "FIN-04",
+      "status": "NO_DATA",
+      "policyVersion": "skills-mvp-v1",
+      "explanation": {
+        "version": 1,
+        "description": "Учится рассчитывать траты до следующего поступления денег.",
+        "summary": "Пока не видно, хватает ли денег на необходимое до следующего дохода.",
+        "evidence": []
+      }
+    },
+    {
+      "skillId": "FIN-05",
+      "status": "NO_DATA",
+      "policyVersion": "skills-mvp-v1",
+      "explanation": {
+        "version": 1,
+        "description": "Учится понемногу откладывать на цель и сохранять накопленное.",
+        "summary": "Пока не видно повторяющихся накоплений на цель.",
+        "evidence": []
+      }
+    },
+    {
+      "skillId": "FIN-06",
+      "status": "NO_DATA",
+      "policyVersion": "skills-mvp-v1",
+      "explanation": {
+        "version": 1,
+        "description": "Учится откладывать желанную покупку ради более важной цели.",
+        "summary": "Пока не видно, откладывает ли ребёнок желанную покупку ради другой цели.",
+        "evidence": []
+      }
+    },
+    {
+      "skillId": "FIN-07",
+      "status": "NO_DATA",
+      "policyVersion": "skills-mvp-v1",
+      "explanation": {
+        "version": 1,
+        "description": "Учится оставлять деньги на неожиданные расходы.",
+        "summary": "Пока не видно, готовит ли ребёнок запас для неожиданных трат.",
+        "evidence": []
+      }
+    },
+    {
+      "skillId": "FIN-08",
+      "status": "NO_DATA",
+      "policyVersion": "skills-mvp-v1",
+      "explanation": {
+        "version": 1,
+        "description": "Учится менять план после неожиданной траты, чтобы хватило на необходимое.",
+        "summary": "Пока не видно, как ребёнок меняет решения после неожиданной траты.",
+        "evidence": []
+      }
+    },
+    {
+      "skillId": "FIN-09",
+      "status": "NO_DATA",
+      "policyVersion": "skills-mvp-v1",
+      "explanation": {
+        "version": 1,
+        "description": "Учится сравнивать, сколько денег, энергии и времени потребуют разные варианты.",
+        "summary": "Пока не видно выбора, который сохранял бы деньги, энергию и время на главное.",
+        "evidence": []
+      }
+    },
+    {
+      "skillId": "FIN-10",
+      "status": "NO_DATA",
+      "policyVersion": "skills-mvp-v1",
+      "explanation": {
+        "version": 1,
+        "description": "Учится выбирать посильное дело и планировать использование заработка.",
+        "summary": "Пока не видно, удаётся ли довести план заработка до результата.",
+        "evidence": []
+      }
+    },
+    {
+      "skillId": "FIN-11",
+      "status": "NO_DATA",
+      "policyVersion": "skills-mvp-v1",
+      "explanation": {
+        "version": 1,
+        "description": "Учится понимать последствия выбора и учитывать их в следующем решении.",
+        "summary": "Пока не видно, как объяснение последствий связано со следующим выбором.",
+        "evidence": []
+      }
+    },
+    {
+      "skillId": "FIN-12",
+      "status": "NO_DATA",
+      "policyVersion": "skills-mvp-v1",
+      "explanation": {
+        "version": 1,
+        "description": "Учится различать доходы, расходы и переводы между кошельком и копилкой.",
+        "summary": "Пока мало ответов, чтобы рассказать, как ребёнок различает поступления и траты.",
+        "evidence": []
+      }
+    }
+  ]
+}

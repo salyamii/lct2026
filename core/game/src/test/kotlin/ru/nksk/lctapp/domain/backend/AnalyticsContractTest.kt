@@ -28,6 +28,7 @@ class AnalyticsContractTest {
         val request = analyticsUploadRequest("device", "batch", "run", 0, emptyList())
         assertEquals(SkillId.entries.toList(), request.skills.map { it.skillId })
         assertTrue(request.skills.all { it.observations.isEmpty() && it.completedEpisodes == 0 })
+        assertTrue(request.skills.all { it.explanation?.isSupported() == true && it.explanation.evidence.isEmpty() })
         val encoded = json.encodeToString(request)
         assertFalse(encoded.contains("\"status\""))
         assertEquals(request, json.decodeFromString<AnalyticsUploadRequest>(encoded))
@@ -69,5 +70,53 @@ class AnalyticsContractTest {
         val encoded = json.encodeToString(response)
         assertEquals(response, json.decodeFromString<SkillAssessmentsResponse>(encoded))
         assertFalse(encoded.contains("COMPARE_AMOUNTS"))
+    }
+
+    @Test fun legacyPendingBodiesDoNotGainExplanationFieldsWhenRetried() {
+        val generated = analyticsUploadRequest("device", "batch", "run", 0, emptyList())
+        val legacy = generated.copy(skills = generated.skills.map { it.copy(explanation = null) })
+        val encoded = json.encodeToString(legacy)
+        assertFalse(encoded.contains("explanation"))
+        assertEquals(encoded, json.encodeToString(json.decodeFromString<AnalyticsUploadRequest>(encoded)))
+    }
+
+    @Test fun eventContextTravelsInsideExplanationWithoutChangingEvidenceLinks() {
+        val fact = AnalyticsFact("purchase", "run", "shop", "buy", 3,
+            FactDetail.OptionalPurchase("toy", 5, true),
+            DecisionContext(presentationId = "shop-shown", informationPresented = true, complete = true,
+                before = FinancialPosition(20, 0, 10), after = FinancialPosition(15, 0, 10),
+                alternativeAvailable = true, day = 3))
+        val request = analyticsUploadRequest("device", "batch", "run", 3, listOf(fact)) {
+            SkillEventContext(3, "Лавка игрушек")
+        }
+        val skill = request.skills.single { it.skillId == SkillId.PRIORITIZE_NEEDS }
+        val example = checkNotNull(skill.explanation).evidence.single()
+        assertTrue(example.text.contains("Лавка игрушек"))
+        assertTrue(example.text.contains("3"))
+        assertEquals(listOf("purchase"), example.sourceEventIds)
+        assertEquals(request, json.decodeFromString<AnalyticsUploadRequest>(json.encodeToString(request)))
+    }
+
+    @Test fun unknownOrMalformedExplanationDoesNotHideAValidAssessment() {
+        val valid = SkillExplanations.explain(SkillProfile("run", SkillId.SAVE_FOR_GOAL, emptyList()))
+        val assessment = SkillAssessmentDto(SkillId.SAVE_FOR_GOAL, SkillStatus.PRACTICING, "policy", valid)
+        val encoded = json.encodeToString(assessment)
+        assertEquals(assessment, json.decodeFromString<SkillAssessmentDto>(encoded))
+        val unknown = encoded.replace("\"version\":1", "\"version\":2")
+        assertEquals(assessment.copy(explanation = null), json.decodeFromString<SkillAssessmentDto>(unknown))
+        val missingVersion = encoded.replace("\"version\":1,", "")
+        assertEquals(assessment.copy(explanation = null), json.decodeFromString<SkillAssessmentDto>(missingVersion))
+        val stringVersion = encoded.replace("\"version\":1", "\"version\":\"1\"")
+        assertEquals(assessment.copy(explanation = null), json.decodeFromString<SkillAssessmentDto>(stringVersion))
+        val malformed = """{"skillId":"FIN-05","status":"PRACTICING","policyVersion":"policy","explanation":"broken"}"""
+        assertEquals(assessment.copy(explanation = null), json.decodeFromString<SkillAssessmentDto>(malformed))
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun explanationCannotReferToAnEventOutsideItsSkillObservations() {
+        val profile = SkillProfile("run", SkillId.SAVE_FOR_GOAL, emptyList())
+        profile.toEvidenceDto().copy(explanation = SkillExplanations.explain(profile).copy(
+            evidence = listOf(SkillExplanationEvidence("foreign-episode", listOf("foreign-event"), "Чужое действие.")),
+        ))
     }
 }

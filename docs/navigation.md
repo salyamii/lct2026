@@ -85,6 +85,18 @@ The labels for Coins, Village and ContinueDay are now savings, map and event
 name; route keys remain stable. Navigation keys contain no game snapshot. See
 [project architecture](architecture.md) for ownership.
 
+## Questionnaire
+
+By SURVEY-D-001/002 (2026-10-18), the first Settings card opens the Yandex
+questionnaire in an external browser with the saved deviceId and current
+gameRunId. The same survey feature can render a dismissible invitation in the
+finished-day summary, first from day 7 and at least 7 game days after the last
+invitation for that run. App composition supplies both slots and the shared
+ViewModel; no survey route or game state is added to navigation keys. Only
+resumed entries can launch the browser. Returning from it does not confirm form
+submission; the explicit completion action saves the device preference and
+suppresses further invitations, including after a world restore or new campaign.
+
 ## Adding a screen
 
 1. Define an `@Serializable` key implementing `NavKey` in the owning feature.
@@ -167,8 +179,13 @@ an optional `choiceId` for a practical STORY/RANDOM branch. Its default is null,
 so old routes still open the offered deed. Both values identify the entry and
 its board state; no game snapshot or financial context is stored in the key.
 Its serializer is registered alongside all existing keys. Starting from a Day proposal replaces
-that entry; starting from Tasks pushes the game. Completion returns directly to
-the menu. Both system and UI Back first save PauseEvent, then return to the menu.
+that entry; starting from Tasks pushes the game. Completion normally returns directly to
+the menu. FINANCE-UI-D-027 adds an inline result after a paid deed with a selected
+savings goal: the player can set aside part of the actual reward or continue to
+the menu. The amount editor expands inside the same entry, without a new route
+or dialog. Back from the editor closes it; Back from the completed result exits
+without pausing or repeating the deed.
+During an unfinished deed, both system and UI Back first save PauseEvent, then return to the menu.
 A failed save leaves the game visible with retry; it does not silently navigate.
 Back during loading waits for the saved occurrence before requesting its pause.
 Practical event branches use the same route after a successful admission check;
@@ -178,8 +195,11 @@ See [the event-work contract](design/story-work-minigames.md).
 DeedGameViewModel observes the aggregate; the existing board ViewModels belong
 to this game's entry and retain their small SavedStateHandle state on recreation.
 Explicit exit removes the entry, so the next start creates a new board. Restoring
-a route whose occurrence was already completed or paused only exits; it grants
-no rewards and does not execute a new event. Outgoing Day cards remain frozen
+a route whose occurrence was already completed or paused only exits, unless that
+entry retains its own unfinished reward presentation. That presentation restores
+the original request from SavedStateHandle and reads its indexed command receipt;
+an uncertain write retries the same request ID. It never derives earnings from
+later balance changes or replays a completed deed. Outgoing Day cards remain frozen
 until replacement to avoid showing the intermediate generic day screen.
 
 ## Transient completion confirmation - 2026-09-19

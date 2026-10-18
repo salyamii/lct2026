@@ -37,7 +37,11 @@ fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> 
         }
         BackHandler(enabled = resumed) { model.leave() }
         val leave = { if (resumed) model.leave() }
-        DeedGameHost(state, model::retry, leave, onSkipGame = { if (resumed) model.skipGame() }) {
+        DeedGameHost(state, model::retry, leave, onSkipGame = { if (resumed) model.skipGame() },
+            onOpenSavings = { if (resumed) model.openRewardTransfer() },
+            onSavingsInput = { if (resumed) model.changeRewardTransferInput(it) },
+            onConfirmSavings = { if (resumed) model.confirmRewardTransfer() },
+            onCancelSavings = { if (resumed) model.cancelRewardTransfer() }) {
             when (state.type) {
                 DeedGameType.MEMORY -> {
                     val game = hiltViewModel<MemoryGameViewModel>()

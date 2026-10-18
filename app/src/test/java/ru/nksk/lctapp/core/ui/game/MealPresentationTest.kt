@@ -103,4 +103,18 @@ class MealPresentationTest {
             assertTrue(choices.all { it.priceLabel == "Бесплатно" })
         }
     }
+
+    @Test fun mealsShowReserveOnlyForTheActualAffordableFeedingSplit() {
+        val current = state(100).copy(economy = EconomyState(BudgetPlan(3, 0, 0, 10)))
+        val basic = mealChoices(current, catalog, engine).single { it.id == "basic-v1" }
+        assertEquals("Из запаса: 2. Останется: 8.", basic.reserveSpending)
+        val covered = current.copy(economy = EconomyState(BudgetPlan(10, 0, 0, 10)))
+        assertTrue(mealChoices(covered, catalog, engine).all { it.reserveSpending == null })
+        assertTrue(mealChoices(current, catalog, engine, demoMode = true).all { it.reserveSpending == null })
+        val insufficient = current.copy(economy = EconomyState(BudgetPlan(0, 0, 0, 4)))
+        assertTrue(mealChoices(insufficient, catalog, engine).all { it.reserveSpending == null })
+        val after = (engine.preview(current, EngineCommand.Feed("basic-v1")) as EngineResult.Applied).state
+        assertEquals(8L, after.economy.plan.reserve)
+        assertEquals(10L, current.economy.plan.reserve)
+    }
 }

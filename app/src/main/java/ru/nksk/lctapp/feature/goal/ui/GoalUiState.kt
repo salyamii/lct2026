@@ -82,6 +82,7 @@ internal data class PurchaseConfirmation(
     val foodNeeded: Long,
     val contextId: String,
     val demoMode: Boolean = false,
+    val reserveBefore: Long? = null,
 ) {
     val foodShortfall: Long get() = if (demoMode) 0 else (foodNeeded - remainingBalance).coerceAtLeast(0)
 }

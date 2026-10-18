@@ -39,6 +39,9 @@
     <string name="parents_report_sync_error_cached">Не удалось обновить оценки. Показаны последние полученные данные.</string>
     <string name="parents_report_sync_stale">Новые действия в игре ещё не учтены в оценках.</string>
     <string name="parents_report_evidence_title">Наблюдения в игре</string>
+    <string name="parents_report_explanation_server">По действиям в игре</string>
+    <string name="parents_report_explanation_local">По текущей игре на устройстве</string>
+    <string name="parents_report_explanation_missing">Подробности пока не получены.</string>
     <string name="parents_report_no_evidence_body">В этом прохождении ещё нет наблюдений по теме. Это не означает, что ребёнок не владеет навыком.</string>
     <string name="parents_report_supported">Успешные применения</string>
     <string name="parents_report_difficulties">Эпизоды с трудностями</string>

@@ -23,15 +23,15 @@ internal annotation class DemoSettingsStore
 internal class DataStoreDemoPreferencesRepository @Inject constructor(
     @param:DemoSettingsStore private val preferences: DataStore<Preferences>,
 ) : DemoPreferencesRepository {
-    // A legacy preference must never enable demo rules in a children's installation.
-    override fun observe() = if (!BuildConfig.JURY_TOOLS) flowOf(DemoPreferences()) else preferences.data.map { saved ->
+    // A legacy preference must never enable demo rules in a children's release installation.
+    override fun observe() = if (!BuildConfig.DEBUG && !BuildConfig.JURY_TOOLS) flowOf(DemoPreferences()) else preferences.data.map { saved ->
         DemoPreferences(demoModeEnabled = saved[DemoModeEnabled] ?: false)
     }.distinctUntilChanged()
 
     override suspend fun read(): DemoPreferences = observe().first()
 
     override suspend fun setDemoModeEnabled(enabled: Boolean) {
-        if (!BuildConfig.JURY_TOOLS) return
+        if (!BuildConfig.DEBUG && !BuildConfig.JURY_TOOLS) return
         preferences.edit { it[DemoModeEnabled] = enabled }
     }
 

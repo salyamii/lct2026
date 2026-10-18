@@ -6,7 +6,7 @@ import ru.nksk.lctapp.domain.economy.BudgetSection
 import ru.nksk.lctapp.domain.economy.SpendPart
 
 /** Presentation of the same quote used by the domain when committing a payment. */
-internal fun SpendingQuote.playerDescription(kind: SpendingKind): String? {
+internal fun SpendingQuote.playerDescription(kind: SpendingKind, reserveBefore: Long? = null): String? {
     if (blocked) return null
     if (missing > 0) {
         return if (kind == SpendingKind.WANT) {
@@ -18,20 +18,21 @@ internal fun SpendingQuote.playerDescription(kind: SpendingKind): String? {
     if (kind == SpendingKind.EARNING) return null
     val amount = parts.sumOf { it.amount }
     return if (kind == SpendingKind.GOAL) "Возьмём из копилки $amount ${paymentCoins(amount)}."
-    else availableSourcesDescription(prefix = "Возьмём для оплаты")
+    else availableSourcesDescription(prefix = "Возьмём для оплаты", reserveBefore = reserveBefore)
 }
 
-internal fun SpendingQuote.availableSourcesDescription(prefix: String = "Возьмём"): String? {
+internal fun SpendingQuote.availableSourcesDescription(prefix: String = "Возьмём", reserveBefore: Long? = null): String? {
     if (blocked || missing > 0 || parts.isEmpty()) return null
-    return paymentSourcesDescription(0, parts, prefix, "и ещё")
+    return paymentSourcesDescription(0, parts, prefix, "и ещё", reserveBefore)
 }
 
 /** Common wording for an actual payment split; no allocation or affordability rules live here. */
 internal fun paymentSourcesDescription(fromSavings: Long, parts: List<SpendPart>,
-    prefix: String = "Для оплаты возьмём", conjunction: String = "и"): String? {
+    prefix: String = "Для оплаты возьмём", conjunction: String = "и", reserveBefore: Long? = null): String? {
+    val reserve = reserveBefore?.let { reserveSpendingDescription(parts, it) }
     val sources = buildList {
         if (fromSavings > 0) add("${paymentCoinAmount(fromSavings)} из копилки")
-        parts.filter { it.amount > 0 }.forEach { part ->
+        parts.filter { it.amount > 0 && (reserve == null || it.section != BudgetSection.RESERVE) }.forEach { part ->
             val source = when (part.section) {
                 BudgetSection.NEEDS -> "из денег на необходимое"
                 BudgetSection.WANTS -> "из денег на желания"
@@ -42,9 +43,19 @@ internal fun paymentSourcesDescription(fromSavings: Long, parts: List<SpendPart>
             add("$amount $source")
         }
     }
-    if (sources.isEmpty()) return null
-    return "$prefix " + if (sources.size == 1) sources.single() + "."
+    val sourceText = if (sources.isEmpty()) null else "$prefix " + if (sources.size == 1) sources.single() + "."
         else sources.dropLast(1).joinToString(", ") + " $conjunction " + sources.last() + "."
+    return listOfNotNull(sourceText, reserve).takeIf { it.isNotEmpty() }?.joinToString("\n")
+}
+
+/** An unaffordable quote is not a partial payment and must not promise a new reserve balance. */
+internal fun SpendingQuote.reserveSpendingDescription(reserveBefore: Long): String? =
+    if (affordable) reserveSpendingDescription(parts, reserveBefore) else null
+
+private fun reserveSpendingDescription(parts: List<SpendPart>, reserveBefore: Long): String? {
+    val spent = parts.filter { it.section == BudgetSection.RESERVE }.sumOf { it.amount }
+    if (spent <= 0 || spent > reserveBefore) return null
+    return "Из запаса: $spent. Останется: ${reserveBefore - spent}."
 }
 
 internal fun paymentCoinAmount(amount: Long): String = "$amount ${paymentCoins(amount)}"
