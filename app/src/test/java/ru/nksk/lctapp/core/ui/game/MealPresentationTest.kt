@@ -46,12 +46,12 @@ class MealPresentationTest {
             assertNull(choices.getValue("feast-v1").consequence)
             val luxury = choices.getValue("luxury-v1").petEffects
             assertEquals(listOf(PetIndicatorKind.SATIETY, PetIndicatorKind.ENERGY), luxury.map { it.kind })
-            assertEquals("Восстановит немного сил", luxury.single { it.kind == PetIndicatorKind.ENERGY }.label)
+            assertEquals("Восстановит немного энергии", luxury.single { it.kind == PetIndicatorKind.ENERGY }.label)
             val festive = choices.getValue("feast-v1").petEffects
             assertEquals(listOf(PetIndicatorKind.SATIETY, PetIndicatorKind.ENERGY, PetIndicatorKind.MOOD), festive.map { it.kind })
-            assertEquals("Восстановит больше сил", festive.single { it.kind == PetIndicatorKind.ENERGY }.label)
+            assertEquals("Восстановит больше энергии", festive.single { it.kind == PetIndicatorKind.ENERGY }.label)
             assertEquals("Радость", festive.single { it.kind == PetIndicatorKind.MOOD }.label)
-            assertEquals(if (demoMode) "В режиме бога силы не тратятся." else "Силы уже полные.",
+            assertEquals(if (demoMode) "В режиме бога энергия не тратится." else "Энергия на максимуме.",
                 festive.single { it.kind == PetIndicatorKind.ENERGY }.explanation)
         }
         assertEquals(state(100), current)
@@ -71,18 +71,18 @@ class MealPresentationTest {
                 if (demoMode) assertEquals("Бесплатно", choices.first { it.id == mealId }.priceLabel)
             }
             val luxury = choices.first { it.id == "luxury-v1" }
-            assertEquals("Восстановит немного сил",
+            assertEquals("Восстановит немного энергии",
                 luxury.petEffects.single { it.kind == PetIndicatorKind.ENERGY }.label)
             val free = choices.first { it.id == "community-v1" }
             assertEquals("Бесплатно", free.priceLabel)
-            assertEquals(if (demoMode) null else "После обеда нужен отдых. Утром сил будет меньше.", free.consequence)
+            assertEquals(if (demoMode) null else "После обеда нужен отдых. Утром энергии будет меньше.", free.consequence)
         }
     }
 
     @Test fun mealCapacityRemainsDistinctWhileActualRestorationIsLimitedByMissingEnergy() {
         val current = state(100, energy = catalog.rules.fullEnergy - 1)
         val festive = mealChoices(current, catalog, engine).single { it.id == "feast-v1" }
-        assertEquals("Восстановит больше сил", festive.petEffects.single { it.kind == PetIndicatorKind.ENERGY }.label)
+        assertEquals("Восстановит больше энергии", festive.petEffects.single { it.kind == PetIndicatorKind.ENERGY }.label)
         assertEquals("До полного запаса.", festive.petEffects.single { it.kind == PetIndicatorKind.ENERGY }.explanation)
         val after = (engine.preview(current, EngineCommand.Feed("feast-v1")) as EngineResult.Applied).state
         assertEquals(catalog.rules.fullEnergy, after.engine!!.energy)

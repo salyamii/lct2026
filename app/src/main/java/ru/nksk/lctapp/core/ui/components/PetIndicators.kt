@@ -51,7 +51,7 @@ internal fun PetIndicators(
     }
     selected?.let { key ->
         val (title, explanation) = when (PetIndicatorKind.valueOf(key)) {
-            PetIndicatorKind.ENERGY -> "Силы" to buildString {
+            PetIndicatorKind.ENERGY -> "Энергия" to buildString {
                 if (!state.demoMode) state.energy?.let { append("$it из ${state.maxEnergy}. ") }
                 append(state.energyExplanation)
             }
@@ -76,9 +76,9 @@ private fun PetIndicatorsHud(
     canChooseMeal: Boolean,
     onSelect: (PetIndicatorKind) -> Unit,
 ) {
-    val energyDescription = "Силы: " + when {
+    val energyDescription = "Энергия: " + when {
         state.energy == null -> state.energyLabel
-        state.demoMode -> "без усталости, режим бога"
+        state.demoMode -> "не тратится, режим бога"
         else -> "${state.energy} из ${state.maxEnergy}. ${state.energyLabel}"
     }
     Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -87,7 +87,7 @@ private fun PetIndicatorsHud(
             state = state,
             modifier = Modifier.weight(1f)
                 .clickable(enabled = interactionEnabled, role = Role.Button,
-                    onClickLabel = "Подробнее о силах") { onSelect(PetIndicatorKind.ENERGY) }
+                    onClickLabel = "Подробнее об энергии") { onSelect(PetIndicatorKind.ENERGY) }
                 .semantics(mergeDescendants = true) { contentDescription = energyDescription },
         )
         StateIconButton(
@@ -160,7 +160,7 @@ private fun FramedEnergyGauge(state: PetIndicatorsUiState, modifier: Modifier) {
         }
         Box(Modifier.align(Alignment.TopCenter).fillMaxWidth().padding(top = captionTop)
             .height(captionBottom - captionTop).clearAndSetSemantics {}, contentAlignment = Alignment.Center) {
-            Text(if (state.demoMode) "Силы ∞" else "Силы", color = Color(0xFFFFEBC5),
+            Text(if (state.demoMode) "Энергия ∞" else "Энергия", color = Color(0xFFFFEBC5),
                 fontFamily = Nunito, fontWeight = FontWeight.ExtraBold,
                 fontSize = 12.sp, lineHeight = 15.sp, maxLines = 1)
         }

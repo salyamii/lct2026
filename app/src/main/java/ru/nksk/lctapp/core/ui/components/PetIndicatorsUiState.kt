@@ -25,7 +25,7 @@ enum class PetMoodUiState(val label: String, val explanation: String) {
     WORRIED("Волнуется", "Герой переживает из-за события."),
     NEEDS_CARE("Нужна помощь", "Помоги герою в текущем событии."),
     HUNGRY("Хочет есть", "Покорми героя."),
-    TIRED("Нужен отдых", "Сон восстановит силы."),
+    TIRED("Нужен отдых", "Сон восстановит энергию."),
 }
 
 enum class PetIndicatorKind { ENERGY, SATIETY, MOOD }

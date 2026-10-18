@@ -23,8 +23,8 @@ class DayChoicePresentationTest {
     }
 
     @Test fun differentAmountsStayBesideTheirOwnActions() {
-        val shortWork = PetIndicatorEffectUiState(PetIndicatorKind.ENERGY, "Силы -1")
-        val longWork = PetIndicatorEffectUiState(PetIndicatorKind.ENERGY, "Силы -2")
+        val shortWork = PetIndicatorEffectUiState(PetIndicatorKind.ENERGY, "Энергия -1")
+        val longWork = PetIndicatorEffectUiState(PetIndicatorKind.ENERGY, "Энергия -2")
         val options = listOf(
             DayOption("short", "Немного поработать", false, true, petEffects = listOf(shortWork)),
             DayOption("long", "Поработать подольше", false, true, petEffects = listOf(longWork)),

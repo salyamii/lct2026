@@ -22,6 +22,8 @@ import ru.nksk.lctapp.core.ui.components.GameBackButton
 import ru.nksk.lctapp.core.ui.components.GameSceneTitle
 import ru.nksk.lctapp.core.ui.components.GameActionButton
 import ru.nksk.lctapp.core.ui.components.GameActionStyle
+import ru.nksk.lctapp.core.ui.components.FinancialAdviceText
+import ru.nksk.lctapp.core.ui.game.FinancialAdviceUi
 import ru.nksk.lctapp.core.ui.game.coinAmount
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
 import ru.nksk.lctapp.core.ui.theme.Nunito
@@ -42,6 +44,7 @@ internal data class WeeklyIncomeUiState(
     val reserveRemainder: Long = 0,
     val busy: Boolean = false,
     val reserveTransferred: Long? = null,
+    val advice: FinancialAdviceUi? = null,
 )
 
 @Composable
@@ -50,18 +53,19 @@ internal fun WeeklyIncomeScreen(
     onPlan: () -> Unit,
     onBack: () -> Unit,
     onDepositReserve: () -> Unit = {},
+    onAdviceShown: (String) -> Unit = {},
 ) {
     BoxWithConstraints(Modifier.fillMaxSize().background(GameInk)) {
         val landscape = maxWidth >= 600.dp && maxWidth > maxHeight
         if (landscape) {
             Row(Modifier.fillMaxSize()) {
                 IncomeHero(state, onBack, Modifier.weight(1f).fillMaxHeight())
-                IncomeInvitation(state, onPlan, onDepositReserve, Modifier.weight(1f).fillMaxHeight())
+                IncomeInvitation(state, onPlan, onDepositReserve, onAdviceShown, Modifier.weight(1f).fillMaxHeight())
             }
         } else {
             Column(Modifier.fillMaxSize()) {
                 IncomeHero(state, onBack, Modifier.fillMaxWidth().weight(0.46f))
-                IncomeInvitation(state, onPlan, onDepositReserve, Modifier.fillMaxWidth().weight(0.54f))
+                IncomeInvitation(state, onPlan, onDepositReserve, onAdviceShown, Modifier.fillMaxWidth().weight(0.54f))
             }
         }
     }
@@ -85,7 +89,7 @@ private fun IncomeHero(state: WeeklyIncomeUiState, onBack: () -> Unit, modifier:
 
 @Composable
 private fun IncomeInvitation(state: WeeklyIncomeUiState, onPlan: () -> Unit,
-    onDepositReserve: () -> Unit, modifier: Modifier) {
+    onDepositReserve: () -> Unit, onAdviceShown: (String) -> Unit, modifier: Modifier) {
     Surface(modifier, color = GamePaper, shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)) {
         Box(Modifier.fillMaxSize().windowInsetsPadding(
             WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)),
@@ -122,7 +126,10 @@ private fun IncomeInvitation(state: WeeklyIncomeUiState, onPlan: () -> Unit,
                     Text("Вместе с оставшимися монетами у нас теперь $available.", color = GameInk,
                         fontFamily = Nunito, fontSize = 15.sp, lineHeight = 21.sp)
                 }
-                Text(state.hint, color = Color(0xFF6B6394), fontFamily = Nunito,
+                val advice = state.advice
+                if (advice != null) FinancialAdviceText(advice.text, exposureKey = advice.id,
+                    onShown = { onAdviceShown(advice.id) })
+                else Text(state.hint, color = Color(0xFF6B6394), fontFamily = Nunito,
                     fontSize = 14.sp, lineHeight = 20.sp)
                 Text(state.nextIncome, color = Color(0xFF6B6394), fontFamily = Nunito,
                     fontSize = 14.sp, lineHeight = 20.sp)

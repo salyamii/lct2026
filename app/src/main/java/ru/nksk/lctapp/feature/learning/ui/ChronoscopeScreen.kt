@@ -137,6 +137,10 @@ internal fun ChronoscopeScreen(state: ReflectionUiState, onAction: (ReflectionAc
                 GameTitle(if (state.demoExample) "Купить или пройти мимо?" else "Какой момент вспомним?")
                 GameBody(if (state.demoExample) "Обычные цены. Твоя игра не изменится."
                     else "Попробуем другой выбор и сравним, что получилось бы.")
+                state.financialAdvice?.let { advice ->
+                    FinancialAdviceText(advice.text, exposureKey = advice.id,
+                        onShown = { onAction(ReflectionAction.AdvicePresented(advice.id)) })
+                }
                 state.reflectionDay?.takeUnless { state.demoExample }?.let {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(ReflectionScope.DAY to "Этот день", ReflectionScope.WEEK to "Эта неделя").forEach { (scope, label) ->
@@ -220,7 +224,7 @@ internal fun ChronoscopeScreen(state: ReflectionUiState, onAction: (ReflectionAc
             }
             ChronoscopeStep.EXPLANATION -> {
                 GameTitle(if (state.quizAnswer?.correct == true) "Верно!" else "У каждого выбора свои последствия")
-                QuizExplanation(state, onAction, "Сравнивай не только монеты: другой поступок может сохранить силы или помочь получить нужную вещь.")
+                QuizExplanation(state, onAction, "Сравнивай не только монеты: другой поступок может сохранить энергию или помочь получить нужную вещь.")
             }
             ChronoscopeStep.PRESENT -> {
                 GameTitle("Вернёмся к приключению")

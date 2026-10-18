@@ -97,6 +97,10 @@ internal fun SavingsScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
             SavingsGoalSummary(state.savingsTarget, economy.savingsBalance,
                 onOpenGoal = { if (!state.saving) onOpenGoal() })
             SavingsCaption("На покупку можно добавить доступные деньги.")
+            state.savingsAdvice?.let { advice ->
+                FinancialAdviceText(advice.text, exposureKey = advice.id,
+                    onShown = { onAction(EconomyAction.AdvicePresented(advice.id)) })
+            }
             SavingsDirections(withdrawing, enabled = !planningRequired, onSelect = {
                 if (!state.saving) { focus.clearFocus(); onAction(EconomyAction.OpenTransfer(it)) }
             })

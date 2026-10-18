@@ -20,7 +20,7 @@ internal fun mealChoices(state: GameState, catalog: GameCatalog, engine: GameEng
             else -> "Роскошный обед"
         }
         val description = if (effect.exhaustsCurrentEnergy && !demoMode)
-            "После обеда нужен отдых. Утром сил будет меньше." else null
+            "После обеда нужен отдых. Утром энергии будет меньше." else null
         MealChoiceUiState(meal.id, label, enabled = blocked == null, consequence = description,
             priceLabel = if (price == 0L) "Бесплатно" else paymentCoinAmount(price),
             petEffects = mealPetEffects(state, catalog, meal.id, demoMode))

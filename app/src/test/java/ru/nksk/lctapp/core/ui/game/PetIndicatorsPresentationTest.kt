@@ -79,7 +79,7 @@ class PetIndicatorsPresentationTest {
         val content = catalogWith(EventPolicy(energyCost = 3, choiceEnergyCosts = mapOf(choice.id to 1)))
         val current = state()
         val effects = eventChoicePetEffects(current, content, choice.id)
-        assertEquals("Силы -1", effects.single { it.kind == PetIndicatorKind.ENERGY }.label)
+        assertEquals("Энергия -1", effects.single { it.kind == PetIndicatorKind.ENERGY }.label)
         assertEquals("Радость", effects.single { it.kind == PetIndicatorKind.MOOD }.label)
         assertEquals(effects, deedPetEffects(current, content, event.id))
         assertEquals(5, current.engine!!.energy)
@@ -93,7 +93,7 @@ class PetIndicatorsPresentationTest {
         assertFalse(hungryAfter.any { it.kind == PetIndicatorKind.MOOD })
         val tiredAfter = eventChoicePetEffects(state(energy = 1, ate = true), content, choice.id)
         assertFalse(tiredAfter.any { it.kind == PetIndicatorKind.MOOD })
-        assertEquals("Силы -1", tiredAfter.single { it.kind == PetIndicatorKind.ENERGY }.label)
+        assertEquals("Энергия -1", tiredAfter.single { it.kind == PetIndicatorKind.ENERGY }.label)
     }
 
     @Test fun foodChoiceAtHungerThresholdCanStillPromiseItsAuthoredJoy() {
@@ -134,19 +134,19 @@ class PetIndicatorsPresentationTest {
 
     @Test fun restorationIsCappedAndDoesNotAdvertiseAnUnavailableIncrease() {
         val content = catalogWith(EventPolicy(energyCost = 0, choiceEnergyRestores = mapOf(choice.id to 2)))
-        assertEquals("Силы +1", eventChoicePetEffects(state(energy = 4), content, choice.id)
+        assertEquals("Энергия +1", eventChoicePetEffects(state(energy = 4), content, choice.id)
             .single { it.kind == PetIndicatorKind.ENERGY }.label)
-        assertEquals("Силы полные", eventChoicePetEffects(state(), content, choice.id)
+        assertEquals("Энергия на максимуме", eventChoicePetEffects(state(), content, choice.id)
             .single { it.kind == PetIndicatorKind.ENERGY }.label)
-        assertEquals("Восстановит больше сил", mealPetEffects(state(energy = 4), catalog, "feast-v1")
+        assertEquals("Восстановит больше энергии", mealPetEffects(state(energy = 4), catalog, "feast-v1")
             .single { it.kind == PetIndicatorKind.ENERGY }.label)
-        assertEquals("Силы без изменений", mealPetEffects(state(energy = 2), catalog, "basic-v1")
+        assertEquals("Энергия не изменится", mealPetEffects(state(energy = 2), catalog, "basic-v1")
             .single { it.kind == PetIndicatorKind.ENERGY }.label)
     }
 
     @Test fun equalRestoreAndCostDoNotInventAFullEnergyBar() {
         val content = catalogWith(EventPolicy(energyCost = 1, choiceEnergyRestores = mapOf(choice.id to 1)))
-        assertEquals("Силы без изменений", eventChoicePetEffects(state(energy = 3), content, choice.id)
+        assertEquals("Энергия не изменится", eventChoicePetEffects(state(energy = 3), content, choice.id)
             .single { it.kind == PetIndicatorKind.ENERGY }.label)
     }
 
@@ -154,9 +154,9 @@ class PetIndicatorsPresentationTest {
         val current = state(energy = 3)
         val ordinary = mealPetEffects(current, catalog, "community-v1")
         assertEquals("Нужен отдых", ordinary.single { it.kind == PetIndicatorKind.ENERGY }.label)
-        assertEquals("Силы: 0 сегодня, 3 из 5 утром.", ordinary.single { it.kind == PetIndicatorKind.ENERGY }.explanation)
+        assertEquals("Энергия: 0 сегодня, 3 из 5 утром.", ordinary.single { it.kind == PetIndicatorKind.ENERGY }.explanation)
         val demo = mealPetEffects(current, catalog, "community-v1", demoMode = true)
-        assertEquals("Без усталости", demo.single { it.kind == PetIndicatorKind.ENERGY }.label)
+        assertEquals("Энергия не тратится", demo.single { it.kind == PetIndicatorKind.ENERGY }.label)
         assertFalse(demo.any { it.explanation.orEmpty().contains("утром") })
     }
 

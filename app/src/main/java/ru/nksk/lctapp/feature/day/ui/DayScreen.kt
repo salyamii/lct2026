@@ -151,6 +151,10 @@ private fun StoryIntroduction(state: DayUiState, onAction: (DayAction) -> Unit, 
 private fun DayActions(state: DayUiState, onAction: (DayAction) -> Unit) {
     if (!state.practiceRequired && state.options.isEmpty() && state.primary == null && state.later == null) return
     Column(verticalArrangement = Arrangement.spacedBy(GameActionButtonDefaults.Spacing)) {
+        state.financialAdvice?.let { advice ->
+            FinancialAdviceText(advice.text, Modifier.padding(bottom = 8.dp), exposureKey = advice.id,
+                onShown = { onAction(DayAction.AdvicePresented(advice.id)) })
+        }
         if (state.practiceRequired) {
             AdventurePrimaryButton("К практике", { onAction(DayAction.OpenLearning) }, enabled = !state.busy)
         }

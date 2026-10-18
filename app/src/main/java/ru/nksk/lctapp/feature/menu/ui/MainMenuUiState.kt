@@ -66,7 +66,7 @@ internal val MainMenuPreviewState = MainMenuUiState(
     totalGoals = 4,
     pet = PetState("PLAIN", PetVisualState.NORMAL).toMainMenuPetUiState(),
     dayStatus = "День 2",
-    indicators = PetIndicatorsUiState(3, 5, "Устал", "Дела расходуют силы. Отдых помогает их восстановить.",
+    indicators = PetIndicatorsUiState(3, 5, "Устал", "Дела расходуют энергию. Отдых помогает её восстановить.",
         PetSatietyUiState.NOT_EATEN, PetMoodUiState.CALM),
     canFeed = true,
 )
