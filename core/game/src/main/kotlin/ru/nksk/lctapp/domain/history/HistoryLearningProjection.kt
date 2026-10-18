@@ -244,6 +244,7 @@ object HistoryLearningProjection {
             is EngineCommand.Choose -> command.occurrenceId
             is EngineCommand.CompleteEvent -> command.occurrenceId
             is EngineCommand.CompleteStoryGame -> command.occurrenceId
+            is EngineCommand.PayBoatRepair -> command.occurrenceId
             EngineCommand.OpenNextEvent, is EngineCommand.BeginDay -> expense.after?.engine?.currentEvent?.id
             else -> null
         } ?: return null
@@ -274,6 +275,7 @@ object HistoryLearningProjection {
         if (entry.facts.any { it.detail is OptionalPurchase }) return false
         val journal = entry.after?.engine?.journal?.find { it.id == operationId } ?: return null
         if (journal.kind == DayJournalKind.MEAL) return false
+        if (journal.kind == DayJournalKind.BOAT_REPAIR) return true
         val eventId = when (journal.kind) {
             DayJournalKind.EVENT_START -> journal.sourceId
             DayJournalKind.EVENT_CHOICE -> content?.choices?.find { it.id == journal.sourceId }?.eventId

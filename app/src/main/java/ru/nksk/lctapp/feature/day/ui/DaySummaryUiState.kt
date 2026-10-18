@@ -103,6 +103,7 @@ internal fun DaySummary.toUiState(catalog: GameCatalog, petName: String, economy
                 DaySummaryRow("Подарок от родителя", actionMoney(entry.moneyDelta), DaySummaryRowKind.COINS)
                 else DaySummaryRow("Подарок от родителя: ${itemName(entry.sourceId)}", kind = DaySummaryRowKind.FOUND)
             DayJournalKind.EVENT_START -> rows += DaySummaryRow(eventName(entry.sourceId), actionMoney(entry.moneyDelta))
+            DayJournalKind.BOAT_REPAIR -> rows += DaySummaryRow("Починили лодку", actionMoney(entry.moneyDelta))
         }
     }
     // Compatibility for callers that only have the earlier summary projection.

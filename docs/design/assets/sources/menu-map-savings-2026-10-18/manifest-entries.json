@@ -1,0 +1,74 @@
+[
+  {
+    "resource": "menu_map_v2",
+    "category": "Generated menu map and narrow savings frame - 2026-10-18",
+    "path": "app/src/main/res/drawable-nodpi/menu_map_v2.webp",
+    "format": "webp",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 1622800,
+    "sha256": "1b23e9e105a5f93cfa3baea0ed9c9c41d2db1e1bd51efc21e0b4d376746fb651",
+    "rgba_sha256": "6f5c46c361727922c56f300eae87f9d2a23eedf58da88a180e1e505af7f0abd2",
+    "alpha_bounds": [
+      0,
+      51,
+      1489,
+      1024
+    ],
+    "source_path": "docs/design/assets/sources/menu-map-savings-2026-10-18/menu_map_v2.png",
+    "source_sha256": "d2459289de34bc9cc271ea2cbc3e720c480e170a933daf93df2a74eb0b84390f",
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-10-18",
+      "prompt_path": "docs/design/assets/sources/menu-map-savings-2026-10-18/prompts.json",
+      "prompt_key": "menu_map_v2",
+      "generated_source_filename": "exec-dc63ccde-2953-40dd-82ce-134a3599e7a7.png",
+      "reference_source_path": "docs/design/assets/sources/menu-map-savings-2026-10-18/map-reference.webp",
+      "reference_source_sha256": "38bfd12f76f9f5913c13d5c951ad8d5ee116fda96bb63c036d2ae762f8e77805"
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "method": 6,
+      "resized": false,
+      "pillow_version": "12.3.0"
+    }
+  },
+  {
+    "resource": "menu_savings_frame_v3",
+    "category": "Generated menu map and narrow savings frame - 2026-10-18",
+    "path": "app/src/main/res/drawable-nodpi/menu_savings_frame_v3.webp",
+    "format": "webp",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 1149478,
+    "sha256": "97ba245d69c789028d0e613900dae3ee93a17a43c6dabbc03c19995b0113e43b",
+    "rgba_sha256": "cce594d8f9a8e85fe6f26065a38d105da9e3b6253c0c37450f67d74f1bfaa35f",
+    "alpha_bounds": [
+      0,
+      0,
+      1004,
+      1536
+    ],
+    "source_path": "docs/design/assets/sources/menu-map-savings-2026-10-18/menu_savings_frame_v3.png",
+    "source_sha256": "aa69a2e10fb7427d458869e0516b09f5976972a77a6635ee50140385363ca63f",
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-10-18",
+      "prompt_path": "docs/design/assets/sources/menu-map-savings-2026-10-18/prompts.json",
+      "prompt_key": "menu_savings_frame_v3",
+      "generated_source_filename": "exec-57280cb0-60d5-46ba-a07a-da319a6d470a.png",
+      "reference_source_path": "docs/design/assets/sources/menu-map-savings-2026-10-18/savings-narrow-reference.png",
+      "reference_source_sha256": "ef319d7ff517bbdd9ba08a87a4fd29f2a3a89222e2bc2671dcc4b8f392670d12"
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "method": 6,
+      "resized": false,
+      "pillow_version": "12.3.0"
+    }
+  }
+]

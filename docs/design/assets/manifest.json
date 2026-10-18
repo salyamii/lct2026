@@ -20638,6 +20638,328 @@
         "resized": false,
         "pillow_version": "12.3.0"
       }
+    },
+    {
+      "resource": "menu_map_v2",
+      "category": "Generated menu map and narrow savings frame - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/menu_map_v2.webp",
+      "format": "webp",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1622800,
+      "sha256": "1b23e9e105a5f93cfa3baea0ed9c9c41d2db1e1bd51efc21e0b4d376746fb651",
+      "rgba_sha256": "6f5c46c361727922c56f300eae87f9d2a23eedf58da88a180e1e505af7f0abd2",
+      "alpha_bounds": [
+        0,
+        51,
+        1489,
+        1024
+      ],
+      "source_path": "docs/design/assets/sources/menu-map-savings-2026-10-18/menu_map_v2.png",
+      "source_sha256": "d2459289de34bc9cc271ea2cbc3e720c480e170a933daf93df2a74eb0b84390f",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-18",
+        "prompt_path": "docs/design/assets/sources/menu-map-savings-2026-10-18/prompts.json",
+        "prompt_key": "menu_map_v2",
+        "generated_source_filename": "exec-dc63ccde-2953-40dd-82ce-134a3599e7a7.png",
+        "reference_source_path": "docs/design/assets/sources/menu-map-savings-2026-10-18/map-reference.webp",
+        "reference_source_sha256": "38bfd12f76f9f5913c13d5c951ad8d5ee116fda96bb63c036d2ae762f8e77805"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "menu_savings_frame_v3",
+      "category": "Generated menu map and narrow savings frame - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/menu_savings_frame_v3.webp",
+      "format": "webp",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 1149478,
+      "sha256": "97ba245d69c789028d0e613900dae3ee93a17a43c6dabbc03c19995b0113e43b",
+      "rgba_sha256": "cce594d8f9a8e85fe6f26065a38d105da9e3b6253c0c37450f67d74f1bfaa35f",
+      "alpha_bounds": [
+        0,
+        0,
+        1004,
+        1536
+      ],
+      "source_path": "docs/design/assets/sources/menu-map-savings-2026-10-18/menu_savings_frame_v3.png",
+      "source_sha256": "aa69a2e10fb7427d458869e0516b09f5976972a77a6635ee50140385363ca63f",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-18",
+        "prompt_path": "docs/design/assets/sources/menu-map-savings-2026-10-18/prompts.json",
+        "prompt_key": "menu_savings_frame_v3",
+        "generated_source_filename": "exec-57280cb0-60d5-46ba-a07a-da319a6d470a.png",
+        "reference_source_path": "docs/design/assets/sources/menu-map-savings-2026-10-18/savings-narrow-reference.png",
+        "reference_source_sha256": "ef319d7ff517bbdd9ba08a87a4fd29f2a3a89222e2bc2671dcc4b8f392670d12"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "story_game_telescope_tripod",
+      "category": "Generated chapter-one game sprites - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/story_game_telescope_tripod.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 632674,
+      "sha256": "79f53454c31ade85a9b5fb3524df021e37d14b2ae841e9ab9c73fdfd7c533433",
+      "rgba_sha256": "19e7648fa447d30be002da678c6485b63f2bbfa6891408fe960cf8c0b083c728",
+      "alpha_bounds": [
+        0,
+        16,
+        1254,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/chapter-games-2026-10-18/story_game_telescope_tripod.png",
+      "source_sha256": "d31d6d4c67980f45bffc7adba40f734e34f84da6d03459d5a7c4927124a59d6c",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-18",
+        "prompt_path": "docs/design/assets/sources/chapter-games-2026-10-18/prompts.json",
+        "prompt_key": "story_game_telescope_tripod",
+        "references": [
+          "C:/Users/User/StudioProjects/lct2026/app/src/main/res/drawable-nodpi/story_telescope_parts.webp"
+        ]
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "10.2.0"
+      }
+    },
+    {
+      "resource": "story_game_telescope_tube",
+      "category": "Generated chapter-one game sprites - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/story_game_telescope_tube.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 799544,
+      "sha256": "6f60d4b06cb28f81d5be3c1c82cf1248877d0896f006099ab609bd87b4f6b3c3",
+      "rgba_sha256": "09794c212a5660cd76a48712cea219b655364b2938fd348ebd5d48b5869cdc2a",
+      "alpha_bounds": [
+        0,
+        21,
+        1243,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/chapter-games-2026-10-18/story_game_telescope_tube.png",
+      "source_sha256": "855d24a2baea00b74142ee2586fe02f04585e6013e00041ffc59b9ca14cd0fda",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-18",
+        "prompt_path": "docs/design/assets/sources/chapter-games-2026-10-18/prompts.json",
+        "prompt_key": "story_game_telescope_tube",
+        "references": [
+          "C:/Users/User/StudioProjects/lct2026/app/src/main/res/drawable-nodpi/story_telescope_parts.webp"
+        ]
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "10.2.0"
+      }
+    },
+    {
+      "resource": "story_game_telescope_lens",
+      "category": "Generated chapter-one game sprites - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/story_game_telescope_lens.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 838316,
+      "sha256": "b1cbd47904b2e167ea4d2812fa5c4a673603b76f8ed55d0a5f2ee7abe87d86f2",
+      "rgba_sha256": "744f41df133d82919d74bc94e5420d829113e2de60ebc170f3d2dfb09e5d9a93",
+      "alpha_bounds": [
+        65,
+        23,
+        1224,
+        1230
+      ],
+      "source_path": "docs/design/assets/sources/chapter-games-2026-10-18/story_game_telescope_lens.png",
+      "source_sha256": "b3a6f6827bdc5ce4c2527d4aaf850cc594db90c79bc8b6586ba067616709036d",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-18",
+        "prompt_path": "docs/design/assets/sources/chapter-games-2026-10-18/prompts.json",
+        "prompt_key": "story_game_telescope_lens",
+        "references": [
+          "C:/Users/User/StudioProjects/lct2026/app/src/main/res/drawable-nodpi/story_telescope_parts.webp"
+        ]
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "10.2.0"
+      }
+    },
+    {
+      "resource": "story_game_wheel",
+      "category": "Generated chapter-one game sprites - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/story_game_wheel.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1236282,
+      "sha256": "732afa846502b52405010f5373465cd7bd6fab47ab0d9d7c32904b9b5d1d0445",
+      "rgba_sha256": "c0242e1873ea538b5e289fb2bf66023d92b9daa983d14d1fc5d585c7388bacf7",
+      "alpha_bounds": [
+        0,
+        30,
+        1224,
+        1222
+      ],
+      "source_path": "docs/design/assets/sources/chapter-games-2026-10-18/story_game_wheel.png",
+      "source_sha256": "fc1e0ea73da9c10da4fd011554a3202c7ec9d38cb3b13636268bdb7474dc0af6",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-18",
+        "prompt_path": "docs/design/assets/sources/chapter-games-2026-10-18/prompts.json",
+        "prompt_key": "story_game_wheel",
+        "references": [
+          "C:/Users/User/StudioProjects/lct2026/app/src/main/res/drawable-nodpi/event_broken_wheel.webp"
+        ]
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "10.2.0"
+      }
+    },
+    {
+      "resource": "story_game_boat",
+      "category": "Generated chapter-one game sprites - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/story_game_boat.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 775316,
+      "sha256": "ee1fc2549bb87d1e2c0e203af1169c5649b41c606c2015222a1445485c74494a",
+      "rgba_sha256": "a4c21071080ab75317d7c5a52d8317301a3833ef2a798d0b7d1812d994b80eb4",
+      "alpha_bounds": [
+        0,
+        15,
+        1240,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/chapter-games-2026-10-18/story_game_boat.png",
+      "source_sha256": "0013837e038d413a325cac8a19bcb09ffc9cf225d25dba750b72e7abff2f7189",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-18",
+        "prompt_path": "docs/design/assets/sources/chapter-games-2026-10-18/prompts.json",
+        "prompt_key": "story_game_boat",
+        "references": null
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "10.2.0"
+      }
+    },
+    {
+      "resource": "story_game_workbench_surface",
+      "category": "Generated chapter-one game sprites - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/story_game_workbench_surface.webp",
+      "format": "webp",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 1995568,
+      "sha256": "ca2c7ae7d028aaad06ea528429029243fbec8ef0f7f8bca8c51e7662e6f37cc0",
+      "rgba_sha256": "0e6accf207155e9bb02d65b1fdcb6b039b62c7552aadeb78a01ade1c28762f7b",
+      "alpha_bounds": [
+        0,
+        0,
+        1024,
+        1536
+      ],
+      "source_path": "docs/design/assets/sources/chapter-workshop-2026-10-18/story_game_workbench_surface.png",
+      "source_sha256": "7d2739214b9bed53ccbb1eba0640a5474a399f03f2a42408a9c0271373fa371e",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-18",
+        "prompt_path": "docs/design/assets/sources/chapter-workshop-2026-10-18/prompts.json",
+        "prompt_key": "story_game_workbench_surface",
+        "references": [
+          "C:/Users/User/StudioProjects/lct2026/app/src/main/res/drawable-nodpi/story_cleaning_worktable.webp"
+        ]
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "10.2.0"
+      }
+    },
+    {
+      "resource": "story_game_strap_patch",
+      "category": "Generated chapter-one game sprites - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/story_game_strap_patch.webp",
+      "format": "webp",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 1449392,
+      "sha256": "7755f688496d2348849db064b694151d1c6d22ce183c9df5ac712c2193b4510c",
+      "rgba_sha256": "a4ba088abbcae2e7833c818f0ec40f333093992cd591a45a9479538ed7ab2946",
+      "alpha_bounds": [
+        0,
+        63,
+        1004,
+        1536
+      ],
+      "source_path": "docs/design/assets/sources/chapter-workshop-2026-10-18/story_game_strap_patch.png",
+      "source_sha256": "aaab0441c9f6807e56f8fd53fff93413fc036d7513c9ce5ea530d8df44d5d67f",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-18",
+        "prompt_path": "docs/design/assets/sources/chapter-workshop-2026-10-18/prompts.json",
+        "prompt_key": "story_game_strap_patch",
+        "references": [
+          "C:/Users/User/StudioProjects/lct2026/app/src/main/res/drawable-nodpi/event_backpack_torn.webp"
+        ]
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "10.2.0"
+      }
     }
   ],
   "missing": [],

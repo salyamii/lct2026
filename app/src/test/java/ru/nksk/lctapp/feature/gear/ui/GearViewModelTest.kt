@@ -58,6 +58,31 @@ class GearViewModelTest {
         assertEquals(1, (model.uiState.value as GearLoadState.Ready).inventory.itemCount)
     }
 
+    @Test fun unrelatedUpdatesAndRenamingReuseDefinitionsButAcquisitionReadsNewContent() = runTest(dispatcher) {
+        val games = InventoryGames(createInitialGameState().copy(ownedItems = listOf(OwnedItem("map-1", "map"))))
+        val content = InventoryContent().apply {
+            catalog = StoryContent(items = listOf(ItemDefinition("map", "Карта", "")))
+        }
+        val model = gearModel(games, content).also { store.put("gear", it) }
+        advanceUntilIdle()
+        val firstInventory = (model.uiState.value as GearLoadState.Ready).inventory
+        assertEquals(1, content.reads)
+        games.state.value = games.state.value!!.let { it.copy(satiety = it.satiety + 1) }
+        advanceUntilIdle()
+        assertSame(firstInventory, (model.uiState.value as GearLoadState.Ready).inventory)
+        games.state.value = games.state.value!!.let { it.copy(pet = it.pet.copy(name = "Тоша")) }
+        advanceUntilIdle()
+        assertEquals(1, content.reads)
+        content.catalog = content.catalog.copy(items = content.catalog.items + ItemDefinition("book", "Книга", ""))
+        games.state.value = games.state.value!!.let {
+            it.copy(ownedItems = it.ownedItems + OwnedItem("book-1", "book"))
+        }
+        advanceUntilIdle()
+        assertEquals(2, content.reads)
+        assertEquals(listOf("Карта", "Книга"),
+            (model.uiState.value as GearLoadState.Ready).inventory.storyItems.map { it.name })
+    }
+
     @Test fun missingSaveShowsErrorInsteadOfGrantingPreviewItems() = runTest(dispatcher) {
         val model = gearModel(InventoryGames(null), InventoryContent()).also { store.put("gear", it) }
         advanceUntilIdle()
@@ -88,7 +113,9 @@ private class InventoryGames(initial: GameState?) : GameRepository {
 private class InventoryContent : StoryContentRepository {
     var catalog = StoryContent()
     var fail = false
+    var reads = 0
     override suspend fun read(): StoryContent {
+        reads++
         check(!fail) { "Storage unavailable" }
         return catalog
     }

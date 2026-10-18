@@ -108,6 +108,7 @@ private fun AuditEntry.activityRows(catalog: GameCatalog, petName: String, inclu
             DayJournalKind.WEEKLY_INCOME -> add("Получили монеты на новую неделю", receipt(entry))
             DayJournalKind.PARENT_REWARD -> add("Подарок от родителя", receipt(entry))
             DayJournalKind.EVENT_START -> add(eventName(entry.sourceId), receipt(entry))
+            DayJournalKind.BOAT_REPAIR -> add("Починили лодку", receipt(entry))
         }
     }
     // Transfers have their own canonical receipts and no daily journal charge.

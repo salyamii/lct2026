@@ -41,6 +41,7 @@ internal data class BudgetUiState(
     val advice: FinancialAdviceUi? = null,
     val focusedArticle: BudgetArticle? = null,
     val adviceScope: String = "budget",
+    val planningId: String? = null,
 ) {
     val canConfirm: Boolean get() = actionsEnabled && !busy && unallocated == 0L && (!isEditing || needs >= minimumNeeds)
     val total: Long get() = needs + wants + savings + reserve + unallocated
@@ -52,29 +53,31 @@ internal data class BudgetUiState(
     val foodAdvice: String get() = if (foodShortfall > 0)
         "На еду до следующей недели не хватает ещё ${missingCoinAmount(foodShortfall)}."
     else "На еду до следующей недели хватает."
-    val foodContextText: String get() = "На еду до следующей недели нужно ${coinAmount(knownNeeds)}, выделено $needs."
+    val foodReminderText: String? get() = if (foodShortfall > 0)
+        "На еду до следующей недели нужно ${coinAmount(knownNeeds)}. Добавь в «Нужно» ещё ${missingCoinAmount(foodShortfall)}."
+    else null
     val adviser: FinancialAdviceUi get() {
         val text = when {
-            foodShortfall > 0 -> "В «Нужно» не хватает ещё ${missingCoinAmount(foodShortfall)} на еду до следующей недели. " +
-                "Обеды придётся оплатить из других денег или сначала заработать."
             focusedArticle == BudgetArticle.WANTS && wants == 0L ->
-                "На приятные покупки пока ничего не выделено. Можно оставить на них немного монет, а можно пока копить на цель."
+                "На приятные покупки можно оставить немного монет или пока копить на цель."
             focusedArticle == BudgetArticle.WANTS ->
-                "Эти монеты можно потратить на то, что нравится. Если часть отложить, на покупки останется меньше, зато быстрее накопишь на цель."
+                "Больше радостей сейчас или ближе большая цель? Реши, сколько потратить, а сколько отложить."
             focusedArticle == BudgetArticle.SAVINGS && savingsTransfer > 0 ->
-                "Когда подтвердишь бюджет, эти монеты перейдут в копилку. Там они останутся на большую цель и не уйдут на обычные покупки."
+                "После подтверждения эти монеты перейдут в копилку на большую цель."
             focusedArticle == BudgetArticle.SAVINGS ->
-                "Даже небольшие суммы в копилке приближают большую покупку. Эти монеты хранятся отдельно, чтобы не потратить их на другое."
+                "В копилке деньги хранятся отдельно от обычных покупок и приближают большую цель."
             focusedArticle == BudgetArticle.RESERVE && reserve == 0L ->
-                "В запасе пока ничего нет на внезапный ремонт или лечение. Если что-то случится, придётся заработать ещё или отложить другую покупку."
+                "Запас выручит при ремонте или лечении. Пока он пуст."
             focusedArticle == BudgetArticle.RESERVE ->
-                "Эти монеты выручат, если что-то сломается. Если ремонт не понадобится, в конце недели их можно переложить в копилку."
+                "Запас — на ремонт и лечение. Остаток можно отложить в копилку в конце недели."
+            focusedArticle == BudgetArticle.NEEDS ->
+                "Монеты из «Нужно» идут на еду. Другие покупки их не заберут."
             focusedArticle == null && advice != null -> advice.text
             knownNeeds == 0L ->
-                "До следующей недели новых расходов на еду нет. Деньги можно оставить на будущие обеды или распределить между другими планами."
+                "Можно оставить монеты на будущие обеды или распределить между другими планами."
             needs > knownNeeds ->
-                "На ближайшие обеды уже хватает. Другие покупки эти деньги не заберут, а лишнее можно выделить на цель, радости и неожиданности."
-            else -> "Эти деньги останутся на еду: другие покупки их не заберут. Так на обеды будет хватать до следующего поступления."
+                "Лишнее можно выделить на цель, радости и неожиданные траты."
+            else -> "Сначала отложи на необходимое, затем реши, сколько оставить на радости, цель и запас."
         }
         return FinancialAdviceUi("$adviceScope:${focusedArticle?.name ?: "overview"}:${text.hashCode()}", text)
     }
@@ -115,7 +118,8 @@ internal fun EconomyUiState.budgetScreenState(): BudgetScreenState {
             },
             busy = saving,
             isEditing = planning != null, advice = budgetAdvice,
-            focusedArticle = focusedBudgetArticle, adviceScope = budgetAdviceScope),
+            focusedArticle = focusedBudgetArticle, adviceScope = budgetAdviceScope,
+            planningId = planning?.id),
         pet = pet,
         revisionReason = revisionReason.takeIf { planning == null || planning.reason == BudgetPlanningReason.MANUAL },
         historyAvailable = planning == null,

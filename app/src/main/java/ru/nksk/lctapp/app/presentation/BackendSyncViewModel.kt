@@ -5,17 +5,14 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.retryWhen
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import ru.nksk.lctapp.data.backend.BackendSyncScheduler
 import ru.nksk.lctapp.domain.engine.GameSession
+import ru.nksk.lctapp.domain.backend.CloudSyncRepository
 import javax.inject.Inject
 
 /** App-owned scheduling stays outside features and does not change the game. */
@@ -24,6 +21,7 @@ import javax.inject.Inject
 internal class BackendSyncViewModel @Inject constructor(
     private val scheduler: BackendSyncScheduler,
     session: GameSession,
+    private val cloud: CloudSyncRepository,
 ) : ViewModel() {
     init {
         scheduler.ensurePeriodicSync()
@@ -34,22 +32,17 @@ internal class BackendSyncViewModel @Inject constructor(
                     delay(5_000L * (attempt + 1).coerceAtMost(12))
                     true
                 }
-                .debounce(5_000L)
+                .debounce(HistorySyncDebounceMillis)
                 .collect { scheduler.requestSync() }
         }
     }
 
-    suspend fun whileResumed(): Unit = coroutineScope {
-        scheduler.requestSync()
-        launch {
-            scheduler.networkReturns().catch { cause ->
-                if (cause is CancellationException || cause !is RuntimeException) throw cause
-                // A platform callback limit must not cancel the foreground timer or the UI.
-                // Connected WorkManager requests and the next resume remain available.
-            }.collect { scheduler.requestSync() }
-        }
-        while (currentCoroutineContext().isActive) {
-            delay(60_000L)
+    suspend fun whileResumed() {
+        try {
+            runForegroundBackendSync(scheduler.networkReturns(), scheduler::isConnected,
+                cloud::synchronize, scheduler::requestSync)
+        } finally {
+            // Continue a cancelled/unfinished exchange after the app leaves the foreground.
             scheduler.requestSync()
         }
     }

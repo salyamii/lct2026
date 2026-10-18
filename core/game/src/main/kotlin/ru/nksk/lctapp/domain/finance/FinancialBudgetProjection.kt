@@ -171,6 +171,7 @@ object FinancialBudgetProjection {
         val receipt = entry.after?.engine?.journal?.find { it.id == operation.operationId } ?: return null
         val eventId = when (receipt.kind) {
             DayJournalKind.MEAL -> return BudgetSection.NEEDS
+            DayJournalKind.BOAT_REPAIR -> return BudgetSection.RESERVE
             DayJournalKind.EVENT_START -> receipt.sourceId
             DayJournalKind.EVENT_CHOICE, DayJournalKind.DEED -> content.choices.find { it.id == receipt.sourceId }?.eventId
             else -> null

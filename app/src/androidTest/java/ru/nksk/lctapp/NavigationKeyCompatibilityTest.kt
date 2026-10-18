@@ -81,6 +81,8 @@ class NavigationKeyCompatibilityTest {
             "gear" to Gear,
             "goal" to Goal,
             "tasks" to Tasks,
+            "chapter_test_games" to ru.nksk.lctapp.feature.storygames.navigation.ChapterTestGames,
+            "chapter_test_game" to ru.nksk.lctapp.feature.storygames.navigation.ChapterTestGameSession("boat"),
             "tasks_star_plates" to StarPlates,
             "tasks_price_check" to PriceCheck,
             "tasks_telescope" to Telescope,

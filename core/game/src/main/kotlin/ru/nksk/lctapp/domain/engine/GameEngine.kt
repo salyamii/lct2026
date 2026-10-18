@@ -10,6 +10,8 @@ import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.game.OwnedItem
 import ru.nksk.lctapp.domain.story.StoryDecision
 import ru.nksk.lctapp.domain.minigame.DeedGameScore
+import ru.nksk.lctapp.domain.minigame.DeedGameKind
+import ru.nksk.lctapp.domain.minigame.chapterone.BoatJourney
 import ru.nksk.lctapp.domain.pet.isValidPetName
 import ru.nksk.lctapp.domain.finance.FinancialPeriods
 import ru.nksk.lctapp.domain.finance.FinancialTraining
@@ -260,6 +262,7 @@ class GameEngine(
                 is EngineCommand.AcceptDeedProposal -> acceptProposal(current, command, request.id, request.demoMode)
                 is EngineCommand.CompleteDeed -> completeDeed(current, command, request.demoMode)
                 is EngineCommand.StartStoryGame -> startStoryGame(current, command, request.demoMode)
+                is EngineCommand.PayBoatRepair -> payBoatRepair(current, command)
                 is EngineCommand.CompleteStoryGame -> completeStoryGame(current, command, request.demoMode)
                 is EngineCommand.SkipMiniGame -> {
                     ensure(request.demoMode, BlockReason.InvalidEventAction)
@@ -733,6 +736,21 @@ class GameEngine(
         val beforeChoice = if (policy.startEffectsTiming == EffectTiming.COMPLETE) eventEffects(state, occurrence, demoMode) else state
         money(beforeChoice, choiceMoneyDelta(choice.id, demoMode), choiceSpendingKind(choice.id))
         return state
+    }
+
+    private fun payBoatRepair(state: GameState, command: EngineCommand.PayBoatRepair): GameState {
+        val day = running(state)
+        val occurrence = day.currentEvent
+        ensure(occurrence?.id == command.occurrenceId && occurrence.status == EventStatus.ACTIVE &&
+            occurrence.origin == EventOrigin.SCHEDULE, BlockReason.InvalidEventAction)
+        val policy = factory.policy(checkNotNull(occurrence).eventId)
+        ensure(DeedGameKind.BOAT in policy.choiceGameKinds.values && command.rockIndex in BoatJourney.rocks.indices,
+            BlockReason.InvalidEventAction)
+        // A new UI request for an already paid collision cannot charge it again. The aggregate
+        // audit additionally deduplicates the original EngineRequest across day boundaries.
+        if (day.journal.any { it.id == boatRepairReceiptId(command.occurrenceId, command.rockIndex) }) return state
+        return state.copy(economy = EconomyOperations.spend(state.economy,
+            BoatJourney.REPAIR_PRICE.toLong(), SpendingKind.GENERAL))
     }
 
     private fun completeStoryGame(state: GameState, command: EngineCommand.CompleteStoryGame, demoMode: Boolean = false): GameState {

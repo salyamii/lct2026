@@ -28,6 +28,12 @@ internal val GameTextWrapping = TextStyle(
     lineBreak = LineBreak.Paragraph,
 )
 
+// Action labels wrap at word boundaries; paragraph hyphenation belongs to longer game copy.
+internal val GameLabelTextWrapping = GameTextWrapping.copy(
+    hyphens = Hyphens.None,
+    lineBreak = LineBreak.Simple,
+)
+
 private val BaseTypography = Typography(
     headlineSmall = MenuText.copy(fontSize = 24.sp, lineHeight = 30.sp),
     titleLarge = MenuText.copy(fontSize = 22.sp, lineHeight = 28.sp),
@@ -53,8 +59,8 @@ val Typography = BaseTypography.run {
         bodyLarge = bodyLarge.merge(GameTextWrapping),
         bodyMedium = bodyMedium.merge(GameTextWrapping),
         bodySmall = bodySmall.merge(GameTextWrapping),
-        labelLarge = labelLarge.merge(GameTextWrapping),
-        labelMedium = labelMedium.merge(GameTextWrapping),
-        labelSmall = labelSmall.merge(GameTextWrapping),
+        labelLarge = labelLarge.merge(GameLabelTextWrapping),
+        labelMedium = labelMedium.merge(GameLabelTextWrapping),
+        labelSmall = labelSmall.merge(GameLabelTextWrapping),
     )
 }

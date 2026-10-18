@@ -27,7 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
-import ru.nksk.lctapp.core.ui.theme.GameTextWrapping
+import ru.nksk.lctapp.core.ui.theme.GameLabelTextWrapping
 import ru.nksk.lctapp.core.ui.theme.Nunito
 
 /** Scene controls share the wooden artwork while keeping native input and accessible labels. */
@@ -54,12 +54,12 @@ internal fun GameForwardAction(
         contentPadding = PaddingValues(0.dp)) {
         Button(onClick, Modifier.heightIn(min = 52.dp).semantics { contentDescription = label },
             enabled = enabled, shape = RoundedCornerShape(24.dp), elevation = null,
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent,
                 disabledContainerColor = Color.Transparent, contentColor = GameInk,
                 disabledContentColor = GameInk)) {
             Text(label, Modifier.weight(1f, fill = false).clearAndSetSemantics {},
-                style = GameTextWrapping.merge(TextStyle(fontFamily = Nunito,
+                style = GameLabelTextWrapping.merge(TextStyle(fontFamily = Nunito,
                     fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, lineHeight = 18.sp)),
                 textAlign = TextAlign.Center)
             Spacer(Modifier.width(8.dp))

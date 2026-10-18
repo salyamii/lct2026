@@ -27,8 +27,11 @@ import ru.nksk.lctapp.core.ui.game.eventSceneBackground
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.minigame.*
+import ru.nksk.lctapp.domain.economy.EconomyOperations
+import ru.nksk.lctapp.feature.tasks.navigation.ChapterRepairPayment
 
-enum class DeedGameType { MEMORY, COMPARISON, PRECISION, LIGHTS, SEQUENCE, PIPES, DIFFERENCES, STACKING }
+enum class DeedGameType { MEMORY, COMPARISON, PRECISION, LIGHTS, SEQUENCE, PIPES, DIFFERENCES, STACKING,
+    TELESCOPE, MARK, WHEEL, STRAP, SIGNAL, ROUTE_MAP, BOAT }
 data class DeedGamePresentation(val title: String, val maximumReward: Long, val canPlay: Boolean,
     val storyAction: Boolean = false, val sceneRes: Int? = null, val instructions: String? = null,
     val activityArtworkRes: Int? = null)
@@ -44,6 +47,7 @@ internal data class DeedGameUiState(
     val canSkipGame: Boolean = false,
     val demoMode: Boolean = false,
     val reward: DeedRewardUiState? = null,
+    val repairCoins: Int = 0,
 )
 
 /** Connects an actual offered deed to a transient board and one atomic engine outcome. */
@@ -77,6 +81,7 @@ internal class DeedGameViewModel @Inject constructor(
     private var rewardEditing = false
     private var rewardInput = ""
     private var rewardDeposited = 0L
+    private var repairWriting = false
 
     fun load(id: String, storyChoiceId: String? = null, reload: Boolean = false) {
         if (!reload && occurrenceId == id && choiceId == storyChoiceId && observer?.isActive == true) return
@@ -111,6 +116,62 @@ internal class DeedGameViewModel @Inject constructor(
     fun finishDifferences(state: DifferencesState) { DeedGameScore.fromDifferences(state)?.let(::finish) }
     fun finishStacking(state: StackingState) { DeedGameScore.fromStacking(state)?.let(::finish) }
 
+    fun finishChapterGame(score: DeedGameScore) {
+        if (mutableState.value.presentation?.canPlay != true || score.kind !in chapterGameKinds || repairUnconfirmed()) return
+        finish(score)
+    }
+
+    /** The child board owns only the collision. This host owns the durable payment intent. */
+    suspend fun payBoatRepair(requestId: String, rockIndex: Int): ChapterRepairPayment {
+        if (busy || repairWriting || pending != null || requestId.isBlank()) return ChapterRepairPayment.FAILED
+        val id = occurrenceId ?: return ChapterRepairPayment.FAILED
+        val command = EngineCommand.PayBoatRepair(id, rockIndex)
+        repairWriting = true
+        render()
+        return try {
+            val stored = savedState.get<String>(REPAIR_REQUEST)
+            val same = savedState.get<String>(REPAIR_KEY) == requestId
+            if (!same && repairUnconfirmed()) return ChapterRepairPayment.FAILED
+            val attempt = if (same && stored != null) {
+                val request = Json.decodeFromString<EngineRequest>(stored)
+                check(request.command == command)
+                GameActionAttempt.restore(request)
+            } else {
+                val current = checkNotNull(session.read())
+                GameActionAttempt.prepare(current, command, demoMode = session.demoModeEnabled).also {
+                    savedState[REPAIR_KEY] = requestId
+                    savedState[REPAIR_REQUEST] = Json.encodeToString(it.request)
+                    savedState[REPAIR_CONFIRMED] = false
+                }
+            }
+            when (val result = attempt.submit(session)) {
+                is EngineResult.Applied -> {
+                    latest = result.state
+                    savedState[REPAIR_CONFIRMED] = true
+                    ChapterRepairPayment.PAID
+                }
+                is EngineResult.Blocked -> {
+                    // A definite rejection is safe to replace on the child's explicit next attempt.
+                    savedState.remove<String>(REPAIR_REQUEST)
+                    savedState.remove<String>(REPAIR_KEY)
+                    savedState[REPAIR_CONFIRMED] = true
+                    latest = session.read() ?: latest
+                    if (result.reason is BlockReason.InsufficientMoney) ChapterRepairPayment.NOT_ENOUGH_COINS
+                    else ChapterRepairPayment.FAILED
+                }
+            }
+        } catch (cancelled: CancellationException) { throw cancelled
+        } catch (_: Exception) {
+            ChapterRepairPayment.FAILED
+        } finally {
+            repairWriting = false
+            render()
+        }
+    }
+
+    private fun repairUnconfirmed() = savedState.get<String>(REPAIR_REQUEST) != null &&
+        savedState.get<Boolean>(REPAIR_CONFIRMED) != true
+
     private fun finish(score: DeedGameScore) {
         if (busy || pending != null || rejectedAction != null || rewardOutcome != null || rewardReceiptNeeded) return
         val id = occurrenceId ?: return
@@ -119,14 +180,14 @@ internal class DeedGameViewModel @Inject constructor(
     }
 
     fun skipGame() {
-        if (busy || pending != null || rejectedAction != null || !session.demoModeEnabled ||
+        if (busy || repairWriting || repairUnconfirmed() || pending != null || rejectedAction != null || !session.demoModeEnabled ||
             !uiState.value.canSkipGame) return
         val id = occurrenceId ?: return
         execute(EngineCommand.SkipMiniGame(id, choiceId))
     }
 
     fun leave() {
-        if (busy) return
+        if (busy || repairWriting || repairUnconfirmed()) return
         if (rewardOutcome != null) {
             if (pending != null || rewardReceiptNeeded) return
             if (rewardEditing) { cancelRewardTransfer(); return }
@@ -463,8 +524,15 @@ internal class DeedGameViewModel @Inject constructor(
                 DeedGameKind.PIPES -> DeedGameType.PIPES
                 DeedGameKind.DIFFERENCES -> DeedGameType.DIFFERENCES
                 DeedGameKind.STACKING -> DeedGameType.STACKING
+                DeedGameKind.TELESCOPE -> DeedGameType.TELESCOPE
+                DeedGameKind.MARK -> DeedGameType.MARK
+                DeedGameKind.WHEEL -> DeedGameType.WHEEL
+                DeedGameKind.STRAP -> DeedGameType.STRAP
+                DeedGameKind.SIGNAL -> DeedGameType.SIGNAL
+                DeedGameKind.ROUTE_MAP -> DeedGameType.ROUTE_MAP
+                DeedGameKind.BOAT -> DeedGameType.BOAT
             },
-            presentation = DeedGamePresentation(renderPetText(session.catalog.displayTitle(event), game.pet.name), reward, pending == null && message == null,
+            presentation = DeedGamePresentation(renderPetText(session.catalog.displayTitle(event), game.pet.name), reward, pending == null && message == null && !repairWriting,
                 storyAction = storyGame,
                 sceneRes = eventSceneBackground(event.id, card?.scene),
                 instructions = theme?.instructions ?: storyGameInstructions(kind),
@@ -473,8 +541,9 @@ internal class DeedGameViewModel @Inject constructor(
             canRetry = pending != null || rejectedAction != null || comparisonSaveFailed,
             audioOccurrenceId = occurrence.id,
             eventMedia = card?.presentation?.media ?: EventMedia(),
-            canSkipGame = session.demoModeEnabled && rejectedAction == null,
+            canSkipGame = session.demoModeEnabled && rejectedAction == null && !repairWriting && !repairUnconfirmed(),
             demoMode = session.demoModeEnabled,
+            repairCoins = EconomyOperations.depositAvailableBalance(game.economy).coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
         )
     }
 
@@ -485,6 +554,11 @@ internal class DeedGameViewModel @Inject constructor(
     }
 
     private companion object {
+        val chapterGameKinds = setOf(DeedGameKind.TELESCOPE, DeedGameKind.MARK, DeedGameKind.WHEEL,
+            DeedGameKind.STRAP, DeedGameKind.SIGNAL, DeedGameKind.ROUTE_MAP, DeedGameKind.BOAT)
+        const val REPAIR_KEY = "boat_payment_key"
+        const val REPAIR_REQUEST = "boat_payment_request"
+        const val REPAIR_CONFIRMED = "boat_payment_confirmed"
         const val REWARD_REQUEST = "deed_reward_request"
         const val REWARD_TRANSFER = "deed_reward_transfer"
         const val REWARD_EDITING = "deed_reward_editing"

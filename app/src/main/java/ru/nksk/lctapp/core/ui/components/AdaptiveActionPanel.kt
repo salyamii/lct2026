@@ -36,6 +36,7 @@ internal fun AdaptiveActionPanel(
     fillBody: Boolean = false,
     actionsAtTop: Boolean = false,
     contentScrollState: ScrollState? = null,
+    minimumBodyHeight: Dp = 64.dp,
     actions: @Composable ColumnScope.() -> Unit,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -54,7 +55,7 @@ internal fun AdaptiveActionPanel(
             val verticalPadding = with(density) {
                 (contentPadding.calculateTopPadding() + contentPadding.calculateBottomPadding()).roundToPx()
             }
-            val minimumBodyViewport = with(density) { 64.dp.roundToPx() }
+            val minimumBodyViewport = with(density) { minimumBodyHeight.roundToPx() }
             SubcomposeLayout(Modifier.fillMaxWidth().verticalScroll(overflowScroll).padding(contentPadding)) { childConstraints ->
                 val unbounded = childConstraints.copy(minHeight = 0, maxHeight = Constraints.Infinity)
                 val actionPlaceable = subcompose("actions") {

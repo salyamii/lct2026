@@ -1,5 +1,9 @@
 package ru.nksk.lctapp.feature.menu.ui
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.view.WindowManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,11 +16,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
@@ -33,6 +39,18 @@ internal fun PetNameDialog(
     onSave: () -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val context = LocalContext.current
+    val backgroundWindow = remember(context) { context.hostActivity()?.window }
+    DisposableEffect(backgroundWindow) {
+        if (backgroundWindow == null) return@DisposableEffect onDispose {}
+        val previousMode = backgroundWindow.attributes.softInputMode
+        backgroundWindow.setSoftInputMode(
+            (previousMode and WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST.inv()) or
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING,
+        )
+        // The dialog keeps its own keyboard avoidance; other screens retain the Activity policy.
+        onDispose { backgroundWindow.setSoftInputMode(previousMode) }
+    }
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { focus.requestFocus() }
     AlertDialog(
@@ -73,4 +91,10 @@ internal fun PetNameDialog(
                 interactionBlocked = busy, style = GameActionStyle.QUIET)
         },
     )
+}
+
+private tailrec fun Context.hostActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> if (baseContext !== this) baseContext.hostActivity() else null
+    else -> null
 }

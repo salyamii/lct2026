@@ -14,7 +14,10 @@ data class DayJournalEntry(
     init { require(id.isNotBlank() && sourceId.isNotBlank()) }
 }
 
-enum class DayJournalKind { WEEKLY_INCOME, MEAL, ITEM_PURCHASE, ITEM_RECEIVED, EVENT_START, EVENT_CHOICE, DEED, PARENT_REWARD }
+enum class DayJournalKind { WEEKLY_INCOME, MEAL, ITEM_PURCHASE, ITEM_RECEIVED, EVENT_START, EVENT_CHOICE, DEED, PARENT_REWARD, BOAT_REPAIR }
+
+/** Stable collision identity, independent of retries and temporary mini-game sessions. */
+fun boatRepairReceiptId(occurrenceId: String, rockIndex: Int): String = "boat-repair:$occurrenceId:$rockIndex"
 
 /** Called only after a successful transition, inside the same aggregate write transaction. */
 internal fun recordDayChanges(before: GameState, after: GameState, request: EngineRequest, factory: EventFactory): GameState {
@@ -44,6 +47,10 @@ internal fun recordDayChanges(before: GameState, after: GameState, request: Engi
         is EngineCommand.Feed -> record(DayJournalKind.MEAL, command.mealId, moneyDelta,
             day.energy - checkNotNull(before.engine).energy)
         is EngineCommand.BuyGoalItem -> record(DayJournalKind.ITEM_PURCHASE, command.itemId, moneyDelta)
+        is EngineCommand.PayBoatRepair -> if (moneyDelta < 0) {
+            entries += DayJournalEntry(boatRepairReceiptId(command.occurrenceId, command.rockIndex),
+                DayJournalKind.BOAT_REPAIR, checkNotNull(before.engine?.currentEvent).eventId, moneyDelta)
+        }
         EngineCommand.OpenNextEvent -> day.currentEvent?.let {
             record(DayJournalKind.EVENT_START, it.eventId, moneyDelta)
         }

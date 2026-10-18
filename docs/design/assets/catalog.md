@@ -1,5 +1,34 @@
 # Asset catalog
 
+## Верстак и ремонт лямки — 2026-10-18
+
+CHAPTER-GAMES-D-002 добавляет `story_game_workbench_surface` и
+`story_game_strap_patch`, оба 1024 × 1536 в `app/src/main/res/drawable-nodpi`.
+Поверхность используется для сборки телескопа и пришивания лямки. Полотно
+лямки содержит две отдельные детали; шов и перемещение рисуются в Compose
+без изменения оригинала. Lossless exact WebP, сохранены полные размеры и RGBA.
+[Источники, запросы, координаты](sources/chapter-workshop-2026-10-18/README.md).
+
+## Игры первой главы — 2026-10-18
+
+Пять новых прозрачных спрайтов `story_game_telescope_tripod`,
+`story_game_telescope_tube`, `story_game_telescope_lens`, `story_game_wheel`,
+`story_game_boat` находятся в `app/src/main/res/drawable-nodpi`.
+Каждый 1254 × 1254, lossless exact WebP без обрезки полотна.
+[Оригиналы, запросы и конвертация](sources/chapter-games-2026-10-18/README.md).
+Хэши и размеры файлов записаны в manifest. Остальные сцены используют
+существующие сюжетные изображения, лампы, фон обсерватории и общие рамки.
+
+## Parchment map and slimmer savings gauge - 2026-10-18
+
+MENU-MAP-UI-D-001 replaces the menu map button with `menu_map_v2`: only the
+curled illustrated parchment remains, without the wooden board or physical
+compass. SAVINGS-UI-D-004 uses `menu_savings_frame_v3`, a narrower brass-and-glass
+housing with native captions and two coin stacks. The full 1536 x 1024 and
+1024 x 1536 transparent canvases are retained, respectively. The original map
+and previous frames remain bundled. [PNG sources, exact prompts, coordinates
+and conversion details](sources/menu-map-savings-2026-10-18/README.md).
+
 ## Balanced checklist - 2026-10-18
 
 `menu_action_tasks_v4` refines the earlier narrow checklist with a moderately
@@ -39,7 +68,8 @@ Native labels, amounts and hit areas stay inside their panels. No monetary
 figures, symbols or names are baked into the new panel images.
 
 The former attached savings caption used `menu_name_plaque_v3`; SAVINGS-UI-D-003
-replaces it with the integrated caption bands of `menu_savings_frame_v2`.
+replaces it with integrated caption bands; SAVINGS-UI-D-004 uses the slimmer
+`menu_savings_frame_v3`.
 The current energy caption uses the integrated top rail of `menu_energy_frame_v4`.
 By GAME-UI-D-001/002, the name-plaque artwork frames scene titles;
 `menu_action_plaque_v2` frames text actions (at least 64 dp high by GAME-UI-D-004) and
@@ -73,15 +103,15 @@ Name and wallet use the v3 objects above.
 `menu_savings_gauge_frame` is a generated brass-and-glass overlay for the real
 savings meter. [PNG source, edit reference and exact prompt](sources/savings-gauge-2026-10-17/README.md).
 The entire 1024 × 1536 transparent canvas is preserved as lossless exact WebP.
-This original frame remains bundled. SAVINGS-UI-D-003 uses the revised
-`menu_savings_frame_v2` (1024 × 1536) and `menu_savings_coin_flat` (1774 × 887).
+This original frame remains bundled. SAVINGS-UI-D-003/004 now use the revised
+`menu_savings_frame_v3` (1024 × 1536) and `menu_savings_coin_flat` (1774 × 887).
 [Full PNGs, exact prompts and alpha geometry](sources/savings-stacks-2026-10-18/README.md).
 Both are built-in imagegen outputs, converted to lossless exact WebP without cropping.
 The new frame has one transparent window and two integrated blank caption bands.
 Compose draws «Цель» above and «X из Y» below, stretching only the caption bands
 vertically to fit native text. Normal widths are 104 dp in the menu and 96 dp
 beside a goal; limited height compresses the central glass region.
-Three stable stacks contain up to 66 illustrative horizontal coins. Their count
+Two stable stacks contain up to 48 illustrative horizontal coins. Their count
 represents progress, not currency units. There is no solid fill or clipping of
 the top coin, and no text or coin count baked into the artwork. The shared
 painter decodes one coin at its displayed bounds; animation is read only in Canvas.

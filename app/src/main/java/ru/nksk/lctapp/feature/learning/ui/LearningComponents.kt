@@ -89,7 +89,7 @@ internal fun PracticeButton(text: String, enabled: Boolean, primary: Boolean = t
     GameActionButton(text, onClick, enabled = enabled, interactionBlocked = interactionBlocked,
         style = if (primary) GameActionStyle.PRIMARY else GameActionStyle.SECONDARY,
         shape = RoundedCornerShape(20.dp), borderColor = PracticeBorder,
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
         textStyle = MaterialTheme.typography.bodyLarge)
 }
 

@@ -53,8 +53,33 @@ indicator only after 300 ms, avoiding a spinner flash for fast local commits.
 The registered features render their working screens. Gear displays the inventory
 with two sections, owned items only, and an entry-scoped Hilt ViewModel. Its saved
 route ID remains `gear`; Back returns to the menu without changing game state.
-Tasks displays current offered deeds and a Skill Training entry. The app host
-maps its training callback to `SkillTraining`.
+Tasks displays current offered deeds, Skill Training and, by CHAPTER-GAMES-D-001,
+the new Test Games entry. The app host maps these callbacks to `SkillTraining`
+and `ChapterTestGames` (`chapter_test_games`). Its gallery opens
+`ChapterTestGameSession` (`chapter_test_game`) with a stable scene ID only.
+These seven gallery scenes (including strap repair by CHAPTER-GAMES-D-002)
+use entry-scoped temporary state and do not write to the game repository.
+Back returns to the gallery and then Tasks. CHAPTER-GAMES-D-005 retains this
+gallery after the mechanics are connected to real events.
+
+By CHAPTER-GAMES-D-004, real chapter games use the existing `DeedGame` entry
+with an occurrence ID and, for a story branch, its choice ID. Tasks supplies
+a `chapterContent` composable slot; app-owned `ChapterStoryGameContent` chooses
+the scene from `feature/storygames`. Features do not import each other.
+An explicit Continue returns the completed model, which app composition
+validates through `DeedGameScore.from…` before Tasks saves `CompleteDeed` or
+`CompleteStoryGame`. Back pauses the real event, and saving or an inactive
+lifecycle blocks input. Failed completion remains available for an explicit
+retry through the existing Tasks session state.
+
+The same app slot connects boat repair to Tasks' durable `PayBoatRepair`
+request. Only confirmed payment resumes the boat; the real money journal is
+updated through the aggregate repository. N1.TRIP begins with the purchased
+ticket already accounted for, and does not run the gallery's practice budget.
+Existing event definitions and saved navigation keys remain valid; no world
+snapshot or score is added to a navigation key. See
+[chapter games](design/chapter-one-test-games.md) for mappings and recovery.
+
 Goal owns read-only nested views inside its existing entry. Both toolbar and
 system Back return from a preview to the catalogue, then to the current goal,
 then to the menu. After the campaign, a catalogue with no current goal exits to
