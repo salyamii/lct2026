@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -37,6 +35,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.core.ui.components.GameInk
+import ru.nksk.lctapp.core.ui.components.GameActionButton
 import ru.nksk.lctapp.core.ui.components.GamePaper
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
 import ru.nksk.lctapp.core.ui.theme.Nunito
@@ -143,10 +142,8 @@ fun SpotlightOverlay(
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     if (hasPrevious) TextButton(onPrevious, enabled = !busy) { Text("Назад", color = GameInk) }
                     else TextButton(onSkip, enabled = !busy) { Text("Пропустить", color = GameInk) }
-                    Button(onNext, enabled = !busy,
-                        colors = ButtonDefaults.buttonColors(containerColor = AdventureLime, contentColor = GameInk)) {
-                        Text(if (last) "Понятно!" else "Дальше")
-                    }
+                    GameActionButton(if (last) "Понятно!" else "Дальше", onNext,
+                        Modifier.weight(1f), enabled = !busy, minHeight = 48.dp)
                 }
                 if (hasPrevious) TextButton(onSkip, enabled = !busy, contentPadding = PaddingValues(horizontal = 8.dp)) {
                     Text("Пропустить обучение", color = GameInk.copy(alpha = .7f))

@@ -14,6 +14,11 @@ private val pricedAction = Regex("^(.+?)\\s*\u00b7\\s*(\\+?)(\\d+)(?:\\s+мон�
 private val unnamedEffort = Regex("(^|[,;:.!?]\\s*)((?:немного |средне |заметно |сильно )?устанет|не тратит силы)(?=[.!?,;:]|$)",
     RegexOption.IGNORE_CASE)
 private val manualEffortPrefix = Regex("^Самому:\\s*", RegexOption.IGNORE_CASE)
+private val effortSuffix = Regex("\\s*·\\s*(?:(?:немного |средне |заметно |сильно )?устанет|без (?:траты|трат|расхода) сил|не тратит силы)\\s*$",
+    RegexOption.IGNORE_CASE)
+
+/** Only legacy effort annotations move into indicators; prices and action wording are retained. */
+internal fun String.withoutEffortSuffix(): String = replace(effortSuffix, "")
 
 /** Name the hero in standalone effort clauses, leaving already named clauses unchanged. */
 internal fun String.asPetEffortText(petName: String): String {

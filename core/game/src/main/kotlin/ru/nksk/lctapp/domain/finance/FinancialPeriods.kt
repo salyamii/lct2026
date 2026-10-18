@@ -36,13 +36,13 @@ object FinancialPeriods {
         val plan = BudgetPlanRevision("${request.id}:plan", progress.currentPeriodId,
             (previous?.ordinal ?: 0) + 1, after.engine?.day ?: 1,
             before.economy.planning?.baseAmount ?: before.economy.availableBalance,
-            after.economy.plan, reason, previous?.id,
+            before.economy.displayPlan, reason, previous?.id,
             knownNeeds.takeIf { request.context?.informationPresented == true }, command.causeActionId)
         val review = progress.currentPeriod?.reviewEvidence
         val realisticRevision = review?.answerCorrect == true && !FinancialProgressionPolicy.reviewReady(review) &&
             request.context?.let { it.complete && it.informationPresented && it.before != null &&
                 plan.allocation.needs >= minOf(it.before.knownNeeds, plan.availableBasis) &&
-                plan.allocation.total <= after.economy.availableBalance } == true
+                plan.allocation.total <= plan.availableBasis } == true
         val periods = if (!realisticRevision) progress.periods else progress.periods.map { period ->
             if (period.id == progress.currentPeriodId) period.copy(reviewEvidence = checkNotNull(review).copy(recoveryPlanRevisionId = plan.id)) else period
         }
@@ -65,18 +65,24 @@ object FinancialPeriods {
         }
         var saving = period.savingPractice ?: FinancialProgressionPolicy.opening(period.id, before.economy.savingsBalance)
         if (newEntries.any { it.moneyDelta > 0 }) saving = FinancialProgressionPolicy.income(saving, request.id)
+        val deposited = when (val command = request.command) {
+            is EngineCommand.DepositSavings -> command.amount
+            is EngineCommand.DepositWeeklyReserve -> command.amount
+            is EngineCommand.ConfirmBudget -> Math.subtractExact(after.economy.savingsBalance, before.economy.savingsBalance)
+            else -> 0L
+        }
+        if (deposited > 0) {
+            val context = request.context
+            val independent = context?.complete == true && context.informationPresented && context.assistance.none {
+                it in setOf(Assistance.HINT, Assistance.WORKED_EXAMPLE, Assistance.ANSWER_REVEALED, Assistance.ADULT_REPORTED)
+            }
+            saving = FinancialProgressionPolicy.deposit(saving, "${request.id}:deposit", after.engine?.day ?: 1,
+                deposited, independent, context?.before?.let { after.economy.availableBalance >= it.knownNeeds } == true)
+            period = period.copy(independentlySaved = period.independentlySaved || independent,
+                deposited = Math.addExact(period.deposited, deposited))
+        }
         period = when (val command = request.command) {
             is EngineCommand.Feed -> period.copy(needsProvided = true)
-            is EngineCommand.DepositSavings -> {
-                val context = request.context
-                val independent = context?.complete == true && context.informationPresented && context.assistance.none {
-                    it in setOf(Assistance.HINT, Assistance.WORKED_EXAMPLE, Assistance.ANSWER_REVEALED, Assistance.ADULT_REPORTED)
-                }
-                saving = FinancialProgressionPolicy.deposit(saving, "${request.id}:deposit", after.engine?.day ?: 1,
-                    command.amount, independent, context?.before?.let { after.economy.availableBalance >= it.knownNeeds } == true)
-                period.copy(independentlySaved = period.independentlySaved || independent,
-                    deposited = Math.addExact(period.deposited, command.amount))
-            }
             is EngineCommand.WithdrawSavings -> {
                 saving = FinancialProgressionPolicy.withdraw(saving, command.amount)
                 period.copy(withdrawn = Math.addExact(period.withdrawn, command.amount))

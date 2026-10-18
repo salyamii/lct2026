@@ -20,6 +20,7 @@ import ru.nksk.lctapp.domain.backend.CloudSyncRepository
 import ru.nksk.lctapp.domain.backend.CloudSyncResult
 import ru.nksk.lctapp.domain.diagnostics.DiagnosticLogRepository
 import ru.nksk.lctapp.domain.demo.DemoPreferencesRepository
+import ru.nksk.lctapp.BuildConfig
 
 internal enum class ParentCodeStatus { NONE, LOADING, READY, ERROR }
 internal enum class ProfileRegistrationStatus { NONE, LOADING, REGISTERED, ERROR }
@@ -30,8 +31,9 @@ internal data class DemoSettingsUiState(
     val loading: Boolean = true,
     val saving: Boolean = false,
     val error: DemoSettingsError? = null,
+    val available: Boolean = BuildConfig.JURY_TOOLS,
 ) {
-    val canChange: Boolean get() = enabled != null && !loading && !saving && error != DemoSettingsError.READ
+    val canChange: Boolean get() = available && enabled != null && !loading && !saving && error != DemoSettingsError.READ
 }
 internal data class SoundSettingsUiState(
     val enabled: Boolean? = null,
@@ -256,6 +258,10 @@ internal class SettingsViewModel @Inject constructor(
     }
 
     private fun observeDemo() {
+        if (!BuildConfig.JURY_TOOLS) {
+            updateDemo { copy(enabled = false, loading = false, saving = false, error = null, available = false) }
+            return
+        }
         if (demoObserver?.isActive == true) return
         updateDemo { copy(loading = true, error = null) }
         demoObserver = viewModelScope.launch {

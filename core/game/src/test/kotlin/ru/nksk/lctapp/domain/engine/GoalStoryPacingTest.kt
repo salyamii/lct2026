@@ -336,7 +336,7 @@ class GoalStoryPacingTest {
                     StoryCondition.EventCompleted("second"), StoryCondition.Not(StoryCondition.Fact("tuned")))), "job")) else emptyList()),
         )
         private val initial = GameState(PetState("PLAIN", PetVisualState.NORMAL),
-            EconomyState(BudgetPlan(100, 0, 0, 0), availableBalance = 100),
+            EconomyState(BudgetPlan(35, 0, 0, 65), availableBalance = 100),
             StoryState("day", null, null, completed.map { StoryDecision("completed:$it:decision", "$it:done") }),
             0, 0, if (collected) listOf(OwnedItem("owned-part", "part")) else emptyList(),
             engine = EngineState("pacing-test", 0, 1, phase, completed.size, 5, true, null, 100,

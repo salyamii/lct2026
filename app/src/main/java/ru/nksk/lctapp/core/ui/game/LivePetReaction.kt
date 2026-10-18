@@ -1,7 +1,7 @@
 package ru.nksk.lctapp.core.ui.game
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.compositionLocalOf
 import ru.nksk.lctapp.domain.pet.PetState
 
 /** Temporary presentation of the real pet. Neither version is written back into the game. */
@@ -11,7 +11,7 @@ internal data class LivePetReaction(
     val reactionVisible: Boolean,
 )
 
-internal val LocalLivePetReaction = staticCompositionLocalOf<LivePetReaction?> { null }
+internal val LocalLivePetReaction = compositionLocalOf<LivePetReaction?> { null }
 
 /** Only live-game screens opt in. Historical/alternative pets use the pure mapper directly. */
 @Composable

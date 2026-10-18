@@ -48,7 +48,7 @@ internal fun CharacterScene(
     artworkModifier: Modifier = Modifier,
 ) {
     val shownPet = livePetPresentation()?.toMainMenuPetUiState() ?: pet
-    BoxWithConstraints(modifier.offset(y = 64.dp), contentAlignment = Alignment.Center) {
+    BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
         // The shared renderer keeps the full canvas and its paw contact together.
         val characterSize = minOf(maxWidth * 1.18f, maxHeight * 0.92f, 560.dp) * shownPet.artworkScale
         val artwork = shownPet.artworkRes
@@ -60,7 +60,8 @@ internal fun CharacterScene(
             artwork = artwork,
             description = stringResource(shownPet.descriptionRes, shownPet.name),
             intensity = shownPet.motionIntensity,
-            modifier = Modifier.requiredSize(characterSize).then(artworkModifier),
+            modifier = Modifier.offset(y = ((maxHeight - characterSize) / 2).coerceIn(0.dp, 64.dp))
+                .requiredSize(characterSize).then(artworkModifier),
         )
     }
 }

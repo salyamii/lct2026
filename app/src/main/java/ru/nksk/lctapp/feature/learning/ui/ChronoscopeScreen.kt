@@ -78,7 +78,8 @@ internal fun ChronoscopeScreen(state: ReflectionUiState, onAction: (ReflectionAc
     }
     val contentScroll = key(step, state.quiz?.id) { rememberScrollState() }
     val shown = when (step) {
-        ChronoscopeStep.INTRO, ChronoscopeStep.MOMENTS, ChronoscopeStep.PRESENT -> state.realGame
+        ChronoscopeStep.INTRO, ChronoscopeStep.MOMENTS -> state.exampleGame ?: state.realGame
+        ChronoscopeStep.PRESENT -> state.realGame
         ChronoscopeStep.CONSEQUENCES -> state.alternativePath?.state
         else -> memory?.before ?: state.realGame
     }
@@ -100,7 +101,7 @@ internal fun ChronoscopeScreen(state: ReflectionUiState, onAction: (ReflectionAc
         else -> null
     }
     AdventureScreen(
-        title = title,
+        title = if (state.demoExample && step != ChronoscopeStep.PRESENT) "Демо-пример" else title,
         onBack = {
             if (step in setOf(ChronoscopeStep.INTRO, ChronoscopeStep.MOMENTS, ChronoscopeStep.PRESENT)) onExit()
             else onAction(ReflectionAction.ChronoscopeBack)
@@ -133,9 +134,10 @@ internal fun ChronoscopeScreen(state: ReflectionUiState, onAction: (ReflectionAc
         }
         when (step) {
             ChronoscopeStep.INTRO, ChronoscopeStep.MOMENTS -> {
-                GameTitle("Какой момент вспомним?")
-                GameBody("Попробуем другой выбор и сравним, что получилось бы.")
-                state.reflectionDay?.let {
+                GameTitle(if (state.demoExample) "Купить или пройти мимо?" else "Какой момент вспомним?")
+                GameBody(if (state.demoExample) "Обычные цены. Твоя игра не изменится."
+                    else "Попробуем другой выбор и сравним, что получилось бы.")
+                state.reflectionDay?.takeUnless { state.demoExample }?.let {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(ReflectionScope.DAY to "Этот день", ReflectionScope.WEEK to "Эта неделя").forEach { (scope, label) ->
                             FilterChip(
@@ -152,11 +154,14 @@ internal fun ChronoscopeScreen(state: ReflectionUiState, onAction: (ReflectionAc
                 }
                 val moments = state.timeMachine?.decisions.orEmpty().asReversed()
                 moments.groupBy { it.day }.forEach { (day, decisions) ->
-                    Text(day?.let { "День $it" } ?: "Из приключения", color = GameInk.copy(alpha = .65f),
-                        style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
-                    decisions.forEach { decision ->
-                        ChoiceAction(renderPetText(decision.title, name).asGameUiText(), !state.busy) {
-                            onAction(ReflectionAction.SelectMoment(decision.entryId))
+                    if (!state.demoExample) Text(day?.let { "День $it" } ?: "Из приключения",
+                        color = GameInk.copy(alpha = .65f), style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold)
+                    Column(verticalArrangement = Arrangement.spacedBy(GameActionButtonDefaults.Spacing)) {
+                        decisions.forEach { decision ->
+                            ChoiceAction(renderPetText(decision.title, name).asGameUiText(), !state.busy) {
+                                onAction(ReflectionAction.SelectMoment(decision.entryId))
+                            }
                         }
                     }
                 }
@@ -167,7 +172,7 @@ internal fun ChronoscopeScreen(state: ReflectionUiState, onAction: (ReflectionAc
             }
             ChronoscopeStep.MEMORY, ChronoscopeStep.ALTERNATIVES -> memory?.let {
                 GameTitle(renderPetText(it.decision.title, name).asGameUiText())
-                StoryNote("Тогда мы решили", it.originalAction)
+                StoryNote(if (state.demoExample) "В этом примере" else "Тогда мы решили", it.originalAction)
                 Text("Сверху - сколько монет было до этого решения", color = GameInk.copy(alpha = .65f),
                     style = MaterialTheme.typography.labelMedium)
                 it.knownNeeds?.takeIf { needed -> needed > 0 }?.let { needed ->
@@ -175,9 +180,11 @@ internal fun ChronoscopeScreen(state: ReflectionUiState, onAction: (ReflectionAc
                 }
                 Text("А если выбрать так?", color = GameInk, style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold)
-                it.decision.alternatives.forEach { alternative ->
-                    ChoiceAction(renderPetText(alternative.title, name).asGameActionLabel(), !state.busy) {
-                        onAction(ReflectionAction.Simulate(it.decision.entryId, alternative.id))
+                Column(verticalArrangement = Arrangement.spacedBy(GameActionButtonDefaults.Spacing)) {
+                    it.decision.alternatives.forEach { alternative ->
+                        ChoiceAction(renderPetText(alternative.title, name).asGameActionLabel(), !state.busy) {
+                            onAction(ReflectionAction.Simulate(it.decision.entryId, alternative.id))
+                        }
                     }
                 }
             }
@@ -217,7 +224,8 @@ internal fun ChronoscopeScreen(state: ReflectionUiState, onAction: (ReflectionAc
             }
             ChronoscopeStep.PRESENT -> {
                 GameTitle("Вернёмся к приключению")
-                GameBody("Мы посмотрели другой путь. Твоя история продолжается.")
+                GameBody(if (state.demoExample) "Демо-пример завершён. Твоя игра не изменилась."
+                    else "Мы посмотрели другой путь. Твоя история продолжается.")
             }
             ChronoscopeStep.UNAVAILABLE -> {
                 GameTitle("Этот путь не удалось сравнить")
@@ -308,7 +316,7 @@ private fun ChronoscopeActions(state: ReflectionUiState, selectedOptionId: Strin
         SecondaryAction("К приключению", onExit, enabled = !state.busy)
     }
     when (step) {
-        ChronoscopeStep.EXPLANATION -> SecondaryAction("Вспомнить другой момент",
+        ChronoscopeStep.EXPLANATION -> SecondaryAction(if (state.demoExample) "К началу примера" else "Вспомнить другой момент",
             { onAction(ReflectionAction.ShowMoments) }, enabled = !state.busy)
         else -> Unit
     }
@@ -316,7 +324,8 @@ private fun ChronoscopeActions(state: ReflectionUiState, selectedOptionId: Strin
 
 @Composable
 private fun Horizon(state: ReflectionUiState) {
-    state.simulation?.let { GameBody(chronoscopeHorizon(it, state.memory?.decision?.day)) }
+    if (state.demoExample) GameBody("Покупка и отказ при обычных ценах.")
+    else state.simulation?.let { GameBody(chronoscopeHorizon(it, state.memory?.decision?.day)) }
     state.comparisonBoundary?.takeIf { state.simulation?.status == TimeMachineStatus.DIVERGED }?.let {
         Text(it, color = GameInk.copy(alpha = .7f), style = MaterialTheme.typography.bodyMedium)
     }
@@ -331,7 +340,8 @@ private fun PathsComparison(state: ReflectionUiState) {
     val selectedAlternative = state.memory?.decision?.alternatives?.find {
         it.id == state.simulation?.request?.alternativeId
     }
-    PathConsequences("Как было", "Выбрали «${state.memory?.originalChoice ?: "Прежний поступок"}»",
+    PathConsequences(if (state.demoExample) "Покупка в примере" else "Как было",
+        "Выбрали «${state.memory?.originalChoice ?: "Прежний поступок"}»",
         differences.original + chronoscopeMoneyLines(differences, alternative = false))
     val otherChoice = selectedAlternative?.title?.let {
         renderPetText(it, original.state.pet.name).asGameActionLabel()
@@ -359,7 +369,8 @@ private fun ComparisonScene(state: ReflectionUiState) {
     // Keep the adventure scene visible; only each pet has a quiet paper backdrop.
     Row(Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        listOf("Было" to state.originalPath, "Могло быть" to state.alternativePath).forEach { (label, path) ->
+        listOf((if (state.demoExample) "Купили" else "Было") to state.originalPath,
+            (if (state.demoExample) "Отказались" else "Могло быть") to state.alternativePath).forEach { (label, path) ->
             Surface(Modifier.weight(1f).fillMaxHeight(), shape = RoundedCornerShape(24.dp),
                 color = GamePaper, border = BorderStroke(1.dp, PathRule)) {
                 Column(Modifier.fillMaxSize().padding(top = 10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -389,13 +400,7 @@ private fun StoryNote(title: String, body: String) {
 }
 
 @Composable
-private fun ChoiceAction(text: String, enabled: Boolean, showArrow: Boolean = true, action: () -> Unit) {
-    OutlinedButton(action, Modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = enabled,
-        shape = RoundedCornerShape(18.dp), border = BorderStroke(1.dp, GameInk.copy(alpha = .20f)),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = GameInk, containerColor = Color.White)) {
-        Text(text, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
-        if (showArrow) Icon(painterResource(R.drawable.menu_chevron), null,
-            Modifier.padding(start = 12.dp).size(18.dp), tint = GameInk)
-    }
+private fun ChoiceAction(text: String, enabled: Boolean, action: () -> Unit) {
+    GameActionButton(text, action, enabled = enabled, style = GameActionStyle.SECONDARY,
+        textStyle = MaterialTheme.typography.bodyLarge)
 }

@@ -59,6 +59,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.components.GameArtwork
+import ru.nksk.lctapp.core.ui.components.GameActionButton
+import ru.nksk.lctapp.core.ui.components.GameActionStyle
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
@@ -177,20 +179,10 @@ internal fun GearItemDetails(
                     }
                 }
                 item.lookId?.let { lookId ->
-                    Button(
-                        onClick = { onEquip(if (item.equipped) "PLAIN" else lookId) },
-                        enabled = !busy,
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = AdventureLime, contentColor = GearColors.Ink,
-                            disabledContainerColor = AdventureLime, disabledContentColor = GearColors.Ink,
-                        ),
-                    ) {
-                        Text(
-                            stringResource(if (item.equipped) R.string.gear_unequip else R.string.gear_equip),
-                            fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp,
-                        )
-                    }
+                    GameActionButton(stringResource(if (item.equipped) R.string.gear_unequip else R.string.gear_equip),
+                        { onEquip(if (item.equipped) "PLAIN" else lookId) }, interactionBlocked = busy,
+                        style = if (item.equipped) GameActionStyle.SECONDARY else GameActionStyle.PRIMARY,
+                        contentColor = GearColors.Ink)
                 }
             }
         }

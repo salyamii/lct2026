@@ -1,6 +1,7 @@
 package ru.nksk.lctapp
 
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.Role
@@ -12,8 +13,11 @@ import androidx.compose.ui.test.ForcedSize
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHasNoClickAction
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
@@ -31,6 +35,8 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,6 +44,10 @@ import ru.nksk.lctapp.feature.menu.ui.MainMenuPreviewState
 import ru.nksk.lctapp.feature.menu.ui.MainMenuScreen
 import ru.nksk.lctapp.feature.menu.ui.MainMenuAction
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
+import ru.nksk.lctapp.core.ui.components.PetSatietyUiState
+import ru.nksk.lctapp.core.ui.components.tour.LocalSpotlightTargets
+import ru.nksk.lctapp.core.ui.components.tour.SpotlightTargets
+import ru.nksk.lctapp.feature.settings.ui.SettingsGearButton
 
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -47,7 +57,7 @@ class MainMenuScreenTest {
 
     @Test
     fun suppliedStateUpdatesVisibleProgressAndAccessibleCoinBalance() {
-        val state = mutableStateOf(MainMenuPreviewState.copy(coins = 275L, completedGoals = 2, totalGoals = 7))
+        val state = mutableStateOf(MainMenuPreviewState.copy(coins = 275L, budget = null, completedGoals = 2, totalGoals = 7))
         compose.setContent {
             LCTAppTheme {
                 MainMenuScreen(state = state.value, onAction = {})
@@ -66,7 +76,7 @@ class MainMenuScreenTest {
 
         assertValues(coins = 275, completedGoals = 2, totalGoals = 7)
         compose.runOnIdle {
-            state.value = MainMenuPreviewState.copy(coins = 40L, completedGoals = 3, totalGoals = 8)
+            state.value = MainMenuPreviewState.copy(coins = 40L, budget = null, completedGoals = 3, totalGoals = 8)
         }
         assertValues(coins = 40, completedGoals = 3, totalGoals = 8)
     }
@@ -78,7 +88,118 @@ class MainMenuScreenTest {
 
     @Test
     fun compactPhoneWithLargeTextKeepsEveryActionReachable() {
-        verifyActions(DpSize(360.dp, 640.dp), fontScale = 1.5f)
+        verifyActions(DpSize(360.dp, 640.dp), fontScale = 1.5f, scrollToActions = true)
+    }
+
+    @Test
+    fun compactHudKeepsTheSettingsSlotGesturesAndGoalProgressVisible() {
+        var settings = 0
+        var parents = 0
+        compose.setContent {
+            DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(DpSize(360.dp, 640.dp))) {
+                LCTAppTheme {
+                    MainMenuScreen(MainMenuPreviewState.copy(completedGoals = 2), onAction = {},
+                        settingsButton = { SettingsGearButton(onClick = { settings++ }, onLongClick = { parents++ }) })
+                }
+            }
+        }
+        compose.onNodeWithText(MainMenuPreviewState.goalTitle).assertDoesNotExist()
+        compose.onNodeWithText(compose.activity.getString(R.string.menu_goal_progress, 2, MainMenuPreviewState.totalGoals))
+            .assertIsDisplayed()
+        compose.onNodeWithContentDescription("Настройки").assertIsDisplayed().performTouchInput { longClick() }
+        compose.runOnIdle {
+            assertEquals(0, settings)
+            assertEquals(1, parents)
+        }
+        compose.onNodeWithContentDescription("Настройки").performClick()
+        compose.runOnIdle {
+            assertEquals(1, settings)
+            assertEquals(1, parents)
+        }
+    }
+
+    @Test
+    fun hungryBowlOpensMealChoiceAndOwnsItsTourTarget() {
+        val selections = mutableListOf<MainMenuAction>()
+        val targets = SpotlightTargets()
+        compose.setContent {
+            CompositionLocalProvider(LocalSpotlightTargets provides targets) {
+                LCTAppTheme {
+                    MainMenuScreen(MainMenuPreviewState.copy(canFeed = true,
+                        indicators = checkNotNull(MainMenuPreviewState.indicators).copy(satiety = PetSatietyUiState.HUNGRY)),
+                        selections::add)
+                }
+            }
+        }
+        compose.onNodeWithText("Выбрать обед").assertDoesNotExist()
+        val bowl = compose.onNodeWithContentDescription("Сытость: Голоден")
+        bowl.assertIsDisplayed().assertHasClickAction()
+        val bowlBounds = bowl.fetchSemanticsNode().boundsInRoot
+        compose.runOnIdle {
+            val mealTarget = targets.bounds["menu.meal"]
+            assertNotNull(mealTarget)
+            assertEquals(bowlBounds.width, checkNotNull(mealTarget).width, 1f)
+            assertEquals(bowlBounds.height, mealTarget.height, 1f)
+        }
+        bowl.performClick()
+        compose.runOnIdle { assertEquals(listOf(MainMenuAction.Feed), selections) }
+    }
+
+    @Test
+    fun fedBowlExplainsThatThePetHasAlreadyEatenWithoutBuyingAgain() {
+        val selections = mutableListOf<MainMenuAction>()
+        val targets = SpotlightTargets()
+        compose.setContent {
+            CompositionLocalProvider(LocalSpotlightTargets provides targets) {
+                LCTAppTheme {
+                    MainMenuScreen(MainMenuPreviewState.copy(canFeed = false,
+                        indicators = checkNotNull(MainMenuPreviewState.indicators).copy(satiety = PetSatietyUiState.FED)),
+                        selections::add)
+                }
+            }
+        }
+        compose.onNodeWithContentDescription("Сытость: Сыт").assertIsDisplayed().performClick()
+        compose.onNodeWithText("Сегодня уже поели").assertIsDisplayed()
+        compose.runOnIdle {
+            assertEquals(emptyList<MainMenuAction>(), selections)
+            assertFalse(targets.bounds.containsKey("menu.meal"))
+        }
+    }
+
+    @Test
+    fun bowlBeforeTheFirstDayShowsItsStateWithoutStartingAMeal() {
+        val selections = mutableListOf<MainMenuAction>()
+        compose.setContent {
+            LCTAppTheme {
+                MainMenuScreen(MainMenuPreviewState.copy(dayStatus = null, canFeed = false,
+                    indicators = checkNotNull(MainMenuPreviewState.indicators).copy(satiety = PetSatietyUiState.NOT_EATEN)),
+                    selections::add)
+            }
+        }
+        compose.onNodeWithContentDescription("Сытость: Пора поесть").assertIsDisplayed().performClick()
+        compose.onNodeWithText("Сегодня герой ещё не ел.").assertIsDisplayed()
+        compose.runOnIdle { assertEquals(emptyList<MainMenuAction>(), selections) }
+    }
+
+    @Test
+    fun busyMenuAndActiveTourKeepTheBowlFromStartingAMeal() {
+        val selections = mutableListOf<MainMenuAction>()
+        val state = mutableStateOf(MainMenuPreviewState.copy(busy = true))
+        val targets = SpotlightTargets()
+        compose.setContent {
+            CompositionLocalProvider(LocalSpotlightTargets provides targets) {
+                LCTAppTheme { MainMenuScreen(state.value, selections::add) }
+            }
+        }
+        val bowl = compose.onNodeWithContentDescription("Сытость: Пора поесть")
+        bowl.assertIsNotEnabled().performClick()
+        compose.runOnIdle {
+            assertEquals(emptyList<MainMenuAction>(), selections)
+            state.value = state.value.copy(busy = false)
+            targets.blocking = true
+        }
+        bowl.assertIsNotEnabled().performClick()
+        compose.runOnIdle { assertEquals(emptyList<MainMenuAction>(), selections) }
     }
 
     @Test
@@ -139,7 +260,7 @@ class MainMenuScreenTest {
             }
         }
         val fixedElements = listOf(
-            hasText(MainMenuPreviewState.goalTitle),
+            hasContentDescription("Цель: ${MainMenuPreviewState.goalTitle}"),
             hasText(MainMenuPreviewState.pet.name),
             hasTestTag("menu_pet"),
             hasContentDescription(compose.activity.getString(R.string.menu_village)),
@@ -187,21 +308,19 @@ class MainMenuScreenTest {
                     DeviceConfigurationOverride.FontScale(fontScale),
             ) {
                 LCTAppTheme {
-                    MainMenuScreen(state = MainMenuPreviewState, onAction = selections::add)
+                    MainMenuScreen(state = MainMenuPreviewState.copy(budget = null), onAction = selections::add)
                 }
             }
         }
 
         fun label(id: Int) = hasText(compose.activity.getString(id))
         val name = compose.onNodeWithText(MainMenuPreviewState.pet.name)
-        name.assertIsDisplayed().assertHasNoClickAction()
+        name.assertIsDisplayed().assertHasClickAction()
         name.performTouchInput { click() }
-        val goalSummary = compose.onNodeWithText(MainMenuPreviewState.goalTitle)
-        goalSummary.assertIsDisplayed().assertHasNoClickAction()
-        goalSummary.performTouchInput { click() }
+        compose.onNodeWithText(MainMenuPreviewState.goalTitle).assertDoesNotExist()
         compose.runOnIdle { assertEquals(emptyList<MainMenuAction>(), selections) }
         val actions = listOf(
-            hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility, 100)) to
+            hasContentDescription(compose.activity.getString(R.string.menu_coins_accessibility, MainMenuPreviewState.coins)) to
                 MainMenuAction.Coins,
             hasContentDescription(compose.activity.getString(R.string.menu_village)) to MainMenuAction.Village,
             label(R.string.menu_gear) to MainMenuAction.Gear,

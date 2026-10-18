@@ -109,13 +109,13 @@ class OnboardingJourneyTest {
         compose.onNodeWithText("Первый бюджет").assertDoesNotExist()
         compose.onNodeWithText("Распределить монеты").assertDoesNotExist()
         compose.onNodeWithText("НОВОЕ ПРИКЛЮЧЕНИЕ НАЧАЛОСЬ").assertDoesNotExist()
-        compose.onNodeWithText("Запомнить план").assertIsNotEnabled()
+        compose.onNodeWithText("Подтвердить бюджет").assertIsNotEnabled()
 
         // The first saved screen is already allocation; recreation must not show a receipt or credit coins again.
         compose.activityRule.scenario.recreate()
         compose.onNodeWithText("Первый план").assertIsDisplayed()
         compose.onNodeWithText("Первый бюджет").assertDoesNotExist()
-        compose.onNodeWithText("Запомнить план").assertIsNotEnabled()
+        compose.onNodeWithText("Подтвердить бюджет").assertIsNotEnabled()
         compose.runOnIdle {
             val saved = runBlocking { repository.read() }!!
             assertEquals(100L, saved.economy.availableBalance)
@@ -128,7 +128,7 @@ class OnboardingJourneyTest {
         compose.waitUntil(10_000) { runBlocking { repository.read() }?.economy?.displayPlan?.needs == 35L }
         compose.activityRule.scenario.recreate()
         compose.onNodeWithContentDescription("Нужно: 35 монет. Ввести сумму").assertExists()
-        compose.onNodeWithText("Запомнить план").assertIsNotEnabled()
+        compose.onNodeWithText("Подтвердить бюджет").assertIsNotEnabled()
 
         // System Back cannot leave a budget with unallocated coins.
         compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
@@ -154,21 +154,27 @@ class OnboardingJourneyTest {
         compose.waitUntil(10_000) { runBlocking { repository.read() }?.economy?.displayPlan?.savings == 20L }
         setAllocation("Запас", 25)
         compose.waitUntil(10_000) { runBlocking { repository.read() }?.economy?.unallocated == 0L }
-        compose.onNodeWithText("Запомнить план").assertIsEnabled()
-        compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
+        compose.onNodeWithText("Подтвердить бюджет").assertIsEnabled().performClick()
         compose.waitUntil(10_000) { runBlocking { repository.read() }?.economy?.planning == null }
         compose.onNodeWithText("Монетки").assertIsDisplayed()
         compose.runOnIdle {
             val saved = runBlocking { repository.read() }!!
-            assertEquals(ru.nksk.lctapp.domain.economy.BudgetPlan(35, 20, 20, 25), saved.economy.plan)
+            assertEquals(ru.nksk.lctapp.domain.economy.BudgetPlan(35, 20, 0, 25), saved.economy.plan)
             assertEquals(100L, saved.economy.balance)
-            assertEquals(100L, saved.economy.availableBalance)
-            assertEquals(0L, saved.economy.savingsBalance)
+            assertEquals(80L, saved.economy.availableBalance)
+            assertEquals(20L, saved.economy.savingsBalance)
+            assertEquals(ru.nksk.lctapp.domain.economy.BudgetPlan(35, 20, 20, 25), saved.financial.plans.single().allocation)
             assertNull(saved.engine)
         }
         compose.activityRule.scenario.recreate()
         compose.onNodeWithText("Монетки").assertIsDisplayed()
         compose.onNodeWithText("Первый план").assertDoesNotExist()
+        compose.runOnIdle {
+            val restored = runBlocking { repository.read() }!!
+            assertEquals(80L, restored.economy.availableBalance)
+            assertEquals(20L, restored.economy.savingsBalance)
+            assertEquals(1, restored.financial.plans.size)
+        }
     }
 
     private fun setAllocation(article: String, amount: Long) {

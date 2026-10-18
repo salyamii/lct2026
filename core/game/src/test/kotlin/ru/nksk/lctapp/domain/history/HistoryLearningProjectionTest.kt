@@ -84,6 +84,34 @@ class HistoryLearningProjectionTest {
         assertEquals(ObservationOutcome.SUPPORTED, observed.single { it.skill == SkillId.BUILD_EMERGENCY_FUND }.outcome)
     }
 
+    @Test fun newWeekReserveTransferCannotRewriteTheClosedPreviousWeek() {
+        val history = week()
+        val closed = HistoryLearningProjection.facts(history).single {
+            (it.detail as? ReserveDecision)?.intervalClosed == true
+        }
+        // This history fixture records checkpoints directly; command guards have separate engine tests.
+        val before = checkNotNull(history.last().after)
+        val after = before.copy(economy = before.economy.copy(
+            availableBalance = before.economy.availableBalance - 10,
+            savingsBalance = before.economy.savingsBalance + 10))
+        val request = EngineRequest("weekly-reserve", before.engine?.revision,
+            EngineCommand.DepositWeeklyReserve("week:8", 0, 10))
+        val sequence = history.last().sequence + 1
+        val shown = context(day = 8).copy(
+            before = FinancialPosition(before.economy.availableBalance, before.economy.savingsBalance, 35),
+            after = FinancialPosition(after.economy.availableBalance, after.economy.savingsBalance, 35))
+        val movement = fact("weekly-reserve", sequence, "saving:period",
+            SavingMovement("weekly-reserve:deposit", "goal", "income:week8", SavingMovementKind.DEPOSIT, 10))
+            .copy(context = shown)
+        val appended = AuditEntry("weekly-reserve", sequence, "run", AuditType.COMMAND, request,
+            before = before, after = after, facts = listOf(movement),
+            operations = CanonicalLedger.fromTransition(before, after, request))
+        val projected = HistoryLearningProjection.facts(history + appended)
+        assertEquals(closed, projected.single { (it.detail as? ReserveDecision)?.intervalClosed == true })
+        assertEquals(ObservationOutcome.SUPPORTED, SkillEvaluator().evaluate(projected)
+            .single { it.skill == SkillId.BUILD_EMERGENCY_FUND }.outcome)
+    }
+
     @Test fun missingDayCannotBecomeAPlanningFailureOrSuccess() {
         val facts = HistoryLearningProjection.facts(week().filterNot { it.id == "finish-4" })
         val outcome = SkillEvaluator().evaluate(facts).single { it.skill == SkillId.MAKE_MONEY_LAST }

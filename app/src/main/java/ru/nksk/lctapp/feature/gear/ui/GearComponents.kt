@@ -1,6 +1,9 @@
 package ru.nksk.lctapp.feature.gear.ui
 
 import ru.nksk.lctapp.core.ui.components.GameArtwork
+import ru.nksk.lctapp.core.ui.components.GameActionButton
+import ru.nksk.lctapp.core.ui.components.GameActionButtonDefaults
+import ru.nksk.lctapp.core.ui.components.GameActionStyle
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -101,36 +104,22 @@ internal fun GearItemCard(item: GearItemUiState, enabled: Boolean = true, onEqui
             }
             Text(item.name, color = GearColors.Ink, fontFamily = Rubik, fontWeight = FontWeight.Medium,
                 fontSize = 16.sp, lineHeight = 22.sp, minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            OutlinedButton(onClick = { onOpen(item.occurrenceId) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-                shape = RoundedCornerShape(12.dp), border = BorderStroke(1.dp, GearColors.Ink.copy(alpha = .35f)),
-                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = GearColors.Ink)) {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally)) {
-                    Text("Рассмотреть", Modifier.weight(1f, fill = false), textAlign = TextAlign.Center,
-                        fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp,
-                        lineHeight = 20.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Icon(painterResource(R.drawable.menu_chevron), null, Modifier.size(14.dp))
-                }
-            }
-            if (item.lookId != null) {
-                val buttonColor = if (item.equipped) Color(0xFFE6E1F0) else Color(0xFFA5E91F)
-                Button(enabled = enabled, onClick = { onEquip(if (item.equipped) "PLAIN" else item.lookId) },
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), shape = RoundedCornerShape(12.dp),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = buttonColor, contentColor = GearColors.Ink,
-                        // A short save blocks repeat taps without flashing every inventory card.
-                        disabledContainerColor = buttonColor, disabledContentColor = GearColors.Ink)) {
-                    Text(stringResource(if (item.equipped) R.string.gear_unequip else R.string.gear_equip),
-                        fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp,
-                        lineHeight = 20.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-            } else if (reserveEquipSlot) {
-                // Keep neighbouring accessory actions aligned without inventing an equip action.
-                Box(Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(vertical = 8.dp),
-                    contentAlignment = Alignment.Center) {
-                    Text("", fontFamily = Nunito, fontSize = 14.sp, lineHeight = 20.sp, minLines = 1, maxLines = 1)
+            Column(verticalArrangement = Arrangement.spacedBy(GameActionButtonDefaults.Spacing)) {
+                GameActionButton("Рассмотреть", { onOpen(item.occurrenceId) }, style = GameActionStyle.SECONDARY,
+                    minHeight = 48.dp, contentColor = GearColors.Ink,
+                    textStyle = GameActionButtonDefaults.QuietText.copy(fontSize = 14.sp, lineHeight = 20.sp))
+                if (item.lookId != null) {
+                    GameActionButton(stringResource(if (item.equipped) R.string.gear_unequip else R.string.gear_equip),
+                        { onEquip(if (item.equipped) "PLAIN" else item.lookId) }, interactionBlocked = !enabled,
+                        style = if (item.equipped) GameActionStyle.SECONDARY else GameActionStyle.PRIMARY,
+                        minHeight = 48.dp, contentColor = GearColors.Ink,
+                        textStyle = GameActionButtonDefaults.QuietText.copy(fontSize = 14.sp, lineHeight = 20.sp))
+                } else if (reserveEquipSlot) {
+                    // Keep neighbouring accessory actions aligned without inventing an equip action.
+                    Box(Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center) {
+                        Text("", fontFamily = Nunito, fontSize = 14.sp, lineHeight = 20.sp, minLines = 1, maxLines = 1)
+                    }
                 }
             }
         }

@@ -56,11 +56,12 @@ fun EntryProviderScope<NavKey>.economyEntry(onBack: (Economy) -> Unit, onConfirm
                 EconomyOperations.allocationRemaining(economy) > 0 -> exitMessage = "Распредели ещё ${paymentCoinAmount(EconomyOperations.allocationRemaining(economy))}, чтобы продолжить."
                 economy.displayPlan.needs < EconomyOperations.minimumNeeds(economy, state.knownNeeds) ->
                     exitMessage = "Оставь ещё ${paymentCoinAmount(EconomyOperations.minimumNeeds(economy, state.knownNeeds) - economy.displayPlan.needs)} на необходимое."
-                else -> model.onAction(EconomyAction.Confirm)
+                else -> exitMessage = "Нажми «Подтвердить бюджет», чтобы сохранить распределение и отложить выбранную сумму в копилку."
             }
         }
         val back: () -> Unit = {
-            if (state.budgetConfirmation == null) {
+            if (state.budgetConfirmation == null &&
+                !(state.saving && state.economy?.planning?.stage == BudgetPlanningStage.RECEIPT)) {
                 if (state.saving) exitAfterSave = true else finishExit()
             }
         }

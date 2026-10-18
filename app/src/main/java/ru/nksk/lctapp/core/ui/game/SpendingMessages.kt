@@ -51,6 +51,16 @@ internal fun paymentCoinAmount(amount: Long): String = "$amount ${paymentCoins(a
 internal fun missingCoinAmount(amount: Long): String = "$amount ${missingCoins(amount)}"
 internal fun coinAmount(amount: Long): String = "$amount ${priceCoins(amount)}"
 
+/** Final balance and the signed change from the same preview or receipt. */
+internal fun balanceWithChange(before: Long, after: Long): String {
+    val change = after - before
+    return when {
+        change > 0 -> "$after (+$change)"
+        change < 0 -> "$after ($change)"
+        else -> after.toString()
+    }
+}
+
 private fun paymentCoins(amount: Long): String = when {
     amount % 100 in 11..14 -> "монет"
     amount % 10 == 1L -> "монету"

@@ -27,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -49,7 +48,6 @@ import androidx.compose.ui.unit.sp
 private val Ink = Color(0xff231942)
 private val Cream = Color(0xfffbfaef)
 private val Muted = Color(0xff79738b)
-private val Lime = Color(0xffa8e830)
 private val Line = Color(0xffe1deeb)
 
 enum class CharacterTemperament(val label: String) {
@@ -117,7 +115,7 @@ fun CustomizationScreen(
                         Spacer(Modifier.height(16.dp))
                         CustomizationFields(state, artwork, editName, onTemperamentChange,
                             onFurChange, saving, nameError)
-                        CustomizationContinue(artwork, saving, saveFailed, {
+                        CustomizationContinue(saving, saveFailed, {
                             continueWithName()
                             if (state.name.isBlank()) scope.launch { scroll.animateScrollTo(0) }
                         })
@@ -192,7 +190,7 @@ private fun CustomizationEditor(
         Column(Modifier.fillMaxSize().padding(bottom = actionHeight).verticalScroll(scroll)) {
             CustomizationFields(state, artwork, onNameChange, onTemperamentChange, onFurChange, saving, nameError)
         }
-        CustomizationContinue(artwork, saving, saveFailed, {
+        CustomizationContinue(saving, saveFailed, {
             onContinue()
             if (state.name.isBlank()) scope.launch { scroll.animateScrollTo(0) }
         },
@@ -294,7 +292,6 @@ private fun CustomizationFields(
 
 @Composable
 private fun CustomizationContinue(
-    artwork: CustomizationArtwork,
     saving: Boolean,
     saveFailed: Boolean,
     onContinue: () -> Unit,
@@ -307,14 +304,8 @@ private fun CustomizationContinue(
             Text("Не удалось сохранить настройки. Попробуй ещё раз.", color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(bottom = 8.dp))
         }
-        Button(onClick = onContinue, enabled = !saving, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
-            shape = RoundedCornerShape(18.dp),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp, pressedElevation = 3.dp,
-                disabledElevation = 0.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Lime, contentColor = Ink,
-                disabledContainerColor = Color(0xffdedbe3), disabledContentColor = Muted)) {
-            Text(if (saving) "Сохраняем…" else "Продолжить", fontFamily = artwork.titleFont, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
-        }
+        OnboardingPrimaryButton(if (saving) "Сохраняем…" else "Продолжить",
+            enabled = !saving, onClick = onContinue, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp))
     }
 }
 
@@ -326,7 +317,6 @@ fun CustomizationHeader(
     title: String = "Создай образ",
     backDescription: String = "Назад к выбору персонажа",
 ) {
-    val background = Color(0xff171440).copy(alpha = .63f)
     Row(
         Modifier.fillMaxWidth().windowInsetsPadding(
             WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
@@ -334,26 +324,8 @@ fun CustomizationHeader(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Keep a 48 dp touch target around the 40 dp circle from the design.
-        IconButton(onClick = onBack, enabled = !saving, modifier = Modifier.size(48.dp)) {
-            Box(
-                Modifier.size(40.dp).background(background, CircleShape)
-                    .border(1.dp, Color.White.copy(alpha = .2f), CircleShape),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(painterResource(artwork.chevron), backDescription,
-                    Modifier.size(20.dp).rotate(180f), tint = Color.White)
-            }
-        }
-        Text(
-            title,
-            modifier = Modifier.background(background, RoundedCornerShape(20.dp))
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            fontFamily = artwork.titleFont,
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 14.sp,
-            color = Color.White,
-        )
+        OnboardingBackButton(enabled = !saving, onClick = onBack, contentDescription = backDescription)
+        OnboardingSceneTitle(title, Modifier.weight(1f, fill = false))
     }
 }
 

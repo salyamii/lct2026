@@ -45,6 +45,9 @@ sealed interface EngineCommand {
     data class ConfirmBudget(val sessionId: String, val revision: Long,
         val reason: BudgetRevisionReason = BudgetRevisionReason.UNSPECIFIED,
         val causeActionId: String? = null) : EngineCommand
+    /** Explicitly move only the previous week's remaining reserve, before allocating new income. */
+    @Serializable
+    data class DepositWeeklyReserve(val sessionId: String, val revision: Long, val amount: Long) : EngineCommand
     @Serializable
     data class DepositSavings(val amount: Long, val acceptFoodRisk: Boolean = false,
         @EncodeDefault(EncodeDefault.Mode.NEVER) val expected: SavingsTransferExpectation? = null) : EngineCommand

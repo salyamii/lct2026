@@ -26,4 +26,10 @@ class MenuTourPolicyTest {
         assertNull(visibleTourStep(5, emptySet()))
         assertEquals(5, visibleTourStep(5, setOf("menu.tasks"))?.index)
     }
+
+    @Test fun goalHintUsesTheBottomGoalButtonWithoutTheRemovedHeader() {
+        assertNull(visibleTourStep(3, emptySet()))
+        assertEquals(listOf("menu.goal"), visibleTourStep(3, setOf("menu.goal"))?.targets)
+        assertFalse(MenuTourSteps.flatMap { it.targets }.contains("menu.goal.summary"))
+    }
 }

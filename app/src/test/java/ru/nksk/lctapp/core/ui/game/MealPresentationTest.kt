@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import org.junit.Assert.*
 import org.junit.Test
 import ru.nksk.lctapp.app.createInitialGameState
+import ru.nksk.lctapp.core.ui.components.PetIndicatorKind
 import ru.nksk.lctapp.data.game.content.bundledGameCatalog
 import ru.nksk.lctapp.domain.economy.BudgetPlan
 import ru.nksk.lctapp.domain.economy.EconomyState
@@ -34,13 +35,24 @@ class MealPresentationTest {
             val choices = mealChoices(current, catalog, engine, demoMode).associateBy { it.id }
             assertEquals("Обычный обед", choices.getValue("basic-v1").label)
             assertEquals(if (demoMode) "Бесплатно" else "5 монет", choices.getValue("basic-v1").priceLabel)
-            assertEquals("Утолит голод.", choices.getValue("basic-v1").consequence)
+            assertNull(choices.getValue("basic-v1").consequence)
+            assertEquals(listOf(PetIndicatorKind.SATIETY, PetIndicatorKind.ENERGY),
+                choices.getValue("basic-v1").petEffects.map { it.kind })
             assertEquals("Роскошный обед", choices.getValue("luxury-v1").label)
             assertEquals(if (demoMode) "Бесплатно" else "7 монет", choices.getValue("luxury-v1").priceLabel)
-            assertEquals("Поднимет настроение. Восстановит немного сил.", choices.getValue("luxury-v1").consequence)
+            assertNull(choices.getValue("luxury-v1").consequence)
             assertEquals("Праздничный обед", choices.getValue("feast-v1").label)
             assertEquals(if (demoMode) "Бесплатно" else "10 монет", choices.getValue("feast-v1").priceLabel)
-            assertEquals("Поднимет настроение. Восстановит часть сил.", choices.getValue("feast-v1").consequence)
+            assertNull(choices.getValue("feast-v1").consequence)
+            val luxury = choices.getValue("luxury-v1").petEffects
+            assertEquals(listOf(PetIndicatorKind.SATIETY, PetIndicatorKind.ENERGY), luxury.map { it.kind })
+            assertEquals("Восстановит немного сил", luxury.single { it.kind == PetIndicatorKind.ENERGY }.label)
+            val festive = choices.getValue("feast-v1").petEffects
+            assertEquals(listOf(PetIndicatorKind.SATIETY, PetIndicatorKind.ENERGY, PetIndicatorKind.MOOD), festive.map { it.kind })
+            assertEquals("Восстановит больше сил", festive.single { it.kind == PetIndicatorKind.ENERGY }.label)
+            assertEquals("Радость", festive.single { it.kind == PetIndicatorKind.MOOD }.label)
+            assertEquals(if (demoMode) "В режиме бога силы не тратятся." else "Силы уже полные.",
+                festive.single { it.kind == PetIndicatorKind.ENERGY }.explanation)
         }
         assertEquals(state(100), current)
     }
@@ -58,11 +70,23 @@ class MealPresentationTest {
                 assertEquals(demoMode, choices.first { it.id == mealId }.enabled)
                 if (demoMode) assertEquals("Бесплатно", choices.first { it.id == mealId }.priceLabel)
             }
-            assertEquals("Поднимет настроение. Восстановит немного сил.", choices.first { it.id == "luxury-v1" }.consequence)
+            val luxury = choices.first { it.id == "luxury-v1" }
+            assertEquals("Восстановит немного сил",
+                luxury.petEffects.single { it.kind == PetIndicatorKind.ENERGY }.label)
             val free = choices.first { it.id == "community-v1" }
             assertEquals("Бесплатно", free.priceLabel)
-            assertEquals(if (demoMode) "Утолит голод." else "После обеда нужен отдых. Утром сил будет меньше.", free.consequence)
+            assertEquals(if (demoMode) null else "После обеда нужен отдых. Утром сил будет меньше.", free.consequence)
         }
+    }
+
+    @Test fun mealCapacityRemainsDistinctWhileActualRestorationIsLimitedByMissingEnergy() {
+        val current = state(100, energy = catalog.rules.fullEnergy - 1)
+        val festive = mealChoices(current, catalog, engine).single { it.id == "feast-v1" }
+        assertEquals("Восстановит больше сил", festive.petEffects.single { it.kind == PetIndicatorKind.ENERGY }.label)
+        assertEquals("До полного запаса.", festive.petEffects.single { it.kind == PetIndicatorKind.ENERGY }.explanation)
+        val after = (engine.preview(current, EngineCommand.Feed("feast-v1")) as EngineResult.Applied).state
+        assertEquals(catalog.rules.fullEnergy, after.engine!!.energy)
+        assertEquals(catalog.rules.fullEnergy - 1, current.engine!!.energy)
     }
 
     @Test fun demoMealOffersKeepDayAndBudgetGuards() {

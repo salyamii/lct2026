@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.feature.menu.ui
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.verticalScroll
 import ru.nksk.lctapp.core.ui.components.tour.spotlightScrollable
 
@@ -8,12 +9,12 @@ import ru.nksk.lctapp.core.ui.components.tour.spotlightTarget
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import ru.nksk.lctapp.core.ui.components.GameArtwork
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,22 +32,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -54,25 +45,24 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
-import ru.nksk.lctapp.core.ui.theme.AdventureLavender
-import ru.nksk.lctapp.core.ui.theme.AdventureLabel
-import ru.nksk.lctapp.core.ui.theme.AdventureLime
-import ru.nksk.lctapp.core.ui.theme.AdventureMuted
-import ru.nksk.lctapp.core.ui.theme.AdventurePanel
 import ru.nksk.lctapp.core.ui.theme.Rubik
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.components.GameInk
 import ru.nksk.lctapp.core.ui.components.GamePaper
+import ru.nksk.lctapp.core.ui.components.GamePlaque
+import ru.nksk.lctapp.core.ui.components.PetIndicators
+import ru.nksk.lctapp.core.ui.components.PetIndicatorsUiState
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
+import kotlin.math.roundToInt
 
 private val MenuBadgeMinHeight = 56.dp
+private val MenuCoinsMinHeight = 68.dp
 private val BudgetCornerRadius = 20.dp
 private val BudgetPopupCornerRadius = 24.dp
 
@@ -80,60 +70,40 @@ private val BudgetPopupCornerRadius = 24.dp
 internal fun MenuHud(
     petName: String,
     coins: Long,
-    completedGoals: Int,
-    totalGoals: Int,
     onAction: (MainMenuAction) -> Unit,
-    goalTitle: String = "Выбрать большую цель",
     modifier: Modifier = Modifier,
+    indicators: PetIndicatorsUiState? = null,
     budget: MenuBudgetUiState? = null,
     budgetExpanded: Boolean = false,
     onBudgetExpandedChange: (Boolean) -> Unit = {},
     settingsButton: (@Composable () -> Unit)? = null,
     onRename: () -> Unit = {},
     renameEnabled: Boolean = true,
+    onFeed: (() -> Unit)? = null,
+    interactionEnabled: Boolean = true,
+    attachNameToEdge: Boolean = false,
 ) {
-    Column(modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+    Column(modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            // Progress is informational; the bottom menu owns the goal action.
-            Row(
-                Modifier.weight(1f).heightIn(min = 40.dp).spotlightTarget("menu.goal.summary")
-                    .shadow(8.dp, RoundedCornerShape(20.dp))
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(AdventurePanel.copy(alpha = 0.63f))
-                    .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(20.dp))
-                    .semantics(mergeDescendants = true) { }
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                MenuText(stringResource(R.string.menu_goal_label), 11, color = AdventureLavender, letterSpacing = 0.44f)
-                GoalTitle(goalTitle, Modifier.weight(1f))
-                if (totalGoals > 0) MenuText(
-                    stringResource(R.string.menu_goal_progress, completedGoals, totalGoals),
-                    size = 11,
-                    color = AdventureLime,
-                    modifier = Modifier.clip(RoundedCornerShape(50))
-                        .background(Color.White.copy(alpha = 0.15f))
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                )
-            }
+            if (indicators != null) PetIndicators(indicators,
+                Modifier.weight(1f).spotlightTarget("menu.status"),
+                onFeed = onFeed, interactionEnabled = interactionEnabled,
+                satietyModifier = if (onFeed != null) Modifier.spotlightTarget("menu.meal") else Modifier)
+            else Spacer(Modifier.weight(1f))
             settingsButton?.let { button ->
                 Box(
-                    Modifier.size(48.dp).spotlightTarget("menu.settings")
-                        .clip(RoundedCornerShape(50))
-                        .background(AdventurePanel.copy(alpha = 0.63f))
-                        .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(50)),
+                    Modifier.size(48.dp).spotlightTarget("menu.settings"),
                     contentAlignment = Alignment.Center,
                 ) { button() }
             }
         }
         Spacer(Modifier.height(8.dp))
         Row(
-            Modifier.fillMaxWidth(),
+            Modifier.fillMaxWidth().padding(start = 16.dp, end = if (attachNameToEdge) 0.dp else 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -143,19 +113,19 @@ internal fun MenuHud(
                 onSavings = { onAction(MainMenuAction.Savings) })
             Spacer(Modifier.width(8.dp))
             Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
-                Box(
-                    modifier = Modifier.heightIn(min = MenuBadgeMinHeight).spotlightTarget("menu.name")
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(AdventurePanel.copy(alpha = 0.85f))
-                        .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(20.dp))
+                MenuRightEdgePlaque(
+                    modifier = Modifier.widthIn(min = 100.dp).heightIn(min = MenuBadgeMinHeight)
+                        .spotlightTarget("menu.name")
                         .clickable(enabled = renameEnabled, role = Role.Button,
-                            onClickLabel = "Изменить имя", onClick = onRename)
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    contentAlignment = Alignment.Center,
+                            onClickLabel = "Изменить имя", onClick = onRename),
+                    contentPadding = PaddingValues(start = 30.dp, end = 18.dp, top = 12.dp, bottom = 12.dp),
+                    attached = attachNameToEdge,
+                    artworkRes = R.drawable.menu_name_plaque_v3,
                 ) {
                     Text(
                         text = petName,
-                        color = AdventureLabel,
+                        modifier = Modifier.align(Alignment.Center),
+                        color = GameInk,
                         fontFamily = Rubik,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
@@ -168,38 +138,37 @@ internal fun MenuHud(
     }
 }
 
+/** The frame continues beyond the viewport; its label and hit area stay inside it. */
 @Composable
-private fun GoalTitle(text: String, modifier: Modifier = Modifier) {
-    var overflows by remember(text) { mutableStateOf(false) }
-    Text(
-        text = text,
-        modifier = modifier
-            .graphicsLayer {
-                // Mask only the letters, keeping the translucent panel and counter intact.
-                compositingStrategy = if (overflows) CompositingStrategy.Offscreen else CompositingStrategy.Auto
-            }
-            .drawWithCache {
-                val fade = if (overflows && size.width > 0f) Brush.horizontalGradient(
-                    colors = listOf(Color.Black, Color.Transparent),
-                    startX = size.width - minOf(24.dp.toPx(), size.width / 2f),
-                    endX = size.width,
-                ) else null
-                onDrawWithContent {
-                    drawContent()
-                    if (fade != null) drawRect(fade, blendMode = BlendMode.DstIn)
-                }
+internal fun MenuRightEdgePlaque(
+    modifier: Modifier = Modifier,
+    attached: Boolean,
+    light: Boolean = false,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 18.dp, vertical = 12.dp),
+    @DrawableRes artworkRes: Int? = null,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    if (!attached) {
+        GamePlaque(modifier, light, contentPadding, artworkRes = artworkRes, content = content)
+        return
+    }
+    Box(modifier, contentAlignment = Alignment.Center) {
+        GamePlaque(
+            Modifier.matchParentSize().layout { measurable, constraints ->
+                // Hide the right brass cap and its transparent canvas margin past the screen edge.
+                val overhang = (constraints.maxHeight * .6f).roundToInt()
+                val background = measurable.measure(constraints.copy(
+                    minWidth = constraints.minWidth + overhang,
+                    maxWidth = constraints.maxWidth + overhang,
+                ))
+                layout(constraints.maxWidth, constraints.maxHeight) { background.place(0, 0) }
             },
-        color = Color.White,
-        fontFamily = Nunito,
-        fontWeight = FontWeight.ExtraBold,
-        fontSize = 13.sp,
-        lineHeight = 17.sp,
-        letterSpacing = 0.sp,
-        maxLines = 1,
-        softWrap = false,
-        overflow = TextOverflow.Clip,
-        onTextLayout = { overflows = it.didOverflowWidth },
-    )
+            light = light,
+            contentPadding = PaddingValues(0.dp),
+            artworkRes = artworkRes,
+        ) {}
+        Box(Modifier.padding(contentPadding), contentAlignment = Alignment.Center, content = content)
+    }
 }
 
 @Composable
@@ -220,31 +189,30 @@ private fun BudgetBadge(
     // Only the header participates in HUD measurement. The menu is a separate popup,
     // so expanding it cannot resize the pet scene or reposition the map/actions.
     Box {
-        Row(
-            Modifier.widthIn(min = 164.dp).heightIn(min = MenuBadgeMinHeight).spotlightTarget("menu.budget")
+        GamePlaque(
+            Modifier.widthIn(min = 176.dp).heightIn(min = MenuCoinsMinHeight).spotlightTarget("menu.budget")
                 .spotlightTarget("menu.coins", cornerRadius = BudgetCornerRadius, gap = 4.dp)
-                .clip(RoundedCornerShape(BudgetCornerRadius))
-                .background(AdventurePanel.copy(alpha = 0.9f))
-                .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(BudgetCornerRadius))
-                .clickable(role = Role.Button, onClickLabel = openBudgetLabel, onClick = onClick)
-                .padding(start = 12.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
+                .clickable(role = Role.Button, onClickLabel = openBudgetLabel, onClick = onClick),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 10.dp),
+            artworkRes = R.drawable.menu_wallet_panel_v3,
         ) {
-            GameArtwork(R.drawable.menu_coin, null, Modifier.size(26.dp), contentScale = ContentScale.Fit)
-            Spacer(Modifier.width(8.dp))
-            Column {
-                MenuText(stringResource(R.string.menu_budget_title), 11, color = AdventureMuted)
-                Text(budget.available.toString(), color = AdventureLabel, fontFamily = Rubik,
-                    fontWeight = FontWeight.Bold, fontSize = 18.sp, maxLines = 1)
-            }
-            Spacer(Modifier.width(8.dp))
-            IconButton(onClick = { onExpandedChange(!expanded) }, modifier = Modifier.size(48.dp).spotlightTarget("menu.budget.arrow", cornerRadius = 24.dp, gap = 4.dp)) {
-                Icon(
-                    painter = painterResource(R.drawable.menu_chevron),
-                    contentDescription = stringResource(if (expanded) R.string.menu_budget_collapse else R.string.menu_budget_expand),
-                    tint = AdventureLabel.copy(alpha = .8f),
-                    modifier = Modifier.size(18.dp).graphicsLayer { rotationZ = arrowRotation.value },
-                )
+            Row(Modifier.align(Alignment.Center), verticalAlignment = Alignment.CenterVertically) {
+                GameArtwork(R.drawable.menu_coin, null, Modifier.size(26.dp), contentScale = ContentScale.Fit)
+                Spacer(Modifier.width(8.dp))
+                Column {
+                    MenuText(stringResource(R.string.menu_budget_title), 11, color = GameInk.copy(alpha = .7f))
+                    Text(budget.available.toString(), color = GameInk, fontFamily = Rubik,
+                        fontWeight = FontWeight.Bold, fontSize = 18.sp, maxLines = 1)
+                }
+                Spacer(Modifier.width(8.dp))
+                IconButton(onClick = { onExpandedChange(!expanded) }, modifier = Modifier.size(48.dp).spotlightTarget("menu.budget.arrow", cornerRadius = 24.dp, gap = 4.dp)) {
+                    Icon(
+                        painter = painterResource(R.drawable.menu_chevron),
+                        contentDescription = stringResource(if (expanded) R.string.menu_budget_collapse else R.string.menu_budget_expand),
+                        tint = GameInk.copy(alpha = .8f),
+                        modifier = Modifier.size(18.dp).graphicsLayer { rotationZ = arrowRotation.value },
+                    )
+                }
             }
         }
         DropdownMenu(
@@ -298,7 +266,7 @@ private fun BudgetPopupSummary(budget: MenuBudgetUiState) {
         Spacer(Modifier.height(6.dp))
         BudgetArticleRow("Нужно", budget.needs)
         BudgetArticleRow("Хочу", budget.wants)
-        BudgetArticleRow("В копилку", budget.savings)
+        if (budget.savings != 0L) BudgetArticleRow("В копилку", budget.savings)
         BudgetArticleRow("Запас", budget.reserve)
         if (budget.unallocated > 0) {
             Spacer(Modifier.height(6.dp))
@@ -346,20 +314,20 @@ private fun BudgetPopupAction(title: String, onClick: () -> Unit) {
 @Composable
 private fun CoinsBadge(coins: Long, onClick: () -> Unit) {
     val description = stringResource(R.string.menu_coins_accessibility, coins)
-    Row(
-        Modifier.heightIn(min = MenuBadgeMinHeight).clip(RoundedCornerShape(20.dp))
-            .background(AdventurePanel.copy(alpha = 0.63f))
-            .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(20.dp))
+    GamePlaque(
+        Modifier.widthIn(min = 132.dp).heightIn(min = MenuCoinsMinHeight)
             .clickable(role = Role.Button, onClick = onClick)
-            .clearAndSetSemantics { contentDescription = description }
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+            .clearAndSetSemantics { contentDescription = description },
+        contentPadding = PaddingValues(horizontal = 22.dp, vertical = 14.dp),
+        artworkRes = R.drawable.menu_wallet_panel_v3,
     ) {
-        MenuArtwork(R.drawable.menu_coin, 27.dp)
-        Column {
-            MenuText(stringResource(R.string.menu_coins), 9, color = AdventureMuted)
-            MenuText(coins.toString(), 14)
+        Row(Modifier.align(Alignment.Center), verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            MenuArtwork(R.drawable.menu_coin, 27.dp)
+            Column {
+                MenuText(stringResource(R.string.menu_coins), 9, color = GameInk.copy(alpha = .7f))
+                MenuText(coins.toString(), 14, color = GameInk)
+            }
         }
     }
 }

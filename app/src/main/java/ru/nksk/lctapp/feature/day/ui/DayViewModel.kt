@@ -19,9 +19,13 @@ import kotlinx.coroutines.withContext
 import ru.nksk.lctapp.core.ui.game.GameActionAttempt
 import ru.nksk.lctapp.core.ui.game.mealChoices
 import ru.nksk.lctapp.core.ui.components.MealChoiceUiState
+import ru.nksk.lctapp.core.ui.components.PetIndicatorsUiState
+import ru.nksk.lctapp.core.ui.components.PetIndicatorEffectUiState
+import ru.nksk.lctapp.core.ui.game.petIndicators
+import ru.nksk.lctapp.core.ui.game.eventChoicePetEffects
+import ru.nksk.lctapp.core.ui.game.withoutEffortSuffix
 import ru.nksk.lctapp.core.ui.game.playerDescription
 import ru.nksk.lctapp.domain.economy.EconomyOperations
-import ru.nksk.lctapp.domain.economy.SpendingKind
 import ru.nksk.lctapp.core.ui.game.playerMessage
 import ru.nksk.lctapp.core.ui.game.eventCompletionMessage
 import ru.nksk.lctapp.core.ui.game.restingPetArtwork
@@ -45,7 +49,8 @@ import ru.nksk.lctapp.domain.analytics.FinancialPosition
 import ru.nksk.lctapp.domain.history.CampaignRestartRequest
 import ru.nksk.lctapp.domain.history.CampaignRestartConflictException
 
-internal data class DayOption(val id: String, val label: String, val needsFood: Boolean, val enabled: Boolean, val spending: String? = null)
+internal data class DayOption(val id: String, val label: String, val needsFood: Boolean, val enabled: Boolean,
+    val spending: String? = null, val petEffects: List<PetIndicatorEffectUiState> = emptyList())
 internal data class StoryGameRequest(val occurrenceId: String, val choiceId: String)
 internal data class ResourcePriorityUi(val offerId: String, val title: String, val effort: String,
     val reward: Long, val comparisons: List<String>, val selected: Boolean)
@@ -54,6 +59,7 @@ internal data class DayUiState(
     val retryRequired: Boolean = false,
     val title: String = "", val body: String = "", val category: String = "Событие",
     val impact: String = "", val effort: String = "",
+    val indicators: PetIndicatorsUiState? = null,
     val scene: String? = null, val character: String? = null,
     val options: List<DayOption> = emptyList(), val later: String? = null,
     val primary: String? = null, val primaryNeedsFood: Boolean = false,
@@ -67,6 +73,7 @@ internal data class DayUiState(
     val financialContext: DecisionContext? = null,
     val practiceRequired: Boolean = false,
     val reflectionAvailable: Boolean = false,
+    val reflectionDemo: Boolean = false,
     val resourcePriority: ResourcePriorityUi? = null,
     val layout: EventLayout = EventLayout.SCENE,
     val locationTitle: String = "",
@@ -181,7 +188,9 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
                         // A new day/save may arrive while this read is running. Never update its UI.
                         if (screenActive && game === saved) {
                             reflectionDay = finishedDay.takeIf { available }
-                            mutableState.value = mutableState.value.copy(reflectionAvailable = available)
+                            mutableState.value = mutableState.value.copy(
+                                reflectionAvailable = available || session.demoModeEnabled,
+                                reflectionDemo = session.demoModeEnabled && !available)
                         }
                     }
                 }
@@ -505,7 +514,8 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
         mutableState.value = current.state.copy(
             busy = false,
             message = message?.takeUnless { it == current.state.actionNotice } ?: current.state.message,
-            reflectionAvailable = current.state.summary?.day?.let { it == reflectionDay } == true,
+            reflectionAvailable = current.state.summary?.day?.let { current.demoMode || it == reflectionDay } == true,
+            reflectionDemo = current.demoMode && current.state.summary?.day?.let { it != reflectionDay } == true,
             resourcePriority = current.state.resourcePriority?.let { it.copy(selected = it.offerId == selectedResourcePriority) },
             showMeals = mealsShown && current.includesMeals,
             meals = if (mealsShown) current.state.meals else emptyList(),
@@ -581,6 +591,7 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
         val resourcePriority = if (restFromCard) null else resourcePriority(saved, choices.filter { blocked[it.id] == null }.map { it.id }, demoMode)
         val state = DayUiState(
             loading = false, petName = saved.pet.name,
+            indicators = petIndicators(saved, catalog, demoMode),
             audioOccurrenceId = occurrence?.id.takeIf { !story.campaignComplete && !result && summary == null },
             eventMedia = presentation.media,
             summary = summary?.toUiState(catalog, saved.pet.name, saved.economy),
@@ -609,22 +620,22 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
             body = if (event == null && summary == null && actionNotice != null) "" else body,
             category = if (summary != null) "Итоги дня" else card?.category?.let { renderPetText(it, saved.pet.name).asGameUiText() } ?: saved.pet.name,
             impact = if (story.campaignComplete || result || storyIntroduction || purchaseCard) "" else if (isDeed(saved)) "Награда: до ${choices.single().moneyDelta} монет" else renderPetText(card?.impact.orEmpty(), saved.pet.name).asGameUiText(),
-            effort = if (story.campaignComplete || result || simpleStoryAction || !presentation.showEffort) "" else if (demoMode) "Без усталости · режим бога" else
-                card?.effort.orEmpty().asGameUiText().takeUnless {
-                    it in setOf("Без траты сил", "Без трат сил", "Без расхода сил", "Не тратит силы", "Можно отказаться")
-                }.orEmpty().asPetEffortText(saved.pet.name),
+            // Each choice carries its own actual resource effect; the generic effort paragraph
+            // could describe the wrong branch of a paid/manual decision.
+            effort = "",
             scene = variant?.scene ?: card?.scene, character = variant?.character ?: card?.character,
             options = (if (restFromCard) emptyList() else choices).map { DayOption(it.id, if (isDeed(saved)) {
                 if (goalSelected) "Заработать на цель" else "Выполнить дело"
             } else if (it.moneyDelta < 0 && choiceDeltas.getValue(it.id) == 0L) "Получить бесплатно"
-                else catalog.displayAction(it).asGameActionLabel().asPetEffortText(saved.pet.name),
+                else renderPetText(catalog.displayAction(it).withoutEffortSuffix().asGameActionLabel(), saved.pet.name),
                 blocked[it.id] == BlockReason.MustEat, blocked[it.id] == null || blocked[it.id] == BlockReason.MustEat,
                 if (it.moneyDelta < 0 && choiceDeltas.getValue(it.id) == 0L) "Бесплатно · режим бога"
                 else if (it.moneyDelta < 0 && blocked[it.id] !is BlockReason.InsufficientMoney)
                     EconomyOperations.quote(saved.economy, Math.negateExact(it.moneyDelta),
-                        SpendingKind.forEvent(checkNotNull(event).type)).playerDescription(SpendingKind.forEvent(event.type))
+                        session.engine.choiceSpendingKind(it.id)).playerDescription(session.engine.choiceSpendingKind(it.id))
                 else (blocked[it.id] as? BlockReason.InsufficientMoney)?.takeIf { choiceBlock !is BlockReason.InsufficientMoney }
-                    ?.let { reason -> "Не хватает ${reason.missing} монет" }) },
+                    ?.let { reason -> "Не хватает ${reason.missing} монет" },
+                petEffects = eventChoicePetEffects(saved, catalog, it.id, demoMode)) },
             later = if (event != null && !result && !story.campaignComplete) {
                 if (isDeed(saved)) "Сделать позже"
                 else if (card != null) card.later?.let { renderPetText(it, saved.pet.name).asGameActionLabel() }

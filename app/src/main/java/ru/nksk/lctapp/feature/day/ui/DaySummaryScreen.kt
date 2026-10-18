@@ -39,6 +39,8 @@ import ru.nksk.lctapp.core.ui.components.GameArtwork
 import ru.nksk.lctapp.core.ui.components.GameCardLayout
 import ru.nksk.lctapp.core.ui.components.GameInk
 import ru.nksk.lctapp.core.ui.components.GameTitle
+import ru.nksk.lctapp.core.ui.components.GameActionButton
+import ru.nksk.lctapp.core.ui.components.GameActionStyle
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 
@@ -60,14 +62,12 @@ internal fun DaySummaryScreen(state: DayUiState, onAction: (DayAction) -> Unit, 
         if (state.reflectionAvailable) {
             Surface(Modifier.fillMaxWidth(), color = Color(0xFFEDE9F7), shape = RoundedCornerShape(22.dp)) {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    DiarySectionTitle("А что, если…")
-                    AdventureBody("Посмотрим, что изменилось бы, если поступить иначе?")
-                    OutlinedButton(onClick = { onAction(DayAction.OpenReflection) }, enabled = !state.busy,
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-                        shape = RoundedCornerShape(18.dp), border = BorderStroke(1.dp, Color(0xFFC9C0DF)),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = GameInk)) {
-                        Text("Посмотреть другой путь", fontFamily = Nunito, fontWeight = FontWeight.Bold)
-                    }
+                    DiarySectionTitle(if (state.reflectionDemo) "Машина времени" else "А что, если…")
+                    AdventureBody(if (state.reflectionDemo) "Сравним покупку и отказ на демо-примере."
+                        else "Посмотрим, что изменилось бы, если поступить иначе?")
+                    GameActionButton(if (state.reflectionDemo) "Посмотреть демо-пример" else "Посмотреть другой путь",
+                        { onAction(DayAction.OpenReflection) }, enabled = !state.busy,
+                        style = GameActionStyle.SECONDARY, minHeight = 48.dp)
                 }
             }
         }

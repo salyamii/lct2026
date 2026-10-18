@@ -13,6 +13,8 @@ import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import org.junit.Assume.assumeTrue
+import ru.nksk.lctapp.BuildConfig
 import ru.nksk.lctapp.domain.parentlink.*
 import ru.nksk.lctapp.domain.media.MediaPreferences
 import ru.nksk.lctapp.domain.media.MediaPreferencesRepository
@@ -398,6 +400,7 @@ class SettingsViewModelTest {
     }
 
     @Test fun demoModeShowsPersistedValueAndWaitsForTheWrite() = runTest(dispatcher) {
+        assumeTrue(BuildConfig.JURY_TOOLS)
         val demo = FakeDemoRepository().apply { pendingWrite = CompletableDeferred() }
         val model = model(FakeRepository(), demo = demo)
         runCurrent()
@@ -413,6 +416,7 @@ class SettingsViewModelTest {
     }
 
     @Test fun demoWriteFailureKeepsPersistedValueAndRetryUsesRequestedValue() = runTest(dispatcher) {
+        assumeTrue(BuildConfig.JURY_TOOLS)
         val demo = FakeDemoRepository().apply { writeFailure = true }
         val model = model(FakeRepository(), demo = demo)
         runCurrent()
@@ -427,6 +431,22 @@ class SettingsViewModelTest {
         assertNull(model.uiState.value.demo.error)
     }
 
+    @Test fun childrenSettingsHideDemoAndIgnoreActionsEvenIfAnOldPreferenceIsEnabled() = runTest(dispatcher) {
+        assumeTrue(!BuildConfig.JURY_TOOLS)
+        val demo = FakeDemoRepository().apply { saved.value = DemoPreferences(true) }
+        val model = model(FakeRepository(), demo = demo)
+        runCurrent()
+        assertFalse(model.uiState.value.demo.available)
+        assertEquals(false, model.uiState.value.demo.enabled)
+        assertFalse(model.uiState.value.demo.canChange)
+        model.onAction(SettingsAction.SetDemoModeEnabled(true))
+        model.onAction(SettingsAction.SetDemoModeEnabled(false))
+        model.onAction(SettingsAction.RetryDemoMode)
+        runCurrent()
+        assertEquals(0, demo.writeCalls)
+        assertEquals(false, model.uiState.value.demo.enabled)
+    }
+
     private fun model(repository: ParentLinkRepository, sound: MediaPreferencesRepository = FakeMediaRepository(),
         cloud: CloudSyncRepository = FakeCloudRepository(), diagnostics: DiagnosticLogRepository = FakeDiagnosticLogs(),
         demo: DemoPreferencesRepository = FakeDemoRepository()) =
@@ -437,9 +457,11 @@ class SettingsViewModelTest {
         val saved = MutableStateFlow(DemoPreferences())
         var pendingWrite: CompletableDeferred<Unit>? = null
         var writeFailure = false
+        var writeCalls = 0
         override fun observe() = saved
         override suspend fun read() = saved.value
         override suspend fun setDemoModeEnabled(enabled: Boolean) {
+            writeCalls++
             pendingWrite?.await()
             if (writeFailure) error("Preference write failed")
             saved.value = DemoPreferences(enabled)

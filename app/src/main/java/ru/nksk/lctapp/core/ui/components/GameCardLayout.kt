@@ -46,12 +46,9 @@ internal fun GameCardLayout(
                         .align(Alignment.BottomCenter).padding(bottom = 12.dp), contentScale = ContentScale.Fit)
                 }
                 Row(Modifier.statusBarsPadding().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    FilledTonalButton(onClick = onBack) { Text("Назад") }
+                    GameBackButton(onClick = onBack)
                     Spacer(Modifier.width(8.dp))
-                    Surface(color = AdventurePanel.copy(alpha = 0.85f), shape = RoundedCornerShape(20.dp)) {
-                        Text(category, Modifier.padding(horizontal = 14.dp, vertical = 10.dp), color = Color.White,
-                            fontFamily = Rubik, fontWeight = FontWeight.Bold)
-                    }
+                    GameSceneTitle(category, Modifier.weight(1f, fill = false))
                 }
             }
         }

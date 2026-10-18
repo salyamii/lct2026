@@ -71,22 +71,26 @@ class MealPolicyTest {
         assertEquals(before.ownedItems, after.ownedItems)
     }
 
-    @Test fun upgradedMealsRestoreCurrentEnergyAndMoodWithoutChangingTheNextMorningLimit() {
-        for ((price, restoration) in listOf(7L to 1, 10L to 2)) {
-            val meal = MealDefinition("upgraded-$price", price, PetVisualState.HAPPY, energyRestore = restoration)
-            val before = state(20).let { it.copy(engine = it.engine!!.copy(energy = 1, nextMorningEnergy = 3)) }
+    @Test fun upgradedMealsRestoreDifferentAmountsAndOnlyTheFeastAddsJoy() {
+        val luxury = MealDefinition("luxury", 7, null, energyRestore = 1)
+        val feast = MealDefinition("feast", 10, PetVisualState.HAPPY, energyRestore = 2)
+        for (meal in listOf(luxury, feast)) {
+            val before = state(20).let { it.copy(
+                pet = it.pet.transitionTo(PetVisualState.UPSET),
+                engine = it.engine!!.copy(energy = 1, nextMorningEnergy = 3),
+            ) }
             val after = MealPolicy(listOf(basic, meal, free)).apply(before, meal.id, 5)
-            assertEquals(20 - price, after.economy.availableBalance)
-            assertEquals(1 + restoration, after.engine!!.energy)
+            assertEquals(20 - meal.price, after.economy.availableBalance)
+            assertEquals(1 + meal.energyRestore, after.engine!!.energy)
             assertEquals(3, after.engine!!.nextMorningEnergy)
-            assertEquals(PetVisualState.HAPPY, after.pet.visualState)
+            assertEquals(if (meal == feast) PetVisualState.HAPPY else PetVisualState.UPSET, after.pet.visualState)
             assertTrue(after.engine!!.ateToday)
             assertEquals(before.story, after.story)
         }
     }
 
     @Test fun demoMealsWaiveThePriceWithoutTurningPaidMealsIntoTheFreeFallback() {
-        val luxury = MealDefinition("luxury", 7, PetVisualState.HAPPY, energyRestore = 1)
+        val luxury = MealDefinition("luxury", 7, null, energyRestore = 1)
         val feast = MealDefinition("feast", 10, PetVisualState.HAPPY, energyRestore = 2)
         val meals = MealPolicy(listOf(basic, luxury, feast, free))
         val before = state(0).let { it.copy(engine = it.engine!!.copy(energy = 1, nextMorningEnergy = 3)) }

@@ -9,11 +9,11 @@ import ru.nksk.lctapp.core.ui.game.missingCoinAmount
 internal const val BUDGET_STEP = 5L
 
 /** Labels and help text for the economy screens; balances are supplied by the caller. */
-internal enum class BudgetArticle(val title: String, val subtitle: String, val explanation: String) {
-    NEEDS("Нужно", "Ежедневная еда и забота", "На еду и всё необходимое в пути. Сначала позаботимся об этом, а потом выберем приятные покупки."),
-    WANTS("Хочу", "Приятные покупки", "На угощения, игрушки и другие радости. Выбери, сколько можем потратить, когда на необходимое уже хватает."),
-    SAVINGS("В копилку", "Для большой цели", "Открой копилку, чтобы отложить выбранную сумму."),
-    RESERVE("Запас", "На неожиданности и приключения", "Пусть немного монет останется на неожиданности: починить вещь или помочь спутнику в пути.");
+internal enum class BudgetArticle(val title: String, val explanation: String) {
+    NEEDS("Нужно", "На еду и заботу о герое."),
+    WANTS("Хочу", "На угощения, игрушки и другие радости."),
+    SAVINGS("В копилку", "На большую цель. Деньги отложатся, когда подтвердишь бюджет."),
+    RESERVE("Запас", "На ремонт, лечение и другие неожиданные траты.");
 
     val minimum: Long get() = if (this == NEEDS) 35L else 0L
 
@@ -39,6 +39,9 @@ internal data class BudgetUiState(
 ) {
     val canConfirm: Boolean get() = actionsEnabled && !busy && unallocated == 0L && (!isEditing || needs >= minimumNeeds)
     val total: Long get() = needs + wants + savings + reserve + unallocated
+    val savingsTransfer: Long get() = if (isEditing) savings else 0
+    val availableAfterConfirmation: Long get() = availableBalance - savingsTransfer
+    val savingsAfterConfirmation: Long get() = Math.addExact(savingsBalance, savingsTransfer)
     /** `needs` is the displayed draft allocation; `knownNeeds` remains the full food requirement. */
     val foodShortfall: Long get() = (knownNeeds - needs).coerceAtLeast(0)
     val foodAdvice: String get() = if (foodShortfall > 0)

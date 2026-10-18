@@ -8,7 +8,7 @@ class EconomyOperationsTest {
     private fun state(available: Long = 100, savings: Long = 30) =
         EconomyState(plan, availableBalance = available, savingsBalance = savings)
 
-    @Test fun planEditsNeverMoveRealMoneyOrReplaceConfirmedPlan() {
+    @Test fun draftEditsDoNotMoveMoneyUntilConfirmationDepositsTheChosenSavings() {
         val original = state()
         val manual = EconomyOperations.beginManual(original, "manual")
         val released = EconomyOperations.adjustAllocation(manual, "manual", 0, BudgetSection.SAVINGS, false)
@@ -19,14 +19,16 @@ class EconomyOperationsTest {
         assertEquals(original.savingsBalance, released.savingsBalance)
         val allocated = EconomyOperations.adjustAllocation(released, "manual", 1, BudgetSection.RESERVE, true)
         val confirmed = EconomyOperations.confirm(allocated, "manual", 2)
-        assertEquals(BudgetPlan(35, 20, 15, 30), confirmed.plan)
+        assertEquals(BudgetPlan(35, 20, 0, 30), confirmed.plan)
         assertEquals(original.balance, confirmed.balance)
-        assertEquals(30L, confirmed.savingsBalance)
+        assertEquals(85L, confirmed.availableBalance)
+        assertEquals(45L, confirmed.savingsBalance)
         assertNull(confirmed.planning)
     }
 
     @Test fun editingRemainingMoneyStartsWithActualAllocationsInsteadOfAnEmptyDraft() {
-        val original = EconomyOperations.spend(state(), 83, SpendingKind.GENERAL)
+        val original = EconomyOperations.spend(EconomyOperations.spend(state(), 65, SpendingKind.GENERAL),
+            18, SpendingKind.FEEDING)
         val manual = EconomyOperations.beginManual(original, "manual")
         assertEquals(BudgetPlan(17, 0, 0, 0), manual.plan)
         assertEquals(manual.plan, manual.displayPlan)
@@ -46,7 +48,8 @@ class EconomyOperationsTest {
         assertThrows(EconomyViolation::class.java) {
             EconomyOperations.setAllocation(manual, "manual", 0, BudgetSection.NEEDS, 34)
         }
-        assertEquals(original, EconomyOperations.confirm(manual, "manual", 0))
+        assertEquals(original.copy(plan = original.plan.copy(savings = 0), availableBalance = 80, savingsBalance = 50),
+            EconomyOperations.confirm(manual, "manual", 0))
     }
 
     @Test fun oldUnderfundedManualDraftCanBeRepairedButCannotBeConfirmed() {
@@ -59,9 +62,9 @@ class EconomyOperationsTest {
         val released = EconomyOperations.adjustAllocation(manual, "manual", 0, BudgetSection.WANTS, false)
         val repaired = EconomyOperations.adjustAllocation(released, "manual", 1, BudgetSection.NEEDS, true)
         val confirmed = EconomyOperations.confirm(repaired, "manual", 2)
-        assertEquals(BudgetPlan(35, 20, 20, 25), confirmed.plan)
-        assertEquals(original.availableBalance, confirmed.availableBalance)
-        assertEquals(original.savingsBalance, confirmed.savingsBalance)
+        assertEquals(BudgetPlan(35, 20, 0, 25), confirmed.plan)
+        assertEquals(original.availableBalance - 20, confirmed.availableBalance)
+        assertEquals(original.savingsBalance + 20, confirmed.savingsBalance)
     }
 
     @Test fun explicitMigrationDraftStillAllocatesFoodStepByStepWithoutAutomaticDistribution() {
@@ -111,20 +114,20 @@ class EconomyOperationsTest {
         assertEquals(original.plan, bought.plan)
     }
 
-    @Test fun goalPurchaseUsesSavingsThenEveryAvailableSourceWithNeedsLast() {
+    @Test fun goalPurchaseUsesSavingsThenOtherAvailableSourcesWithoutSpendingNeeds() {
         val original = state(savings = 9)
-        val quote = EconomyOperations.goalPurchaseQuote(original, 99)
+        val quote = EconomyOperations.goalPurchaseQuote(original, 74)
         assertEquals(9L, quote.fromSavings)
-        assertEquals(90L, quote.fromAvailableAmount)
+        assertEquals(65L, quote.fromAvailableAmount)
         assertEquals(listOf(SpendPart(BudgetSection.SAVINGS, 20), SpendPart(BudgetSection.RESERVE, 25),
-            SpendPart(BudgetSection.WANTS, 20), SpendPart(BudgetSection.NEEDS, 25)), quote.fromAvailable.parts)
+            SpendPart(BudgetSection.WANTS, 20)), quote.fromAvailable.parts)
         assertTrue(quote.affordable)
         assertEquals(0L, quote.missing)
-        val paid = EconomyOperations.purchaseGoal(original, 99)
+        val paid = EconomyOperations.purchaseGoal(original, 74)
         assertEquals(0L, paid.savingsBalance)
-        assertEquals(10L, paid.availableBalance)
-        assertEquals(BudgetPlan(10, 0, 0, 0), paid.plan)
-        assertEquals(original.balance - 99, paid.balance)
+        assertEquals(35L, paid.availableBalance)
+        assertEquals(BudgetPlan(35, 0, 0, 0), paid.plan)
+        assertEquals(original.balance - 74, paid.balance)
     }
 
     @Test fun directGoalPurchaseNeedsNoDepositAndSavingsOnlyPurchaseLeavesAllocationsUntouched() {
@@ -145,12 +148,12 @@ class EconomyOperationsTest {
         val original = EconomyState(BudgetPlan(4, 0, 0, 0), savingsBalance = 3)
         val quote = EconomyOperations.goalPurchaseQuote(original, 10)
         assertEquals(3L, quote.fromSavings)
-        assertEquals(4L, quote.fromAvailableAmount)
-        assertEquals(3L, quote.missing)
+        assertEquals(0L, quote.fromAvailableAmount)
+        assertEquals(7L, quote.missing)
         assertFalse(quote.affordable)
         val insufficient = assertThrows(EconomyViolation::class.java) { EconomyOperations.purchaseGoal(original, 10) }
         assertEquals(EconomyFailure.INSUFFICIENT_MONEY, insufficient.reason)
-        assertEquals(3L, insufficient.missing)
+        assertEquals(7L, insufficient.missing)
         assertEquals(7L, original.balance)
 
         val draft = EconomyOperations.beginManual(state(), "draft")
@@ -236,14 +239,16 @@ class EconomyOperationsTest {
         assertEquals(Long.MAX_VALUE, large.balance)
     }
 
-    @Test fun plannedDepositIsAvailableMoneyUntilAnExplicitTransfer() {
+    @Test fun readingALegacySettledPlanDoesNotRetroactivelyDepositItsSavingAllocation() {
         val created = EconomyState(plan)
+        assertEquals(plan, EconomyOperations.proposedPlan(created))
+        assertEquals(plan, created.displayPlan)
         assertEquals(100L, created.availableBalance)
         assertEquals(0L, created.savingsBalance)
         assertEquals(100L, created.balance)
     }
 
-    @Test fun ordinarySpendingUsesItsCategoryThenApprovedFallbacksWithNeedsLast() {
+    @Test fun ordinarySpendingUsesItsCategoryAndOnlyFoodCanConsumeNeeds() {
         val cases = listOf(
             SpendingKind.GENERAL to listOf(SpendPart(BudgetSection.RESERVE, 25), SpendPart(BudgetSection.WANTS, 20), SpendPart(BudgetSection.SAVINGS, 15)),
             SpendingKind.WANT to listOf(SpendPart(BudgetSection.WANTS, 20), SpendPart(BudgetSection.RESERVE, 25), SpendPart(BudgetSection.SAVINGS, 15)),
@@ -261,27 +266,39 @@ class EconomyOperationsTest {
             if (kind != SpendingKind.FEEDING) assertEquals(35L, spent.plan.needs)
         }
         val lastFood = EconomyOperations.quote(state(), 90, SpendingKind.WANT)
-        assertEquals(SpendPart(BudgetSection.NEEDS, 25), lastFood.parts.last())
-        val all = EconomyOperations.spend(state(), 100, SpendingKind.GENERAL)
-        assertEquals(BudgetPlan(0, 0, 0, 0), all.plan)
+        assertEquals(25L, lastFood.missing)
+        assertTrue(lastFood.parts.none { it.section == BudgetSection.NEEDS })
+        assertThrows(EconomyViolation::class.java) { EconomyOperations.spend(state(), 100, SpendingKind.GENERAL) }
+        val all = EconomyOperations.spend(state(), 65, SpendingKind.GENERAL)
+        assertEquals(BudgetPlan(35, 0, 0, 0), all.plan)
         assertEquals(30L, all.savingsBalance)
     }
 
-    @Test fun depositExhaustsPlannedSavingThenReserveWantsAndOnlyThenNeeds() {
+    @Test fun depositExhaustsPlannedSavingThenReserveAndWantsWhileProtectingNeeds() {
         val quote = EconomyOperations.depositQuote(state(), 90)
         assertEquals(listOf(SpendPart(BudgetSection.SAVINGS, 20), SpendPart(BudgetSection.RESERVE, 25),
-            SpendPart(BudgetSection.WANTS, 20), SpendPart(BudgetSection.NEEDS, 25)), quote.parts)
-        assertTrue(quote.affordable)
-        assertEquals(1L, EconomyOperations.depositQuote(state(), 101).missing)
+            SpendPart(BudgetSection.WANTS, 20)), quote.parts)
+        assertFalse(quote.affordable)
+        assertEquals(25L, quote.missing)
+        assertEquals(36L, EconomyOperations.depositQuote(state(), 101).missing)
         assertTrue(EconomyOperations.depositQuote(EconomyOperations.beginManual(state(), "editing"), 10).blocked)
         assertEquals(BudgetPlan(35, 20, 5, 25), EconomyOperations.deposit(state(), 15).plan)
         assertEquals(BudgetPlan(35, 20, 0, 10), EconomyOperations.deposit(state(), 35).plan)
         assertEquals(BudgetPlan(35, 10, 0, 0), EconomyOperations.deposit(state(), 55).plan)
-        val large = EconomyOperations.deposit(state(), 90)
-        assertEquals(BudgetPlan(10, 0, 0, 0), large.plan)
-        assertEquals(10L, large.availableBalance)
-        assertEquals(120L, large.savingsBalance)
+        assertThrows(EconomyViolation::class.java) { EconomyOperations.deposit(state(), 90) }
+        val large = EconomyOperations.deposit(state(), 65)
+        assertEquals(BudgetPlan(35, 0, 0, 0), large.plan)
+        assertEquals(35L, large.availableBalance)
+        assertEquals(95L, large.savingsBalance)
         assertEquals(130L, large.balance)
+    }
+
+    @Test fun depositMaximumExcludesNeedsAndUnavailableDraftMoney() {
+        assertEquals(65L, EconomyOperations.depositAvailableBalance(state()))
+        assertEquals(0L, EconomyOperations.depositAvailableBalance(EconomyState(BudgetPlan(35, 0, 0, 0))))
+        assertEquals(0L, EconomyOperations.depositAvailableBalance(EconomyOperations.beginManual(state(), "draft")))
+        assertEquals(0L, EconomyOperations.depositAvailableBalance(state().copy(unallocated = 1)))
+        assertEquals(0L, EconomyOperations.depositAvailableBalance(state().copy(availableBalance = 99)))
     }
 
     @Test fun revisingAfterFoodWasPaidRequiresOnlyStillKnownNeeds() {
@@ -290,14 +307,46 @@ class EconomyOperationsTest {
         val draft = EconomyOperations.beginManual(remaining, "manual")
         assertEquals(20L, EconomyOperations.minimumNeeds(draft, knownNeeds = 20))
         val confirmed = EconomyOperations.confirm(draft, "manual", 0, knownNeeds = 20)
-        assertEquals(remaining, confirmed)
+        assertEquals(remaining.copy(plan = remaining.plan.copy(savings = 0), availableBalance = 65, savingsBalance = 50), confirmed)
         assertThrows(EconomyViolation::class.java) {
             EconomyOperations.adjustAllocation(draft, "manual", 0, BudgetSection.NEEDS, false, knownNeeds = 20)
         }
         val lastDay = EconomyOperations.beginManual(remaining, "last-day")
         val released = EconomyOperations.setAllocation(lastDay, "last-day", 0, BudgetSection.NEEDS, 0, knownNeeds = 0)
         val allocated = EconomyOperations.setAllocation(released, "last-day", 1, BudgetSection.RESERVE, 45, knownNeeds = 0)
-        assertEquals(85L, EconomyOperations.confirm(allocated, "last-day", 2, knownNeeds = 0).availableBalance)
+        assertEquals(65L, EconomyOperations.confirm(allocated, "last-day", 2, knownNeeds = 0).availableBalance)
+    }
+
+    @Test fun explicitConfirmationDepositsForEveryPlanningReasonAndSecondEditStartsWithZeroToDeposit() {
+        for (reason in BudgetPlanningReason.entries) {
+            val before = state().copy(planning = BudgetPlanning("draft", reason, BudgetPlanningStage.ALLOCATION,
+                if (reason in listOf(BudgetPlanningReason.INITIAL, BudgetPlanningReason.WEEKLY)) 100 else 0,
+                draft = plan, baseAmount = 100))
+            val confirmed = EconomyOperations.confirm(before, "draft", 0)
+            assertEquals(reason.name, 80L, confirmed.availableBalance)
+            assertEquals(reason.name, 50L, confirmed.savingsBalance)
+            assertEquals(reason.name, 130L, confirmed.balance)
+            assertEquals(confirmed.availableBalance, confirmed.plan.total)
+            assertEquals(0L, confirmed.plan.savings)
+            assertEquals(0L, confirmed.unallocated)
+            assertNull(confirmed.planning)
+            assertThrows(EconomyViolation::class.java) { EconomyOperations.confirm(confirmed, "draft", 0) }
+
+            val second = EconomyOperations.beginManual(confirmed, "second")
+            assertEquals(0L, second.displayPlan.savings)
+            assertEquals(confirmed, EconomyOperations.confirm(second, "second", 0))
+        }
+    }
+
+    @Test fun confirmationRejectsStaleRevisionAndChangedAvailableBasisWithoutMovingMoney() {
+        val draft = EconomyOperations.beginManual(state(), "draft")
+        assertEquals(EconomyFailure.STALE_SESSION,
+            assertThrows(EconomyViolation::class.java) { EconomyOperations.confirm(draft, "draft", 1) }.reason)
+        val staleBasis = draft.copy(availableBalance = 99)
+        assertEquals(EconomyFailure.INVALID_ALLOCATION,
+            assertThrows(EconomyViolation::class.java) { EconomyOperations.confirm(staleBasis, "draft", 0) }.reason)
+        assertEquals(30L, staleBasis.savingsBalance)
+        assertEquals(plan, staleBasis.displayPlan)
     }
 
     @Test fun freshWeeklyMinimumIsFullWeekWhileMigrationUsesRemainingNeed() {

@@ -3,6 +3,9 @@ package ru.nksk.lctapp.feature.menu.ui
 import ru.nksk.lctapp.domain.pet.PetState
 import ru.nksk.lctapp.domain.pet.PetVisualState
 import ru.nksk.lctapp.core.ui.components.MealChoiceUiState
+import ru.nksk.lctapp.core.ui.components.PetIndicatorsUiState
+import ru.nksk.lctapp.core.ui.components.PetMoodUiState
+import ru.nksk.lctapp.core.ui.components.PetSatietyUiState
 
 /** Values rendered by the menu; this is presentation state, not a saved game. */
 data class MainMenuUiState(
@@ -12,6 +15,7 @@ data class MainMenuUiState(
     val totalGoals: Int,
     val pet: MainMenuPetUiState,
     val dayStatus: String? = null,
+    val indicators: PetIndicatorsUiState? = null,
     val continueLabel: String? = null,
     val canFeed: Boolean = false,
     val busy: Boolean = false,
@@ -22,9 +26,18 @@ data class MainMenuUiState(
     val meals: List<MealChoiceUiState> = emptyList(),
     val goalTitle: String = "Выбрать большую цель",
     val budget: MenuBudgetUiState? = null,
+    val savings: MainMenuSavingsUiState? = null,
     val spendingPreview: String? = null,
     val canRestartCampaign: Boolean = false,
     val nameEditor: PetNameEditorUiState? = null,
+)
+
+/** A selected, unowned item and money already in the piggy bank, never a draft allocation. */
+data class MainMenuSavingsUiState(
+    val targetId: String,
+    val title: String,
+    val saved: Long,
+    val total: Long,
 )
 
 data class PetNameEditorUiState(
@@ -47,10 +60,15 @@ data class MenuBudgetUiState(
 /** Preview-only presentation fixture. Runtime state comes from MainMenuViewModel. */
 internal val MainMenuPreviewState = MainMenuUiState(
     coins = 140L,
-    budget = MenuBudgetUiState(needs = 40, wants = 30, savings = 50, reserve = 20),
+    budget = MenuBudgetUiState(needs = 40, wants = 30, savings = 50, reserve = 20, actualSavings = 12),
+    savings = MainMenuSavingsUiState("preview-tripod", "Штатив", saved = 12, total = 36),
     completedGoals = 0,
     totalGoals = 4,
     pet = PetState("PLAIN", PetVisualState.NORMAL).toMainMenuPetUiState(),
+    dayStatus = "День 2",
+    indicators = PetIndicatorsUiState(3, 5, "Устал", "Дела расходуют силы. Отдых помогает их восстановить.",
+        PetSatietyUiState.NOT_EATEN, PetMoodUiState.CALM),
+    canFeed = true,
 )
 
 /** UI intents are handled by the app host; the menu stays independent of navigation. */

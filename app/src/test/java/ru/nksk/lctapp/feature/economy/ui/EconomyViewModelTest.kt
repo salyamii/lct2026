@@ -44,7 +44,7 @@ class EconomyViewModelTest {
     @Before fun setup() { Dispatchers.setMain(dispatcher) }
     @After fun cleanup() { Dispatchers.resetMain() }
 
-    @Test fun readingBudgetDoesNotOpenSessionAndEditingIntentionDoesNotMoveSavings() = runTest(dispatcher) {
+    @Test fun readingAndEditingKeepMoneyInPlaceUntilTheNewBudgetIsConfirmed() = runTest(dispatcher) {
         val original = createInitialGameState().copy(economy = EconomyState(BudgetPlan(35, 20, 20, 25),
             availableBalance = 100, savingsBalance = 30))
         val repo = BudgetRepository(original)
@@ -65,9 +65,11 @@ class EconomyViewModelTest {
         advanceUntilIdle()
         val saved = repo.state.value!!
         assertNull(saved.economy.planning)
-        assertEquals(BudgetPlan(35, 20, 15, 30), saved.economy.plan)
-        assertEquals(100L, saved.economy.availableBalance)
-        assertEquals(30L, saved.economy.savingsBalance)
+        assertEquals(BudgetPlan(35, 20, 0, 30), saved.economy.plan)
+        assertEquals(85L, saved.economy.availableBalance)
+        assertEquals(45L, saved.economy.savingsBalance)
+        assertEquals(BudgetPlan(35, 20, 15, 30), saved.financial.plans.single().allocation)
+        assertEquals(original.economy.balance, saved.economy.balance)
         assertEquals(original.story, saved.story)
         assertEquals(original.ownedItems, saved.ownedItems)
     }
@@ -177,7 +179,9 @@ class EconomyViewModelTest {
         assertTrue(repo.requests.single().command is EngineCommand.ConfirmBudget)
         assertNull(repo.state.value!!.economy.planning)
         assertNull(model.uiState.value.economy!!.planning)
-        assertEquals(BudgetPlan(35, 20, 20, 25), repo.state.value!!.economy.plan)
+        assertEquals(BudgetPlan(35, 20, 0, 25), repo.state.value!!.economy.plan)
+        assertEquals(80L, repo.state.value!!.economy.availableBalance)
+        assertEquals(20L, repo.state.value!!.economy.savingsBalance)
         // A successful commit can update Room while the outgoing entry is still in its slide animation.
         assertEquals(displayed, model.uiState.value.budgetScreenState())
         assertEquals(displayed, model.uiState.value.budgetConfirmation)
@@ -227,6 +231,62 @@ class EconomyViewModelTest {
         assertFalse(model.uiState.value.planEditingEnabled)
     }
 
+    @Test fun confirmationWithLostReplyRetriesTheSameTransferAndReopeningDoesNotRepeatIt() = runTest(dispatcher) {
+        val ready = allocating().let { game ->
+            game.copy(economy = game.economy.copy(unallocated = 0,
+                planning = game.economy.planning!!.copy(draft = BudgetPlan(35, 20, 20, 25))))
+        }
+        val repo = BudgetRepository(ready)
+        val model = model(repo)
+        advanceUntilIdle()
+        repo.failReplyAfterCommit = true
+        model.onAction(EconomyAction.Confirm)
+        advanceUntilIdle()
+        assertNotNull(model.uiState.value.error)
+        val request = repo.attemptedRequests.single()
+        assertTrue(request.command is EngineCommand.ConfirmBudget)
+        val committed = checkNotNull(repo.state.value)
+        assertNull(committed.economy.planning)
+        assertEquals(BudgetPlan(35, 20, 0, 25), committed.economy.plan)
+        assertEquals(80L, committed.economy.availableBalance)
+        assertEquals(20L, committed.economy.savingsBalance)
+        assertEquals(BudgetPlan(35, 20, 20, 25), committed.financial.plans.single().allocation)
+
+        model.onAction(EconomyAction.Retry)
+        advanceUntilIdle()
+        assertNull(model.uiState.value.error)
+        assertEquals(listOf(request, request), repo.attemptedRequests)
+        assertEquals(listOf(request), repo.requests)
+        assertEquals(committed, repo.state.value)
+        assertEquals(BudgetCompletion(ready.economy.planning!!.id), model.completed.first())
+
+        repeat(2) {
+            val reopened = model(repo)
+            advanceUntilIdle()
+            assertCurrentBudget(reopened.uiState.value, BudgetPlan(35, 20, 0, 25), available = 80, savings = 20)
+            reopened.onAction(EconomyAction.Confirm)
+            advanceUntilIdle()
+            assertEquals(BudgetCompletion(null), reopened.completed.first())
+            assertEquals(committed, repo.state.value)
+            assertEquals(listOf(request, request), repo.attemptedRequests)
+        }
+    }
+
+    @Test fun reopeningALegacyBudgetDoesNotTransferItsSavingsArticle() = runTest(dispatcher) {
+        val original = planned()
+        val repo = BudgetRepository(original)
+        repeat(3) {
+            val reopened = model(repo)
+            advanceUntilIdle()
+            assertCurrentBudget(reopened.uiState.value, original.economy.plan, available = 100, savings = 30)
+            reopened.onAction(EconomyAction.Confirm)
+            advanceUntilIdle()
+            assertEquals(BudgetCompletion(null), reopened.completed.first())
+            assertEquals(original, repo.state.value)
+            assertTrue(repo.attemptedRequests.isEmpty())
+        }
+    }
+
     @Test fun transferKeepsPlanEditsDisabledUntilItsResultIsCommitted() = runTest(dispatcher) {
         val repo = BudgetRepository(planned())
         val model = model(repo)
@@ -260,7 +320,7 @@ class EconomyViewModelTest {
         assertEquals(100L, repo.state.value!!.economy.balance)
     }
 
-    @Test fun confirmationRequiresCompleteDraftAndDoesNotDepositItsSavingsIntention() = runTest(dispatcher) {
+    @Test fun confirmationRequiresCompleteDraftAndTransfersTheConfirmedSavingsOnce() = runTest(dispatcher) {
         val repo = BudgetRepository(allocating())
         val model = model(repo)
         advanceUntilIdle()
@@ -281,9 +341,11 @@ class EconomyViewModelTest {
         advanceUntilIdle()
         val economy = repo.state.value!!.economy
         assertNull(economy.planning)
-        assertEquals(65L, economy.plan.savings)
-        assertEquals(0L, economy.savingsBalance)
-        assertEquals(100L, economy.availableBalance)
+        assertEquals(0L, economy.plan.savings)
+        assertEquals(65L, economy.savingsBalance)
+        assertEquals(35L, economy.availableBalance)
+        assertEquals(100L, economy.balance)
+        assertEquals(BudgetPlan(35, 0, 65, 0), repo.state.value!!.financial.plans.single().allocation)
         val confirmation = repo.requests.last { it.command is EngineCommand.ConfirmBudget }
         assertEquals(FinancialPosition(100, 0, 35), confirmation.context?.before)
         assertTrue(confirmation.context!!.informationPresented)
@@ -370,7 +432,7 @@ class EconomyViewModelTest {
         assertNull(repo.state.value!!.economy.planning)
     }
 
-    @Test fun directEditingPreservesCurrentAllocationsAndRestoresItsDraftWithoutMovingMoney() = runTest(dispatcher) {
+    @Test fun directEditingRestoresItsDraftAndMovesOnlyTheNewSavingsOnConfirmation() = runTest(dispatcher) {
         val original = planned().let { it.copy(economy = EconomyOperations.deposit(it.economy, 20)) }
         val repo = BudgetRepository(original)
         val model = model(repo)
@@ -405,9 +467,11 @@ class EconomyViewModelTest {
         advanceUntilIdle()
         val confirmed = repo.state.value!!.economy
         assertNull(confirmed.planning)
-        assertEquals(BudgetPlan(35, 15, 5, 25), confirmed.plan)
-        assertEquals(80L, confirmed.availableBalance)
-        assertEquals(50L, confirmed.savingsBalance)
+        assertEquals(BudgetPlan(35, 15, 0, 25), confirmed.plan)
+        assertEquals(75L, confirmed.availableBalance)
+        assertEquals(55L, confirmed.savingsBalance)
+        assertEquals(original.economy.balance, confirmed.balance)
+        assertEquals(BudgetPlan(35, 15, 5, 25), repo.state.value!!.financial.plans.single().allocation)
         assertTrue(repo.requests.none { it.command is EngineCommand.DepositSavings || it.command is EngineCommand.WithdrawSavings })
     }
 
@@ -946,6 +1010,90 @@ class EconomyViewModelTest {
                 before = saved, after = deposited,
                 operations = listOf(LedgerEntry("deposit:10", LedgerKind.DEPOSIT, 10))),
         )
+    }
+
+    @Test fun weeklyReserveMovesOnlyAfterExplicitClickAndLeavesNewIncomeUnallocated() = runTest(dispatcher) {
+        val original = weeklyReceipt()
+        val repo = BudgetRepository(original)
+        val model = model(repo)
+        advanceUntilIdle()
+        assertEquals(original, repo.state.value)
+        assertTrue(repo.requests.isEmpty())
+
+        model.onAction(EconomyAction.DepositWeeklyReserve)
+        model.onAction(EconomyAction.DepositWeeklyReserve)
+        model.onAction(EconomyAction.StartAllocation)
+        advanceUntilIdle()
+        val economy = repo.state.value!!.economy
+        assertEquals(1, repo.requests.size)
+        assertEquals(EngineCommand.DepositWeeklyReserve("week:8", 0, 25), repo.requests.single().command)
+        assertEquals(175L, economy.availableBalance)
+        assertEquals(55L, economy.savingsBalance)
+        assertEquals(100L, economy.unallocated)
+        assertEquals(0L, economy.plan.reserve)
+        assertEquals(BudgetPlanningStage.RECEIPT, economy.planning!!.stage)
+        assertEquals(SavingsReceipt(25, false, 200, 30, 175, 55), model.uiState.value.weeklyReserveReceipt)
+        assertEquals(original.economy.balance, economy.balance)
+        assertFalse(repo.requests.single().context!!.complete)
+
+        model.onAction(EconomyAction.StartAllocation)
+        advanceUntilIdle()
+        assertEquals(BudgetPlanningStage.ALLOCATION, repo.state.value!!.economy.planning!!.stage)
+        assertNull(model.uiState.value.weeklyReserveReceipt)
+        assertEquals(100L, repo.state.value!!.economy.unallocated)
+    }
+
+    @Test fun weeklyReserveLostReplyRetriesOneTransferWithoutFullHistory() = runTest(dispatcher) {
+        val repo = BudgetRepository(weeklyReceipt())
+        val model = model(repo)
+        advanceUntilIdle()
+        repo.failReplyAfterCommit = true
+        model.onAction(EconomyAction.DepositWeeklyReserve)
+        advanceUntilIdle()
+        assertNotNull(model.uiState.value.error)
+        val original = repo.attemptedRequests.single()
+        val committed = repo.state.value
+        repo.forbidFullHistoryRead = true
+        model.onAction(EconomyAction.Retry)
+        advanceUntilIdle()
+        assertNull(model.uiState.value.error)
+        assertEquals(listOf(original, original), repo.attemptedRequests)
+        assertEquals(listOf(original), repo.requests)
+        assertEquals(committed, repo.state.value)
+        assertEquals(SavingsReceipt(25, false, 200, 30, 175, 55), model.uiState.value.weeklyReserveReceipt)
+        assertEquals(listOf(original.id), repo.receiptReads)
+
+        val reopened = model(repo)
+        advanceUntilIdle()
+        reopened.onAction(EconomyAction.DepositWeeklyReserve)
+        advanceUntilIdle()
+        assertEquals(listOf(original), repo.requests)
+        assertEquals(committed, repo.state.value)
+    }
+
+    @Test fun startingWeeklyAllocationWithoutTransferKeepsReserveAndInitialReceiptCannotTransfer() = runTest(dispatcher) {
+        val repo = BudgetRepository(weeklyReceipt())
+        val model = model(repo)
+        advanceUntilIdle()
+        model.onAction(EconomyAction.StartAllocation)
+        advanceUntilIdle()
+        assertEquals(25L, repo.state.value!!.economy.plan.reserve)
+        assertEquals(30L, repo.state.value!!.economy.savingsBalance)
+        assertEquals(BudgetPlanningStage.ALLOCATION, repo.state.value!!.economy.planning!!.stage)
+        model.onAction(EconomyAction.DepositWeeklyReserve)
+        advanceUntilIdle()
+        assertEquals(1, repo.requests.size)
+
+        val initialRepo = BudgetRepository(createInitialGameState())
+        val initial = model(initialRepo)
+        advanceUntilIdle()
+        initial.onAction(EconomyAction.DepositWeeklyReserve)
+        advanceUntilIdle()
+        assertTrue(initialRepo.requests.isEmpty())
+    }
+
+    private fun weeklyReceipt() = planned().let {
+        it.copy(economy = EconomyOperations.weekly(it.economy, "week:8", 100))
     }
 
     private fun planned() = createInitialGameState().copy(economy = EconomyState(BudgetPlan(35, 20, 20, 25),

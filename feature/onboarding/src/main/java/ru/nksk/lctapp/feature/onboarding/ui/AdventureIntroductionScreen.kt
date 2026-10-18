@@ -95,8 +95,8 @@ private data class MoneyConcept(val title: String, val detail: String, val icon:
 private val concepts = listOf(
     MoneyConcept("Нужно", "Еда, уход и всё, без чего питомцу не обойтись.", "basket", Color(0xffedf4d8)),
     MoneyConcept("Хочу", "Игрушки, книги и развлечения - покупки, которые можно отложить.", "diamond", Color(0xffeeebf8)),
-    MoneyConcept("В копилку", "Планируем, сколько сберечь для цели. Затем откроем копилку и положим туда эту сумму.", "goal", Color(0xffedf4d8)),
-    MoneyConcept("Запас", "Поможет, если в дороге понадобится ремонт или лечение.", "reserve", Color(0xffeeebf8)),
+    MoneyConcept("В копилку", "Откладываем на большую цель.", "goal", Color(0xffedf4d8)),
+    MoneyConcept("Запас", "На ремонт, лечение и другие неожиданности.", "reserve", Color(0xffeeebf8)),
 )
 
 @Composable
@@ -146,13 +146,8 @@ private fun IntroductionContent(
         }.padding(start = 22.dp, end = 22.dp, top = 12.dp, bottom = if (compact) 8.dp else 16.dp)) {
             if (saveFailed) Text("Не удалось сохранить настройки. Попробуй ещё раз.",
                 color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(bottom = 8.dp))
-            Button(onClick = onStart, enabled = !saving, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
-                shape = RoundedCornerShape(18.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp, pressedElevation = 3.dp, disabledElevation = 0.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xffa8e830), contentColor = IntroInk,
-                    disabledContainerColor = Color(0xffdedbe3), disabledContentColor = IntroMuted)) {
-                Text(if (saving) "Сохраняем…" else "Начать приключение", fontFamily = artwork.titleFont, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
-            }
+            OnboardingPrimaryButton(if (saving) "Сохраняем…" else "Начать приключение",
+                enabled = !saving, onClick = onStart, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp))
         }
         }
         if (scrollAll) Column { body(); action(Modifier) }

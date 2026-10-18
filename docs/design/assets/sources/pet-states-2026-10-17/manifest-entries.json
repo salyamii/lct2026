@@ -1,0 +1,226 @@
+[
+  {
+    "resource": "menu_satiety_fed_v2",
+    "category": "Generated pet state variants - 2026-10-17",
+    "path": "app/src/main/res/drawable-nodpi/menu_satiety_fed_v2.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1059564,
+    "sha256": "ea1c88e56642b7b2161775ac5cdb384f2c6bc848d727f9977ca5faee94060af8",
+    "rgba_sha256": "0512f325bbafc5919fe23ed991a3aa64fd3d074b573710f07e30a0ed922ec938",
+    "alpha_bounds": [
+      0,
+      18,
+      1230,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/pet-states-2026-10-17/menu_satiety_fed_v2.png",
+    "source_sha256": "aa443498293a1f875c7c348cf84adb0004e177e3f8b5ee2bf949ec2d660d6712",
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-10-17",
+      "prompt_path": "docs/design/assets/sources/pet-states-2026-10-17/README.md"
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "method": 6,
+      "resized": false,
+      "pillow_version": "12.3.0"
+    }
+  },
+  {
+    "resource": "menu_mood_calm_v2",
+    "category": "Generated pet state variants - 2026-10-17",
+    "path": "app/src/main/res/drawable-nodpi/menu_mood_calm_v2.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1373344,
+    "sha256": "f27f3c03e3aef922627335af604c179498ffe36f3a568308af7974524629e26f",
+    "rgba_sha256": "972fdd9805c6d4f4f4a06b93b37e3e77dc13e404e5de3ee8f12806390224388b",
+    "alpha_bounds": [
+      0,
+      4,
+      1251,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/pet-states-2026-10-17/menu_mood_calm_v2.png",
+    "source_sha256": "2d56bd391497adfec4fb488278ce99f8a04ce1bfbcf588eb0c603480cf182cee",
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-10-17",
+      "prompt_path": "docs/design/assets/sources/pet-states-2026-10-17/README.md"
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "method": 6,
+      "resized": false,
+      "pillow_version": "12.3.0"
+    }
+  },
+  {
+    "resource": "menu_satiety_hungry_v2",
+    "category": "Generated pet state variants - 2026-10-17",
+    "path": "app/src/main/res/drawable-nodpi/menu_satiety_hungry_v2.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 687066,
+    "sha256": "ecfbc203af8f30840cc3ca8292bb3a8c27089041c48db6e969d06a0451025e68",
+    "rgba_sha256": "eb337e6e59106762a68964f4813c06eabda61b0db9f5721018e937e5224b0cb6",
+    "alpha_bounds": [
+      0,
+      17,
+      1208,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/pet-states-2026-10-17/menu_satiety_hungry_v2.png",
+    "source_sha256": "478be57dc6a3e9b3cf7c64461fda8338eedf2b01cd1051158be83d3b9a996aa1",
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-10-17",
+      "prompt_path": "docs/design/assets/sources/pet-states-2026-10-17/README.md"
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "method": 6,
+      "resized": false,
+      "pillow_version": "12.3.0"
+    }
+  },
+  {
+    "resource": "menu_mood_happy_v2",
+    "category": "Generated pet state variants - 2026-10-17",
+    "path": "app/src/main/res/drawable-nodpi/menu_mood_happy_v2.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1344982,
+    "sha256": "4a70935490e2b3fa90f35a670d952fb1d99783ad5e3e7dc0b237dbf950600b08",
+    "rgba_sha256": "8d79c24a3b7a3246502f18e8d2f094fea1a02f48e46a6b434139070f258d5b7f",
+    "alpha_bounds": [
+      0,
+      23,
+      1221,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/pet-states-2026-10-17/menu_mood_happy_v2.png",
+    "source_sha256": "91737f0f9dbdcd9175cd7b051faf799494047e3e5442ef4618fc5166d64e24b4",
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-10-17",
+      "prompt_path": "docs/design/assets/sources/pet-states-2026-10-17/README.md"
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "method": 6,
+      "resized": false,
+      "pillow_version": "12.3.0"
+    }
+  },
+  {
+    "resource": "menu_mood_upset_v2",
+    "category": "Generated pet state variants - 2026-10-17",
+    "path": "app/src/main/res/drawable-nodpi/menu_mood_upset_v2.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1307462,
+    "sha256": "8da46aece01b4fc6c416df4f81d1b7e4c408e3f1758c6b10780db73605bfe508",
+    "rgba_sha256": "9c90e7fcc05317f09a22cc0d6e70dffa39876ce8d503915934648f0ab76af0b5",
+    "alpha_bounds": [
+      0,
+      37,
+      1253,
+      1235
+    ],
+    "source_path": "docs/design/assets/sources/pet-states-2026-10-17/menu_mood_upset_v2.png",
+    "source_sha256": "6101da56bf49d0d0a6971545cd261f9ac30883c019d9ecbb0bedeb8b157fa96e",
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-10-17",
+      "prompt_path": "docs/design/assets/sources/pet-states-2026-10-17/README.md"
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "method": 6,
+      "resized": false,
+      "pillow_version": "12.3.0"
+    }
+  },
+  {
+    "resource": "menu_mood_worried_v2",
+    "category": "Generated pet state variants - 2026-10-17",
+    "path": "app/src/main/res/drawable-nodpi/menu_mood_worried_v2.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1332366,
+    "sha256": "957490b35583133f0a3d9295d51bef89f94fac53c268b62874cde37c6f405181",
+    "rgba_sha256": "9a0b623a14dee0d779ad50352c0ce5687ba1b8d2319d501af41dac1d2cc68000",
+    "alpha_bounds": [
+      0,
+      21,
+      1225,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/pet-states-2026-10-17/menu_mood_worried_v2.png",
+    "source_sha256": "2ccd5292f8da0fa44552abd0fdf140b3293eea8535dbaa526beadc16843a1a0a",
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-10-17",
+      "prompt_path": "docs/design/assets/sources/pet-states-2026-10-17/README.md"
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "method": 6,
+      "resized": false,
+      "pillow_version": "12.3.0"
+    }
+  },
+  {
+    "resource": "menu_mood_tired_v2",
+    "category": "Generated pet state variants - 2026-10-17",
+    "path": "app/src/main/res/drawable-nodpi/menu_mood_tired_v2.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1277584,
+    "sha256": "4d1021201cf80ca633704d3b9ffcd041eb9df7a3bdadf4047e67db7b6ce5c9e1",
+    "rgba_sha256": "2817fb267473d14843993fbc8b00dd45d1bb56b102a7b3c5f99ef6a0e58e445d",
+    "alpha_bounds": [
+      0,
+      17,
+      1234,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/pet-states-2026-10-17/menu_mood_tired_v2.png",
+    "source_sha256": "23363c2e5e1c57558b58f2cf99c35589eb6a73648980788939d27b626cc0fad3",
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-10-17",
+      "prompt_path": "docs/design/assets/sources/pet-states-2026-10-17/README.md"
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "method": 6,
+      "resized": false,
+      "pillow_version": "12.3.0"
+    }
+  }
+]

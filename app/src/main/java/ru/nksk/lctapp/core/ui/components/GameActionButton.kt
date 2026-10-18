@@ -3,6 +3,8 @@ package ru.nksk.lctapp.core.ui.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
@@ -17,7 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -27,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
 import ru.nksk.lctapp.core.ui.theme.GameTextWrapping
 import ru.nksk.lctapp.core.ui.theme.Nunito
@@ -35,13 +40,15 @@ import ru.nksk.lctapp.core.ui.theme.Rubik
 internal enum class GameActionStyle { PRIMARY, SECONDARY, QUIET }
 
 internal object GameActionButtonDefaults {
+    val Spacing = 8.dp
+    val CompactContainer = Color(0xFFEAD8A9)
     val PrimaryText = TextStyle(fontFamily = Rubik, fontWeight = FontWeight.ExtraBold,
         fontSize = 16.sp, lineHeight = 22.sp)
     val QuietText = TextStyle(fontFamily = Nunito, fontWeight = FontWeight.ExtraBold,
         fontSize = 15.sp, lineHeight = 21.sp)
 }
 
-/** Shared interaction rules; feature wrappers keep their approved shape, color and typography. */
+/** Shared game artwork and interaction rules. Already decorated controls can opt out of artwork. */
 @Composable
 internal fun GameActionButton(
     text: String,
@@ -62,6 +69,8 @@ internal fun GameActionButton(
     },
     contentColor: Color = GameInk,
     borderColor: Color = GameInk.copy(alpha = .35f),
+    artwork: Boolean = true,
+    artworkColorFilter: ColorFilter? = null,
 ) {
     // A short write blocks input without flashing disabled colors or replacing the label.
     // Actual unavailability still has its own appearance; loading can show progress explicitly.
@@ -77,7 +86,8 @@ internal fun GameActionButton(
         },
         disabledContentColor = if (keepAppearance) contentColor else GameDisabledButtonContent,
     )
-    val buttonModifier = modifier.fillMaxWidth().heightIn(min = minHeight).then(
+    val effectiveMinHeight = maxOf(minHeight, if (artwork) 64.dp else 48.dp)
+    val buttonModifier = modifier.fillMaxWidth().heightIn(min = effectiveMinHeight).then(
         when {
             loading -> Modifier.semantics { stateDescription = "Выполняется" }
             enabled && interactionBlocked -> Modifier.semantics { stateDescription = "Временно недоступно" }
@@ -89,6 +99,33 @@ internal fun GameActionButton(
                 style = GameTextWrapping.merge(textStyle), textAlign = TextAlign.Center)
             if (loading) GameLoadingIndicator(Modifier.size(24.dp).clearAndSetSemantics {}, size = 24.dp)
         }
+    }
+    if (artwork) {
+        val direction = LocalLayoutDirection.current
+        val inset = PaddingValues(
+            start = maxOf(contentPadding.calculateStartPadding(direction), 32.dp),
+            end = maxOf(contentPadding.calculateEndPadding(direction), 32.dp),
+            top = maxOf(contentPadding.calculateTopPadding(), 18.dp),
+            bottom = maxOf(contentPadding.calculateBottomPadding(), 18.dp),
+        )
+        Box(buttonModifier.semantics(mergeDescendants = true) {}, contentAlignment = Alignment.Center) {
+            GamePlaque(
+                modifier = Modifier.matchParentSize().alpha(if (enabled || keepAppearance) 1f else .45f),
+                artworkRes = R.drawable.menu_action_plaque_v2,
+                contentPadding = PaddingValues(0.dp),
+                fixedEdges = true,
+                fillVisibleHeight = true,
+                colorFilter = artworkColorFilter,
+            ) {}
+            Button(onClick, Modifier.fillMaxWidth().heightIn(min = effectiveMinHeight),
+                enabled = acceptsInput, shape = shape, contentPadding = inset, elevation = null,
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent, contentColor = contentColor,
+                    disabledContentColor = if (keepAppearance) contentColor else GameDisabledButtonContent)) {
+                content()
+            }
+        }
+        return
     }
     when (style) {
         GameActionStyle.PRIMARY -> Button(onClick, buttonModifier, enabled = acceptsInput,

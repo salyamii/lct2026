@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.core.ui.components.*
 import ru.nksk.lctapp.core.ui.game.availableSourcesDescription
+import ru.nksk.lctapp.core.ui.game.balanceWithChange
 import ru.nksk.lctapp.core.ui.game.toLiveAdventurePetPresentation
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
 import ru.nksk.lctapp.core.ui.theme.Nunito
@@ -41,7 +42,8 @@ internal fun SavingsScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
     val economy = state.economy
     val withdrawing = state.savingsStep == SavingsStep.WITHDRAW
     val amount = state.transferInput.toLongOrNull()
-    val maximum = if (withdrawing) economy?.savingsBalance ?: 0 else economy?.availableBalance ?: 0
+    val maximum = if (withdrawing) economy?.savingsBalance ?: 0
+        else economy?.let(EconomyOperations::depositAvailableBalance) ?: 0
     val planningRequired = economy?.let { it.planning != null || it.unallocated != 0L } == true
     val valid = economy != null && !planningRequired && amount != null && amount > 0 && amount <= maximum
     val confirming = state.withdrawal != null || state.depositWarning != null
@@ -55,11 +57,15 @@ internal fun SavingsScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
         available = economy?.availableBalance, savings = economy?.savingsBalance,
         characterRes = pet?.artworkRes, characterMotionIntensity = pet?.motionIntensity ?: 1f,
         characterDescription = pet?.name,
-        speech = if (withdrawing) "Можно взять часть монет. На цель останется меньше."
-            else "Отложим монеты для следующих приключений!",
+        speech = if (withdrawing) "Вернём деньги из копилки в запас."
+            else "Здесь копим на большую цель. Обычные покупки не тратят эти деньги.",
         pinFooter = true, scrollWholePage = true, contentSpacing = 10.dp,
         footer = {
             if (economy != null && !planningRequired) {
+                if (confirming) AdventureQuietButton("Изменить сумму", {
+                    if (!state.saving) onAction(if (state.withdrawal != null) EconomyAction.CancelWithdrawal
+                        else EconomyAction.CancelDepositRisk)
+                })
                 AdventurePrimaryButton(
                     text = when {
                         state.depositWarning != null -> "Всё равно отложить"
@@ -90,15 +96,19 @@ internal fun SavingsScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
         } else {
             SavingsGoalSummary(state.savingsTarget, economy.savingsBalance,
                 onOpenGoal = { if (!state.saving) onOpenGoal() })
+            SavingsCaption("На покупку можно добавить доступные деньги.")
             SavingsDirections(withdrawing, enabled = !planningRequired, onSelect = {
                 if (!state.saving) { focus.clearFocus(); onAction(EconomyAction.OpenTransfer(it)) }
             })
             if (planningRequired) {
-                AdventureBody("Сначала распределим бюджет. Потом можно будет пополнить копилку или взять из неё монеты.")
+                AdventureBody("Сначала подтверди бюджет.")
                 AdventurePrimaryButton("К бюджету", { if (!state.saving) onOpenBudget() })
             } else {
-                SavingsCaption(if (withdrawing) "Добавим эти монеты к запасу на неожиданности"
-                    else "По плану отложим ${savingsCoins(economy.plan.savings, true)}")
+                SavingsCaption(when {
+                    withdrawing -> "Накоплений станет меньше."
+                    economy.plan.savings > 0 -> "По прежнему плану осталось отложить ${savingsCoins(economy.plan.savings, true)}."
+                    else -> "Сколько отложим?"
+                })
                 SavingsAmountInput(state.transferInput, maximum, readOnly = confirming,
                     onChange = { if (!state.saving) onAction(EconomyAction.UpdateTransferInput(it)) })
                 // Confirmation and receipt stay in this form; neither opens another page.
@@ -111,19 +121,21 @@ internal fun SavingsScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
                             color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold,
                             fontSize = 16.sp, lineHeight = 22.sp)
                     }
+                    SavingsBalanceChange(receipt.availableBefore, receipt.availableAfter,
+                        receipt.savingsBefore, receipt.savingsAfter, receipt.withdrawing)
                 } else if (valid) {
                     val value = checkNotNull(amount)
                     val availableAfter = if (withdrawing) economy.availableBalance + value else economy.availableBalance - value
                     val savingsAfter = if (withdrawing) economy.savingsBalance - value else economy.savingsBalance + value
                     SavingsPreviewContext(state, onAction) {
-                        SavingsBalanceChange(economy.availableBalance, availableAfter, economy.savingsBalance, savingsAfter)
-                        if (withdrawing) {
-                            state.savingsTarget?.let { target ->
-                                val remaining = target.remaining(savingsAfter)
-                                SavingsCaption(if (remaining > 0) "После снятия на «${target.name}» останется накопить ${savingsCoins(remaining, true)}."
-                                    else "На «${target.name}» по-прежнему хватает.")
-                            }
-                        } else EconomyOperations.depositQuote(economy, value).availableSourcesDescription()?.let {
+                        SavingsBalanceChange(economy.availableBalance, availableAfter, economy.savingsBalance, savingsAfter,
+                            withdrawing)
+                        state.savingsTarget?.let { target ->
+                            val remaining = target.remaining(savingsAfter)
+                            SavingsCaption(if (remaining > 0) "Останется накопить: ${savingsCoins(remaining)}."
+                                else "В копилке хватит на выбранный предмет.")
+                        }
+                        if (!withdrawing) EconomyOperations.depositQuote(economy, value).availableSourcesDescription()?.let {
                             SavingsCaption(it)
                         }
                         val warning = state.depositWarning
@@ -136,16 +148,13 @@ internal fun SavingsScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
                 } else {
                     SavingsCaption(when {
                         maximum == 0L -> if (withdrawing) "В копилке пока пусто. Сначала отложим монеты."
-                            else "Пока нет доступных монет. Их можно заработать в делах."
+                            else if (economy.plan.needs > 0) "Оставшиеся деньги нужны на еду."
+                            else "Пока нечего отложить. Можно заработать в делах."
                         state.transferInput.isNotEmpty() && amount == null -> "Введи сумму от 1 до $maximum."
                         amount != null && amount > maximum -> "Доступно для перевода: ${savingsCoins(maximum)}."
-                        else -> "Выбери сумму - ниже увидишь, сколько монет останется."
+                        else -> "Введи сумму."
                     })
                 }
-                if (confirming) AdventureQuietButton("Изменить сумму", {
-                    if (!state.saving) onAction(if (state.withdrawal != null) EconomyAction.CancelWithdrawal
-                        else EconomyAction.CancelDepositRisk)
-                })
             }
         }
     }
@@ -156,7 +165,7 @@ internal fun SavingsScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
 private fun SavingsDirections(withdrawing: Boolean, enabled: Boolean, onSelect: (Boolean) -> Unit) {
     Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFFECE7F3))
         .padding(4.dp).selectableGroup(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        listOf(false to "Пополнить", true to "Взять").forEach { (direction, label) ->
+        listOf(false to "В копилку", true to "Из копилки").forEach { (direction, label) ->
             val selected = withdrawing == direction
             Box(Modifier.weight(1f).clip(RoundedCornerShape(14.dp))
                 .background(if (selected) GameInk else Color.Transparent)
@@ -200,7 +209,7 @@ private fun SavingsAmountInput(input: String, maximum: Long, readOnly: Boolean, 
         @Composable fun StepButton(label: String, enabled: Boolean, onClick: () -> Unit) {
             FilledTonalButton(onClick, enabled = enabled, modifier = Modifier.size(48.dp),
                 shape = RoundedCornerShape(16.dp), contentPadding = PaddingValues(0.dp),
-                colors = ButtonDefaults.filledTonalButtonColors(containerColor = AdventureLime, contentColor = GameInk,
+                colors = ButtonDefaults.filledTonalButtonColors(containerColor = GameActionButtonDefaults.CompactContainer, contentColor = GameInk,
                     disabledContainerColor = Color(0xFFECE7F3), disabledContentColor = muted)) {
                 Text(label, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 24.sp)
             }
@@ -228,14 +237,20 @@ private fun SavingsAmountInput(input: String, maximum: Long, readOnly: Boolean, 
 }
 
 @Composable
-private fun SavingsBalanceChange(availableBefore: Long, availableAfter: Long, savingsBefore: Long, savingsAfter: Long) {
-    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color(0xFFEFECF5)).padding(12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        listOf("Доступно" to "$availableBefore → $availableAfter", "В копилке" to "$savingsBefore → $savingsAfter").forEach { (label, value) ->
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                SavingsCaption(label)
-                Text(value, color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold,
-                    fontSize = 18.sp, lineHeight = 24.sp)
+private fun SavingsBalanceChange(availableBefore: Long, availableAfter: Long, savingsBefore: Long, savingsAfter: Long,
+    withdrawing: Boolean) {
+    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color(0xFFEFECF5)).padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(if (withdrawing) "После снятия" else "После перевода", color = GameInk,
+            fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, lineHeight = 21.sp)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            listOf("Доступно" to balanceWithChange(availableBefore, availableAfter),
+                "В копилке" to balanceWithChange(savingsBefore, savingsAfter)).forEach { (label, value) ->
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    SavingsCaption(label)
+                    Text(value, color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold,
+                        fontSize = 18.sp, lineHeight = 24.sp)
+                }
             }
         }
     }

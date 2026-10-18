@@ -1,0 +1,72 @@
+[
+  {
+    "resource": "menu_energy_frame_v4",
+    "category": "Generated energy frame and narrow checklist - 2026-10-18",
+    "path": "app/src/main/res/drawable-nodpi/menu_energy_frame_v4.webp",
+    "format": "webp",
+    "width": 2172,
+    "height": 724,
+    "bytes": 1152588,
+    "sha256": "1c1e01b13b9aa0355c979b09da6aa1db14decbe35fc4a86f9c625e198152cd02",
+    "rgba_sha256": "461134b4b35c0baf067fdab99f43c6124c35a1e573599a8fa9a4b25016e80628",
+    "alpha_bounds": [
+      15,
+      27,
+      2158,
+      700
+    ],
+    "source_path": "docs/design/assets/sources/energy-scroll-2026-10-18/menu_energy_frame_v4.png",
+    "source_sha256": "e5c2d4ef4487493c933f172cbb29ecbf272da995b67c9e20c30f67f8dce0c8ad",
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-10-18",
+      "prompt_path": "docs/design/assets/sources/energy-scroll-2026-10-18/prompts.json",
+      "prompt_key": "menu_energy_frame_v4",
+      "generated_source_filename": "exec-77644165-ced7-4b38-8f59-104d5eda80e7.png"
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "method": 6,
+      "resized": false,
+      "pillow_version": "12.3.0"
+    }
+  },
+  {
+    "resource": "menu_action_tasks_v3",
+    "category": "Generated energy frame and narrow checklist - 2026-10-18",
+    "path": "app/src/main/res/drawable-nodpi/menu_action_tasks_v3.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 906642,
+    "sha256": "a3f6c12c95899c8955da89b4e3ff0bb13f7f91e6ec3f50a5647349fc77b560ee",
+    "rgba_sha256": "d84012368bcd4bf3f55d084da3256057a349fc216e6819cb398e04d72a0c2182",
+    "alpha_bounds": [
+      27,
+      17,
+      1232,
+      1228
+    ],
+    "source_path": "docs/design/assets/sources/energy-scroll-2026-10-18/menu_action_tasks_v3.png",
+    "source_sha256": "0d90bad70d5534124e1fb3b7d9eafd6dd57f9ce407f1f780b50a34930fe6c4d4",
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-10-18",
+      "prompt_path": "docs/design/assets/sources/energy-scroll-2026-10-18/prompts.json",
+      "prompt_key": "menu_action_tasks_v3",
+      "generated_source_filename": "exec-8010cba9-43bd-460f-a57f-7a3eaebd4144.png",
+      "reference_source_path": "docs/design/assets/sources/menu-buttons-2026-10-17/menu_action_tasks_v2.png",
+      "reference_source_sha256": "e9e62aa09217f499cb19dc7c3529d1a78714b52355e4090aa614cd885175d78c"
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "method": 6,
+      "resized": false,
+      "pillow_version": "12.3.0"
+    }
+  }
+]

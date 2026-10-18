@@ -6,10 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -44,7 +41,6 @@ import androidx.compose.ui.unit.sp
 private val AccessoryInk = Color(0xff231942)
 private val AccessoryCream = Color(0xfffbfaef)
 private val AccessoryMuted = Color(0xff79738b)
-private val AccessoryLime = Color(0xffa8e830)
 private val AccessoryCardShape = RoundedCornerShape(18.dp)
 
 enum class OnboardingAccessory(val label: String, val id: String, val available: Boolean = true) {
@@ -197,16 +193,9 @@ private fun AccessoryControls(
             if (saveFailed) Text("Не удалось сохранить настройки. Попробуй ещё раз.",
                 color = androidx.compose.material3.MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(bottom = 8.dp))
-            Button(onClick = onApply, enabled = !saving && state.accessory.available,
-                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
-                shape = RoundedCornerShape(18.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp, pressedElevation = 3.dp,
-                    disabledElevation = 0.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = AccessoryLime, contentColor = AccessoryInk,
-                    disabledContainerColor = Color(0xffdedbe3), disabledContentColor = AccessoryMuted)) {
-                Text(if (saving) "Сохраняем…" else "Применить", fontFamily = artwork.titleFont,
-                    fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
-            }
+            OnboardingPrimaryButton(if (saving) "Сохраняем…" else "Применить",
+                enabled = !saving && state.accessory.available, onClick = onApply,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp))
         }
         }
         if (scrollAll) Column { controls(); action(Modifier) }

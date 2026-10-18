@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.sp
 internal val GoalCream = Color(0xfffbfaef)
 internal val GoalInk = Color(0xff231942)
 internal val GoalPurple = Color(0xff6540bd)
-private val GoalLime = Color(0xffa8e830)
 
 /** Presentation data only; the caller owns selection and game commands. */
 @Immutable
@@ -66,7 +65,7 @@ fun AdventureGoalBriefingScreen(
                 fontSize = 15.sp, lineHeight = 22.sp)
         }
         if (saveFailed) GoalSaveError(artwork)
-        GoalFooter("Дальше", artwork, !saving, onContinue)
+        GoalFooter("Дальше", !saving, onContinue)
     }
 }
 
@@ -115,7 +114,7 @@ fun AdventureGoalSelectionScreen(
             GoalBody("Это части одного задания. Выбор можно изменить позже - накопленные монеты сохранятся.", artwork)
         }
         if (saveFailed) GoalSaveError(artwork)
-        GoalFooter(if (saving) "Сохраняем…" else "Начать с этого", artwork,
+        GoalFooter(if (saving) "Сохраняем…" else "Начать с этого",
             !saving && goals.any { it.id == selectedGoalId }, onConfirm)
     }
 }
@@ -146,7 +145,7 @@ fun AdventureStartedScreen(
             GoalBody(goal.introduction, artwork)
         }
         if (saveFailed) GoalSaveError(artwork)
-        GoalFooter(if (saving) "Сохраняем…" else "В путь!", artwork, !saving, onContinue)
+        GoalFooter(if (saving) "Сохраняем…" else "В путь!", !saving, onContinue)
     }
 }
 
@@ -222,14 +221,9 @@ private fun GoalBody(text: String, artwork: CustomizationArtwork) {
 }
 
 @Composable
-internal fun GoalFooter(text: String, artwork: CustomizationArtwork, enabled: Boolean, onClick: () -> Unit) {
-    Button(onClick, enabled = enabled,
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp, vertical = 16.dp).heightIn(min = 56.dp),
-        shape = RoundedCornerShape(18.dp),
-        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp, pressedElevation = 3.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = GoalLime, contentColor = GoalInk)) {
-        Text(text, fontFamily = artwork.titleFont, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
-    }
+internal fun GoalFooter(text: String, enabled: Boolean, onClick: () -> Unit) {
+    OnboardingPrimaryButton(text, enabled, onClick,
+        Modifier.fillMaxWidth().padding(horizontal = 22.dp, vertical = 16.dp).heightIn(min = 56.dp))
 }
 
 @Composable

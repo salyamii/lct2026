@@ -1,0 +1,38 @@
+[
+  {
+    "resource": "menu_action_tasks_v4",
+    "category": "Generated balanced checklist - 2026-10-18",
+    "path": "app/src/main/res/drawable-nodpi/menu_action_tasks_v4.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 930504,
+    "sha256": "cec9ce0be017c4e8835178e5678a1bc52989f0f35b46a8c37eb8e41745b0192e",
+    "rgba_sha256": "7d9fa547f08397b1e6ec8fc06e5315ff1b293a4ace59e15908388958a1285c71",
+    "alpha_bounds": [
+      0,
+      33,
+      1224,
+      1228
+    ],
+    "source_path": "docs/design/assets/sources/tasks-balanced-2026-10-18/menu_action_tasks_v4.png",
+    "source_sha256": "a01807c8d21095ac08b60c9a1e5e7a5ca7334aa88a3a2cd8b69de2928ad1072a",
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-10-18",
+      "prompt_path": "docs/design/assets/sources/tasks-balanced-2026-10-18/prompts.json",
+      "prompt_key": "menu_action_tasks_v4",
+      "generated_source_filename": "exec-5d93e6a5-1f27-482d-b045-5a28d2b0ee50.png",
+      "reference_source_path": "docs/design/assets/sources/energy-scroll-2026-10-18/menu_action_tasks_v3.png",
+      "reference_source_sha256": "0d90bad70d5534124e1fb3b7d9eafd6dd57f9ce407f1f780b50a34930fe6c4d4"
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "method": 6,
+      "resized": false,
+      "pillow_version": "12.3.0"
+    }
+  }
+]

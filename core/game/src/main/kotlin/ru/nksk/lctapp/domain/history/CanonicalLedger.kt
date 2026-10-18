@@ -12,7 +12,16 @@ object CanonicalLedger {
     fun fromTransition(before: GameState, after: GameState, request: EngineRequest): List<LedgerEntry> {
         val command = request.command
         val entries = when (command) {
+            is EngineCommand.ConfirmBudget -> {
+                // A confirmed allocation may transfer money, but historical confirmations
+                // only changed the plan. Reconstruct only the movement in these checkpoints.
+                val amount = Math.subtractExact(after.economy.savingsBalance, before.economy.savingsBalance)
+                require(amount >= 0) { "Confirming a budget cannot withdraw savings" }
+                if (amount == 0L) emptyList()
+                else listOf(LedgerEntry("${request.id}:deposit", LedgerKind.DEPOSIT, amount))
+            }
             is EngineCommand.DepositSavings -> listOf(LedgerEntry("${request.id}:deposit", LedgerKind.DEPOSIT, command.amount))
+            is EngineCommand.DepositWeeklyReserve -> listOf(LedgerEntry("${request.id}:deposit", LedgerKind.DEPOSIT, command.amount))
             is EngineCommand.WithdrawSavings -> listOf(LedgerEntry("${request.id}:withdrawal", LedgerKind.WITHDRAWAL, command.amount))
             is EngineCommand.BuyGoalItem -> {
                 val previous = before.engine?.journal.orEmpty().map { it.id }.toSet()

@@ -61,7 +61,7 @@ fun BudgetIntroductionScreen(
                     WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)), contentAlignment = Alignment.TopCenter) {
                     Column(Modifier.widthIn(max = 560.dp).fillMaxWidth().then(if (scrollAll) Modifier else Modifier.fillMaxHeight())) {
                         BudgetIntroductionContent(artwork, categoryArtwork, saveFailed, scrollAll)
-                        GoalFooter("Распределить монеты", artwork, !saving, onContinue)
+                        GoalFooter("Распределить монеты", !saving, onContinue)
                     }
                 }
             }
@@ -92,13 +92,13 @@ private fun ColumnScope.BudgetIntroductionContent(
                 "На угощения, игрушки и другие радости.",
                 Color(0xffe8effb), artwork, categoryArtwork)
             BudgetCategoryCard(OnboardingBudgetCategory.Savings, "В копилку",
-                "Монеты, которые хотим сберечь для большой цели.",
+                "Откладываем на большую цель.",
                 Color(0xfffff0d3), artwork, categoryArtwork)
             BudgetCategoryCard(OnboardingBudgetCategory.Reserve, "Запас",
-                "Пригодится, если в пути что-нибудь сломается.",
+                "На ремонт, лечение и другие неожиданности.",
                 Color(0xffeee6f7), artwork, categoryArtwork)
         }
-        BudgetIntroBody("Чтобы начать копить, открой копилку и положи в неё выбранную сумму.", artwork)
+        BudgetIntroBody("Подтверди бюджет - выбранная сумма попадёт в копилку.", artwork)
     }
     if (saveFailed) {
         Text("Не удалось сохранить игру. Попробуй ещё раз.", Modifier.padding(horizontal = 22.dp),

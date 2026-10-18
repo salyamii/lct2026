@@ -4,6 +4,10 @@ import ru.nksk.lctapp.core.ui.components.GameArtwork
 import ru.nksk.lctapp.core.ui.components.GameActionButton
 import ru.nksk.lctapp.core.ui.components.GameActionButtonDefaults
 import ru.nksk.lctapp.core.ui.components.GameActionStyle
+import ru.nksk.lctapp.core.ui.components.GameBackButton
+import ru.nksk.lctapp.core.ui.components.GameSceneTitle
+import ru.nksk.lctapp.core.ui.components.PetChoiceEffects
+import ru.nksk.lctapp.core.ui.components.PetIndicatorEffectUiState
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,8 +37,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -44,7 +46,7 @@ import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 
-/** Шапка экрана дела: пилюля «‹ Название» поверх ночной сцены. */
+/** Native Back control and an optional scene title in the shared game frames. */
 @Composable
 fun DeedHeader(
     title: String,
@@ -58,35 +60,13 @@ fun DeedHeader(
             .fillMaxWidth()
             .statusBarsPadding()
             .padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(24.dp))
-                .background(Color.Black.copy(alpha = 0.42f))
-                .clickable(onClick = onBack)
-                .padding(horizontal = 18.dp, vertical = 10.dp)
-                .semantics { contentDescription = backDescription },
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    "‹",
-                    color = DeedColors.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontFamily = Rubik,
-                )
-                Spacer(Modifier.width(6.dp))
-                Text(
-                    title,
-                    color = DeedColors.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontFamily = Rubik,
-                )
-            }
-        }
+        GameBackButton(onBack, contentDescription = backDescription)
+        if (title.isNotBlank() && title != backDescription) {
+            GameSceneTitle(title, Modifier.weight(1f, fill = false))
+        } else Spacer(Modifier.weight(1f))
         trailing()
     }
 }
@@ -135,7 +115,7 @@ fun CoinChip(text: String, modifier: Modifier = Modifier, lime: Boolean = false)
     }
 }
 
-/** Лаймовая пилюля-действие. */
+/** Основное действие в общей игровой рамке. */
 @Composable
 fun DeedButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier,
     enabled: Boolean = true, loading: Boolean = false) {
@@ -144,7 +124,7 @@ fun DeedButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier,
         containerColor = DeedColors.Lime, contentColor = DeedColors.Text)
 }
 
-/** Белая пилюля-действие (вторичный выбор). */
+/** Вторичный выбор на пергаменте. */
 @Composable
 fun DeedButtonSoft(text: String, onClick: () -> Unit, modifier: Modifier = Modifier,
     enabled: Boolean = true, loading: Boolean = false) {
@@ -184,6 +164,7 @@ fun DeedCard(
     onOpen: () -> Unit,
     modifier: Modifier = Modifier,
     deadline: String? = null,
+    effects: List<PetIndicatorEffectUiState> = emptyList(),
 ) {
     Column(
         modifier = modifier
@@ -230,6 +211,13 @@ fun DeedCard(
                 fontFamily = Nunito,
                 color = DeedColors.Text.copy(alpha = 0.85f),
             )
+            if (effects.isNotEmpty()) {
+                Spacer(Modifier.height(10.dp))
+                Text("После выполнения", color = DeedColors.TextSoft, fontFamily = Nunito,
+                    fontWeight = FontWeight.Bold, fontSize = 12.sp, lineHeight = 17.sp)
+                Spacer(Modifier.height(4.dp))
+                PetChoiceEffects(effects)
+            }
             Spacer(Modifier.height(12.dp))
             DeedButton(stringResource(R.string.deeds_start), onOpen)
             deadline?.let {
@@ -273,7 +261,7 @@ fun DeedResultSheet(
             CoinChip(stringResource(R.string.deeds_demo_reward, reward), lime = true)
             Spacer(Modifier.height(20.dp))
             DeedButton(stringResource(R.string.deeds_again), onAgain)
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(GameActionButtonDefaults.Spacing))
             DeedButtonSoft(stringResource(R.string.deeds_back_to_list), onHub)
         }
     }

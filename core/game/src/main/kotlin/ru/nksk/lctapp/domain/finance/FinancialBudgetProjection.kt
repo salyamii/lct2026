@@ -107,8 +107,16 @@ object FinancialBudgetProjection {
             val anchor = anchors[revision.id]
             val next = revisions.getOrNull(index + 1)
             val nextAnchor = next?.let { anchors[it.id] }
+            // The confirmation's deposit fulfils its own plan. Older confirmations have
+            // no receipts and retain their earlier source-action range unchanged.
+            val anchorTransfersSavings = anchor?.let { it.request?.command is EngineCommand.ConfirmBudget &&
+                it.operations.any { operation -> operation.kind == LedgerKind.DEPOSIT } } == true
             val slice = if (anchor == null) emptyList() else entries.filter {
-                it.sequence > anchor.sequence && (nextAnchor == null || it.sequence < nextAnchor.sequence)
+                (it.sequence > anchor.sequence || anchorTransfersSavings && it.sequence == anchor.sequence) &&
+                    (nextAnchor == null || it.sequence < nextAnchor.sequence) &&
+                    // This is a new week's decision, made before its new allocation.
+                    // It contributes to the goal, not retroactively to the previous plan.
+                    it.request?.command !is EngineCommand.DepositWeeklyReserve
             }
             val sliceActual = actual(slice, content)
             // Missing an earlier period checkpoint does not invalidate a later, fully recorded revision.

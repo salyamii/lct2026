@@ -8,6 +8,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.app.createInitialGameState
+import ru.nksk.lctapp.data.game.content.bundledGameCatalog
+import ru.nksk.lctapp.core.ui.components.PetMoodUiState
+import ru.nksk.lctapp.core.ui.components.PetSatietyUiState
 import ru.nksk.lctapp.domain.pet.toPetState
 import ru.nksk.lctapp.domain.pet.PetCustomization
 import ru.nksk.lctapp.domain.pet.PetFur
@@ -18,8 +21,67 @@ import ru.nksk.lctapp.core.ui.game.restingPetArtwork
 import ru.nksk.lctapp.domain.pet.PetVisualState
 import ru.nksk.lctapp.domain.engine.DayPhase
 import ru.nksk.lctapp.domain.engine.EngineState
+import ru.nksk.lctapp.domain.game.OwnedItem
 
 class MainMenuUiStateMapperTest {
+    @Test fun savingsGaugeUsesRealSavingsForTheSelectedItemRatherThanTheBudgetDraft() {
+        val catalog = bundledGameCatalog()
+        val goal = catalog.goals.first()
+        val item = catalog.content.items.first { it.id in goal.itemIds && (it.priceCoins ?: 0) > 0 }
+        val draft = BudgetPlan(35, 10, 40, 15)
+        val game = createInitialGameState().copy(selectedGoalId = goal.goalId, selectedSavingItemId = item.id,
+            economy = EconomyState(plan = BudgetPlan(35, 20, 20, 25), savingsBalance = 12,
+                planning = BudgetPlanning("week", BudgetPlanningReason.WEEKLY,
+                    BudgetPlanningStage.ALLOCATION, 100, draft = draft)))
+
+        val gauge = game.toMainMenuUiState(catalog).savings!!
+
+        assertEquals(item.id, gauge.targetId)
+        assertEquals(item.name, gauge.title)
+        assertEquals(12L, gauge.saved)
+        assertEquals(item.priceCoins, gauge.total)
+        assertEquals(40L, game.economy.planning!!.draft!!.savings)
+        val overTarget = game.copy(economy = game.economy.copy(savingsBalance = gauge.total + 10))
+        assertEquals(gauge.total + 10, overTarget.toMainMenuUiState(catalog).savings!!.saved)
+    }
+
+    @Test fun savingsGaugeIsAbsentForMissingOwnedFreeAndDemoTargets() {
+        val catalog = bundledGameCatalog()
+        val goal = catalog.goals.first()
+        val item = catalog.content.items.first { it.id in goal.itemIds && (it.priceCoins ?: 0) > 0 }
+        val game = createInitialGameState().copy(selectedGoalId = goal.goalId, selectedSavingItemId = item.id)
+
+        assertNull(game.copy(selectedSavingItemId = null).toMainMenuUiState(catalog).savings)
+        assertNull(game.copy(selectedSavingItemId = "unavailable-item").toMainMenuUiState(catalog).savings)
+        assertNull(game.copy(selectedGoalId = null).toMainMenuUiState(catalog).savings)
+        assertNull(game.copy(ownedItems = listOf(OwnedItem("purchase", item.id))).toMainMenuUiState(catalog).savings)
+        assertNull(game.toMainMenuUiState(catalog, demoMode = true).savings)
+        assertNull(game.toMainMenuUiState().savings)
+        val freeCatalog = catalog.copy(content = catalog.content.copy(items = catalog.content.items.map {
+            if (it.id == item.id) it.copy(priceCoins = 0) else it
+        }))
+        assertNull(game.toMainMenuUiState(freeCatalog).savings)
+    }
+
+    @Test fun indicatorsUseSavedNeedsInsteadOfDuplicatingThemInTheDayCaption() {
+        val catalog = bundledGameCatalog()
+        val game = createInitialGameState().copy(
+            pet = PetState("PLAIN", PetVisualState.HAPPY),
+            engine = EngineState(catalog.rules.id, 1, 2, DayPhase.RUNNING, 1, 3, true, null,
+                100, emptyList(), emptyList()),
+        )
+        val menu = game.toMainMenuUiState(catalog)
+        assertEquals("День 2", menu.dayStatus)
+        assertEquals(3, menu.indicators!!.energy)
+        assertEquals(catalog.rules.fullEnergy, menu.indicators.maxEnergy)
+        assertEquals(PetSatietyUiState.FED, menu.indicators.satiety)
+        assertEquals(PetMoodUiState.HAPPY, menu.indicators.mood)
+        val demo = game.toMainMenuUiState(catalog, demoMode = true)
+        assertEquals(catalog.rules.fullEnergy, demo.indicators!!.energy)
+        assertTrue(demo.indicators.demoMode)
+        assertEquals(3, game.engine!!.energy)
+    }
+
     @Test fun feedingIsAvailableImmediatelyAfterWakingUntilThePetEats() {
         val morning = createInitialGameState().copy(
             economy = EconomyState(BudgetPlan(35, 20, 20, 25)),

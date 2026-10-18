@@ -43,6 +43,7 @@ internal object PetVisualLifecycle {
         val authored = authoredResult ?: authoredStart
         val mealReaction = (command as? EngineCommand.Feed)?.let { factory.meal(it.mealId).visualStateAfter }
         val previous = before.pet.visualState
+        val restoredEnergy = day.energy > (before.engine?.energy ?: day.energy)
         var visual = when {
             needsHelp -> PetVisualState.NEEDS_HELP
             helpResolved -> authored ?: PetVisualState.NORMAL
@@ -52,6 +53,7 @@ internal object PetVisualLifecycle {
             newDay && previous != PetVisualState.HUNGRY -> PetVisualState.NORMAL
             choice != null || dismissedProposal -> PetVisualState.NORMAL
             feeding && previous == PetVisualState.HUNGRY -> PetVisualState.NORMAL
+            feeding && previous == PetVisualState.TIRED && restoredEnergy -> PetVisualState.NORMAL
             else -> after.pet.visualState
         }
 
@@ -60,7 +62,6 @@ internal object PetVisualLifecycle {
         if (previous == PetVisualState.NEEDS_HELP && authored == null && !helpResolved) visual = PetVisualState.NEEDS_HELP
         else if (authored == null && !needsHelp && !helpResolved) {
             if (previous == PetVisualState.HUNGRY && !feeding) visual = PetVisualState.HUNGRY
-            val restoredEnergy = day.energy > (before.engine?.energy ?: day.energy)
             if (previous == PetVisualState.TIRED && !newDay && !restoredEnergy) visual = PetVisualState.TIRED
         }
 

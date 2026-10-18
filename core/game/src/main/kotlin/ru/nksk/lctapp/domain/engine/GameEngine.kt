@@ -156,7 +156,8 @@ class GameEngine(
                 request.command is EngineCommand.RenamePet || request.command is EngineCommand.SetPetColor || request.command is EngineCommand.SetPetLook ||
                 request.command is EngineCommand.StartBudgetAllocation ||
                 request.command is EngineCommand.ChangeBudgetAllocation ||
-                request.command is EngineCommand.ConfirmBudget,
+                request.command is EngineCommand.ConfirmBudget ||
+                request.command is EngineCommand.DepositWeeklyReserve,
                 BlockReason.BudgetPlanningRequired)
             require(current.engine == null || current.engine.rulesId == rules.id) { "Saved engine uses a different rules version" }
             val next = when (val command = request.command) {
@@ -177,6 +178,8 @@ class GameEngine(
                     val confirmed = current.copy(economy = EconomyOperations.confirm(current.economy, command.sessionId, command.revision, knownNeeds))
                     FinancialPeriods.confirmed(current, confirmed, request, command, knownNeeds)
                 }
+                is EngineCommand.DepositWeeklyReserve -> current.copy(economy =
+                    EconomyOperations.depositWeeklyReserve(current.economy, command.sessionId, command.revision, command.amount))
                 is EngineCommand.DepositSavings -> {
                     val deposited = EconomyOperations.deposit(current.economy, command.amount)
                     val needed = factory.mealPolicy.foodRequirement(current)
@@ -449,6 +452,13 @@ class GameEngine(
     fun choiceMoneyDelta(choiceId: String, demoMode: Boolean = previewDemoMode()): Long =
         factory.choiceMoneyDelta(choiceId, demoMode)
 
+    /** A food purchase is paid from food money even when its card is an optional WANT. */
+    fun choiceSpendingKind(choiceId: String): SpendingKind {
+        val choice = factory.content.choices.first { it.id == choiceId }
+        return if (choiceId in factory.policy(choice.eventId).feedsPetChoiceIds) SpendingKind.FEEDING
+            else SpendingKind.forEvent(factory.event(choice.eventId).type)
+    }
+
     fun nextEventSpendingPreview(state: GameState, demoMode: Boolean = previewDemoMode()): EventSpendingPreview? = try {
         if (state.economy.planning != null || state.engine == null || state.engine.phase == DayPhase.FINISHED ||
             state.engine.currentEvent != null) null
@@ -646,7 +656,7 @@ class GameEngine(
         var next = if (policy.startEffectsTiming == EffectTiming.COMPLETE) eventEffects(state, occurrence, demoMode) else state
         val delta = choiceMoneyDelta(choice.id, demoMode)
         val reward = if (event.type == EventType.EARNING) score?.reward(delta) ?: delta else delta
-        next = money(next, reward, SpendingKind.forEvent(event.type))
+        next = money(next, reward, choiceSpendingKind(choice.id))
         choice.petStateAfter?.let { next = next.copy(pet = next.pet.transitionTo(it)) }
         factory.content.choiceItemEffects.filter { it.choiceId == choice.id }.sortedBy { it.position }.forEach {
             next = item(next, it.itemId, it.operation, "${occurrence.id}:choice-item:${it.id}")
@@ -721,7 +731,7 @@ class GameEngine(
         actionGuard(day, policy.energyFor(choice.id))
         // Quote admission using pure transformations; opening the board commits no effects.
         val beforeChoice = if (policy.startEffectsTiming == EffectTiming.COMPLETE) eventEffects(state, occurrence, demoMode) else state
-        money(beforeChoice, choiceMoneyDelta(choice.id, demoMode), SpendingKind.forEvent(event.type))
+        money(beforeChoice, choiceMoneyDelta(choice.id, demoMode), choiceSpendingKind(choice.id))
         return state
     }
 
@@ -872,7 +882,7 @@ class GameEngine(
                     factory.eventMoneyDelta(event.id, demoMode)
                 } else 0L
                 money(money(state, priceOnStart, SpendingKind.forEvent(event.type)),
-                    choiceMoneyDelta(choice.id, demoMode), SpendingKind.forEvent(event.type))
+                    choiceMoneyDelta(choice.id, demoMode), choiceSpendingKind(choice.id))
                 true
             } catch (blocked: EconomyViolation) {
                 if (blocked.reason != EconomyFailure.INSUFFICIENT_MONEY) throw blocked

@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -28,7 +27,6 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
@@ -47,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.components.*
 import ru.nksk.lctapp.core.ui.game.goalItemArtwork
+import ru.nksk.lctapp.core.ui.game.balanceWithChange
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
 import ru.nksk.lctapp.core.ui.theme.AdventureNight
 import ru.nksk.lctapp.core.ui.theme.Nunito
@@ -95,7 +94,7 @@ internal fun GoalScreen(
     }
 
     AdventureScreen(
-        title = "Цели",
+        title = "",
         onBack = back,
         backgroundRes = goalPreviewArtwork(state.goalId),
         sceneFraction = .32f,
@@ -105,12 +104,8 @@ internal fun GoalScreen(
         contentScrollState = detailsScroll,
         headerAction = {
             if (!state.loading && !state.failed && result == null) {
-                TextButton(onClick = { onAction(GoalAction.ShowList) }, enabled = !state.busy,
-                    modifier = Modifier.heightIn(min = 48.dp), shape = RoundedCornerShape(24.dp),
-                    colors = ButtonDefaults.textButtonColors(containerColor = AdventureNight, contentColor = Color.White)) {
-                    Text("Другие цели", fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
-                    Icon(painterResource(R.drawable.menu_chevron), null, Modifier.padding(start = 4.dp).size(18.dp))
-                }
+                GameForwardAction("Другие цели", { onAction(GoalAction.ShowList) },
+                    Modifier.widthIn(max = 210.dp), enabled = !state.busy)
             }
         },
         scene = {},
@@ -245,33 +240,27 @@ private fun GoalSavingProgress(part: GoalPartUiState, savings: Long, anchor: Mod
     Surface(color = Color.White, shape = RoundedCornerShape(22.dp), border = BorderStroke(1.dp, GoalLine)) {
     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(anchor.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            GoalItemIllustration(part.id, Modifier.size(64.dp))
+            GoalItemIllustration(part.id, Modifier.size(48.dp))
             Column(Modifier.weight(1f)) {
-                GoalCaption("Сейчас собираем")
+                GoalCaption("Копим на")
                 Text(part.title, color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold,
                     fontSize = 20.sp, lineHeight = 25.sp)
-                GoalCaption(if (part.demoMode) "Бесплатно · режим бога" else "Цена ${goalCoins(part.price)}")
+                if (part.demoMode) GoalCaption("Бесплатно · режим бога")
+                else Text("Накоплено ${part.savedCoins} из ${part.price} монет", color = GameInk,
+                    fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, lineHeight = 22.sp)
             }
+            if (!part.demoMode && part.price > 0) SavingsGauge(part.savedCoins, part.price, Modifier.width(72.dp))
         }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            GoalCaption("В копилке")
-            Text(goalCoins(savings), color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-        }
-        if (!part.demoMode) LinearProgressIndicator(progress = { if (part.price == 0L) 1f else part.savedCoins.toFloat() / part.price },
-            modifier = Modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(8.dp)).semantics {
-                contentDescription = "Для покупки ${part.savedCoins} из ${part.price} монет"
-            },
-            color = AdventureLime, trackColor = Color(0xFFE3E3CE), drawStopIndicator = {})
-        Text(when {
-            part.demoMode -> "Предмет можно получить без траты монет."
+        if (savings > part.savedCoins) GoalCaption("Всего в копилке ${goalCoins(savings)}")
+        val paymentHint = when {
+            part.demoMode -> null
             part.missingCoins != null -> "Не хватает ${goalMissingCoins(part.missingCoins)}."
             part.availableContribution > 0 -> "Добавим ${goalPaymentCoins(part.availableContribution)} из бюджета."
-            part.remainingCoins > 0 -> "Можно оплатить накоплениями и текущими деньгами."
-            else -> "На покупку уже хватает"
-        },
-            color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 14.sp, lineHeight = 19.sp)
-        GoalCaption("Копилка общая. При смене цели монеты останутся в ней.")
-        actions()
+            else -> null
+        }
+        paymentHint?.let { Text(it, color = GameInk, fontFamily = Nunito,
+            fontWeight = FontWeight.Bold, fontSize = 14.sp, lineHeight = 19.sp) }
+        Column(verticalArrangement = Arrangement.spacedBy(GameActionButtonDefaults.Spacing), content = actions)
     }
     }
 }
@@ -312,10 +301,10 @@ private fun GoalPurchaseDialog(confirmation: PurchaseConfirmation, busy: Boolean
                     else confirmation.paymentDescription(), exposure("sources"), color = GameInk,
                     fontFamily = Nunito, fontSize = 15.sp, lineHeight = 21.sp)
                 if (confirmation.fromSavings > 0) Text(
-                    "В копилке: ${confirmation.savingsBefore} → ${confirmation.remainingSavings}.", exposure("savings"),
+                    "В копилке: ${balanceWithChange(confirmation.savingsBefore, confirmation.remainingSavings)}.", exposure("savings"),
                     color = GoalMuted, fontFamily = Nunito, fontSize = 14.sp, lineHeight = 20.sp)
                 Text(if (confirmation.availableBefore != confirmation.remainingBalance)
-                    "С собой: ${confirmation.availableBefore} → ${confirmation.remainingBalance}."
+                    "С собой: ${balanceWithChange(confirmation.availableBefore, confirmation.remainingBalance)}."
                     else "С собой останется: ${confirmation.remainingBalance}.", exposure("available"),
                     color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 15.sp, lineHeight = 21.sp)
                 if (!confirmation.demoMode) Text("На еду до следующей недели нужно: ${confirmation.foodNeeded}.", exposure("food"),
@@ -330,12 +319,10 @@ private fun GoalPurchaseDialog(confirmation: PurchaseConfirmation, busy: Boolean
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 listOf("Отмена" to GoalAction.CancelPurchase,
                     (when { message != null -> "Повторить"; confirmation.demoMode -> "Получить"; else -> "Купить" }) to GoalAction.ConfirmPurchase).forEach { (label, action) ->
-                    OutlinedButton(onClick = { onAction(action) }, enabled = !busy,
-                        modifier = Modifier.weight(1f).heightIn(min = 52.dp), shape = RoundedCornerShape(20.dp),
-                        border = BorderStroke(1.dp, GoalMuted),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = GameInk)) {
-                        Text(label, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold)
-                    }
+                    GameActionButton(text = label, onClick = { onAction(action) },
+                        interactionBlocked = busy, modifier = Modifier.weight(1f), minHeight = 52.dp,
+                        style = if (action == GoalAction.CancelPurchase) GameActionStyle.SECONDARY
+                            else GameActionStyle.PRIMARY)
                 }
             }
         })
@@ -379,15 +366,9 @@ private fun GoalProjectCard(project: GoalProjectUiState, enabled: Boolean, onCli
                 if (locked) GoalCaption("Откроется после предыдущей главы")
                 if (project.status == GoalProjectStatus.COMPLETED) GoalStatus("Цель выполнена")
                 if (locked) {
-                    OutlinedButton(onClick = onClick, enabled = enabled,
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
-                        shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, GoalLine),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = Color(0xFFF0EFEA), contentColor = GoalMuted,
-                        )) {
-                        Text("Посмотреть цель", fontFamily = Nunito, fontWeight = FontWeight.ExtraBold,
-                            fontSize = 16.sp)
-                    }
+                    GameActionButton(text = "Посмотреть цель", onClick = onClick, enabled = enabled,
+                        minHeight = 52.dp, style = GameActionStyle.SECONDARY,
+                        contentColor = GoalMuted, artworkColorFilter = lockedArtwork)
                 } else {
                     AdventurePrimaryButton("Открыть цель", onClick, enabled = enabled)
                 }
@@ -401,11 +382,8 @@ private fun GoalProjectList(state: GoalUiState, scrollState: LazyListState, onBa
     Column(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            IconButton(onBack, Modifier.size(48.dp).background(Color.White.copy(alpha = .10f), CircleShape)) {
-                Icon(painterResource(R.drawable.menu_chevron), "Назад", Modifier.size(20.dp).rotate(180f), tint = Color.White)
-            }
-            Text(if (state.campaignComplete) "Наши приключения" else "Большие цели", color = Color.White,
-                fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
+            GameBackButton(onBack)
+            GameSceneTitle(if (state.campaignComplete) "Наши приключения" else "Большие цели", Modifier.weight(1f))
         }
         LazyColumn(Modifier.weight(1f).fillMaxWidth().clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
             .background(GamePaper).testTag("goal_project_list"), state = scrollState,

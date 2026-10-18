@@ -6,7 +6,6 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -14,10 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -33,13 +29,13 @@ import ru.nksk.lctapp.core.ui.theme.AdventureLime
 
 @Composable
 internal fun SettingsGearButton(onClick: () -> Unit, onLongClick: (() -> Unit)? = null) {
-    Box(Modifier.size(48.dp).clip(CircleShape).combinedClickable(
+    Box(Modifier.size(48.dp).combinedClickable(
         role = Role.Button,
         onClick = onClick,
         onLongClick = onLongClick,
         onLongClickLabel = stringResource(R.string.parents_open_mode),
     ), contentAlignment = Alignment.Center) {
-        Icon(painterResource(R.drawable.settings_gear), "Настройки", Modifier.size(20.dp), tint = Color.White)
+        GameArtwork(R.drawable.menu_settings_v3, "Настройки", Modifier.size(48.dp))
     }
 }
 
@@ -52,9 +48,7 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
     Column(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding().background(GamePaper)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            IconButton(onBack, Modifier.size(48.dp)) {
-                Icon(painterResource(R.drawable.menu_chevron), "Назад", Modifier.size(20.dp).rotate(180f), tint = GameInk)
-            }
+            GameBackButton(onBack)
             AdventureHeading("Настройки")
         }
         Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(20.dp),
@@ -67,7 +61,7 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
                 }
             }
             SoundSettingsCard(state.sound, onAction)
-            DemoSettingsCard(state.demo, onAction)
+            if (state.demo.available) DemoSettingsCard(state.demo, onAction)
             DiagnosticsSettingsCard(state.diagnostics, pickingDiagnostics, onDownloadDiagnostics)
             SettingsCard {
                 Text("Для родителей", color = GameInk, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -87,25 +81,23 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
                 SettingsCard {
                     Text("Номер устройства", color = GameInk, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Text(profileId, color = GameInk, style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Monospace)
-                    OutlinedButton(onClick = { onCopyProfile(profileId); copied = true }, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = GameInk)) {
-                        Text(if (copied) "Скопировано" else "Скопировать номер")
-                    }
+                    GameActionButton(if (copied) "Скопировано" else "Скопировать номер",
+                        { onCopyProfile(profileId); copied = true }, style = GameActionStyle.SECONDARY)
                 }
             }
-            CloudSettingsCard(state.cloud,
-                configured = state.backendConfigured && !state.loading && !state.profileError,
-                onAction = onAction)
-            debugButton?.let {
-                SettingsCard {
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text("Инструменты разработчика", Modifier.weight(1f), color = GameInk,
-                            style = MaterialTheme.typography.titleMedium)
-                        Surface(shape = CircleShape, color = AdventureNight) { it() }
-                    }
-                }
-            }
+//            CloudSettingsCard(state.cloud,
+//                configured = state.backendConfigured && !state.loading && !state.profileError,
+//                onAction = onAction)
+//            debugButton?.let {
+//                SettingsCard {
+//                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+//                        horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+//                        Text("Инструменты разработчика", Modifier.weight(1f), color = GameInk,
+//                            style = MaterialTheme.typography.titleMedium)
+//                        Surface(shape = CircleShape, color = AdventureNight) { it() }
+//                    }
+//                }
+//            }
         }
     }
     state.cloud.restorePreview?.let { preview ->
@@ -219,11 +211,8 @@ private fun ParentCodeContent(state: SettingsUiState, onAction: (SettingsAction)
                 }
                 ProfileRegistrationStatus.ERROR -> {
                     AdventureBody("Не удалось зарегистрировать профиль. Код сохранён - попробуйте ещё раз.")
-                    OutlinedButton(onClick = { onAction(SettingsAction.RetryRegistration) },
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = GameInk)) {
-                        Text("Повторить подключение")
-                    }
+                    GameActionButton("Повторить подключение", { onAction(SettingsAction.RetryRegistration) },
+                        style = GameActionStyle.SECONDARY)
                 }
                 ProfileRegistrationStatus.NONE, ProfileRegistrationStatus.REGISTERED -> Unit
             }

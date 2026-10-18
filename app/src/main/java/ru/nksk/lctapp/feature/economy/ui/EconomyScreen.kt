@@ -1,6 +1,7 @@
 package ru.nksk.lctapp.feature.economy.ui
 
 import ru.nksk.lctapp.core.ui.components.GameLoadingScreen
+import ru.nksk.lctapp.core.ui.components.GameActionButton
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -34,20 +35,28 @@ internal fun EconomyScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
         Surface(Modifier.fillMaxSize(), color = GamePaper) {
             Column(Modifier.safeDrawingPadding().padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                Button(onClick = { onAction(EconomyAction.Retry) }) { Text("Повторить загрузку") }
+                GameActionButton("Повторить загрузку", { onAction(EconomyAction.Retry) })
                 TextButton(onClick = onBack) { Text("В меню") }
             }
         }
     } else {
         val planning = economy.planning
         val display = state.budgetScreenState()
+        val isWeeklyReceipt = planning?.reason == BudgetPlanningReason.WEEKLY &&
+            planning.stage == BudgetPlanningStage.RECEIPT
+        val receiptBusy = state.saving || state.error != null
         when {
             planning?.stage == BudgetPlanningStage.RECEIPT && state.budgetConfirmation == null -> WeeklyIncomeScreen(
                 state = WeeklyIncomeUiState(amount = planning.income,
                     availableBalance = economy.availableBalance, savingsBalance = economy.savingsBalance,
+                    reserveRemainder = if (isWeeklyReceipt) economy.plan.reserve else 0,
+                    busy = receiptBusy,
+                    reserveTransferred = if (isWeeklyReceipt) state.weeklyReserveReceipt?.amount else null,
                     header = if (planning.reason == BudgetPlanningReason.INITIAL) "Первый бюджет" else "Новая неделя",
                     title = if (planning.reason == BudgetPlanningReason.INITIAL) "Монеты для приключения" else "Новый запас на неделю"),
-                onPlan = { if (!state.saving) onAction(EconomyAction.StartAllocation) }, onBack = onBack)
+                onPlan = { if (!receiptBusy) onAction(EconomyAction.StartAllocation) },
+                onBack = { if (!receiptBusy) onBack() },
+                onDepositReserve = { if (!receiptBusy) onAction(EconomyAction.DepositWeeklyReserve) })
             else -> BudgetPlanScreen(
                 state = display.budget,
                 interactionsBlocked = state.budgetConfirmation != null,

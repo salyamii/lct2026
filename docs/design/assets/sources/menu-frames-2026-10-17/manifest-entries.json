@@ -1,0 +1,68 @@
+[
+  {
+    "resource": "menu_hud_plaque_v2",
+    "category": "Generated menu frames - 2026-10-17",
+    "path": "app/src/main/res/drawable-nodpi/menu_hud_plaque_v2.webp",
+    "format": "webp",
+    "width": 2163,
+    "height": 727,
+    "bytes": 1064570,
+    "sha256": "d14133141466d4ca905e068c7ff7e8a298049f494bb1e7c2b71696d9b5726161",
+    "rgba_sha256": "ff2333303378f3262716a02b9b3a2be748002f7eddd13109673981f4d9ff839f",
+    "alpha_bounds": [
+      31,
+      15,
+      2131,
+      727
+    ],
+    "source_path": "docs/design/assets/sources/menu-frames-2026-10-17/menu_hud_plaque_v2.png",
+    "source_sha256": "241284b635d0fb102f810424b6e5e6b0d45c17f5fc74406d4590f0becad396fe",
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-10-17",
+      "prompt_path": "docs/design/assets/sources/menu-frames-2026-10-17/prompts.json",
+      "prompt_key": "menu_hud_plaque_v2"
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "method": 6,
+      "resized": false,
+      "pillow_version": "12.3.0"
+    }
+  },
+  {
+    "resource": "menu_action_plaque_v2",
+    "category": "Generated menu frames - 2026-10-17",
+    "path": "app/src/main/res/drawable-nodpi/menu_action_plaque_v2.webp",
+    "format": "webp",
+    "width": 2172,
+    "height": 724,
+    "bytes": 1245156,
+    "sha256": "17bc2f2137bcb0cfdbd08c9c59908e07f7ade19d7b809506aed326ba3fa0de51",
+    "rgba_sha256": "903b8ffba858352f793939461f9ff5a0b97e8a76dbf0b82c732fb145b386bf25",
+    "alpha_bounds": [
+      0,
+      37,
+      2172,
+      708
+    ],
+    "source_path": "docs/design/assets/sources/menu-frames-2026-10-17/menu_action_plaque_v2.png",
+    "source_sha256": "b91c3793e8b02204872ffe4d132abdee0d459945aedef85c79e4ff4b6963d273",
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-10-17",
+      "prompt_path": "docs/design/assets/sources/menu-frames-2026-10-17/prompts.json",
+      "prompt_key": "menu_action_plaque_v2"
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "method": 6,
+      "resized": false,
+      "pillow_version": "12.3.0"
+    }
+  }
+]

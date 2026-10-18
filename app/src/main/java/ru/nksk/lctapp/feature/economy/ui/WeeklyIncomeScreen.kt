@@ -2,16 +2,13 @@ package ru.nksk.lctapp.feature.economy.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -21,6 +18,11 @@ import ru.nksk.lctapp.core.ui.components.GameInk
 import ru.nksk.lctapp.core.ui.components.GamePaper
 import ru.nksk.lctapp.core.ui.components.GameArtwork
 import ru.nksk.lctapp.core.ui.components.AdaptiveActionPanel
+import ru.nksk.lctapp.core.ui.components.GameBackButton
+import ru.nksk.lctapp.core.ui.components.GameSceneTitle
+import ru.nksk.lctapp.core.ui.components.GameActionButton
+import ru.nksk.lctapp.core.ui.components.GameActionStyle
+import ru.nksk.lctapp.core.ui.game.coinAmount
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
@@ -33,10 +35,13 @@ internal data class WeeklyIncomeUiState(
     val title: String = "Новый запас на неделю",
     val description: String = "Сначала позаботимся о еде. Остальное разделим между желаниями, большой целью и запасом на неожиданности.",
     val nextIncome: String = "Новые монеты получим через 7 игровых дней.",
-    val hint: String = "План можно менять. В копилку положим монеты отдельно.",
+    val hint: String = "Выделим часть на цель. Она попадёт в копилку при подтверждении бюджета.",
     val action: String = "Распределить монеты",
     val availableBalance: Long? = null,
     val savingsBalance: Long? = null,
+    val reserveRemainder: Long = 0,
+    val busy: Boolean = false,
+    val reserveTransferred: Long? = null,
 )
 
 @Composable
@@ -44,18 +49,19 @@ internal fun WeeklyIncomeScreen(
     state: WeeklyIncomeUiState,
     onPlan: () -> Unit,
     onBack: () -> Unit,
+    onDepositReserve: () -> Unit = {},
 ) {
     BoxWithConstraints(Modifier.fillMaxSize().background(GameInk)) {
         val landscape = maxWidth >= 600.dp && maxWidth > maxHeight
         if (landscape) {
             Row(Modifier.fillMaxSize()) {
                 IncomeHero(state, onBack, Modifier.weight(1f).fillMaxHeight())
-                IncomeInvitation(state, onPlan, Modifier.weight(1f).fillMaxHeight())
+                IncomeInvitation(state, onPlan, onDepositReserve, Modifier.weight(1f).fillMaxHeight())
             }
         } else {
             Column(Modifier.fillMaxSize()) {
                 IncomeHero(state, onBack, Modifier.fillMaxWidth().weight(0.46f))
-                IncomeInvitation(state, onPlan, Modifier.fillMaxWidth().weight(0.54f))
+                IncomeInvitation(state, onPlan, onDepositReserve, Modifier.fillMaxWidth().weight(0.54f))
             }
         }
     }
@@ -70,23 +76,16 @@ private fun IncomeHero(state: WeeklyIncomeUiState, onBack: () -> Unit, modifier:
             .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))) {
             Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Surface(shape = CircleShape, color = GameInk.copy(alpha = 0.9f)) {
-                    IconButton(onClick = onBack) {
-                        Icon(painterResource(R.drawable.menu_chevron), "В главное меню",
-                            Modifier.size(20.dp).rotate(180f), tint = Color.White)
-                    }
-                }
-                Surface(shape = RoundedCornerShape(28.dp), color = GameInk.copy(alpha = 0.9f)) {
-                    Text(state.header, Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                        color = Color.White, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
-                }
+                GameBackButton(onClick = onBack, enabled = !state.busy, contentDescription = "В главное меню")
+                GameSceneTitle(state.header, Modifier.weight(1f, fill = false))
             }
         }
     }
 }
 
 @Composable
-private fun IncomeInvitation(state: WeeklyIncomeUiState, onPlan: () -> Unit, modifier: Modifier) {
+private fun IncomeInvitation(state: WeeklyIncomeUiState, onPlan: () -> Unit,
+    onDepositReserve: () -> Unit, modifier: Modifier) {
     Surface(modifier, color = GamePaper, shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)) {
         Box(Modifier.fillMaxSize().windowInsetsPadding(
             WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)),
@@ -97,12 +96,17 @@ private fun IncomeInvitation(state: WeeklyIncomeUiState, onPlan: () -> Unit, mod
                 sectionSpacing = 10.dp,
                 fillBody = true,
                 actions = {
-                    Button(onClick = onPlan, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
-                        shape = RoundedCornerShape(28.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = AdventureLime, contentColor = GameInk)) {
-                        Text(state.action, fontFamily = Rubik, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp,
-                            textAlign = TextAlign.Center)
+                    state.reserveTransferred?.takeIf { it > 0 }?.let { amount ->
+                        Text("В копилку +$amount", color = GameInk, fontFamily = Nunito,
+                            fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, lineHeight = 22.sp)
                     }
+                    if (state.reserveRemainder > 0) {
+                        Text("Остаток запаса: ${coinAmount(state.reserveRemainder)}", color = GameInk,
+                            fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 16.sp, lineHeight = 22.sp)
+                        GameActionButton("Отложить остаток", onDepositReserve, enabled = !state.busy,
+                            style = GameActionStyle.SECONDARY, minHeight = 48.dp)
+                    }
+                    GameActionButton(state.action, onPlan, enabled = !state.busy)
                 },
             ) {
                 Text(state.title, color = GameInk, fontFamily = Rubik, fontWeight = FontWeight.ExtraBold,

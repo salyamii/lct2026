@@ -6,10 +6,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.history.AuditEntry
@@ -23,6 +25,7 @@ internal data class ReflectionUiState(
     val chronoscopeStep: ChronoscopeStep? = null, val memory: ChronoscopeMemory? = null,
     val originalPath: ChronoscopePath? = null, val alternativePath: ChronoscopePath? = null,
     val realGame: GameState? = null, val quizHintShown: Boolean = false, val comparisonBoundary: String? = null,
+    val demoExample: Boolean = false, val exampleGame: GameState? = null,
 )
 
 internal sealed interface ReflectionAction {
@@ -49,6 +52,9 @@ internal class ReflectionViewModel @Inject constructor(private val session: Game
     val uiState = state.asStateFlow()
     private var saved: GameState? = null
     private var history: List<AuditEntry> = emptyList()
+    private var demo: TimeMachineDemo? = null
+    private val reflectionMachine: TimeMachine get() = demo?.machine ?: session.timeMachine
+    private suspend fun reflectionHistory(): List<AuditEntry> = demo?.history ?: session.history()
     private var active = false
     private var observation: Job? = null
     private val observing: Boolean get() = observation?.isActive == true
@@ -94,9 +100,11 @@ internal class ReflectionViewModel @Inject constructor(private val session: Game
                 session.prepare()
                 session.observe().collect { game ->
                     saved = checkNotNull(game)
-                    history = session.history()
+                    val demoDisabled = clearDisabledDemo()
+                    history = reflectionHistory()
                     render(game)
                     if (state.value.error == HISTORY_READ_ERROR) state.value = state.value.copy(error = null)
+                    if (demoDisabled && !state.value.busy) onAction(ReflectionAction.OpenTimeMachine)
                 }
             } catch (cancelled: CancellationException) { throw cancelled }
             catch (_: Exception) { state.value = state.value.copy(loading = false, error = HISTORY_READ_ERROR) }
@@ -122,6 +130,10 @@ internal class ReflectionViewModel @Inject constructor(private val session: Game
     }
 
     fun onAction(action: ReflectionAction) {
+        if (clearDisabledDemo()) {
+            onAction(ReflectionAction.OpenTimeMachine)
+            return
+        }
         if (action is ReflectionAction.ChronoscopeQuestionPresented) {
             if (state.value.chronoscopeStep == ChronoscopeStep.QUIZ && state.value.quiz?.id == action.quizId) {
                 presentedChronoscopeQuestions += action.quizId
@@ -155,16 +167,22 @@ internal class ReflectionViewModel @Inject constructor(private val session: Game
             try {
                 when (action) {
                     is ReflectionAction.SetReflectionScope -> {
-                        val availability = session.timeMachine.availableReflections()
+                        if (demo != null) return@launch
+                        val availability = reflectionMachine.availableReflections()
                             .forReflection(state.value.reflectionDay, action.scope)
-                        history = session.history()
+                        history = reflectionHistory()
                         state.value = state.value.copy(reflectionScope = action.scope, timeMachine = availability, memory = null,
                             simulation = null, quiz = null, quizAnswer = null,
                             originalPath = null, alternativePath = null, chronoscopeStep = ChronoscopeStep.MOMENTS)
                     }
                     ReflectionAction.OpenTimeMachine -> {
-                        val availability = scopedAvailability(session.timeMachine.availableReflections())
-                        history = session.history()
+                        val realAvailability = scopedAvailability(session.timeMachine.availableReflections())
+                        demo = if (session.demoModeEnabled && realAvailability.status == TimeMachineStatus.READY &&
+                            realAvailability.decisions.isEmpty()) demo ?: withContext(Dispatchers.Default) {
+                                TimeMachineDemo.create(session.catalog, state.value.reflectionDay ?: 1)
+                            } else null
+                        val availability = demo?.machine?.availableReflections() ?: realAvailability
+                        history = reflectionHistory()
                         val current = checkNotNull(session.read())
                         saved = current
                         render(current)
@@ -172,12 +190,13 @@ internal class ReflectionViewModel @Inject constructor(private val session: Game
                         state.value = state.value.copy(timeMachine = availability,
                             simulation = null, quiz = null, quizAnswer = null, memory = null,
                             originalPath = null, alternativePath = null, chronoscopeStep = ChronoscopeStep.MOMENTS,
-                            quizHintShown = false, comparisonBoundary = null)
+                            quizHintShown = false, comparisonBoundary = null,
+                            demoExample = demo != null, exampleGame = demo?.game)
                         pendingQuizSubmission = null
                     }
                     ReflectionAction.ShowMoments -> {
-                        val availability = scopedAvailability(session.timeMachine.availableReflections())
-                        history = session.history()
+                        val availability = scopedAvailability(reflectionMachine.availableReflections())
+                        history = reflectionHistory()
                         state.value = state.value.copy(timeMachine = availability,
                             chronoscopeStep = ChronoscopeStep.MOMENTS)
                     }
@@ -204,7 +223,7 @@ internal class ReflectionViewModel @Inject constructor(private val session: Game
                         // Read/observe the actual aggregate; never restore the pre-simulation copy.
                         val current = checkNotNull(session.read()) { "The real save is unavailable" }
                         saved = current
-                        history = session.history()
+                        history = reflectionHistory()
                         render(current)
                         state.value = state.value.copy(chronoscopeStep = ChronoscopeStep.PRESENT)
                     }
@@ -219,11 +238,11 @@ internal class ReflectionViewModel @Inject constructor(private val session: Game
                         val day = target?.after?.engine?.day
                         val through = history.lastOrNull { it.sequence >= (target?.sequence ?: Long.MAX_VALUE) &&
                             it.after?.engine?.day == day }?.sequence ?: target?.sequence
-                        val result = session.timeMachine.simulate(TimeMachineRequest(action.entryId, action.alternativeId, through))
+                        val result = reflectionMachine.simulate(TimeMachineRequest(action.entryId, action.alternativeId, through))
                         val comparable = result.hasComparablePaths(memory.decision.sequence)
                         val quiz = result.simulationId?.takeIf { comparable }?.let { id ->
-                            session.timeMachine.quiz(id, TimeMachineQuizKind.CAUSE)
-                                ?: session.timeMachine.quiz(id, TimeMachineQuizKind.LEDGER)
+                            reflectionMachine.quiz(id, TimeMachineQuizKind.CAUSE)
+                                ?: reflectionMachine.quiz(id, TimeMachineQuizKind.LEDGER)
                         }
                         state.value = state.value.copy(simulation = result, quiz = quiz, quizAnswer = null,
                             originalPath = if (comparable) chronoscopePath(requireNotNull(result.baseline), memory.before, session.catalog) else null,
@@ -255,7 +274,7 @@ internal class ReflectionViewModel @Inject constructor(private val session: Game
                             ?: QuizSubmission(quiz.id, action.id, UUID.randomUUID().toString(),
                                 questionPresented = quiz.id in presentedChronoscopeQuestions,
                                 usedHint = state.value.quizHintShown).also { pendingQuizSubmission = it }
-                        val answer = session.timeMachine.submitQuiz(quiz.id, action.id, submission.id,
+                        val answer = reflectionMachine.submitQuiz(quiz.id, action.id, submission.id,
                             usedHint = submission.usedHint, questionPresented = submission.questionPresented)
                         state.value = state.value.copy(quizAnswer = answer,
                             quizHintShown = state.value.quizHintShown || !answer.correct,
@@ -268,7 +287,10 @@ internal class ReflectionViewModel @Inject constructor(private val session: Game
                 if (!observing) observe()
             } catch (cancelled: CancellationException) { throw cancelled }
             catch (_: Exception) { state.value = state.value.copy(error = "Не удалось выполнить действие. Попробуй ещё раз.") }
-            finally { state.value = state.value.copy(busy = false) }
+            finally {
+                state.value = state.value.copy(busy = false)
+                if (clearDisabledDemo()) onAction(ReflectionAction.OpenTimeMachine)
+            }
         }
     }
 
@@ -277,18 +299,22 @@ internal class ReflectionViewModel @Inject constructor(private val session: Game
         viewModelScope.launch {
             try {
                 val current = checkNotNull(session.read())
-                history = session.history()
+                history = reflectionHistory()
                 saved = current
                 render(current)
                 if (!observing) observe()
             } catch (cancelled: CancellationException) { throw cancelled }
             catch (_: Exception) { state.value = state.value.copy(error = "Не удалось обновить разбор. Повтори попытку.") }
-            finally { state.value = state.value.copy(busy = false) }
+            finally {
+                state.value = state.value.copy(busy = false)
+                if (clearDisabledDemo()) onAction(ReflectionAction.OpenTimeMachine)
+            }
         }
     }
 
     /** Telemetry cannot block navigation or turn a successful replay into a failed game action. */
     private fun recordChronoscope(record: ChronoscopeRecord, retry: Boolean = false) {
+        if (demo != null) return
         if (record.key in recordedChronoscope || record.key in recordingChronoscope ||
             !retry && record.key in pendingChronoscopeRecords) return
         pendingChronoscopeRecords[record.key] = record
@@ -309,6 +335,19 @@ internal class ReflectionViewModel @Inject constructor(private val session: Game
                 }
             } finally { recordingChronoscope -= record.key }
         }
+    }
+
+    private fun clearDisabledDemo(): Boolean {
+        if (demo == null || session.demoModeEnabled || state.value.busy) return false
+        demo = null
+        reflectionConfigured = false
+        pendingQuizSubmission = null
+        presentedChronoscopeQuestions.clear()
+        state.value = state.value.copy(demoExample = false, exampleGame = null,
+            memory = null, simulation = null, quiz = null, quizAnswer = null,
+            originalPath = null, alternativePath = null, chronoscopeStep = null,
+            timeMachine = null, comparisonBoundary = null, quizHintShown = false)
+        return true
     }
 
     private companion object {
