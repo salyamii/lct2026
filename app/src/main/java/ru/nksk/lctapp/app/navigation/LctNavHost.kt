@@ -63,7 +63,6 @@ import ru.nksk.lctapp.feature.tasks.navigation.Tasks
 import ru.nksk.lctapp.feature.tasks.navigation.DeedGame
 import ru.nksk.lctapp.feature.tasks.navigation.deedGameEntry
 import ru.nksk.lctapp.feature.tasks.navigation.tasksEntry
-import ru.nksk.lctapp.feature.storygames.navigation.ChapterTestGames
 import ru.nksk.lctapp.feature.storygames.navigation.ChapterTestGameSession
 import ru.nksk.lctapp.feature.storygames.navigation.storyGamesEntry
 import ru.nksk.lctapp.feature.map.navigation.GameMap
@@ -229,7 +228,6 @@ fun LctNavHost(
                     onEvent = { source -> navigator.navigate(source, Day) },
                     onGame = { source, id -> navigator.navigate(source, DeedGame(id)) },
                     onTraining = { source -> navigator.navigate(source, SkillTraining) },
-                    onTestGames = { source -> navigator.navigate(source, ChapterTestGames) },
                     onBack = navigator::goBack,
                 )
                 storyGamesEntry(

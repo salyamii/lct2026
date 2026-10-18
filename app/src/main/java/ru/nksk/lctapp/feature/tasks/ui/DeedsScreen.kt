@@ -53,14 +53,12 @@ fun DeedsScreen(onTraining: () -> Unit, onExit: () -> Unit,
     state: DeedsUiState = DeedsUiState(), onStart: (String) -> Unit = {}, onRetry: () -> Unit = {},
     onFeed: (String) -> Unit = {}, onCurrentEvent: () -> Unit = {},
     onDismissMessage: () -> Unit = {},
-    onTestGames: () -> Unit = {},
 ) {
     BackHandler(enabled = state.busy) {}
     Box(Modifier.fillMaxSize()) {
         DeedsContent(
             state = state.copy(busy = false),
             onTraining = { if (!state.busy) onTraining() },
-            onTestGames = { if (!state.busy) onTestGames() },
             onExit = { if (!state.busy) onExit() },
             onStart = { if (!state.busy) onStart(it) },
             onRetry = { if (!state.busy) onRetry() },
@@ -102,7 +100,6 @@ fun DeedsScreen(onTraining: () -> Unit, onExit: () -> Unit,
 private fun DeedsContent(onTraining: () -> Unit, onExit: () -> Unit,
     state: DeedsUiState, onStart: (String) -> Unit, onRetry: () -> Unit,
     onCurrentEvent: () -> Unit,
-    onTestGames: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -145,10 +142,6 @@ private fun DeedsContent(onTraining: () -> Unit, onExit: () -> Unit,
                             Text("Пока нет новых дел. Продолжи день, чтобы узнать, кому нужна помощь.", color = DeedColors.TextSoft)
                         }
                     }
-                }
-                item(key = "chapter-test-games", contentType = "test-games") {
-                    Spacer(Modifier.height(12.dp))
-                    AdventurePrimaryButton("Тестовые игры", onTestGames, enabled = !state.busy)
                 }
                 item(key = "skill-training", contentType = "training") {
                     Spacer(Modifier.height(16.dp))

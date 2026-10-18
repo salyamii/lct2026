@@ -39,7 +39,6 @@ data object Telescope : NavKey
 
 fun EntryProviderScope<NavKey>.tasksEntry(
     onTraining: (Tasks) -> Unit,
-    onTestGames: (Tasks) -> Unit,
     onBack: (NavKey) -> Unit,
     onEvent: (Tasks) -> Unit,
     onGame: (Tasks, String) -> Unit,
@@ -66,7 +65,6 @@ fun EntryProviderScope<NavKey>.tasksEntry(
             onDismissMessage = viewModel::dismissMessage,
             onCurrentEvent = dropUnlessResumed { onEvent(source) },
             onTraining = dropUnlessResumed { onTraining(source) },
-            onTestGames = dropUnlessResumed { onTestGames(source) },
             onExit = dropUnlessResumed { onBack(source) },
         )
     }

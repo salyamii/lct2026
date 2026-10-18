@@ -53,14 +53,16 @@ indicator only after 300 ms, avoiding a spinner flash for fast local commits.
 The registered features render their working screens. Gear displays the inventory
 with two sections, owned items only, and an entry-scoped Hilt ViewModel. Its saved
 route ID remains `gear`; Back returns to the menu without changing game state.
-Tasks displays current offered deeds, Skill Training and, by CHAPTER-GAMES-D-001,
-the new Test Games entry. The app host maps these callbacks to `SkillTraining`
-and `ChapterTestGames` (`chapter_test_games`). Its gallery opens
+Tasks displays current offered deeds and Skill Training. By CHAPTER-GAMES-D-006,
+the Test Games entry has been removed from Tasks. The `ChapterTestGames`
+(`chapter_test_games`) and `ChapterTestGameSession` (`chapter_test_game`)
+serializers and entries remain to restore previously saved back stacks.
+A restored gallery opens
 `ChapterTestGameSession` (`chapter_test_game`) with a stable scene ID only.
 These seven gallery scenes (including strap repair by CHAPTER-GAMES-D-002)
 use entry-scoped temporary state and do not write to the game repository.
-Back returns to the gallery and then Tasks. CHAPTER-GAMES-D-005 retains this
-gallery after the mechanics are connected to real events.
+Back returns to the gallery and then Tasks. This supersedes the visible gallery
+entry retained by CHAPTER-GAMES-D-005; real games still open from their events.
 
 By CHAPTER-GAMES-D-004, real chapter games use the existing `DeedGame` entry
 with an occurrence ID and, for a story branch, its choice ID. Tasks supplies
