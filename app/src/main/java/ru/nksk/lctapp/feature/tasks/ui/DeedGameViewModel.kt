@@ -31,7 +31,8 @@ import ru.nksk.lctapp.domain.economy.EconomyOperations
 import ru.nksk.lctapp.feature.tasks.navigation.ChapterRepairPayment
 
 enum class DeedGameType { MEMORY, COMPARISON, PRECISION, LIGHTS, SEQUENCE, PIPES, DIFFERENCES, STACKING,
-    TELESCOPE, MARK, WHEEL, STRAP, SIGNAL, ROUTE_MAP, BOAT }
+    TELESCOPE, MARK, WHEEL, STRAP, SIGNAL, ROUTE_MAP, BOAT,
+    NEED_WANT, REAL_DISCOUNT, COIN_BALANCE, FINANCIAL_TRAP, EXTRA_PURCHASE }
 data class DeedGamePresentation(val title: String, val maximumReward: Long, val canPlay: Boolean,
     val storyAction: Boolean = false, val sceneRes: Int? = null, val instructions: String? = null,
     val activityArtworkRes: Int? = null)
@@ -115,6 +116,12 @@ internal class DeedGameViewModel @Inject constructor(
     fun finishPipes(state: PipesState) { DeedGameScore.fromPipes(state)?.let(::finish) }
     fun finishDifferences(state: DifferencesState) { DeedGameScore.fromDifferences(state)?.let(::finish) }
     fun finishStacking(state: StackingState) { DeedGameScore.fromStacking(state)?.let(::finish) }
+
+    fun finishFinancialGame(score: DeedGameScore) {
+        if (choiceId != null || mutableState.value.presentation?.canPlay != true ||
+            score.kind !in financialGameKinds || mutableState.value.type?.name != score.kind.name) return
+        finish(score)
+    }
 
     fun finishChapterGame(score: DeedGameScore) {
         if (mutableState.value.presentation?.canPlay != true || score.kind !in chapterGameKinds || repairUnconfirmed()) return
@@ -531,6 +538,11 @@ internal class DeedGameViewModel @Inject constructor(
                 DeedGameKind.SIGNAL -> DeedGameType.SIGNAL
                 DeedGameKind.ROUTE_MAP -> DeedGameType.ROUTE_MAP
                 DeedGameKind.BOAT -> DeedGameType.BOAT
+                DeedGameKind.NEED_WANT -> DeedGameType.NEED_WANT
+                DeedGameKind.REAL_DISCOUNT -> DeedGameType.REAL_DISCOUNT
+                DeedGameKind.COIN_BALANCE -> DeedGameType.COIN_BALANCE
+                DeedGameKind.FINANCIAL_TRAP -> DeedGameType.FINANCIAL_TRAP
+                DeedGameKind.EXTRA_PURCHASE -> DeedGameType.EXTRA_PURCHASE
             },
             presentation = DeedGamePresentation(renderPetText(session.catalog.displayTitle(event), game.pet.name), reward, pending == null && message == null && !repairWriting,
                 storyAction = storyGame,
@@ -554,6 +566,8 @@ internal class DeedGameViewModel @Inject constructor(
     }
 
     private companion object {
+        val financialGameKinds = setOf(DeedGameKind.NEED_WANT, DeedGameKind.REAL_DISCOUNT,
+            DeedGameKind.COIN_BALANCE, DeedGameKind.FINANCIAL_TRAP, DeedGameKind.EXTRA_PURCHASE)
         val chapterGameKinds = setOf(DeedGameKind.TELESCOPE, DeedGameKind.MARK, DeedGameKind.WHEEL,
             DeedGameKind.STRAP, DeedGameKind.SIGNAL, DeedGameKind.ROUTE_MAP, DeedGameKind.BOAT)
         const val REPAIR_KEY = "boat_payment_key"

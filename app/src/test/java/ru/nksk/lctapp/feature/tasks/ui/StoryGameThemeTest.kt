@@ -22,6 +22,8 @@ class StoryGameThemeTest {
                 assertTrue(choiceId, instructions.startsWith(checkNotNull(media.game).context))
             }
             when (kind) {
+                DeedGameKind.NEED_WANT, DeedGameKind.REAL_DISCOUNT, DeedGameKind.COIN_BALANCE,
+                DeedGameKind.FINANCIAL_TRAP, DeedGameKind.EXTRA_PURCHASE -> fail("Financial games belong to paid deeds: $choiceId")
                 DeedGameKind.MEMORY -> {
                     assertTrue(choiceId, instructions.contains("по две карточки"))
                     assertFalse(choiceId, instructions.contains("маркер"))
@@ -31,7 +33,7 @@ class StoryGameThemeTest {
                     assertFalse(choiceId, instructions.contains("по две карточки"))
                 }
                 DeedGameKind.COMPARISON -> {
-                    assertTrue(choiceId, instructions.contains("выбери предмет дороже"))
+                    assertTrue(choiceId, instructions.contains("следуй заданию раунда"))
                     assertFalse(choiceId, instructions.contains("маркер"))
                 }
                 DeedGameKind.LIGHTS -> assertTrue(choiceId, instructions.contains("фонарь и соседи"))
@@ -60,7 +62,7 @@ class StoryGameThemeTest {
         assertFalse(memory.contains("маркер"))
         assertTrue(precision.contains("маркер в зелёной зоне"))
         assertFalse(precision.contains("по две карточки"))
-        assertTrue(comparison.contains("выбери предмет дороже"))
+        assertTrue(comparison.contains("следуй заданию раунда"))
         assertFalse(comparison.contains("маркер"))
     }
 

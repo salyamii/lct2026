@@ -6,6 +6,7 @@ import ru.nksk.lctapp.domain.minigame.chapterone.*
 enum class DeedGameKind {
     MEMORY, COMPARISON, PRECISION, LIGHTS, SEQUENCE, PIPES, DIFFERENCES, STACKING,
     TELESCOPE, MARK, WHEEL, STRAP, SIGNAL, ROUTE_MAP, BOAT,
+    NEED_WANT, REAL_DISCOUNT, COIN_BALANCE, FINANCIAL_TRAP, EXTRA_PURCHASE,
 }
 
 /** A completed round set; incomplete boards cannot be submitted for payment. */
@@ -26,6 +27,11 @@ class DeedGameScore private constructor(
             DeedGameKind.PIPES -> attempts == 1 && correct == 1
             DeedGameKind.DIFFERENCES -> correct == DifferencesState.DIFF_COUNT && attempts >= DifferencesState.DIFF_COUNT
             DeedGameKind.STACKING -> attempts == StackingState.ROUNDS
+            DeedGameKind.NEED_WANT -> attempts == PracticeGames.needs().questions.size
+            DeedGameKind.REAL_DISCOUNT -> attempts == PracticeGames.discounts().questions.size
+            DeedGameKind.COIN_BALANCE -> attempts == CoinBalanceState.create().rounds.size
+            DeedGameKind.FINANCIAL_TRAP -> attempts == PracticeGames.traps().questions.size
+            DeedGameKind.EXTRA_PURCHASE -> attempts == PracticeGames.extraPurchases().questions.size
             DeedGameKind.TELESCOPE, DeedGameKind.MARK, DeedGameKind.WHEEL,
             DeedGameKind.STRAP, DeedGameKind.SIGNAL, DeedGameKind.ROUTE_MAP, DeedGameKind.BOAT -> correct == 1 && attempts == 1
         }) { "Invalid completed mini-game result" }
@@ -34,6 +40,29 @@ class DeedGameScore private constructor(
     fun reward(maximum: Long): Long = deedReward(maximum, correct, attempts)
 
     companion object {
+        /** Only a complete authored set can settle its paid deed; shuffled order is supported. */
+        fun fromNeedWant(state: PracticeChoiceState<NeedWantQuestion>): DeedGameScore? =
+            fromPractice(DeedGameKind.NEED_WANT, state, PracticeGames.matchesNeeds(state.questions))
+
+        fun fromRealDiscount(state: PracticeChoiceState<DiscountQuestion>): DeedGameScore? =
+            fromPractice(DeedGameKind.REAL_DISCOUNT, state, PracticeGames.matchesDiscounts(state.questions))
+
+        fun fromFinancialTrap(state: PracticeChoiceState<FinancialTrapQuestion>): DeedGameScore? =
+            fromPractice(DeedGameKind.FINANCIAL_TRAP, state, state.questions == PracticeGames.traps().questions)
+
+        fun fromExtraPurchase(state: PracticeChoiceState<ExtraPurchaseQuestion>): DeedGameScore? =
+            fromPractice(DeedGameKind.EXTRA_PURCHASE, state, PracticeGames.matchesExtraPurchases(state.questions))
+
+        private fun <Q : PracticeQuestion> fromPractice(kind: DeedGameKind,
+            state: PracticeChoiceState<Q>, matches: Boolean): DeedGameScore? =
+            if (matches && state.finished)
+                DeedGameScore(kind, state.correctAnswers, state.questions.size) else null
+
+        fun fromCoinBalance(state: CoinBalanceState): DeedGameScore? =
+            if (state.rounds == CoinBalanceState.create().rounds && state.finished && state.started &&
+                state.verdict == null && state.removed.isEmpty() && !state.madeMistake)
+                DeedGameScore(DeedGameKind.COIN_BALANCE, state.correctAnswers, state.rounds.size) else null
+
         fun fromBoat(state: BoatJourney): DeedGameScore? =
             if (state.phase == BoatPhase.ARRIVED && state.plan != null && state.distance == 1f &&
                 state.x.isFinite() && state.x in 0.18f..0.82f && state.targetX.isFinite() &&

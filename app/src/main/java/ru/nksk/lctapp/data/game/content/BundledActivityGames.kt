@@ -64,7 +64,7 @@ internal fun GameCatalog.withActivityGameVersions(): GameCatalog {
         val card = currentCards.getValue(id)
         currentCards[id] = card.copy(presentation = card.presentation.copy(
             body = when (id) {
-                "figma-2163-2-v1:balance-v2" -> "Смотритель выбирает приборы для наблюдений. Помоги сравнить ценники и найти, какой предмет стоит дороже."
+                "figma-2163-2-v1:balance-v2" -> "Смотритель выбирает приборы для наблюдений. Помоги сравнить ценники: иногда нужно найти товар дороже, а иногда — дешевле."
                 "figma-2270-210-v1:balance-v2" -> "Под пылью на ящике нашлась картинка отправителя. Бобёр принёс карточки из своих записей. Найди одинаковые пары, чтобы сверить отметки."
                 else -> card.presentation.body
             },

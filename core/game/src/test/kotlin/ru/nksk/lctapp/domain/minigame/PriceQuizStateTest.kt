@@ -10,11 +10,49 @@ import org.junit.Test
 class PriceQuizStateTest {
     @Test
     fun create_generatesFiveDistinctAmountQuestions() {
-        val state = PriceQuizState.create(random = Random(42))
-        assertEquals(PriceQuizState.QUESTION_COUNT, state.questions.size)
-        state.questions.forEach { question ->
-            assertTrue(kotlin.math.abs(question.leftAmount - question.rightAmount) >= 10)
+        val questions = (0..200).flatMap { seed ->
+            val state = PriceQuizState.create(random = Random(seed))
+            assertEquals(PriceQuizState.QUESTION_COUNT, state.questions.size)
+            state.questions
         }
+        questions.forEach { question ->
+            assertTrue(question.leftAmount in 10..199)
+            assertTrue(question.rightAmount in 10..199)
+            assertTrue(question.leftAmount != question.rightAmount)
+        }
+        assertEquals(setOf(true, false), questions.map { it.pickLarger }.toSet())
+        assertTrue(questions.any { kotlin.math.abs(it.leftAmount - it.rightAmount) == 1 })
+        val amounts = questions.flatMap { listOf(it.leftAmount, it.rightAmount) }
+        assertTrue(10 in amounts)
+        assertTrue(199 in amounts)
+        assertEquals(PriceQuizState.create(Random(42)), PriceQuizState.create(Random(42)))
+    }
+
+    @Test
+    fun answer_checksBothTargetsOnEitherSideIncludingAdjacentPrices() {
+        for (pickLarger in listOf(true, false)) {
+            for ((left, right) in listOf(10 to 199, 199 to 10, 198 to 199, 199 to 198)) {
+                val state = PriceQuizState(listOf(QuizQuestion(left, right, pickLarger)))
+                val expectedLeft = if (pickLarger) left > right else left < right
+                val correct = state.answer(expectedLeft)
+                assertEquals(true, correct.lastCorrect)
+                assertEquals(1, correct.correctAnswers)
+                assertEquals(PriceQuizState.REWARD_PER_CORRECT, correct.reward)
+                val wrong = state.answer(!expectedLeft)
+                assertEquals(false, wrong.lastCorrect)
+                assertEquals(0, wrong.correctAnswers)
+                assertEquals(0, wrong.reward)
+                assertEquals(correct, correct.answer(!expectedLeft))
+                val finished = correct.next()
+                assertTrue(finished.finished)
+                assertEquals(finished, finished.answer(!expectedLeft).next())
+            }
+        }
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun equalPricesAreNotAValidQuestion() {
+        QuizQuestion(100, 100, pickLarger = false)
     }
 
     @Test

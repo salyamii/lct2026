@@ -97,7 +97,7 @@ fun MemoryGameScreen(
                                 label = label,
                                 revealed = index in state.faceUp || index in state.matched,
                                 matched = index in state.matched,
-                                enabled = state.pending == null && !state.won && deed?.canPlay != false,
+                                enabled = !state.won && deed?.canPlay != false,
                                 onClick = {
                                     onAction(MemoryGameAction.Tap(index))
                                 },

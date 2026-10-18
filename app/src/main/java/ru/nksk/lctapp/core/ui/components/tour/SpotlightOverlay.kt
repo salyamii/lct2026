@@ -56,6 +56,7 @@ fun SpotlightOverlay(
     onPrevious: () -> Unit,
     onNext: () -> Unit,
     onSkip: () -> Unit,
+    cardBelowTarget: Boolean = false,
     onScroll: (Offset, Float) -> Unit = { _, _ -> },
 ) {
     BackHandler { if (!busy) { if (hasPrevious) onPrevious() else onSkip() } }
@@ -78,7 +79,7 @@ fun SpotlightOverlay(
         // The scrim covers the entire window. Insets apply only to the explanatory card.
         val safeOffset = Offset(0f, -safeBounds.top)
         val region = spotlightCardRegion(safeBounds.height, rects.map { it.translate(safeOffset) },
-            target?.translate(safeOffset), gap, with(density) { 210.dp.toPx() })
+            target?.translate(safeOffset), gap, with(density) { 210.dp.toPx() }, belowTarget = cardBelowTarget)
         var cardWindowBounds by remember(title) { mutableStateOf<Rect?>(null) }
         val cardTop = safeBounds.top + region.top
         val focus = remember { FocusRequester() }
@@ -131,8 +132,9 @@ fun SpotlightOverlay(
                 .semantics { paneTitle = "Обучение: $title"; isTraversalGroup = true },
             shape = RoundedCornerShape(24.dp), color = GamePaper, shadowElevation = 10.dp,
         ) {
-            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()),
+            Column(Modifier.then(if (cardBelowTarget) Modifier.verticalScroll(rememberScrollState()) else Modifier)
+                .padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(if (cardBelowTarget) Modifier else Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(progress, fontFamily = Nunito, fontSize = 13.sp, color = GameInk.copy(alpha = .7f))
                     Text(title, fontFamily = Rubik, fontSize = 20.sp, fontWeight = FontWeight.Bold,

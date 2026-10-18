@@ -18,7 +18,7 @@ internal fun storyGameInstructions(kind: DeedGameKind, context: String? = null):
     when (kind) {
         DeedGameKind.MEMORY -> "Открывай по две карточки. Найди все пары."
         DeedGameKind.PRECISION -> "Останови маркер в зелёной зоне."
-        DeedGameKind.COMPARISON -> "Сравни цены и выбери предмет дороже."
+        DeedGameKind.COMPARISON -> "Сравни цены и следуй заданию раунда."
         DeedGameKind.LIGHTS -> "Нажимай на фонари: выбранный фонарь и соседи меняют состояние. Погаси их все."
         DeedGameKind.SEQUENCE -> if (context.isNullOrBlank()) "Повтори вспышки по памяти." else null
         DeedGameKind.PIPES -> "Соедини концы одного цвета линией."
@@ -31,5 +31,10 @@ internal fun storyGameInstructions(kind: DeedGameKind, context: String? = null):
         DeedGameKind.SIGNAL -> "Передай башне три сигнала."
         DeedGameKind.ROUTE_MAP -> "Соедини отметки на карте."
         DeedGameKind.BOAT -> "Веди лодку пальцем до причала."
+        DeedGameKind.NEED_WANT -> "Прочитай условия прогулки и выбери корзину: в дорогу или для радости."
+        DeedGameKind.REAL_DISCOUNT -> "Сравни цену сегодня с ценой вчера."
+        DeedGameKind.COIN_BALANCE -> "Собери всё для этой задачи и уложись в сумму."
+        DeedGameKind.FINANCIAL_TRAP -> "Сравни полную цену и время ожидания."
+        DeedGameKind.EXTRA_PURCHASE -> "Выбери предмет, который не нужен для этого дела."
     },
 ).joinToString(" ")

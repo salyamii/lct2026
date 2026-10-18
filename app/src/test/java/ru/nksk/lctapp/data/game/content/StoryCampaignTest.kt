@@ -387,6 +387,8 @@ class StoryCampaignTest {
         fun permutations(values: List<String>): List<List<String>> = if (values.isEmpty()) listOf(emptyList())
             else values.flatMap { first -> permutations(values - first).map { listOf(first) + it } }
         fun perfectScore(kind: DeedGameKind): DeedGameScore = checkNotNull(when (kind) {
+            DeedGameKind.NEED_WANT, DeedGameKind.REAL_DISCOUNT, DeedGameKind.COIN_BALANCE,
+            DeedGameKind.FINANCIAL_TRAP, DeedGameKind.EXTRA_PURCHASE -> completedFinancialGameScore(kind)
             DeedGameKind.TELESCOPE, DeedGameKind.MARK, DeedGameKind.WHEEL, DeedGameKind.STRAP,
             DeedGameKind.SIGNAL, DeedGameKind.ROUTE_MAP, DeedGameKind.BOAT -> completedChapterGameScore(kind)
             DeedGameKind.PRECISION -> DeedGameScore.fromPrecision(TargetStopState(10, round = 5, hits = 5, lastHit = true))
