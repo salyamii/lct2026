@@ -3,6 +3,7 @@ package ru.nksk.lctapp.feature.tasks.ui.practice
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ru.nksk.lctapp.R
@@ -37,20 +38,20 @@ fun FinancialTrapScreen(
                 question.options.forEachIndexed { index, option ->
                     val first = index == 0
                     val title = when (scenario) {
-                        TrapScenario.TICKET, TrapScenario.URGENT_TICKET ->
+                        TrapScenario.TICKET ->
                             if (first) R.string.practice_today else R.string.practice_tomorrow
+                        TrapScenario.URGENT_TICKET ->
+                            if (first) R.string.practice_ticket_for_today else R.string.practice_ticket_for_tomorrow
                         TrapScenario.BORROWED_LANTERN -> if (first) R.string.practice_borrow else R.string.practice_save
                         TrapScenario.DELIVERY_FEE -> if (first) R.string.practice_shop_a else R.string.practice_shop_b
                     }
                     val details = when (scenario) {
                         TrapScenario.TICKET, TrapScenario.URGENT_TICKET ->
-                            stringResource(R.string.practice_ticket_cost, option.price) + "\n" +
-                                stringResource(R.string.practice_ticket_left, 20 - option.price)
-                        TrapScenario.BORROWED_LANTERN -> if (first) {
-                            stringResource(R.string.practice_loan_cost, option.price, option.total) + "\n" +
-                                stringResource(R.string.practice_loan_extra, option.extraCost)
-                        } else stringResource(R.string.practice_save_cost, option.price) + "\n" +
-                            stringResource(R.string.practice_no_extra)
+                            stringResource(R.string.practice_ticket_cost, option.price)
+                        TrapScenario.BORROWED_LANTERN -> if (first)
+                            stringResource(R.string.practice_loan_cost, option.price, option.total)
+                        else stringResource(R.string.practice_save_cost, option.price) + "\n" +
+                            pluralStringResource(R.plurals.practice_saving_time, option.waitDays, option.waitDays)
                         TrapScenario.DELIVERY_FEE -> stringResource(R.string.practice_delivery_cost,
                             option.price, option.extraCost)
                     }

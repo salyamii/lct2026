@@ -61,7 +61,7 @@ class PracticeGameScreensTest {
         compose.setContent { LCTAppTheme {
             FinancialTrapScreen(game.value, { game.value = game.value.reduce(it) }, {})
         } }
-        compose.onNodeWithText("СЕГОДНЯ").performScrollTo().performClick()
+        compose.onNodeWithText("НА СЕГОДНЯ").performScrollTo().performClick()
         compose.runOnIdle { assertEquals(true, game.value.lastCorrect) }
         compose.onNodeWithText("Посмотреть итог").performScrollTo().performClick()
         compose.runOnIdle { assertTrue(game.value.finished) }
