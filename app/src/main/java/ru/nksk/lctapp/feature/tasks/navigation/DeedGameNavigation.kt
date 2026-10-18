@@ -127,6 +127,13 @@ fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> 
                         onExit = leave,
                     ))
                 }
+                DeedGameType.NEED_WANT, DeedGameType.REAL_DISCOUNT, DeedGameType.COIN_BALANCE,
+                DeedGameType.FINANCIAL_TRAP, DeedGameType.EXTRA_PURCHASE -> FinancialDeedContent(
+                    occurrenceId = source.occurrenceId,
+                    kind = DeedGameKind.valueOf(checkNotNull(state.type).name),
+                    deed = checkNotNull(state.presentation), resumed = resumed,
+                    onCompleted = model::finishFinancialGame, onBack = leave,
+                )
                 null -> Unit
             }
         }

@@ -22,6 +22,8 @@ class StoryGameThemeTest {
                 assertTrue(choiceId, instructions.startsWith(checkNotNull(media.game).context))
             }
             when (kind) {
+                DeedGameKind.NEED_WANT, DeedGameKind.REAL_DISCOUNT, DeedGameKind.COIN_BALANCE,
+                DeedGameKind.FINANCIAL_TRAP, DeedGameKind.EXTRA_PURCHASE -> fail("Financial games belong to paid deeds: $choiceId")
                 DeedGameKind.MEMORY -> {
                     assertTrue(choiceId, instructions.contains("по две карточки"))
                     assertFalse(choiceId, instructions.contains("маркер"))

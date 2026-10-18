@@ -28,7 +28,7 @@ class BundledActivityGamesTest {
         mapOf("figma-2297-2-v2" to "figma-2297-2-v3", "figma-2326-112-v2" to "figma-2326-112-v3", "figma-2326-352-v2" to "figma-2326-352-v3")
 
     @Test fun allBoardsHaveMeaningfulCurrentAssignments() {
-        assertEquals(deedBoards.keys.map { "figma-$it-v1:balance-v2" + if (it in changedDeeds) ":game-v3" else "" }, catalog.deedPool)
+        assertEquals(deedBoards.keys.map { "figma-$it-v1:balance-v2" + if (it in changedDeeds) ":game-v3" else "" }, catalog.deedPool.filter { it.startsWith("figma-") })
         for ((node, kind) in deedBoards) {
             val id = catalog.deedPool.single { it.startsWith("figma-$node-v1:") }
             assertEquals(node, kind, catalog.policies.getValue(id).deedGameKind)

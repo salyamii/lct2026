@@ -20960,9 +20960,546 @@
         "resized": false,
         "pillow_version": "10.2.0"
       }
+    },
+    {
+      "resource": "npc_luna_explaining",
+      "category": "Standalone mini-games - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/npc_luna_explaining.webp",
+      "format": "webp",
+      "width": 1107,
+      "height": 1421,
+      "bytes": 708232,
+      "sha256": "fc1fa0f975b4aca970a05abc5731e73eff7156dfa05fe239f891ef3483ae54af",
+      "rgba_sha256": "39486a22493d4cdd154f1071e1950ae9747b3816e04a5d6482244023fa8f5ec7",
+      "alpha_bounds": [
+        39,
+        37,
+        1075,
+        1421
+      ],
+      "source_path": "docs/design/assets/sources/standalone-games-2026-10-18/npc_luna_explaining.png",
+      "source_sha256": "cb89f9f61e1e77474b9314485fbab602314076d9c899d375e2744a74c7480f27",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "4153:928",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-928",
+        "collection_id": null
+      },
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "prop_practice_backpack",
+      "category": "Standalone mini-games - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/prop_practice_backpack.webp",
+      "format": "webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 416094,
+      "sha256": "d1163dde3cc57ceec095201af5e727d7edb4cd97b59d224978ec0da4d6196cf8",
+      "rgba_sha256": "fba9f3eb88d22013143014e9618fb969f8071eae15d8bf0b54a6ea7e107a2409",
+      "alpha_bounds": [
+        177,
+        152,
+        823,
+        874
+      ],
+      "source_path": "docs/design/assets/sources/standalone-games-2026-10-18/prop_practice_backpack.png",
+      "source_sha256": "d8518d7354e0e2a9d7444cedb524fbb16756545d7388e40237404ea4963ba795",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "4153:1046",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1046",
+        "collection_id": null
+      },
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "prop_coin_balance_scales",
+      "category": "Standalone mini-games - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/prop_coin_balance_scales.webp",
+      "format": "webp",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1320210,
+      "sha256": "b178c625cf355617d8524006217e96778985d175316f6cdf29117babe2ab89de",
+      "rgba_sha256": "b3c44fc33824161eec906817953aaed025056d2e5b534178b340814f5f93a5d3",
+      "alpha_bounds": [
+        0,
+        14,
+        1536,
+        1024
+      ],
+      "source_path": "docs/design/assets/sources/standalone-games-2026-10-18/prop_coin_balance_scales.png",
+      "source_sha256": "dbe32f40df170fa6fbc6b8d81868a46c903670990a96d644e62bd2c223258836",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "4211:705",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4211-705",
+        "collection_id": null
+      },
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "prop_practice_medicine",
+      "category": "Standalone mini-games - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/prop_practice_medicine.webp",
+      "format": "webp",
+      "width": 128,
+      "height": 85,
+      "bytes": 11640,
+      "sha256": "6285ea7fcfcf8b91f1a14e8bad6d0a4244ddf30964d2a767617aec35b95b1966",
+      "rgba_sha256": "cd467b911048644668bf9c8fecdbeea6ecf5def00ee2a57d97913a7a170ab65a",
+      "alpha_bounds": [
+        11,
+        5,
+        116,
+        80
+      ],
+      "source_path": "docs/design/assets/sources/standalone-games-2026-10-18/prop_practice_medicine.png",
+      "source_sha256": "6a063d1439047718047f55e2beb0c51813410c64a469ed7867b7ca524c7cf05f",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "4153:1193",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1193",
+        "collection_id": null
+      },
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "prop_practice_bread",
+      "category": "Standalone mini-games - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/prop_practice_bread.webp",
+      "format": "webp",
+      "width": 128,
+      "height": 85,
+      "bytes": 14120,
+      "sha256": "8c593a5355d1a7a8507fc1b9134fc94ceb843fa62e535782725e0ba5da854a01",
+      "rgba_sha256": "c8adfe148cbd5b7a751e4de8defc24e320b0d3347aed0e04cd114df97aa14a28",
+      "alpha_bounds": [
+        7,
+        6,
+        124,
+        85
+      ],
+      "source_path": "docs/design/assets/sources/standalone-games-2026-10-18/prop_practice_bread.png",
+      "source_sha256": "62b078b533f3103302c7b5ec2035e4eccf1f65b6b33eb2f27d1416593f9a8ff3",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "4153:1213",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1213",
+        "collection_id": null
+      },
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "prop_practice_candy",
+      "category": "Standalone mini-games - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/prop_practice_candy.webp",
+      "format": "webp",
+      "width": 128,
+      "height": 118,
+      "bytes": 19298,
+      "sha256": "fb65ba81338aa1af416b54e7299f3589e1f60e4675b0798fda4602292e9d1cba",
+      "rgba_sha256": "056a28c8ca45e6e0e516314289940a7e29f0dcf422ef70ace37f5b908f574286",
+      "alpha_bounds": [
+        6,
+        2,
+        124,
+        118
+      ],
+      "source_path": "docs/design/assets/sources/standalone-games-2026-10-18/prop_practice_candy.png",
+      "source_sha256": "99073b581898c997eb0f1574dc4af5deb02249fb30a04379a0e0b7713d2138df",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "4153:1217",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1217",
+        "collection_id": null
+      },
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "npc_tiko_workbench",
+      "category": "Standalone mini-games - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/npc_tiko_workbench.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 698200,
+      "sha256": "863b0956671e4cba4051c0ac65cc9ae30c21f36b540de5b00dc0c7e0feb7a3f3",
+      "rgba_sha256": "e0947aacaee91de00c84fed071fec422409fa9b1344053aea3dfb2b6663fbc57",
+      "alpha_bounds": [
+        29,
+        37,
+        1198,
+        1182
+      ],
+      "source_path": "docs/design/assets/sources/standalone-games-2026-10-18/npc_tiko_workbench.png",
+      "source_sha256": "b4cfc3017abcfae496e00cbd10f48aa8bafcca6ad130361ccabae33fcf46dfec",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "4153:1729",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1729",
+        "collection_id": null
+      },
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "prop_practice_workbench",
+      "category": "Standalone mini-games - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/prop_practice_workbench.webp",
+      "format": "webp",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 1576640,
+      "sha256": "0554c498d2c9e2498f25a2af9c60e3307a1a86145f9bc351a8839f056a40f4b7",
+      "rgba_sha256": "d8c4a2a0c1559f68226864ef140d467108f42afa658f8e68c9f2baefdbc382da",
+      "alpha_bounds": [
+        0,
+        0,
+        1024,
+        1536
+      ],
+      "source_path": "docs/design/assets/sources/standalone-games-2026-10-18/prop_practice_workbench.png",
+      "source_sha256": "162d817eadfbcb428f826b9271a51a007456a948654c297513bc8777b9745d17",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "4153:1730",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1730",
+        "collection_id": null
+      },
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "prop_practice_plank",
+      "category": "Standalone mini-games - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/prop_practice_plank.webp",
+      "format": "webp",
+      "width": 128,
+      "height": 85,
+      "bytes": 9056,
+      "sha256": "782b81ea0f1dfc7ed970e99812979d7556107ff3e09d86f05464c5cfe10e9f45",
+      "rgba_sha256": "70021f737ecb99e32443be4bc036cd362a0a32aaaa72a2132619463e81c2f2a2",
+      "alpha_bounds": [
+        7,
+        8,
+        122,
+        79
+      ],
+      "source_path": "docs/design/assets/sources/standalone-games-2026-10-18/prop_practice_plank.png",
+      "source_sha256": "fa007bcd63a40e2d2a655f6e64d2f3f4583a7a6d47162bcd4e884968ec401b98",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "4153:1734",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1734",
+        "collection_id": null
+      },
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "prop_practice_candles",
+      "category": "Standalone mini-games - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/prop_practice_candles.webp",
+      "format": "webp",
+      "width": 128,
+      "height": 106,
+      "bytes": 10708,
+      "sha256": "c6abfe8bee63619b5be78ff0c5c2a49bfae2acfe17081288bf6286e0f1dee5b3",
+      "rgba_sha256": "a3b2881d7b28644c23b75b08a1380a58d27cf65af4d08837951c5df6b9807280",
+      "alpha_bounds": [
+        33,
+        2,
+        96,
+        102
+      ],
+      "source_path": "docs/design/assets/sources/standalone-games-2026-10-18/prop_practice_candles.png",
+      "source_sha256": "1ed37e213d7c965d04850a5b931274ce124b1b0871ac501eb91963344095f882",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "4153:1737",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1737",
+        "collection_id": null
+      },
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "prop_practice_nails",
+      "category": "Standalone mini-games - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/prop_practice_nails.webp",
+      "format": "webp",
+      "width": 128,
+      "height": 99,
+      "bytes": 7988,
+      "sha256": "8772c77e8b4f7e4d8d87093de2b25b0b9ad6d8526db904c074383b13ac8f4b95",
+      "rgba_sha256": "b31d33f92fa451a47a9429e583ac08c9a111b2541e4ebd47eb02fa556b665b11",
+      "alpha_bounds": [
+        14,
+        8,
+        118,
+        91
+      ],
+      "source_path": "docs/design/assets/sources/standalone-games-2026-10-18/prop_practice_nails.png",
+      "source_sha256": "f94acf7b44c6c823c1ec6fdc2ec9858b4d776586ff1ac929de114cd94d2db680",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "4153:1740",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1740",
+        "collection_id": null
+      },
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "prop_practice_hammer",
+      "category": "Standalone mini-games - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/prop_practice_hammer.webp",
+      "format": "webp",
+      "width": 128,
+      "height": 85,
+      "bytes": 5816,
+      "sha256": "cdc10eb7fdc33d4d06e5608492eb8ed309774682ab9611c40b527735db504333",
+      "rgba_sha256": "152649690d1dc0a3da979ad1987098eac9f3fca41d0a99ffd6df1392f0441207",
+      "alpha_bounds": [
+        18,
+        2,
+        113,
+        82
+      ],
+      "source_path": "docs/design/assets/sources/standalone-games-2026-10-18/prop_practice_hammer.png",
+      "source_sha256": "9218f0198dabd2f08dc7eafbce3c94eb07114e986b669a22497c0a7eef0dae4a",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "4153:1743",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1743",
+        "collection_id": null
+      },
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "prop_practice_ticket",
+      "category": "Standalone mini-games - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/prop_practice_ticket.webp",
+      "format": "webp",
+      "width": 128,
+      "height": 85,
+      "bytes": 11662,
+      "sha256": "02bb39cfdba64ae68a8786580bc17a82bcf32b643d7cc2a4af1f5eceb1d21837",
+      "rgba_sha256": "660e8d849825b5c4560d3b3b22fa5f9b0507281e867632aa4755dcf94178cd50",
+      "alpha_bounds": [
+        0,
+        7,
+        122,
+        85
+      ],
+      "source_path": "docs/design/assets/sources/standalone-games-2026-10-18/prop_practice_ticket.png",
+      "source_sha256": "8b1e34474125974d999aa35627f3d46bff6fb7ee32e3afbe57fe578e16f82ee0",
+      "figma": {
+        "file_key": "bAod1cKtTX9Q8omQ067q3q",
+        "node_id": "4153:1543",
+        "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1543",
+        "collection_id": null
+      },
+      "conversion": {
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "pillow_version": "12.3.0"
+      },
+      "lossless_rgba_verified": true
+    },
+    {
+      "resource": "icon_practice_water",
+      "category": "Practice native vector illustrations - 2026-10-18",
+      "format": "vector_xml",
+      "path": "app/src/main/res/drawable/icon_practice_water.xml",
+      "bytes": 780,
+      "sha256": "49c543730303ad5beeac7d3fc959a6b8016d7894454a1bc7db40ea91305a41db",
+      "width": 96,
+      "height": 96,
+      "source_path": "docs/design/assets/sources/standalone-games-2026-10-18/icon_practice_water.svg",
+      "source_sha256": "42c86eedc40da66689f8dad8d4e879e213112e132d75f0adddb1b2ffc984e580",
+      "source_method": "authored_native_vector; not a Figma export"
+    },
+    {
+      "resource": "icon_practice_scarf",
+      "category": "Practice native vector illustrations - 2026-10-18",
+      "format": "vector_xml",
+      "path": "app/src/main/res/drawable/icon_practice_scarf.xml",
+      "bytes": 749,
+      "sha256": "e951cb1aad758fdba92868169e9cb939d99808f5bb94ceb6d7250bd14fb60a47",
+      "width": 96,
+      "height": 96,
+      "source_path": "docs/design/assets/sources/standalone-games-2026-10-18/icon_practice_scarf.svg",
+      "source_sha256": "bf35bd1b8290a9d3ce80c5f691dbb73fa942275372084e70fe9bfcd0bbfe9300",
+      "source_method": "authored_native_vector; not a Figma export"
+    },
+    {
+      "resource": "icon_practice_teddy",
+      "category": "Practice native vector illustrations - 2026-10-18",
+      "format": "vector_xml",
+      "path": "app/src/main/res/drawable/icon_practice_teddy.xml",
+      "bytes": 1130,
+      "sha256": "5f480e80638270d3681ed48a7d36a0b584a9a6f7a4ce6a56cdd3cfc49ccdbfe7",
+      "width": 96,
+      "height": 96,
+      "source_path": "docs/design/assets/sources/standalone-games-2026-10-18/icon_practice_teddy.svg",
+      "source_sha256": "a1a7be3747cfe4d35640adaefd36e59de31fb3b68d4f6966f00ec644f0d5212f",
+      "source_method": "authored_native_vector; not a Figma export"
+    },
+    {
+      "resource": "icon_practice_fishing_rod",
+      "category": "Practice native vector illustrations - 2026-10-18",
+      "format": "vector_xml",
+      "path": "app/src/main/res/drawable/icon_practice_fishing_rod.xml",
+      "bytes": 1119,
+      "sha256": "9e5eac32f739818972cc28a114eeef9427acf737345fc615c08368033e2812e7",
+      "width": 96,
+      "height": 96,
+      "source_path": "docs/design/assets/sources/standalone-games-2026-10-18/icon_practice_fishing_rod.svg",
+      "source_sha256": "c1750126a6bedde247acc0f7d471e4cf90bf77496e1162dbd4c4c014f04f49bd",
+      "source_method": "authored_native_vector; not a Figma export"
+    },
+    {
+      "resource": "icon_practice_bait",
+      "category": "Practice native vector illustrations - 2026-10-18",
+      "format": "vector_xml",
+      "path": "app/src/main/res/drawable/icon_practice_bait.xml",
+      "bytes": 794,
+      "sha256": "e8c0b2c61e0a3a5407ac98381a698e0cf5ea873ec7d9c28c6aa812c60e414c5b",
+      "width": 96,
+      "height": 96,
+      "source_path": "docs/design/assets/sources/standalone-games-2026-10-18/icon_practice_bait.svg",
+      "source_sha256": "67bde0ec570adb4f6c0bbaee210c5f1292e86b54dd823d52aa61ef153e7346a7",
+      "source_method": "authored_native_vector; not a Figma export"
+    },
+    {
+      "resource": "icon_practice_bucket",
+      "category": "Practice native vector illustrations - 2026-10-18",
+      "format": "vector_xml",
+      "path": "app/src/main/res/drawable/icon_practice_bucket.xml",
+      "bytes": 918,
+      "sha256": "1b0f23b23844a875a3546b6ee0e7aa2a8feb99b3848c6ddb9a06cead43ca3621",
+      "width": 96,
+      "height": 96,
+      "source_path": "docs/design/assets/sources/standalone-games-2026-10-18/icon_practice_bucket.svg",
+      "source_sha256": "246d2a4281c3ac8501ebcc38c37a0de5f3bccc6bc5c23a09822f5988fb043e22",
+      "source_method": "authored_native_vector; not a Figma export"
     }
   ],
-  "missing": [],
+  "missing": [
+    {
+      "figma_node_id": "4114:706",
+      "name": "Запас воды",
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4114-706",
+      "reason": "Figma MCP call quota exhausted on 2026-10-18; bitmap export unavailable.",
+      "implementation": "Standalone games use the separately catalogued authored native illustration icon_practice_water. This is not a Figma bitmap export."
+    },
+    {
+      "figma_node_id": "4153:1842",
+      "name": "Шарф",
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1842",
+      "reason": "Figma MCP call quota exhausted on 2026-10-18; bitmap export unavailable.",
+      "implementation": "Standalone games use the separately catalogued authored native illustration icon_practice_scarf. This is not a Figma bitmap export."
+    },
+    {
+      "figma_node_id": "4153:1845",
+      "name": "Мишка",
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1845",
+      "reason": "Figma MCP call quota exhausted on 2026-10-18; bitmap export unavailable.",
+      "implementation": "Standalone games use the separately catalogued authored native illustration icon_practice_teddy. This is not a Figma bitmap export."
+    },
+    {
+      "figma_node_id": "4153:1866",
+      "name": "Удочка",
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1866",
+      "reason": "Figma MCP call quota exhausted on 2026-10-18; bitmap export unavailable.",
+      "implementation": "Standalone games use the separately catalogued authored native illustration icon_practice_fishing_rod. This is not a Figma bitmap export."
+    },
+    {
+      "figma_node_id": "4153:1869",
+      "name": "Наживка",
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1869",
+      "reason": "Figma MCP call quota exhausted on 2026-10-18; bitmap export unavailable.",
+      "implementation": "Standalone games use the separately catalogued authored native illustration icon_practice_bait. This is not a Figma bitmap export."
+    },
+    {
+      "figma_node_id": "4153:1872",
+      "name": "Ведро",
+      "url": "https://www.figma.com/design/bAod1cKtTX9Q8omQ067q3q/?node-id=4153-1872",
+      "reason": "Figma MCP call quota exhausted on 2026-10-18; bitmap export unavailable.",
+      "implementation": "Standalone games use the separately catalogued authored native illustration icon_practice_bucket. This is not a Figma bitmap export."
+    }
+  ],
   "launcher_icons": {
     "decision": "APP-ICON-D-002",
     "approved_on": "2026-09-28",

@@ -23,6 +23,18 @@ class DeedRewardPreview private constructor(
     }
 
     companion object {
+        fun fromPractice(state: PracticeChoiceState<*>): DeedRewardPreview {
+            val mistakes = state.answers.size - state.correctAnswers
+            return DeedRewardPreview(mistakes, state.questions.size - mistakes, state.questions.size)
+        }
+
+        fun fromCoinBalance(state: CoinBalanceState): DeedRewardPreview {
+            val completedCorrect = state.correctAnswers -
+                if (state.verdict == BalanceVerdict.BALANCED && !state.madeMistake) 1 else 0
+            val mistakes = state.current - completedCorrect + if (state.madeMistake) 1 else 0
+            return DeedRewardPreview(mistakes, state.rounds.size - mistakes, state.rounds.size)
+        }
+
         fun fromMemory(state: MemoryState): DeedRewardPreview {
             // Recall mistakes are recorded once, on the second tap. Blind discovery is free.
             val mistakes = state.recallMistakes

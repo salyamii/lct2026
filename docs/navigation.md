@@ -612,3 +612,16 @@ and Settings receives a repeat callback. Repeating the tour returns to the exist
 MainMenu root; it adds no route or game command. Only the resumed, ready menu without
 an active dialog or budget redirect can present guidance. Progress lives in a separate
 device preference rather than navigation keys. See [menu tour](design/menu-tour.md).
+
+
+## Финансовые игры в обычных делах — 2026-10-18
+
+По FINANCIAL-DEEDS-D-001 пять финансовых полей открываются в существующем
+`DeedGame(occurrenceId, choiceId = null)`. `FinancialDeedContent` получает
+entry-scoped Hilt ViewModel, собирает его состояние с lifecycle и допускает
+ввод/передачу завершённого результата только в RESUMED при `canPlay`.
+`FinancialGameViewModel` хранит только временную партию в `SavedStateHandle`.
+Обычный `DeedGameViewModel` остаётся владельцем паузы, атомарного начисления,
+ошибки/повтора записи и предложения отложить награду. Новых ключей маршрута
+или самостоятельных кнопок демо в «Делах» нет. Preview используют те же экраны
+и reducers с локальным состоянием, без игрового сохранения.
