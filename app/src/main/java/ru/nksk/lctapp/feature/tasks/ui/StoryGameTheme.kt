@@ -31,9 +31,9 @@ internal fun storyGameInstructions(kind: DeedGameKind, context: String? = null):
         DeedGameKind.SIGNAL -> "Передай башне три сигнала."
         DeedGameKind.ROUTE_MAP -> "Соедини отметки на карте."
         DeedGameKind.BOAT -> "Веди лодку пальцем до причала."
-        DeedGameKind.NEED_WANT -> "Выбери корзину: в дорогу или для радости."
+        DeedGameKind.NEED_WANT -> "Прочитай условия прогулки и выбери корзину: в дорогу или для радости."
         DeedGameKind.REAL_DISCOUNT -> "Сравни цену сегодня с ценой вчера."
-        DeedGameKind.COIN_BALANCE -> "Убери необязательные покупки, чтобы хватило монет."
+        DeedGameKind.COIN_BALANCE -> "Собери всё для этой задачи и уложись в сумму."
         DeedGameKind.FINANCIAL_TRAP -> "Сравни полную цену и время ожидания."
         DeedGameKind.EXTRA_PURCHASE -> "Выбери предмет, который не нужен для этого дела."
     },

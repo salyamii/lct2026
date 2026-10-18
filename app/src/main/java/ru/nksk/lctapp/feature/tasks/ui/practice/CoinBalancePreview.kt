@@ -18,28 +18,41 @@ private fun CoinBalanceInteractivePreview() = CoinBalancePreviewContent()
 
 @Preview(name = "Верный баланс", group = "Монетный баланс", widthDp = 393, heightDp = 852)
 @Composable
-private fun CoinBalanceCorrectPreview() = CoinBalancePreviewContent(CoinBalanceState.create()
-    .reduce(CoinBalanceAction.Start)
-    .reduce(CoinBalanceAction.Toggle(PracticeItem.BUN, 0))
-    .reduce(CoinBalanceAction.Check(0)))
+private fun CoinBalanceCorrectPreview() = CoinBalancePreviewContent(
+    checkedPicnic(PracticeItem.BREAD, PracticeItem.WATER, PracticeItem.RINGS))
 
 @Preview(name = "Перерасход · 320 dp", group = "Монетный баланс", widthDp = 320, heightDp = 640)
 @Composable
-private fun CoinBalanceOverspentPreview() = CoinBalancePreviewContent(CoinBalanceState.create()
-    .reduce(CoinBalanceAction.Start).reduce(CoinBalanceAction.Check(0)))
+private fun CoinBalanceOverspentPreview() = CoinBalancePreviewContent(
+    checkedPicnic(PracticeItem.BREAD, PracticeItem.WATER, PracticeItem.TOY_BOAT))
 
-@Preview(name = "Снято обязательное · крупный шрифт", group = "Монетный баланс", widthDp = 393, heightDp = 852, fontScale = 1.5f)
+@Preview(name = "Не хватает игры · крупный шрифт", group = "Монетный баланс", widthDp = 393, heightDp = 852, fontScale = 1.5f)
 @Composable
-private fun CoinBalanceRequiredPreview() = CoinBalancePreviewContent(CoinBalanceState.create()
-    .reduce(CoinBalanceAction.Start)
-    .reduce(CoinBalanceAction.Toggle(PracticeItem.MEDICINE, 0))
-    .reduce(CoinBalanceAction.Check(0)))
+private fun CoinBalanceIncompletePreview() = CoinBalancePreviewContent(
+    checkedPicnic(PracticeItem.BREAD, PracticeItem.WATER))
+
+@Preview(name = "Ночная прогулка", group = "Монетный баланс", widthDp = 393, heightDp = 852)
+@Composable
+private fun CoinBalanceNightPreview() = CoinBalancePreviewContent(
+    CoinBalanceState.create().copy(current = 1, started = true))
+
+@Preview(name = "Ремонт стола", group = "Монетный баланс", widthDp = 393, heightDp = 852)
+@Composable
+private fun CoinBalanceWorkbenchPreview() = CoinBalancePreviewContent(
+    CoinBalanceState.create().copy(current = 2, started = true))
 
 @Preview(name = "Итог · повтор", group = "Монетный баланс", widthDp = 393, heightDp = 852)
 @Composable
 private fun CoinBalanceFinishedPreview() = CoinBalancePreviewContent(CoinBalanceState.create().let {
     it.copy(current = it.rounds.size, correctAnswers = it.rounds.size, started = true)
 })
+
+private fun checkedPicnic(vararg kept: PracticeItem): CoinBalanceState {
+    val initial = CoinBalanceState.create().reduce(CoinBalanceAction.Start)
+    return initial.round.expenses.filter { it.item !in kept }.fold(initial) { game, expense ->
+        game.reduce(CoinBalanceAction.Toggle(expense.item, 0))
+    }.reduce(CoinBalanceAction.Check(0))
+}
 
 @Composable
 private fun CoinBalancePreviewContent(initial: CoinBalanceState = CoinBalanceState.create()) {

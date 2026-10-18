@@ -1,8 +1,9 @@
 package ru.nksk.lctapp.domain.minigame
 
 import kotlinx.serialization.Serializable
+import kotlin.random.Random
 
-/** Fixed Figma exercises. Prices here never debit the player’s wallet. */
+/** Authored exercises. Prices here never debit the player’s wallet. */
 @Serializable
 sealed interface PracticeQuestion {
     val choiceCount: Int
@@ -15,12 +16,22 @@ enum class PracticeItem {
     STAR_MAP, SCARF, TEDDY, FISHING_ROD, BAIT, BUCKET,
 }
 
+enum class NeedWantSituation(val item: PracticeItem, val needed: Boolean) {
+    NIGHT_WALK(PracticeItem.LANTERN, true),
+    DAY_WALK(PracticeItem.LANTERN, false),
+    SUNNY_DAY(PracticeItem.CAP, true),
+    SPARE_CAP(PracticeItem.CAP, false),
+    HOT_WALK(PracticeItem.WATER, true),
+    NO_SNACK(PracticeItem.BUN, true),
+    PACKED_LUNCH(PracticeItem.BUN, false),
+    TOY_ON_WALK(PracticeItem.TOY_BOAT, false),
+}
+
 @Serializable
-data class NeedWantQuestion(val item: PracticeItem, val neededForTrip: Boolean) : PracticeQuestion {
-    init { require(item in setOf(PracticeItem.MAP, PracticeItem.WATER, PracticeItem.BUN,
-        PracticeItem.LANTERN, PracticeItem.RINGS, PracticeItem.TOY_BOAT, PracticeItem.KEYCHAIN, PracticeItem.CAP)) }
+data class NeedWantQuestion(val situation: NeedWantSituation) : PracticeQuestion {
+    val item: PracticeItem get() = situation.item
     override val choiceCount: Int = 2
-    override val correctChoice: Int get() = if (neededForTrip) 0 else 1
+    override val correctChoice: Int get() = if (situation.needed) 0 else 1
 }
 
 @Serializable
@@ -113,24 +124,16 @@ data class PracticeChoiceState<Q : PracticeQuestion>(
 
 /** Figma examples plus authored practice variations; these are not shop prices or event assignments. */
 object PracticeGames {
-    fun needs() = PracticeChoiceState(listOf(
-        NeedWantQuestion(PracticeItem.MAP, true),
-        NeedWantQuestion(PracticeItem.TOY_BOAT, false),
-        NeedWantQuestion(PracticeItem.WATER, true),
-        NeedWantQuestion(PracticeItem.RINGS, false),
-        NeedWantQuestion(PracticeItem.BUN, true),
-        NeedWantQuestion(PracticeItem.KEYCHAIN, false),
-        NeedWantQuestion(PracticeItem.LANTERN, true),
-        NeedWantQuestion(PracticeItem.CAP, false),
-    ))
+    fun needs(seed: Int = 0) = PracticeChoiceState(
+        NeedWantSituation.entries.map(::NeedWantQuestion).mixed(seed))
 
-    fun discounts() = PracticeChoiceState(listOf(
+    fun discounts(seed: Int = 0) = PracticeChoiceState(listOf(
         DiscountQuestion(PracticeItem.BACKPACK, 42, 52, 34),
         DiscountQuestion(PracticeItem.LANTERN, 55, 90, 65),
         DiscountQuestion(PracticeItem.BUN, 8, 8, 5),
         DiscountQuestion(PracticeItem.CAP, 25, 40, 28),
-        DiscountQuestion(PracticeItem.TOY_BOAT, 8, 12, 7),
-    ))
+        DiscountQuestion(PracticeItem.TOY_BOAT, 20, 30, 20),
+    ).mixed(seed))
 
     fun traps() = PracticeChoiceState(listOf(
         FinancialTrapQuestion(TrapScenario.TICKET, 3,
@@ -143,15 +146,32 @@ object PracticeGames {
             listOf(FinancialOption(40, 15), FinancialOption(48))),
     ))
 
-    fun extraPurchases() = PracticeChoiceState(listOf(
+    fun extraPurchases(seed: Int = 0) = PracticeChoiceState(listOf(
         ExtraPurchaseQuestion(PurchaseGoal.WORKBENCH,
             listOf(PracticeItem.PLANK, PracticeItem.CANDLES, PracticeItem.NAILS, PracticeItem.HAMMER),
             PracticeItem.CANDLES),
         ExtraPurchaseQuestion(PurchaseGoal.OBSERVATORY,
-            listOf(PracticeItem.LANTERN, PracticeItem.STAR_MAP, PracticeItem.SCARF, PracticeItem.TEDDY),
-            PracticeItem.TEDDY),
+            listOf(PracticeItem.LANTERN, PracticeItem.STAR_MAP, PracticeItem.SCARF, PracticeItem.WATER),
+            PracticeItem.SCARF),
         ExtraPurchaseQuestion(PurchaseGoal.FISHING,
-            listOf(PracticeItem.FISHING_ROD, PracticeItem.BAIT, PracticeItem.BUCKET, PracticeItem.CANDLES),
-            PracticeItem.CANDLES),
-    ))
+            listOf(PracticeItem.FISHING_ROD, PracticeItem.BAIT, PracticeItem.BUCKET, PracticeItem.WATER),
+            PracticeItem.BUCKET),
+    ).mapIndexed { index, question -> question.copy(items = question.items.shuffled(Random(seed + index))) })
+
+    /** Full authored sets in any order; duplicates or modified prices/answers cannot settle paid work. */
+    fun matchesNeeds(questions: List<NeedWantQuestion>) = sameSet(questions, needs().questions)
+    fun matchesDiscounts(questions: List<DiscountQuestion>) = sameSet(questions, discounts().questions)
+    fun matchesExtraPurchases(questions: List<ExtraPurchaseQuestion>) = sameSet(
+        questions.map { it.copy(items = it.items.sortedBy(PracticeItem::name)) },
+        extraPurchases().questions.map { it.copy(items = it.items.sortedBy(PracticeItem::name)) })
+
+    private fun <T> sameSet(actual: List<T>, expected: List<T>) =
+        actual.groupingBy { it }.eachCount() == expected.groupingBy { it }.eachCount()
+
+    private fun <Q : PracticeQuestion> List<Q>.mixed(seed: Int): List<Q> = shuffled(Random(seed)).let { mixed ->
+        // Do not accidentally reproduce the old left/right/left/right answer sequence.
+        if (mixed.zipWithNext().all { (a, b) -> a.correctChoice != b.correctChoice })
+            mixed.toMutableList().apply { val swap = this[1]; this[1] = this[2]; this[2] = swap }
+        else mixed
+    }
 }

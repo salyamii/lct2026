@@ -22,6 +22,7 @@ internal class FinancialGameViewModel @Inject constructor(
 
     fun bind(occurrenceId: String, kind: DeedGameKind) {
         val key = "$occurrenceId:${kind.name}"
+        val seed = key.hashCode()
         if (owner == key) return
         owner = key
         val restored = if (savedState.get<String>(OWNER) == key) {
@@ -30,7 +31,7 @@ internal class FinancialGameViewModel @Inject constructor(
             }
         } else null
         savedState[OWNER] = key
-        update(restored?.takeIf { it.kind == kind && it.matchesExercises() } ?: FinancialBoard.create(kind))
+        update(restored?.takeIf { it.kind == kind && it.matchesExercises(seed) } ?: FinancialBoard.create(kind, seed))
     }
 
     fun onChoice(action: PracticeChoiceAction) {
@@ -91,21 +92,21 @@ internal sealed interface FinancialBoard {
         is Extra -> DeedGameScore.fromExtraPurchase(game)
     }
 
-    fun matchesExercises(): Boolean = when (this) {
-        is Needs -> game.questions == PracticeGames.needs().questions
-        is Discounts -> game.questions == PracticeGames.discounts().questions
+    fun matchesExercises(seed: Int): Boolean = when (this) {
+        is Needs -> game.questions == PracticeGames.needs(seed).questions
+        is Discounts -> game.questions == PracticeGames.discounts(seed).questions
         is Balance -> game.rounds == CoinBalanceState.create().rounds
         is Traps -> game.questions == PracticeGames.traps().questions
-        is Extra -> game.questions == PracticeGames.extraPurchases().questions
+        is Extra -> game.questions == PracticeGames.extraPurchases(seed).questions
     }
 
     companion object {
-        fun create(kind: DeedGameKind): FinancialBoard = when (kind) {
-            DeedGameKind.NEED_WANT -> Needs()
-            DeedGameKind.REAL_DISCOUNT -> Discounts()
+        fun create(kind: DeedGameKind, seed: Int = 0): FinancialBoard = when (kind) {
+            DeedGameKind.NEED_WANT -> Needs(PracticeGames.needs(seed))
+            DeedGameKind.REAL_DISCOUNT -> Discounts(PracticeGames.discounts(seed))
             DeedGameKind.COIN_BALANCE -> Balance()
             DeedGameKind.FINANCIAL_TRAP -> Traps()
-            DeedGameKind.EXTRA_PURCHASE -> Extra()
+            DeedGameKind.EXTRA_PURCHASE -> Extra(PracticeGames.extraPurchases(seed))
             else -> error("Not a financial exercise: $kind")
         }
     }

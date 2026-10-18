@@ -29,8 +29,7 @@ class PracticeGameScreensTest {
         compose.setContent { LCTAppTheme {
             NeedWantScreen(game.value, { game.value = game.value.reduce(it) }, {})
         } }
-        val choices = listOf("В ДОРОГУ", "ДЛЯ РАДОСТИ", "В ДОРОГУ", "ДЛЯ РАДОСТИ",
-            "В ДОРОГУ", "ДЛЯ РАДОСТИ", "В ДОРОГУ", "ДЛЯ РАДОСТИ")
+        val choices = game.value.questions.map { if (it.correctChoice == 0) "В ДОРОГУ" else "ДЛЯ РАДОСТИ" }
         choices.forEachIndexed { index, title ->
             compose.onNodeWithText(title).performScrollTo().performClick()
             compose.onNodeWithText(title).assertIsNotEnabled()
@@ -43,7 +42,10 @@ class PracticeGameScreensTest {
     }
 
     @Test fun discountUsesYesterdayPriceAndWaitsForNext() {
-        val game = mutableStateOf(PracticeGames.discounts())
+        val game = mutableStateOf(PracticeChoiceState(listOf(
+            DiscountQuestion(PracticeItem.BACKPACK, 42, 52, 34),
+            DiscountQuestion(PracticeItem.LANTERN, 55, 90, 65),
+        )))
         compose.setContent { LCTAppTheme {
             RealDiscountScreen(game.value, { game.value = game.value.reduce(it) }, {})
         } }
@@ -77,18 +79,20 @@ class PracticeGameScreensTest {
         compose.runOnIdle { assertEquals(true, game.value.lastCorrect) }
     }
 
-    @Test fun budgetCanRestoreAnEssentialThenRemoveAnOptionalExpense() {
+    @Test fun picnicCannotPassByRemovingEveryGameButTheSelectionCanBeCorrected() {
         val game = mutableStateOf(CoinBalanceState.create())
         compose.setContent { LCTAppTheme {
             CoinBalanceScreen(game.value, { game.value = game.value.reduce(it) }, {})
         } }
         compose.onNodeWithText("Понятно").performScrollTo().performClick()
-        compose.onNodeWithText("Лекарский набор").performScrollTo().performClick()
+        listOf("Игрушечный парусник", "Булочка", "Медовые леденцы", "Игра с кольцами").forEach {
+            compose.onNodeWithText(it).performScrollTo().performClick()
+        }
         compose.onNodeWithText("Проверить баланс").performScrollTo().performClick()
-        compose.runOnIdle { assertEquals(BalanceVerdict.MISSING_REQUIRED, game.value.verdict) }
+        compose.runOnIdle { assertEquals(BalanceVerdict.INCOMPLETE_PLAN, game.value.verdict) }
+        compose.onNodeWithText("Выбери ровно одну игру для компании.").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Исправить выбор").performScrollTo().performClick()
-        compose.onNodeWithText("Лекарский набор").performScrollTo().performClick()
-        compose.onNodeWithText("Булочка").performScrollTo().performClick()
+        compose.onNodeWithText("Игра с кольцами").performScrollTo().performClick()
         compose.onNodeWithText("Проверить баланс").performScrollTo().performClick()
         compose.runOnIdle { assertEquals(BalanceVerdict.BALANCED, game.value.verdict) }
         compose.onNodeWithText("Дальше").performScrollTo().performClick()

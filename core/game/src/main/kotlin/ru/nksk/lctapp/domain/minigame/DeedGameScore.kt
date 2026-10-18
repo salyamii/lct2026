@@ -40,22 +40,22 @@ class DeedGameScore private constructor(
     fun reward(maximum: Long): Long = deedReward(maximum, correct, attempts)
 
     companion object {
-        /** Only the complete, unchanged exercise set can settle its paid deed. */
+        /** Only a complete authored set can settle its paid deed; shuffled order is supported. */
         fun fromNeedWant(state: PracticeChoiceState<NeedWantQuestion>): DeedGameScore? =
-            fromPractice(DeedGameKind.NEED_WANT, state, PracticeGames.needs())
+            fromPractice(DeedGameKind.NEED_WANT, state, PracticeGames.matchesNeeds(state.questions))
 
         fun fromRealDiscount(state: PracticeChoiceState<DiscountQuestion>): DeedGameScore? =
-            fromPractice(DeedGameKind.REAL_DISCOUNT, state, PracticeGames.discounts())
+            fromPractice(DeedGameKind.REAL_DISCOUNT, state, PracticeGames.matchesDiscounts(state.questions))
 
         fun fromFinancialTrap(state: PracticeChoiceState<FinancialTrapQuestion>): DeedGameScore? =
-            fromPractice(DeedGameKind.FINANCIAL_TRAP, state, PracticeGames.traps())
+            fromPractice(DeedGameKind.FINANCIAL_TRAP, state, state.questions == PracticeGames.traps().questions)
 
         fun fromExtraPurchase(state: PracticeChoiceState<ExtraPurchaseQuestion>): DeedGameScore? =
-            fromPractice(DeedGameKind.EXTRA_PURCHASE, state, PracticeGames.extraPurchases())
+            fromPractice(DeedGameKind.EXTRA_PURCHASE, state, PracticeGames.matchesExtraPurchases(state.questions))
 
         private fun <Q : PracticeQuestion> fromPractice(kind: DeedGameKind,
-            state: PracticeChoiceState<Q>, original: PracticeChoiceState<Q>): DeedGameScore? =
-            if (state.questions == original.questions && state.finished)
+            state: PracticeChoiceState<Q>, matches: Boolean): DeedGameScore? =
+            if (matches && state.finished)
                 DeedGameScore(kind, state.correctAnswers, state.questions.size) else null
 
         fun fromCoinBalance(state: CoinBalanceState): DeedGameScore? =

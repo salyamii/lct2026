@@ -12,7 +12,6 @@ import ru.nksk.lctapp.core.ui.components.GameArtwork
 import ru.nksk.lctapp.domain.minigame.NeedWantQuestion
 import ru.nksk.lctapp.domain.minigame.PracticeChoiceAction
 import ru.nksk.lctapp.domain.minigame.PracticeChoiceState
-import ru.nksk.lctapp.domain.minigame.PracticeItem
 
 @Composable
 fun NeedWantScreen(
@@ -23,19 +22,12 @@ fun NeedWantScreen(
 ) {
     val question = state.question
     PracticeScaffold(stringResource(R.string.practice_needs_title), R.drawable.location_city,
-        R.drawable.npc_luna_explaining, stringResource(R.string.practice_needs_prompt),
+        R.drawable.npc_luna_explaining, stringResource(question.situation.promptRes),
         state.current, state.questions.size, state.correctAnswers, state.finished,
         { onAction(PracticeChoiceAction.Restart) }, onBack, deed, DeedRewardPreview.fromPractice(state)) {
         PracticeBoard {
             GameArtwork(question.item.artwork, null, Modifier.size(148.dp))
             PracticeText(stringResource(question.item.titleRes), bold = true)
-            val context = when (question.item) {
-                PracticeItem.BUN -> R.string.practice_bun_context
-                PracticeItem.KEYCHAIN -> R.string.practice_keychain_context
-                PracticeItem.CAP -> R.string.practice_cap_context
-                else -> null
-            }
-            if (context != null) PracticeText(stringResource(context))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 for (choice in 0..1) PracticeOption(
                     title = stringResource(if (choice == 0) R.string.practice_road else R.string.practice_joy),
@@ -47,16 +39,7 @@ fun NeedWantScreen(
                 )
             }
         }
-        PracticeFeedback(state, stringResource(when (question.item) {
-            PracticeItem.MAP -> R.string.practice_need_map
-            PracticeItem.WATER -> R.string.practice_need_water
-            PracticeItem.BUN -> R.string.practice_need_bun
-            PracticeItem.LANTERN -> R.string.practice_need_lantern
-            PracticeItem.RINGS -> R.string.practice_want_rings
-            PracticeItem.TOY_BOAT -> R.string.practice_want_boat
-            PracticeItem.KEYCHAIN -> R.string.practice_want_keychain
-            PracticeItem.CAP -> R.string.practice_want_cap
-            else -> error("No need/want copy for ${question.item}")
-        }), stringResource(R.string.practice_needs_hint), onAction)
+        PracticeFeedback(state, stringResource(question.situation.explanationRes),
+            stringResource(R.string.practice_needs_hint), onAction)
     }
 }

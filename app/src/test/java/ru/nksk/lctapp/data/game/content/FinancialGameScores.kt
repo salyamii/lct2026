@@ -15,7 +15,12 @@ internal fun completedFinancialGameScore(kind: DeedGameKind, cap: Int = 100): De
             if (game.current >= correctRounds) {
                 game = game.reduce(CoinBalanceAction.Check(game.current)).reduce(CoinBalanceAction.Edit(game.current))
             }
-            game.round.expenses.filter { !it.required }.forEach {
+            val kept = when (game.round.scenario) {
+                BalanceScenario.PICNIC -> setOf(PracticeItem.BREAD, PracticeItem.WATER, PracticeItem.RINGS)
+                BalanceScenario.NIGHT_WALK -> setOf(PracticeItem.LANTERN, PracticeItem.SCARF, PracticeItem.BUN)
+                BalanceScenario.WORKBENCH -> setOf(PracticeItem.PLANK, PracticeItem.NAILS)
+            }
+            game.round.expenses.filter { it.item !in kept }.forEach {
                 game = game.reduce(CoinBalanceAction.Toggle(it.item, game.current))
             }
             game = game.reduce(CoinBalanceAction.Check(game.current)).reduce(CoinBalanceAction.Next(game.current))

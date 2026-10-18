@@ -3,20 +3,35 @@ package ru.nksk.lctapp.domain.minigame
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PracticeExpense(val item: PracticeItem, val cost: Int, val required: Boolean) {
+data class PracticeExpense(val item: PracticeItem, val cost: Int) {
     init { require(cost > 0) }
 }
 
+enum class BalanceScenario { PICNIC, NIGHT_WALK, WORKBENCH }
+enum class BalanceNeed { FOOD, DRINK, ONE_GAME, LIGHT, WARMTH, BOARD, FASTENERS }
+
 @Serializable
-data class CoinBalanceRound(val income: Int, val expenses: List<PracticeExpense>) {
+data class BalanceRequirement(val need: BalanceNeed, val options: Set<PracticeItem>,
+    val minCount: Int = 1, val maxCount: Int = options.size) {
+    init { require(options.isNotEmpty() && minCount in 1..maxCount && maxCount <= options.size) }
+    fun isMet(selected: Set<PracticeItem>) = options.count { it in selected } in minCount..maxCount
+}
+
+@Serializable
+data class CoinBalanceRound(val scenario: BalanceScenario, val income: Int,
+    val expenses: List<PracticeExpense>, val requirements: List<BalanceRequirement>) {
     init {
         require(income > 0 && expenses.isNotEmpty())
         require(expenses.map { it.item }.distinct().size == expenses.size)
-        require(expenses.filter { it.required }.sumOf { it.cost.toLong() } <= income)
+        require(requirements.isNotEmpty() && requirements.map { it.need }.distinct().size == requirements.size)
+        val options = requirements.flatMap { it.options }
+        require(options.distinct().size == options.size && options.all { item -> expenses.any { it.item == item } })
+        require(requirements.sumOf { requirement -> expenses.filter { it.item in requirement.options }
+            .sortedBy { it.cost }.take(requirement.minCount).sumOf { it.cost.toLong() } } <= income)
     }
 }
 
-enum class BalanceVerdict { BALANCED, OVERSPENT, MISSING_REQUIRED }
+enum class BalanceVerdict { BALANCED, OVERSPENT, INCOMPLETE_PLAN }
 
 sealed interface CoinBalanceAction {
     data object Start : CoinBalanceAction
@@ -42,7 +57,7 @@ data class CoinBalanceState(
         val currentCorrect = verdict == BalanceVerdict.BALANCED && !madeMistake
         require(correctAnswers in (if (currentCorrect) 1 else 0)..(current + if (currentCorrect) 1 else 0))
         require(verdict == null || started)
-        require(verdict !in setOf(BalanceVerdict.OVERSPENT, BalanceVerdict.MISSING_REQUIRED) || madeMistake)
+        require(verdict !in setOf(BalanceVerdict.OVERSPENT, BalanceVerdict.INCOMPLETE_PLAN) || madeMistake)
         require(current < rounds.size || (started && verdict == null && removed.isEmpty() && !madeMistake))
         require(removed.all { item -> round.expenses.any { it.item == item } })
     }
@@ -50,8 +65,10 @@ data class CoinBalanceState(
     val round: CoinBalanceRound get() = rounds[minOf(current, rounds.lastIndex)]
     val spent: Long get() = round.expenses.filter { it.item !in removed }.sumOf { it.cost.toLong() }
     val remainder: Long get() = round.income - spent
-    val missingRequired: List<PracticeItem> get() = round.expenses
-        .filter { it.required && it.item in removed }.map { it.item }
+    val unmetNeeds: List<BalanceNeed> get() {
+        val selected = round.expenses.filter { it.item !in removed }.map { it.item }.toSet()
+        return round.requirements.filterNot { it.isMet(selected) }.map { it.need }
+    }
 
     fun reduce(action: CoinBalanceAction): CoinBalanceState {
         if (action == CoinBalanceAction.Restart) return CoinBalanceState(rounds)
@@ -63,7 +80,7 @@ data class CoinBalanceState(
                 removed = if (action.item in removed) removed - action.item else removed + action.item)
             is CoinBalanceAction.Check -> if (!started || verdict != null || action.round != current) this else {
                 val result = when {
-                    missingRequired.isNotEmpty() -> BalanceVerdict.MISSING_REQUIRED
+                    unmetNeeds.isNotEmpty() -> BalanceVerdict.INCOMPLETE_PLAN
                     spent > round.income -> BalanceVerdict.OVERSPENT
                     else -> BalanceVerdict.BALANCED
                 }
@@ -79,17 +96,33 @@ data class CoinBalanceState(
     }
 
     companion object {
-        fun create(): CoinBalanceState {
-            val expenses = listOf(
-                PracticeExpense(PracticeItem.MEDICINE, 5, true),
-                PracticeExpense(PracticeItem.BUN, 6, false),
-                PracticeExpense(PracticeItem.TOY_BOAT, 5, false),
-                PracticeExpense(PracticeItem.RINGS, 4, false),
-                PracticeExpense(PracticeItem.BACKPACK_REPAIR, 7, true),
-                PracticeExpense(PracticeItem.BREAD, 5, true),
-                PracticeExpense(PracticeItem.CANDY, 5, false),
-            )
-            return CoinBalanceState(listOf(35, 30, 25).map { CoinBalanceRound(it, expenses) })
-        }
+        fun create() = CoinBalanceState(listOf(
+            CoinBalanceRound(BalanceScenario.PICNIC, 20, listOf(
+                PracticeExpense(PracticeItem.BREAD, 6), PracticeExpense(PracticeItem.WATER, 4),
+                PracticeExpense(PracticeItem.RINGS, 8), PracticeExpense(PracticeItem.TOY_BOAT, 12),
+                PracticeExpense(PracticeItem.BUN, 5), PracticeExpense(PracticeItem.CANDY, 3),
+            ), listOf(
+                BalanceRequirement(BalanceNeed.FOOD, setOf(PracticeItem.BREAD, PracticeItem.BUN)),
+                BalanceRequirement(BalanceNeed.DRINK, setOf(PracticeItem.WATER)),
+                BalanceRequirement(BalanceNeed.ONE_GAME, setOf(PracticeItem.RINGS, PracticeItem.TOY_BOAT), maxCount = 1),
+            )),
+            CoinBalanceRound(BalanceScenario.NIGHT_WALK, 22, listOf(
+                PracticeExpense(PracticeItem.LANTERN, 9), PracticeExpense(PracticeItem.BREAD, 5),
+                PracticeExpense(PracticeItem.TOY_BOAT, 7), PracticeExpense(PracticeItem.SCARF, 6),
+                PracticeExpense(PracticeItem.BUN, 4), PracticeExpense(PracticeItem.WATER, 4),
+            ), listOf(
+                BalanceRequirement(BalanceNeed.LIGHT, setOf(PracticeItem.LANTERN)),
+                BalanceRequirement(BalanceNeed.WARMTH, setOf(PracticeItem.SCARF)),
+                BalanceRequirement(BalanceNeed.FOOD, setOf(PracticeItem.BREAD, PracticeItem.BUN)),
+            )),
+            CoinBalanceRound(BalanceScenario.WORKBENCH, 15, listOf(
+                PracticeExpense(PracticeItem.HAMMER, 7), PracticeExpense(PracticeItem.PLANK, 8),
+                PracticeExpense(PracticeItem.CANDY, 3), PracticeExpense(PracticeItem.NAILS, 5),
+                PracticeExpense(PracticeItem.CANDLES, 4),
+            ), listOf(
+                BalanceRequirement(BalanceNeed.BOARD, setOf(PracticeItem.PLANK)),
+                BalanceRequirement(BalanceNeed.FASTENERS, setOf(PracticeItem.NAILS)),
+            )),
+        ))
     }
 }

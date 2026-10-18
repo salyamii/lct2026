@@ -6,7 +6,7 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class FinancialDeedScoreTest {
-    @Test fun completeOriginalExercisesProduceTheirOwnScores() {
+    @Test fun completeExercisesProduceTheirOwnScores() {
         assertNull(DeedGameScore.fromNeedWant(PracticeGames.needs()))
         assertNull(DeedGameScore.fromRealDiscount(PracticeGames.discounts()))
         assertNull(DeedGameScore.fromFinancialTrap(PracticeGames.traps()))
@@ -30,13 +30,30 @@ class FinancialDeedScoreTest {
         assertEquals(0L, checkNotNull(DeedGameScore.fromNeedWant(allWrong)).reward(0))
     }
 
-    @Test fun shortenedOrChangedExercisesCannotSettleAnOriginalDeed() {
+    @Test fun shortenedDuplicatedOrChangedExercisesCannotSettleADeed() {
         val needs = PracticeGames.needs()
         assertNull(DeedGameScore.fromNeedWant(finish(PracticeChoiceState(needs.questions.take(1)))))
-        assertNull(DeedGameScore.fromNeedWant(finish(PracticeChoiceState(needs.questions.reversed()))))
+        assertNull(DeedGameScore.fromNeedWant(finish(PracticeChoiceState(List(8) { needs.questions.first() }))))
+        val discounts = PracticeGames.discounts()
+        assertNull(DeedGameScore.fromRealDiscount(finish(PracticeChoiceState(discounts.questions.mapIndexed { i, q ->
+            if (i == 0) q.copy(todayPrice = 1) else q
+        }))))
+        val extra = PracticeGames.extraPurchases()
+        assertNull(DeedGameScore.fromExtraPurchase(finish(PracticeChoiceState(extra.questions.mapIndexed { i, q ->
+            if (i == 0) q.copy(extraItem = q.items.first { it != q.extraItem }) else q
+        }))))
         val answered = needs.copy(current = 7, answers = needs.questions.map { it.correctChoice })
         assertNull(DeedGameScore.fromNeedWant(answered))
         assertNotNull(DeedGameScore.fromNeedWant(answered.reduce(PracticeChoiceAction.Next(7))))
+    }
+
+    @Test fun completeShuffledSetsAndReorderedCardsKeepTheirReward() {
+        repeat(20) { seed ->
+            assertEquals(5L, DeedGameScore.fromNeedWant(finish(PracticeGames.needs(seed)))!!.reward(5))
+            assertEquals(5L, DeedGameScore.fromRealDiscount(finish(PracticeGames.discounts(seed)))!!.reward(5))
+            assertEquals(5L, DeedGameScore.fromExtraPurchase(finish(PracticeGames.extraPurchases(seed)))!!.reward(5))
+        }
+        assertNotNull(DeedGameScore.fromNeedWant(finish(PracticeChoiceState(PracticeGames.needs().questions.reversed()))))
     }
 
     @Test fun balanceMistakeLowersForecastOnceAndCorrectionStillAllowsCompletion() {
@@ -48,7 +65,12 @@ class FinancialDeedScoreTest {
         assertEquals(3L, DeedRewardPreview.fromCoinBalance(game).reward(5))
         game = game.reduce(CoinBalanceAction.Edit(0))
         repeat(3) { round ->
-            game.round.expenses.filter { !it.required }.forEach {
+            val kept = when (game.round.scenario) {
+                BalanceScenario.PICNIC -> setOf(PracticeItem.BREAD, PracticeItem.WATER, PracticeItem.RINGS)
+                BalanceScenario.NIGHT_WALK -> setOf(PracticeItem.LANTERN, PracticeItem.SCARF, PracticeItem.BUN)
+                BalanceScenario.WORKBENCH -> setOf(PracticeItem.PLANK, PracticeItem.NAILS)
+            }
+            game.round.expenses.filter { it.item !in kept }.forEach {
                 game = game.reduce(CoinBalanceAction.Toggle(it.item, round))
             }
             game = game.reduce(CoinBalanceAction.Check(round))

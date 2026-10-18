@@ -2,7 +2,6 @@ package ru.nksk.lctapp.domain.minigame
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -32,13 +31,45 @@ class PracticeGamesTest {
         assertEquals(initial, game.reduce(PracticeChoiceAction.Restart))
     }
 
-    @Test fun needsUseTheAuthoredTripContextRatherThanEveryItemBeingEssential() {
-        val questions = PracticeGames.needs().questions.associateBy { it.item }
+    @Test fun theSameItemCanBeNeededOrOptionalDependingOnTheSituation() {
+        val questions = PracticeGames.needs().questions
         assertEquals(8, questions.size)
-        assertEquals(0, questions.getValue(PracticeItem.WATER).correctChoice)
-        assertEquals(0, questions.getValue(PracticeItem.LANTERN).correctChoice)
-        assertEquals(1, questions.getValue(PracticeItem.CAP).correctChoice)
-        assertEquals(1, questions.getValue(PracticeItem.KEYCHAIN).correctChoice)
+        for (item in listOf(PracticeItem.LANTERN, PracticeItem.CAP, PracticeItem.BUN)) {
+            assertEquals(setOf(0, 1), questions.filter { it.item == item }.map { it.correctChoice }.toSet())
+        }
+        val bySituation = questions.associateBy { it.situation }
+        assertEquals(0, bySituation.getValue(NeedWantSituation.NIGHT_WALK).correctChoice)
+        assertEquals(1, bySituation.getValue(NeedWantSituation.DAY_WALK).correctChoice)
+        assertEquals(0, bySituation.getValue(NeedWantSituation.SUNNY_DAY).correctChoice)
+        assertEquals(1, bySituation.getValue(NeedWantSituation.SPARE_CAP).correctChoice)
+        assertEquals(0, bySituation.getValue(NeedWantSituation.NO_SNACK).correctChoice)
+        assertEquals(1, bySituation.getValue(NeedWantSituation.PACKED_LUNCH).correctChoice)
+    }
+
+    @Test fun seededOrdersAreStableCompleteAndNeverStrictlyAlternateAnswers() {
+        repeat(100) { seed ->
+            val needs = PracticeGames.needs(seed)
+            val discounts = PracticeGames.discounts(seed)
+            assertEquals(needs, PracticeGames.needs(seed))
+            assertEquals(discounts, PracticeGames.discounts(seed))
+            assertTrue(PracticeGames.matchesNeeds(needs.questions))
+            assertTrue(PracticeGames.matchesDiscounts(discounts.questions))
+            assertTrue(PracticeGames.matchesExtraPurchases(PracticeGames.extraPurchases(seed).questions))
+            listOf(needs, discounts).forEach { game ->
+                assertTrue(game.questions.zipWithNext().any { (a, b) -> a.correctChoice == b.correctChoice })
+            }
+        }
+        assertTrue((0..20).map { PracticeGames.needs(it).questions }.distinct().size > 1)
+        assertTrue((0..20).map { PracticeGames.discounts(it).questions }.distinct().size > 1)
+        assertTrue((0..20).map { PracticeGames.extraPurchases(it).questions }.distinct().size > 1)
+    }
+
+    @Test fun discountSeriesIncludesAnUnchangedPriceBehindAnInflatedLabel() {
+        val question = PracticeGames.discounts().questions.single { it.todayPrice == it.yesterdayPrice }
+        assertEquals(20, question.todayPrice)
+        assertEquals(30, question.crossedOutPrice)
+        assertEquals(0, question.correctChoice)
+        assertEquals(0, question.saving)
     }
 
     @Test fun inflatedLabelsCannotTurnEqualOrHigherPricesIntoDiscounts() {
@@ -52,7 +83,7 @@ class PracticeGamesTest {
 
     @Test fun wrongChoiceIsRecordedOnceAndDoesNotPreventFinishing() {
         val initial = PracticeGames.discounts()
-        val wrong = initial.reduce(PracticeChoiceAction.Answer(0, 0))
+        val wrong = initial.reduce(PracticeChoiceAction.Answer(1 - initial.question.correctChoice, 0))
         assertEquals(false, wrong.lastCorrect)
         assertEquals(0, wrong.correctAnswers)
         assertEquals(wrong, wrong.reduce(PracticeChoiceAction.Answer(1, 0)))
@@ -81,70 +112,8 @@ class PracticeGamesTest {
             val reordered = question.copy(items = question.items.reversed())
             assertEquals(question.extraItem, reordered.items[reordered.correctChoice])
         }
-        assertEquals(PracticeItem.TEDDY, PracticeGames.extraPurchases().questions[1].extraItem)
+        assertEquals(listOf(PracticeItem.CANDLES, PracticeItem.SCARF, PracticeItem.BUCKET),
+            PracticeGames.extraPurchases().questions.map { it.extraItem })
     }
 
-    @Test fun budgetRequiresStartAndExplicitCheck() {
-        val initial = CoinBalanceState.create()
-        assertEquals(37L, initial.spent)
-        assertEquals(initial, initial.reduce(CoinBalanceAction.Toggle(PracticeItem.BUN, 0)))
-        assertEquals(initial, initial.reduce(CoinBalanceAction.Check(0)))
-        val edited = initial.reduce(CoinBalanceAction.Start)
-            .reduce(CoinBalanceAction.Toggle(PracticeItem.BUN, 0))
-        assertEquals(31L, edited.spent)
-        assertNull(edited.verdict)
-        assertEquals(edited, edited.reduce(CoinBalanceAction.Next(0)))
-        val checked = edited.reduce(CoinBalanceAction.Check(0))
-        assertEquals(BalanceVerdict.BALANCED, checked.verdict)
-        assertEquals(1, checked.correctAnswers)
-        assertEquals(checked, checked.reduce(CoinBalanceAction.Check(0)))
-        assertEquals(checked, checked.reduce(CoinBalanceAction.Toggle(PracticeItem.BUN, 0)))
-    }
-
-    @Test fun removingEssentialCannotPassEvenWhenMoneyIsEnough() {
-        val checked = CoinBalanceState.create().reduce(CoinBalanceAction.Start)
-            .reduce(CoinBalanceAction.Toggle(PracticeItem.MEDICINE, 0))
-            .reduce(CoinBalanceAction.Check(0))
-        assertEquals(32L, checked.spent)
-        assertEquals(BalanceVerdict.MISSING_REQUIRED, checked.verdict)
-        assertEquals(checked, checked.reduce(CoinBalanceAction.Next(0)))
-        val corrected = checked.reduce(CoinBalanceAction.Edit(0))
-            .reduce(CoinBalanceAction.Toggle(PracticeItem.MEDICINE, 0))
-            .reduce(CoinBalanceAction.Toggle(PracticeItem.BUN, 0))
-            .reduce(CoinBalanceAction.Check(0))
-        assertEquals(BalanceVerdict.BALANCED, corrected.verdict)
-        assertEquals(0, corrected.correctAnswers) // A correction is not a first-try answer.
-        assertEquals(1, corrected.reduce(CoinBalanceAction.Next(0)).current)
-    }
-
-    @Test fun overspendingCanBeCorrectedAndAnExactBudgetPasses() {
-        val initial = CoinBalanceState.create().reduce(CoinBalanceAction.Start)
-        val checked = initial.reduce(CoinBalanceAction.Check(0))
-        assertEquals(BalanceVerdict.OVERSPENT, checked.verdict)
-        assertEquals(checked, checked.reduce(CoinBalanceAction.Toggle(PracticeItem.CANDY, 0)))
-        val corrected = checked.reduce(CoinBalanceAction.Edit(0))
-            .reduce(CoinBalanceAction.Toggle(PracticeItem.CANDY, 0))
-            .reduce(CoinBalanceAction.Check(0))
-        assertEquals(BalanceVerdict.BALANCED, corrected.verdict)
-        val exact = CoinBalanceState(listOf(CoinBalanceRound(17, initial.round.expenses)), started = true,
-            removed = initial.round.expenses.filterNot { it.required }.map { it.item }.toSet())
-        assertEquals(0L, exact.remainder)
-        assertEquals(BalanceVerdict.BALANCED, exact.reduce(CoinBalanceAction.Check(0)).verdict)
-    }
-
-    @Test fun budgetRestartsAndIgnoresActionsFromPreviousRound() {
-        val initial = CoinBalanceState.create()
-        var state = initial.reduce(CoinBalanceAction.Start)
-        repeat(initial.rounds.size) { round ->
-            state.round.expenses.filterNot { it.required }.forEach {
-                state = state.reduce(CoinBalanceAction.Toggle(it.item, round))
-            }
-            state = state.reduce(CoinBalanceAction.Check(round)).reduce(CoinBalanceAction.Next(round))
-            assertEquals(state, state.reduce(CoinBalanceAction.Toggle(PracticeItem.BUN, round)))
-            assertEquals(state, state.reduce(CoinBalanceAction.Next(round)))
-        }
-        assertTrue(state.finished)
-        assertEquals(3, state.correctAnswers)
-        assertEquals(initial, state.reduce(CoinBalanceAction.Restart))
-    }
 }

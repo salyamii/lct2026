@@ -47,7 +47,7 @@ fun CoinBalanceScreen(
         if (state.verdict != null) feedback.bringIntoView()
     }
     PracticeScaffold(stringResource(R.string.practice_balance_title), R.drawable.location_city,
-        R.drawable.npc_caretaker_explaining, stringResource(R.string.practice_balance_prompt),
+        R.drawable.npc_caretaker_explaining, stringResource(state.round.scenario.promptRes, state.round.income),
         state.current, state.rounds.size, state.correctAnswers, state.finished,
         { onAction(CoinBalanceAction.Restart) }, onBack, deed, DeedRewardPreview.fromCoinBalance(state)) {
         PracticeBoard {
@@ -91,8 +91,8 @@ fun CoinBalanceScreen(
                         BalanceVerdict.BALANCED -> stringResource(R.string.practice_budget_ok,
                             state.spent, state.round.income, state.remainder)
                         BalanceVerdict.OVERSPENT -> stringResource(R.string.practice_budget_over, -state.remainder)
-                        BalanceVerdict.MISSING_REQUIRED -> stringResource(R.string.practice_budget_required,
-                            state.missingRequired.map { stringResource(it.titleRes) }.joinToString(", "))
+                        BalanceVerdict.INCOMPLETE_PLAN ->
+                            state.unmetNeeds.map { stringResource(it.explanationRes) }.joinToString(" ")
                     }
                     FeedbackNote(correct, explanation)
                     DeedButton(stringResource(if (!correct) R.string.practice_edit_balance
