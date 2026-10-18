@@ -10,6 +10,7 @@ internal data class PriceQuizAnswerEvidence(
     val pickedLeft: Boolean,
     val wasPresented: Boolean,
     val closesSeries: Boolean,
+    val pickLarger: Boolean = true,
 )
 
 internal data class PriceQuizEvidence(val seriesId: String, val answers: List<PriceQuizAnswerEvidence>)
@@ -31,7 +32,7 @@ internal object PriceQuizEvidenceMapper {
                 sequence = sequence,
                 detail = FactDetail.QuestionAnswer(questionId, 1,
                     AssessmentTask.CompareAmounts(answer.leftAmount.toLong(), answer.rightAmount.toLong(),
-                        if (answer.pickedLeft) ComparisonSide.LEFT else ComparisonSide.RIGHT),
+                        if (answer.pickedLeft) ComparisonSide.LEFT else ComparisonSide.RIGHT, answer.pickLarger),
                     answerWasRevealed = false, seriesClosed = answer.closesSeries),
                 context = DecisionContext(
                     presentationId = if (answer.wasPresented) "$questionId:presented" else null,

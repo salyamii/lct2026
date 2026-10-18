@@ -36,6 +36,82 @@ class MainMenuViewModelTest {
 
     private fun model(session: GameSession) = MainMenuViewModel(session, dispatcher).also { it.setActive(true) }
 
+    @Test fun deedCountTracksUnfinishedOffersAndTheirInclusiveDeadlinesWithoutWriting() = runTest(dispatcher) {
+        val catalog = bundledGameCatalog()
+        val eventId = "financial-deed-coin-balance-v1"
+        val initial = createInitialGameState().copy(
+            economy = EconomyState(BudgetPlan(35, 20, 20, 25)),
+            engine = EngineState(catalog.rules.id, 0, 3, DayPhase.RUNNING, 0, 5, true, null,
+                100, emptyList(), listOf(
+                    DeedOffer("today", eventId, 3), DeedOffer("tomorrow", eventId, 4),
+                    DeedOffer("later", eventId, 5), DeedOffer("expired", eventId, 2),
+                    DeedOffer("done", eventId, 5, completed = true),
+                )),
+        )
+        val repository = MenuRepository(initial)
+        val model = model(session(repository, initial, catalog))
+        advanceUntilIdle()
+        fun count() = (model.uiState.value as MainMenuLoadState.Ready).menu.availableDeedsCount
+        assertEquals(3, count())
+
+        repository.update { game -> game.copy(engine = game.engine!!.let { day ->
+            day.copy(deeds = day.deeds.map { if (it.id == "today") it.copy(completed = true) else it })
+        }) }
+        advanceUntilIdle()
+        assertEquals(2, count())
+        repository.update { it.copy(engine = it.engine!!.copy(day = 5)) }
+        advanceUntilIdle()
+        assertEquals(1, count())
+        repository.update { it.copy(engine = it.engine!!.copy(phase = DayPhase.FINISHED)) }
+        advanceUntilIdle()
+        assertEquals(0, count())
+        assertTrue(repository.requests.isEmpty())
+    }
+
+    @Test fun deedCountUsesCurrentStartGuardsAndCountsAnActiveDeedOnlyOnce() = runTest(dispatcher) {
+        val shortId = "financial-deed-coin-balance-v1"
+        val longId = "financial-deed-financial-trap-v1"
+        val catalog = bundledGameCatalog().let {
+            it.copy(policies = it.policies + (longId to it.policies.getValue(longId).copy(energyCost = 3)))
+        }
+        val initial = createInitialGameState().copy(
+            economy = EconomyState(BudgetPlan(35, 20, 20, 25)),
+            engine = EngineState(catalog.rules.id, 0, 3, DayPhase.RUNNING, 0, 1, true, null,
+                100, emptyList(), listOf(DeedOffer("short", shortId, 3), DeedOffer("long", longId, 5))),
+        )
+        val repository = MenuRepository(initial)
+        val model = model(session(repository, initial, catalog))
+        advanceUntilIdle()
+        fun count() = (model.uiState.value as MainMenuLoadState.Ready).menu.availableDeedsCount
+        assertEquals(1, count())
+        repository.update { it.copy(engine = it.engine!!.copy(energy = 3)) }
+        advanceUntilIdle()
+        assertEquals(2, count())
+        repository.update { it.copy(engine = it.engine!!.copy(energy = 0)) }
+        advanceUntilIdle()
+        assertEquals(0, count())
+        repository.update { it.copy(engine = it.engine!!.copy(energy = 3, ateToday = false,
+            steps = catalog.rules.hungerBlocksAtStep)) }
+        advanceUntilIdle()
+        assertEquals(0, count())
+        repository.update { it.copy(engine = it.engine!!.copy(ateToday = true, phase = DayPhase.READY_TO_END)) }
+        advanceUntilIdle()
+        assertEquals(1, count())
+        repository.update { it.copy(engine = it.engine!!.copy(phase = DayPhase.RUNNING, events = listOf(
+            EventOccurrence("active", shortId, EventOrigin.DEED, EventStatus.ACTIVE, "short")))) }
+        advanceUntilIdle()
+        assertEquals(1, count())
+        repository.update { it.copy(engine = it.engine!!.copy(events = listOf(
+            EventOccurrence("story", catalog.introductionId, EventOrigin.SCHEDULE, EventStatus.ACTIVE)))) }
+        advanceUntilIdle()
+        assertEquals(0, count())
+        repository.update { it.copy(engine = it.engine!!.copy(events = emptyList()),
+            economy = it.economy.copy(unallocated = 1)) }
+        advanceUntilIdle()
+        assertEquals(0, count())
+        assertTrue(repository.requests.isEmpty())
+    }
+
     @Test fun editingNameRequiresConfirmationAndOnlyChangesThePetName() = runTest(dispatcher) {
         val initial = createInitialGameState()
         val repository = MenuRepository(initial)

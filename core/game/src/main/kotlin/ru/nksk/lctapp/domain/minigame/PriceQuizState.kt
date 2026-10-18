@@ -2,13 +2,14 @@ package ru.nksk.lctapp.domain.minigame
 
 import kotlin.random.Random
 
-/** Один вопрос викторины: суммы монет слева и справа, всегда разные. */
-data class QuizQuestion(val leftAmount: Int, val rightAmount: Int) {
-    val leftIsBigger: Boolean get() = leftAmount > rightAmount
+/** The target belongs to the question; legacy questions ask for the larger amount. */
+data class QuizQuestion(val leftAmount: Int, val rightAmount: Int, val pickLarger: Boolean = true) {
+    init { require(leftAmount > 0 && rightAmount > 0 && leftAmount != rightAmount) }
+    val leftIsCorrect: Boolean get() = if (pickLarger) leftAmount > rightAmount else leftAmount < rightAmount
 }
 
 /**
- * Чистое состояние викторины «Что дороже?»: [QUESTION_COUNT] вопросов,
+ * Чистое состояние сравнения цен: [QUESTION_COUNT] вопросов «дороже» / «дешевле»,
  * за каждый верный ответ - награда. Финал после последнего вопроса.
  */
 data class PriceQuizState(
@@ -28,7 +29,7 @@ data class PriceQuizState(
     /** Ответ игрока: true - выбрана левая карточка. Фиксирует результат, ждёт [next]. */
     fun answer(pickedLeft: Boolean): PriceQuizState {
         if (finished || lastCorrect != null) return this
-        val correct = question.leftIsBigger == pickedLeft
+        val correct = question.leftIsCorrect == pickedLeft
         return copy(
             correctAnswers = if (correct) correctAnswers + 1 else correctAnswers,
             lastCorrect = correct,
@@ -46,15 +47,14 @@ data class PriceQuizState(
         const val REWARD_PER_CORRECT = 2
         const val MAX_REWARD = QUESTION_COUNT * REWARD_PER_CORRECT
 
-        /** Генерирует вопросы с заметной разницей сумм, чтобы выбор был однозначным. */
+        /** Independent random targets and distinct prices in [10, 200), including close prices. */
         fun create(random: Random = Random.Default): PriceQuizState {
             val questions = List(QUESTION_COUNT) {
-                val left = random.nextInt(10, 90)
-                var right = random.nextInt(10, 90)
-                while (kotlin.math.abs(left - right) < 10) {
-                    right = random.nextInt(10, 90)
-                }
-                QuizQuestion(leftAmount = left, rightAmount = right)
+                val left = random.nextInt(10, 200)
+                // Draw uniformly from the other 189 prices, without retrying equal values.
+                val other = random.nextInt(10, 199)
+                val right = if (other >= left) other + 1 else other
+                QuizQuestion(leftAmount = left, rightAmount = right, pickLarger = random.nextBoolean())
             }
             return PriceQuizState(questions = questions)
         }

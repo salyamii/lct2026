@@ -43,17 +43,21 @@ class MemoryGameViewModel @Inject constructor(private val savedState: SavedState
             }
             MemoryGameAction.Restart -> {
                 feedbackJob?.cancel()
+                feedbackJob = null
                 publish(MemoryState.deal())
             }
         }
     }
 
     private fun resolveAfterFeedback() {
-        if (uiState.value.game.pending == null) return
         feedbackJob?.cancel()
+        feedbackJob = null
+        val waiting = uiState.value.game
+        if (waiting.pending == null) return
         feedbackJob = viewModelScope.launch {
             delay(700)
-            publish(uiState.value.game.resolvePending())
+            // A new tap can dismiss the mismatch before this timer; never close its new card.
+            if (uiState.value.game == waiting) publish(waiting.resolvePending())
         }
     }
 
@@ -72,7 +76,7 @@ class MemoryGameViewModel @Inject constructor(private val savedState: SavedState
         val faces = savedState.get<IntArray>("faces") ?: return MemoryState.deal()
         val open = savedState.get<IntArray>("face_up")?.toList().orEmpty()
         val matched = savedState.get<IntArray>("matched")?.toSet().orEmpty()
-        return MemoryState(
+        val restored = MemoryState(
             faces = faces.toList(),
             faceUp = open.toSet(),
             matched = matched,
@@ -83,5 +87,7 @@ class MemoryGameViewModel @Inject constructor(private val savedState: SavedState
             seen = savedState.get<IntArray>("seen")?.toSet() ?: (matched + open),
             recallMistakes = savedState["recall_mistakes"] ?: 0,
         )
+        // Old versions saved matching pairs during the same 700 ms delay as mismatches.
+        return if (restored.pendingMatches) restored.resolvePending() else restored
     }
 }

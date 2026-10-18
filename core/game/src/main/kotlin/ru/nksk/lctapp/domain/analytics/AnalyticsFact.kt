@@ -2,6 +2,8 @@ package ru.nksk.lctapp.domain.analytics
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 
 /** Facts describe committed decisions, not UI-derived balances or assessed skill levels. */
 @Serializable
@@ -369,13 +371,17 @@ sealed interface AssessmentTask {
     @Serializable
 
     @SerialName("compare_amounts")
-    data class CompareAmounts(val left: Long, val right: Long, val chosen: ComparisonSide) : AssessmentTask {
+    @OptIn(ExperimentalSerializationApi::class)
+    data class CompareAmounts(val left: Long, val right: Long, val chosen: ComparisonSide,
+        // Keep canonical legacy facts byte-for-byte unchanged, including when encodeDefaults is true.
+        @EncodeDefault(EncodeDefault.Mode.NEVER) val pickLarger: Boolean = true,
+    ) : AssessmentTask {
         init { require(left >= 0 && right >= 0) }
         override val purpose = QuestionPurpose.COMPARE_AMOUNTS
         override fun isCorrect() = chosen == when {
-            left > right -> ComparisonSide.LEFT
-            left < right -> ComparisonSide.RIGHT
-            else -> ComparisonSide.EQUAL
+            left == right -> ComparisonSide.EQUAL
+            (left > right) == pickLarger -> ComparisonSide.LEFT
+            else -> ComparisonSide.RIGHT
         }
     }
 

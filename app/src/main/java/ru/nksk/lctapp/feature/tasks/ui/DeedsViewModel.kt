@@ -152,7 +152,7 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
                 val card = catalog.cards.getValue(event.id)
                 val reward = catalog.content.choices.single { it.eventId == event.id }.moneyDelta
                 OfferedDeedUiState(offer.id, renderPetText(event.title, saved.pet.name).asGameUiText(),
-                    renderPetText(event.description, saved.pet.name).asGameUiText(), "До ${missingCoinAmount(reward)}",
+                    renderPetText(card.presentation.body ?: event.description, saved.pet.name).asGameUiText(), "До ${missingCoinAmount(reward)}",
                     deedDeadline(saved.engine!!.day, offer.expiresDay), card.scene,
                     deedPetEffects(saved, catalog, event.id, shownDemoMode))
             },

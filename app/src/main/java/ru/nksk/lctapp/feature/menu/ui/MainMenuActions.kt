@@ -36,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.TextStyle
@@ -83,6 +84,7 @@ private object QuickActionsPanelShape : Shape {
 
 @Composable
 internal fun MenuActions(onAction: (MainMenuAction) -> Unit, state: MainMenuUiState, modifier: Modifier = Modifier) {
+    val deedsDescription = stringResource(R.string.menu_available_deeds, state.availableDeedsCount)
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         state.notice?.let { Text(it, Modifier.padding(horizontal = 20.dp), color = AdventureLabel, fontFamily = Rubik) }
         Row(
@@ -109,8 +111,10 @@ internal fun MenuActions(onAction: (MainMenuAction) -> Unit, state: MainMenuUiSt
             )
             QuickAction(
                 R.drawable.menu_action_tasks_v4, R.string.menu_tasks,
-                Modifier.weight(1f).padding(bottom = QuickActionCenterLift).spotlightTarget("menu.tasks"),
+                Modifier.weight(1f).padding(bottom = QuickActionCenterLift).spotlightTarget("menu.tasks")
+                    .semantics { stateDescription = deedsDescription },
                 onClick = { onAction(MainMenuAction.Tasks) },
+                badge = state.availableDeedsCount.takeIf { it > 0 }?.toString(),
             )
             QuickAction(
                 R.drawable.menu_action_goal_v2, R.string.menu_goal,

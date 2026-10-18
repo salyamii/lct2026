@@ -89,6 +89,38 @@ class PriceQuizEvidenceTest {
         assertEquals(AnalyticsMode.REAL, first.mode)
     }
 
+    @Test fun mixedTargetsPreserveTheActualChoiceAndMatchTheGameScoreAfterRestoration() {
+        var saved = SavedStateHandle(mapOf(
+            "questions" to intArrayOf(80, 20, 15, 60, 199, 198),
+            "comparison_pick_larger" to booleanArrayOf(false, true, false),
+        ))
+        var model = PriceQuizViewModel(saved)
+        // Cheaper on the right, dearer on the right, then an incorrect cheaper-on-the-left answer.
+        for ((index, pickedLeft) in listOf(false, false, true).withIndex()) {
+            model.questionPresented(index)
+            model.onAction(PriceQuizAction.Answer(pickedLeft, index))
+            val evidence = model.comparisonEvidence()
+            saved = SavedStateHandle(saved.keys().associateWith { saved.get<Any?>(it) })
+            model = PriceQuizViewModel(saved)
+            assertEquals(evidence, model.comparisonEvidence())
+            model.onAction(PriceQuizAction.Next(index))
+        }
+        val evidence = model.comparisonEvidence()
+        val mapped = facts(evidence)
+        val tasks = mapped.map { (it.detail as FactDetail.QuestionAnswer).task as AssessmentTask.CompareAmounts }
+        assertEquals(listOf(false, true, false), tasks.map { it.pickLarger })
+        assertEquals(listOf(80L, 15L, 199L), tasks.map { it.left })
+        assertEquals(listOf(20L, 60L, 198L), tasks.map { it.right })
+        assertEquals(listOf(ComparisonSide.RIGHT, ComparisonSide.RIGHT, ComparisonSide.LEFT), tasks.map { it.chosen })
+        assertEquals(listOf(true, true, false), tasks.map { it.isCorrect() })
+        val result = SkillEvaluator().evaluate(mapped).single()
+        assertEquals(3L, result.measures["questions"])
+        assertEquals(2L, result.measures["correctFirstAnswers"])
+        assertEquals(model.uiState.value.game.correctAnswers.toLong(), result.measures["correctFirstAnswers"])
+        assertEquals(EpisodeCompletion.COMPLETE, result.completion)
+        assertEquals(mapped, facts(evidence))
+    }
+
     private fun facts(evidence: PriceQuizEvidence) = PriceQuizEvidenceMapper.facts(evidence,
         "deed", "run", 10, 1, "period", "catalog", "rules")
 }

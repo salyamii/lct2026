@@ -195,6 +195,14 @@ class SkillEvaluatorTest {
         assertEquals(0L, result.measures["correctFirstAnswers"])
     }
 
+    @Test(expected = IllegalArgumentException::class)
+    fun changedComparisonTargetCannotMasqueradeAsAnotherAttemptAtTheSameQuestion() {
+        val task = AssessmentTask.CompareAmounts(80, 20, ComparisonSide.LEFT)
+        val first = fact("quiz", 1, QuestionAnswer("q", 1, task))
+        val changed = fact("quiz", 2, QuestionAnswer("q", 2, task.copy(pickLarger = false)))
+        evaluator.evaluate(listOf(first, changed))
+    }
+
     @Test fun simulationFinanceIsExcludedButCounterfactualQuizIsRealLearning() {
         val ledger = fact("ledger", 1, ledgerQuestion()).copy(learningContext = LearningContext.COUNTERFACTUAL)
         assertEquals(SUPPORTED, single(ledger).outcome)

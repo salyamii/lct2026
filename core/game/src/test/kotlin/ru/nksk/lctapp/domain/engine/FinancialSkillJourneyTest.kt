@@ -46,10 +46,11 @@ class FinancialSkillJourneyTest {
             comparisonFacts += AnalyticsFact("compare:${quiz.current}", "run", "comparison:$occurrence", "answer:${quiz.current}", 0,
                 FactDetail.QuestionAnswer("question:${quiz.current}", 1,
                     AssessmentTask.CompareAmounts(question.leftAmount.toLong(), question.rightAmount.toLong(),
-                        if (question.leftIsBigger) ComparisonSide.LEFT else ComparisonSide.RIGHT),
+                        if (question.leftIsCorrect) ComparisonSide.LEFT else ComparisonSide.RIGHT,
+                        pickLarger = question.pickLarger),
                     seriesClosed = quiz.current == PriceQuizState.QUESTION_COUNT - 1), f.shown("question:${quiz.current}"),
                 contextFamily = "money_comparison")
-            quiz = quiz.answer(question.leftIsBigger).next()
+            quiz = quiz.answer(question.leftIsCorrect).next()
         }
         // Mirrors the tested UI adapter: shown question amounts, never inferred from the reward.
         f.repo.recordFacts(comparisonFacts)
