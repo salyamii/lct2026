@@ -10,9 +10,12 @@ import ru.nksk.lctapp.domain.game.GameState
 
 /** One user intent. An uncertain write must keep its original identity, revision and evidence. */
 internal class GameActionAttempt private constructor(
-    val before: GameState,
+    private val originalBefore: GameState?,
     val request: EngineRequest,
 ) {
+    /** A restored request has no historical snapshot; callers must read its indexed receipt. */
+    val before: GameState get() = checkNotNull(originalBefore) { "A restored attempt has no original world" }
+
     suspend fun submit(session: GameSession) = session.dispatch(request)
 
     /** A deduplicated request returns the latest world; feedback must describe its own receipt. */
@@ -30,6 +33,9 @@ internal class GameActionAttempt private constructor(
     }
 
     companion object {
+        /** Restore only the original intent, never substitute today's world for its historical before. */
+        fun restore(request: EngineRequest) = GameActionAttempt(null, request)
+
         fun prepare(before: GameState, command: EngineCommand, context: DecisionContext? = null, demoMode: Boolean = false) =
             GameActionAttempt(before, EngineRequest(UUID.randomUUID().toString(), before.engine?.revision, command, context, demoMode))
     }

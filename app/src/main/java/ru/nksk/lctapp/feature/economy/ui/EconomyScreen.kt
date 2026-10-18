@@ -52,12 +52,17 @@ internal fun EconomyScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
                     reserveRemainder = if (isWeeklyReceipt) economy.plan.reserve else 0,
                     busy = receiptBusy,
                     reserveTransferred = if (isWeeklyReceipt) state.weeklyReserveReceipt?.amount else null,
+                    reserveTransferVisible = isWeeklyReceipt && state.weeklyReserveTransferVisible,
+                    reserveTransferInput = state.weeklyReserveInput,
                     advice = state.weeklyAdvice,
                     header = if (planning.reason == BudgetPlanningReason.INITIAL) "Первый бюджет" else "Новая неделя",
-                    title = if (planning.reason == BudgetPlanningReason.INITIAL) "Монеты для приключения" else "Новый запас на неделю"),
+                    title = if (planning.reason == BudgetPlanningReason.INITIAL) "Монеты для приключения" else "Монеты на неделю"),
                 onPlan = { if (!receiptBusy) onAction(EconomyAction.StartAllocation) },
                 onBack = { if (!receiptBusy) onBack() },
                 onDepositReserve = { if (!receiptBusy) onAction(EconomyAction.DepositWeeklyReserve) },
+                onOpenReserveTransfer = { if (!receiptBusy) onAction(EconomyAction.OpenWeeklyReserveTransfer) },
+                onReserveInputChange = { onAction(EconomyAction.UpdateWeeklyReserveInput(it)) },
+                onCancelReserveTransfer = { onAction(EconomyAction.CloseWeeklyReserveTransfer) },
                 onAdviceShown = { onAction(EconomyAction.AdvicePresented(it)) })
             else -> BudgetPlanScreen(
                 state = display.budget,

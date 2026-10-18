@@ -6,6 +6,7 @@ import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -25,7 +26,7 @@ fun EntryProviderScope<NavKey>.dayEntry(onBack: (Day) -> Unit, onFinished: (Day,
     onGame: (Day, String) -> Unit, onLearning: (Day) -> Unit = {},
     onStoryGame: (Day, String, String) -> Unit = { _, _, _ -> },
     onReflection: (Day, Int) -> Unit = { _, _ -> }, isCurrentEntry: (Day) -> Boolean = { true },
-    onRestarted: (Day) -> Unit = {}) {
+    onRestarted: (Day) -> Unit = {}, summaryExtra: (@Composable () -> Unit)? = null) {
     entry<Day> { source ->
         val viewModel = hiltViewModel<DayViewModel>()
         val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -69,6 +70,7 @@ fun EntryProviderScope<NavKey>.dayEntry(onBack: (Day) -> Unit, onFinished: (Day,
             onBack = dropUnlessResumed { onBack(source) },
             // Starting the day was already committed. Continue to the existing menu without another command.
             onLoadingContinue = dropUnlessResumed { onFinished(source, null) },
+            summaryExtra = summaryExtra,
         )
     }
 }

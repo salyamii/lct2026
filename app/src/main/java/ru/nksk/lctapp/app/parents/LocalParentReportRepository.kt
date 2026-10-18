@@ -20,7 +20,11 @@ import ru.nksk.lctapp.domain.backend.CloudSyncState
 import ru.nksk.lctapp.domain.backend.SkillStatus
 import ru.nksk.lctapp.domain.backend.SkillSyncPhase
 import ru.nksk.lctapp.domain.analytics.SkillEvaluator
+import ru.nksk.lctapp.domain.analytics.SkillExplanation
+import ru.nksk.lctapp.domain.analytics.SkillExplanations
 import ru.nksk.lctapp.domain.analytics.SkillId
+import ru.nksk.lctapp.domain.analytics.SkillProfile
+import ru.nksk.lctapp.domain.analytics.isSupported
 import ru.nksk.lctapp.domain.content.StoryContent
 import ru.nksk.lctapp.domain.content.StoryContentRepository
 import ru.nksk.lctapp.domain.game.GameRepository
@@ -28,6 +32,7 @@ import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.history.AuditEntry
 import ru.nksk.lctapp.domain.history.AuditType
 import ru.nksk.lctapp.domain.history.HistoryLearningProjection
+import ru.nksk.lctapp.domain.history.SkillExplanationContexts
 import ru.nksk.lctapp.domain.history.localGameGeneration
 import ru.nksk.lctapp.feature.parents.report.ParentPet
 import ru.nksk.lctapp.feature.parents.report.ParentReport
@@ -35,6 +40,7 @@ import ru.nksk.lctapp.feature.parents.report.ParentReportRepository
 import ru.nksk.lctapp.feature.parents.report.ParentSkill
 import ru.nksk.lctapp.feature.parents.report.ParentAssessmentSync
 import ru.nksk.lctapp.feature.parents.report.ParentSkillAssessment
+import ru.nksk.lctapp.feature.parents.report.ParentSkillExplanation
 import ru.nksk.lctapp.feature.parents.report.ParentSkillStatus
 import ru.nksk.lctapp.feature.parents.report.ParentSyncPhase
 
@@ -103,6 +109,7 @@ internal fun withServerAssessments(
                         SkillStatus.HAS_PROBLEM -> ParentSkillStatus.HAS_PROBLEM
                     },
                     policyVersion = assessment.policyVersion,
+                    explanation = assessment.explanation?.toParentExplanation(),
                 )
             })
         },
@@ -127,28 +134,34 @@ internal fun localParentReport(game: GameState?, history: List<AuditEntry>, cont
     val checkpoint = currentHistory.lastOrNull { it.after != null }?.after
     if (checkpoint != null && checkpoint != game) return null
 
-    val profiles = if (runId == null) emptyMap() else SkillEvaluator().project(
-        runId, HistoryLearningProjection.facts(currentHistory, content),
-    ).associateBy { it.skill }
+    val facts = if (runId == null) emptyList() else HistoryLearningProjection.facts(currentHistory, content)
+    val profiles = if (runId == null) emptyMap() else SkillEvaluator().project(runId, facts).associateBy { it.skill }
+    val contexts = SkillExplanationContexts.from(currentHistory, facts, content)
     return ParentReport(
         pet = ParentPet(game.pet.name, game.economy.availableBalance, game.economy.savingsBalance),
         skills = SkillId.entries.map { id ->
-            val profile = profiles[id]
+            val profile = profiles[id] ?: SkillProfile(runId.orEmpty(), id, emptyList())
             ParentSkill(
                 id = id.id,
                 title = id.parentTitle(),
-                observedEpisodes = profile?.observations?.size ?: 0,
-                supportedEpisodes = profile?.supportedEpisodes ?: 0,
-                difficultyEpisodes = profile?.difficultyEpisodes ?: 0,
-                neutralEpisodes = profile?.neutralEpisodes ?: 0,
-                pendingEpisodes = profile?.pendingEpisodes ?: 0,
-                incompleteEpisodes = profile?.incompleteEpisodes ?: 0,
-                supportedWithoutGameHints = profile?.supportedWithoutGameHints ?: 0,
-                assistedEpisodes = profile?.assistedEpisodes ?: 0,
+                observedEpisodes = profile.observations.size,
+                supportedEpisodes = profile.supportedEpisodes,
+                difficultyEpisodes = profile.difficultyEpisodes,
+                neutralEpisodes = profile.neutralEpisodes,
+                pendingEpisodes = profile.pendingEpisodes,
+                incompleteEpisodes = profile.incompleteEpisodes,
+                supportedWithoutGameHints = profile.supportedWithoutGameHints,
+                assistedEpisodes = profile.assistedEpisodes,
+                localExplanation = SkillExplanations.explain(profile, contexts::contextFor).toParentExplanation(),
             )
         },
     )
 }
+
+private fun SkillExplanation.toParentExplanation(): ParentSkillExplanation? =
+    takeIf(SkillExplanation::isSupported)?.let {
+        ParentSkillExplanation(it.description, it.summary, it.evidence.map { evidence -> evidence.text })
+    }
 
 /** Parent-facing names from the existing FIN-01–FIN-12 analytics specification. */
 private fun SkillId.parentTitle(): String = when (this) {

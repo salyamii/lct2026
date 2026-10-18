@@ -649,7 +649,8 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
                 if (it.moneyDelta < 0 && choiceDeltas.getValue(it.id) == 0L) "Бесплатно · режим бога"
                 else if (it.moneyDelta < 0 && blocked[it.id] !is BlockReason.InsufficientMoney)
                     EconomyOperations.quote(saved.economy, Math.negateExact(it.moneyDelta),
-                        session.engine.choiceSpendingKind(it.id)).playerDescription(session.engine.choiceSpendingKind(it.id))
+                        session.engine.choiceSpendingKind(it.id)).playerDescription(session.engine.choiceSpendingKind(it.id),
+                            reserveBefore = saved.economy.plan.reserve)
                 else (blocked[it.id] as? BlockReason.InsufficientMoney)?.takeIf { choiceBlock !is BlockReason.InsufficientMoney }
                     ?.let { reason -> "Не хватает ${reason.missing} монет" },
                 petEffects = eventChoicePetEffects(saved, catalog, it.id, demoMode)) },
@@ -669,7 +670,7 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
             primarySpending = if (occurrence == null && primary != null && primaryBlock != BlockReason.MustEat)
                 session.engine.advanceSpending(saved, primary, demoMode)?.let {
                     if (demoMode && it.quote.affordable && it.quote.parts.isEmpty()) "Бесплатно · режим бога"
-                    else it.quote.playerDescription(it.kind)
+                    else it.quote.playerDescription(it.kind, reserveBefore = saved.economy.plan.reserve)
                 } else null,
             message = effectiveMessage, actionNotice = actionNotice,
         )

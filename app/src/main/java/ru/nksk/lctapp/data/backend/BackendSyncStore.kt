@@ -17,6 +17,9 @@ internal interface BackendSyncStore {
     suspend fun replaceAfterRestore(state: BackendSyncStateEntity)
     suspend fun replaceAfterRestart(state: BackendSyncStateEntity)
     suspend fun clear(profileId: String, kind: String, requestId: String)
+    suspend fun stageLocalUpload(state: BackendSyncStateEntity, request: PendingBackendRequestEntity) {
+        error("Atomic local upload staging is unavailable")
+    }
 }
 
 @Singleton
@@ -27,6 +30,14 @@ internal class RoomBackendSyncStore @Inject constructor(private val database: Ga
     override suspend fun pending(profileId: String, kind: String) = dao.readPending(profileId, kind)
     override suspend fun stage(request: PendingBackendRequestEntity) = dao.upsertPending(request)
     override suspend fun clear(profileId: String, kind: String, requestId: String) = dao.deletePending(profileId, kind, requestId)
+    override suspend fun stageLocalUpload(state: BackendSyncStateEntity, request: PendingBackendRequestEntity) {
+        database.withWriteTransaction {
+            check(listOf("snapshot", "analytics", "ack").all { dao.readPending(state.profileId, it) == null })
+            dao.readPending(state.profileId, "restore")?.let { dao.deletePending(it.profileId, it.kind, it.requestId) }
+            dao.upsertState(state)
+            dao.upsertPending(request)
+        }
+    }
     override suspend fun complete(state: BackendSyncStateEntity, kind: String, requestId: String) {
         database.withWriteTransaction {
             dao.upsertState(state)

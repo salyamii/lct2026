@@ -5,6 +5,10 @@ import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.ExperimentalSerializationApi
 import ru.nksk.lctapp.domain.analytics.AnalyticsFact
 import ru.nksk.lctapp.domain.analytics.SkillEvaluator
+import ru.nksk.lctapp.domain.analytics.SkillExplanation
+import ru.nksk.lctapp.domain.analytics.SkillExplanations
+import ru.nksk.lctapp.domain.analytics.SkillEventContext
+import ru.nksk.lctapp.domain.analytics.isSupported
 import ru.nksk.lctapp.domain.analytics.SkillId
 import ru.nksk.lctapp.domain.analytics.SkillObservation
 import ru.nksk.lctapp.domain.analytics.SkillProfile
@@ -12,6 +16,7 @@ import ru.nksk.lctapp.domain.content.StoryContent
 import ru.nksk.lctapp.domain.history.GameSnapshot
 import ru.nksk.lctapp.domain.history.HistoryCodec
 import ru.nksk.lctapp.domain.history.HistoryLearningProjection
+import ru.nksk.lctapp.domain.history.SkillExplanationContexts
 
 /** Backend vocabulary only. Episode outcomes are not mastery statuses. */
 @Serializable
@@ -52,6 +57,7 @@ data class AnalyticsUploadRequest(
 
 /** The client supplies evidence without inventing unapproved mastery thresholds. */
 @Serializable
+@OptIn(ExperimentalSerializationApi::class)
 data class SkillEvidenceDto(
     val skillId: SkillId,
     val completedEpisodes: Int,
@@ -63,20 +69,34 @@ data class SkillEvidenceDto(
     val supportedWithoutGameHints: Int,
     val assistedEpisodes: Int,
     val observations: List<SkillObservation>,
+    /** Presentation of these observations, not a client-assigned mastery status. */
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
+    val explanation: SkillExplanation? = null,
 ) {
     init {
         require(listOf(completedEpisodes, supportedEpisodes, difficultyEpisodes, neutralEpisodes,
             pendingEpisodes, incompleteEpisodes, supportedWithoutGameHints, assistedEpisodes).all { it >= 0 })
         require(observations.all { it.skill == skillId })
+        explanation?.let { copy ->
+            require(copy.isSupported())
+            require(copy.evidence.all { example -> observations.any { observation ->
+                observation.episodeId == example.episodeId &&
+                    observation.sourceEventIds.toSet() == example.sourceEventIds.toSet()
+            } })
+        }
     }
 }
 
 /** The backend owns status policy; its version is independent of the client's evidence rules. */
 @Serializable
+@OptIn(ExperimentalSerializationApi::class)
 data class SkillAssessmentDto(
     val skillId: SkillId,
     val status: SkillStatus,
     val policyVersion: String,
+    @Serializable(with = OptionalSkillExplanationSerializer::class)
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
+    val explanation: SkillExplanation? = null,
 ) {
     init { require(policyVersion.isNotBlank()) }
 }
@@ -122,8 +142,10 @@ fun analyticsUploadRequest(
     content: StoryContent,
 ): AnalyticsUploadRequest {
     HistoryCodec.validate(snapshot)
+    val facts = HistoryLearningProjection.facts(snapshot.history, content)
+    val contexts = SkillExplanationContexts.from(snapshot.history, facts, content)
     return analyticsUploadRequest(deviceId, batchId, snapshot.runId, snapshot.historySequence,
-        HistoryLearningProjection.facts(snapshot.history, content))
+        facts, contexts::contextFor)
 }
 
 /** [facts] must be the full HistoryLearningProjection result through the supplied boundary. */
@@ -133,6 +155,7 @@ fun analyticsUploadRequest(
     gameRunId: String,
     throughHistorySequence: Long,
     facts: List<AnalyticsFact>,
+    contextFor: (SkillObservation) -> SkillEventContext? = { null },
 ): AnalyticsUploadRequest {
     require(facts.all { it.gameRunId == gameRunId && it.sequence <= throughHistorySequence })
     val unique = facts.groupBy { it.eventId }.map { (id, copies) ->
@@ -145,11 +168,13 @@ fun analyticsUploadRequest(
         gameRunId = gameRunId,
         throughHistorySequence = throughHistorySequence,
         facts = unique,
-        skills = SkillEvaluator().project(gameRunId, unique).map(SkillProfile::toEvidenceDto),
+        skills = SkillEvaluator().project(gameRunId, unique).map { it.toEvidenceDto(contextFor) },
     )
 }
 
-fun SkillProfile.toEvidenceDto(): SkillEvidenceDto = SkillEvidenceDto(
+fun SkillProfile.toEvidenceDto(
+    contextFor: (SkillObservation) -> SkillEventContext? = { null },
+): SkillEvidenceDto = SkillEvidenceDto(
     skillId = skill,
     completedEpisodes = completedEpisodes,
     supportedEpisodes = supportedEpisodes,
@@ -160,4 +185,5 @@ fun SkillProfile.toEvidenceDto(): SkillEvidenceDto = SkillEvidenceDto(
     supportedWithoutGameHints = supportedWithoutGameHints,
     assistedEpisodes = assistedEpisodes,
     observations = observations,
+    explanation = SkillExplanations.explain(this, contextFor),
 )

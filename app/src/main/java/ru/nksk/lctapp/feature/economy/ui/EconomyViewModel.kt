@@ -50,6 +50,8 @@ internal data class EconomyUiState(
     val withdrawal: WithdrawalPreview? = null,
     val transferReceipt: SavingsReceipt? = null,
     val weeklyReserveReceipt: SavingsReceipt? = null,
+    val weeklyReserveTransferVisible: Boolean = false,
+    val weeklyReserveInput: String = "0",
     val exclusiveSaving: Boolean = false,
     val budgetConfirmation: BudgetScreenState? = null,
     val budgetHistory: BudgetHistoryUi? = null,
@@ -81,6 +83,9 @@ internal data class EconomyUiState(
 
 internal sealed interface EconomyAction {
     data object StartAllocation : EconomyAction
+    data object OpenWeeklyReserveTransfer : EconomyAction
+    data class UpdateWeeklyReserveInput(val input: String) : EconomyAction
+    data object CloseWeeklyReserveTransfer : EconomyAction
     data object DepositWeeklyReserve : EconomyAction
     data object OpenBudgetHistory : EconomyAction
     data object CloseBudgetHistory : EconomyAction
@@ -201,14 +206,39 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
                     shownAdviceIds += action.id
                 return
             }
-            EconomyAction.DepositWeeklyReserve -> {
+            EconomyAction.OpenWeeklyReserveTransfer -> {
                 val shown = state.value
                 val economy = shown.economy ?: return
                 val planning = economy.planning ?: return
                 if (shown.saving || shown.error != null || planning.reason != BudgetPlanningReason.WEEKLY ||
                     planning.stage != BudgetPlanningStage.RECEIPT || economy.plan.reserve <= 0) return
+                state.value = shown.copy(weeklyReserveTransferVisible = true, weeklyReserveInput = "0",
+                    weeklyReserveReceipt = null)
+                return
+            }
+            is EconomyAction.UpdateWeeklyReserveInput -> {
+                val shown = state.value
+                if (shown.saving || shown.error != null || !shown.weeklyReserveTransferVisible ||
+                    action.input.length > 19 || action.input.any { it !in '0'..'9' }) return
+                state.value = shown.copy(weeklyReserveInput = action.input)
+                return
+            }
+            EconomyAction.CloseWeeklyReserveTransfer -> {
+                val shown = state.value
+                if (shown.saving || shown.error != null) return
+                state.value = shown.copy(weeklyReserveTransferVisible = false, weeklyReserveInput = "0")
+                return
+            }
+            EconomyAction.DepositWeeklyReserve -> {
+                val shown = state.value
+                val economy = shown.economy ?: return
+                val planning = economy.planning ?: return
+                val amount = shown.weeklyReserveInput.toLongOrNull() ?: return
+                if (shown.saving || shown.error != null || planning.reason != BudgetPlanningReason.WEEKLY ||
+                    planning.stage != BudgetPlanningStage.RECEIPT || !shown.weeklyReserveTransferVisible ||
+                    amount <= 0 || amount > economy.plan.reserve) return
                 enqueue(Pending(action, shownRevision = shown.revision,
-                    weeklyReserve = EngineCommand.DepositWeeklyReserve(planning.id, planning.revision, economy.plan.reserve),
+                    weeklyReserve = EngineCommand.DepositWeeklyReserve(planning.id, planning.revision, amount),
                     context = DecisionContext(presentationId = "weekly-reserve:${planning.id}:${planning.revision}",
                         informationPresented = false, complete = false,
                         before = FinancialPosition(economy.availableBalance, economy.savingsBalance, shown.knownNeeds),
@@ -432,11 +462,14 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
             it.revision != game.engine?.revision || it.available != game.economy.availableBalance ||
                 it.savings != game.economy.savingsBalance || it.target != target
         } == true
+        val sameWeeklyReceipt = old?.planning?.id == game.economy.planning?.id &&
+            game.economy.planning?.reason == BudgetPlanningReason.WEEKLY &&
+            game.economy.planning?.stage == BudgetPlanningStage.RECEIPT
         state.value = state.value.copy(loading = false, economy = game.economy, knownNeeds = knownNeeds(game),
             pet = game.pet, revision = game.engine?.revision, savingsTarget = target, day = game.engine?.day ?: 1,
-            weeklyReserveReceipt = state.value.weeklyReserveReceipt.takeIf {
-                old?.planning?.id == game.economy.planning?.id && game.economy.planning?.stage == BudgetPlanningStage.RECEIPT
-            },
+            weeklyReserveReceipt = state.value.weeklyReserveReceipt.takeIf { sameWeeklyReceipt },
+            weeklyReserveTransferVisible = state.value.weeklyReserveTransferVisible && sameWeeklyReceipt,
+            weeklyReserveInput = if (sameWeeklyReceipt) state.value.weeklyReserveInput else "0",
             withdrawal = state.value.withdrawal.takeUnless { confirmationChanged },
             savingsStep = if (confirmationChanged) SavingsStep.WITHDRAW else state.value.savingsStep)
         if (screenActive && state.value.budgetHistoryVisible && (changed || budgetHistoryJob?.isCancelled == true)) loadBudgetHistory()
@@ -557,6 +590,7 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
                                 before?.savingsBalance ?: if (withdrawing) it.savingsBalance + amount else it.savingsBalance - amount,
                                 it.availableBalance, it.savingsBalance) }
                         state.value = if (command is EngineCommand.DepositWeeklyReserve) state.value.copy(
+                            weeklyReserveTransferVisible = false, weeklyReserveInput = "0",
                             weeklyReserveReceipt = feedback.takeIf {
                                 state.value.economy?.planning?.id == command.sessionId &&
                                     state.value.economy?.planning?.stage == BudgetPlanningStage.RECEIPT

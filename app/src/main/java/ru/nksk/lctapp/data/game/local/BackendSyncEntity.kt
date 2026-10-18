@@ -22,6 +22,7 @@ internal data class BackendSyncStateEntity(
     @ColumnInfo(name = "game_run_id") val gameRunId: String? = null,
     @ColumnInfo(name = "local_generation") val localGeneration: String? = null,
     @ColumnInfo(name = "reward_fetch_cursor") val rewardFetchCursor: Long? = null,
+    @ColumnInfo(name = "cloud_lineage_payload") val cloudLineagePayload: String? = null,
 )
 
 /** Frozen request bytes are a transport document, not a second mutable world model. */

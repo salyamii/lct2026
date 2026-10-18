@@ -44,7 +44,9 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
     onCopyProfile: (String) -> Unit, debugButton: (@Composable () -> Unit)? = null,
     onShareCode: () -> Unit = {}, sharingCode: Boolean = false, shareError: Boolean = false,
     onDownloadDiagnostics: () -> Unit = {}, pickingDiagnostics: Boolean = false,
-    onRepeatTutorial: (() -> Unit)? = null) {
+    onRepeatTutorial: (() -> Unit)? = null,
+    debugInfo: (@Composable () -> Unit)? = null,
+    survey: (@Composable () -> Unit)? = null) {
     Column(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding().background(GamePaper)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -53,6 +55,7 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
         }
         Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            survey?.invoke()
             onRepeatTutorial?.let { repeat ->
                 SettingsCard {
                     Text("Обучение", color = GameInk, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -85,6 +88,7 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
                         { onCopyProfile(profileId); copied = true }, style = GameActionStyle.SECONDARY)
                 }
             }
+            debugInfo?.invoke()
 //            CloudSettingsCard(state.cloud,
 //                configured = state.backendConfigured && !state.loading && !state.profileError,
 //                onAction = onAction)
@@ -102,6 +106,9 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
     }
     state.cloud.restorePreview?.let { preview ->
         CloudRestoreDialog(preview, busy = state.cloud.busy, onAction = onAction)
+    }
+    state.cloud.localUploadPreview?.let { preview ->
+        CloudLocalUploadDialog(preview, busy = state.cloud.busy, onAction = onAction)
     }
 }
 

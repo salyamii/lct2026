@@ -23,6 +23,7 @@ import ru.nksk.lctapp.core.ui.components.GameSceneTitle
 import ru.nksk.lctapp.core.ui.components.GameActionButton
 import ru.nksk.lctapp.core.ui.components.GameActionStyle
 import ru.nksk.lctapp.core.ui.components.FinancialAdviceText
+import ru.nksk.lctapp.core.ui.components.InlineSavingsTransfer
 import ru.nksk.lctapp.core.ui.game.FinancialAdviceUi
 import ru.nksk.lctapp.core.ui.game.coinAmount
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
@@ -34,7 +35,7 @@ internal data class WeeklyIncomeUiState(
     val amount: Long = 100,
     val header: String = "Новая неделя",
     val amountCaption: String = "монет на эту неделю",
-    val title: String = "Новый запас на неделю",
+    val title: String = "Монеты на неделю",
     val description: String = "Сначала позаботимся о еде. Остальное разделим между желаниями, большой целью и запасом на неожиданности.",
     val nextIncome: String = "Новые монеты получим через 7 игровых дней.",
     val hint: String = "Выделим часть на цель. Она попадёт в копилку при подтверждении бюджета.",
@@ -44,6 +45,8 @@ internal data class WeeklyIncomeUiState(
     val reserveRemainder: Long = 0,
     val busy: Boolean = false,
     val reserveTransferred: Long? = null,
+    val reserveTransferVisible: Boolean = false,
+    val reserveTransferInput: String = "0",
     val advice: FinancialAdviceUi? = null,
 )
 
@@ -54,18 +57,23 @@ internal fun WeeklyIncomeScreen(
     onBack: () -> Unit,
     onDepositReserve: () -> Unit = {},
     onAdviceShown: (String) -> Unit = {},
+    onOpenReserveTransfer: () -> Unit = {},
+    onReserveInputChange: (String) -> Unit = {},
+    onCancelReserveTransfer: () -> Unit = {},
 ) {
-    BoxWithConstraints(Modifier.fillMaxSize().background(GameInk)) {
+    BoxWithConstraints(Modifier.fillMaxSize().background(GameInk).imePadding()) {
         val landscape = maxWidth >= 600.dp && maxWidth > maxHeight
         if (landscape) {
             Row(Modifier.fillMaxSize()) {
                 IncomeHero(state, onBack, Modifier.weight(1f).fillMaxHeight())
-                IncomeInvitation(state, onPlan, onDepositReserve, onAdviceShown, Modifier.weight(1f).fillMaxHeight())
+                IncomeInvitation(state, onPlan, onDepositReserve, onAdviceShown, onOpenReserveTransfer,
+                    onReserveInputChange, onCancelReserveTransfer, Modifier.weight(1f).fillMaxHeight())
             }
         } else {
             Column(Modifier.fillMaxSize()) {
                 IncomeHero(state, onBack, Modifier.fillMaxWidth().weight(0.46f))
-                IncomeInvitation(state, onPlan, onDepositReserve, onAdviceShown, Modifier.fillMaxWidth().weight(0.54f))
+                IncomeInvitation(state, onPlan, onDepositReserve, onAdviceShown, onOpenReserveTransfer,
+                    onReserveInputChange, onCancelReserveTransfer, Modifier.fillMaxWidth().weight(0.54f))
             }
         }
     }
@@ -89,7 +97,8 @@ private fun IncomeHero(state: WeeklyIncomeUiState, onBack: () -> Unit, modifier:
 
 @Composable
 private fun IncomeInvitation(state: WeeklyIncomeUiState, onPlan: () -> Unit,
-    onDepositReserve: () -> Unit, onAdviceShown: (String) -> Unit, modifier: Modifier) {
+    onDepositReserve: () -> Unit, onAdviceShown: (String) -> Unit, onOpenReserveTransfer: () -> Unit,
+    onReserveInputChange: (String) -> Unit, onCancelReserveTransfer: () -> Unit, modifier: Modifier) {
     Surface(modifier, color = GamePaper, shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)) {
         Box(Modifier.fillMaxSize().windowInsetsPadding(
             WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)),
@@ -104,10 +113,21 @@ private fun IncomeInvitation(state: WeeklyIncomeUiState, onPlan: () -> Unit,
                         Text("В копилку +$amount", color = GameInk, fontFamily = Nunito,
                             fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, lineHeight = 22.sp)
                     }
-                    if (state.reserveRemainder > 0) {
+                    if (state.reserveTransferVisible) {
+                        InlineSavingsTransfer(
+                            input = state.reserveTransferInput,
+                            maximum = state.reserveRemainder,
+                            reserveBalance = state.reserveRemainder,
+                            savingsBalance = state.savingsBalance ?: 0,
+                            enabled = !state.busy,
+                            onInputChange = onReserveInputChange,
+                            onConfirm = onDepositReserve,
+                            onCancel = onCancelReserveTransfer,
+                        )
+                    } else if (state.reserveRemainder > 0) {
                         Text("Остаток запаса: ${coinAmount(state.reserveRemainder)}", color = GameInk,
                             fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 16.sp, lineHeight = 22.sp)
-                        GameActionButton("Отложить остаток", onDepositReserve, enabled = !state.busy,
+                        GameActionButton("Отложить часть", onOpenReserveTransfer, enabled = !state.busy,
                             style = GameActionStyle.SECONDARY, minHeight = 48.dp)
                     }
                     GameActionButton(state.action, onPlan, enabled = !state.busy)

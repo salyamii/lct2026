@@ -4,6 +4,13 @@ import androidx.room3.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 
+/** Preserve every existing world and frozen request; cloud replacement is an explicit future choice. */
+internal val MIGRATION_23_24 = object : Migration(23, 24) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE BACKEND_SYNC_STATE ADD COLUMN cloud_lineage_payload TEXT")
+    }
+}
+
 /** Split old archives inside SQLite, without reading a complete historical JSON string into the VM. */
 internal val MIGRATION_22_23 = object : Migration(22, 23) {
     override suspend fun migrate(connection: SQLiteConnection) {

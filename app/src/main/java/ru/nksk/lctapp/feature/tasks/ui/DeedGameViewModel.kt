@@ -3,6 +3,7 @@ package ru.nksk.lctapp.feature.tasks.ui
 import ru.nksk.lctapp.domain.pet.renderPetText
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -15,6 +16,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import ru.nksk.lctapp.core.ui.game.GameActionAttempt
 import ru.nksk.lctapp.core.ui.game.playerMessage
 import ru.nksk.lctapp.core.ui.game.deedCompletionMessage
@@ -40,11 +43,15 @@ internal data class DeedGameUiState(
     val eventMedia: EventMedia = EventMedia(),
     val canSkipGame: Boolean = false,
     val demoMode: Boolean = false,
+    val reward: DeedRewardUiState? = null,
 )
 
 /** Connects an actual offered deed to a transient board and one atomic engine outcome. */
 @HiltViewModel
-internal class DeedGameViewModel @Inject constructor(private val session: GameSession) : ViewModel() {
+internal class DeedGameViewModel @Inject constructor(
+    private val session: GameSession,
+    private val savedState: SavedStateHandle = SavedStateHandle(),
+) : ViewModel() {
     private val mutableState = MutableStateFlow(DeedGameUiState())
     val uiState = mutableState.asStateFlow()
     private val exits = Channel<String?>(Channel.BUFFERED)
@@ -65,9 +72,14 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
     private var comparisonWriter: Job? = null
     private var comparisonSaveFailed = false
     private var leaveWhenLoaded = false
+    private var rewardOutcome: DeedRewardOutcome? = null
+    private var rewardReceiptNeeded = false
+    private var rewardEditing = false
+    private var rewardInput = ""
+    private var rewardDeposited = 0L
 
-    fun load(id: String, storyChoiceId: String? = null) {
-        if (occurrenceId == id && choiceId == storyChoiceId && observer?.isActive == true) return
+    fun load(id: String, storyChoiceId: String? = null, reload: Boolean = false) {
+        if (!reload && occurrenceId == id && choiceId == storyChoiceId && observer?.isActive == true) return
         if (occurrenceId != id || choiceId != storyChoiceId) comparisonEvidence.clear()
         occurrenceId = id
         choiceId = storyChoiceId
@@ -75,6 +87,10 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
         observer = viewModelScope.launch {
             try {
                 session.prepare()
+                if (savedState.contains(REWARD_REQUEST)) {
+                    latest = checkNotNull(session.read())
+                    restoreReward()
+                }
                 session.observe().collect { latest = checkNotNull(it); render() }
             } catch (cancelled: CancellationException) { throw cancelled
             } catch (_: Exception) {
@@ -96,7 +112,7 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
     fun finishStacking(state: StackingState) { DeedGameScore.fromStacking(state)?.let(::finish) }
 
     private fun finish(score: DeedGameScore) {
-        if (busy || pending != null || rejectedAction != null) return
+        if (busy || pending != null || rejectedAction != null || rewardOutcome != null || rewardReceiptNeeded) return
         val id = occurrenceId ?: return
         execute(choiceId?.let { EngineCommand.CompleteStoryGame(id, it, score) }
             ?: EngineCommand.CompleteDeed(id, score))
@@ -111,6 +127,13 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
 
     fun leave() {
         if (busy) return
+        if (rewardOutcome != null) {
+            if (pending != null || rewardReceiptNeeded) return
+            if (rewardEditing) { cancelRewardTransfer(); return }
+            savedState[REWARD_DISMISSED] = true
+            exit()
+            return
+        }
         if (pending != null) { exit(); return }
         if (latest == null) {
             leaveWhenLoaded = true
@@ -126,9 +149,94 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
     fun retry() {
         if (busy) return
         pending?.let { submit(it); return }
+        if (rewardReceiptNeeded) {
+            occurrenceId?.let { load(it, choiceId, reload = true) }
+            return
+        }
         // A definite stale rejection can be retried only as an explicit new intent.
         rejectedAction?.let { execute(it); return }
         if (comparisonSaveFailed) persistComparisonAnswers() else occurrenceId?.let { load(it, choiceId) }
+    }
+
+    fun openRewardTransfer() {
+        val shown = uiState.value.reward ?: return
+        if (busy || pending != null || rewardReceiptNeeded || shown.maximum <= 0 || rewardDeposited > 0) return
+        rewardEditing = true
+        rewardInput = ""
+        savedState[REWARD_EDITING] = true
+        savedState[REWARD_INPUT] = rewardInput
+        message = null
+        render()
+    }
+
+    fun changeRewardTransferInput(input: String) {
+        if (busy || pending != null || rewardReceiptNeeded || !rewardEditing || !input.all(Char::isDigit) || input.length > 19) return
+        rewardInput = input
+        savedState[REWARD_INPUT] = input
+        message = null
+        render()
+    }
+
+    fun cancelRewardTransfer() {
+        if (busy || pending != null || rewardReceiptNeeded) return
+        rewardEditing = false
+        savedState[REWARD_EDITING] = false
+        message = null
+        render()
+    }
+
+    fun confirmRewardTransfer() {
+        if (busy || pending != null || rewardReceiptNeeded || !rewardEditing || rewardDeposited > 0 || session.demoModeEnabled) return
+        val game = latest ?: return
+        val reward = rewardOutcome ?: return
+        val amount = rewardInput.toLongOrNull() ?: return
+        if (amount <= 0 || amount > reward.transferMaximum(game, session.catalog)) return
+        execute(EngineCommand.DepositSavings(amount, expected = SavingsTransferExpectation(
+            game.economy.availableBalance, game.economy.savingsBalance,
+            game.selectedSavingItemId, game.economy.plan)))
+    }
+
+    private suspend fun restoreReward() {
+        val completion = savedState.get<String>(REWARD_REQUEST)?.let { Json.decodeFromString<EngineRequest>(it) }
+            ?: return
+        val command = completion.command as? EngineCommand.CompleteDeed ?: return
+        if (command.occurrenceId != occurrenceId || choiceId != null || savedState.get<Boolean>(REWARD_DISMISSED) == true) return
+        if (savedState.get<Boolean>(REWARD_REJECTED) == true) {
+            rejectedAction = command
+            message = "Игра изменилась. Нажми «Повторить», чтобы заново проверить и сохранить действие."
+            return
+        }
+        rewardReceiptNeeded = true
+        val receipt = session.commandReceipt(completion.id)
+        if (receipt == null) {
+            // The process may have stopped before the write. Retry the original intent explicitly.
+            pending = PendingAction(checkNotNull(latest), command).also { it.attempt = GameActionAttempt.restore(completion) }
+            message = "Не удалось проверить результат. Нажми «Повторить»."
+            rewardReceiptNeeded = false
+            return
+        }
+        rewardOutcome = deedRewardOutcome(receipt, command.occurrenceId, session.catalog)
+        message = null
+        rewardEditing = savedState[REWARD_EDITING] ?: false
+        rewardInput = savedState[REWARD_INPUT] ?: ""
+        val transfer = savedState.get<String>(REWARD_TRANSFER)?.let { Json.decodeFromString<EngineRequest>(it) }
+        if (transfer == null || rewardOutcome == null) { rewardReceiptNeeded = false; return }
+        val deposit = checkNotNull(transfer.command as? EngineCommand.DepositSavings)
+        val transferReceipt = session.commandReceipt(transfer.id)
+        if (transferReceipt != null) {
+            check(transferReceipt.request?.copy(demoMode = transfer.demoMode) == transfer)
+            val deposited = checkNotNull(transferReceipt.after).economy.savingsBalance -
+                checkNotNull(transferReceipt.before).economy.savingsBalance
+            check(deposited == deposit.amount)
+            rewardDeposited = deposited
+            rewardEditing = false
+            savedState[REWARD_EDITING] = false
+            message = null
+        } else {
+            pending = PendingAction(checkNotNull(latest), deposit).also { it.attempt = GameActionAttempt.restore(transfer) }
+            message = "Не удалось проверить перевод. Нажми «Повторить»."
+        }
+        rewardReceiptNeeded = false
     }
 
     fun recordComparisonAnswers(evidence: PriceQuizEvidence) {
@@ -207,6 +315,7 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
             presentation = mutableState.value.presentation?.copy(canPlay = false))
         viewModelScope.launch {
             var leaving = false
+            var committedResult = false
             try {
                 if (command !is EngineCommand.SkipMiniGame) flushComparisonAnswers()
                 comparisonSaveFailed = false
@@ -215,12 +324,36 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
                         eventGameStartEvidence(session.latestCommand(), game, command) else null
                     val submitted = if (command is EngineCommand.CompleteStoryGame)
                         command.copy(resourcePriorityOfferId = evidence?.priorityOfferId) else command
-                    GameActionAttempt.prepare(game, submitted, evidence?.context).also { action.attempt = it }
+                    GameActionAttempt.prepare(game, submitted, evidence?.context,
+                        demoMode = session.demoModeEnabled).also { action.attempt = it }
+                }
+                if (command is EngineCommand.CompleteDeed && !attempt.request.demoMode &&
+                    game.selectedSavingItemId != null && session.catalog.goals.selectedGoal(game) != null) {
+                    savedState[REWARD_REQUEST] = Json.encodeToString(attempt.request)
+                    savedState[REWARD_REJECTED] = false
+                }
+                if (command is EngineCommand.DepositSavings) {
+                    savedState[REWARD_TRANSFER] = Json.encodeToString(attempt.request)
                 }
                 when (val result = attempt.submit(session)) {
                     is EngineResult.Applied -> {
                         pending = null
                         latest = result.state
+                        committedResult = true
+                        if (command is EngineCommand.DepositSavings) {
+                            // Confirm the original transfer, including after a lost reply or recreation.
+                            rewardReceiptNeeded = true
+                            restoreReward()
+                            return@launch
+                        }
+                        if (command is EngineCommand.CompleteDeed && savedState.get<String>(REWARD_REQUEST) != null &&
+                            !attempt.request.demoMode) {
+                            rewardReceiptNeeded = true
+                            val receipt = checkNotNull(session.commandReceipt(attempt.request.id))
+                            rewardOutcome = deedRewardOutcome(receipt, command.occurrenceId, session.catalog)
+                            rewardReceiptNeeded = false
+                            if (rewardOutcome != null) return@launch
+                        }
                         leaving = true
                         val committed = if (command is EngineCommand.SkipMiniGame) null
                             else attempt.committedState(session, result.state)
@@ -238,14 +371,25 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
                     }
                     is EngineResult.Blocked -> {
                         pending = null
-                        if (result.reason == BlockReason.StaleRevision) {
+                        if (command is EngineCommand.CompleteDeed && savedState.contains(REWARD_REQUEST)) {
+                            if (result.reason == BlockReason.StaleRevision) savedState[REWARD_REJECTED] = true
+                            else savedState.remove<String>(REWARD_REQUEST)
+                        }
+                        if (command is EngineCommand.DepositSavings) {
+                            savedState.remove<String>(REWARD_TRANSFER)
+                            message = result.reason.playerMessage(game.pet.name)
+                        } else if (result.reason == BlockReason.StaleRevision) {
                             rejectedAction = command
                             message = "Игра изменилась. Нажми «Повторить», чтобы заново проверить и сохранить действие."
                         } else message = result.reason.playerMessage(game.pet.name)
                     }
                 }
             } catch (cancelled: CancellationException) { throw cancelled
-            } catch (_: Exception) { message = "Не удалось сохранить результат. Нажми «Повторить»."
+            } catch (_: Exception) {
+                message = if (committedResult && command is EngineCommand.DepositSavings)
+                    "Не удалось проверить перевод. Нажми «Повторить»."
+                    else if (committedResult) "Не удалось показать награду. Нажми «Повторить»."
+                    else "Не удалось сохранить результат. Нажми «Повторить»."
             } finally {
                 if (!leaving) { busy = false; render() }
             }
@@ -262,8 +406,27 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
 
     private fun render() {
         if (busy) return
+        rewardOutcome?.let { reward ->
+            val game = latest ?: return
+            mutableState.value = mutableState.value.copy(
+                loading = false, busy = false, message = message,
+                canRetry = pending != null || rewardReceiptNeeded, canSkipGame = false,
+                presentation = mutableState.value.presentation?.copy(canPlay = false),
+                reward = DeedRewardUiState(reward.earned, reward.itemTitle,
+                    if (rewardDeposited > 0 || session.demoModeEnabled) 0 else reward.transferMaximum(game, session.catalog),
+                    game.economy.plan.reserve, game.economy.savingsBalance, reward.sceneRes,
+                    editing = rewardEditing, input = rewardInput, deposited = rewardDeposited),
+            )
+            return
+        }
+        if (rewardReceiptNeeded) {
+            mutableState.value = mutableState.value.copy(loading = false, busy = false, message = message,
+                canRetry = true, canSkipGame = false,
+                presentation = mutableState.value.presentation?.copy(canPlay = false))
+            return
+        }
         if (pending != null) {
-            mutableState.value = mutableState.value.copy(busy = false, message = message, canRetry = true,
+            mutableState.value = mutableState.value.copy(loading = false, busy = false, message = message, canRetry = true,
                 canSkipGame = false,
                 presentation = mutableState.value.presentation?.copy(canPlay = false))
             return
@@ -319,5 +482,14 @@ internal class DeedGameViewModel @Inject constructor(private val session: GameSe
         val policy = session.catalog.policies[occurrence.eventId] ?: return null
         return if (choiceId == null) policy.deedGameKind.takeIf { occurrence.origin == EventOrigin.DEED }
         else policy.choiceGameKinds[choiceId].takeIf { occurrence.origin == EventOrigin.SCHEDULE }
+    }
+
+    private companion object {
+        const val REWARD_REQUEST = "deed_reward_request"
+        const val REWARD_TRANSFER = "deed_reward_transfer"
+        const val REWARD_EDITING = "deed_reward_editing"
+        const val REWARD_INPUT = "deed_reward_input"
+        const val REWARD_DISMISSED = "deed_reward_dismissed"
+        const val REWARD_REJECTED = "deed_reward_rejected"
     }
 }

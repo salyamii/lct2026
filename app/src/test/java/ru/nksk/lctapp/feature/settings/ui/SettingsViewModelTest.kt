@@ -21,6 +21,7 @@ import ru.nksk.lctapp.domain.media.MediaPreferencesRepository
 import ru.nksk.lctapp.domain.backend.CloudRestorePreview
 import ru.nksk.lctapp.domain.backend.CloudSyncPhase
 import ru.nksk.lctapp.domain.backend.CloudSyncRepository
+import ru.nksk.lctapp.domain.backend.CloudLocalUploadPreview
 import ru.nksk.lctapp.domain.backend.CloudSyncResult
 import ru.nksk.lctapp.domain.backend.CloudSyncState
 import ru.nksk.lctapp.domain.diagnostics.DiagnosticLogRepository
@@ -400,10 +401,12 @@ class SettingsViewModelTest {
     }
 
     @Test fun demoModeShowsPersistedValueAndWaitsForTheWrite() = runTest(dispatcher) {
-        assumeTrue(BuildConfig.JURY_TOOLS)
+        assumeTrue(BuildConfig.DEBUG || BuildConfig.JURY_TOOLS)
         val demo = FakeDemoRepository().apply { pendingWrite = CompletableDeferred() }
         val model = model(FakeRepository(), demo = demo)
         runCurrent()
+        assertTrue(model.uiState.value.demo.available)
+        assertTrue(model.uiState.value.demo.canChange)
         assertEquals(false, model.uiState.value.demo.enabled)
         model.onAction(SettingsAction.SetDemoModeEnabled(true))
         runCurrent()
@@ -416,7 +419,7 @@ class SettingsViewModelTest {
     }
 
     @Test fun demoWriteFailureKeepsPersistedValueAndRetryUsesRequestedValue() = runTest(dispatcher) {
-        assumeTrue(BuildConfig.JURY_TOOLS)
+        assumeTrue(BuildConfig.DEBUG || BuildConfig.JURY_TOOLS)
         val demo = FakeDemoRepository().apply { writeFailure = true }
         val model = model(FakeRepository(), demo = demo)
         runCurrent()
@@ -431,8 +434,8 @@ class SettingsViewModelTest {
         assertNull(model.uiState.value.demo.error)
     }
 
-    @Test fun childrenSettingsHideDemoAndIgnoreActionsEvenIfAnOldPreferenceIsEnabled() = runTest(dispatcher) {
-        assumeTrue(!BuildConfig.JURY_TOOLS)
+    @Test fun childrenReleaseSettingsHideDemoAndIgnoreActionsEvenIfAnOldPreferenceIsEnabled() = runTest(dispatcher) {
+        assumeTrue(!BuildConfig.DEBUG && !BuildConfig.JURY_TOOLS)
         val demo = FakeDemoRepository().apply { saved.value = DemoPreferences(true) }
         val model = model(FakeRepository(), demo = demo)
         runCurrent()
@@ -479,9 +482,47 @@ class SettingsViewModelTest {
         }
     }
 
+    @Test fun localCloudReplacementRequiresItsOwnConfirmationAndNeverRestoresTheOldGame() = runTest(dispatcher) {
+        assumeTrue(BuildConfig.DEBUG || BuildConfig.JURY_TOOLS)
+        val cloud = FakeCloudRepository()
+        val model = model(FakeRepository(), cloud = cloud)
+        runCurrent()
+        model.onAction(SettingsAction.PrepareLocalUpload)
+        runCurrent()
+        assertEquals(cloud.localPreview, model.uiState.value.cloud.localUploadPreview)
+        assertTrue(cloud.localUploads.isEmpty())
+        model.onAction(SettingsAction.ConfirmLocalUpload("stale"))
+        runCurrent()
+        assertTrue(cloud.localUploads.isEmpty())
+        model.onAction(SettingsAction.ConfirmLocalUpload(cloud.localPreview.id))
+        runCurrent()
+        assertEquals(listOf(cloud.localPreview.id), cloud.localUploads)
+        assertTrue(cloud.restores.isEmpty())
+        assertEquals(1, cloud.syncCalls)
+        assertNull(model.uiState.value.cloud.localUploadPreview)
+    }
+
+    @Test fun failedFollowupSyncDoesNotPresentACommittedCloudReplacementAsFailed() = runTest(dispatcher) {
+        assumeTrue(BuildConfig.DEBUG || BuildConfig.JURY_TOOLS)
+        val cloud = FakeCloudRepository().apply { syncFailure = true }
+        val model = model(FakeRepository(), cloud = cloud)
+        runCurrent()
+        model.onAction(SettingsAction.PrepareLocalUpload)
+        runCurrent()
+        model.onAction(SettingsAction.ConfirmLocalUpload(cloud.localPreview.id))
+        runCurrent()
+        assertEquals(listOf(cloud.localPreview.id), cloud.localUploads)
+        assertTrue(checkNotNull(model.uiState.value.cloud.feedback).startsWith("Облачная копия заменена."))
+        assertFalse(model.uiState.value.cloud.busy)
+    }
+
     private class FakeCloudRepository : CloudSyncRepository {
         override val state = MutableStateFlow(CloudSyncState())
         val preview = CloudRestorePreview("preview-id", "Лис", 4, 21L, 8L)
+        val localPreview = CloudLocalUploadPreview("local-preview", "Текущая", "Облачная")
+        val localUploads = mutableListOf<String>()
+        override suspend fun prepareLocalUpload() = localPreview
+        override suspend fun uploadLocal(previewId: String) { localUploads += previewId }
         var syncCalls = 0
         var prepareCalls = 0
         var syncFailure = false

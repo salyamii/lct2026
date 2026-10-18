@@ -1,6 +1,8 @@
 package ru.nksk.lctapp.core.ui.game
 
 import ru.nksk.lctapp.core.ui.components.MealChoiceUiState
+import ru.nksk.lctapp.domain.economy.EconomyOperations
+import ru.nksk.lctapp.domain.economy.SpendingKind
 import ru.nksk.lctapp.domain.engine.EngineCommand
 import ru.nksk.lctapp.domain.engine.GameCatalog
 import ru.nksk.lctapp.domain.engine.GameEngine
@@ -23,5 +25,8 @@ internal fun mealChoices(state: GameState, catalog: GameCatalog, engine: GameEng
             "После обеда нужен отдых. Утром энергии будет меньше." else null
         MealChoiceUiState(meal.id, label, enabled = blocked == null, consequence = description,
             priceLabel = if (price == 0L) "Бесплатно" else paymentCoinAmount(price),
-            petEffects = mealPetEffects(state, catalog, meal.id, demoMode))
+            petEffects = mealPetEffects(state, catalog, meal.id, demoMode),
+            reserveSpending = if (price > 0 && blocked == null)
+                EconomyOperations.quote(state.economy, price, SpendingKind.FEEDING)
+                    .reserveSpendingDescription(state.economy.plan.reserve) else null)
     }

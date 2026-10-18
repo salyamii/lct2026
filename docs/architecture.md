@@ -27,6 +27,15 @@ Generic spotlight geometry/overlay lives in `core/ui/components/tour`, while the
 device preference uses a domain contract and `data/tutorial` adapter. It never
 changes a game snapshot. See [menu tour](design/menu-tour.md).
 
+By SURVEY-D-001/002, `feature/survey` supplies the first Settings card and an
+optional end-of-day invitation through app-owned composable slots. Settings and
+Day do not import the survey feature. A dedicated device DataStore remembers
+completion of this questionnaire and reminder days per game run; restoring or
+restarting a world does not clear them. A fresh lightweight snapshot-head read
+supplies the current run for each external form URL. Opening the browser never
+marks the questionnaire completed or awards an item: the player explicitly
+confirms completion, and gifts arrive through the existing backend reward lane.
+
 Most features remain packages inside `:app`; they are not separate Gradle modules.
 Features never import another feature, app wiring or data implementations.
 Screens receive state and callbacks, not repositories or navigation objects.
@@ -73,6 +82,20 @@ inventing mastery thresholds or presenting unknown assessments as zero mastered.
 Server MASTERED/PRACTICING/NO_DATA/HAS_PROBLEM remain distinct from local episode
 outcomes. [Calculation report](backend/skills-calculation-report.md).
 Source adaptation: lct26-parentsapp commit `89d644f74e40c4f3d6a44f99fad79cb7dca52de6`.
+
+By PARENT-EXPLANATIONS-D-001, `core/game` builds one deterministic description
+and evidence summary for each skill from the existing `SkillProfile`. Analytics
+uploads carry this optional block; the server returns it unchanged only when
+the source observations match those used by the assessment. Both parent clients
+display the same block. The embedded adapter can show the current local summary
+when no server explanation is available, with an explicit local-source label;
+it never uses fresh local evidence to explain an older server status. The parent
+feature receives a domain-independent presentation model. See the
+[explanation contract](backend/skill-explanations.md).
+The shared read-only `SkillExplanationContexts` mapper links source facts to
+recorded event names and game days when the relationship is unambiguous. Upload
+preparation and the local report use the same mapper; it retains compact indexes,
+not historical world checkpoints, and does not modify the evidence or game state.
 
 ## Screen orientation
 
@@ -280,7 +303,7 @@ job. Re-entry reads the latest committed state.
 
 ## Persistence and compatibility
 
-Room is version 23; snapshot is format 5 and history format 1. Schemas and earlier
+Room is version 24; snapshot is format 5 and history format 1. Schemas and earlier
 migrations remain in `app/schemas`. A full snapshot includes the aggregate and
 complete validated history, plus the flat archive of completed runs. Restore does not mean merging multiple active devices.
 There is no destructive fallback or silent reset to the initial fixture.
@@ -394,6 +417,10 @@ App composition schedules connected WorkManager requests after history changes
 and periodically every fifteen minutes subject to Android scheduling. This observes
 only the history sequence; serialization and network work stay off the main thread.
 The local world remains available offline and cloud conflicts never overwrite it.
+Debug and jury Settings also offer explicit local-authoritative cloud replacement
+(CLOUD-LOCAL-D-001). Room v24 retains the selected transport lineage together with
+the frozen upload. Local gameplay/history remain unchanged; lost replies replay
+the same request. A cloud successor that would make a lineage cycle is rejected.
 Settings offers manual sync and a downloaded preview followed by explicit restore
 confirmation. Restore validates the archive and guards the local history; its
 durable intent recovers transport bookkeeping after a crash without restoring twice.

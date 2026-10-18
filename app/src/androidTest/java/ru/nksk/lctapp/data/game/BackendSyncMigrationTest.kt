@@ -12,6 +12,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import ru.nksk.lctapp.data.game.local.*
+import ru.nksk.lctapp.data.backend.RoomBackendSyncStore
 
 /** Compilation coverage only; connected execution requires separate user authorization. */
 @RunWith(AndroidJUnit4::class)
@@ -71,6 +72,53 @@ class BackendSyncMigrationTest {
             assertEquals(pending, dao.readPending("profile", "snapshot"))
             dao.deletePending("profile", "snapshot", pending.requestId)
             assertNull(dao.readPending("profile", "snapshot"))
+        } finally { db.close() }
+    }
+
+    @Test fun v23UpgradePreservesTheWorldAndFrozenRequestsAndStartsWithoutAReplacementChoice() = runBlocking {
+        schemas.createDatabase(23).use { db ->
+            db.execSQL("""INSERT INTO GAME_STATE(id, visual_state, selected_look, satiety, fatigue,
+                unallocated, needs, wants, savings, reserve, available_balance, savings_balance,
+                budget_model_version, pet_name, location_id, location_lighting)
+                VALUES ('current', 'NORMAL', 'PLAIN', 3, 2, 0, 5, 7, 0, 11, 23, 19,
+                1, 'Текущая игра', 'pier', 'EVENING')""")
+            db.execSQL("INSERT INTO BACKEND_SYNC_STATE(profile_id, backend_url, server_revision, last_analytics_sequence, game_run_id, local_generation) VALUES ('device', 'https://example.test/', 9, 17, 'run', 'generation')")
+            db.execSQL("INSERT INTO PENDING_BACKEND_REQUEST(profile_id, kind, request_id, payload) VALUES ('device', 'snapshot', 'frozen-id', 'exact frozen bytes')")
+        }
+        schemas.runMigrationsAndValidate(24, listOf(MIGRATION_23_24)).use { db ->
+            db.prepare("SELECT pet_name, available_balance, savings_balance FROM GAME_STATE").use {
+                assertTrue(it.step()); assertEquals("Текущая игра", it.getText(0))
+                assertEquals(23L, it.getLong(1)); assertEquals(19L, it.getLong(2))
+            }
+            db.prepare("SELECT server_revision, last_analytics_sequence, game_run_id, local_generation, cloud_lineage_payload FROM BACKEND_SYNC_STATE").use {
+                assertTrue(it.step()); assertEquals(9L, it.getLong(0)); assertEquals(17L, it.getLong(1))
+                assertEquals("run", it.getText(2)); assertEquals("generation", it.getText(3)); assertTrue(it.isNull(4))
+            }
+            db.prepare("SELECT request_id, payload FROM PENDING_BACKEND_REQUEST").use {
+                assertTrue(it.step()); assertEquals("frozen-id", it.getText(0)); assertEquals("exact frozen bytes", it.getText(1))
+            }
+        }
+    }
+
+    @Test fun replacementChoiceAndRequestSurviveReopenAndAFailedStageRollsBackBoth() = runBlocking {
+        var db = GameDatabase.open(context, name)
+        try {
+            val original = BackendSyncStateEntity("device", "https://example.test/", serverRevision = 3)
+            val pending = PendingBackendRequestEntity("device", "snapshot", "old-id", "old frozen bytes")
+            db.backendSyncDao().upsertState(original)
+            db.backendSyncDao().upsertPending(pending)
+            val choice = original.copy(cloudLineagePayload = "durable choice", gameRunId = "current-run")
+            val next = pending.copy(requestId = "new-id", payload = "new frozen bytes")
+            try { RoomBackendSyncStore(db).stageLocalUpload(choice, next); fail("Uncertain write cannot be replaced") }
+            catch (_: IllegalStateException) { }
+            assertEquals(original, db.backendSyncDao().readState("device"))
+            assertEquals(pending, db.backendSyncDao().readPending("device", "snapshot"))
+            db.backendSyncDao().deletePending("device", "snapshot", "old-id")
+            RoomBackendSyncStore(db).stageLocalUpload(choice, next)
+            db.close()
+            db = GameDatabase.open(context, name)
+            assertEquals(choice, db.backendSyncDao().readState("device"))
+            assertEquals(next, db.backendSyncDao().readPending("device", "snapshot"))
         } finally { db.close() }
     }
 }

@@ -15,7 +15,7 @@ import ru.nksk.lctapp.core.ui.components.*
 
 @Composable
 internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit,
-    onLoadingContinue: () -> Unit = onBack) {
+    onLoadingContinue: () -> Unit = onBack, summaryExtra: (@Composable () -> Unit)? = null) {
     // Saving overlays the existing card. It must not insert a row, shift the scroll
     // position or recolour every choice immediately before the route disappears.
     BackHandler(enabled = state.busy) {}
@@ -23,7 +23,7 @@ internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
         DayContent(state.copy(busy = false),
             onAction = { if (!state.busy) onAction(it) },
             onBack = { if (!state.busy) onBack() },
-            onLoadingContinue = { if (!state.busy) onLoadingContinue() })
+            onLoadingContinue = { if (!state.busy) onLoadingContinue() }, summaryExtra = summaryExtra)
         if (state.busy) Box(Modifier.fillMaxSize().pointerInput(Unit) {
             awaitPointerEventScope {
                 while (true) awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() }
@@ -44,7 +44,7 @@ internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
 
 @Composable
 private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit,
-    onLoadingContinue: () -> Unit) {
+    onLoadingContinue: () -> Unit, summaryExtra: (@Composable () -> Unit)?) {
     if (state.loading) {
         Box(Modifier.fillMaxSize()) {
             GameLoadingScreen()
@@ -67,7 +67,7 @@ private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
         return
     }
     if (state.summary != null) {
-        DaySummaryScreen(state, onAction, onBack)
+        DaySummaryScreen(state, onAction, onBack, summaryExtra)
     } else if (state.layout == EventLayout.INTRODUCTION) {
         StoryIntroduction(state, onAction, onBack)
     } else if (state.layout == EventLayout.PURCHASE) {

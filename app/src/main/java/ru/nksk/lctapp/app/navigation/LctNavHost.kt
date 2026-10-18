@@ -74,6 +74,9 @@ import ru.nksk.lctapp.feature.learning.navigation.CampaignArchive
 import ru.nksk.lctapp.feature.learning.navigation.campaignArchiveEntry
 import ru.nksk.lctapp.feature.settings.navigation.Settings
 import ru.nksk.lctapp.feature.settings.navigation.settingsEntry
+import ru.nksk.lctapp.feature.survey.SurveyViewModel
+import ru.nksk.lctapp.feature.survey.SurveySettingsEntry
+import ru.nksk.lctapp.feature.survey.SurveyInvitationEntry
 import ru.nksk.lctapp.feature.settings.ui.SettingsGearButton
 import ru.nksk.lctapp.app.parents.rememberParentsLauncher
 
@@ -95,6 +98,7 @@ fun LctNavHost(
     val snackbarHost = remember { SnackbarHostState() }
     var completion by remember { mutableStateOf<CompletionNotice?>(null) }
     val tourModel: MenuTourViewModel = hiltViewModel()
+    val surveyModel: SurveyViewModel = hiltViewModel()
     val tour by tourModel.uiState.collectAsStateWithLifecycle()
     val gateModel: EconomyGateViewModel = hiltViewModel()
     val gate by gateModel.uiState.collectAsStateWithLifecycle()
@@ -210,6 +214,7 @@ fun LctNavHost(
                     )
                 }
                 settingsEntry(onBack = navigator::goBack, debugButton = debugSettingsButton,
+                    survey = { SurveySettingsEntry(surveyModel) },
                     onRepeatTutorial = { source ->
                         if (backStack.lastOrNull() == source) {
                             tourModel.restart()
@@ -254,6 +259,7 @@ fun LctNavHost(
                 })
                 mapEntry(onBack = navigator::goBack, onSelected = navigator::returnToRoot)
                 dayEntry(onBack = navigator::goBack, onFinished = finish,
+                    summaryExtra = { SurveyInvitationEntry(surveyModel) },
                     onRestarted = { source ->
                         if (backStack.lastOrNull() == source) {
                             navigator.returnToRoot(source)

@@ -36,7 +36,7 @@ data class WorldSnapshot(
     }
 }
 
-/** Restart lineage only; no previous world's state or journal travels in a cloud upload. */
+/** Cloud predecessor references; explicit replacement adds transport lineage, without invented game history. */
 @Serializable
 data class CloudWorldAncestor(val runId: String, val generation: String, val historySequence: Long) {
     init { require(runId.isNotBlank() && generation.isNotBlank() && historySequence >= 0) }

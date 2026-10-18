@@ -56,9 +56,14 @@ fun ParentTopicScreen(
                     if (skill == null) {
                         item { ParentReportError(onRetry) }
                     } else {
+                        val serverExplanation = skill.assessment?.explanation
+                        val explanation = serverExplanation ?: skill.localExplanation
                         item {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Text(skill.title, style = MaterialTheme.typography.headlineSmall)
+                                explanation?.let {
+                                    Text(it.description, style = MaterialTheme.typography.bodyLarge)
+                                }
                                 ParentSkillAssessmentLabel(skill.assessment)
                             }
                         }
@@ -67,6 +72,18 @@ fun ParentTopicScreen(
                                 sync = state.report.assessmentSync,
                                 hasAssessments = skill.assessment != null,
                                 onRefresh = onRefresh,
+                            )
+                        }
+                        item {
+                            ParentMaterialCard(
+                                stringResource(
+                                    if (serverExplanation == null && explanation != null) {
+                                        R.string.parents_report_explanation_local
+                                    } else R.string.parents_report_explanation_server,
+                                ),
+                                explanation?.let {
+                                    (listOf(it.summary) + it.evidence.take(2)).joinToString("\n\n")
+                                } ?: stringResource(R.string.parents_report_explanation_missing),
                             )
                         }
                         item { SkillEvidence(skill) }

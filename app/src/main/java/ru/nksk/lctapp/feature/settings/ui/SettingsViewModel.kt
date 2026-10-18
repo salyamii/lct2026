@@ -18,6 +18,7 @@ import ru.nksk.lctapp.domain.media.MediaPreferencesRepository
 import ru.nksk.lctapp.domain.parentlink.ParentLinkRepository
 import ru.nksk.lctapp.domain.backend.CloudSyncRepository
 import ru.nksk.lctapp.domain.backend.CloudSyncResult
+import ru.nksk.lctapp.domain.backend.CloudLocalUploadException
 import ru.nksk.lctapp.domain.diagnostics.DiagnosticLogRepository
 import ru.nksk.lctapp.domain.demo.DemoPreferencesRepository
 import ru.nksk.lctapp.BuildConfig
@@ -31,7 +32,7 @@ internal data class DemoSettingsUiState(
     val loading: Boolean = true,
     val saving: Boolean = false,
     val error: DemoSettingsError? = null,
-    val available: Boolean = BuildConfig.JURY_TOOLS,
+    val available: Boolean = BuildConfig.DEBUG || BuildConfig.JURY_TOOLS,
 ) {
     val canChange: Boolean get() = available && enabled != null && !loading && !saving && error != DemoSettingsError.READ
 }
@@ -69,6 +70,9 @@ internal sealed interface SettingsAction {
     data object PrepareCloudRestore : SettingsAction
     data class ConfirmCloudRestore(val previewId: String) : SettingsAction
     data class DismissCloudRestore(val previewId: String) : SettingsAction
+    data object PrepareLocalUpload : SettingsAction
+    data class ConfirmLocalUpload(val previewId: String) : SettingsAction
+    data class DismissLocalUpload(val previewId: String) : SettingsAction
     data object PrepareDiagnosticsExport : SettingsAction
     data object DiagnosticsPickerFailed : SettingsAction
     data class ExportDiagnostics(val destination: String) : SettingsAction
@@ -114,6 +118,9 @@ internal class SettingsViewModel @Inject constructor(
             SettingsAction.PrepareCloudRestore -> prepareCloudRestore()
             is SettingsAction.ConfirmCloudRestore -> restoreCloud(action.previewId)
             is SettingsAction.DismissCloudRestore -> dismissCloudRestore(action.previewId)
+            SettingsAction.PrepareLocalUpload -> prepareLocalUpload()
+            is SettingsAction.ConfirmLocalUpload -> uploadLocal(action.previewId)
+            is SettingsAction.DismissLocalUpload -> dismissLocalUpload(action.previewId)
             SettingsAction.PrepareDiagnosticsExport -> if (!mutableState.value.diagnostics.saving) {
                 updateDiagnostics { copy(result = null) }
             }
@@ -166,7 +173,7 @@ internal class SettingsViewModel @Inject constructor(
     private fun canStartCloudOperation(): Boolean {
         val current = mutableState.value
         return current.backendConfigured && !current.loading && !current.profileError &&
-            !current.cloud.busy && current.cloud.restorePreview == null
+            !current.cloud.busy && current.cloud.restorePreview == null && current.cloud.localUploadPreview == null
     }
 
     private fun synchronizeCloud() {
@@ -190,6 +197,52 @@ internal class SettingsViewModel @Inject constructor(
                 updateCloud { copy(operation = null) }
             }
         }
+    }
+
+    private fun prepareLocalUpload() {
+        if (!(BuildConfig.DEBUG || BuildConfig.JURY_TOOLS) || !canStartCloudOperation()) return
+        updateCloud { copy(operation = CloudSettingsOperation.PREPARE_UPLOAD, feedback = null) }
+        viewModelScope.launch {
+            try {
+                val preview = cloudRepository.prepareLocalUpload()
+                updateCloud { copy(localUploadPreview = preview) }
+            } catch (cancelled: CancellationException) { throw cancelled
+            } catch (failure: Exception) {
+                updateCloud { copy(feedback = (failure as? CloudLocalUploadException)?.message
+                    ?: "Не удалось подготовить замену. Текущая игра сохранена на устройстве.") }
+            } finally { updateCloud { copy(operation = null) } }
+        }
+    }
+
+    private fun uploadLocal(previewId: String) {
+        val cloud = mutableState.value.cloud
+        if (cloud.busy || cloud.localUploadPreview?.id != previewId) return
+        updateCloud { copy(operation = CloudSettingsOperation.UPLOAD_LOCAL, feedback = null) }
+        viewModelScope.launch {
+            var uploaded = false
+            try {
+                cloudRepository.uploadLocal(previewId)
+                uploaded = true
+                updateCloud { copy(localUploadPreview = null, feedback = "Облачная копия заменена текущей игрой.") }
+                val result = cloudRepository.synchronize()
+                updateCloud { copy(feedback = if (result == CloudSyncResult.SUCCESS) "Облачная копия заменена. Игра синхронизирована."
+                    else "Облачная копия заменена. Проверка наград и остальных данных ещё не завершена.") }
+            } catch (cancelled: CancellationException) { throw cancelled
+            } catch (failure: Exception) {
+                updateCloud { copy(feedback = if (uploaded) "Облачная копия заменена. Проверка наград и остальных данных ещё не завершена."
+                    else (failure as? CloudLocalUploadException)?.message
+                    ?: "Не удалось подтвердить замену. Нажмите «Синхронизировать сейчас» для проверки и повтора.") }
+            } finally {
+                cloudRepository.dismissLocalUpload(previewId)
+                updateCloud { copy(operation = null, localUploadPreview = null) }
+            }
+        }
+    }
+
+    private fun dismissLocalUpload(previewId: String) {
+        if (mutableState.value.cloud.busy || mutableState.value.cloud.localUploadPreview?.id != previewId) return
+        cloudRepository.dismissLocalUpload(previewId)
+        updateCloud { copy(localUploadPreview = null) }
     }
 
     private fun prepareCloudRestore() {
@@ -243,6 +296,7 @@ internal class SettingsViewModel @Inject constructor(
 
     override fun onCleared() {
         mutableState.value.cloud.restorePreview?.let { cloudRepository.dismissRestore(it.id) }
+        mutableState.value.cloud.localUploadPreview?.let { cloudRepository.dismissLocalUpload(it.id) }
         super.onCleared()
     }
 
@@ -258,7 +312,7 @@ internal class SettingsViewModel @Inject constructor(
     }
 
     private fun observeDemo() {
-        if (!BuildConfig.JURY_TOOLS) {
+        if (!BuildConfig.DEBUG && !BuildConfig.JURY_TOOLS) {
             updateDemo { copy(enabled = false, loading = false, saving = false, error = null, available = false) }
             return
         }

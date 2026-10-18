@@ -17,6 +17,7 @@ backend; CI прошёл. Пользователь подтвердил полу
 - [Места вызова и расписание Android](client-sync.md).
 - [Облачный текущий мир](world-snapshot.md), [аналитика](analytics.md),
   [доставка родительских наград](parent-rewards.md).
+- [Единые описания навыков и объяснения наблюдений для родителей](skill-explanations.md).
 - [Генератор проверенных snapshot/analytics примеров](tools/README.md).
 
 ## Идентификатор в JSON

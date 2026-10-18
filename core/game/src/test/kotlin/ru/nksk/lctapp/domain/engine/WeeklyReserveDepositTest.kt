@@ -29,7 +29,20 @@ class WeeklyReserveDepositTest {
         assertEquals(after.availableBalance, after.displayPlan.total + after.unallocated)
     }
 
-    @Test fun receiptAndExactShownReserveAreRequiredBeforeAnyMoneyCanMove() {
+    @Test fun partialTransferKeepsTheChosenReserveRemainderAndTheNewIncome() {
+        val before = weeklyEconomy()
+        val after = EconomyOperations.depositWeeklyReserve(before, "week:8", 0, 5)
+        assertEquals(147L, after.availableBalance)
+        assertEquals(25L, after.savingsBalance)
+        assertEquals(BudgetPlan(35, 5, 0, 7), after.plan)
+        assertEquals(after.plan, after.displayPlan)
+        assertEquals(100L, after.unallocated)
+        assertEquals(before.planning!!.copy(revision = 1, draft = after.plan, baseAmount = 147), after.planning)
+        assertEquals(before.balance, after.balance)
+        assertEquals(after.availableBalance, after.displayPlan.total + after.unallocated)
+    }
+
+    @Test fun receiptCurrentRevisionAndPositiveAmountWithinReserveAreRequired() {
         val before = weeklyEconomy()
         val unavailable = listOf(
             before.copy(planning = null),
@@ -41,7 +54,7 @@ class WeeklyReserveDepositTest {
         for (state in unavailable) assertThrows(EconomyViolation::class.java) {
             EconomyOperations.depositWeeklyReserve(state, "week:8", state.planning?.revision ?: 0, 12)
         }
-        for (amount in listOf(-1L, 0L, 11L, 13L, 112L)) assertThrows(EconomyViolation::class.java) {
+        for (amount in listOf(-1L, 0L, 13L, 112L)) assertThrows(EconomyViolation::class.java) {
             EconomyOperations.depositWeeklyReserve(before, "week:8", 0, amount)
         }
         assertThrows(EconomyViolation::class.java) { EconomyOperations.depositWeeklyReserve(before, "another", 0, 12) }
@@ -109,6 +122,33 @@ class WeeklyReserveDepositTest {
         assertTrue(f.engine.dispatch(request) is EngineResult.Applied)
         assertEquals(32L, f.repo.value.economy.savingsBalance)
         assertEquals(1, f.repo.entries.size)
+    }
+
+    @Test fun partialTransferRetryUsesItsOriginalReceiptAndFurtherTransferNeedsANewIntent() = runTest {
+        val f = Fixture()
+        val request = f.request().copy(command = EngineCommand.DepositWeeklyReserve("week:8", 0, 5))
+        f.repo.loseNextReply = true
+        assertTrue(runCatching { f.engine.dispatch(request) }.exceptionOrNull() is IllegalStateException)
+        val moved = f.repo.value
+        assertTrue(f.engine.dispatch(request) is EngineResult.Applied)
+        assertEquals(moved, f.repo.value)
+        assertEquals(7L, moved.economy.plan.reserve)
+        assertEquals(1, f.repo.entries.size)
+        assertEquals(listOf(LedgerEntry("reserve:deposit", LedgerKind.DEPOSIT, 5)), f.repo.entries.single().operations)
+
+        val stale = request.copy(id = "stale", expectedRevision = moved.engine!!.revision)
+        assertEquals(EngineResult.Blocked(BlockReason.StaleRevision), f.engine.dispatch(stale))
+        val excessive = stale.copy(id = "too-much", command = EngineCommand.DepositWeeklyReserve("week:8", 1, 8))
+        assertEquals(EngineResult.Blocked(BlockReason.StaleRevision), f.engine.dispatch(excessive))
+        assertEquals(moved, f.repo.value)
+
+        val next = stale.copy(id = "next", command = EngineCommand.DepositWeeklyReserve("week:8", 1, 3))
+        assertTrue(f.engine.dispatch(next) is EngineResult.Applied)
+        assertEquals(4L, f.repo.value.economy.plan.reserve)
+        assertEquals(28L, f.repo.value.economy.savingsBalance)
+        assertEquals(100L, f.repo.value.economy.unallocated)
+        assertEquals(2, f.repo.entries.size)
+        assertEquals(8L, f.repo.entries.flatMap { it.operations }.sumOf { it.amount })
     }
 
     @Test fun reopeningOrReadingDoesNotTransferAndSavedCommandRoundTripsAndReplays() = runTest {
