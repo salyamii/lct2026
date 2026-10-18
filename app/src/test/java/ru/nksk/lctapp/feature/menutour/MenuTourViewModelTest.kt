@@ -42,7 +42,7 @@ class MenuTourViewModelTest {
         advanceUntilIdle()
         model.skip()
         advanceUntilIdle()
-        assertEquals(11, model.uiState.value.step)
+        assertEquals(12, model.uiState.value.step)
         model.restart()
         advanceUntilIdle()
         assertEquals(0, model.uiState.value.step)

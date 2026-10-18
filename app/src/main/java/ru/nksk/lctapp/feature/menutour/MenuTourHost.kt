@@ -53,7 +53,7 @@ internal fun MenuTourHost(
             })
             step?.let {
                 SpotlightOverlay(
-                    title = it.title, body = it.body,
+                    title = it.title, body = it.body, cardBelowTarget = it.cardBelowTarget,
                     progress = if (it.index < MainTourStepCount) "${it.index + 1} из $MainTourStepCount" else "Подсказка ${it.index - MainTourStepCount + 1} из 2",
                     highlights = it.targets.mapNotNull(targets::highlight), pointer = targets.highlight(it.pointerTarget)?.bounds,
                     busy = state.busy, hasPrevious = it.index in 1 until MainTourStepCount,
