@@ -33,7 +33,7 @@ class StoryGameThemeTest {
                     assertFalse(choiceId, instructions.contains("по две карточки"))
                 }
                 DeedGameKind.COMPARISON -> {
-                    assertTrue(choiceId, instructions.contains("выбери предмет дороже"))
+                    assertTrue(choiceId, instructions.contains("следуй заданию раунда"))
                     assertFalse(choiceId, instructions.contains("маркер"))
                 }
                 DeedGameKind.LIGHTS -> assertTrue(choiceId, instructions.contains("фонарь и соседи"))
@@ -62,7 +62,7 @@ class StoryGameThemeTest {
         assertFalse(memory.contains("маркер"))
         assertTrue(precision.contains("маркер в зелёной зоне"))
         assertFalse(precision.contains("по две карточки"))
-        assertTrue(comparison.contains("выбери предмет дороже"))
+        assertTrue(comparison.contains("следуй заданию раунда"))
         assertFalse(comparison.contains("маркер"))
     }
 

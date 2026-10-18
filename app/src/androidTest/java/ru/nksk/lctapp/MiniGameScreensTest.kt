@@ -54,6 +54,37 @@ class MiniGameScreensTest {
         compose.runOnIdle { assertEquals(listOf(PriceQuizAction.Next(0)), actions) }
     }
 
+    @Test fun quizChangesThePromptAndHighlightsAccordingToEachRoundsTarget() {
+        val state = mutableStateOf(PriceQuizState(listOf(
+            QuizQuestion(199, 198, pickLarger = false), QuizQuestion(10, 11, pickLarger = true),
+        )))
+        compose.setContent {
+            LCTAppTheme {
+                PriceQuizScreen(PriceQuizUiState(state.value), onAction = { action ->
+                    state.value = when (action) {
+                        is PriceQuizAction.Answer -> state.value.answer(action.pickedLeft)
+                        is PriceQuizAction.Next -> state.value.next()
+                        PriceQuizAction.Restart -> state.value
+                    }
+                }, onBack = {})
+            }
+        }
+        compose.onNodeWithText("Какая покупка дешевле?").assertIsDisplayed()
+        compose.onNodeWithText("198 монет").assertIsNotSelected()
+        compose.onNodeWithText("Выбери более дешёвый товар").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("199 монет").performScrollTo().performClick()
+        compose.onNodeWithText("198 монет").assertIsSelected()
+        compose.onNodeWithText("199 монет").assertIsNotSelected()
+        compose.onNodeWithText("Неправильно").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Дальше").performScrollTo().performClick()
+        compose.onNodeWithText("Какая покупка дороже?").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Выбери более дорогой товар").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("11 монет").performScrollTo().performClick()
+        compose.onNodeWithText("11 монет").assertIsSelected()
+        compose.onNodeWithText("Правильно").performScrollTo().assertIsDisplayed()
+        compose.runOnIdle { assertEquals(1, state.value.correctAnswers) }
+    }
+
     @Test fun compactLandscapeKeepsTheLastMemoryCardReachable() {
         val actions = mutableListOf<MemoryGameAction>()
         compose.setContent {

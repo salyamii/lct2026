@@ -11,8 +11,8 @@ import ru.nksk.lctapp.domain.minigame.PriceQuizState
 import ru.nksk.lctapp.domain.minigame.QuizQuestion
 
 data class PriceQuizUiState(val game: PriceQuizState) {
-    val leftIsAnswer: Boolean get() = !game.finished && game.lastCorrect != null && game.question.leftIsBigger
-    val rightIsAnswer: Boolean get() = !game.finished && game.lastCorrect != null && !game.question.leftIsBigger
+    val leftIsAnswer: Boolean get() = !game.finished && game.lastCorrect != null && game.question.leftIsCorrect
+    val rightIsAnswer: Boolean get() = !game.finished && game.lastCorrect != null && !game.question.leftIsCorrect
 }
 
 sealed interface PriceQuizAction {
@@ -79,7 +79,7 @@ class PriceQuizViewModel @Inject constructor(private val savedState: SavedStateH
         return PriceQuizEvidence(seriesId, game.questions.mapIndexedNotNull { index, question ->
             selectedAnswers[index].takeIf { it != -1 }?.let { selected ->
                 PriceQuizAnswerEvidence(index, question.leftAmount, question.rightAmount, selected == 1,
-                    presentedQuestions[index], complete && index == game.questions.lastIndex)
+                    presentedQuestions[index], complete && index == game.questions.lastIndex, question.pickLarger)
             }
         })
     }
@@ -92,6 +92,7 @@ class PriceQuizViewModel @Inject constructor(private val savedState: SavedStateH
 
     private fun publish(game: PriceQuizState) {
         savedState["questions"] = game.questions.flatMap { listOf(it.leftAmount, it.rightAmount) }.toIntArray()
+        savedState["comparison_pick_larger"] = game.questions.map { it.pickLarger }.toBooleanArray()
         savedState["current"] = game.current
         savedState["correct"] = game.correctAnswers
         savedState["last_correct"] = game.lastCorrect
@@ -100,8 +101,14 @@ class PriceQuizViewModel @Inject constructor(private val savedState: SavedStateH
 
     private fun restore(): PriceQuizState {
         val amounts = savedState.get<IntArray>("questions") ?: return PriceQuizState.create()
+        val targets = savedState.get<BooleanArray>("comparison_pick_larger")
+        require(amounts.isNotEmpty() && amounts.size % 2 == 0)
+        require(targets == null || targets.size == amounts.size / 2)
         return PriceQuizState(
-            questions = amounts.toList().chunked(2).map { QuizQuestion(it[0], it[1]) },
+            // Missing target is an old larger-only series, never a reason to reroll it.
+            questions = amounts.toList().chunked(2).mapIndexed { index, pair ->
+                QuizQuestion(pair[0], pair[1], pickLarger = targets?.get(index) ?: true)
+            },
             current = savedState["current"] ?: 0,
             correctAnswers = savedState["correct"] ?: 0,
             lastCorrect = savedState["last_correct"],

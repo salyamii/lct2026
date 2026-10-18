@@ -18,7 +18,7 @@ internal fun storyGameInstructions(kind: DeedGameKind, context: String? = null):
     when (kind) {
         DeedGameKind.MEMORY -> "Открывай по две карточки. Найди все пары."
         DeedGameKind.PRECISION -> "Останови маркер в зелёной зоне."
-        DeedGameKind.COMPARISON -> "Сравни цены и выбери предмет дороже."
+        DeedGameKind.COMPARISON -> "Сравни цены и следуй заданию раунда."
         DeedGameKind.LIGHTS -> "Нажимай на фонари: выбранный фонарь и соседи меняют состояние. Погаси их все."
         DeedGameKind.SEQUENCE -> if (context.isNullOrBlank()) "Повтори вспышки по памяти." else null
         DeedGameKind.PIPES -> "Соедини концы одного цвета линией."

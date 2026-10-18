@@ -33,6 +33,67 @@ class MiniGameViewModelsTest {
         assertFalse(before.rightIsAnswer)
     }
 
+    @Test fun quizHighlightsTheSmallerAmountOnlyAfterAnswering() {
+        for ((left, right) in listOf(10 to 199, 199 to 10)) {
+            val state = PriceQuizState(listOf(QuizQuestion(left, right, pickLarger = false)))
+            val before = PriceQuizUiState(state)
+            assertFalse(before.leftIsAnswer)
+            assertFalse(before.rightIsAnswer)
+            for (pickedLeft in listOf(true, false)) {
+                val answered = PriceQuizUiState(state.answer(pickedLeft))
+                assertEquals(left < right, answered.leftIsAnswer)
+                assertEquals(right < left, answered.rightIsAnswer)
+            }
+        }
+    }
+
+    @Test fun quizRestoresMixedTargetsAndFeedbackWithoutRerolling() {
+        val saved = SavedStateHandle(mapOf(
+            "questions" to intArrayOf(80, 20, 15, 60),
+            "comparison_pick_larger" to booleanArrayOf(false, true),
+        ))
+        val model = PriceQuizViewModel(saved)
+        model.onAction(PriceQuizAction.Answer(false, 0))
+        val restored = PriceQuizViewModel(copyOf(saved))
+        assertEquals(model.uiState.value, restored.uiState.value)
+        assertTrue(restored.uiState.value.rightIsAnswer)
+        assertEquals(true, restored.uiState.value.game.lastCorrect)
+        restored.onAction(PriceQuizAction.Answer(true, 0))
+        assertEquals(1, restored.uiState.value.game.correctAnswers)
+        restored.onAction(PriceQuizAction.Next(0))
+        assertTrue(restored.uiState.value.game.question.pickLarger)
+        assertNull(restored.uiState.value.game.lastCorrect)
+        restored.onAction(PriceQuizAction.Answer(false, 1))
+        restored.onAction(PriceQuizAction.Next(1))
+        assertTrue(restored.uiState.value.game.finished)
+        assertEquals(4, restored.uiState.value.game.reward)
+        assertEquals(restored.uiState.value, PriceQuizViewModel(copyOf(saved)).uiState.value)
+    }
+
+    @Test fun quizKeepsGeneratedPricesAndTargetsAcrossRestorationAndRestart() {
+        val saved = SavedStateHandle()
+        val model = PriceQuizViewModel(saved)
+        assertEquals(model.uiState.value, PriceQuizViewModel(copyOf(saved)).uiState.value)
+        model.onAction(PriceQuizAction.Answer(true, 0))
+        model.onAction(PriceQuizAction.Restart)
+        assertEquals(0, model.uiState.value.game.correctAnswers)
+        assertNull(model.uiState.value.game.lastCorrect)
+        assertEquals(model.uiState.value, PriceQuizViewModel(copyOf(saved)).uiState.value)
+        assertArrayEquals(model.uiState.value.game.questions.map { it.pickLarger }.toBooleanArray(),
+            saved.get<BooleanArray>("comparison_pick_larger"))
+    }
+
+    @Test fun quizRestoresLegacyQuestionsWithTheirOriginalLargerTarget() {
+        val saved = SavedStateHandle(mapOf("questions" to intArrayOf(80, 20, 15, 60),
+            "current" to 1, "correct" to 1, "last_correct" to false))
+        val model = PriceQuizViewModel(saved)
+        assertTrue(model.uiState.value.game.questions.all { it.pickLarger })
+        assertEquals(1, model.uiState.value.game.correctAnswers)
+        assertEquals(false, model.uiState.value.game.lastCorrect)
+        assertTrue(model.uiState.value.rightIsAnswer)
+        assertArrayEquals(booleanArrayOf(true, true), saved.get<BooleanArray>("comparison_pick_larger"))
+    }
+
     @Test fun memoryRestoresOpenCardsAndResolvesThePendingPairOnce() = runTest(dispatcher) {
         val saved = SavedStateHandle(mapOf("faces" to intArrayOf(0, 0, 1, 1)))
         val model = MemoryGameViewModel(saved)

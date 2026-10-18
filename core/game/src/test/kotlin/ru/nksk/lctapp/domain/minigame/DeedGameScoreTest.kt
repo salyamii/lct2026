@@ -12,7 +12,7 @@ class DeedGameScoreTest {
     @Test fun comparisonPaysForTheCorrectShareAndRoundsDown() {
         var board = PriceQuizState.create()
         repeat(PriceQuizState.QUESTION_COUNT) { index ->
-            board = board.answer(if (index < 3) board.question.leftIsBigger else !board.question.leftIsBigger).next()
+            board = board.answer(if (index < 3) board.question.leftIsCorrect else !board.question.leftIsCorrect).next()
         }
         val score = checkNotNull(DeedGameScore.fromComparison(board))
         assertEquals(4L, score.reward(8))
