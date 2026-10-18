@@ -318,6 +318,9 @@ internal class MainMenuViewModel @Inject constructor(
         val command = (continuation as? ContinueDayPlan.Day)?.command
         val menu = game.toMainMenuUiState(session.catalog, demoMode)
         return Presentation(game, demoMode, menu.copy(
+            availableDeedsCount = session.engine.availableDeeds(game).count { offer ->
+                session.engine.blockReason(game, EngineCommand.StartDeed(offer.id), demoMode) == null
+            },
             spendingPreview = session.engine.advanceSpending(game, command, demoMode)?.let {
                 if (demoMode && it.quote.affordable && it.quote.parts.isEmpty()) "Бесплатно · режим бога"
                 else it.quote.playerDescription(it.kind)
