@@ -20566,6 +20566,78 @@
         "resized": false,
         "pillow_version": "12.3.0"
       }
+    },
+    {
+      "resource": "menu_savings_frame_v2",
+      "category": "Generated savings stack assets - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/menu_savings_frame_v2.webp",
+      "format": "webp",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 1273180,
+      "sha256": "de8cc2f67c57f31cdac03d16960d21307f2a4373cabf1e71bcb3e79fa13c6f54",
+      "rgba_sha256": "77df52b8e6dcc2d3eb7cdb578636a7f57ffe2e7a78ae329f99121bbed3ff8869",
+      "alpha_bounds": [
+        0,
+        0,
+        1024,
+        1536
+      ],
+      "source_path": "docs/design/assets/sources/savings-stacks-2026-10-18/menu_savings_frame_v2.png",
+      "source_sha256": "69af01860314c0d6a5898fb7a55edcd22b65afa6a8cd86cd58bbe8058d3c94d3",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-18",
+        "prompt_path": "docs/design/assets/sources/savings-stacks-2026-10-18/prompts.json",
+        "prompt_key": "menu_savings_frame_v2",
+        "generated_source_filename": "exec-ee6ac036-d7ae-46e2-a664-1f1a1230ca84.png",
+        "reference_source_path": "docs/design/assets/sources/savings-stacks-2026-10-18/frame-reference.png",
+        "reference_source_sha256": "f94d2f6bfa8af1338984a2ba4414b25938eb322fb19c43c257eea868b81e4a5f"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "menu_savings_coin_flat",
+      "category": "Generated savings stack assets - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/menu_savings_coin_flat.webp",
+      "format": "webp",
+      "width": 1774,
+      "height": 887,
+      "bytes": 759326,
+      "sha256": "be45866993b19d02286ddc47a13cdaa25d124b9dbc1296cbcd5f8791c343121b",
+      "rgba_sha256": "3ec2903d6b1bb1b1b87649e4a55358622ffad2fea6eab2bcaeed08d48ca4446f",
+      "alpha_bounds": [
+        0,
+        30,
+        1754,
+        839
+      ],
+      "source_path": "docs/design/assets/sources/savings-stacks-2026-10-18/menu_savings_coin_flat.png",
+      "source_sha256": "5f930676cb8b65cc218509e366a4fdf5e06adb9a2962ba1d56163d4d608db167",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-18",
+        "prompt_path": "docs/design/assets/sources/savings-stacks-2026-10-18/prompts.json",
+        "prompt_key": "menu_savings_coin_flat",
+        "generated_source_filename": "exec-dff65d51-986f-471a-9738-baa53fe03f32.png",
+        "reference_source_path": "app/src/main/res/drawable-nodpi/menu_coin.webp",
+        "reference_source_sha256": "a247172bb5ea64d3a2508a89c31f32ed27c7bfc42ee9ff1833f289725cd4943c"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
     }
   ],
   "missing": [],

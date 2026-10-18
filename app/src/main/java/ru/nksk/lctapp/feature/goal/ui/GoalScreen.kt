@@ -246,10 +246,9 @@ private fun GoalSavingProgress(part: GoalPartUiState, savings: Long, anchor: Mod
                 Text(part.title, color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold,
                     fontSize = 20.sp, lineHeight = 25.sp)
                 if (part.demoMode) GoalCaption("Бесплатно · режим бога")
-                else Text("Накоплено ${part.savedCoins} из ${part.price} монет", color = GameInk,
-                    fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, lineHeight = 22.sp)
+                else if (part.price <= 0) GoalCaption("Бесплатно")
             }
-            if (!part.demoMode && part.price > 0) SavingsGauge(part.savedCoins, part.price, Modifier.width(72.dp))
+            if (!part.demoMode && part.price > 0) SavingsGauge(part.savedCoins, part.price, Modifier.width(96.dp))
         }
         if (savings > part.savedCoins) GoalCaption("Всего в копилке ${goalCoins(savings)}")
         val paymentHint = when {

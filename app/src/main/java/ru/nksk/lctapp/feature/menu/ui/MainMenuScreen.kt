@@ -43,9 +43,6 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -59,8 +56,6 @@ import ru.nksk.lctapp.core.ui.components.rememberScenePainter
 import ru.nksk.lctapp.core.ui.components.GameArtworkScene
 import ru.nksk.lctapp.core.ui.components.SavingsGauge
 import ru.nksk.lctapp.core.ui.components.GameInk
-import ru.nksk.lctapp.core.ui.components.GamePlaque
-import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.Rubik
 
 private val MapButtonWidth = 176.dp
@@ -186,40 +181,24 @@ private fun MenuCharacterScene(
     attachDayToEdge: Boolean = false,
 ) {
     BoxWithConstraints(modifier) {
+        val dayAboveSavings = savings != null && dayStatus != null && maxWidth < 276.dp
+        val daySpace = if (dayAboveSavings) 64.dp * LocalDensity.current.fontScale.coerceAtLeast(1f) else 0.dp
         CharacterScene(pet, Modifier.fillMaxSize()
             .then(if (savings != null) Modifier.padding(start = 56.dp) else Modifier), artworkModifier)
         savings?.let { target ->
-            val availableHeight = (maxHeight - 20.dp).coerceAtLeast(0.dp)
-            val titleHeight = minOf(availableHeight,
-                (14.dp * LocalDensity.current.fontScale + 12.dp).coerceAtLeast(36.dp))
-            val overlap = minOf(14.dp, titleHeight / 2f)
-            val gaugeHeight = minOf(144.dp, (availableHeight - titleHeight + overlap).coerceAtLeast(0.dp))
-            val blockHeight = maxOf(titleHeight, titleHeight - overlap + gaugeHeight)
-            Box(
+            val availableHeight = (maxHeight - 20.dp - daySpace).coerceAtLeast(0.dp)
+            SavingsGauge(target.saved, target.total,
                 Modifier.align(Alignment.BottomStart).padding(start = 8.dp, bottom = 10.dp)
-                    .width(minOf(104.dp, (maxWidth - 8.dp).coerceAtLeast(0.dp))).height(blockHeight)
-                    .clickable(enabled = enabled, role = Role.Button, onClickLabel = "Открыть цель", onClick = onOpenGoal)
-                    .semantics(mergeDescendants = true) {
-                        contentDescription = "${target.title}: накоплено ${minOf(target.saved, target.total)} из ${target.total} монет"
-                    },
-            ) {
-                SavingsGauge(target.saved, target.total,
-                    Modifier.align(Alignment.BottomCenter).width(gaugeHeight * (2f / 3f)))
-                // The plaque overlaps the frame's transparent top margin, joining both into one object.
-                GamePlaque(
-                    Modifier.align(Alignment.TopCenter).fillMaxWidth().height(titleHeight),
-                    artworkRes = R.drawable.menu_name_plaque_v3,
-                    contentPadding = PaddingValues(start = 22.dp, end = 12.dp, top = 6.dp, bottom = 6.dp),
-                ) {
-                    Text("На цель", Modifier.clearAndSetSemantics {}, color = GameInk,
-                        fontFamily = Rubik, fontWeight = FontWeight.SemiBold,
-                        fontSize = 11.sp, lineHeight = 14.sp, maxLines = 1)
-                }
-            }
+                    .width(minOf(104.dp, (maxWidth - 8.dp).coerceAtLeast(0.dp)))
+                    .heightIn(max = availableHeight)
+                    .clickable(enabled = enabled, role = Role.Button, onClickLabel = "Открыть цель", onClick = onOpenGoal),
+                contentDescription = "${target.title}: накоплено ${minOf(target.saved, target.total)} из ${target.total} монет")
         }
         dayStatus?.let { status ->
             MenuRightEdgePlaque(
-                Modifier.align(Alignment.BottomEnd).padding(end = if (attachDayToEdge) 0.dp else 12.dp, bottom = 10.dp)
+                Modifier.align(if (dayAboveSavings) Alignment.TopEnd else Alignment.BottomEnd)
+                    .padding(end = if (attachDayToEdge) 0.dp else 12.dp,
+                        top = if (dayAboveSavings) 10.dp else 0.dp, bottom = if (dayAboveSavings) 0.dp else 10.dp)
                     .widthIn(min = 112.dp, max = 152.dp).heightIn(min = 52.dp),
                 attached = attachDayToEdge,
                 light = true,

@@ -59,7 +59,7 @@
     <string name="deeds_pair_unknown">предмет %1$d</string>
     <string name="deeds_resources">Голод: %1$d/100, усталость: %2$d/100</string>
     <string name="deeds_cost">При успехе: +%1$d голода и +%2$d усталости</string>
-    <string name="deeds_unavailable">Недоступно: не хватает запаса сил или сытости</string>
+    <string name="deeds_unavailable">Недоступно: не хватает энергии или сытости</string>
     <string name="deeds_saving">Сохраняем результат…</string>
     <string name="deeds_save_error">Не удалось сохранить результат. Попробуй ещё раз.</string>
     <string name="deeds_cost_applied">Голод и усталость увеличены</string>

@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.nksk.lctapp.core.ui.game.GameActionAttempt
+import ru.nksk.lctapp.core.ui.game.FinancialAdviceUi
+import ru.nksk.lctapp.core.ui.game.eventFinancialAdvice
 import ru.nksk.lctapp.core.ui.game.mealChoices
 import ru.nksk.lctapp.core.ui.components.MealChoiceUiState
 import ru.nksk.lctapp.core.ui.components.PetIndicatorsUiState
@@ -45,6 +47,7 @@ import ru.nksk.lctapp.domain.content.EventType
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.analytics.DecisionContext
+import ru.nksk.lctapp.domain.analytics.Assistance
 import ru.nksk.lctapp.domain.analytics.FinancialPosition
 import ru.nksk.lctapp.domain.history.CampaignRestartRequest
 import ru.nksk.lctapp.domain.history.CampaignRestartConflictException
@@ -71,6 +74,7 @@ internal data class DayUiState(
     val summary: DaySummaryUiState? = null,
     val restingPetRes: Int? = null,
     val financialContext: DecisionContext? = null,
+    val financialAdvice: FinancialAdviceUi? = null,
     val practiceRequired: Boolean = false,
     val reflectionAvailable: Boolean = false,
     val reflectionDemo: Boolean = false,
@@ -98,6 +102,7 @@ internal sealed interface DayAction {
     data object Primary : DayAction
     data class Choose(val id: String) : DayAction
     data class FinancialContextPresented(val id: String) : DayAction
+    data class AdvicePresented(val id: String) : DayAction
     data object OpenLearning : DayAction
     data object OpenReflection : DayAction
     data class SetResourcePriority(val offerId: String, val selected: Boolean) : DayAction
@@ -132,6 +137,7 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
     private var reflectionDay: Int? = null
     private var reflectionLoading: Job? = null
     private var shownFinancialContext: String? = null
+    private var shownAdviceId: String? = null
     private var selectedResourcePriority: String? = null
     private var game: GameState? = null
     private var loading: Job? = null
@@ -200,6 +206,10 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
     }
 
     fun onAction(action: DayAction) {
+        if (action is DayAction.AdvicePresented) {
+            if (mutableState.value.financialAdvice?.id == action.id) shownAdviceId = action.id
+            return
+        }
         if (action is DayAction.FinancialContextPresented) {
             if (mutableState.value.financialContext?.presentationId == action.id) shownFinancialContext = action.id
             return
@@ -255,17 +265,22 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
             }
             DayAction.Retry -> Unit
             is DayAction.FinancialContextPresented -> Unit
+            is DayAction.AdvicePresented -> Unit
         }
     }
 
     private fun execute(saved: GameState, command: EngineCommand, action: DayAction, leave: Boolean = false,
         fed: Boolean = false, openGame: Boolean = false) {
-        val context = mutableState.value.financialContext?.let { displayed ->
+        val shown = mutableState.value
+        val adviceShown = shown.financialAdvice?.id?.let { it == shownAdviceId } == true
+        val baseContext = shown.financialContext?.let { displayed ->
             val presented = displayed.presentationId == shownFinancialContext
             displayed.copy(informationPresented = presented,
                 complete = presented && displayed.before == financialPosition(saved) &&
                     displayed.presentationId == presentationId(saved))
         }
+        val context = if (adviceShown) (baseContext ?: DecisionContext(presentationId = presentationId(saved)))
+            .let { it.copy(assistance = it.assistance + Assistance.HINT) } else baseContext
         val pending = PendingAction(GameActionAttempt.prepare(saved, command, context,
             demoMode = presentation?.demoMode ?: session.demoModeEnabled), action, leave, fed, openGame)
         pendingAction = pending
@@ -413,7 +428,7 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
     }
 
     private fun effortCost(cost: Int, petName: String, demoMode: Boolean) = if (demoMode) "Без усталости · режим бога" else when (cost) {
-        0 -> "Не тратит силы"
+        0 -> "Энергия не тратится"
         1 -> "Немного устанет"
         2 -> "Устанет"
         else -> "Сильно устанет"
@@ -591,6 +606,8 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
         val resourcePriority = if (restFromCard) null else resourcePriority(saved, choices.filter { blocked[it.id] == null }.map { it.id }, demoMode)
         val state = DayUiState(
             loading = false, petName = saved.pet.name,
+            financialAdvice = if (!result && !restFromCard && summary == null && !story.campaignComplete && !storyIntroduction)
+                eventFinancialAdvice(saved, catalog) else null,
             indicators = petIndicators(saved, catalog, demoMode),
             audioOccurrenceId = occurrence?.id.takeIf { !story.campaignComplete && !result && summary == null },
             eventMedia = presentation.media,

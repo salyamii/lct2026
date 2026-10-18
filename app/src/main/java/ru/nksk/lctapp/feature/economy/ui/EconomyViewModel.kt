@@ -1,6 +1,8 @@
 package ru.nksk.lctapp.feature.economy.ui
 
 import ru.nksk.lctapp.core.ui.game.asGameUiText
+import ru.nksk.lctapp.core.ui.game.FinancialAdviceTopic
+import ru.nksk.lctapp.core.ui.game.financialAdvice
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,6 +22,7 @@ import ru.nksk.lctapp.core.ui.game.BudgetHistoryUi
 import ru.nksk.lctapp.core.ui.game.budgetHistoryUi
 import ru.nksk.lctapp.core.ui.game.playerMessage
 import ru.nksk.lctapp.domain.analytics.DecisionContext
+import ru.nksk.lctapp.domain.analytics.Assistance
 import ru.nksk.lctapp.domain.analytics.FinancialPosition
 import ru.nksk.lctapp.domain.economy.*
 import ru.nksk.lctapp.domain.engine.*
@@ -53,7 +56,17 @@ internal data class EconomyUiState(
     val budgetHistoryVisible: Boolean = false,
     val budgetHistoryLoading: Boolean = false,
     val budgetHistoryError: String? = null,
+    val day: Int = 1,
+    val focusedBudgetArticle: BudgetArticle? = null,
 ) {
+    val budgetAdviceScope get() = "budget:$day"
+    val budgetAdvice get() = financialAdvice(day, "budget", 0,
+        FinancialAdviceTopic.PLAN, FinancialAdviceTopic.NEEDS, FinancialAdviceTopic.RESERVE,
+        first = economy?.planning?.reason == BudgetPlanningReason.INITIAL)
+    val savingsAdvice get() = financialAdvice(day, "savings", 2,
+        FinancialAdviceTopic.SAVING, FinancialAdviceTopic.LEDGER)
+    val weeklyAdvice get() = if (economy?.planning?.reason == BudgetPlanningReason.WEEKLY)
+        financialAdvice(day, "weekly", 1, FinancialAdviceTopic.PLAN, FinancialAdviceTopic.RESERVE_OR_GOAL) else null
     /** Relative edits can queue while a previous edit is being persisted. Final actions cannot. */
     val planEditingEnabled: Boolean get() = !loading && economy != null && error == null &&
         !exclusiveSaving && budgetConfirmation == null
@@ -76,6 +89,9 @@ internal sealed interface EconomyAction {
     data class SetReason(val reason: BudgetRevisionReason) : EconomyAction
     data class ContextPresented(val id: String) : EconomyAction
     data class TransferContextPresented(val id: String) : EconomyAction
+    data class AdvicePresented(val id: String) : EconomyAction
+    data class FocusBudgetArticle(val article: BudgetArticle) : EconomyAction
+    data class BudgetAdvicePresented(val id: String) : EconomyAction
     data class SelectUnexpectedExpense(val operationId: String?) : EconomyAction
     data object RetryExpenseHistory : EconomyAction
     data class Deposit(val amount: Long) : EconomyAction
@@ -120,6 +136,7 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
     private var depositRisk: Pending? = null
     private var presentedContextId: String? = null
     private var presentedTransferContextId: String? = null
+    private val shownAdviceIds = mutableSetOf<String>()
     private var queued = 0
     private var exclusiveQueued = 0
     private val manualId = "manual:" + UUID.randomUUID().toString()
@@ -168,6 +185,22 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
         // Keep the successful outgoing screen locked until its navigation entry is removed.
         if (state.value.budgetConfirmation != null) return
         when (action) {
+            is EconomyAction.FocusBudgetArticle -> {
+                if (state.value.planEditingEnabled) state.value = state.value.copy(focusedBudgetArticle = action.article)
+                return
+            }
+            is EconomyAction.BudgetAdvicePresented -> {
+                val shown = state.value
+                if (shown.economy != null && shown.budgetScreenState().budget.adviser.id == action.id)
+                    shownAdviceIds += shown.budgetAdviceScope
+                return
+            }
+            is EconomyAction.AdvicePresented -> {
+                val shown = state.value
+                if (action.id in listOfNotNull(shown.savingsAdvice?.id, shown.weeklyAdvice?.id))
+                    shownAdviceIds += action.id
+                return
+            }
             EconomyAction.DepositWeeklyReserve -> {
                 val shown = state.value
                 val economy = shown.economy ?: return
@@ -179,7 +212,8 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
                     context = DecisionContext(presentationId = "weekly-reserve:${planning.id}:${planning.revision}",
                         informationPresented = false, complete = false,
                         before = FinancialPosition(economy.availableBalance, economy.savingsBalance, shown.knownNeeds),
-                        alternativeAvailable = true)))
+                        alternativeAvailable = true,
+                        assistance = adviceAssistance(shown.weeklyAdvice?.id))))
                 return
             }
             EconomyAction.OpenBudgetHistory -> {
@@ -384,6 +418,7 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
     }
 
     private fun project(game: GameState) {
+        if (state.value.day != (game.engine?.day ?: 1)) shownAdviceIds.clear()
         val changed = projectedGame != game
         projectedGame = game
         val old = state.value.economy
@@ -398,7 +433,7 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
                 it.savings != game.economy.savingsBalance || it.target != target
         } == true
         state.value = state.value.copy(loading = false, economy = game.economy, knownNeeds = knownNeeds(game),
-            pet = game.pet, revision = game.engine?.revision, savingsTarget = target,
+            pet = game.pet, revision = game.engine?.revision, savingsTarget = target, day = game.engine?.day ?: 1,
             weeklyReserveReceipt = state.value.weeklyReserveReceipt.takeIf {
                 old?.planning?.id == game.economy.planning?.id && game.economy.planning?.stage == BudgetPlanningStage.RECEIPT
             },
@@ -427,8 +462,12 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
             informationPresented = presented, complete = presented,
             before = FinancialPosition(economy.availableBalance, economy.savingsBalance, shown.knownNeeds),
             alternativeAvailable = true,
+            assistance = adviceAssistance(if (action == EconomyAction.Confirm) shown.budgetAdviceScope else shown.savingsAdvice?.id),
         )
     }
+
+    private fun adviceAssistance(id: String?): Set<Assistance> =
+        if (id != null && id in shownAdviceIds) setOf(Assistance.HINT) else emptySet()
 
     private fun enqueue(pending: Pending) {
         queued++

@@ -52,11 +52,13 @@ internal fun EconomyScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
                     reserveRemainder = if (isWeeklyReceipt) economy.plan.reserve else 0,
                     busy = receiptBusy,
                     reserveTransferred = if (isWeeklyReceipt) state.weeklyReserveReceipt?.amount else null,
+                    advice = state.weeklyAdvice,
                     header = if (planning.reason == BudgetPlanningReason.INITIAL) "Первый бюджет" else "Новая неделя",
                     title = if (planning.reason == BudgetPlanningReason.INITIAL) "Монеты для приключения" else "Новый запас на неделю"),
                 onPlan = { if (!receiptBusy) onAction(EconomyAction.StartAllocation) },
                 onBack = { if (!receiptBusy) onBack() },
-                onDepositReserve = { if (!receiptBusy) onAction(EconomyAction.DepositWeeklyReserve) })
+                onDepositReserve = { if (!receiptBusy) onAction(EconomyAction.DepositWeeklyReserve) },
+                onAdviceShown = { onAction(EconomyAction.AdvicePresented(it)) })
             else -> BudgetPlanScreen(
                 state = display.budget,
                 interactionsBlocked = state.budgetConfirmation != null,
@@ -66,6 +68,8 @@ internal fun EconomyScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
                 onOpenSavings = onOpenSavings,
                 pet = display.pet,
                 contextId = display.contextId,
+                onAdviceShown = { onAction(EconomyAction.BudgetAdvicePresented(it)) },
+                onArticleFocused = { onAction(EconomyAction.FocusBudgetArticle(it)) },
                 onContextPresented = { onAction(EconomyAction.ContextPresented(it)) })
         }
     }

@@ -21,6 +21,7 @@ import org.junit.Test
 import org.junit.Assert.*
 import ru.nksk.lctapp.app.createInitialGameState
 import ru.nksk.lctapp.domain.analytics.AnalyticsFact
+import ru.nksk.lctapp.domain.analytics.Assistance
 import ru.nksk.lctapp.domain.analytics.DecisionContext
 import ru.nksk.lctapp.domain.analytics.FinancialPosition
 import ru.nksk.lctapp.domain.analytics.FactDetail
@@ -151,6 +152,39 @@ class EconomyViewModelTest {
         model.onAction(EconomyAction.Confirm)
         advanceUntilIdle()
         assertNull(repo.state.value!!.economy.planning)
+    }
+
+    @Test fun adviserPrioritizesTheFullFoodRequirementBeforeTheFocusedCategory() {
+        val shown = BudgetUiState(needs = 5, wants = 0, savings = 0, reserve = 0,
+            unallocated = 0, weeklyIncome = 100, minimumNeeds = 5, knownNeeds = 35,
+            focusedArticle = BudgetArticle.RESERVE)
+        assertTrue(shown.adviser.text.contains("не хватает ещё 30 монет"))
+        assertTrue(shown.foodContextText.contains("35 монет"))
+        val funded = shown.copy(needs = 35)
+        assertTrue(funded.adviser.text.contains("В запасе пока ничего нет"))
+        assertNotEquals(funded.adviser.id, funded.copy(focusedArticle = BudgetArticle.WANTS).adviser.id)
+        assertTrue(funded.copy(reserve = 5).adviser.text.contains("в конце недели их можно переложить в копилку"))
+    }
+
+    @Test fun budgetHintRequiresExposureAndSurvivesDraftEdits() = runTest(dispatcher) {
+        for (wasShown in listOf(false, true)) {
+            val repo = BudgetRepository(allocating())
+            val model = model(repo)
+            advanceUntilIdle()
+            val before = model.uiState.value.budgetScreenState().budget.adviser
+            if (wasShown) model.onAction(EconomyAction.BudgetAdvicePresented(before.id))
+            model.onAction(EconomyAction.FocusBudgetArticle(BudgetArticle.NEEDS))
+            model.onAction(EconomyAction.SetAmount(BudgetArticle.NEEDS, 35))
+            model.onAction(EconomyAction.SetAmount(BudgetArticle.SAVINGS, 65))
+            advanceUntilIdle()
+            assertNotEquals(before.id, model.uiState.value.budgetScreenState().budget.adviser.id)
+            model.onAction(EconomyAction.Confirm)
+            advanceUntilIdle()
+            val context = repo.requests.last { it.command is EngineCommand.ConfirmBudget }.context!!
+            assertEquals(wasShown, Assistance.HINT in context.assistance)
+            // A visible explanation alone does not prove that all financial information was visible.
+            assertFalse(context.complete)
+        }
     }
 
     @Test fun confirmationKeepsTheDisplayedPlanAndBlocksActionsUntilTheScreenIsRemoved() = runTest(dispatcher) {

@@ -262,7 +262,7 @@ class TimeMachine(
                 if (entry.id == target.id && alternative.assumesCompletedWork) engine.simulateCompletedWork(branch, changedRequest)
                 else engine.transition(branch, changedRequest)
             }.getOrNull()
-                ?: return result(TimeMachineStatus.DIVERGED, "Следующее действие уже недоступно: изменились деньги, силы или условия события.")
+                ?: return result(TimeMachineStatus.DIVERGED, "Следующее действие уже недоступно: изменились деньги, энергия или условия события.")
             val operations = if (command == null) emptyList() else runCatching { CanonicalLedger.fromTransition(branch, next, changedRequest) }.getOrNull()
                 ?: return result(TimeMachineStatus.DIVERGED, "В новом варианте не удалось проверить денежный результат.")
             baseline = after

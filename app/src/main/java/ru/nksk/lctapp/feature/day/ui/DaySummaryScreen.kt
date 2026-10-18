@@ -41,6 +41,9 @@ import ru.nksk.lctapp.core.ui.components.GameInk
 import ru.nksk.lctapp.core.ui.components.GameTitle
 import ru.nksk.lctapp.core.ui.components.GameActionButton
 import ru.nksk.lctapp.core.ui.components.GameActionStyle
+import ru.nksk.lctapp.core.ui.components.FinancialAdviceText
+import ru.nksk.lctapp.core.ui.game.FinancialAdviceTopic
+import ru.nksk.lctapp.core.ui.game.financialAdvice
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 
@@ -79,6 +82,9 @@ internal fun DaySummaryScreen(state: DayUiState, onAction: (DayAction) -> Unit, 
         }
         HorizontalDivider(color = DiaryRule)
         DiaryMoney(summary)
+        financialAdvice(summary.day, "summary", 3, FinancialAdviceTopic.LEDGER, FinancialAdviceTopic.REFLECTION)?.let {
+            FinancialAdviceText(it.text, exposureKey = it.id)
+        }
         summary.detailsNote?.let { DiaryNote(it) }
         summary.adjustmentNote?.let { DiaryNote(it) }
         if (summary.availableBalance != null || summary.savingsBalance != null) {

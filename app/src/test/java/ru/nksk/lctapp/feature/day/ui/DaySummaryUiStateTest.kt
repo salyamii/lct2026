@@ -134,7 +134,7 @@ class DaySummaryUiStateTest {
         val summary = DaySummary(1, 0, 0, emptyList(), 3, 5, 0,
             listOf(DayJournalEntry("free", DayJournalKind.MEAL, "community-v1", 0))).toUiState(catalog, "Тоша")
         assertTrue(summary.moneyLines.isEmpty())
-        assertEquals(listOf(DaySummaryRow("Поели в бесплатной столовой", "Завтра будет меньше сил", DaySummaryRowKind.MEAL)), summary.activities)
+        assertEquals(listOf(DaySummaryRow("Поели в бесплатной столовой", "Завтра будет меньше энергии", DaySummaryRowKind.MEAL)), summary.activities)
     }
 
     @Test fun diarySeparatesDailyFlowsFromCurrentWalletAndBankWithoutGuessingMissingAmounts() {

@@ -1,6 +1,10 @@
 package ru.nksk.lctapp.feature.menu.ui
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import ru.nksk.lctapp.core.ui.components.tour.spotlightScrollable
 
@@ -26,7 +30,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.HorizontalDivider
@@ -35,6 +38,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
@@ -54,7 +61,6 @@ import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.Rubik
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.components.GameInk
-import ru.nksk.lctapp.core.ui.components.GamePaper
 import ru.nksk.lctapp.core.ui.components.GamePlaque
 import ru.nksk.lctapp.core.ui.components.PetIndicators
 import ru.nksk.lctapp.core.ui.components.PetIndicatorsUiState
@@ -65,6 +71,7 @@ private val MenuBadgeMinHeight = 56.dp
 private val MenuCoinsMinHeight = 68.dp
 private val BudgetCornerRadius = 20.dp
 private val BudgetPopupCornerRadius = 24.dp
+private val BudgetPopupLine = Color(0xFF91643D).copy(alpha = .26f)
 
 @Composable
 internal fun MenuHud(
@@ -219,16 +226,19 @@ private fun BudgetBadge(
             expanded = expanded,
             onDismissRequest = { onExpandedChange(false) },
             modifier = Modifier.width((LocalConfiguration.current.screenWidthDp.dp - 32.dp).coerceIn(0.dp, 280.dp)),
-            shape = RoundedCornerShape(BudgetPopupCornerRadius),
-            containerColor = GamePaper,
+            shape = RectangleShape,
+            containerColor = Color.Transparent,
             tonalElevation = 0.dp,
-            shadowElevation = 10.dp,
+            shadowElevation = 0.dp,
         ) {
-            BudgetPopupSummary(budget)
-            HorizontalDivider(Modifier.padding(horizontal = 16.dp, vertical = 6.dp), color = GameInk.copy(alpha = .10f))
-            BudgetPopupAction("Открыть бюджет") { onExpandedChange(false); onClick() }
-            if (onSavings != null) BudgetPopupAction("Открыть копилку") { onExpandedChange(false); onSavings() }
-            if (onFinance != null) BudgetPopupAction("История приключения") { onExpandedChange(false); onFinance() }
+            BudgetPopupPanel(
+                budget = budget,
+                modifier = Modifier.heightIn(max = (LocalConfiguration.current.screenHeightDp.dp * .62f)
+                    .coerceIn(160.dp, 560.dp)),
+                onBudget = { onExpandedChange(false); onClick() },
+                onSavings = onSavings?.let { action -> { onExpandedChange(false); action() } },
+                onFinance = onFinance?.let { action -> { onExpandedChange(false); action() } },
+            )
         }
     }
 }
@@ -247,8 +257,33 @@ private fun ExpandedBudgetBadgePreview() {
 }
 
 @Composable
+private fun BudgetPopupPanel(
+    budget: MenuBudgetUiState,
+    modifier: Modifier = Modifier,
+    scroll: ScrollState = rememberScrollState(),
+    onBudget: (() -> Unit)? = null,
+    onSavings: (() -> Unit)? = null,
+    onFinance: (() -> Unit)? = null,
+    preview: Boolean = false,
+) {
+    GamePlaque(modifier.fillMaxWidth(), light = true, fixedEdges = true,
+        contentPadding = PaddingValues(horizontal = 18.dp, vertical = 18.dp)) {
+        // The frame stays in place while a compact viewport scrolls its native contents.
+        Column(Modifier.fillMaxWidth().verticalScroll(scroll)) {
+            BudgetPopupSummary(budget)
+            HorizontalDivider(Modifier.padding(vertical = 10.dp), color = BudgetPopupLine)
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                BudgetPopupAction("Открыть бюджет", onBudget)
+                if (preview || onSavings != null) BudgetPopupAction("Открыть копилку", onSavings)
+                if (preview || onFinance != null) BudgetPopupAction("История приключения", onFinance)
+            }
+        }
+    }
+}
+
+@Composable
 private fun BudgetPopupSummary(budget: MenuBudgetUiState) {
-    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 8.dp)) {
+    Column(Modifier.fillMaxWidth()) {
         if (LocalDensity.current.fontScale > 1.3f) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 BudgetBalance("Доступно", budget.available, R.drawable.menu_coin)
@@ -260,7 +295,7 @@ private fun BudgetPopupSummary(budget: MenuBudgetUiState) {
                 BudgetBalance("В копилке", budget.actualSavings, R.drawable.budget_savings, Modifier.weight(1f))
             }
         }
-        HorizontalDivider(Modifier.padding(vertical = 14.dp), color = GameInk.copy(alpha = .10f))
+        HorizontalDivider(Modifier.padding(vertical = 12.dp), color = BudgetPopupLine)
         Text("В бюджете", color = GameInk.copy(alpha = .65f), fontFamily = Nunito,
             fontWeight = FontWeight.Bold, fontSize = 13.sp)
         Spacer(Modifier.height(6.dp))
@@ -302,13 +337,20 @@ private fun BudgetArticleRow(title: String, amount: Long) {
 }
 
 @Composable
-private fun BudgetPopupAction(title: String, onClick: () -> Unit) {
-    DropdownMenuItem(
-        text = { Text(title, color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp) },
-        trailingIcon = { Icon(painterResource(R.drawable.menu_chevron), null, Modifier.size(16.dp), tint = GameInk.copy(alpha = .55f)) },
-        onClick = onClick,
-        modifier = Modifier.heightIn(min = 48.dp),
-    )
+private fun BudgetPopupAction(title: String, onClick: (() -> Unit)?) {
+    val shape = RoundedCornerShape(9.dp)
+    Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).clip(shape)
+        .background(Brush.verticalGradient(listOf(Color(0xFFFFF7DD).copy(alpha = .60f),
+            Color(0xFFC9A264).copy(alpha = .16f))))
+        .border(1.dp, BudgetPopupLine, shape)
+        .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
+        .padding(horizontal = 10.dp, vertical = 9.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(title, Modifier.weight(1f), color = GameInk, fontFamily = Nunito,
+            fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, lineHeight = 19.sp)
+        Icon(painterResource(R.drawable.menu_chevron), null, Modifier.size(16.dp), tint = Color(0xFF785334))
+    }
 }
 
 @Composable
@@ -344,17 +386,8 @@ internal fun VillageMapButton(onClick: () -> Unit, modifier: Modifier = Modifier
 /** Same content as the budget popup, hosted in-screen so the tour owns all input. */
 @Composable
 internal fun MenuBudgetTourPreview(budget: MenuBudgetUiState, modifier: Modifier = Modifier) {
-    val scroll = androidx.compose.foundation.rememberScrollState()
-    androidx.compose.material3.Surface(modifier
+    val scroll = rememberScrollState()
+    BudgetPopupPanel(budget, modifier
         .spotlightTarget("menu.budget.details", cornerRadius = BudgetPopupCornerRadius, gap = 4.dp)
-        .spotlightScrollable("menu.budget.details", scroll), shape = RoundedCornerShape(BudgetPopupCornerRadius), color = GamePaper,
-        shadowElevation = 10.dp) {
-        Column(Modifier.verticalScroll(scroll).padding(vertical = 8.dp)) {
-            BudgetPopupSummary(budget)
-            HorizontalDivider(Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
-            listOf("Открыть бюджет", "Открыть копилку", "История приключения").forEach {
-                Text(it, Modifier.padding(horizontal = 16.dp, vertical = 10.dp), color = GameInk, fontFamily = Nunito)
-            }
-        }
-    }
+        .spotlightScrollable("menu.budget.details", scroll), scroll = scroll, preview = true)
 }

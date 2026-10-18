@@ -22,13 +22,13 @@ internal fun petIndicators(state: GameState, catalog: GameCatalog, demoMode: Boo
         energy = energy,
         maxEnergy = catalog.rules.fullEnergy,
         energyLabel = when {
-            demoMode -> "Без усталости"
+            demoMode -> "Не тратится"
             else -> energyDescription(energy, catalog.rules.fullEnergy)
         },
         energyExplanation = when {
             day == null -> "Герой отдохнул и готов к первому дню."
-            demoMode -> "Силы не тратятся, но герой всё ещё может проголодаться."
-            else -> "Дела тратят силы, сон восстанавливает."
+            demoMode -> "Энергия не тратится, но герой всё ещё может проголодаться."
+            else -> "Дела тратят энергию, сон восстанавливает."
         },
         satiety = when {
             day == null -> PetSatietyUiState.NOT_EATEN
@@ -103,18 +103,18 @@ internal fun mealPetEffects(state: GameState, catalog: GameCatalog, mealId: Stri
         if (effects.exhaustsCurrentEnergy && !demoMode) {
             val tomorrow = effects.nextMorningEnergy
             add(PetIndicatorEffectUiState(PetIndicatorKind.ENERGY, "Нужен отдых",
-                if (tomorrow != null) "Силы: 0 сегодня, $tomorrow из ${catalog.rules.fullEnergy} утром." else "Сегодня силы закончатся."))
+                if (tomorrow != null) "Энергия: 0 сегодня, $tomorrow из ${catalog.rules.fullEnergy} утром." else "Сегодня энергия закончится."))
         } else if (effects.energyRestore > 0) {
             add(PetIndicatorEffectUiState(PetIndicatorKind.ENERGY,
-                if (effects.energyRestore == 1) "Восстановит немного сил" else "Восстановит больше сил",
+                if (effects.energyRestore == 1) "Восстановит немного энергии" else "Восстановит больше энергии",
                 when {
-                    demoMode -> "В режиме бога силы не тратятся."
-                    currentEnergy >= catalog.rules.fullEnergy -> "Силы уже полные."
+                    demoMode -> "В режиме бога энергия не тратится."
+                    currentEnergy >= catalog.rules.fullEnergy -> "Энергия на максимуме."
                     else -> "До полного запаса."
                 }))
         } else {
             add(energyEffect(currentEnergy, afterEnergy, catalog.rules.fullEnergy, demoMode, effects.energyRestore > 0)
-                ?: PetIndicatorEffectUiState(PetIndicatorKind.ENERGY, "Силы без изменений"))
+                ?: PetIndicatorEffectUiState(PetIndicatorKind.ENERGY, "Энергия не изменится"))
         }
         effects.visualStateAfter?.takeUnless { it == PetVisualState.NORMAL }?.let { reaction ->
             if (afterEnergy > 0 && !needsCareAfter(state, catalog, completedEventId = null, reaction = reaction)) {
@@ -126,11 +126,11 @@ internal fun mealPetEffects(state: GameState, catalog: GameCatalog, mealId: Stri
 
 private fun energyEffect(before: Int, after: Int, maximum: Int, demoMode: Boolean,
     hasRestoration: Boolean): PetIndicatorEffectUiState? = when {
-    demoMode -> PetIndicatorEffectUiState(PetIndicatorKind.ENERGY, "Без усталости", "Режим бога.")
-    after < before -> PetIndicatorEffectUiState(PetIndicatorKind.ENERGY, "Силы -${before - after}")
-    after > before -> PetIndicatorEffectUiState(PetIndicatorKind.ENERGY, "Силы +${after - before}")
-    hasRestoration && after >= maximum -> PetIndicatorEffectUiState(PetIndicatorKind.ENERGY, "Силы полные")
-    hasRestoration -> PetIndicatorEffectUiState(PetIndicatorKind.ENERGY, "Силы без изменений")
+    demoMode -> PetIndicatorEffectUiState(PetIndicatorKind.ENERGY, "Энергия не тратится", "Режим бога.")
+    after < before -> PetIndicatorEffectUiState(PetIndicatorKind.ENERGY, "Энергия -${before - after}")
+    after > before -> PetIndicatorEffectUiState(PetIndicatorKind.ENERGY, "Энергия +${after - before}")
+    hasRestoration && after >= maximum -> PetIndicatorEffectUiState(PetIndicatorKind.ENERGY, "Энергия на максимуме")
+    hasRestoration -> PetIndicatorEffectUiState(PetIndicatorKind.ENERGY, "Энергия не изменится")
     else -> null
 }
 

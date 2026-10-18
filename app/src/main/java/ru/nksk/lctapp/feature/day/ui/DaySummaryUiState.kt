@@ -94,7 +94,7 @@ internal fun DaySummary.toUiState(catalog: GameCatalog, petName: String, economy
         when (entry.kind) {
             DayJournalKind.EVENT_CHOICE, DayJournalKind.DEED -> completedAction(entry.sourceId, entry)
             DayJournalKind.MEAL -> rows += if (entry.moneyDelta == 0L)
-                DaySummaryRow("Поели в бесплатной столовой", "Завтра будет меньше сил", DaySummaryRowKind.MEAL)
+                DaySummaryRow("Поели в бесплатной столовой", "Завтра будет меньше энергии", DaySummaryRowKind.MEAL)
                 else DaySummaryRow("Пообедали", actionMoney(entry.moneyDelta), DaySummaryRowKind.MEAL)
             DayJournalKind.ITEM_PURCHASE -> rows += DaySummaryRow("Купили: ${itemName(entry.sourceId)}", actionMoney(entry.moneyDelta), DaySummaryRowKind.PURCHASE)
             DayJournalKind.ITEM_RECEIVED -> rows += DaySummaryRow("Получили: ${itemName(entry.sourceId)}", kind = DaySummaryRowKind.FOUND)

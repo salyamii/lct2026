@@ -32,13 +32,9 @@ internal fun SavingsGoalSummary(target: SavingsTargetUi?, savings: Long, onOpenG
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(target?.name ?: "Выбрать предмет", color = GameInk, fontFamily = Nunito,
                 fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, lineHeight = 24.sp)
-            if (target != null) {
-                Text("Накоплено ${minOf(savings, target.price)} из ${target.price}", color = GameInk,
-                    fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 14.sp, lineHeight = 20.sp)
-            }
         }
         if (target != null && target.price > 0) {
-            SavingsGauge(savings, target.price, Modifier.width(72.dp))
+            SavingsGauge(savings, target.price, Modifier.width(96.dp))
         }
         Icon(painterResource(R.drawable.menu_chevron), null, Modifier.size(24.dp), tint = GameInk)
     }

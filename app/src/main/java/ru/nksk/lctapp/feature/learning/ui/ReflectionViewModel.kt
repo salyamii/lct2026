@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import ru.nksk.lctapp.core.ui.game.FinancialAdviceTopic
+import ru.nksk.lctapp.core.ui.game.financialAdvice
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.history.AuditEntry
@@ -26,7 +28,11 @@ internal data class ReflectionUiState(
     val originalPath: ChronoscopePath? = null, val alternativePath: ChronoscopePath? = null,
     val realGame: GameState? = null, val quizHintShown: Boolean = false, val comparisonBoundary: String? = null,
     val demoExample: Boolean = false, val exampleGame: GameState? = null,
-)
+) {
+    val financialAdvice get() = (reflectionDay ?: realGame?.engine?.day)?.let {
+        financialAdvice(it, "reflection", 0, FinancialAdviceTopic.REFLECTION)
+    }
+}
 
 internal sealed interface ReflectionAction {
     data object Retry : ReflectionAction
@@ -44,6 +50,7 @@ internal sealed interface ReflectionAction {
     data class AnswerQuiz(val quizId: String, val id: String) : ReflectionAction
     data class ChronoscopeQuestionPresented(val quizId: String) : ReflectionAction
     data class ChronoscopeExplanationPresented(val quizId: String, val submissionId: String) : ReflectionAction
+    data class AdvicePresented(val id: String) : ReflectionAction
 }
 
 @HiltViewModel
@@ -62,6 +69,7 @@ internal class ReflectionViewModel @Inject constructor(private val session: Game
         val questionPresented: Boolean, val usedHint: Boolean)
     private var pendingQuizSubmission: QuizSubmission? = null
     private val presentedChronoscopeQuestions = mutableSetOf<String>()
+    private var shownAdviceId: String? = null
     private sealed interface ChronoscopeRecord {
         val key: String
         data class Simulation(val id: String) : ChronoscopeRecord { override val key = "simulation:$id" }
@@ -130,6 +138,11 @@ internal class ReflectionViewModel @Inject constructor(private val session: Game
     }
 
     fun onAction(action: ReflectionAction) {
+        if (action is ReflectionAction.AdvicePresented) {
+            if (state.value.chronoscopeStep in setOf(ChronoscopeStep.INTRO, ChronoscopeStep.MOMENTS) &&
+                state.value.financialAdvice?.id == action.id) shownAdviceId = action.id
+            return
+        }
         if (clearDisabledDemo()) {
             onAction(ReflectionAction.OpenTimeMachine)
             return
@@ -273,7 +286,9 @@ internal class ReflectionViewModel @Inject constructor(private val session: Game
                         val submission = previous?.takeIf { it.quizId == quiz.id && it.optionId == action.id }
                             ?: QuizSubmission(quiz.id, action.id, UUID.randomUUID().toString(),
                                 questionPresented = quiz.id in presentedChronoscopeQuestions,
-                                usedHint = state.value.quizHintShown).also { pendingQuizSubmission = it }
+                                usedHint = state.value.quizHintShown ||
+                                    state.value.financialAdvice?.id?.let { it == shownAdviceId } == true)
+                                .also { pendingQuizSubmission = it }
                         val answer = reflectionMachine.submitQuiz(quiz.id, action.id, submission.id,
                             usedHint = submission.usedHint, questionPresented = submission.questionPresented)
                         state.value = state.value.copy(quizAnswer = answer,
@@ -283,6 +298,7 @@ internal class ReflectionViewModel @Inject constructor(private val session: Game
                     }
                     ReflectionAction.Retry -> Unit
                     is ReflectionAction.ChronoscopeQuestionPresented, is ReflectionAction.ChronoscopeExplanationPresented -> Unit
+                    is ReflectionAction.AdvicePresented -> Unit
                 }
                 if (!observing) observe()
             } catch (cancelled: CancellationException) { throw cancelled }
