@@ -1,0 +1,98 @@
+[
+  {
+    "resource": "menu_settings_v3",
+    "category": "Generated menu HUD objects - 2026-10-18",
+    "path": "app/src/main/res/drawable-nodpi/menu_settings_v3.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1225318,
+    "sha256": "a75345776c62519cf0cfe3e8ac532b3e4d971a2c89134596d5e28c16d15ce1b9",
+    "rgba_sha256": "5a4dae4af80a45107b553cd1c4d7365196f4a2d712d9396592852584413fe32e",
+    "alpha_bounds": [
+      28,
+      19,
+      1238,
+      1230
+    ],
+    "source_path": "docs/design/assets/sources/menu-hud-2026-10-18/menu_settings_v3.png",
+    "source_sha256": "9bfafbf50d881cbb7d4ed43367d9553df8b921e3d1aeaadca41790f11731b414",
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-10-18",
+      "prompt_path": "docs/design/assets/sources/menu-hud-2026-10-18/README.md"
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "method": 6,
+      "resized": false,
+      "pillow_version": "12.3.0"
+    }
+  },
+  {
+    "resource": "menu_wallet_panel_v3",
+    "category": "Generated menu HUD objects - 2026-10-18",
+    "path": "app/src/main/res/drawable-nodpi/menu_wallet_panel_v3.webp",
+    "format": "webp",
+    "width": 2172,
+    "height": 724,
+    "bytes": 1463592,
+    "sha256": "b3443e7534194be7d84f6f579650073b513f91f2879a5e8320f7dd4120f44f6c",
+    "rgba_sha256": "53637b6d7e970f230dd1b80b78f478bc7b99e392d7a78f560ee5452aed8fa326",
+    "alpha_bounds": [
+      29,
+      0,
+      2143,
+      698
+    ],
+    "source_path": "docs/design/assets/sources/menu-hud-2026-10-18/menu_wallet_panel_v3.png",
+    "source_sha256": "dd9963889636ed0024d46c00f3cb99e68a8d72c5bc843396ea90472db4f9c91b",
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-10-18",
+      "prompt_path": "docs/design/assets/sources/menu-hud-2026-10-18/README.md"
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "method": 6,
+      "resized": false,
+      "pillow_version": "12.3.0"
+    }
+  },
+  {
+    "resource": "menu_name_plaque_v3",
+    "category": "Generated menu HUD objects - 2026-10-18",
+    "path": "app/src/main/res/drawable-nodpi/menu_name_plaque_v3.webp",
+    "format": "webp",
+    "width": 2172,
+    "height": 724,
+    "bytes": 1204666,
+    "sha256": "f651d8de1f502fce0573a5dfd77f711af23a5b81cbcbc0765bb734672aa2477e",
+    "rgba_sha256": "68e57166e8719a765c113f6faa9ef8d54bb8f3fe24ef0c6ec78409a24a9414c3",
+    "alpha_bounds": [
+      0,
+      23,
+      2172,
+      724
+    ],
+    "source_path": "docs/design/assets/sources/menu-hud-2026-10-18/menu_name_plaque_v3.png",
+    "source_sha256": "f2f89266a85973f4661335f3d2a18ae85cceb857fa581e30f3f8e61172d36442",
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-10-18",
+      "prompt_path": "docs/design/assets/sources/menu-hud-2026-10-18/README.md"
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "method": 6,
+      "resized": false,
+      "pillow_version": "12.3.0"
+    }
+  }
+]

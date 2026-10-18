@@ -316,7 +316,7 @@ internal class MainMenuViewModel @Inject constructor(
     private fun buildPresentation(game: GameState, demoMode: Boolean): Presentation {
         val continuation = session.continueDayPlan(game, demoMode)
         val command = (continuation as? ContinueDayPlan.Day)?.command
-        val menu = game.toMainMenuUiState(session.catalog.rules.fullEnergy, session.catalog, demoMode)
+        val menu = game.toMainMenuUiState(session.catalog, demoMode)
         return Presentation(game, demoMode, menu.copy(
             spendingPreview = session.engine.advanceSpending(game, command, demoMode)?.let {
                 if (demoMode && it.quote.affordable && it.quote.parts.isEmpty()) "Бесплатно · режим бога"

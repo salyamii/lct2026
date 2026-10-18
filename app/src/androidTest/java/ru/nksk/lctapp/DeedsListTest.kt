@@ -22,7 +22,7 @@ class DeedsListTest {
     @Test fun offscreenOffersAreNotComposedButRemainReachableWithTheirOwnAction() {
         val offers = List(60) { index ->
             OfferedDeedUiState("offer-$index", "Поручение $index", "Помоги мастеру",
-                "До 5 монет", "Немного устанет", "Осталось 2 дня", "workshop")
+                "До 5 монет", "Осталось 2 дня", "workshop")
         }
         var selected: String? = null
         compose.setContent {
@@ -43,7 +43,7 @@ class DeedsListTest {
     @Test fun rejectedStartRemainsVisibleWhenTheListHeadingIsOffscreen() {
         val offers = List(60) { index ->
             OfferedDeedUiState("offer-$index", "Поручение $index", "Помоги мастеру",
-                "До 5 монет", "Немного устанет", "Осталось 2 дня", "workshop")
+                "До 5 монет", "Осталось 2 дня", "workshop")
         }
         val state = mutableStateOf(DeedsUiState(loading = false, offers = offers))
         val reason = "Рыжик устал. Сначала нужно отдохнуть."

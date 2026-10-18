@@ -1,0 +1,119 @@
+[
+  {
+    "resource": "menu_action_gear_v2",
+    "category": "Generated menu buttons - 2026-10-17",
+    "path": "app/src/main/res/drawable-nodpi/menu_action_gear_v2.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1351144,
+    "sha256": "ac5e90e9c3d7148a700ed7a5f67d4d052ea6db090abb6529557d360ffc88d87f",
+    "rgba_sha256": "6d8183bfe8f8015b7c009dc950eb06f67bcd6ea0e6e3c85a7012f3771f0d3e77",
+    "alpha_bounds": [
+      0,
+      44,
+      1240,
+      1230
+    ],
+    "source_path": "docs/design/assets/sources/menu-buttons-2026-10-17/menu_action_gear_v2.png",
+    "source_sha256": "d2ab779b05781bbadfe08f12dbd0b6e361fa7f4cee74e64fb5c4584362effa5b",
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-10-17",
+      "prompt_path": "docs/design/assets/sources/menu-buttons-2026-10-17/prompts.json",
+      "prompt_key": "gear",
+      "reference_resources": [
+        "menu_gear",
+        "menu_tasks",
+        "menu_goal"
+      ],
+      "note": "Original resources inspected for visual style; new independent generation without an image-edit target."
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "method": 6,
+      "resized": false,
+      "pillow_version": "12.3.0"
+    }
+  },
+  {
+    "resource": "menu_action_tasks_v2",
+    "category": "Generated menu buttons - 2026-10-17",
+    "path": "app/src/main/res/drawable-nodpi/menu_action_tasks_v2.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1281408,
+    "sha256": "7165fcbe796c618143c9b490eee56ecccb41a85ef50b210cde07ad927b4143c1",
+    "rgba_sha256": "28328e6658fab2936413c8fdb1353e647f63f28cde93af36724c8dcf637a62e5",
+    "alpha_bounds": [
+      0,
+      9,
+      1224,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/menu-buttons-2026-10-17/menu_action_tasks_v2.png",
+    "source_sha256": "e9e62aa09217f499cb19dc7c3529d1a78714b52355e4090aa614cd885175d78c",
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-10-17",
+      "prompt_path": "docs/design/assets/sources/menu-buttons-2026-10-17/prompts.json",
+      "prompt_key": "tasks",
+      "reference_resources": [
+        "menu_gear",
+        "menu_tasks",
+        "menu_goal"
+      ],
+      "note": "Original resources inspected for visual style; new independent generation without an image-edit target."
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "method": 6,
+      "resized": false,
+      "pillow_version": "12.3.0"
+    }
+  },
+  {
+    "resource": "menu_action_goal_v2",
+    "category": "Generated menu buttons - 2026-10-17",
+    "path": "app/src/main/res/drawable-nodpi/menu_action_goal_v2.webp",
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1159856,
+    "sha256": "baaf4989a354e93bd8684b8d4fe7feb90cbedadcdad16a2b526e674e3f4ae0aa",
+    "rgba_sha256": "01615c73bfa53ce6231a520dcd266041ea460fead0c0462e3b018db20bc1343e",
+    "alpha_bounds": [
+      0,
+      16,
+      1242,
+      1254
+    ],
+    "source_path": "docs/design/assets/sources/menu-buttons-2026-10-17/menu_action_goal_v2.png",
+    "source_sha256": "577d6fcca30644d4a13f36b55ecf39a43eae299a26fee432f03b002256c5ea85",
+    "provenance": {
+      "type": "imagegen",
+      "date": "2026-10-17",
+      "prompt_path": "docs/design/assets/sources/menu-buttons-2026-10-17/prompts.json",
+      "prompt_key": "goal",
+      "reference_resources": [
+        "menu_gear",
+        "menu_tasks",
+        "menu_goal"
+      ],
+      "note": "Original resources inspected for visual style; new independent generation without an image-edit target."
+    },
+    "conversion": {
+      "format": "WebP",
+      "lossless": true,
+      "exact": true,
+      "method": 6,
+      "resized": false,
+      "pillow_version": "12.3.0"
+    }
+  }
+]

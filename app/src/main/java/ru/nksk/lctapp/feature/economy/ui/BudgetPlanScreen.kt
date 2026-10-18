@@ -17,7 +17,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -25,7 +24,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
@@ -63,11 +61,14 @@ internal fun BudgetPlanScreen(state: BudgetUiState, onAmountChange: (BudgetArtic
     var editing by rememberSaveable { mutableStateOf<String?>(null) }
     var balancesVisible by remember { mutableStateOf(false) }
     var foodNeedVisible by remember { mutableStateOf(false) }
+    var transferVisible by remember(contextId) { mutableStateOf(false) }
     val savingsAction = onOpenSavings ?: onDeposit ?: onWithdraw
     val character = pet?.toLiveAdventurePetPresentation()
     val characterArt = character?.artworkRes
-    LaunchedEffect(contextId, balancesVisible, foodNeedVisible) {
-        if (balancesVisible && foodNeedVisible) contextId?.let { onContextPresented?.invoke(it) }
+    LaunchedEffect(contextId, balancesVisible, foodNeedVisible, transferVisible, state.savingsTransfer) {
+        if (balancesVisible && foodNeedVisible && (state.savingsTransfer == 0L || transferVisible)) {
+            contextId?.let { onContextPresented?.invoke(it) }
+        }
     }
     Box(Modifier.fillMaxSize().background(GameInk)) {
         GameArtwork(R.drawable.location_city_evening, null, Modifier.matchParentSize(), contentScale = ContentScale.Crop)
@@ -79,14 +80,8 @@ internal fun BudgetPlanScreen(state: BudgetUiState, onAmountChange: (BudgetArtic
         }) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                IconButton(onClick = onBack, enabled = !interactionsBlocked,
-                    modifier = Modifier.size(48.dp).clip(CircleShape).background(GameInk)) {
-                    Icon(painterResource(R.drawable.menu_chevron), "Назад", Modifier.size(20.dp).rotate(180f), tint = Color.White)
-                }
-                Surface(color = GameInk, shape = RoundedCornerShape(24.dp), modifier = Modifier.weight(1f, fill = false)) {
-                    Text(state.title, Modifier.padding(horizontal = 14.dp, vertical = 10.dp), color = Color.White,
-                        fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
-                }
+                GameBackButton(onClick = onBack, enabled = !interactionsBlocked)
+                GameSceneTitle(state.title, Modifier.weight(1f, fill = false))
 
             }
             Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp), horizontalAlignment = Alignment.CenterHorizontally,
@@ -169,18 +164,19 @@ internal fun BudgetPlanScreen(state: BudgetUiState, onAmountChange: (BudgetArtic
                     },
                         color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold)
                     BudgetAllocationSummary(state)
-                    val actionEnabled = state.canConfirm
-                    Button(onClick = onConfirm,
-                        enabled = actionEnabled && !interactionsBlocked,
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp), shape = RoundedCornerShape(28.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = AdventureLime, contentColor = GameInk,
-                            disabledContainerColor = if (interactionsBlocked && actionEnabled) AdventureLime else Color(0xFFE3DFEC),
-                            disabledContentColor = if (interactionsBlocked && actionEnabled) GameInk else Color(0xFF756D8A))) {
-                        Text(if (state.isEditing) "Запомнить план" else "Готово",
-                            fontFamily = Rubik, fontSize = 16.sp, textAlign = TextAlign.Center)
+                    if (state.savingsTransfer > 0) Column(Modifier.fillMaxWidth().onGloballyPositioned { coordinates ->
+                        val visible = coordinates.boundsInWindow()
+                        transferVisible = visible.width >= coordinates.size.width - 1 &&
+                            visible.height >= coordinates.size.height - 1 && visible.width > 0 && visible.height > 0
+                    }, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text("В копилку перейдёт ${paymentCoinAmount(state.savingsTransfer)}",
+                            color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        Text("После подтверждения: доступно ${state.availableAfterConfirmation}, в копилке ${state.savingsAfterConfirmation}.",
+                            color = PlanMuted, fontFamily = Nunito, fontSize = 12.sp, lineHeight = 17.sp)
                     }
-                    Text("Открой копилку, чтобы отложить выбранную сумму.",
-                        color = PlanMuted, fontFamily = Nunito, fontSize = 12.sp)
+                    val actionEnabled = state.canConfirm
+                    GameActionButton(if (state.isEditing) "Подтвердить бюджет" else "Готово", onConfirm,
+                        enabled = actionEnabled, interactionBlocked = interactionsBlocked)
                 }
                 }
             }
@@ -260,11 +256,6 @@ private fun PlanArticle(article: BudgetArticle, state: BudgetUiState, modifier: 
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                     GameArtwork(article.planArt, null, Modifier.size(46.dp), contentScale = ContentScale.Fit)
                     Text(article.title, color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
-                    if (article == BudgetArticle.SAVINGS) Text(
-                        article.subtitle,
-                        color = PlanMuted, fontFamily = Nunito, fontSize = 14.sp, lineHeight = 18.sp,
-                        textAlign = TextAlign.Center,
-                    )
                 }
             }
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -292,8 +283,8 @@ private fun PlanArticle(article: BudgetArticle, state: BudgetUiState, modifier: 
 private fun PlanStep(label: String, description: String, enabled: Boolean, interactionsBlocked: Boolean, onClick: () -> Unit) {
     TextButton(onClick, Modifier.size(48.dp).semantics { contentDescription = description }, enabled = enabled && !interactionsBlocked,
         shape = RoundedCornerShape(14.dp), contentPadding = PaddingValues(0.dp),
-        colors = ButtonDefaults.textButtonColors(containerColor = AdventureLime, contentColor = GameInk,
-            disabledContainerColor = if (interactionsBlocked && enabled) AdventureLime else Color(0xFFECE6F8),
+        colors = ButtonDefaults.textButtonColors(containerColor = GameActionButtonDefaults.CompactContainer, contentColor = GameInk,
+            disabledContainerColor = if (interactionsBlocked && enabled) GameActionButtonDefaults.CompactContainer else Color(0xFFECE6F8),
             disabledContentColor = if (interactionsBlocked && enabled) GameInk else Color(0xFF8C82A6))) {
         Text(label, fontSize = 22.sp, fontWeight = FontWeight.Bold)
     }

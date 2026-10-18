@@ -6,6 +6,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -60,6 +61,29 @@ class DayViewModelTest {
 
     @Before fun setup() { Dispatchers.setMain(dispatcher) }
     @After fun cleanup() { store.clear(); Dispatchers.resetMain() }
+
+    @Test fun jurySummaryOffersTimeMachineWithoutAPaidMemoryAndDisablingDemoHidesIt() = runTest(dispatcher) {
+        val preferences = MutableStateFlow(DemoPreferences(true))
+        val demo = object : DemoPreferencesRepository {
+            override fun observe() = preferences
+            override suspend fun read() = preferences.value
+            override suspend fun setDemoModeEnabled(enabled: Boolean) { preferences.value = DemoPreferences(enabled) }
+        }
+        val (repository, model) = fixture(finishedDay = 1, demoPreferences = demo)
+        val summary = model.uiState.first { !it.loading && it.summary != null && it.reflectionAvailable }
+        assertTrue(summary.reflectionDemo)
+        val before = repository.read()
+        model.onAction(DayAction.OpenReflection)
+        assertEquals(1, model.openReflection.first())
+        assertEquals(before, repository.read())
+        assertEquals(0, repository.writes)
+
+        demo.setDemoModeEnabled(false)
+        val ordinary = model.uiState.first { !it.loading && it.summary != null && !it.reflectionAvailable }
+        assertFalse(ordinary.reflectionDemo)
+        assertEquals(before, repository.read())
+        assertEquals(0, repository.writes)
+    }
 
     @Test fun finalChoicePreparesCharacterSetupAndLostReplyRetriesOnlyTheSameRestart() = runTest(dispatcher) {
         val (repository, model, session) = fixture(catalogTransform = { catalog ->

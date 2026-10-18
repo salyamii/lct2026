@@ -80,6 +80,31 @@
       "id": null,
       "name": "Moscow and LCT 2026 caps",
       "expected_assets": 78
+    },
+    {
+      "id": null,
+      "name": "Generated pet state icons - 2026-10-17",
+      "expected_assets": 3
+    },
+    {
+      "id": null,
+      "name": "Generated savings gauge - 2026-10-17",
+      "expected_assets": 1
+    },
+    {
+      "id": null,
+      "name": "Generated menu buttons - 2026-10-17",
+      "expected_assets": 3
+    },
+    {
+      "id": null,
+      "name": "Generated menu frames - 2026-10-17",
+      "expected_assets": 2
+    },
+    {
+      "id": null,
+      "name": "Generated pet state variants - 2026-10-17",
+      "expected_assets": 7
     }
   ],
   "scope": "Five character/equipment packs (252 layers including 12 sleeping foxes), all 14 locations, additional NPC/event art, and existing menu/font assets, onboarding artwork and the debug settings vector. Design mockup screens and hidden RAW work areas are excluded. Includes five generated chapter preview illustrations for the goal screen.",
@@ -19796,6 +19821,742 @@
       "provenance": {
         "type": "figma-node-export",
         "date": "2026-09-29"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "menu_status_energy",
+      "category": "Generated pet state icons - 2026-10-17",
+      "path": "app/src/main/res/drawable-nodpi/menu_status_energy.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1154280,
+      "sha256": "3474c70a7e007d2bbe97462099a03dcb3f7a2ea0957e5beb00e47d831e46ab68",
+      "rgba_sha256": "a24c4c904a96dfd6683733c546ebc7cf891b0623153c76b0b243928647855a7d",
+      "alpha_bounds": [
+        0,
+        23,
+        1224,
+        1220
+      ],
+      "source_path": "docs/design/assets/sources/status-icons-2026-10-17/menu_status_energy.png",
+      "source_sha256": "5081db0c081569cbc2ef18ffadb2b02a8b29261a824ec08e7638fb11ff8284f1",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-17",
+        "prompt_path": "docs/design/assets/sources/status-icons-2026-10-17/README.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false
+      }
+    },
+    {
+      "resource": "menu_status_satiety",
+      "category": "Generated pet state icons - 2026-10-17",
+      "path": "app/src/main/res/drawable-nodpi/menu_status_satiety.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1049778,
+      "sha256": "12c08db262a404a1f496cea5d0b533411ead117dc3195c33cf3b10f36ea5175f",
+      "rgba_sha256": "62bb7dd8d2e35c210daf92bde62a14f8736ec6eebe03af9e241bd45ad9d65c5c",
+      "alpha_bounds": [
+        0,
+        31,
+        1214,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/status-icons-2026-10-17/menu_status_satiety.png",
+      "source_sha256": "af4c9e9587092d9174d3296f2b1d0bd61221267e028d6470e6e19556030bae33",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-17",
+        "prompt_path": "docs/design/assets/sources/status-icons-2026-10-17/README.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false
+      }
+    },
+    {
+      "resource": "menu_status_mood",
+      "category": "Generated pet state icons - 2026-10-17",
+      "path": "app/src/main/res/drawable-nodpi/menu_status_mood.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1160828,
+      "sha256": "49b1d4d022bab7d46728fcb860bf225aa67b12b899eccdd917a6470f96d2466b",
+      "rgba_sha256": "4df577c194b3b0180eec9492865017fcc54574bdfdfa74c466eea0aec0ab25f9",
+      "alpha_bounds": [
+        0,
+        4,
+        1234,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/status-icons-2026-10-17/menu_status_mood.png",
+      "source_sha256": "4f907e6b661e097e1cf5ec3cd99a5626b7694d3723fc0cd03ab3e4c92c4d1ac0",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-17",
+        "prompt_path": "docs/design/assets/sources/status-icons-2026-10-17/README.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false
+      }
+    },
+    {
+      "resource": "menu_savings_gauge_frame",
+      "category": "Generated savings gauge - 2026-10-17",
+      "path": "app/src/main/res/drawable-nodpi/menu_savings_gauge_frame.webp",
+      "format": "webp",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 1036208,
+      "sha256": "a0d7181f118c64a16582ab92a73f3b79c7bf765fc285a424281e8c9c570e4f6f",
+      "rgba_sha256": "de88f1ab54d51e7d557b10c5ad6e4ec11c06085440317d0eef2885aa2097e0a3",
+      "alpha_bounds": [
+        0,
+        0,
+        1004,
+        1536
+      ],
+      "source_path": "docs/design/assets/sources/savings-gauge-2026-10-17/menu_savings_gauge_frame.png",
+      "source_sha256": "55bc7e75a53c15a73a292b09c1c0173449c4075dd0349799710a7b06350da003",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-17",
+        "prompt_path": "docs/design/assets/sources/savings-gauge-2026-10-17/README.md",
+        "reference_path": "docs/design/assets/sources/savings-gauge-2026-10-17/generation-reference.png",
+        "reference_sha256": "faaf00b646857ee0445ad8c9920c6f49825576774606faec52d2d09a3d3cfb9e"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "10.2.0"
+      }
+    },
+    {
+      "resource": "menu_hud_plaque_v2",
+      "category": "Generated menu frames - 2026-10-17",
+      "path": "app/src/main/res/drawable-nodpi/menu_hud_plaque_v2.webp",
+      "format": "webp",
+      "width": 2163,
+      "height": 727,
+      "bytes": 1064570,
+      "sha256": "d14133141466d4ca905e068c7ff7e8a298049f494bb1e7c2b71696d9b5726161",
+      "rgba_sha256": "ff2333303378f3262716a02b9b3a2be748002f7eddd13109673981f4d9ff839f",
+      "alpha_bounds": [
+        31,
+        15,
+        2131,
+        727
+      ],
+      "source_path": "docs/design/assets/sources/menu-frames-2026-10-17/menu_hud_plaque_v2.png",
+      "source_sha256": "241284b635d0fb102f810424b6e5e6b0d45c17f5fc74406d4590f0becad396fe",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-17",
+        "prompt_path": "docs/design/assets/sources/menu-frames-2026-10-17/prompts.json",
+        "prompt_key": "menu_hud_plaque_v2"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "menu_action_plaque_v2",
+      "category": "Generated menu frames - 2026-10-17",
+      "path": "app/src/main/res/drawable-nodpi/menu_action_plaque_v2.webp",
+      "format": "webp",
+      "width": 2172,
+      "height": 724,
+      "bytes": 1245156,
+      "sha256": "17bc2f2137bcb0cfdbd08c9c59908e07f7ade19d7b809506aed326ba3fa0de51",
+      "rgba_sha256": "903b8ffba858352f793939461f9ff5a0b97e8a76dbf0b82c732fb145b386bf25",
+      "alpha_bounds": [
+        0,
+        37,
+        2172,
+        708
+      ],
+      "source_path": "docs/design/assets/sources/menu-frames-2026-10-17/menu_action_plaque_v2.png",
+      "source_sha256": "b91c3793e8b02204872ffe4d132abdee0d459945aedef85c79e4ff4b6963d273",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-17",
+        "prompt_path": "docs/design/assets/sources/menu-frames-2026-10-17/prompts.json",
+        "prompt_key": "menu_action_plaque_v2"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "menu_action_gear_v2",
+      "category": "Generated menu buttons - 2026-10-17",
+      "path": "app/src/main/res/drawable-nodpi/menu_action_gear_v2.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1351144,
+      "sha256": "ac5e90e9c3d7148a700ed7a5f67d4d052ea6db090abb6529557d360ffc88d87f",
+      "rgba_sha256": "6d8183bfe8f8015b7c009dc950eb06f67bcd6ea0e6e3c85a7012f3771f0d3e77",
+      "alpha_bounds": [
+        0,
+        44,
+        1240,
+        1230
+      ],
+      "source_path": "docs/design/assets/sources/menu-buttons-2026-10-17/menu_action_gear_v2.png",
+      "source_sha256": "d2ab779b05781bbadfe08f12dbd0b6e361fa7f4cee74e64fb5c4584362effa5b",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-17",
+        "prompt_path": "docs/design/assets/sources/menu-buttons-2026-10-17/prompts.json",
+        "prompt_key": "gear",
+        "reference_resources": [
+          "menu_gear",
+          "menu_tasks",
+          "menu_goal"
+        ],
+        "note": "Original resources inspected for visual style; new independent generation without an image-edit target."
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "menu_action_tasks_v2",
+      "category": "Generated menu buttons - 2026-10-17",
+      "path": "app/src/main/res/drawable-nodpi/menu_action_tasks_v2.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1281408,
+      "sha256": "7165fcbe796c618143c9b490eee56ecccb41a85ef50b210cde07ad927b4143c1",
+      "rgba_sha256": "28328e6658fab2936413c8fdb1353e647f63f28cde93af36724c8dcf637a62e5",
+      "alpha_bounds": [
+        0,
+        9,
+        1224,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/menu-buttons-2026-10-17/menu_action_tasks_v2.png",
+      "source_sha256": "e9e62aa09217f499cb19dc7c3529d1a78714b52355e4090aa614cd885175d78c",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-17",
+        "prompt_path": "docs/design/assets/sources/menu-buttons-2026-10-17/prompts.json",
+        "prompt_key": "tasks",
+        "reference_resources": [
+          "menu_gear",
+          "menu_tasks",
+          "menu_goal"
+        ],
+        "note": "Original resources inspected for visual style; new independent generation without an image-edit target."
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "menu_action_goal_v2",
+      "category": "Generated menu buttons - 2026-10-17",
+      "path": "app/src/main/res/drawable-nodpi/menu_action_goal_v2.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1159856,
+      "sha256": "baaf4989a354e93bd8684b8d4fe7feb90cbedadcdad16a2b526e674e3f4ae0aa",
+      "rgba_sha256": "01615c73bfa53ce6231a520dcd266041ea460fead0c0462e3b018db20bc1343e",
+      "alpha_bounds": [
+        0,
+        16,
+        1242,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/menu-buttons-2026-10-17/menu_action_goal_v2.png",
+      "source_sha256": "577d6fcca30644d4a13f36b55ecf39a43eae299a26fee432f03b002256c5ea85",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-17",
+        "prompt_path": "docs/design/assets/sources/menu-buttons-2026-10-17/prompts.json",
+        "prompt_key": "goal",
+        "reference_resources": [
+          "menu_gear",
+          "menu_tasks",
+          "menu_goal"
+        ],
+        "note": "Original resources inspected for visual style; new independent generation without an image-edit target."
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "menu_satiety_fed_v2",
+      "category": "Generated pet state variants - 2026-10-17",
+      "path": "app/src/main/res/drawable-nodpi/menu_satiety_fed_v2.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1059564,
+      "sha256": "ea1c88e56642b7b2161775ac5cdb384f2c6bc848d727f9977ca5faee94060af8",
+      "rgba_sha256": "0512f325bbafc5919fe23ed991a3aa64fd3d074b573710f07e30a0ed922ec938",
+      "alpha_bounds": [
+        0,
+        18,
+        1230,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/pet-states-2026-10-17/menu_satiety_fed_v2.png",
+      "source_sha256": "aa443498293a1f875c7c348cf84adb0004e177e3f8b5ee2bf949ec2d660d6712",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-17",
+        "prompt_path": "docs/design/assets/sources/pet-states-2026-10-17/README.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "menu_mood_calm_v2",
+      "category": "Generated pet state variants - 2026-10-17",
+      "path": "app/src/main/res/drawable-nodpi/menu_mood_calm_v2.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1373344,
+      "sha256": "f27f3c03e3aef922627335af604c179498ffe36f3a568308af7974524629e26f",
+      "rgba_sha256": "972fdd9805c6d4f4f4a06b93b37e3e77dc13e404e5de3ee8f12806390224388b",
+      "alpha_bounds": [
+        0,
+        4,
+        1251,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/pet-states-2026-10-17/menu_mood_calm_v2.png",
+      "source_sha256": "2d56bd391497adfec4fb488278ce99f8a04ce1bfbcf588eb0c603480cf182cee",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-17",
+        "prompt_path": "docs/design/assets/sources/pet-states-2026-10-17/README.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "menu_satiety_hungry_v2",
+      "category": "Generated pet state variants - 2026-10-17",
+      "path": "app/src/main/res/drawable-nodpi/menu_satiety_hungry_v2.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 687066,
+      "sha256": "ecfbc203af8f30840cc3ca8292bb3a8c27089041c48db6e969d06a0451025e68",
+      "rgba_sha256": "eb337e6e59106762a68964f4813c06eabda61b0db9f5721018e937e5224b0cb6",
+      "alpha_bounds": [
+        0,
+        17,
+        1208,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/pet-states-2026-10-17/menu_satiety_hungry_v2.png",
+      "source_sha256": "478be57dc6a3e9b3cf7c64461fda8338eedf2b01cd1051158be83d3b9a996aa1",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-17",
+        "prompt_path": "docs/design/assets/sources/pet-states-2026-10-17/README.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "menu_mood_happy_v2",
+      "category": "Generated pet state variants - 2026-10-17",
+      "path": "app/src/main/res/drawable-nodpi/menu_mood_happy_v2.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1344982,
+      "sha256": "4a70935490e2b3fa90f35a670d952fb1d99783ad5e3e7dc0b237dbf950600b08",
+      "rgba_sha256": "8d79c24a3b7a3246502f18e8d2f094fea1a02f48e46a6b434139070f258d5b7f",
+      "alpha_bounds": [
+        0,
+        23,
+        1221,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/pet-states-2026-10-17/menu_mood_happy_v2.png",
+      "source_sha256": "91737f0f9dbdcd9175cd7b051faf799494047e3e5442ef4618fc5166d64e24b4",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-17",
+        "prompt_path": "docs/design/assets/sources/pet-states-2026-10-17/README.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "menu_mood_upset_v2",
+      "category": "Generated pet state variants - 2026-10-17",
+      "path": "app/src/main/res/drawable-nodpi/menu_mood_upset_v2.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1307462,
+      "sha256": "8da46aece01b4fc6c416df4f81d1b7e4c408e3f1758c6b10780db73605bfe508",
+      "rgba_sha256": "9c90e7fcc05317f09a22cc0d6e70dffa39876ce8d503915934648f0ab76af0b5",
+      "alpha_bounds": [
+        0,
+        37,
+        1253,
+        1235
+      ],
+      "source_path": "docs/design/assets/sources/pet-states-2026-10-17/menu_mood_upset_v2.png",
+      "source_sha256": "6101da56bf49d0d0a6971545cd261f9ac30883c019d9ecbb0bedeb8b157fa96e",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-17",
+        "prompt_path": "docs/design/assets/sources/pet-states-2026-10-17/README.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "menu_mood_worried_v2",
+      "category": "Generated pet state variants - 2026-10-17",
+      "path": "app/src/main/res/drawable-nodpi/menu_mood_worried_v2.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1332366,
+      "sha256": "957490b35583133f0a3d9295d51bef89f94fac53c268b62874cde37c6f405181",
+      "rgba_sha256": "9a0b623a14dee0d779ad50352c0ce5687ba1b8d2319d501af41dac1d2cc68000",
+      "alpha_bounds": [
+        0,
+        21,
+        1225,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/pet-states-2026-10-17/menu_mood_worried_v2.png",
+      "source_sha256": "2ccd5292f8da0fa44552abd0fdf140b3293eea8535dbaa526beadc16843a1a0a",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-17",
+        "prompt_path": "docs/design/assets/sources/pet-states-2026-10-17/README.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "menu_mood_tired_v2",
+      "category": "Generated pet state variants - 2026-10-17",
+      "path": "app/src/main/res/drawable-nodpi/menu_mood_tired_v2.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1277584,
+      "sha256": "4d1021201cf80ca633704d3b9ffcd041eb9df7a3bdadf4047e67db7b6ce5c9e1",
+      "rgba_sha256": "2817fb267473d14843993fbc8b00dd45d1bb56b102a7b3c5f99ef6a0e58e445d",
+      "alpha_bounds": [
+        0,
+        17,
+        1234,
+        1254
+      ],
+      "source_path": "docs/design/assets/sources/pet-states-2026-10-17/menu_mood_tired_v2.png",
+      "source_sha256": "23363c2e5e1c57558b58f2cf99c35589eb6a73648980788939d27b626cc0fad3",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-17",
+        "prompt_path": "docs/design/assets/sources/pet-states-2026-10-17/README.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "menu_settings_v3",
+      "category": "Generated menu HUD objects - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/menu_settings_v3.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1225318,
+      "sha256": "a75345776c62519cf0cfe3e8ac532b3e4d971a2c89134596d5e28c16d15ce1b9",
+      "rgba_sha256": "5a4dae4af80a45107b553cd1c4d7365196f4a2d712d9396592852584413fe32e",
+      "alpha_bounds": [
+        28,
+        19,
+        1238,
+        1230
+      ],
+      "source_path": "docs/design/assets/sources/menu-hud-2026-10-18/menu_settings_v3.png",
+      "source_sha256": "9bfafbf50d881cbb7d4ed43367d9553df8b921e3d1aeaadca41790f11731b414",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-18",
+        "prompt_path": "docs/design/assets/sources/menu-hud-2026-10-18/README.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "menu_wallet_panel_v3",
+      "category": "Generated menu HUD objects - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/menu_wallet_panel_v3.webp",
+      "format": "webp",
+      "width": 2172,
+      "height": 724,
+      "bytes": 1463592,
+      "sha256": "b3443e7534194be7d84f6f579650073b513f91f2879a5e8320f7dd4120f44f6c",
+      "rgba_sha256": "53637b6d7e970f230dd1b80b78f478bc7b99e392d7a78f560ee5452aed8fa326",
+      "alpha_bounds": [
+        29,
+        0,
+        2143,
+        698
+      ],
+      "source_path": "docs/design/assets/sources/menu-hud-2026-10-18/menu_wallet_panel_v3.png",
+      "source_sha256": "dd9963889636ed0024d46c00f3cb99e68a8d72c5bc843396ea90472db4f9c91b",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-18",
+        "prompt_path": "docs/design/assets/sources/menu-hud-2026-10-18/README.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "menu_name_plaque_v3",
+      "category": "Generated menu HUD objects - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/menu_name_plaque_v3.webp",
+      "format": "webp",
+      "width": 2172,
+      "height": 724,
+      "bytes": 1204666,
+      "sha256": "f651d8de1f502fce0573a5dfd77f711af23a5b81cbcbc0765bb734672aa2477e",
+      "rgba_sha256": "68e57166e8719a765c113f6faa9ef8d54bb8f3fe24ef0c6ec78409a24a9414c3",
+      "alpha_bounds": [
+        0,
+        23,
+        2172,
+        724
+      ],
+      "source_path": "docs/design/assets/sources/menu-hud-2026-10-18/menu_name_plaque_v3.png",
+      "source_sha256": "f2f89266a85973f4661335f3d2a18ae85cceb857fa581e30f3f8e61172d36442",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-18",
+        "prompt_path": "docs/design/assets/sources/menu-hud-2026-10-18/README.md"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "menu_energy_frame_v4",
+      "category": "Generated energy frame and narrow checklist - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/menu_energy_frame_v4.webp",
+      "format": "webp",
+      "width": 2172,
+      "height": 724,
+      "bytes": 1152588,
+      "sha256": "1c1e01b13b9aa0355c979b09da6aa1db14decbe35fc4a86f9c625e198152cd02",
+      "rgba_sha256": "461134b4b35c0baf067fdab99f43c6124c35a1e573599a8fa9a4b25016e80628",
+      "alpha_bounds": [
+        15,
+        27,
+        2158,
+        700
+      ],
+      "source_path": "docs/design/assets/sources/energy-scroll-2026-10-18/menu_energy_frame_v4.png",
+      "source_sha256": "e5c2d4ef4487493c933f172cbb29ecbf272da995b67c9e20c30f67f8dce0c8ad",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-18",
+        "prompt_path": "docs/design/assets/sources/energy-scroll-2026-10-18/prompts.json",
+        "prompt_key": "menu_energy_frame_v4",
+        "generated_source_filename": "exec-77644165-ced7-4b38-8f59-104d5eda80e7.png"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "menu_action_tasks_v3",
+      "category": "Generated energy frame and narrow checklist - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/menu_action_tasks_v3.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 906642,
+      "sha256": "a3f6c12c95899c8955da89b4e3ff0bb13f7f91e6ec3f50a5647349fc77b560ee",
+      "rgba_sha256": "d84012368bcd4bf3f55d084da3256057a349fc216e6819cb398e04d72a0c2182",
+      "alpha_bounds": [
+        27,
+        17,
+        1232,
+        1228
+      ],
+      "source_path": "docs/design/assets/sources/energy-scroll-2026-10-18/menu_action_tasks_v3.png",
+      "source_sha256": "0d90bad70d5534124e1fb3b7d9eafd6dd57f9ce407f1f780b50a34930fe6c4d4",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-18",
+        "prompt_path": "docs/design/assets/sources/energy-scroll-2026-10-18/prompts.json",
+        "prompt_key": "menu_action_tasks_v3",
+        "generated_source_filename": "exec-8010cba9-43bd-460f-a57f-7a3eaebd4144.png",
+        "reference_source_path": "docs/design/assets/sources/menu-buttons-2026-10-17/menu_action_tasks_v2.png",
+        "reference_source_sha256": "e9e62aa09217f499cb19dc7c3529d1a78714b52355e4090aa614cd885175d78c"
+      },
+      "conversion": {
+        "format": "WebP",
+        "lossless": true,
+        "exact": true,
+        "method": 6,
+        "resized": false,
+        "pillow_version": "12.3.0"
+      }
+    },
+    {
+      "resource": "menu_action_tasks_v4",
+      "category": "Generated balanced checklist - 2026-10-18",
+      "path": "app/src/main/res/drawable-nodpi/menu_action_tasks_v4.webp",
+      "format": "webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 930504,
+      "sha256": "cec9ce0be017c4e8835178e5678a1bc52989f0f35b46a8c37eb8e41745b0192e",
+      "rgba_sha256": "7d9fa547f08397b1e6ec8fc06e5315ff1b293a4ace59e15908388958a1285c71",
+      "alpha_bounds": [
+        0,
+        33,
+        1224,
+        1228
+      ],
+      "source_path": "docs/design/assets/sources/tasks-balanced-2026-10-18/menu_action_tasks_v4.png",
+      "source_sha256": "a01807c8d21095ac08b60c9a1e5e7a5ca7334aa88a3a2cd8b69de2928ad1072a",
+      "provenance": {
+        "type": "imagegen",
+        "date": "2026-10-18",
+        "prompt_path": "docs/design/assets/sources/tasks-balanced-2026-10-18/prompts.json",
+        "prompt_key": "menu_action_tasks_v4",
+        "generated_source_filename": "exec-5d93e6a5-1f27-482d-b045-5a28d2b0ee50.png",
+        "reference_source_path": "docs/design/assets/sources/energy-scroll-2026-10-18/menu_action_tasks_v3.png",
+        "reference_source_sha256": "0d90bad70d5534124e1fb3b7d9eafd6dd57f9ce407f1f780b50a34930fe6c4d4"
       },
       "conversion": {
         "format": "WebP",

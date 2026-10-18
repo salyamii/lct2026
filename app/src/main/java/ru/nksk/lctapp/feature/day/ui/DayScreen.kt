@@ -60,7 +60,7 @@ private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
             Column(Modifier.safeDrawingPadding().padding(24.dp), verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("Не удалось загрузить игру. Сохранение не изменено.")
-                Button({ onAction(DayAction.Retry) }) { Text("Повторить") }
+                GameActionButton("Повторить", { onAction(DayAction.Retry) })
                 TextButton(onBack) { Text("Назад") }
             }
         }
@@ -73,43 +73,22 @@ private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
     } else if (state.layout == EventLayout.PURCHASE) {
         PurchaseCard(state, onAction, onBack)
     } else AdventureScreen(
-        title = state.category, onBack = onBack, backgroundRes = state.eventBackgroundRes,
+        title = "", onBack = onBack, backgroundRes = state.eventBackgroundRes,
         blurBackground = state.focusesItem,
         artworkSceneKey = state.audioOccurrenceId ?: state.title,
+        indicators = { state.indicators?.let { PetIndicators(it) } },
         sceneAspectRatio = 1.12f, pinFooter = false,
+        contentSpacing = 8.dp,
+        fitContent = true,
         scene = { DayEventScene(state, Modifier.fillMaxSize()) },
     ) {
         GameTitle(state.title)
         if (state.body.isNotBlank()) GameBody(state.body)
         if (state.impact.isNotBlank()) GameBody(state.impact)
-        if (state.effort.isNotBlank()) GameBody(state.effort)
         state.deedDeadline?.let { GameBody(it) }
         state.message?.let { GameBody(it) }
         state.actionNotice?.let { GameBody(it) }
-        if (state.practiceRequired) GameButton("К практике", !state.busy) { onAction(DayAction.OpenLearning) }
-        if (state.options.any { it.needsFood }) {
-            GameButton("Покормить", !state.busy) { onAction(DayAction.ShowMeals) }
-        }
-        state.options.filterNot { it.needsFood }.forEach { option ->
-            option.spending?.let { GameBody(it) }
-            GameButton(if (option.needsFood) "Покормить" else option.label, !state.busy && option.enabled) {
-                onAction(if (option.needsFood) DayAction.ShowMeals else DayAction.Choose(option.id))
-            }
-        }
-        state.primary?.let { text ->
-            state.primarySpending?.let { GameBody(it) }
-            GameButton(text, !state.busy) { onAction(if (state.primaryNeedsFood) DayAction.ShowMeals else DayAction.Primary) }
-        }
-        state.later?.let { text ->
-            OutlinedButton(
-                { onAction(DayAction.Later) }, Modifier.fillMaxWidth().heightIn(min = 50.dp), enabled = !state.busy,
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = GameInk,
-                    disabledContainerColor = GameDisabledButtonContainer,
-                    disabledContentColor = GameDisabledButtonContent,
-                ),
-            ) { Text(text) }
-        }
+        DayActions(state, onAction)
     }
     if (state.showMeals) MealSelectionDialog(state.meals, state.busy,
         onChoose = { onAction(DayAction.Feed(it)) }, onDismiss = { onAction(DayAction.CloseMeals) },
@@ -119,11 +98,14 @@ private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
 @Composable
 private fun PurchaseCard(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit) {
     AdventureScreen(
-        title = state.locationTitle, onBack = onBack,
+        title = "", onBack = onBack,
         backgroundRes = state.eventBackgroundRes,
         blurBackground = state.focusesItem,
         artworkSceneKey = state.audioOccurrenceId ?: state.title,
+        indicators = { state.indicators?.let { PetIndicators(it) } },
         sceneAspectRatio = 1.12f, pinFooter = false,
+        contentSpacing = 8.dp,
+        fitContent = true,
         scene = {
             Box(
                 modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 32.dp, vertical = 12.dp)
@@ -140,24 +122,49 @@ private fun PurchaseCard(state: DayUiState, onAction: (DayAction) -> Unit, onBac
         AdventureHeading(state.title)
         AdventureBody(state.body)
         if (state.impact.isNotBlank()) AdventureBody(state.impact)
-        if (state.effort.isNotBlank()) AdventureBody(state.effort)
         state.message?.let { AdventureBody(it) }
         state.actionNotice?.let { AdventureBody(it) }
+        DayActions(state, onAction)
+    }
+}
+
+@Composable
+private fun StoryIntroduction(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit) {
+    AdventureScreen(
+        title = "", onBack = onBack,
+        backgroundRes = state.eventBackgroundRes,
+        artworkSceneKey = state.audioOccurrenceId ?: state.title,
+        indicators = { state.indicators?.let { PetIndicators(it) } },
+        sceneAspectRatio = 1.5f, scene = {}, pinFooter = false,
+        contentSpacing = 8.dp,
+        fitContent = true,
+        footer = { DayActions(state, onAction) },
+    ) {
+        AdventureHeading(state.title)
+        AdventureBody(state.body)
+        state.message?.let { AdventureBody(it) }
+        state.actionNotice?.let { AdventureBody(it) }
+    }
+}
+
+@Composable
+private fun DayActions(state: DayUiState, onAction: (DayAction) -> Unit) {
+    if (!state.practiceRequired && state.options.isEmpty() && state.primary == null && state.later == null) return
+    Column(verticalArrangement = Arrangement.spacedBy(GameActionButtonDefaults.Spacing)) {
         if (state.practiceRequired) {
             AdventurePrimaryButton("К практике", { onAction(DayAction.OpenLearning) }, enabled = !state.busy)
         }
         if (state.options.any { it.needsFood }) {
             AdventurePrimaryButton("Покормить", { onAction(DayAction.ShowMeals) }, enabled = !state.busy)
         }
-        state.options.filterNot { it.needsFood }.forEach { option ->
-            option.spending?.let { AdventureBody(it) }
-            AdventurePrimaryButton(option.label, { onAction(DayAction.Choose(option.id)) },
-                enabled = option.enabled && !state.busy)
-        }
+        DayChoices(state.options, state.busy, onAction)
         state.primary?.let { label ->
-            state.primarySpending?.let { AdventureBody(it) }
-            AdventurePrimaryButton(label, { onAction(if (state.primaryNeedsFood) DayAction.ShowMeals else DayAction.Primary) },
-                enabled = !state.busy)
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                state.primarySpending?.let { AdventureBody(it) }
+                AdventurePrimaryButton(label,
+                    { onAction(if (state.primaryNeedsFood) DayAction.ShowMeals else DayAction.Primary) },
+                    enabled = !state.busy)
+            }
         }
         state.later?.let { label ->
             AdventureQuietButton(label, { onAction(DayAction.Later) }, enabled = !state.busy)
@@ -166,31 +173,31 @@ private fun PurchaseCard(state: DayUiState, onAction: (DayAction) -> Unit, onBac
 }
 
 @Composable
-private fun StoryIntroduction(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit) {
-    AdventureScreen(
-        title = state.locationTitle, onBack = onBack,
-        backgroundRes = state.eventBackgroundRes,
-        artworkSceneKey = state.audioOccurrenceId ?: state.title,
-        sceneAspectRatio = 1.5f, scene = {}, pinFooter = false,
-        footer = {
-            if (state.practiceRequired) AdventurePrimaryButton("К практике", { onAction(DayAction.OpenLearning) }, enabled = !state.busy)
-            if (state.options.any { it.needsFood }) {
-                AdventurePrimaryButton("Покормить", { onAction(DayAction.ShowMeals) }, enabled = !state.busy)
-            }
-            state.options.filterNot { it.needsFood }.forEach { option ->
-                AdventurePrimaryButton(option.label, { onAction(DayAction.Choose(option.id)) }, enabled = option.enabled && !state.busy)
-            }
-            state.primary?.let { label ->
-                AdventurePrimaryButton(label, { onAction(if (state.primaryNeedsFood) DayAction.ShowMeals else DayAction.Primary) }, enabled = !state.busy)
-            }
-            state.later?.let { label ->
-                AdventureQuietButton(label, { onAction(DayAction.Later) }, enabled = !state.busy)
-            }
-        },
-    ) {
-        AdventureHeading(state.title)
-        AdventureBody(state.body)
-        state.message?.let { AdventureBody(it) }
-        state.actionNotice?.let { AdventureBody(it) }
+private fun DayChoices(options: List<DayOption>, busy: Boolean, onAction: (DayAction) -> Unit) {
+    val presentation = dayChoicesPresentation(options)
+    if (presentation.options.isEmpty()) return
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        if (presentation.commonEffects.isNotEmpty()) {
+            Text("После выбора", color = GameInk.copy(alpha = .72f),
+                style = MaterialTheme.typography.labelMedium)
+            PetChoiceEffects(presentation.commonEffects)
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(GameActionButtonDefaults.Spacing)) {
+            presentation.options.forEach { option -> DayChoice(option, busy, onAction) }
+        }
+    }
+}
+
+@Composable
+private fun DayChoice(option: DayOption, busy: Boolean, onAction: (DayAction) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        option.spending?.let { AdventureBody(it) }
+        if (option.petEffects.isNotEmpty()) {
+            Text("После выполнения", color = GameInk.copy(alpha = .72f),
+                style = MaterialTheme.typography.labelMedium)
+            PetChoiceEffects(option.petEffects)
+        }
+        AdventurePrimaryButton(option.label, { onAction(DayAction.Choose(option.id)) },
+            enabled = option.enabled && !busy)
     }
 }

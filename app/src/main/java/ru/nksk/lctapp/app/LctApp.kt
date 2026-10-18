@@ -2,6 +2,9 @@ package ru.nksk.lctapp.app
 
 import ru.nksk.lctapp.core.ui.components.GameLoadingIndicator
 import ru.nksk.lctapp.core.ui.components.GameLoadingScreen
+import ru.nksk.lctapp.core.ui.components.GameActionButton
+import ru.nksk.lctapp.core.ui.components.GameBackButton
+import ru.nksk.lctapp.core.ui.components.GameSceneTitle
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,6 +35,7 @@ import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
 import ru.nksk.lctapp.feature.onboarding.navigation.OnboardingEntry
 import ru.nksk.lctapp.feature.onboarding.ui.OnboardingArtwork
+import ru.nksk.lctapp.feature.onboarding.ui.ProvideOnboardingControls
 import ru.nksk.lctapp.feature.onboarding.ui.AdventureGoalBriefingScreen
 import ru.nksk.lctapp.feature.onboarding.ui.AdventureGoalSelectionScreen
 import ru.nksk.lctapp.feature.onboarding.ui.BudgetIntroductionScreen
@@ -92,124 +96,134 @@ private fun LctAppContent(debugSettingsButton: (@Composable () -> Unit)?, startu
             LaunchedEffect(media, audio) {
                 media.actionCues.collect { audio?.playAction(it.id, it.cues) }
             }
-            when (val current = state) {
-                AppStartupState.Ready -> {
-                    val sync: BackendSyncViewModel = hiltViewModel()
-                    val lifecycleOwner = LocalLifecycleOwner.current
-                    LaunchedEffect(sync, lifecycleOwner) {
-                        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                            sync.whileResumed()
+            ProvideOnboardingControls(
+                primary = { text, enabled, onClick, modifier ->
+                    GameActionButton(text, onClick, modifier = modifier, enabled = enabled)
+                },
+                back = { enabled, onClick, modifier, description ->
+                    GameBackButton(onClick, modifier = modifier, enabled = enabled, contentDescription = description)
+                },
+                title = { text, modifier -> GameSceneTitle(text, modifier) },
+            ) {
+                when (val current = state) {
+                    AppStartupState.Ready -> {
+                        val sync: BackendSyncViewModel = hiltViewModel()
+                        val lifecycleOwner = LocalLifecycleOwner.current
+                        LaunchedEffect(sync, lifecycleOwner) {
+                            lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                                sync.whileResumed()
+                            }
+                        }
+                        val reactions: PetReactionViewModel = hiltViewModel()
+                        val reaction by reactions.uiState.collectAsStateWithLifecycle()
+                        CompositionLocalProvider(LocalLivePetReaction provides reaction) {
+                            key(startup.navigationRunId) {
+                                LctNavHost(debugSettingsButton = debugSettingsButton,
+                                    onScreenShown = diagnostics::screenShown,
+                                    onNewCampaignSetup = startup::showNewCampaignSetup)
+                            }
                         }
                     }
-                    val reactions: PetReactionViewModel = hiltViewModel()
-                    val reaction by reactions.uiState.collectAsStateWithLifecycle()
-                    CompositionLocalProvider(LocalLivePetReaction provides reaction) {
-                        key(startup.navigationRunId) {
-                            LctNavHost(debugSettingsButton = debugSettingsButton,
-                                onScreenShown = diagnostics::screenShown,
-                                onNewCampaignSetup = startup::showNewCampaignSetup)
-                        }
-                    }
-                }
-                is AppStartupState.Choose -> OnboardingEntry(
-                    loadingIndicator = { GameLoadingIndicator(it) },
-                    artwork = OnboardingArtwork(
-                        background = R.drawable.onboarding_castle,
-                        fox = R.drawable.onboarding_ryzhik,
-                        owl = R.drawable.npc_luna_body,
-                        axolotl = R.drawable.onboarding_tiko_unavailable,
-                        groundShadow = R.drawable.menu_ground_shadow,
-                        titleFont = Rubik,
-                        bodyFont = Nunito,
-                    ),
-                    saving = current.saving,
-                    saveFailed = current.failed,
-                    onStartAdventure = startup::startAdventure,
-                )
-                is AppStartupState.IntroVideo -> IntroVideoEntry(
-                    state = current,
-                    media = mediaState,
-                    onPositionChanged = startup::updateIntroVideoPosition,
-                    onFinished = startup::finishIntroVideo,
-                    onPlaybackError = startup::introVideoFailed,
-                    onSoundChanged = media::setSoundEnabled,
-                    onSoundRetry = media::retry,
-                )
-                is AppStartupState.Customize -> {
-                    BackHandler { startup.backToCharacters() }
-                    CustomizationScreen(
-                        state = CustomizationUiState(current.draft.name,
-                            CharacterTemperament.valueOf(current.draft.temperament.name),
-                            CharacterFur.valueOf(current.draft.fur.name)),
-                        artwork = customizationArtwork(),
-                        onNameChange = startup::editName,
-                        onTemperamentChange = { startup.editTemperament(PetTemperament.valueOf(it.name)) },
-                        onFurChange = { startup.editFur(PetFur.valueOf(it.name)) },
-                        onBack = startup::backToCharacters,
-                        onContinue = startup::finishCustomization,
-                        saving = current.saving,
-                        saveFailed = current.failed,
-                    )
-                }
-                is AppStartupState.Accessories -> {
-                    BackHandler { startup.backToCustomization() }
-                    val art = customizationArtwork()
-                    AccessoryCustomizationScreen(
-                        state = AccessoryCustomizationUiState(
-                            name = current.draft.profile.name,
-                            fur = CharacterFur.valueOf(current.draft.profile.fur.name),
-                            accessory = OnboardingAccessory.entries.first { it.id == current.draft.accessoryId },
+                    is AppStartupState.Choose -> OnboardingEntry(
+                        loadingIndicator = { GameLoadingIndicator(it) },
+                        artwork = OnboardingArtwork(
+                            background = R.drawable.onboarding_castle,
+                            fox = R.drawable.onboarding_ryzhik,
+                            owl = R.drawable.npc_luna_body,
+                            axolotl = R.drawable.onboarding_tiko_unavailable,
+                            groundShadow = R.drawable.menu_ground_shadow,
+                            titleFont = Rubik,
+                            bodyFont = Nunito,
                         ),
-                        artwork = art,
-                        accessories = accessoryArtwork(art),
-                        onSelect = { startup.selectAccessory(it.id) },
-                        onBack = startup::backToCustomization,
-                        onApply = startup::confirmAccessory,
                         saving = current.saving,
                         saveFailed = current.failed,
+                        onStartAdventure = startup::startAdventure,
                     )
-                }
-                is AppStartupState.GoalBriefing -> {
-                    BackHandler { startup.backToAccessories() }
-                    AdventureGoalBriefingScreen(
-                        artwork = customizationArtwork().copy(background = R.drawable.location_hill_day),
-                        chapterPreviewRes = R.drawable.goal_preview_stargazing,
-                        onBack = startup::backToAccessories,
-                        onContinue = startup::continueToGoals,
-                        saving = current.saving,
-                        saveFailed = current.failed,
+                    is AppStartupState.IntroVideo -> IntroVideoEntry(
+                        state = current,
+                        media = mediaState,
+                        onPositionChanged = startup::updateIntroVideoPosition,
+                        onFinished = startup::finishIntroVideo,
+                        onPlaybackError = startup::introVideoFailed,
+                        onSoundChanged = media::setSoundEnabled,
+                        onSoundRetry = media::retry,
                     )
-                }
-                is AppStartupState.GoalSelection -> {
-                    BackHandler { startup.backToGoalBriefing() }
-                    AdventureGoalSelectionScreen(
-                        artwork = customizationArtwork().copy(background = R.drawable.location_hill_day),
-                        goals = onboardingGoalOptions().filter { it.id in startup.savingItemIds },
-                        selectedGoalId = current.draft.savingItemId,
-                        onSelect = startup::selectGoal,
-                        onBack = startup::backToGoalBriefing,
-                        onConfirm = startup::confirmGoal,
-                        saving = current.saving,
-                        saveFailed = current.failed,
-                    )
-                }
-                is AppStartupState.Introduction -> {
-                    BackHandler { startup.backToGoals() }
-                    BudgetIntroductionScreen(
-                        artwork = customizationArtwork().copy(background = R.drawable.location_hill_day),
-                        categoryArtwork = { category, modifier -> OnboardingBudgetArtwork(category, modifier) },
-                        onBack = startup::backToGoals,
-                        onContinue = startup::finishOnboarding,
-                        saving = current.saving,
-                        saveFailed = current.failed,
-                    )
-                }
-                AppStartupState.Loading -> GameLoadingScreen(isPlaying = startupAnimationPlaying)
-                else -> Box(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding(),
-                    contentAlignment = Alignment.Center) {
-                    Column(Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Не удалось прочитать сохранение", color = androidx.compose.ui.graphics.Color.White)
-                        Button(onClick = startup::retry) { Text("Повторить") }
+                    is AppStartupState.Customize -> {
+                        BackHandler { startup.backToCharacters() }
+                        CustomizationScreen(
+                            state = CustomizationUiState(current.draft.name,
+                                CharacterTemperament.valueOf(current.draft.temperament.name),
+                                CharacterFur.valueOf(current.draft.fur.name)),
+                            artwork = customizationArtwork(),
+                            onNameChange = startup::editName,
+                            onTemperamentChange = { startup.editTemperament(PetTemperament.valueOf(it.name)) },
+                            onFurChange = { startup.editFur(PetFur.valueOf(it.name)) },
+                            onBack = startup::backToCharacters,
+                            onContinue = startup::finishCustomization,
+                            saving = current.saving,
+                            saveFailed = current.failed,
+                        )
+                    }
+                    is AppStartupState.Accessories -> {
+                        BackHandler { startup.backToCustomization() }
+                        val art = customizationArtwork()
+                        AccessoryCustomizationScreen(
+                            state = AccessoryCustomizationUiState(
+                                name = current.draft.profile.name,
+                                fur = CharacterFur.valueOf(current.draft.profile.fur.name),
+                                accessory = OnboardingAccessory.entries.first { it.id == current.draft.accessoryId },
+                            ),
+                            artwork = art,
+                            accessories = accessoryArtwork(art),
+                            onSelect = { startup.selectAccessory(it.id) },
+                            onBack = startup::backToCustomization,
+                            onApply = startup::confirmAccessory,
+                            saving = current.saving,
+                            saveFailed = current.failed,
+                        )
+                    }
+                    is AppStartupState.GoalBriefing -> {
+                        BackHandler { startup.backToAccessories() }
+                        AdventureGoalBriefingScreen(
+                            artwork = customizationArtwork().copy(background = R.drawable.location_hill_day),
+                            chapterPreviewRes = R.drawable.goal_preview_stargazing,
+                            onBack = startup::backToAccessories,
+                            onContinue = startup::continueToGoals,
+                            saving = current.saving,
+                            saveFailed = current.failed,
+                        )
+                    }
+                    is AppStartupState.GoalSelection -> {
+                        BackHandler { startup.backToGoalBriefing() }
+                        AdventureGoalSelectionScreen(
+                            artwork = customizationArtwork().copy(background = R.drawable.location_hill_day),
+                            goals = onboardingGoalOptions().filter { it.id in startup.savingItemIds },
+                            selectedGoalId = current.draft.savingItemId,
+                            onSelect = startup::selectGoal,
+                            onBack = startup::backToGoalBriefing,
+                            onConfirm = startup::confirmGoal,
+                            saving = current.saving,
+                            saveFailed = current.failed,
+                        )
+                    }
+                    is AppStartupState.Introduction -> {
+                        BackHandler { startup.backToGoals() }
+                        BudgetIntroductionScreen(
+                            artwork = customizationArtwork().copy(background = R.drawable.location_hill_day),
+                            categoryArtwork = { category, modifier -> OnboardingBudgetArtwork(category, modifier) },
+                            onBack = startup::backToGoals,
+                            onContinue = startup::finishOnboarding,
+                            saving = current.saving,
+                            saveFailed = current.failed,
+                        )
+                    }
+                    AppStartupState.Loading -> GameLoadingScreen(isPlaying = startupAnimationPlaying)
+                    else -> Box(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding(),
+                        contentAlignment = Alignment.Center) {
+                        Column(Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("Не удалось прочитать сохранение", color = androidx.compose.ui.graphics.Color.White)
+                            Button(onClick = startup::retry) { Text("Повторить") }
+                        }
                     }
                 }
             }

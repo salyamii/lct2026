@@ -18,6 +18,7 @@ import ru.nksk.lctapp.app.navigation.AppStartupState
 import ru.nksk.lctapp.app.presentation.MediaPlaybackUiState
 import ru.nksk.lctapp.core.ui.components.GameActionButton
 import ru.nksk.lctapp.core.ui.components.GameActionStyle
+import ru.nksk.lctapp.core.ui.components.GameInk
 import ru.nksk.lctapp.core.ui.media.IntroVideoPlayer
 import ru.nksk.lctapp.core.ui.media.INTRO_VIDEO_ASSET
 import ru.nksk.lctapp.feature.onboarding.ui.IntroVideoScreen
@@ -74,6 +75,5 @@ private fun IntroVideoAction(text: String, onClick: () -> Unit, modifier: Modifi
     GameActionButton(text, onClick, modifier, enabled = enabled, interactionBlocked = saving,
         style = GameActionStyle.SECONDARY, minHeight = 48.dp, textStyle = MaterialTheme.typography.labelLarge,
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-        containerColor = Color.Black.copy(alpha = .75f), contentColor = Color.White,
-        borderColor = Color.White.copy(alpha = .65f))
+        contentColor = GameInk)
 }

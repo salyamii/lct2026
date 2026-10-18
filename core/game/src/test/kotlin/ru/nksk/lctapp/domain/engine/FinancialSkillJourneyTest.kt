@@ -134,7 +134,7 @@ class FinancialSkillJourneyTest {
         }
         suspend fun replanAfterExpense(operationId: String) {
             send(EngineCommand.ChangeBudgetAllocation("replan", 0, BudgetSection.WANTS, amount = 0, startManual = true))
-            allocate(BudgetSection.NEEDS, 35)
+            allocate(BudgetSection.NEEDS, foodCostUntilWeekEnd(state, 5))
             allocate(BudgetSection.RESERVE, 10)
             allocate(BudgetSection.WANTS, EconomyOperations.allocationRemaining(state.economy))
             val planning = state.economy.planning!!

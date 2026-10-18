@@ -217,8 +217,14 @@ class BundledCampaignBalanceTest {
             send(EngineCommand.ChangeBudgetAllocation(planning().id, planning().revision, BudgetSection.RESERVE, amount = reserve))
             send(EngineCommand.ChangeBudgetAllocation(planning().id, planning().revision, BudgetSection.SAVINGS, amount = basis - needs - reserve))
             val money = state.economy.balance
+            val savingsBefore = state.economy.savingsBalance
+            val draft = state.economy.displayPlan
             send(EngineCommand.ConfirmBudget(planning().id, planning().revision), shownMoney())
-            assertEquals(basis, state.economy.plan.total)
+            assertEquals(basis - draft.savings, state.economy.plan.total)
+            assertEquals(basis - draft.savings, state.economy.availableBalance)
+            assertEquals(savingsBefore + draft.savings, state.economy.savingsBalance)
+            assertEquals(0L, state.economy.plan.savings)
+            assertEquals(draft, state.financial.plans.last().allocation)
             assertEquals(money, state.economy.balance)
         }
 

@@ -1017,7 +1017,7 @@ class GameEngineTest {
         }
     }
 
-    @Test fun energyAndEarlySleepUseTheSameAffordabilityAsTheFormerSingleBalance() = runTest {
+    @Test fun energyAndEarlySleepUseOnlySpendableAllocationsForPaidEntry() = runTest {
         val types = listOf(EventType.STATE, EventType.RANDOM, EventType.WANT, EventType.STORY)
         for (type in types) for (timing in EffectTiming.entries) {
             val f = Fixture(energy = 1)
@@ -1029,7 +1029,7 @@ class GameEngineTest {
             val engine = GameEngine(f.repo, EventFactory(content, f.policies + ("reward" to
                 EventPolicy(0, startEffectsTiming = timing, choiceEnergyCosts = mapOf("work" to 2))), emptyList()), f.rules)
             f.begin(listOf("reward", "quiet", "quiet", "quiet"))
-            for (balance in listOf(2L, 3L, 4L, 5L, 6L, 7L)) for (section in BudgetSection.entries) {
+            for (balance in listOf(2L, 3L, 4L, 5L, 6L, 7L)) for (section in BudgetSection.entries.filter { it != BudgetSection.NEEDS }) {
                 for (status in listOf(EventStatus.PENDING, EventStatus.PAUSED, EventStatus.ACTIVE)) {
                     val day = f.day.copy(ateToday = true, events = f.day.events.mapIndexed { i, e ->
                         if (i == 0) e.copy(status = status) else e
@@ -1039,7 +1039,7 @@ class GameEngineTest {
                             availableBalance = balance, savingsBalance = 0),
                         engine = day, story = f.state.story.copy(activeEventId = if (status == EventStatus.ACTIVE) "reward" else null),
                     )
-                    // Former rule: an unapplied entry charge must be affordable before the paid answer.
+                    // Both the entry charge and the paid answer must fit outside protected food money.
                     val entry = if (timing == EffectTiming.COMPLETE || status == EventStatus.PENDING) 2 else 0
                     val canPayWithoutEnergy = balance >= entry + 4
                     val command = if (status == EventStatus.ACTIVE)
@@ -1139,7 +1139,7 @@ class GameEngineTest {
                     return outcomes
                 }
                 val reference = play(BudgetPlan(0, 0, 0, 100))
-                for (plan in listOf(BudgetPlan(100, 0, 0, 0), BudgetPlan(0, 100, 0, 0),
+                for (plan in listOf(BudgetPlan(35, 20, 20, 25), BudgetPlan(0, 100, 0, 0),
                     BudgetPlan(0, 0, 100, 0), BudgetPlan(90, 2, 3, 5))) {
                     assertEquals("$type / $timing / $delta / $plan", reference, play(plan))
                 }

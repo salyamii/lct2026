@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ru.nksk.lctapp.core.ui.components.AdventureBody
 import ru.nksk.lctapp.core.ui.components.GameActionButton
+import ru.nksk.lctapp.core.ui.components.GameActionButtonDefaults
 import ru.nksk.lctapp.core.ui.components.GameActionStyle
 import ru.nksk.lctapp.core.ui.components.GameInk
 import ru.nksk.lctapp.core.ui.components.GamePaper
@@ -46,9 +47,11 @@ internal fun CloudSettingsCard(state: CloudSettingsUiState, configured: Boolean,
             message?.let { AdventureBody(it) }
         }
         val enabled = configured && !state.busy && state.restorePreview == null
-        GameActionButton("Синхронизировать сейчас", { onAction(SettingsAction.SyncCloud) }, enabled = enabled)
-        GameActionButton("Загрузить копию из облака", { onAction(SettingsAction.PrepareCloudRestore) },
-            enabled = enabled, style = GameActionStyle.SECONDARY)
+        Column(verticalArrangement = Arrangement.spacedBy(GameActionButtonDefaults.Spacing)) {
+            GameActionButton("Синхронизировать сейчас", { onAction(SettingsAction.SyncCloud) }, enabled = enabled)
+            GameActionButton("Загрузить копию из облака", { onAction(SettingsAction.PrepareCloudRestore) },
+                enabled = enabled, style = GameActionStyle.SECONDARY)
+        }
         AdventureBody("Сначала покажем сохранение. Текущая игра заменится только после подтверждения.")
     }
 }
@@ -75,7 +78,7 @@ internal fun CloudRestoreDialog(preview: CloudRestorePreview, busy: Boolean,
             }
         },
         confirmButton = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(GameActionButtonDefaults.Spacing)) {
                 GameActionButton("Восстановить эту игру", { onAction(SettingsAction.ConfirmCloudRestore(preview.id)) },
                     enabled = !busy)
                 GameActionButton("Оставить текущую игру", { onAction(SettingsAction.DismissCloudRestore(preview.id)) },

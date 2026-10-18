@@ -1,6 +1,7 @@
 package ru.nksk.lctapp.feature.menu.ui
 
 import ru.nksk.lctapp.core.ui.components.GameLoadingScreen
+import ru.nksk.lctapp.core.ui.components.GameActionButton
 import ru.nksk.lctapp.core.ui.components.MealSelectionDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,7 +35,7 @@ internal fun MainMenuContent(state: MainMenuLoadState, onRetry: () -> Unit, onAc
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(stringResource(R.string.game_load_error))
-                Button(onClick = onRetry) { Text(stringResource(R.string.game_retry)) }
+                GameActionButton(stringResource(R.string.game_retry), onRetry)
             }
         }
     }

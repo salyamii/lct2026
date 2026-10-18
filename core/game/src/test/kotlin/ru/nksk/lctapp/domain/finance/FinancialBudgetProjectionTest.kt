@@ -30,12 +30,18 @@ class FinancialBudgetProjectionTest {
             EngineState("rules", 0, 1, DayPhase.RUNNING, 0, 5, false, null, 100, emptyList(), emptyList()),
             selectedGoalId = "goal", financial = FinancialProgress(period.id, listOf(period)))
         val history = mutableListOf(AuditEntry("init", 1, "run", AuditType.INITIALIZED, after = state))
-        fun plan(id: String, allocation: BudgetPlan) {
+        fun plan(id: String, allocation: BudgetPlan, transferSavings: Boolean = false) {
             val revision = BudgetPlanRevision(id, "period", state.financial.plans.size + 1, 1,
                 state.economy.availableBalance, allocation, BudgetRevisionReason.INITIAL)
-            val next = state.copy(economy = state.economy.copy(plan = allocation),
-                financial = state.financial.copy(plans = state.financial.plans + revision))
-            commit(next, EngineCommand.ConfirmBudget(id, 0))
+            val allocated = state.economy.copy(plan = allocation, planning = null, unallocated = 0)
+            val deposit = allocation.savings.takeIf { transferSavings } ?: 0L
+            val economy = if (deposit == 0L) allocated else EconomyOperations.deposit(allocated, deposit)
+            val next = state.copy(economy = economy,
+                financial = state.financial.copy(plans = state.financial.plans + revision,
+                    periods = state.financial.periods.map { it.copy(deposited = it.deposited + deposit) }))
+            val receipt = if (deposit == 0L) emptyList() else
+                listOf(LedgerEntry("action:${history.size}:deposit", LedgerKind.DEPOSIT, deposit))
+            commit(next, EngineCommand.ConfirmBudget(id, 0), receipt)
         }
         fun operation(kind: LedgerKind, amount: Long, journalKind: DayJournalKind? = null, source: String = "") {
             val id = "operation:${history.size}"
@@ -65,6 +71,21 @@ class FinancialBudgetProjectionTest {
             commit(state.copy(economy = nextMoney, engine = engine.copy(journal = engine.journal + journal),
                 financial = state.financial.copy(periods = listOf(nextPeriod))), EngineCommand.Feed("meal"),
                 listOf(LedgerEntry(id, kind, amount)))
+        }
+        fun depositWeeklyReserve() {
+            val income = 100L
+            val period = checkNotNull(state.financial.currentPeriod)
+            val funded = state.copy(economy = EconomyOperations.weekly(state.economy, "week:8", income),
+                engine = state.engine!!.copy(day = 8),
+                financial = state.financial.copy(periods = listOf(period.copy(income = period.income + income))))
+            commit(funded, EngineCommand.BeginDay("week-eight", emptyList()),
+                listOf(LedgerEntry("weekly-income", LedgerKind.INCOME, income)))
+            val amount = state.economy.plan.reserve
+            val request = EngineRequest("action:${history.size}", state.engine?.revision,
+                EngineCommand.DepositWeeklyReserve("week:8", 0, amount))
+            val after = FinancialPeriods.record(state, state.copy(economy =
+                EconomyOperations.depositWeeklyReserve(state.economy, "week:8", 0, amount)), request)
+            commit(after, request.command, CanonicalLedger.fromTransition(state, after, request))
         }
         private fun commit(next: GameState, command: EngineCommand, operations: List<LedgerEntry> = emptyList()) {
             val id = "action:${history.size}"
@@ -126,6 +147,66 @@ class FinancialBudgetProjectionTest {
         assertEquals(7L, comparisons.last().actual.wants)
     }
 
+    @Test fun weeklyReserveContributesToTheGoalWithoutFulfillingAnOlderOrFuturePlan() {
+        val f = Fixture()
+        f.plan("old-plan", BudgetPlan(35, 25, 25, 15))
+        f.depositWeeklyReserve()
+        val receiptReport = FinancialBudgetProjection.report(f.state, f.history, content).single()
+        assertTrue(receiptReport.complete)
+        assertEquals(15L, receiptReport.actual.deposited)
+        assertEquals(0L, receiptReport.actual.availableExpenses)
+        assertEquals(0L, receiptReport.comparisons.single().actual.deposited)
+        assertFalse(receiptReport.comparisons.single().sourceActionIds.contains("action:3"))
+
+        f.plan("new-plan", BudgetPlan(35, 125, 25, 0), transferSavings = true)
+        val confirmedReport = FinancialBudgetProjection.report(f.state, f.history, content).single()
+        assertTrue(confirmedReport.complete)
+        assertEquals(40L, confirmedReport.actual.deposited)
+        assertEquals(0L, confirmedReport.comparisons.first().actual.deposited)
+        assertEquals(false, confirmedReport.comparisons.first().managedPlan)
+        assertEquals(25L, confirmedReport.comparisons.last().actual.deposited)
+    }
+
+    @Test fun confirmationDepositBelongsToItsOwnRevisionAndNotThePreviousPlan() {
+        val f = Fixture()
+        f.plan("original", BudgetPlan(35, 20, 25, 20), transferSavings = true)
+        f.operation(LedgerKind.AVAILABLE_EXPENSE, 7, DayJournalKind.EVENT_CHOICE, "buy")
+        f.plan("revised", BudgetPlan(35, 3, 10, 20), transferSavings = true)
+        val report = FinancialBudgetProjection.report(f.state, f.history, content).single()
+        assertTrue(report.complete)
+        assertEquals(35L, report.actual.deposited)
+        val original = report.comparisons.first()
+        val revised = report.comparisons.last()
+        assertEquals(25L, original.actual.deposited)
+        assertEquals(7L, original.actual.wants)
+        assertEquals(true, original.managedPlan)
+        assertTrue(original.complete)
+        assertEquals(listOf("action:1", "action:2"), original.sourceActionIds)
+        assertEquals(10L, revised.actual.deposited)
+        assertEquals(0L, revised.actual.wants)
+        assertEquals(listOf("action:3"), revised.sourceActionIds)
+
+        f.operation(LedgerKind.WITHDRAWAL, 8)
+        f.plan("after-withdrawal", BudgetPlan(35, 3, 0, 28), transferSavings = true)
+        val compared = FinancialBudgetProjection.report(f.state, f.history, content).single().comparisons
+        assertEquals(25L, compared.first().actual.netSaved)
+        assertEquals(2L, compared[1].actual.netSaved)
+        assertEquals(false, compared[1].managedPlan)
+        assertEquals(0L, compared.last().actual.deposited)
+        assertTrue(compared.last().sourceActionIds.isEmpty())
+    }
+
+    @Test fun legacyPlanOnlyConfirmationStillHasNoSavingEvidence() {
+        val f = Fixture()
+        f.plan("legacy", BudgetPlan(35, 20, 25, 20))
+        val report = FinancialBudgetProjection.report(f.state, f.history, content).single()
+        assertEquals(0L, report.actual.deposited)
+        assertEquals(0L, report.comparisons.single().actual.deposited)
+        assertTrue(report.comparisons.single().sourceActionIds.isEmpty())
+        assertEquals(100L, f.state.economy.availableBalance)
+        assertEquals(0L, f.state.economy.savingsBalance)
+    }
+
     @Test fun missingLegacyDetailsAndUnknownSourceAreNotZeroOrACompleteComparison() {
         val f = Fixture()
         f.plan("plan", BudgetPlan(35, 25, 25, 15))
@@ -166,7 +247,7 @@ class FinancialBudgetProjectionTest {
         val oldPeriod = f.state.financial.currentPeriod!!
         val before = f.state.copy(financial = f.state.financial.copy(periods = listOf(oldPeriod.copy(reviewEvidence = evidence))),
             economy = f.state.economy.copy(planning = BudgetPlanning("revision", BudgetPlanningReason.MANUAL,
-                BudgetPlanningStage.ALLOCATION, 0, baseAmount = 95)))
+                BudgetPlanningStage.ALLOCATION, 0, draft = BudgetPlan(95, 0, 0, 0), baseAmount = 95)))
         val command = EngineCommand.ConfirmBudget("revision", 0)
         val after = before.copy(economy = before.economy.copy(plan = BudgetPlan(95, 0, 0, 0), planning = null))
         val unknownContext = FinancialPeriods.confirmed(before, after, EngineRequest("unknown", null, command), command, 30)

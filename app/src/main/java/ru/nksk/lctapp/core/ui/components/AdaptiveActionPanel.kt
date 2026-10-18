@@ -31,7 +31,7 @@ internal fun AdaptiveActionPanel(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(20.dp),
     contentSpacing: Dp = 12.dp,
-    actionSpacing: Dp = 8.dp,
+    actionSpacing: Dp = GameActionButtonDefaults.Spacing,
     sectionSpacing: Dp = 12.dp,
     fillBody: Boolean = false,
     actionsAtTop: Boolean = false,

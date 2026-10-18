@@ -2,6 +2,7 @@ package ru.nksk.lctapp.feature.gear.ui
 
 import ru.nksk.lctapp.core.ui.components.GameLoadingIndicator
 import ru.nksk.lctapp.core.ui.components.GameArtwork
+import ru.nksk.lctapp.core.ui.components.GameBackButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -50,9 +51,7 @@ internal fun GearScreen(state: GearLoadState, onBack: () -> Unit, onRetry: () ->
     gridState: LazyGridState = rememberLazyGridState()) {
     Box(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding()) {
         Column(Modifier.align(Alignment.TopCenter).widthIn(max = 840.dp).fillMaxSize()) {
-            TextButton(onClick = onBack, modifier = Modifier.padding(start = 8.dp)) {
-                Text(stringResource(R.string.navigation_back), color = Color.White, fontFamily = Nunito)
-            }
+            GameBackButton(onClick = onBack, modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp))
             Row(
                 Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, bottom = 22.dp),
                 verticalAlignment = Alignment.CenterVertically,

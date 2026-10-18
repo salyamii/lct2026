@@ -34,6 +34,13 @@ Screens receive state and callbacks, not repositories or navigation objects.
 import Android, Compose, Hilt, Room or feature code. ArchitectureTest checks
 explicit imports; Gradle enforces the pure Kotlin module boundary.
 
+Shared game buttons, Back controls and scene title plaques live in
+`app/core/ui/components`. `LctApp` supplies their renderers through
+`ProvideOnboardingControls`, declared by the onboarding feature. The feature
+keeps native fallbacks for standalone previews and has no dependency on app
+resources. Controls retain callbacks, enabled states and native semantics;
+artwork does not own navigation or game state.
+
 By PARENT-MODE-D-001/002, `app/parents/ParentsActivity` opens from a long press
 on the menu's Settings gear. It is internal (`exported=false`), in the same
 process/task, and uses the existing Application/Hilt graph. Its own Navigation 3
@@ -306,6 +313,15 @@ Runtime raster artwork is loaded through the existing Coil-backed shared artwork
 component at explicit bounds. Preserve full transparent character canvases and
 catalogued alignment. Do not decode a large bitmap on every composition or create
 new raster copies for ordinary UI variants.
+
+Frame artwork uses a smaller decode budget matched to its corner scale: 192 x 64 dp
+for fixed corners, and 240 x 80 dp scaled with the system font for menu frames.
+Native frame labels, Back/actions, name and energy controls do not wait for the
+foreground scene's artwork barrier. The barrier still groups character/object art.
+The changing live-pet reaction uses a tracked composition local, invalidating its
+readers rather than the entire navigation tree. Onboarding control renderers keep
+a remembered provider identity. These reduce redundant presentation work; device
+frame timing has not been measured under the build-only verification preference.
 
 By BLUR-D-001, item-focused Day scenes soften only the `AdventureScreen` backdrop.
 `GameBackdrop` uses a small software transformation through the shared Coil loader

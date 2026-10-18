@@ -7,7 +7,6 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -19,10 +18,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -32,6 +31,7 @@ import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
@@ -59,8 +59,10 @@ internal fun AdventureScreen(
     contentSpacing: Dp = 12.dp,
     pinFooter: Boolean = true,
     scrollWholePage: Boolean = false,
+    fitContent: Boolean = false,
     contentScrollState: ScrollState? = null,
     headerAction: (@Composable () -> Unit)? = null,
+    indicators: (@Composable () -> Unit)? = null,
     scene: (@Composable BoxScope.() -> Unit)? = null,
     footer: (@Composable ColumnScope.() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
@@ -72,6 +74,9 @@ internal fun AdventureScreen(
         val density = LocalDensity.current
         val fontScale = density.fontScale
         val largeText = fontScale >= 1.4f
+        val separateHeaderAction = title.isNotBlank() && headerAction != null &&
+            (maxWidth < 400.dp || fontScale >= 1.3f)
+        val fitSceneToCard = fitContent && scene != null && !pinFooter && !scrollWholePage
         // Illustrated custom scenes retain their own framing. Adviser scenes wrap the
         // header, balances and character instead of reserving a percentage of empty floor.
         val customStageHeight = if (sceneAspectRatio != null) (maxWidth / sceneAspectRatio).coerceIn(180.dp, 440.dp)
@@ -81,30 +86,43 @@ internal fun AdventureScreen(
             maxHeight - with(density) { measuredStageHeight.toDp() } < 200.dp)
         val backgroundHeight = if (measuredStageHeight > 0) with(density) { measuredStageHeight.toDp() }
             else if (scene != null) customStageHeight else 340.dp
-        @Composable fun Stage() {
-            Column(Modifier.fillMaxWidth()
-                .then(if (scene != null) Modifier.height(customStageHeight) else Modifier)
-                .onSizeChanged { measuredStageHeight = it.height }) {
+        @Composable fun Indicators() {
+            indicators?.let { content ->
+                Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 8.dp)) { content() }
+            }
+        }
+        @Composable fun Header() {
+            Column(Modifier.fillMaxWidth()) {
                 Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    IconButton(onClick = onBack, modifier = Modifier.size(48.dp).background(AdventureNight, CircleShape)) {
-                        Icon(painterResource(R.drawable.menu_chevron), "Назад",
-                            Modifier.size(20.dp).rotate(180f), tint = Color.White)
-                    }
-                    Surface(color = AdventureNight, shape = RoundedCornerShape(24.dp),
-                        modifier = Modifier.weight(1f, fill = false)) {
-                        Text(title, Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                            color = Color.White, fontFamily = Nunito, fontSize = 16.sp, lineHeight = 22.sp)
-                    }
-                    headerAction?.invoke()
+                    GameBackButton(onBack)
+                    if (title.isNotBlank()) GameSceneTitle(title, Modifier.weight(1f, fill = false))
+                    else Spacer(Modifier.weight(1f))
+                    if (!separateHeaderAction) headerAction?.invoke()
+                }
+                if (separateHeaderAction) {
+                    Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 8.dp),
+                        contentAlignment = Alignment.CenterEnd) { headerAction?.invoke() }
                 }
                 if (available != null && savings != null) {
                     AdventureBalances(available, savings, onOpenSavings,
                         Modifier.padding(horizontal = 20.dp).padding(bottom = 8.dp))
                 }
-                if (scene != null) Box(Modifier.weight(1f).fillMaxWidth(), content = scene)
+            }
+        }
+        @Composable fun Stage() {
+            Column(Modifier.fillMaxWidth().onSizeChanged { measuredStageHeight = it.height }) {
+                Indicators()
+                // Indicators get their own space, leaving the character's existing canvas intact.
+                Column(Modifier.fillMaxWidth().then(
+                    if (scene != null && !separateHeaderAction) Modifier.height(customStageHeight) else Modifier)) {
+                Header()
+                if (scene != null) Box(Modifier.fillMaxWidth().then(
+                    if (separateHeaderAction) Modifier.height((customStageHeight - 80.dp).coerceAtLeast(120.dp))
+                    else Modifier.weight(1f)), content = scene)
                 else AdventureAdviser(characterRes, characterMotionIntensity, characterDescription, speech)
+                }
             }
         }
         @Composable fun Panel(panelModifier: Modifier, scrollContent: Boolean, includeFooter: Boolean = true) {
@@ -120,22 +138,22 @@ internal fun AdventureScreen(
                             content = content,
                         )
                     } else Column(Modifier.widthIn(max = 640.dp).fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 20.dp).let {
+                        .padding(horizontal = 20.dp, vertical = if (fitSceneToCard) 14.dp else 20.dp).let {
                         if (scrollContent && !pinFooter) it.verticalScroll(pageScroll) else it
-                    }, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    }, verticalArrangement = Arrangement.spacedBy(if (fitSceneToCard) 8.dp else 12.dp)) {
                         Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(contentSpacing),
                             content = content)
                         if (includeFooter) footer?.let {
-                            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp), content = it)
+                            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(GameActionButtonDefaults.Spacing), content = it)
                         }
                     }
                 }
             }
         }
-        @Composable fun SceneBackground() {
+        @Composable fun SceneBackground(backgroundModifier: Modifier = Modifier.fillMaxWidth().height(backgroundHeight + 28.dp)) {
             // Continue the same scene beneath the rounded panel instead of exposing a
             // rectangular dark seam. The layer follows whichever content owns the scroll.
-            Box(Modifier.fillMaxWidth().height(backgroundHeight + 28.dp)) {
+            Box(backgroundModifier) {
                 GameBackdrop(backgroundRes, blurBackground, Modifier.fillMaxSize())
                 Box(Modifier.fillMaxSize().background(Brush.verticalGradient(
                     0f to AdventureNight.copy(alpha = .48f), .28f to Color.Transparent,
@@ -143,7 +161,38 @@ internal fun AdventureScreen(
                 )))
             }
         }
-        if (scrollWholePage) {
+        if (fitSceneToCard) {
+            val viewportHeight = constraints.maxHeight
+            // Measure each slot once. A short card borrows space from the illustration;
+            // long cards keep one scroll owner rather than switching layouts after a frame.
+            SubcomposeLayout(Modifier.fillMaxSize().background(GamePaper).verticalScroll(pageScroll)) { childConstraints ->
+                val natural = childConstraints.copy(minHeight = 0, maxHeight = Constraints.Infinity)
+                val panel = subcompose("panel") { Panel(Modifier, scrollContent = false) }
+                    .single().measure(natural)
+                val header = subcompose("header") {
+                    Column(Modifier.fillMaxWidth()) {
+                        Indicators()
+                        Header()
+                    }
+                }.single().measure(natural)
+                val minimumScene = 120.dp.roundToPx()
+                val preferredScene = (customStageHeight - 68.dp).roundToPx().coerceAtLeast(minimumScene)
+                val sceneHeight = (viewportHeight - header.height - panel.height)
+                    .coerceIn(minimumScene, preferredScene)
+                val illustration = subcompose("scene") {
+                    Box(Modifier.fillMaxSize(), content = checkNotNull(scene))
+                }.single().measure(Constraints.fixed(childConstraints.maxWidth, sceneHeight))
+                val stageHeight = header.height + illustration.height
+                val backdrop = subcompose("backdrop") { SceneBackground(Modifier.fillMaxSize()) }
+                    .single().measure(Constraints.fixed(childConstraints.maxWidth, stageHeight + 28.dp.roundToPx()))
+                layout(childConstraints.maxWidth, (stageHeight + panel.height).coerceAtLeast(viewportHeight)) {
+                    backdrop.placeRelative(0, 0)
+                    header.placeRelative(0, 0)
+                    illustration.placeRelative(0, header.height)
+                    panel.placeRelative(0, stageHeight)
+                }
+            }
+        } else if (scrollWholePage) {
             // A form keeps one scroll owner through IME and compact-layout changes. Its
             // primary action remains outside the changing preview/receipt content.
             Column(Modifier.fillMaxSize()) {
@@ -160,7 +209,7 @@ internal fun AdventureScreen(
                             Column(Modifier.widthIn(max = 640.dp).fillMaxWidth()
                                 .verticalScroll(fixedActionScroll)
                                 .padding(horizontal = 20.dp).padding(top = 8.dp, bottom = 12.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp), content = it)
+                                verticalArrangement = Arrangement.spacedBy(GameActionButtonDefaults.Spacing), content = it)
                         }
                     }
                 }

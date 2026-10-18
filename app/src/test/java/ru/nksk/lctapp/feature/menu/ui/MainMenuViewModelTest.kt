@@ -135,14 +135,15 @@ class MainMenuViewModelTest {
     @Test fun persistedStateAndLaterChangesDriveTheMenu() = runTest(dispatcher) {
         val initial = createInitialGameState()
         val repository = MenuRepository(initial.copy(economy = EconomyState(BudgetPlan(0, 0, 0, 42))))
-        val model = model(session(repository, initial))
+        val session = session(repository, initial)
+        val model = model(session)
         assertEquals(MainMenuLoadState.Loading, model.uiState.value)
         advanceUntilIdle()
         assertEquals(42L, (model.uiState.value as MainMenuLoadState.Ready).menu.coins)
         repository.update { it.copy(economy = EconomyState(BudgetPlan(0, 0, 0, 73)), pet = it.pet.transitionTo(PetVisualState.HAPPY)) }
         advanceUntilIdle()
         assertEquals(73L, (model.uiState.value as MainMenuLoadState.Ready).menu.coins)
-        assertEquals(repository.read()!!.toMainMenuUiState().copy(mealPrice = 5), (model.uiState.value as MainMenuLoadState.Ready).menu)
+        assertEquals(repository.read()!!.toMainMenuUiState(catalog = session.catalog).copy(mealPrice = 5), (model.uiState.value as MainMenuLoadState.Ready).menu)
     }
 
     @Test fun initializationFailureShowsErrorAndRetryPreservesSavedData() = runTest(dispatcher) {
@@ -185,7 +186,7 @@ class MainMenuViewModelTest {
             EngineCommand.Feed(session.catalog.meals.first { it.price > 0 }.id))) is EngineResult.Applied)
         advanceUntilIdle()
         val menu = (model.uiState.value as MainMenuLoadState.Ready).menu
-        assertTrue(menu.dayStatus!!.endsWith("сыт"))
+        assertEquals(ru.nksk.lctapp.core.ui.components.PetSatietyUiState.FED, menu.indicators!!.satiety)
         assertNull(menu.notice)
         assertFalse(menu.canFeed)
         assertEquals("Продолжить день", menu.continueLabel)
@@ -286,7 +287,7 @@ class MainMenuViewModelTest {
         val after = repository.read()!!
         assertEquals(before.economy.availableBalance - 7, after.economy.availableBalance)
         assertEquals(3, after.engine!!.energy)
-        assertEquals(PetVisualState.HAPPY, after.pet.visualState)
+        assertEquals(PetVisualState.NORMAL, after.pet.visualState)
         assertTrue(after.engine!!.ateToday)
         assertFalse((model.uiState.value as MainMenuLoadState.Ready).menu.showMeals)
     }

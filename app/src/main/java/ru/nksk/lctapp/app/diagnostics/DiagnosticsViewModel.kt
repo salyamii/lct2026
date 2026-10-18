@@ -6,7 +6,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -82,6 +81,7 @@ private fun EngineCommand.diagnosticAction(): String = when (this) {
     is EngineCommand.StartBudgetAllocation -> "StartBudgetAllocation"
     is EngineCommand.ChangeBudgetAllocation -> "ChangeBudgetAllocation"
     is EngineCommand.ConfirmBudget -> "ConfirmBudget"
+    is EngineCommand.DepositWeeklyReserve -> "DepositWeeklyReserve"
     is EngineCommand.DepositSavings -> "DepositSavings"
     is EngineCommand.WithdrawSavings -> "WithdrawSavings"
     is EngineCommand.RequestFinancialPractice -> "RequestFinancialPractice"

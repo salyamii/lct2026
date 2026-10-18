@@ -46,6 +46,7 @@ internal data class EconomyUiState(
     val transferInput: String = "",
     val withdrawal: WithdrawalPreview? = null,
     val transferReceipt: SavingsReceipt? = null,
+    val weeklyReserveReceipt: SavingsReceipt? = null,
     val exclusiveSaving: Boolean = false,
     val budgetConfirmation: BudgetScreenState? = null,
     val budgetHistory: BudgetHistoryUi? = null,
@@ -67,6 +68,7 @@ internal data class EconomyUiState(
 
 internal sealed interface EconomyAction {
     data object StartAllocation : EconomyAction
+    data object DepositWeeklyReserve : EconomyAction
     data object OpenBudgetHistory : EconomyAction
     data object CloseBudgetHistory : EconomyAction
     data class Adjust(val article: BudgetArticle, val increase: Boolean) : EconomyAction
@@ -105,7 +107,8 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
         val revisionReason: BudgetRevisionReason = BudgetRevisionReason.UNSPECIFIED,
         val causeActionId: String? = null, val shownRevision: Long? = null,
         val transferExpectation: SavingsTransferExpectation? = null,
-        val budgetEditBase: Long? = null)
+        val budgetEditBase: Long? = null,
+        val weeklyReserve: EngineCommand.DepositWeeklyReserve? = null)
     private val actions = Channel<Pending>(Channel.UNLIMITED)
     private var observation: Job? = null
     private var screenActive = true
@@ -165,6 +168,20 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
         // Keep the successful outgoing screen locked until its navigation entry is removed.
         if (state.value.budgetConfirmation != null) return
         when (action) {
+            EconomyAction.DepositWeeklyReserve -> {
+                val shown = state.value
+                val economy = shown.economy ?: return
+                val planning = economy.planning ?: return
+                if (shown.saving || shown.error != null || planning.reason != BudgetPlanningReason.WEEKLY ||
+                    planning.stage != BudgetPlanningStage.RECEIPT || economy.plan.reserve <= 0) return
+                enqueue(Pending(action, shownRevision = shown.revision,
+                    weeklyReserve = EngineCommand.DepositWeeklyReserve(planning.id, planning.revision, economy.plan.reserve),
+                    context = DecisionContext(presentationId = "weekly-reserve:${planning.id}:${planning.revision}",
+                        informationPresented = false, complete = false,
+                        before = FinancialPosition(economy.availableBalance, economy.savingsBalance, shown.knownNeeds),
+                        alternativeAvailable = true)))
+                return
+            }
             EconomyAction.OpenBudgetHistory -> {
                 val shown = state.value
                 if (!shown.planEditingEnabled || shown.saving || shown.economy?.planning != null) return
@@ -382,6 +399,9 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
         } == true
         state.value = state.value.copy(loading = false, economy = game.economy, knownNeeds = knownNeeds(game),
             pet = game.pet, revision = game.engine?.revision, savingsTarget = target,
+            weeklyReserveReceipt = state.value.weeklyReserveReceipt.takeIf {
+                old?.planning?.id == game.economy.planning?.id && game.economy.planning?.stage == BudgetPlanningStage.RECEIPT
+            },
             withdrawal = state.value.withdrawal.takeUnless { confirmationChanged },
             savingsStep = if (confirmationChanged) SavingsStep.WITHDRAW else state.value.savingsStep)
         if (screenActive && state.value.budgetHistoryVisible && (changed || budgetHistoryJob?.isCancelled == true)) loadBudgetHistory()
@@ -435,14 +455,15 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
                 state.value = state.value.copy(error = "Количество монет изменилось. Проверь план ещё раз.")
                 return
             }
-            if (pending.action == EconomyAction.Confirm && planning == null) {
+            if (pending.action == EconomyAction.Confirm && planning == null && pending.request == null) {
                 completions.send(BudgetCompletion((pending.request?.command as? EngineCommand.ConfirmBudget)?.sessionId))
                 return
             }
             val id = planning?.id ?: manualId
             val revision = planning?.revision ?: 0
-            val command = when (val action = pending.action) {
+            val command = pending.request?.command ?: when (val action = pending.action) {
                 EconomyAction.StartAllocation -> EngineCommand.StartBudgetAllocation(id, revision)
+                EconomyAction.DepositWeeklyReserve -> checkNotNull(pending.weeklyReserve)
                 is EconomyAction.Adjust -> EngineCommand.ChangeBudgetAllocation(id, revision,
                     BudgetSection.valueOf(action.article.name), increase = action.increase, startManual = planning == null)
                 is EconomyAction.SetAmount -> EngineCommand.ChangeBudgetAllocation(id, revision,
@@ -461,7 +482,8 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
                     (command !is EngineCommand.ConfirmBudget || shown.presentationId == "budget:$id:$revision")
                 shown.copy(complete = shown.complete && matches)
             }
-            val transfer = command is EngineCommand.DepositSavings || command is EngineCommand.WithdrawSavings
+            val transfer = command is EngineCommand.DepositSavings || command is EngineCommand.WithdrawSavings ||
+                command is EngineCommand.DepositWeeklyReserve
             if (transfer && pending.request == null && pending.context?.before != FinancialPosition(
                     current.economy.availableBalance, current.economy.savingsBalance, knownNeeds(current))) {
                 project(current)
@@ -479,6 +501,7 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
                         val amount = when (command) {
                             is EngineCommand.DepositSavings -> command.amount
                             is EngineCommand.WithdrawSavings -> command.amount
+                            is EngineCommand.DepositWeeklyReserve -> command.amount
                             else -> error("Not a transfer")
                         }
                         val withdrawing = command is EngineCommand.WithdrawSavings
@@ -490,12 +513,17 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
                         catch (_: Exception) { null } else null
                         val after = if (retrying) receipt?.after?.economy else result.state.economy
                         val before = receipt?.before?.economy
-                        state.value = state.value.copy(savingsStep = if (withdrawing) SavingsStep.WITHDRAW else SavingsStep.DEPOSIT,
-                            transferInput = "", withdrawal = null, depositWarning = null,
-                            transferReceipt = after?.let { SavingsReceipt(amount, withdrawing,
+                        val feedback = after?.let { SavingsReceipt(amount, withdrawing,
                                 before?.availableBalance ?: if (withdrawing) it.availableBalance - amount else it.availableBalance + amount,
                                 before?.savingsBalance ?: if (withdrawing) it.savingsBalance + amount else it.savingsBalance - amount,
-                                it.availableBalance, it.savingsBalance) })
+                                it.availableBalance, it.savingsBalance) }
+                        state.value = if (command is EngineCommand.DepositWeeklyReserve) state.value.copy(
+                            weeklyReserveReceipt = feedback.takeIf {
+                                state.value.economy?.planning?.id == command.sessionId &&
+                                    state.value.economy?.planning?.stage == BudgetPlanningStage.RECEIPT
+                            })
+                        else state.value.copy(savingsStep = if (withdrawing) SavingsStep.WITHDRAW else SavingsStep.DEPOSIT,
+                            transferInput = "", withdrawal = null, depositWarning = null, transferReceipt = feedback)
                     }
                     if (command is EngineCommand.ConfirmBudget) completions.send(BudgetCompletion(command.sessionId))
                 }

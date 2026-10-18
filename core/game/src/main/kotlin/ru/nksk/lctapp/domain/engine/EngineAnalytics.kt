@@ -54,6 +54,16 @@ internal class EngineAnalytics(private val factory: EventFactory, private val ru
                 if (cause == BudgetRevisionCause.UNEXPECTED_EXPENSE && command.causeActionId != null)
                     add(FactDetail.RecoveryAction(command.causeActionId, request.id,
                         context.after!!.coverage >= 0), "recovery:${command.causeActionId}", "recovery")
+                // The child chose this allocation and confirmed its transfer. Zero and
+                // historical plan-only confirmations provide no saving movement evidence.
+                receipts.singleOrNull { it.kind == LedgerKind.DEPOSIT }?.let { receipt ->
+                    period?.let {
+                        add(FactDetail.SavingMovement(receipt.operationId, it.goalId, savingOpportunity,
+                            SavingMovementKind.DEPOSIT, receipt.amount), "saving:${it.id}", "saving")
+                        add(FactDetail.PriorityApplied(it.goalId, receipt.operationId, receipt.amount),
+                            "priority:${it.id}:${it.goalId}", "delayed_purchase")
+                    }
+                }
             }
             is EngineCommand.DepositSavings -> period?.let {
                 val receipt = receipts.single { it.kind == LedgerKind.DEPOSIT }
@@ -61,6 +71,11 @@ internal class EngineAnalytics(private val factory: EventFactory, private val ru
                     SavingMovementKind.DEPOSIT, command.amount), "saving:${it.id}", "saving")
                 add(FactDetail.PriorityApplied(it.goalId, receipt.operationId, command.amount),
                     "priority:${it.id}:${it.goalId}", "delayed_purchase")
+            }
+            is EngineCommand.DepositWeeklyReserve -> period?.let {
+                val receipt = receipts.single { it.kind == LedgerKind.DEPOSIT }
+                add(FactDetail.SavingMovement(receipt.operationId, it.goalId, savingOpportunity,
+                    SavingMovementKind.DEPOSIT, receipt.amount), "saving:${it.id}", "saving")
             }
             is EngineCommand.WithdrawSavings -> period?.let {
                 add(FactDetail.SavingMovement(receipts.single { it.kind == LedgerKind.WITHDRAWAL }.operationId, it.goalId, savingOpportunity,

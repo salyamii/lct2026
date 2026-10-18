@@ -228,7 +228,7 @@ class GoalViewModelTest {
     }
 
     @Test fun combinedBalancesShowTheActualSplitAndOnlyExplicitConfirmationPays() = runTest(dispatcher) {
-        val fixture = Fixture(savings = 20, plan = BudgetPlan(40, 20, 20, 20))
+        val fixture = Fixture(savings = 20, plan = BudgetPlan(40, 20, 0, 40))
         fixture.start()
         val model = fixture.model()
         runCurrent()
@@ -240,7 +240,7 @@ class GoalViewModelTest {
         model.onAction(GoalAction.Buy(fixture.goal.goalId, part.id))
         val quote = checkNotNull(model.uiState.value.confirmation)
         assertEquals(20L, quote.fromSavings)
-        assertEquals(listOf(SpendPart(BudgetSection.SAVINGS, 4L)), quote.availableParts)
+        assertEquals(listOf(SpendPart(BudgetSection.RESERVE, 4L)), quote.availableParts)
         assertEquals(96L, quote.remainingBalance)
         assertEquals(0L, quote.remainingSavings)
         assertEquals(before, fixture.state)
@@ -251,7 +251,7 @@ class GoalViewModelTest {
         runCurrent()
         assertEquals(96L, fixture.state.economy.availableBalance)
         assertEquals(0L, fixture.state.economy.savingsBalance)
-        assertEquals(BudgetPlan(40, 20, 16, 20), fixture.state.economy.plan)
+        assertEquals(BudgetPlan(40, 20, 0, 36), fixture.state.economy.plan)
         assertEquals(part.id, model.uiState.value.purchaseResult?.itemId)
         assertTrue(checkNotNull(fixture.repository.purchases.single().context).complete)
     }

@@ -2,6 +2,7 @@ package ru.nksk.lctapp.feature.tasks.ui
 
 import ru.nksk.lctapp.core.ui.components.GameLoadingIndicator
 import ru.nksk.lctapp.core.ui.components.MealChoices
+import ru.nksk.lctapp.core.ui.components.PetIndicators
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.rememberScrollState
@@ -25,8 +26,6 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedButton
 import ru.nksk.lctapp.core.ui.components.gameScene
 import ru.nksk.lctapp.core.ui.components.GameArtwork
 import androidx.compose.runtime.Composable
@@ -130,12 +129,15 @@ private fun DeedsContent(onTraining: () -> Unit, onExit: () -> Unit,
                             color = DeedColors.Text,
                         )
                         Spacer(Modifier.height(2.dp))
+                        state.indicators?.let {
+                            PetIndicators(it, Modifier.padding(top = 10.dp, bottom = 8.dp))
+                        }
                         if (state.loading) GameLoadingIndicator()
                         if (state.failed) {
                             Text("Не удалось загрузить дела.", color = DeedColors.Text)
-                            Button(onRetry) { Text("Повторить") }
+                            AdventurePrimaryButton("Повторить", onRetry)
                         }
-                        if (state.hasCurrentEvent) OutlinedButton(onCurrentEvent, enabled = !state.busy) { Text("Вернуться к событию") }
+                        if (state.hasCurrentEvent) AdventureQuietButton("Вернуться к событию", onCurrentEvent, enabled = !state.busy)
                         if (!state.loading && !state.failed && state.offers.isEmpty()) {
                             Text("Пока нет новых дел. Продолжи день, чтобы узнать, кому нужна помощь.", color = DeedColors.TextSoft)
                         }
@@ -164,7 +166,8 @@ private fun DeedsContent(onTraining: () -> Unit, onExit: () -> Unit,
                     Spacer(Modifier.height(12.dp))
                     DeedCard(
                         title = offer.title,
-                        description = "${offer.description}\n${offer.effort}",
+                        description = offer.description,
+                        effects = offer.effects,
                         rewardLabel = offer.reward,
                         deadline = offer.deadline,
                         scene = gameScene(offer.scene),

@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.components.*
 import ru.nksk.lctapp.core.ui.game.goalItemArtwork
-import ru.nksk.lctapp.core.ui.theme.AdventureLime
 import ru.nksk.lctapp.core.ui.theme.Nunito
 
 /** The target is a compact link inside the transfer page, not another hub. */
@@ -31,17 +30,15 @@ internal fun SavingsGoalSummary(target: SavingsTargetUi?, savings: Long, onOpenG
         GameArtwork(target?.let { goalItemArtwork(it.id) } ?: R.drawable.budget_savings, null,
             Modifier.size(48.dp), contentScale = ContentScale.Fit)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(target?.name ?: "Выбрать цель", color = GameInk, fontFamily = Nunito,
+            Text(target?.name ?: "Выбрать предмет", color = GameInk, fontFamily = Nunito,
                 fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, lineHeight = 24.sp)
             if (target != null) {
-                LinearProgressIndicator(
-                    progress = { if (target.price == 0L) 1f else (savings.toFloat() / target.price).coerceIn(0f, 1f) },
-                    modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(4.dp)),
-                    color = AdventureLime, trackColor = Color(0xFFE5E0EC), gapSize = 0.dp, drawStopIndicator = {},
-                )
-                SavingsCaption(if (target.remaining(savings) == 0L) "На покупку хватает"
-                    else "Ещё ${savingsCoins(target.remaining(savings))} до покупки")
-            } else SavingsCaption("Копилка общая для всех целей")
+                Text("Накоплено ${minOf(savings, target.price)} из ${target.price}", color = GameInk,
+                    fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 14.sp, lineHeight = 20.sp)
+            }
+        }
+        if (target != null && target.price > 0) {
+            SavingsGauge(savings, target.price, Modifier.width(72.dp))
         }
         Icon(painterResource(R.drawable.menu_chevron), null, Modifier.size(24.dp), tint = GameInk)
     }

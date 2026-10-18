@@ -1,5 +1,98 @@
 # Asset catalog
 
+## Balanced checklist - 2026-10-18
+
+`menu_action_tasks_v4` refines the earlier narrow checklist with a moderately
+wider parchment face, approximately 2:3, above the same blank wooden label.
+Its complete 1254 x 1254 canvas and alpha are preserved in lossless exact WebP;
+the button caption remains native UI text. The v2 and v3 resources remain
+available. [Original, exact edit prompt and import details](sources/tasks-balanced-2026-10-18/README.md).
+
+## Energy instrument and narrow checklist - 2026-10-18
+
+Two imagegen assets refine the menu's existing game objects. The energy frame
+is one wooden housing with an empty top rail and recessed channel. The checklist
+has a narrower, taller scroll while retaining its wide bottom label plaque.
+[PNG originals, exact prompts and import details](sources/energy-scroll-2026-10-18/README.md)
+are retained; both runtime files preserve the full transparent canvases in
+lossless exact WebP.
+
+| Resource | Canvas | Native overlay |
+| --- | --- | --- |
+| `menu_energy_frame_v4` | 2172 x 724, 3:1 | Energy label in the top rail; fill and divisions in the empty channel |
+| `menu_action_tasks_v3` | 1254 x 1254 | Task-button caption on the blank bottom plaque |
+
+## Menu objects - 2026-10-18
+
+By PET-HUD-D-005, money and the pet's name use distinct warm objects instead
+of the shared blue plaque, and Settings uses a standalone brass mechanism.
+Generated with built-in imagegen; [sources and prompts](sources/menu-hud-2026-10-18/README.md).
+The full transparent canvases are preserved in lossless exact WebP.
+
+| Resource | Purpose | Runtime bounds |
+| --- | --- | --- |
+| `menu_settings_v3` | Brass settings mechanism, without a background disk | 48 dp artwork and touch target; existing long press retained |
+| `menu_wallet_panel_v3` | Light leather wallet panel with native coin, balance and chevron | At least 68 dp high; empty middle stretches, ends stay proportional |
+| `menu_name_plaque_v3` | Parchment name tag on a wooden backing | At least 56 dp high; right edge extends beyond the phone viewport |
+
+Native labels, amounts and hit areas stay inside their panels. No monetary
+figures, symbols or names are baked into the new panel images.
+
+By PET-HUD-D-006, `menu_name_plaque_v3` also forms the attached savings caption.
+The current energy caption uses the integrated top rail of `menu_energy_frame_v4`.
+By GAME-UI-D-001/002, the name-plaque artwork frames scene titles;
+`menu_action_plaque_v2` frames text actions (at least 64 dp high by GAME-UI-D-004) and
+compact Back buttons (52 dp). Labels remain native and can increase the
+height; nine-slice rendering keeps the corners proportional. Onboarding
+receives these controls from app composition.
+
+## Observatory menu artwork - 2026-10-17
+
+Built-in imagegen illustrations requested for the main screen. Originals,
+exact prompts and source hashes are retained; all imports are lossless exact
+WebP with full canvas and alpha. Existing resources remain available.
+
+| Resources | Purpose | Sources and prompts |
+| --- | --- | --- |
+| `menu_action_gear_v2`, `menu_action_tasks_v2`, `menu_action_goal_v2` | Three buttons with native text on empty plaques, at most 112 dp | [Buttons](sources/menu-buttons-2026-10-17/README.md) |
+| `menu_hud_plaque_v2`, `menu_action_plaque_v2` | Dark HUD frames and light action/day frames; only their center stretches | [Frames](sources/menu-frames-2026-10-17/README.md) |
+| `menu_satiety_fed_v2`, `menu_satiety_hungry_v2` | Full/empty bowl in a 52 dp touch target | [State art](sources/pet-states-2026-10-17/README.md) |
+| `menu_mood_calm_v2`, `menu_mood_happy_v2`, `menu_mood_upset_v2`, `menu_mood_worried_v2`, `menu_mood_tired_v2` | Five facial expressions, 48 dp artwork with spoken state | [State art](sources/pet-states-2026-10-17/README.md) |
+
+The day numeral, name, amounts and labels are native text. The gauge sits at
+the bottom left of the pet scene, the framed day at bottom right. Name-frame
+customization is not implemented. By PET-HUD-D-004, the phone's name/day frame
+backgrounds extend beyond the right viewport edge; their labels stay inside.
+The original dark plaque remains bundled; the menu's energy indicator now uses
+`menu_energy_frame_v4`, with native divisions and label inside one wooden housing.
+Name and wallet use the v3 objects above.
+
+## Savings gauge - 2026-10-17
+
+`menu_savings_gauge_frame` is a generated brass-and-glass overlay for the real
+savings meter. [PNG source, edit reference and exact prompt](sources/savings-gauge-2026-10-17/README.md).
+The entire 1024 × 1536 transparent canvas is preserved as lossless exact WebP.
+Compose draws the fill and the existing `menu_coin` behind its central window;
+no coin count or text is baked into the artwork. Runtime width is 96 dp in the
+menu and 72 dp beside a goal, with the source 2:3 aspect ratio preserved.
+The menu groups the gauge with an overlapping «На цель» tag in a 104 dp
+wide block, shrinking the gauge proportionally when scene height is limited.
+
+## Pet state icons - 2026-10-17
+
+Separate game illustrations generated with built-in imagegen at the user's request.
+[Original PNGs and prompts](sources/status-icons-2026-10-17/README.md).
+Full 1254 × 1254 transparent canvases, lossless exact WebP; no resizing or trimming.
+
+| Resource | Meaning | Runtime bounds |
+| --- | --- | --- |
+| `menu_status_energy` | Fox paw: energy | 22 dp beside choice effects |
+| `menu_status_satiety` | Food bowl: satiety | 22 dp beside choice effects |
+| `menu_status_mood` | Fox head: mood category | 22 dp beside choice effects |
+
+These category icons remain beside effects and in light panels. The main HUD
+uses the changing state artwork above. `GameArtwork` decodes at measured bounds.
+
 Аудио и видео учитываются отдельно: [музыка глав, озвучка и вступительный ролик](media-catalog.md),
 [media manifest](media-manifest.json). Счётчики и manifest изображений ниже относятся только к artwork.
 
@@ -50,7 +143,7 @@
 
 See [the guide](README.md) for storage and usage rules and [the manifest](manifest.json) for checksums and export details.
 
-442 logical assets; 3 exact drawable aliases; 0 unavailable exports.
+545 logical assets; 3 exact drawable aliases; 0 unavailable exports.
 
 ## Fair purchase props - 2026-09-26
 

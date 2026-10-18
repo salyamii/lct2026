@@ -44,6 +44,18 @@ android {
         testInstrumentationRunner = "ru.nksk.lctapp.HiltTestRunner"
     }
 
+    flavorDimensions += "audience"
+    productFlavors {
+        create("children") {
+            dimension = "audience"
+            buildConfigField("boolean", "JURY_TOOLS", "false")
+        }
+        create("jury") {
+            dimension = "audience"
+            buildConfigField("boolean", "JURY_TOOLS", "true")
+        }
+    }
+
     buildTypes {
         release {
             optimization {

@@ -18,7 +18,7 @@ class FinancialEngineIntegrationTest {
     @Test fun everyTrainingTopicHasFourDurableQuestionsAndOnlyCorrectAnswersAdvance() = runTest {
         for (kind in FinancialQuestionKind.entries) {
             val f = Fixture()
-            f.select(); f.confirm()
+            f.select(); f.confirmDefaultBudget()
             val economy = f.state.economy
             val steps = f.state.engine!!.steps
             val pet = f.state.pet
@@ -97,7 +97,7 @@ class FinancialEngineIntegrationTest {
 
     @Test fun futureTrainingQuestionsKeepTheirOriginalNumbersAcrossOtherGameplay() = runTest {
         val f = Fixture()
-        f.select(); f.confirm()
+        f.select(); f.confirmDefaultBudget()
         f.send(EngineCommand.RequestFinancialPractice(FinancialQuestionKind.TRANSACTION_ACCOUNTING, series = true))
         val first = checkNotNull(f.state.financial.practice)
         val next = first.series!!.remainingQuestions.first()
@@ -111,7 +111,7 @@ class FinancialEngineIntegrationTest {
 
     @Test fun unfinishedLegacyQuestionKeepsItsIdentityWhenOpeningTraining() = runTest {
         val f = Fixture()
-        f.select(); f.confirm()
+        f.select(); f.confirmDefaultBudget()
         f.send(EngineCommand.RequestFinancialPractice())
         val legacy = checkNotNull(f.state.financial.practice)
         f.send(EngineCommand.RequestFinancialPractice(FinancialQuestionKind.PLAN_REVIEW, series = true))
@@ -142,7 +142,7 @@ class FinancialEngineIntegrationTest {
         assertTrue(f.repo.entries.single().operations.isEmpty())
     }
 
-    @Test fun draftAndConfirmationPreserveBothAccountsAndKeepOriginalPlanVersion() = runTest {
+    @Test fun draftPreservesBothAccountsAndConfirmationDepositsWithoutReplacingOriginalPlanVersion() = runTest {
         val f = Fixture()
         f.select()
         val original = f.state.economy.plan
@@ -155,23 +155,29 @@ class FinancialEngineIntegrationTest {
         val first = f.state.financial.plans.single()
         assertEquals(BudgetPlan(40, 0, 60, 0), first.allocation)
         assertEquals(100L, first.availableBasis)
-        f.send(EngineCommand.ChangeBudgetAllocation("revision", 0, BudgetSection.SAVINGS,
-            amount = 50, startManual = true))
-        f.allocate(BudgetSection.RESERVE, 10)
+        assertEquals(40L, f.state.economy.availableBalance)
+        assertEquals(60L, f.state.economy.savingsBalance)
+        f.send(EngineCommand.ChangeBudgetAllocation("revision", 0, BudgetSection.NEEDS,
+            amount = 35, startManual = true))
+        f.allocate(BudgetSection.SAVINGS, 3)
+        f.allocate(BudgetSection.RESERVE, 2)
         f.confirm()
         assertEquals(first, f.state.financial.plans.first())
         assertEquals(first.id, f.state.financial.plans.last().previousId)
         assertEquals(2, f.state.financial.plans.last().ordinal)
-        assertEquals(BudgetPlan(40, 0, 50, 10), f.state.economy.plan)
-        assertEquals(100L, f.state.economy.availableBalance)
-        assertEquals(0L, f.state.economy.savingsBalance)
+        assertEquals(BudgetPlan(35, 0, 3, 2), f.state.financial.plans.last().allocation)
+        assertEquals(40L, f.state.financial.plans.last().availableBasis)
+        assertEquals(BudgetPlan(35, 0, 0, 2), f.state.economy.plan)
+        assertEquals(37L, f.state.economy.availableBalance)
+        assertEquals(63L, f.state.economy.savingsBalance)
         assertFalse(f.state.financial.currentPeriod!!.independentlySaved)
-        assertTrue(f.repo.entries.flatMap { it.operations }.isEmpty())
+        assertEquals(listOf(60L, 3L), f.repo.entries.flatMap { it.operations }.map { it.amount })
+        assertTrue(f.repo.entries.flatMap { it.operations }.all { it.kind == LedgerKind.DEPOSIT })
     }
 
     @Test fun fullySavedGoalStillDebitsOnlySavingsAndKeepsItsHistoricalReceipt() = runTest {
         val f = Fixture()
-        f.select(); f.confirm()
+        f.select(); f.confirmDefaultBudget()
         val purchase = EngineCommand.BuyGoalItem("goal", "part")
         f.send(EngineCommand.DepositSavings(20))
         assertEquals(100L, f.state.economy.balance)
@@ -198,13 +204,13 @@ class FinancialEngineIntegrationTest {
 
     @Test fun directGoalPurchaseRecordsWalletExpenseWithoutPretendingTheChildSaved() = runTest {
         val f = Fixture()
-        f.select(); f.confirm()
+        f.select(); f.confirmDefaultBudget()
         val before = f.state
         f.send(EngineCommand.BuyGoalItem("goal", "part"))
 
         assertEquals(80L, f.state.economy.availableBalance)
         assertEquals(0L, f.state.economy.savingsBalance)
-        assertEquals(BudgetPlan(80, 0, 0, 0), f.state.economy.plan)
+        assertEquals(BudgetPlan(35, 0, 0, 45), f.state.economy.plan)
         assertEquals(before.financial.plans, f.state.financial.plans)
         val period = checkNotNull(f.state.financial.currentPeriod)
         assertEquals(20L, period.spentAvailable)
@@ -227,7 +233,7 @@ class FinancialEngineIntegrationTest {
 
     @Test fun mixedGoalPurchaseHasTwoReceiptsOneItemAndNoRepeatedEffectsAfterRetryOrSnapshot() = runTest {
         val f = Fixture(savings = 7)
-        f.select(); f.confirm()
+        f.select(); f.confirmDefaultBudget()
         val before = f.state
         val request = f.request(EngineCommand.BuyGoalItem("goal", "part"))
         assertNull(f.engine.blockReason(before, request.command))
@@ -270,14 +276,14 @@ class FinancialEngineIntegrationTest {
         assertEquals(historySize, f.repo.entries.size)
     }
 
-    @Test fun mixedPurchaseFoodWarningWritesNothingAndConfirmationKeepsItsOriginalRevision() = runTest {
+    @Test fun mixedPurchaseCannotUseProtectedNeedsEvenWhenFoodRiskIsAccepted() = runTest {
         val f = Fixture(available = 40, savings = 7)
-        f.select(); f.confirm()
+        f.select(); f.confirmDefaultBudget()
         val before = f.state
         val request = f.request(EngineCommand.BuyGoalItem("goal", "part"))
         val historySize = f.repo.entries.size
-        assertEquals(BlockReason.FoodBudgetWarning(27, 35), f.engine.blockReason(before, request.command))
-        assertEquals(EngineResult.Blocked(BlockReason.FoodBudgetWarning(27, 35)), f.engine.dispatch(request))
+        assertEquals(BlockReason.InsufficientMoney(8), f.engine.blockReason(before, request.command))
+        assertEquals(EngineResult.Blocked(BlockReason.InsufficientMoney(8)), f.engine.dispatch(request))
         assertEquals(before, f.state)
         assertEquals(historySize, f.repo.entries.size)
 
@@ -287,10 +293,10 @@ class FinancialEngineIntegrationTest {
         assertEquals(EngineResult.Blocked(BlockReason.StaleRevision), f.engine.dispatch(confirmed))
         assertEquals(latest, f.state)
         assertTrue(f.state.ownedItems.isEmpty())
-        f.send(EngineCommand.BuyGoalItem("goal", "part", acceptFoodRisk = true))
-        assertEquals(22L, f.state.economy.availableBalance)
-        assertEquals(0L, f.state.economy.savingsBalance)
-        assertEquals(listOf("part"), f.state.ownedItems.map { it.itemId })
+        assertEquals(BlockReason.InsufficientMoney(8), f.blocked(EngineCommand.BuyGoalItem("goal", "part", acceptFoodRisk = true)))
+        assertEquals(latest, f.state)
+        assertEquals(30L, f.state.economy.plan.needs)
+        assertEquals(7L, f.state.economy.savingsBalance)
     }
 
     @Test fun goalPurchaseChecksCombinedFundsAndCannotBypassUnfinishedAllocation() = runTest {
@@ -302,7 +308,7 @@ class FinancialEngineIntegrationTest {
         assertEquals(draft, f.state)
         f.confirm()
         val before = f.state
-        assertEquals(BlockReason.InsufficientMoney(5), f.blocked(request))
+        assertEquals(BlockReason.InsufficientMoney(15), f.blocked(request))
         assertEquals(before, f.state)
     }
 
@@ -310,30 +316,31 @@ class FinancialEngineIntegrationTest {
         val f = Fixture()
         f.select()
         f.allocate(BudgetSection.NEEDS, 40)
-        f.allocate(BudgetSection.SAVINGS, 60)
+        f.allocate(BudgetSection.SAVINGS, 50)
+        f.allocate(BudgetSection.RESERVE, 10)
         f.confirm()
         val intent = f.state.financial.plans.single()
-        f.send(EngineCommand.DepositSavings(20))
-        assertEquals(BudgetPlan(40, 0, 40, 0), f.state.economy.plan)
+        f.send(EngineCommand.DepositSavings(5))
+        assertEquals(BudgetPlan(40, 0, 0, 5), f.state.economy.plan)
         f.send(EngineCommand.Feed("meal"))
-        assertEquals(BudgetPlan(35, 0, 40, 0), f.state.economy.plan)
+        assertEquals(BudgetPlan(35, 0, 0, 5), f.state.economy.plan)
         f.send(EngineCommand.WithdrawSavings(10, confirmed = true))
-        assertEquals(BudgetPlan(35, 0, 40, 10), f.state.economy.plan)
-        assertEquals(85L, f.state.economy.availableBalance)
-        assertEquals(10L, f.state.economy.savingsBalance)
+        assertEquals(BudgetPlan(35, 0, 0, 15), f.state.economy.plan)
+        assertEquals(50L, f.state.economy.availableBalance)
+        assertEquals(45L, f.state.economy.savingsBalance)
         assertEquals(intent, f.state.financial.plans.single())
 
         // Today's food has been paid, so this new revision covers six remaining meals (30).
         f.send(EngineCommand.ChangeBudgetAllocation("remaining", 0, BudgetSection.NEEDS,
             amount = 30, startManual = true))
-        f.allocate(BudgetSection.RESERVE, 15)
+        f.allocate(BudgetSection.RESERVE, 20)
         f.confirm()
-        assertEquals(BudgetPlan(30, 0, 40, 15), f.state.economy.plan)
+        assertEquals(BudgetPlan(30, 0, 0, 20), f.state.economy.plan)
         assertEquals(intent, f.state.financial.plans.first())
-        assertEquals(BudgetPlan(40, 0, 60, 0), intent.allocation)
-        assertEquals(85L, f.state.economy.availableBalance)
-        assertEquals(10L, f.state.economy.savingsBalance)
-        assertEquals(listOf(LedgerKind.DEPOSIT, LedgerKind.AVAILABLE_EXPENSE, LedgerKind.WITHDRAWAL),
+        assertEquals(BudgetPlan(40, 0, 50, 10), intent.allocation)
+        assertEquals(50L, f.state.economy.availableBalance)
+        assertEquals(45L, f.state.economy.savingsBalance)
+        assertEquals(listOf(LedgerKind.DEPOSIT, LedgerKind.DEPOSIT, LedgerKind.AVAILABLE_EXPENSE, LedgerKind.WITHDRAWAL),
             f.repo.entries.flatMap { it.operations }.map { it.kind })
     }
 
@@ -359,7 +366,7 @@ class FinancialEngineIntegrationTest {
 
     @Test fun savingsCannotPayFoodUntilWithdrawalIsExplicitlyConfirmed() = runTest {
         val f = Fixture(available = 0, savings = 40)
-        f.select(); f.confirm()
+        f.select(); f.confirmDefaultBudget()
         val before = f.state
         assertEquals(BlockReason.InsufficientMoney(5), f.blocked(EngineCommand.Feed("meal")))
         assertEquals(BlockReason.SavingsWithdrawalConfirmationRequired,
@@ -379,7 +386,7 @@ class FinancialEngineIntegrationTest {
 
     @Test fun finaleRequiresThisPeriodsPracticeAndNewPeriodDoesNotInheritOldReview() = runTest {
         val f = Fixture()
-        f.select(); f.confirm()
+        f.select(); f.confirmDefaultBudget()
         f.send(EngineCommand.DepositSavings(20))
         f.send(EngineCommand.BuyGoalItem("goal", "part"))
         f.send(EngineCommand.OpenNextEvent)
@@ -428,7 +435,7 @@ class FinancialEngineIntegrationTest {
 
     @Test fun demoCanContinueAndFinishTheChapterWithoutInventingPracticeCompletion() = runTest {
         val f = Fixture()
-        f.select(); f.confirm()
+        f.select(); f.confirmDefaultBudget()
         f.send(EngineCommand.DepositSavings(20))
         f.send(EngineCommand.BuyGoalItem("goal", "part"))
         f.send(EngineCommand.OpenNextEvent)
@@ -461,7 +468,7 @@ class FinancialEngineIntegrationTest {
 
     @Test fun demoChapterSkipStillRequiresRealFoodAndPendingBudget() = runTest {
         val f = Fixture()
-        f.select(); f.confirm()
+        f.select(); f.confirmDefaultBudget()
         f.send(EngineCommand.DepositSavings(20))
         f.send(EngineCommand.BuyGoalItem("goal", "part"))
         f.send(EngineCommand.OpenNextEvent)
@@ -506,7 +513,7 @@ class FinancialEngineIntegrationTest {
     @Test fun onlyNewPeriodPlanReviewReadsHistoryAndKeepsTheSameFrozenQuestion() = runTest {
         for (kind in FinancialQuestionKind.entries) {
             val f = Fixture()
-            f.select(); f.confirm()
+            f.select(); f.confirmDefaultBudget()
             val request = f.request(EngineCommand.RequestFinancialPractice(kind, series = true))
             val expected = f.engine.transition(f.state, request, f.repo.entries.toList())
             f.repo.failHistoryRead = kind != FinancialQuestionKind.PLAN_REVIEW
@@ -533,7 +540,7 @@ class FinancialEngineIntegrationTest {
 
     @Test fun concurrentStateChangeDuringReviewPreparationCannotCommitAnOldReport() = runTest {
         val f = Fixture()
-        f.select(); f.confirm()
+        f.select(); f.confirmDefaultBudget()
         val before = f.state
         val latest = before.copy(pet = before.pet.copy(name = "Новое имя"))
         f.repo.afterHistoryRead = { f.repo.update { latest } }
@@ -589,6 +596,12 @@ class FinancialEngineIntegrationTest {
             val plan = state.economy.planning!!
             send(EngineCommand.ConfirmBudget(plan.id, plan.revision))
         }
+        suspend fun confirmDefaultBudget() {
+            // These scenarios need a food allocation and spendable money for other actions.
+            allocate(BudgetSection.NEEDS, minOf(35, state.economy.availableBalance))
+            allocate(BudgetSection.RESERVE, EconomyOperations.allocationRemaining(state.economy))
+            confirm()
+        }
         suspend fun confirmAllocatingRemaining() {
             allocate(BudgetSection.NEEDS, state.economy.displayPlan.needs + EconomyOperations.allocationRemaining(state.economy))
             confirm()
@@ -599,7 +612,7 @@ class FinancialEngineIntegrationTest {
             send(EngineCommand.CompleteEvent(event.id, "$expected:done"))
         }
         suspend fun prepareFoodOnlyFinale() {
-            select(); confirm()
+            select(); confirmDefaultBudget()
             send(EngineCommand.DepositSavings(20))
             send(EngineCommand.BuyGoalItem("goal", "part"))
             send(EngineCommand.OpenNextEvent)

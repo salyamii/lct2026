@@ -98,8 +98,14 @@ object EconomyOperations {
     fun confirm(state: EconomyState, id: String, revision: Long, knownNeeds: Long = 35L): EconomyState {
         val session = session(state, id, revision)
         if (session.stage != BudgetPlanningStage.ALLOCATION || allocationRemaining(state) != 0L ||
+            state.displayPlan.total != state.availableBalance ||
             state.displayPlan.needs < minimumNeeds(state, knownNeeds)) fail(EconomyFailure.INVALID_ALLOCATION)
-        return state.copy(plan = state.displayPlan, planning = null, unallocated = 0)
+        // Confirming the draft performs its planned deposit in the same aggregate write.
+        // A settled/legacy plan is never moved by merely opening or restoring the world.
+        val allocation = state.displayPlan
+        return state.copy(plan = allocation.copy(savings = 0), planning = null, unallocated = 0,
+            availableBalance = Math.subtractExact(state.availableBalance, allocation.savings),
+            savingsBalance = Math.addExact(state.savingsBalance, allocation.savings))
     }
 
     fun weekly(state: EconomyState, id: String, income: Long): EconomyState {
@@ -109,6 +115,24 @@ object EconomyOperations {
         return state.copy(availableBalance = amount, unallocated = income,
             planning = BudgetPlanning(id, BudgetPlanningReason.WEEKLY, BudgetPlanningStage.RECEIPT, income,
                 draft = state.plan, baseAmount = amount))
+    }
+
+    /** New weekly income stays unallocated; this explicit transfer uses only the old reserve. */
+    fun depositWeeklyReserve(state: EconomyState, id: String, revision: Long, amount: Long): EconomyState {
+        val session = session(state, id, revision)
+        if (session.reason != BudgetPlanningReason.WEEKLY || session.stage != BudgetPlanningStage.RECEIPT)
+            fail(EconomyFailure.STALE_SESSION)
+        if (amount <= 0) fail(EconomyFailure.INVALID_ALLOCATION)
+        if (amount != state.plan.reserve) fail(EconomyFailure.STALE_SESSION)
+        val draft = state.displayPlan
+        val basis = planningAmount(state)
+        if (draft != state.plan || basis != state.availableBalance ||
+            Math.addExact(draft.total, state.unallocated) != basis) fail(EconomyFailure.INVALID_ALLOCATION)
+        val remaining = Math.subtractExact(state.availableBalance, amount)
+        return state.copy(plan = state.plan.copy(reserve = 0),
+            availableBalance = remaining, savingsBalance = Math.addExact(state.savingsBalance, amount),
+            planning = session.copy(revision = Math.addExact(session.revision, 1),
+                draft = draft.copy(reserve = 0), baseAmount = remaining))
     }
 
     fun earn(state: EconomyState, income: Long): EconomyState {
@@ -129,8 +153,8 @@ object EconomyOperations {
         }
         return quoteAvailable(state.plan, amount, when (kind) {
             SpendingKind.FEEDING -> listOf(BudgetSection.NEEDS, BudgetSection.RESERVE, BudgetSection.WANTS, BudgetSection.SAVINGS)
-            SpendingKind.WANT -> listOf(BudgetSection.WANTS, BudgetSection.RESERVE, BudgetSection.SAVINGS, BudgetSection.NEEDS)
-            else -> listOf(BudgetSection.RESERVE, BudgetSection.WANTS, BudgetSection.SAVINGS, BudgetSection.NEEDS)
+            SpendingKind.WANT -> listOf(BudgetSection.WANTS, BudgetSection.RESERVE, BudgetSection.SAVINGS)
+            else -> listOf(BudgetSection.RESERVE, BudgetSection.WANTS, BudgetSection.SAVINGS)
         })
     }
 
@@ -143,12 +167,18 @@ object EconomyOperations {
         else state.copy(availableBalance = state.availableBalance - amount, plan = deduct(state.plan, quote.parts))
     }
 
+    /** Money eligible for a voluntary transfer; the food allocation remains protected. */
+    fun depositAvailableBalance(state: EconomyState): Long {
+        if (state.planning != null || state.unallocated != 0L || state.plan.total != state.availableBalance) return 0
+        return Math.addExact(Math.addExact(state.plan.savings, state.plan.reserve), state.plan.wants)
+    }
+
     fun depositQuote(state: EconomyState, amount: Long): SpendingQuote {
         require(amount >= 0)
         if (state.planning != null || state.unallocated != 0L || state.plan.total != state.availableBalance)
             return SpendingQuote(emptyList(), amount, blocked = true)
         return quoteAvailable(state.plan, amount,
-            listOf(BudgetSection.SAVINGS, BudgetSection.RESERVE, BudgetSection.WANTS, BudgetSection.NEEDS))
+            listOf(BudgetSection.SAVINGS, BudgetSection.RESERVE, BudgetSection.WANTS))
     }
 
     /** A goal uses real savings first; its remainder follows the existing planned-saving priority. */

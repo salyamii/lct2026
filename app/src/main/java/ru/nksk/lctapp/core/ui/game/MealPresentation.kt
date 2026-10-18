@@ -19,12 +19,9 @@ internal fun mealChoices(state: GameState, catalog: GameCatalog, engine: GameEng
             effect.energyRestore >= 2 -> "Праздничный обед"
             else -> "Роскошный обед"
         }
-        val description = when {
-            effect.exhaustsCurrentEnergy && !demoMode -> "После обеда нужен отдых. Утром сил будет меньше."
-            effect.energyRestore >= 2 -> "Поднимет настроение. Восстановит часть сил."
-            effect.energyRestore > 0 -> "Поднимет настроение. Восстановит немного сил."
-            else -> "Утолит голод."
-        }
+        val description = if (effect.exhaustsCurrentEnergy && !demoMode)
+            "После обеда нужен отдых. Утром сил будет меньше." else null
         MealChoiceUiState(meal.id, label, enabled = blocked == null, consequence = description,
-            priceLabel = if (price == 0L) "Бесплатно" else paymentCoinAmount(price))
+            priceLabel = if (price == 0L) "Бесплатно" else paymentCoinAmount(price),
+            petEffects = mealPetEffects(state, catalog, meal.id, demoMode))
     }

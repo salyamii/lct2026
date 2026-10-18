@@ -140,7 +140,7 @@ internal fun bundledGameCatalog(): GameCatalog {
         rules = EngineRules("ryzhik-2026-09-19-v1", fullEnergy = 5, hungerBlocksAtStep = 3, shortDeedMaxEnergy = 1, weeklyIncome = 100),
         meals = listOf(
             MealDefinition("basic-v1", price = 5, visualStateAfter = null),
-            MealDefinition("luxury-v1", price = 7, visualStateAfter = ru.nksk.lctapp.domain.pet.PetVisualState.HAPPY, energyRestore = 1),
+            MealDefinition("luxury-v1", price = 7, visualStateAfter = null, energyRestore = 1),
             MealDefinition("feast-v1", price = 10, visualStateAfter = ru.nksk.lctapp.domain.pet.PetVisualState.HAPPY, energyRestore = 2),
             MealDefinition("community-v1", price = 0, visualStateAfter = null, nextMorningEnergy = 3),
         ),

@@ -3,6 +3,8 @@ package ru.nksk.lctapp.feature.tasks.ui
 import ru.nksk.lctapp.domain.pet.renderPetText
 import ru.nksk.lctapp.core.ui.game.mealChoices
 import ru.nksk.lctapp.core.ui.components.MealChoiceUiState
+import ru.nksk.lctapp.core.ui.components.PetIndicatorEffectUiState
+import ru.nksk.lctapp.core.ui.components.PetIndicatorsUiState
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,19 +18,21 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ru.nksk.lctapp.core.ui.game.playerMessage
 import ru.nksk.lctapp.core.ui.game.asGameUiText
-import ru.nksk.lctapp.core.ui.game.asPetEffortText
+import ru.nksk.lctapp.core.ui.game.deedPetEffects
 import ru.nksk.lctapp.core.ui.game.deedDeadline
 import ru.nksk.lctapp.core.ui.game.missingCoinAmount
+import ru.nksk.lctapp.core.ui.game.petIndicators
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
 
 data class OfferedDeedUiState(val id: String, val title: String, val description: String, val reward: String,
-    val effort: String, val deadline: String, val scene: String)
+    val deadline: String, val scene: String, val effects: List<PetIndicatorEffectUiState> = emptyList())
 data class DeedsUiState(
     val loading: Boolean = true, val failed: Boolean = false, val busy: Boolean = false,
     val offers: List<OfferedDeedUiState> = emptyList(), val message: String? = null,
     val meals: List<MealChoiceUiState> = emptyList(), val hasCurrentEvent: Boolean = false,
     val petName: String = "",
+    val indicators: PetIndicatorsUiState? = null,
 )
 
 @HiltViewModel
@@ -141,6 +145,7 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
         shownDemoMode = session.demoModeEnabled
         mutableState.value = DeedsUiState(
             loading = false, busy = busy, message = message, petName = saved.pet.name,
+            indicators = petIndicators(saved, catalog, shownDemoMode),
             hasCurrentEvent = saved.engine?.currentEvent != null,
             offers = session.engine.availableDeeds(saved).map { offer ->
                 val event = catalog.content.events.single { it.id == offer.eventId }
@@ -148,8 +153,8 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
                 val reward = catalog.content.choices.single { it.eventId == event.id }.moneyDelta
                 OfferedDeedUiState(offer.id, renderPetText(event.title, saved.pet.name).asGameUiText(),
                     renderPetText(event.description, saved.pet.name).asGameUiText(), "До ${missingCoinAmount(reward)}",
-                    if (session.demoModeEnabled) "Без усталости · режим бога" else card.effort.asPetEffortText(saved.pet.name),
-                    deedDeadline(saved.engine!!.day, offer.expiresDay), card.scene)
+                    deedDeadline(saved.engine!!.day, offer.expiresDay), card.scene,
+                    deedPetEffects(saved, catalog, event.id, shownDemoMode))
             },
             meals = pendingMeal?.let { listOf(it.copy(enabled = true)) }
                 ?: if (!needsFood) emptyList() else mealChoices(saved, catalog, session.engine, shownDemoMode),

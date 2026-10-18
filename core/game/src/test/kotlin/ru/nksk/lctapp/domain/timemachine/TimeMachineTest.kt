@@ -686,7 +686,7 @@ class TimeMachineTest {
             meals = listOf(MealDefinition("basic", 5, null), MealDefinition("large", 30, null)),
             storyDayId = "day", introductionId = "unlock", deedPool = listOf("deed"))
         val repo = RecordingRepository(GameState(PetState("plain", PetVisualState.NORMAL, name = petName),
-            EconomyState(BudgetPlan(balance, 0, 0, 0)),
+            EconomyState(BudgetPlan(0, balance, 0, 0)),
             StoryState("day", null, "shop", if (unlocked) listOf(StoryDecision("unlock-action", "unlocked")) else emptyList()),
             0, 0, emptyList(),
             EngineState("rules", 1, 1, DayPhase.RUNNING, 0, energy, true, null, balance,

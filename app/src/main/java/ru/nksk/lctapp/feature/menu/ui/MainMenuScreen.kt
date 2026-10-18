@@ -7,14 +7,18 @@ import ru.nksk.lctapp.core.ui.components.tour.LocalSpotlightTargets
 import ru.nksk.lctapp.core.ui.components.tour.spotlightTarget
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -22,6 +26,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,13 +42,26 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.core.ui.theme.AdventureNight
 import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
 import ru.nksk.lctapp.core.ui.components.rememberScenePainter
 import ru.nksk.lctapp.core.ui.components.GameArtworkScene
+import ru.nksk.lctapp.core.ui.components.SavingsGauge
+import ru.nksk.lctapp.core.ui.components.GameInk
+import ru.nksk.lctapp.core.ui.components.GamePlaque
+import ru.nksk.lctapp.R
+import ru.nksk.lctapp.core.ui.theme.Rubik
 
 private val MapButtonWidth = 176.dp
 private val MapButtonOverflow = 56.dp
@@ -58,7 +76,9 @@ fun MainMenuScreen(
     onRename: () -> Unit = {},
 ) {
     val tourTargets = LocalSpotlightTargets.current
-    val dispatch: (MainMenuAction) -> Unit = { if (!state.busy && tourTargets?.blocking != true) onAction(it) }
+    val interactionEnabled = !state.busy && tourTargets?.blocking != true
+    val dispatch: (MainMenuAction) -> Unit = { if (interactionEnabled) onAction(it) }
+    val onFeed: (() -> Unit)? = if (state.canFeed) ({ dispatch(MainMenuAction.Feed) }) else null
     var budgetExpanded by rememberSaveable { mutableStateOf(false) }
     val density = LocalDensity.current
     var screenTop by remember { mutableStateOf(0f) }
@@ -70,7 +90,6 @@ fun MainMenuScreen(
     GameArtworkScene(state.backgroundRes, modifier.fillMaxSize().background(AdventureNight)) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize().clipToBounds().background(AdventureNight)
         .onGloballyPositioned { screenTop = it.positionInRoot().y; screenWindowOrigin = it.boundsInWindow().topLeft }) {
-        val viewport = DpSize(maxWidth, maxHeight)
         val sceneScale = maxOf(maxWidth / 390.dp, maxHeight / 844.dp)
         val scenePainter = rememberScenePainter(state.backgroundRes,
             DpSize((483f * sceneScale).dp, (858f * sceneScale).dp))
@@ -85,28 +104,44 @@ fun MainMenuScreen(
                     Modifier.fillMaxSize().absolutePadding(left = 24.dp, right = MapButtonWidth - MapButtonOverflow + 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    CharacterScene(state.pet, Modifier.weight(1f).fillMaxSize(), characterPosition)
+                    MenuCharacterScene(state.pet, state.savings, state.dayStatus, { dispatch(MainMenuAction.Goal) },
+                        Modifier.weight(1f).fillMaxSize(), characterPosition, !state.busy && tourTargets?.blocking != true)
                     Column(
                         Modifier.width(sidePanelWidth)
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                     ) {
-                        MenuHud(state.pet.name, state.coins, state.completedGoals, state.totalGoals, dispatch, state.goalTitle, budget = state.budget,
+                        MenuHud(state.pet.name, state.coins, dispatch, indicators = state.indicators, budget = state.budget,
                             budgetExpanded = budgetExpanded, onBudgetExpandedChange = { budgetExpanded = it }, settingsButton = settingsButton,
-                            onRename = { if (tourTargets?.blocking != true) onRename() }, renameEnabled = !state.busy && tourTargets?.blocking != true)
-                        MenuActions(dispatch, viewport, state, scenePainter)
+                            onRename = { if (tourTargets?.blocking != true) onRename() }, renameEnabled = interactionEnabled,
+                            onFeed = onFeed, interactionEnabled = interactionEnabled)
+                        MenuActions(dispatch, state)
                     }
                 }
             } else {
+                // Keep normal compact phones fixed; scroll only when the larger layout needs it.
+                val indicatorWidth = maxWidth.coerceAtMost(480.dp) - 32.dp - if (settingsButton != null) 56.dp else 0.dp
+                val wrapIndicators = indicatorWidth / density.fontScale < 240.dp
+                val scrollContent = maxHeight < 520.dp || density.fontScale > 1.3f ||
+                    (wrapIndicators && maxHeight < 700.dp)
+                val contentScroll = rememberScrollState()
+                val attachPlaquesToEdge = maxWidth <= 480.dp
                 Column(
-                    Modifier.widthIn(max = 480.dp).fillMaxSize().align(Alignment.TopCenter),
+                    Modifier.widthIn(max = 480.dp).fillMaxSize().align(Alignment.TopCenter)
+                        .then(if (scrollContent) Modifier.verticalScroll(contentScroll) else Modifier),
                 ) {
-                    MenuHud(state.pet.name, state.coins, state.completedGoals, state.totalGoals, dispatch, state.goalTitle,
-                        Modifier.onGloballyPositioned { hudBottom = it.positionInRoot().y + it.size.height }, budget = state.budget,
-                            budgetExpanded = budgetExpanded, onBudgetExpandedChange = { budgetExpanded = it }, settingsButton = settingsButton,
-                            onRename = { if (tourTargets?.blocking != true) onRename() }, renameEnabled = !state.busy && tourTargets?.blocking != true)
-                    CharacterScene(state.pet, Modifier.weight(1f).fillMaxWidth(), characterPosition)
-                    MenuActions(dispatch, viewport, state, scenePainter)
+                    MenuHud(state.pet.name, state.coins, dispatch,
+                        Modifier.onGloballyPositioned { hudBottom = it.positionInRoot().y + it.size.height },
+                        indicators = state.indicators, budget = state.budget,
+                        budgetExpanded = budgetExpanded, onBudgetExpandedChange = { budgetExpanded = it }, settingsButton = settingsButton,
+                        onRename = { if (tourTargets?.blocking != true) onRename() }, renameEnabled = interactionEnabled,
+                        onFeed = onFeed, interactionEnabled = interactionEnabled,
+                        attachNameToEdge = attachPlaquesToEdge)
+                    MenuCharacterScene(state.pet, state.savings, state.dayStatus, { dispatch(MainMenuAction.Goal) },
+                        if (scrollContent) Modifier.fillMaxWidth().height(260.dp)
+                        else Modifier.weight(1f).fillMaxWidth(), characterPosition, !state.busy && tourTargets?.blocking != true,
+                        attachDayToEdge = attachPlaquesToEdge)
+                    MenuActions(dispatch, state)
                 }
             }
         }
@@ -139,10 +174,70 @@ fun MainMenuScreen(
     }
 }
 
+@Composable
+private fun MenuCharacterScene(
+    pet: MainMenuPetUiState,
+    savings: MainMenuSavingsUiState?,
+    dayStatus: String?,
+    onOpenGoal: () -> Unit,
+    modifier: Modifier,
+    artworkModifier: Modifier,
+    enabled: Boolean,
+    attachDayToEdge: Boolean = false,
+) {
+    BoxWithConstraints(modifier) {
+        CharacterScene(pet, Modifier.fillMaxSize()
+            .then(if (savings != null) Modifier.padding(start = 56.dp) else Modifier), artworkModifier)
+        savings?.let { target ->
+            val availableHeight = (maxHeight - 20.dp).coerceAtLeast(0.dp)
+            val titleHeight = minOf(availableHeight,
+                (14.dp * LocalDensity.current.fontScale + 12.dp).coerceAtLeast(36.dp))
+            val overlap = minOf(14.dp, titleHeight / 2f)
+            val gaugeHeight = minOf(144.dp, (availableHeight - titleHeight + overlap).coerceAtLeast(0.dp))
+            val blockHeight = maxOf(titleHeight, titleHeight - overlap + gaugeHeight)
+            Box(
+                Modifier.align(Alignment.BottomStart).padding(start = 8.dp, bottom = 10.dp)
+                    .width(minOf(104.dp, (maxWidth - 8.dp).coerceAtLeast(0.dp))).height(blockHeight)
+                    .clickable(enabled = enabled, role = Role.Button, onClickLabel = "Открыть цель", onClick = onOpenGoal)
+                    .semantics(mergeDescendants = true) {
+                        contentDescription = "${target.title}: накоплено ${minOf(target.saved, target.total)} из ${target.total} монет"
+                    },
+            ) {
+                SavingsGauge(target.saved, target.total,
+                    Modifier.align(Alignment.BottomCenter).width(gaugeHeight * (2f / 3f)))
+                // The plaque overlaps the frame's transparent top margin, joining both into one object.
+                GamePlaque(
+                    Modifier.align(Alignment.TopCenter).fillMaxWidth().height(titleHeight),
+                    artworkRes = R.drawable.menu_name_plaque_v3,
+                    contentPadding = PaddingValues(start = 22.dp, end = 12.dp, top = 6.dp, bottom = 6.dp),
+                ) {
+                    Text("На цель", Modifier.clearAndSetSemantics {}, color = GameInk,
+                        fontFamily = Rubik, fontWeight = FontWeight.SemiBold,
+                        fontSize = 11.sp, lineHeight = 14.sp, maxLines = 1)
+                }
+            }
+        }
+        dayStatus?.let { status ->
+            MenuRightEdgePlaque(
+                Modifier.align(Alignment.BottomEnd).padding(end = if (attachDayToEdge) 0.dp else 12.dp, bottom = 10.dp)
+                    .widthIn(min = 112.dp, max = 152.dp).heightIn(min = 52.dp),
+                attached = attachDayToEdge,
+                light = true,
+                contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp),
+            ) {
+                Text(status, Modifier.align(Alignment.Center), color = GameInk,
+                    fontFamily = Rubik, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
+                    textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+        }
+    }
+}
+
 @Preview(name = "Бюджет · 390 × 844", widthDp = 390, heightDp = 844)
 @Preview(name = "Compact phone", widthDp = 360, heightDp = 640)
 @Preview(name = "Landscape", widthDp = 844, heightDp = 390)
 @Preview(name = "Large text", widthDp = 390, heightDp = 844, fontScale = 1.5f)
+@Preview(name = "Compact with large text", widthDp = 360, heightDp = 640, fontScale = 1.5f)
 @Composable
 private fun MainMenuPreview() {
     LCTAppTheme { MainMenuScreen(state = MainMenuPreviewState, onAction = {}) }

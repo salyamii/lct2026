@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -30,7 +31,6 @@ import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.feature.onboarding.R
 
 private val Night = Color(0xff1f1447)
-private val Lime = Color(0xffa8e830)
 
 @Composable
 fun OnboardingScreen(
@@ -141,18 +141,13 @@ private fun WelcomeCard(
                 modifier = Modifier.padding(bottom = 12.dp).semantics { liveRegion = LiveRegionMode.Polite })
         }
         // A muted button must remain clickable to explain why the adventure cannot start yet.
-        Button(onClick = onStart, enabled = !saving,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).semantics {
+        OnboardingPrimaryButton(
+            text = stringResource(if (saving) R.string.onboarding_starting else R.string.onboarding_start),
+            onClick = onStart, enabled = !saving,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
+                .alpha(if (state.foxSelected) 1f else .65f).semantics {
                 if (!state.foxSelected) stateDescription = chooseFirst
             },
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (state.foxSelected) Lime else Color(0xff6c677e),
-                contentColor = if (state.foxSelected) Color(0xff171440) else Color(0xffd5d0e0),
-                disabledContainerColor = Color(0xff6c677e), disabledContentColor = Color(0xffd5d0e0))) {
-            Text(stringResource(if (saving) R.string.onboarding_starting else R.string.onboarding_start),
-                fontFamily = artwork.titleFont, fontWeight = FontWeight.SemiBold,
-                fontSize = 17.sp, lineHeight = 22.sp)
-        }
+        )
     }
 }
