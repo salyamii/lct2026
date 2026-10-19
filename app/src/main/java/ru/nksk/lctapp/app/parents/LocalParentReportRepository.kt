@@ -165,18 +165,18 @@ private fun SkillExplanation.toParentExplanation(): ParentSkillExplanation? =
 
 /** Parent-facing names from the existing FIN-01–FIN-12 analytics specification. */
 private fun SkillId.parentTitle(): String = when (this) {
-    SkillId.COMPARE_AMOUNTS -> "Сравнивает денежные суммы"
-    SkillId.PLAN_BUDGET -> "Планирует бюджет на период"
-    SkillId.PRIORITIZE_NEEDS -> "Учитывает обязательные нужды перед желаниями"
-    SkillId.MAKE_MONEY_LAST -> "Следит, чтобы денег хватало до следующего дохода"
-    SkillId.SAVE_FOR_GOAL -> "Последовательно собирает на выбранную цель"
-    SkillId.DELAY_PURCHASE -> "Откладывает желанную покупку ради приоритета"
-    SkillId.BUILD_EMERGENCY_FUND -> "Создаёт запас на непредвиденные расходы"
-    SkillId.ADAPT_AFTER_EXPENSE -> "Перестраивает действия после неожиданной траты"
-    SkillId.COMPARE_COSTS -> "Сопоставляет денежные и другие затраты"
-    SkillId.PLAN_EXTRA_INCOME -> "Планирует дополнительный заработок"
-    SkillId.RECONSIDER_DECISION -> "Разбирает финансовые последствия и меняет решение"
-    SkillId.UNDERSTAND_INCOME_AND_EXPENSES -> "Понимает свои доходы и расходы"
+    SkillId.COMPARE_AMOUNTS -> "Сравнивает суммы"
+    SkillId.PLAN_BUDGET -> "Планирует траты"
+    SkillId.PRIORITIZE_NEEDS -> "Оставляет деньги на необходимое"
+    SkillId.MAKE_MONEY_LAST -> "Рассчитывает деньги до следующего дохода"
+    SkillId.SAVE_FOR_GOAL -> "Копит на цель"
+    SkillId.DELAY_PURCHASE -> "Откладывает покупку ради цели"
+    SkillId.BUILD_EMERGENCY_FUND -> "Оставляет запас на неожиданное"
+    SkillId.ADAPT_AFTER_EXPENSE -> "Меняет план после неожиданной траты"
+    SkillId.COMPARE_COSTS -> "Учитывает деньги, силы и время"
+    SkillId.PLAN_EXTRA_INCOME -> "Планирует заработок"
+    SkillId.RECONSIDER_DECISION -> "Учится на своих решениях"
+    SkillId.UNDERSTAND_INCOME_AND_EXPENSES -> "Различает доходы, расходы и переводы"
 }
 
 internal fun withParentMaterials(report: ParentReport, materials: ParentMaterialsState): ParentReport {

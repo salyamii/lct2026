@@ -61,10 +61,14 @@ fun CoinBalanceScreen(
                 DeedChip(stringResource(R.string.practice_price, state.spent), lime = state.remainder >= 0)
             }
             state.round.expenses.chunked(2).forEach { expenses ->
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
                     expenses.forEach { expense ->
                         ExpenseCard(expense, expense.item in state.removed,
-                            enabled = deed?.canPlay != false && state.started && state.verdict == null, modifier = Modifier.weight(1f),
+                            enabled = deed?.canPlay != false && state.started && state.verdict == null,
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
                             onToggle = { onAction(CoinBalanceAction.Toggle(expense.item, state.current)) })
                     }
                     if (expenses.size == 1) Spacer(Modifier.weight(1f))
@@ -110,7 +114,7 @@ private fun ExpenseCard(expense: PracticeExpense, removed: Boolean, enabled: Boo
                         modifier: Modifier = Modifier, onToggle: () -> Unit) {
     val shape = RoundedCornerShape(12.dp)
     val status = stringResource(if (removed) R.string.practice_removed else R.string.practice_kept)
-    Column(modifier.clip(shape).background(if (removed) ColorRemoved else DeedColors.CreamCard)
+    Column(modifier.heightIn(min = 96.dp).clip(shape).background(if (removed) ColorRemoved else DeedColors.CreamCard)
         .border(1.dp, DeedColors.Border, shape)
         .toggleable(value = !removed, enabled = enabled, role = Role.Checkbox, onValueChange = { onToggle() })
         .semantics(mergeDescendants = true) { stateDescription = status }.padding(9.dp),
@@ -118,7 +122,7 @@ private fun ExpenseCard(expense: PracticeExpense, removed: Boolean, enabled: Boo
         Row(verticalAlignment = Alignment.CenterVertically) {
             GameArtwork(expense.item.artwork, null, Modifier.size(36.dp))
             Spacer(Modifier.width(4.dp))
-            Text(stringResource(R.string.practice_price, expense.cost), color = PracticeInk,
+            Text(stringResource(R.string.practice_price, expense.cost), modifier = Modifier.weight(1f), color = PracticeInk,
                 fontFamily = Nunito, fontSize = 13.sp, fontWeight = FontWeight.ExtraBold)
         }
         Text(stringResource(expense.item.titleRes), color = PracticeInk,

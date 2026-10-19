@@ -71,6 +71,14 @@ class StoryProgress(
 
     val requiredGoal: GoalCampaign? get() = currentAct?.goalId?.let { id -> goals.first { it.goalId == id } }
 
+    /** A new chapter needs the player's first savings target; later purchases do not repeat this gate. */
+    val unselectedChapterGoal: GoalCampaign? get() {
+        val act = currentAct ?: return null
+        val goal = requiredGoal ?: return null
+        if (act.id == campaign?.acts?.firstOrNull()?.id || goals.selectedGoal(state)?.goalId == goal.goalId) return null
+        return goal
+    }
+
     /** The current kit leads to its own finale; a completed previous kit never accelerates another act. */
     val goalReadyForStory: Boolean get() = requiredGoal?.let {
         goals.selectedGoal(state)?.goalId == it.goalId && it.progress(state, content).isCollected

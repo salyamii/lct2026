@@ -167,7 +167,7 @@ private fun MapHeader(onBack: () -> Unit, interactionEnabled: Boolean, modifier:
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         GameBackButton(onBack, enabled = interactionEnabled)
-        GameSceneTitle("Карта приключений", Modifier.weight(1f))
+        GameSceneTitle("Карта\nприключений", Modifier.weight(1f), textAlign = TextAlign.Center)
         MapInformationButton()
     }
 }

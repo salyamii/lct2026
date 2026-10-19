@@ -18,6 +18,7 @@ internal fun eventCharacterLayout(
     petBounds: ArtworkVisibleBounds,
     companionBounds: ArtworkVisibleBounds,
     grounding: PetArtworkGrounding?,
+    companionOnFloor: Boolean = true,
 ): EventCharacterLayout {
     val floor = .935f
     val motionMargin = .02f
@@ -32,20 +33,25 @@ internal fun eventCharacterLayout(
     val companionFloor = companionBounds.bottom
     var petSize = width * petWidthFraction
     var companionSize = width * .67f
-    val gap = width * .04f
+    // The pair is one group. A shallow illustration must not retain a phone-wide gap
+    // after both figures have shrunk to fit the space above a long action card.
+    val gap = minOf(width * .025f, height * .04f)
     val visibleWidth = (petRight - petLeft) * petSize + (companionRight - companionLeft) * companionSize
     val aboveFloor = maxOf((floor - petTop) * petSize, (companionFloor - companionTop) * companionSize)
     val belowFloor = maxOf((petBottom - floor) * petSize, motionMargin * companionSize)
-    val fit = minOf(1f, width * .90f / visibleWidth.coerceAtLeast(1f),
-        height * .94f / (aboveFloor + belowFloor).coerceAtLeast(1f)).coerceAtLeast(0f)
+    val fit = minOf(1.12f, width * .94f / (visibleWidth + gap).coerceAtLeast(1f),
+        height * .96f / (aboveFloor + belowFloor).coerceAtLeast(1f)).coerceAtLeast(0f)
     petSize *= fit
     companionSize *= fit
-    val start = (width - visibleWidth * fit - gap) / 2f
-    val baseline = height * .97f - belowFloor * fit
+    val fittedGap = gap * fit
+    val start = (width - visibleWidth * fit - fittedGap) / 2f
+    val baseline = height * .98f - belowFloor * fit
     return EventCharacterLayout(
         companion = EventArtworkSlot(start - companionLeft * companionSize,
-            baseline - companionFloor * companionSize, companionSize),
-        pet = EventArtworkSlot(start + (companionRight - companionLeft) * companionSize + gap - petLeft * petSize,
+            if (companionOnFloor) baseline - companionFloor * companionSize
+            else (height - (companionBounds.top + companionBounds.bottom) * companionSize) / 2f,
+            companionSize),
+        pet = EventArtworkSlot(start + (companionRight - companionLeft) * companionSize + fittedGap - petLeft * petSize,
             baseline - floor * petSize, petSize),
     )
 }

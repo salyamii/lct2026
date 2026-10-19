@@ -25,10 +25,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import ru.nksk.lctapp.core.ui.components.gameScene
 import ru.nksk.lctapp.core.ui.components.GameArtwork
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -69,7 +75,7 @@ fun DeedsScreen(onTraining: () -> Unit, onExit: () -> Unit,
                 while (true) awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() }
             }
         }) {
-            GameLoadingIndicator(Modifier.align(Alignment.Center).safeDrawingPadding())
+            GameLoadingIndicator(Modifier.align(Alignment.Center).safeDrawingPadding(), delayMillis = 300)
         }
     }
     // The selected card can be far below the list heading. Always show the
@@ -101,6 +107,18 @@ private fun DeedsContent(onTraining: () -> Unit, onExit: () -> Unit,
     state: DeedsUiState, onStart: (String) -> Unit, onRetry: () -> Unit,
     onCurrentEvent: () -> Unit,
 ) {
+    val listState = rememberLazyListState()
+    var lastFirstOfferId by rememberSaveable { mutableStateOf<String?>(null) }
+    var previousOfferIds by rememberSaveable { mutableStateOf(emptyList<String>()) }
+    val offerIds = state.offers.map { it.id }
+    LaunchedEffect(state.loading, state.failed, offerIds) {
+        if (state.loading || state.failed) return@LaunchedEffect
+        val firstId = offerIds.firstOrNull()
+        val hasNewFirst = firstId != null && firstId != lastFirstOfferId && firstId !in previousOfferIds
+        lastFirstOfferId = firstId
+        previousOfferIds = offerIds
+        if (hasNewFirst) listState.scrollToItem(0)
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -118,6 +136,7 @@ private fun DeedsContent(onTraining: () -> Unit, onExit: () -> Unit,
         DeedSheet(modifier = Modifier.weight(1f)) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize().testTag("deeds_list"),
+                state = listState,
             ) {
                 item(key = "heading", contentType = "heading") {
                     Column {
@@ -143,6 +162,18 @@ private fun DeedsContent(onTraining: () -> Unit, onExit: () -> Unit,
                         }
                     }
                 }
+                items(state.offers, key = { "offer-${it.id}" }, contentType = { "deed" }) { offer ->
+                    Spacer(Modifier.height(12.dp))
+                    DeedCard(
+                        title = offer.title,
+                        description = offer.description,
+                        effects = offer.effects,
+                        rewardLabel = offer.reward,
+                        deadline = offer.deadline,
+                        scene = gameScene(offer.scene),
+                        onOpen = { if (!state.busy) onStart(offer.id) },
+                    )
+                }
                 item(key = "skill-training", contentType = "training") {
                     Spacer(Modifier.height(16.dp))
                     Surface(onClick = onTraining, enabled = !state.busy,
@@ -161,18 +192,6 @@ private fun DeedsContent(onTraining: () -> Unit, onExit: () -> Unit,
                         }
                     }
                     Spacer(Modifier.height(8.dp))
-                }
-                items(state.offers, key = { "offer-${it.id}" }, contentType = { "deed" }) { offer ->
-                    Spacer(Modifier.height(12.dp))
-                    DeedCard(
-                        title = offer.title,
-                        description = offer.description,
-                        effects = offer.effects,
-                        rewardLabel = offer.reward,
-                        deadline = offer.deadline,
-                        scene = gameScene(offer.scene),
-                        onOpen = { if (!state.busy) onStart(offer.id) },
-                    )
                 }
             }
         }

@@ -36,6 +36,7 @@ internal data class GoalUiState(
     val completedProjectCount: Int = 0,
     val campaignComplete: Boolean = false,
     val demoMode: Boolean = false,
+    val chapterSelectionRequired: Boolean = false,
 )
 
 internal val GoalUiState.backAction: GoalAction?

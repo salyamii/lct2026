@@ -10,16 +10,19 @@ import ru.nksk.lctapp.domain.economy.BudgetPlan
 import ru.nksk.lctapp.domain.economy.EconomyState
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.*
+import ru.nksk.lctapp.domain.history.*
 import ru.nksk.lctapp.domain.minigame.*
+import ru.nksk.lctapp.domain.timemachine.GameCatalogFingerprint
 
 class FinancialDeedsTest {
     private val catalog = bundledGameCatalog()
     private val ids = catalog.deedPool.filter { it.startsWith("financial-deed-") }
+    private val retiredBalanceId = "financial-deed-coin-balance-v1"
 
-    @Test fun fiveIndependentPaidOffersJoinThePoolWithoutChangingChapterAssignments() {
-        assertEquals(18, catalog.deedPool.size)
-        assertEquals(5, ids.size)
-        assertEquals(setOf(DeedGameKind.NEED_WANT, DeedGameKind.REAL_DISCOUNT, DeedGameKind.COIN_BALANCE,
+    @Test fun fourIndependentPaidOffersJoinThePoolWithoutChangingChapterAssignments() {
+        assertEquals(17, catalog.deedPool.size)
+        assertEquals(4, ids.size)
+        assertEquals(setOf(DeedGameKind.NEED_WANT, DeedGameKind.REAL_DISCOUNT,
             DeedGameKind.FINANCIAL_TRAP, DeedGameKind.EXTRA_PURCHASE), ids.map { catalog.policies.getValue(it).deedGameKind }.toSet())
         EventFactory(catalog.content, catalog.policies, catalog.meals, catalog.goals, catalog.storyCampaign)
         for (id in ids) {
@@ -42,8 +45,54 @@ class FinancialDeedsTest {
             catalog.policies.getValue("campaign-choice-v2:G1.02").choiceGameKinds.values.single())
     }
 
-    @Test fun eachGameStartsWithNoMoneyPausesForFreeAndPaysExactlyOnce() = runTest {
-        for (id in ids) {
+    @Test fun retiredBalanceKeepsItsDefinitionButCannotBeNewlyScheduled() {
+        assertFalse(retiredBalanceId in catalog.deedPool)
+        assertFalse(retiredBalanceId in catalog.dailyEventPool)
+        assertFalse(catalog.storyCampaign!!.deedHints.any { it.eventId == retiredBalanceId })
+        assertEquals(DeedGameKind.COIN_BALANCE, catalog.policies.getValue(retiredBalanceId).deedGameKind)
+        assertEquals(EventType.EARNING, catalog.content.events.single { it.id == retiredBalanceId }.type)
+        assertEquals(5L, catalog.content.choices.single { it.eventId == retiredBalanceId }.moneyDelta)
+        assertFalse(retiredBalanceId in catalog.plan(createInitialGameState()))
+        assertNotEquals(GameCatalogFingerprint.compute(catalog),
+            GameCatalogFingerprint.compute(catalog.copy(deedPool = catalog.deedPool + retiredBalanceId)))
+    }
+
+    @Test fun frozenDayWithRetiredBalanceSurvivesHistoryAndReplaysItsSavedEventList() = runTest {
+        val before = createInitialGameState().copy(
+            economy = EconomyState(BudgetPlan(0, 0, 0, 0), availableBalance = 0, savingsBalance = 0))
+        val frozenPlan = listOf(retiredBalanceId) + catalog.dailyEventPool.take(3)
+        val request = EngineRequest("old-begin-day", null,
+            EngineCommand.BeginDay(catalog.storyDayId, frozenPlan))
+        val repository = Repository(before)
+        fun engine(repository: Repository) = GameEngine(repository,
+            EventFactory(catalog.content, catalog.policies, catalog.meals, catalog.goals, catalog.storyCampaign), catalog.rules)
+        assertTrue(engine(repository).dispatch(request) is EngineResult.Applied)
+        assertEquals(frozenPlan, repository.value.engine!!.events.map { it.eventId })
+
+        val oldPool = catalog.deedPool.toMutableList().apply {
+            add(indexOf("financial-deed-financial-trap-v1"), retiredBalanceId)
+        }
+        val oldFingerprint = GameCatalogFingerprint.compute(catalog.copy(deedPool = oldPool))
+        val history = listOf(
+            AuditEntry("init", 1, "run", AuditType.INITIALIZED, after = before),
+            AuditEntry("old-day", 2, "run", AuditType.COMMAND, request = request,
+                before = before, after = repository.value, contentFingerprint = oldFingerprint,
+                operations = CanonicalLedger.fromTransition(before, repository.value, request)),
+        )
+        val snapshot = HistoryCodec.snapshot("run", repository.value, history)
+        val restored = HistoryCodec.decodeSnapshot(HistoryCodec.encodeSnapshot(snapshot))
+        assertEquals(snapshot, restored)
+        assertEquals(oldFingerprint, restored.history.last().contentFingerprint)
+        assertNotEquals(oldFingerprint, GameCatalogFingerprint.compute(catalog))
+
+        val replay = Repository(checkNotNull(restored.history.last().before))
+        assertTrue(engine(replay).dispatch(checkNotNull(restored.history.last().request)) is EngineResult.Applied)
+        assertEquals(HistoryCodec.encodeState(restored.state), HistoryCodec.encodeState(replay.value))
+        assertFalse(retiredBalanceId in catalog.plan(before))
+    }
+
+    @Test fun currentAndPreviouslyOfferedGamesStartPauseAndPayExactlyOnce() = runTest {
+        for (id in ids + retiredBalanceId) {
             val initial = createInitialGameState().let { it.copy(selectedGoalId = null,
                 economy = EconomyState(BudgetPlan(0, 0, 0, 0), availableBalance = 0, savingsBalance = 0),
                 story = it.story.copy(currentDayId = catalog.storyDayId, activeEventId = null),

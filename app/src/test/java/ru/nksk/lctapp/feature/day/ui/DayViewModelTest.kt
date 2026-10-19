@@ -20,6 +20,8 @@ import org.junit.Before
 import org.junit.Test
 import ru.nksk.lctapp.app.createInitialGameState
 import ru.nksk.lctapp.R
+import ru.nksk.lctapp.core.ui.game.cosmeticArtwork
+import ru.nksk.lctapp.core.ui.game.paymentCoinAmount
 import ru.nksk.lctapp.domain.economy.BudgetPlan
 import ru.nksk.lctapp.domain.economy.EconomyState
 import ru.nksk.lctapp.data.game.content.bundledGameCatalog
@@ -45,6 +47,7 @@ import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.analytics.AnalyticsFact
 import ru.nksk.lctapp.domain.analytics.DecisionContext
 import ru.nksk.lctapp.domain.pet.PetVisualState
+import ru.nksk.lctapp.domain.pet.PetCosmetics
 import ru.nksk.lctapp.domain.story.StoryDecision
 import ru.nksk.lctapp.domain.history.AuditEntry
 import ru.nksk.lctapp.domain.history.AuditType
@@ -53,6 +56,7 @@ import ru.nksk.lctapp.domain.history.GameSnapshotHead
 import ru.nksk.lctapp.domain.minigame.DeedGameScore
 import ru.nksk.lctapp.domain.minigame.PriceQuizState
 import ru.nksk.lctapp.domain.minigame.TargetStopState
+import ru.nksk.lctapp.feature.tasks.ui.DeedsViewModel
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DayViewModelTest {
@@ -459,6 +463,51 @@ class DayViewModelTest {
         assertFalse(repository.read().engine!!.deeds.single().completed)
     }
 
+    @Test fun everyCurrentEarningOfferRemainsInTasksImmediatelyAfterLater() = runTest(dispatcher) {
+        for (eventId in bundledGameCatalog().deedPool.distinct()) {
+            val (repository, dayModel, session) = fixture(eventFirst = eventId)
+            val tasks = DeedsViewModel(session)
+            store.put("tasks-after-later", tasks)
+            runCurrent()
+            val before = repository.read()
+            val offer = before.engine!!.deeds.single()
+            val exits = mutableListOf<String?>()
+            val exitCollector = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+                dayModel.exit.collect { exits += it }
+            }
+            dayModel.onAction(DayAction.Later)
+            runCurrent()
+
+            val after = repository.read()
+            assertEquals(eventId, listOf<String?>(null), exits)
+            assertEquals(eventId, listOf(offer.id), tasks.uiState.value.offers.map { it.id })
+            assertEquals(eventId, listOf(offer), after.engine!!.deeds)
+            assertNull(eventId, after.engine!!.currentEvent)
+            assertEquals(eventId, before.engine!!.steps, after.engine!!.steps)
+            assertEquals(eventId, before.engine!!.energy, after.engine!!.energy)
+            assertEquals(eventId, before.economy, after.economy)
+            assertEquals(eventId, before.story.decisions, after.story.decisions)
+            exitCollector.cancel()
+        }
+    }
+
+    @Test fun failedDeferralDoesNotPretendToLeaveTheOfferCard() = runTest(dispatcher) {
+        val (repository, model) = fixture(deedFirst = true)
+        runCurrent()
+        val before = repository.read()
+        val exits = mutableListOf<String?>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.exit.collect { exits += it } }
+        repository.failure = IOException("Cannot save the deferral")
+
+        model.onAction(DayAction.Later)
+        runCurrent()
+
+        assertEquals(before, repository.read())
+        assertTrue(exits.isEmpty())
+        assertFalse(model.uiState.value.busy)
+        assertTrue(model.uiState.value.retryRequired)
+    }
+
     @Test fun telescopeWorkCanBeDeferredInBothCatalogVersionsWithoutLosingItsDeadline() = runTest(dispatcher) {
         for (id in listOf("figma-2163-43-v1", "figma-2163-43-v1:balance-v2")) {
             val (repository, model, session) = fixture(eventFirst = id)
@@ -589,7 +638,7 @@ class DayViewModelTest {
         repository.update { it.copy(economy = it.economy.copy(plan = BudgetPlan(27, 0, 0, 0),
             availableBalance = 27, savingsBalance = 0, unallocated = 0)) }
         runCurrent()
-        assertEquals(listOf("Купить", "Пройти мимо"), model.uiState.value.options.map { it.label })
+        assertEquals(listOf("Купить за 25 монет", "Пройти мимо"), model.uiState.value.options.map { it.label })
         assertNull(model.uiState.value.later)
         assertTrue(model.uiState.value.message!!.contains("обед"))
         val exits = mutableListOf<String?>()
@@ -643,10 +692,33 @@ class DayViewModelTest {
         assertTrue(paid.enabled)
         val explanation = checkNotNull(paid.spending)
         assertTrue(explanation.contains("3 монеты из денег на желания"))
-        assertEquals("Возьмём для оплаты 3 монеты из денег на желания.\nИз запаса: 22. Останется: 0.", explanation)
+        assertEquals("Всего: 25 монет.\nВозьмём для оплаты 3 монеты из денег на желания.\nИз запаса: 22. Останется: 0.", explanation)
         assertEquals(22L, repository.read().economy.plan.reserve)
         assertEquals(20L, repository.read().economy.savingsBalance)
         assertNull(model.uiState.value.options.last().spending)
+    }
+
+    @Test fun explorerHatShowsTheFullPriceAndTheSameItemAsTheInventoryBeforeCharging() = runTest(dispatcher) {
+        val eventId = "figma-2654-50-purchase-v2"
+        val (repository, model) = fixture(eventFirst = eventId)
+        repository.update { it.copy(economy = EconomyState(BudgetPlan(35, 5, 0, 25), savingsBalance = 20)) }
+        runCurrent()
+        val shown = model.uiState.value
+        val before = repository.read()
+        assertEquals("Купить за 25 монет", shown.options.first().label)
+        assertEquals("Всего: 25 монет.\nВозьмём для оплаты 5 монет из денег на желания.\nИз запаса: 20. Останется: 5.",
+            shown.options.first().spending)
+        val look = checkNotNull(PetCosmetics.forItem("cosmetic-explorer-hat-v2"))
+        assertEquals(cosmeticArtwork(look.lookId), shown.purchaseArtworkRes)
+
+        model.onAction(DayAction.Choose("$eventId:buy"))
+        runCurrent()
+        val after = repository.read()
+        assertEquals(25L, before.economy.availableBalance - after.economy.availableBalance)
+        assertEquals(0L, after.economy.plan.wants)
+        assertEquals(5L, after.economy.plan.reserve)
+        assertEquals(before.economy.savingsBalance, after.economy.savingsBalance)
+        assertTrue(after.ownedItems.any { it.itemId == "cosmetic-explorer-hat-v2" })
     }
 
     @Test fun demoPurchasesShowFreeAtZeroCoinsAndRestoreOrdinaryAvailabilityOnDisable() = runTest(dispatcher) {
@@ -669,7 +741,8 @@ class DayViewModelTest {
             demo.setDemoModeEnabled(false)
             runCurrent()
             assertFalse(model.uiState.value.options.first().enabled)
-            assertEquals("Купить", model.uiState.value.options.first().label)
+            assertEquals(if (eventId == "figma-2654-50-purchase-v2") "Купить за 25 монет" else "Купить за 6 монет",
+                model.uiState.value.options.first().label)
 
             demo.setDemoModeEnabled(true)
             runCurrent()
@@ -700,7 +773,7 @@ class DayViewModelTest {
             assertEquals(R.drawable.prop_bakery_bun, shown.purchaseArtworkRes)
             assertEquals("Ароматная булочка", shown.title)
             assertEquals("Заменяет обычный приём пищи. Тоша будет доволен: она гораздо вкуснее обычного обеда.", shown.body)
-            assertEquals(listOf("Купить", "Пройти мимо"), shown.options.map { it.label })
+            assertEquals(listOf("Купить за 6 монет", "Пройти мимо"), shown.options.map { it.label })
             assertTrue(shown.options.all { it.enabled && !it.needsFood })
             assertEquals("", shown.impact)
             assertEquals("", shown.effort)
@@ -729,7 +802,7 @@ class DayViewModelTest {
     @Test fun purchaseCardsKeepTheirArtworkAndOnlyOnePaymentExplanation() = runTest(dispatcher) {
         val expected = listOf(
             "figma-2164-2-v1" to R.drawable.gear_explorer_hat,
-            "figma-2654-50-purchase-v2" to R.drawable.prop_fair_explorer_hat,
+            "figma-2654-50-purchase-v2" to R.drawable.gear_explorer_hat,
             RING_TOSS to R.drawable.prop_fair_ring_toss,
             "figma-56-55-purchase-v2" to R.drawable.gear_pilot_goggles,
             "figma-56-49-purchase-v2" to R.drawable.gear_route_patch,
@@ -750,7 +823,9 @@ class DayViewModelTest {
             assertTrue(shown.impact.isEmpty())
             assertFalse(shown.title.any(Char::isDigit))
             assertFalse(shown.body.any(Char::isDigit))
-            assertEquals(if (event == RING_TOSS) "Сыграть" else "Купить", shown.options.first().label)
+            val action = if (event == RING_TOSS) "Сыграть" else "Купить"
+            val price = -session.catalog.content.choices.first { it.id == shown.options.first().id }.moneyDelta
+            assertEquals("$action за ${paymentCoinAmount(price)}", shown.options.first().label)
             assertEquals("Пройти мимо", shown.options.last().label)
             assertEquals(1, shown.options.count { it.spending != null })
             assertEquals(2, shown.options.size)
@@ -780,7 +855,7 @@ class DayViewModelTest {
         assertNull(shown.purchaseArtworkRes)
         assertEquals("Кольцеброс", shown.title)
         assertEquals("Ярмарка", shown.locationTitle)
-        assertEquals(listOf("Сыграть", "Пройти мимо"), shown.options.map { it.label })
+        assertEquals(listOf("Сыграть за 7 монет", "Пройти мимо"), shown.options.map { it.label })
         assertEquals(0, repository.writes)
     }
 
@@ -793,7 +868,7 @@ class DayViewModelTest {
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.openStoryGame.collect { games += it } }
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.exit.collect { exits += it } }
         val play = model.uiState.value.options.first()
-        assertEquals("Сыграть", play.label)
+        assertEquals("Сыграть за 7 монет", play.label)
         model.onAction(DayAction.Choose(play.id))
         runCurrent()
         assertEquals(listOf(StoryGameRequest(before.engine!!.currentEvent!!.id, "$RING_TOSS:buy")), games)

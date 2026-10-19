@@ -34,8 +34,8 @@ fun FinancialTrapScreen(
         { onAction(PracticeChoiceAction.Restart) }, onBack, deed, DeedRewardPreview.fromPractice(state)) {
         PracticeBoard(background = R.drawable.location_pier) {
             GameArtwork(R.drawable.gear_stargazing_trip, null, Modifier.size(72.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                question.options.forEachIndexed { index, option ->
+            PracticeChoices(question.options.size) { index, modifier ->
+                    val option = question.options[index]
                     val first = index == 0
                     val title = when (scenario) {
                         TrapScenario.TICKET ->
@@ -60,11 +60,10 @@ fun FinancialTrapScreen(
                         TrapScenario.BORROWED_LANTERN -> if (first) R.drawable.story_letter else R.drawable.prop_practice_lantern
                         TrapScenario.DELIVERY_FEE -> R.drawable.story_supply_bag
                     }
-                    PracticeOption(stringResource(title), details, Modifier.weight(1f), artwork,
+                    PracticeOption(stringResource(title), details, modifier, artwork,
                         enabled = deed?.canPlay != false && state.selectedChoice == null, picked = state.selectedChoice == index,
                         correct = state.selectedChoice?.let { question.correctChoice == index },
                         onClick = { onAction(PracticeChoiceAction.Answer(index, state.current)) })
-                }
             }
         }
         PracticeFeedback(state, stringResource(when (scenario) {

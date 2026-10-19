@@ -56,3 +56,9 @@ internal fun String.asGameActionLabel(): String {
         else -> "$action за $coins"
     }
 }
+
+/** A purchase always shows its actual charge, independently of its budget sources. */
+internal fun String.asPurchaseActionLabel(price: Long): String {
+    val action = pricedAction.matchEntire(trim())?.groupValues?.get(1) ?: trim()
+    return "${action.asGameUiText()} за ${paymentCoinAmount(price)}"
+}

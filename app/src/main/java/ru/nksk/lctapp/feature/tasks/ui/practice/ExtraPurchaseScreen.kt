@@ -45,14 +45,13 @@ fun ExtraPurchaseScreen(
                 }), Modifier.fillMaxWidth())
             }
             question.items.indices.chunked(2).forEach { row ->
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    row.forEach { index ->
+                PracticeChoices(row.size) { position, modifier ->
+                        val index = row[position]
                         val item = question.items[index]
-                        PracticeOption(stringResource(item.titleRes), null, Modifier.weight(1f), item.artwork,
+                        PracticeOption(stringResource(item.titleRes), null, modifier, item.artwork,
                             enabled = deed?.canPlay != false && state.selectedChoice == null, picked = state.selectedChoice == index,
                             correct = state.selectedChoice?.let { index == question.correctChoice },
                             onClick = { onAction(PracticeChoiceAction.Answer(index, state.current)) })
-                    }
                 }
             }
         }

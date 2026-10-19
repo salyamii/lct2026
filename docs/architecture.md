@@ -187,6 +187,17 @@ is an event/location key, never the changing world revision or animation phase.
 Background blur uses a bounded cached software transform; a failed transform
 falls back once to the same location without blur. It never changes the location.
 
+By GAME-UI-D-008, `AdventureScreen` measures its scene, background and lower panel
+in one `SubcomposeLayout` pass. Scroll ownership and background bounds no longer
+depend on a subsequent `onSizeChanged` state update. The post-deed savings editor
+centres the jar in a separate full-screen layer sized before keyboard insets.
+Only its natural-height bottom sheet scrolls and moves above the keyboard;
+the form cannot move the jar or resize the background. The normal sheet height
+is limited to the space below the jar; with the keyboard it may overlap the jar
+on a short screen rather than shifting the illustration.
+Amounts and validation text reserve stable space while editing. These are
+presentation changes, with no additional game reads, writes or image cache.
+
 Before a world exists, the same music projection selects the first authored act's
 theme for onboarding. App composition suppresses the music cue only while the
 intro video is shown, independently of the shared sound preference. The video's

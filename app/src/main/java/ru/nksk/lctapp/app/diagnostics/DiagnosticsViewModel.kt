@@ -14,6 +14,7 @@ import ru.nksk.lctapp.data.diagnostics.AppDiagnostics
 import ru.nksk.lctapp.domain.engine.EngineCommand
 import ru.nksk.lctapp.domain.engine.GameSession
 import ru.nksk.lctapp.domain.game.GameState
+import ru.nksk.lctapp.domain.minigame.DeedGameKind
 
 /** Keeps a small, anonymous context ready before a failure; never loads the audit journal. */
 @HiltViewModel
@@ -23,9 +24,17 @@ internal class DiagnosticsViewModel @Inject constructor(
 ) : ViewModel() {
     init {
         diagnostics.updateContext("last_committed_action", "none")
+        diagnostics.updateContext("content_fingerprint", session.contentFingerprint)
+        diagnostics.updateContext("mini_game_schema", "kinds=${DeedGameKind.entries.size}; shopping_comparison=" +
+            DeedGameKind.entries.any { it.name == "SHOPPING_COMPARISON" })
         viewModelScope.launch {
             session.appliedCommands.collect { applied ->
                 diagnostics.updateContext("last_committed_action", applied.request.command.diagnosticAction())
+            }
+        }
+        viewModelScope.launch {
+            session.contentFailures.collect { rejected ->
+                rejected.diagnosticFields().forEach { (key, value) -> diagnostics.updateContext(key, value) }
             }
         }
         viewModelScope.launch {
@@ -77,7 +86,7 @@ internal class DiagnosticsViewModel @Inject constructor(
 private data class GameContext(val chapter: String, val age: String, val accessory: String, val phase: String)
 
 /** Fixed labels survive obfuscation and never include command payloads or user-entered text. */
-private fun EngineCommand.diagnosticAction(): String = when (this) {
+internal fun EngineCommand.diagnosticAction(): String = when (this) {
     is EngineCommand.StartBudgetAllocation -> "StartBudgetAllocation"
     is EngineCommand.ChangeBudgetAllocation -> "ChangeBudgetAllocation"
     is EngineCommand.ConfirmBudget -> "ConfirmBudget"

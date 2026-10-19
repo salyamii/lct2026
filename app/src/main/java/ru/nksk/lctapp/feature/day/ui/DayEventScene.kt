@@ -18,6 +18,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ru.nksk.lctapp.core.ui.components.GameArtwork
+import ru.nksk.lctapp.core.ui.components.ArtworkVisibleBounds
 import ru.nksk.lctapp.core.ui.components.GameInk
 import ru.nksk.lctapp.core.ui.components.GamePaper
 import ru.nksk.lctapp.core.ui.components.MovingNpcArtwork
@@ -32,11 +33,16 @@ internal fun DayEventScene(state: DayUiState, modifier: Modifier = Modifier) {
     BoxWithConstraints(modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
         val focus = state.eventArtwork
         val pet = state.pet?.forLiveDisplay()
-        val companionBounds = focus?.takeIf { it.isCharacter }?.let { eventArtworkBounds(it.resource) }
+        // Unmeasured objects retain their whole canvas. Characters use their measured
+        // silhouette so transparent margins cannot push the pair to opposite edges.
+        val companionBounds = focus?.let {
+            eventArtworkBounds(it.resource) ?: ArtworkVisibleBounds(0f, 0f, 1f, 1f)
+        }
         val petBounds = pet?.artworkRes?.let(::eventArtworkBounds)
         val pair = if (pet != null && companionBounds != null && petBounds != null) {
             eventCharacterLayout(maxWidth.value, maxHeight.value, pet.eventCompanionWidthFraction,
-                petBounds, companionBounds, pet.artworkRes?.let(::petArtworkGrounding))
+                petBounds, companionBounds, pet.artworkRes?.let(::petArtworkGrounding),
+                companionOnFloor = focus?.isCharacter == true)
         } else null
         val petSize = minOf(maxHeight, maxWidth * if (focus == null) .86f else .56f)
         focus?.let { art ->
@@ -48,7 +54,9 @@ internal fun DayEventScene(state: DayUiState, modifier: Modifier = Modifier) {
                         ?: Modifier.size(focusSize).align(Alignment.BottomStart))
             } else {
                 GameArtwork(art.resource, art.description,
-                    Modifier.size(focusSize).align(Alignment.CenterStart),
+                    pair?.companion?.let { Modifier.offset(it.x.dp, it.y.dp)
+                        .wrapContentSize(Alignment.TopStart, unbounded = true).requiredSize(it.size.dp) }
+                        ?: Modifier.size(focusSize).align(Alignment.CenterStart),
                     contentScale = ContentScale.Fit)
             }
         }

@@ -30,6 +30,8 @@ class GameEngine(
     private val rules: EngineRules,
     private val contentVersion: String = rules.id,
     private val onApplied: (AppliedGameCommand) -> Unit = {},
+    private val onRejected: (RejectedGameCommand) -> Unit = {},
+    private val onGuardFailure: (RejectedGameCommand) -> Unit = {},
     private val previewDemoMode: () -> Boolean = { false },
 ) {
     private val analytics = EngineAnalytics(factory, rules, contentVersion,
@@ -81,6 +83,10 @@ class GameEngine(
         }
         EngineResult.Applied(saved)
     } catch (blocked: Rejected) {
+        // Report an actual attempted command, never the many read-only guard previews.
+        // Diagnostics must not replace the original rejection or alter its persistence.
+        try { onRejected(RejectedGameCommand(request.command, blocked.reason, blocked.failure)) }
+        catch (_: Exception) { /* Diagnostics are best effort. */ }
         if (!request.demoMode) games.recordRejected(request, blocked.reason::class.simpleName ?: "Blocked", contentVersion)
         EngineResult.Blocked(blocked.reason)
     }
@@ -282,17 +288,18 @@ class GameEngine(
                 revision = Math.addExact(current.engine?.revision ?: -1L, 1L),
             ))
         } catch (invalid: EconomyViolation) {
-            reject(when (invalid.reason) {
+            val reason = when (invalid.reason) {
                 EconomyFailure.PLANNING_REQUIRED -> BlockReason.BudgetPlanningRequired
                 EconomyFailure.INSUFFICIENT_MONEY -> BlockReason.InsufficientMoney(invalid.missing)
                 EconomyFailure.STALE_SESSION -> BlockReason.StaleRevision
                 EconomyFailure.CONFIRMATION_REQUIRED -> BlockReason.SavingsWithdrawalConfirmationRequired
                 else -> BlockReason.InvalidContent(invalid.message ?: "Invalid economy operation")
-            })
+            }
+            reject(reason, invalid.takeIf { reason is BlockReason.InvalidContent }?.let { ContentFailureSource.capture(it) })
         } catch (invalid: IllegalArgumentException) {
-            reject(BlockReason.InvalidContent(invalid.message ?: "Invalid authored content"))
-        } catch (_: ArithmeticException) {
-            reject(BlockReason.InvalidContent("Numeric overflow"))
+            reject(BlockReason.InvalidContent(invalid.message ?: "Invalid authored content"), ContentFailureSource.capture(invalid))
+        } catch (invalid: ArithmeticException) {
+            reject(BlockReason.InvalidContent("Numeric overflow"), ContentFailureSource.capture(invalid))
         }
     }
 
@@ -300,7 +307,15 @@ class GameEngine(
     fun blockReason(state: GameState, command: EngineCommand, demoMode: Boolean = previewDemoMode()): BlockReason? = try {
         transition(state, EngineRequest("preview:${state.engine?.revision}", state.engine?.revision, command, demoMode = demoMode))
         null
-    } catch (blocked: Rejected) { blocked.reason }
+    } catch (blocked: Rejected) {
+        // A disabled button never dispatches. Retain content failures from this existing check
+        // without recording intent, repeating the transition or notifying analytical previews.
+        if (blocked.reason is BlockReason.InvalidContent || blocked.reason == BlockReason.MissingCarriedLore) {
+            try { onGuardFailure(RejectedGameCommand(command, blocked.reason, blocked.failure, RejectionOrigin.GUARD_CHECK)) }
+            catch (_: Exception) { /* Diagnostics are best effort. */ }
+        }
+        blocked.reason
+    }
 
     /** Side-effect-free result for explaining a real alternative before it is chosen. */
     fun preview(state: GameState, command: EngineCommand): EngineResult =
@@ -996,6 +1011,6 @@ class GameEngine(
     }
 
     private fun ensure(condition: Boolean, reason: BlockReason) { if (!condition) reject(reason) }
-    private fun reject(reason: BlockReason): Nothing = throw Rejected(reason)
-    private class Rejected(val reason: BlockReason) : RuntimeException(null, null, false, false)
+    private fun reject(reason: BlockReason, failure: ContentFailureSource? = null): Nothing = throw Rejected(reason, failure)
+    private class Rejected(val reason: BlockReason, val failure: ContentFailureSource? = null) : RuntimeException(null, null, false, false)
 }

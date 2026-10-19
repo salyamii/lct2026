@@ -18,6 +18,7 @@ import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.minigame.DeedGameKind
 import ru.nksk.lctapp.domain.minigame.DeedGameScore
 import ru.nksk.lctapp.domain.minigame.TargetStopState
+import ru.nksk.lctapp.domain.minigame.chapterone.RingToss
 import ru.nksk.lctapp.domain.pet.PetVisualState
 import ru.nksk.lctapp.domain.story.StoryDecision
 import ru.nksk.lctapp.feature.tasks.ui.storyGameTheme
@@ -48,15 +49,30 @@ class RingTossEventTest {
         assertEquals(listOf(PLAY, PASS), additions.choices.map { it.id })
         assertTrue(RING_TOSS in catalog.dailyEventPool)
         assertFalse(LEGACY_RING_TOSS in catalog.dailyEventPool)
+        assertFalse(PRECISION_RING_TOSS in catalog.dailyEventPool)
         assertEquals(RING_TOSS, catalog.eventReplacements[LEGACY_RING_TOSS])
+        assertEquals(RING_TOSS, catalog.eventReplacements[PRECISION_RING_TOSS])
         val policy = catalog.policies.getValue(RING_TOSS)
-        assertEquals(mapOf(PLAY to DeedGameKind.PRECISION), policy.choiceGameKinds)
+        assertEquals(mapOf(PLAY to DeedGameKind.RING_TOSS), policy.choiceGameKinds)
         assertEquals(mapOf(PLAY to 1), policy.choiceEnergyRestores)
         assertEquals(0, policy.energyFor(PLAY))
         assertTrue(LEGACY_RING_TOSS in policy.scheduling.previousEventIds)
+        assertTrue(PRECISION_RING_TOSS in policy.scheduling.previousEventIds)
         EventFactory(catalog.content, catalog.policies, catalog.meals, catalog.goals, catalog.storyCampaign)
         assertEquals(R.drawable.prop_fair_ring_toss,
-            storyGameTheme(catalog.cards.getValue(RING_TOSS).presentation.media, DeedGameKind.PRECISION)?.objectRes)
+            storyGameTheme(catalog.cards.getValue(RING_TOSS).presentation.media, DeedGameKind.RING_TOSS)?.objectRes)
+    }
+
+    @Test fun previousPrecisionDefinitionAndItsEffectsRemainReadable() {
+        val event = catalog.content.events.single { it.id == PRECISION_RING_TOSS }
+        assertEquals("На ярмарке предлагают бросить кольца и проверить меткость. После игры питомец порадуется и немного восстановит силы. Денежных призов здесь нет.", event.description)
+        val buy = catalog.content.choices.single { it.id == "$PRECISION_RING_TOSS:buy" }
+        assertEquals(-7L, buy.moneyDelta)
+        assertEquals(PetVisualState.HAPPY, buy.petStateAfter)
+        val policy = catalog.policies.getValue(PRECISION_RING_TOSS)
+        assertEquals(mapOf("$PRECISION_RING_TOSS:buy" to DeedGameKind.PRECISION), policy.choiceGameKinds)
+        assertEquals(mapOf("$PRECISION_RING_TOSS:buy" to 1), policy.choiceEnergyRestores)
+        assertEquals(0, policy.energyFor(buy.id))
     }
 
     @Test fun openingBoardCannotChargeRewardOrBypassTheGame() = runTest {
@@ -81,11 +97,11 @@ class RingTossEventTest {
     }
 
     @Test fun fiveThrowsChargeSevenRestoreOneAndCommitOnlyOnceRegardlessOfHits() = runTest {
-        for (hits in listOf(0, TargetStopState.ROUNDS)) {
+        for (hits in listOf(0, RingToss.THROW_COUNT)) {
             val f = fixture(energy = 2)
             assertApplied(f.send(EngineCommand.StartStoryGame(OCCURRENCE, PLAY)))
             val before = f.repo.value
-            val command = EngineCommand.CompleteStoryGame(OCCURRENCE, PLAY, completedPrecision(hits))
+            val command = EngineCommand.CompleteStoryGame(OCCURRENCE, PLAY, completedRingToss(hits))
             val request = f.request(command)
             assertApplied(f.session.dispatch(request))
             val after = f.repo.value
@@ -108,7 +124,7 @@ class RingTossEventTest {
 
     @Test fun energyIsCappedAndPassingHasNeitherCostNorRecovery() = runTest {
         val full = fixture(energy = catalog.rules.fullEnergy)
-        assertApplied(full.send(EngineCommand.CompleteStoryGame(OCCURRENCE, PLAY, completedPrecision())))
+        assertApplied(full.send(EngineCommand.CompleteStoryGame(OCCURRENCE, PLAY, completedRingToss())))
         assertEquals(catalog.rules.fullEnergy, full.repo.value.engine!!.energy)
         assertEquals(13L, full.repo.value.economy.availableBalance)
         val pass = fixture(energy = 2)
@@ -129,7 +145,7 @@ class RingTossEventTest {
             val before = f.repo.value
             assertEquals(EngineResult.Blocked(expected), f.send(EngineCommand.StartStoryGame(OCCURRENCE, PLAY)))
             assertEquals(EngineResult.Blocked(expected),
-                f.send(EngineCommand.CompleteStoryGame(OCCURRENCE, PLAY, completedPrecision())))
+                f.send(EngineCommand.CompleteStoryGame(OCCURRENCE, PLAY, completedRingToss())))
             assertEquals(before, f.repo.value)
         }
         val f = fixture()
@@ -137,18 +153,18 @@ class RingTossEventTest {
         f.repo.update { it.copy(economy = EconomyState(BudgetPlan(0, 0, 0, 6), availableBalance = 6, savingsBalance = 0)) }
         val before = f.repo.value
         assertEquals(EngineResult.Blocked(BlockReason.InsufficientMoney(7)),
-            f.send(EngineCommand.CompleteStoryGame(OCCURRENCE, PLAY, completedPrecision())))
+            f.send(EngineCommand.CompleteStoryGame(OCCURRENCE, PLAY, completedRingToss())))
         assertEquals(before, f.repo.value)
     }
 
     @Test fun prepareUpdatesOnlyUnresolvedOldOccurrencesWithoutPlayingOrChangingHistory() = runTest {
-        for (status in EventStatus.entries) {
-            val initial = state(eventId = LEGACY_RING_TOSS).let { current -> current.copy(
+        for (oldId in listOf(LEGACY_RING_TOSS, PRECISION_RING_TOSS)) for (status in EventStatus.entries) {
+            val initial = state(eventId = oldId).let { current -> current.copy(
                 engine = current.engine!!.copy(events = current.engine!!.events.map { it.copy(status = status) })) }
             val f = Fixture(initial)
             f.session.prepare()
             val after = f.repo.value
-            val expected = if (status in setOf(EventStatus.RESULT, EventStatus.COMPLETED)) LEGACY_RING_TOSS else RING_TOSS
+            val expected = if (status in setOf(EventStatus.RESULT, EventStatus.COMPLETED)) oldId else RING_TOSS
             assertEquals(status.name, expected, after.engine!!.events.single().eventId)
             assertEquals(initial.economy, after.economy)
             assertEquals(initial.engine!!.energy, after.engine!!.energy)
@@ -163,9 +179,24 @@ class RingTossEventTest {
         assertEquals(decided.story.decisions, historical.repo.value.story.decisions)
     }
 
+    @Test fun precisionResultCannotFinishTheNewRingToss() = runTest {
+        val f = fixture()
+        val before = f.repo.value
+        val oldScore = checkNotNull(DeedGameScore.fromPrecision(
+            TargetStopState(zoneStart = 10, round = TargetStopState.ROUNDS, hits = 3, lastHit = true)))
+        assertEquals(EngineResult.Blocked(BlockReason.InvalidEventAction),
+            f.send(EngineCommand.CompleteStoryGame(OCCURRENCE, PLAY, oldScore)))
+        assertEquals(before, f.repo.value)
+    }
+
     private data class GuardCase(val money: Long, val energy: Int, val ate: Boolean, val steps: Int, val reason: BlockReason)
-    private fun completedPrecision(hits: Int = 3) = checkNotNull(DeedGameScore.fromPrecision(
-        TargetStopState(zoneStart = 10, round = TargetStopState.ROUNDS, hits = hits, lastHit = hits > 0)))
+    private fun completedRingToss(hits: Int = 3): DeedGameScore {
+        var game = RingToss()
+        repeat(RingToss.THROW_COUNT) { index ->
+            game = if (index < hits) game.throwAtPeg(index % 3) else game.pull(.20f, .10f)
+        }
+        return checkNotNull(DeedGameScore.fromRingToss(game))
+    }
     private suspend fun fixture(money: Long = 20, energy: Int = 2, ate: Boolean = true, steps: Int = 0) =
         Fixture(state(money, energy, ate, steps)).also { it.session.prepare() }
     private fun state(money: Long = 20, energy: Int = 2, ate: Boolean = true, steps: Int = 0,

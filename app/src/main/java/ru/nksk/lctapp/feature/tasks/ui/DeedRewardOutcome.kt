@@ -18,6 +18,7 @@ internal data class DeedRewardOutcome(
     val itemId: String,
     val itemTitle: String,
     val sceneRes: Int,
+    val itemPrice: Long,
 )
 
 internal data class DeedRewardUiState(
@@ -27,6 +28,7 @@ internal data class DeedRewardUiState(
     val reserveBalance: Long,
     val savingsBalance: Long,
     val sceneRes: Int,
+    val goalPrice: Long,
     val editing: Boolean = false,
     val input: String = "",
     val deposited: Long = 0,
@@ -48,7 +50,8 @@ internal fun deedRewardOutcome(receipt: AuditEntry, occurrenceId: String, catalo
     val item = catalog.content.items.firstOrNull { it.id == itemId && it.priceCoins != null } ?: return null
     val eventId = after.engine?.events?.firstOrNull { it.id == occurrenceId }?.eventId ?: return null
     val scene = eventSceneBackground(eventId, catalog.cards[eventId]?.scene)
-    return DeedRewardOutcome(request.id, earned, goal.goalId, itemId, renderPetText(item.name, after.pet.name), scene)
+    return DeedRewardOutcome(request.id, earned, goal.goalId, itemId,
+        renderPetText(item.name, after.pet.name), scene, checkNotNull(item.priceCoins))
 }
 
 internal fun DeedRewardOutcome.transferMaximum(game: GameState, catalog: GameCatalog): Long {

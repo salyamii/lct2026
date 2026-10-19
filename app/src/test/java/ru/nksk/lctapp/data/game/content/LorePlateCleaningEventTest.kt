@@ -68,7 +68,7 @@ class LorePlateCleaningEventTest {
             assertTrue(progress.facts.containsAll(setOf("plate_found", "plate_symbol")))
             assertTrue(progress.eligible(storyEventId("G1.04")))
             assertFalse(progress.eligible(CURRENT))
-            assertEquals(storyEventId("G1.04"), progress.nextEvent())
+            assertEquals("campaign-choice-v2:G1.04", progress.nextEvent())
         }
     }
 
@@ -114,7 +114,8 @@ class LorePlateCleaningEventTest {
         val initial = createInitialGameState()
         val dockChoice = catalog.policies.values.flatMap { it.factsByChoiceId.entries }
             .first { "helped_dock" in it.value }.key
-        val prior = listOf(dockChoice, "${storyEventId("G1.01")}:continue", "${storyEventId("G1.02")}:continue")
+        val prior = listOf(dockChoice, "${storyEventId("G1.01")}:continue", "$CHAPTER_SHOP_EVENT:compare",
+            "${storyEventId("G1.02")}:continue")
         return initial.copy(selectedGoalId = STARS_GOAL,
             economy = EconomyState(BudgetPlan(0, 0, 0, money), availableBalance = money, savingsBalance = 0),
             story = initial.story.copy(currentDayId = catalog.storyDayId, activeEventId = eventId,

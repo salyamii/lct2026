@@ -125,10 +125,20 @@ fun LctNavHost(
         }
     }
     val redirectingToBudget = shouldPresentBudget(pending, destination, presentedPlanningId, confirmedPlanningId)
+    val redirectingToGoal = shouldPresentChapterGoal(gate.requiredGoalId, pending, destination)
+    val redirecting = redirectingToBudget || redirectingToGoal
+    LaunchedEffect(gate.requiredGoalId, pending, destination) {
+        if (shouldPresentChapterGoal(gate.requiredGoalId, pending, destination)) {
+            backStack.clear()
+            backStack.add(MainMenu)
+            backStack.add(Goal)
+        }
+    }
     // Only the route type is diagnostic context, never its occurrence, choice or day arguments.
     val screen = when {
         gate.loading -> "BudgetGateLoading"
         redirectingToBudget -> "BudgetRedirect"
+        redirectingToGoal -> "ChapterGoalRedirect"
         gate.failed -> "BudgetGateError"
         else -> destination.diagnosticScreen()
     }
@@ -163,15 +173,17 @@ fun LctNavHost(
         if (completion === notice) completion = null
     }
 
-    BackHandler(enabled = redirectingToBudget) {}
+    BackHandler(enabled = redirecting) {}
     BoxWithConstraints(modifier.fillMaxSize().background(AdventureNight)) {
         NavDisplay(
             // A live budget redirect keeps the outgoing screen and entry stores in composition.
             // Replacing the entire host with a loader used to flash and restart its artwork.
             modifier = Modifier.fillMaxSize().then(
-                if (redirectingToBudget) Modifier.clearAndSetSemantics {} else Modifier),
+                if (redirecting) Modifier.clearAndSetSemantics {} else Modifier),
             backStack = backStack,
-            onBack = navigator::goBack,
+            onBack = {
+                if (destination != Goal || gate.requiredGoalId == null) navigator.goBack()
+            },
             // Keep illustrated screens opaque: the default crossfade blends their text and artwork.
             transitionSpec = {
                 slideIntoContainer(SlideDirection.Start, tween(NavigationTransitionMillis)) togetherWith
@@ -191,7 +203,7 @@ fun LctNavHost(
             ),
             entryProvider = entryProvider {
                 mainMenuEntry(decorate = { newPlayer, available, content ->
-                    MenuTourHost(tour, newPlayer, available && !redirectingToBudget && destination == MainMenu,
+                    MenuTourHost(tour, newPlayer, available && !redirecting && destination == MainMenu,
                         tourModel, content)
                 }, settingsButton = {
                     val openParents = rememberParentsLauncher()
@@ -281,7 +293,7 @@ fun LctNavHost(
                     chapterContent = { ChapterStoryGameContent(it) })
             },
         )
-        if (redirectingToBudget) Box(Modifier.matchParentSize().pointerInput(Unit) {
+        if (redirecting) Box(Modifier.matchParentSize().pointerInput(Unit) {
             awaitPointerEventScope {
                 while (true) awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() }
             }

@@ -1,10 +1,12 @@
 package ru.nksk.lctapp.feature.day.ui
 
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.components.eventArtworkBounds
 import ru.nksk.lctapp.core.ui.components.petArtworkGrounding
+import ru.nksk.lctapp.core.ui.components.ArtworkVisibleBounds
 
 class EventCharacterLayoutTest {
     @Test fun adultWithBinocularsIsLargerWithoutOverlappingCaretaker() {
@@ -27,8 +29,40 @@ class EventCharacterLayoutTest {
         }
     }
 
-    private fun layout(width: Float, height: Float, pet: Int, npc: Int) = eventCharacterLayout(
-        width, height, .72f, requireNotNull(eventArtworkBounds(pet)),
+    @Test fun cubAndTeenStayTogetherWhenTheActionCardLeavesAShallowScene() {
+        val pets = listOf(R.drawable.ryzhik_cub_body_accessory_hat,
+            R.drawable.ryzhik_cub_body_base_no_accessory, R.drawable.ryzhik_cub_state_joy_sand,
+            R.drawable.ryzhik_teen_body_base_no_accessory, R.drawable.ryzhik_teen_body_accessory_binoculars,
+            R.drawable.ryzhik_teen_state_tired_dark_russet)
+        val npc = R.drawable.npc_caretaker_explaining
+        val npcBounds = requireNotNull(eventArtworkBounds(npc))
+        for (pet in pets) for (height in listOf(106f, 160f, 252f)) {
+            val layout = layout(336f, height, pet, npc, petWidthFraction = .56f)
+            val petBounds = requireNotNull(eventArtworkBounds(pet))
+            val gap = layout.pet.x + petBounds.left * layout.pet.size -
+                (layout.companion.x + npcBounds.right * layout.companion.size)
+            assertContainedAndSeparated(336f, height, pet, npc, layout)
+            assertTrue("The pair retains a small gap at $height", gap < height * .1f)
+            assertEquals("Age proportions stay unchanged", .56f / .67f,
+                layout.pet.size / layout.companion.size, .001f)
+        }
+    }
+
+    @Test fun anObjectAndPetAlsoRemainOneGroupWithoutStretchingTheirCanvases() {
+        val pet = R.drawable.ryzhik_cub_body_accessory_hat
+        val petBounds = requireNotNull(eventArtworkBounds(pet))
+        val layout = eventCharacterLayout(336f, 120f, .56f, petBounds,
+            ArtworkVisibleBounds(0f, 0f, 1f, 1f), petArtworkGrounding(pet), companionOnFloor = false)
+        assertEquals("The object stays vertically centred", 60f,
+            layout.companion.y + layout.companion.size / 2f, .001f)
+        val gap = layout.pet.x + petBounds.left * layout.pet.size -
+            (layout.companion.x + layout.companion.size)
+        assertTrue("The object is next to the pet", gap > 0f && gap < 12f)
+        assertTrue(layout.companion.y >= 0f && layout.companion.y + layout.companion.size <= 120f)
+    }
+
+    private fun layout(width: Float, height: Float, pet: Int, npc: Int, petWidthFraction: Float = .72f) = eventCharacterLayout(
+        width, height, petWidthFraction, requireNotNull(eventArtworkBounds(pet)),
         requireNotNull(eventArtworkBounds(npc)), petArtworkGrounding(pet))
 
     private fun assertContainedAndSeparated(width: Float, height: Float, pet: Int, npc: Int, layout: EventCharacterLayout) {

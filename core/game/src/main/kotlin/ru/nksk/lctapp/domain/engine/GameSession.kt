@@ -92,9 +92,33 @@ class GameSession(
     )
     /** Only newly confirmed commands. No history replay, durable delivery, or lifecycle catch-up. */
     val appliedCommands = mutableAppliedCommands.asSharedFlow()
+    private val mutableRejectedCommands = MutableSharedFlow<RejectedGameCommand>(
+        replay = 1, extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
+    /** The latest actual rejection survives opening Settings or recreating the diagnostic observer. */
+    val rejectedCommands = mutableRejectedCommands.asSharedFlow()
+    private val mutableContentFailures = MutableSharedFlow<RejectedGameCommand>(
+        replay = 1, extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
+    /** Diagnostic-only failures from actual commands or availability checks; ordinary guards stay silent. */
+    val contentFailures = mutableContentFailures.asSharedFlow()
+    private val contentFailureLock = Any()
+    private var lastContentFailure: RejectedGameCommand? = null
+
+    private fun reportContentFailure(rejected: RejectedGameCommand) {
+        if (rejected.reason !is BlockReason.InvalidContent && rejected.reason != BlockReason.MissingCarriedLore) return
+        synchronized(contentFailureLock) {
+            if (lastContentFailure == rejected) return
+            lastContentFailure = rejected
+            mutableContentFailures.tryEmit(rejected)
+        }
+    }
+
     val contentFingerprint = ru.nksk.lctapp.domain.timemachine.GameCatalogFingerprint.compute(catalog)
     val engine = GameEngine(games, EventFactory(catalog.content, catalog.policies, catalog.meals, catalog.goals, catalog.storyCampaign), catalog.rules,
-        contentFingerprint, onApplied = { mutableAppliedCommands.tryEmit(it) }, previewDemoMode = { demoModeEnabled })
+        contentFingerprint, onApplied = { mutableAppliedCommands.tryEmit(it) }, previewDemoMode = { demoModeEnabled },
+        onRejected = { mutableRejectedCommands.tryEmit(it); reportContentFailure(it) },
+        onGuardFailure = ::reportContentFailure)
     val timeMachine = ru.nksk.lctapp.domain.timemachine.TimeMachine(games, engine, catalog, contentFingerprint)
 
     fun observeHistory() = games.observeHistory()

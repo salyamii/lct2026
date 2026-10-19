@@ -11,6 +11,7 @@ private data class ChapterGameRevision(
     val kind: DeedGameKind,
     val instruction: String,
     val deed: Boolean = false,
+    val body: String? = null,
 )
 
 private val chapterGameRevisions = listOf(
@@ -26,6 +27,15 @@ private val chapterGameRevisions = listOf(
         "continue", DeedGameKind.SIGNAL, "Зажги три огня в порядке из журнала."),
     ChapterGameRevision("campaign-choice-v1:G1.06", "campaign-choice-v2:G1.06",
         "continue", DeedGameKind.ROUTE_MAP, "Дорисуй путь от причала через мост к башне."),
+    ChapterGameRevision("campaign-choice-v1:G1.04", "campaign-choice-v2:G1.04",
+        "continue", DeedGameKind.RECORD_JOURNAL, "Найди в журнале запись о старом маршруте."),
+    ChapterGameRevision("campaign-choice-v1:G1.08", "campaign-choice-v2:G1.08",
+        "continue", DeedGameKind.RECORD_LENSES, "Сопоставь цветные линзы со схемой."),
+    ChapterGameRevision("campaign-choice-v1:G1.10", "campaign-choice-v2:G1.10",
+        "continue", DeedGameKind.RECORD_LIGHTS, "Перенеси порядок огней из журнала."),
+    ChapterGameRevision("figma-2163-2-v1:balance-v2", "figma-2163-2-v1:balance-v2:game-v3",
+        "complete", DeedGameKind.SHOPPING_COMPARISON, "Помоги Смотрителю сравнить цены на одинаковые припасы.",
+        deed = true, body = "Смотритель выбирает припасы для общей поездки. Сравни предложения продавцов и найди, где те же вещи стоят дешевле."),
 )
 
 /** Future offers use the new scenes; already offered boards keep their original identities. */
@@ -92,6 +102,7 @@ private fun GameCatalog.chapterGameSpec(revision: ChapterGameRevision): EventSpe
                 previousEventIds = policy.scheduling.previousEventIds + event.id),
         ),
         card = card.copy(summaryByChoiceId = emptyMap(), presentation = card.presentation.copy(
+            body = revision.body ?: card.presentation.body,
             actionLabels = card.presentation.actionLabels.mapKeys { id(it.key) },
             outcomeLabels = card.presentation.outcomeLabels.mapKeys { id(it.key) },
             media = card.presentation.media.copy(

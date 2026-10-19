@@ -27,12 +27,17 @@ import ru.nksk.lctapp.core.ui.game.eventSceneBackground
 import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.minigame.*
+import ru.nksk.lctapp.domain.minigame.chapterone.ShoppingProgress
+import ru.nksk.lctapp.domain.minigame.chapterone.TripPacking
 import ru.nksk.lctapp.domain.economy.EconomyOperations
 import ru.nksk.lctapp.feature.tasks.navigation.ChapterRepairPayment
 
 enum class DeedGameType { MEMORY, COMPARISON, PRECISION, LIGHTS, SEQUENCE, PIPES, DIFFERENCES, STACKING,
     TELESCOPE, MARK, WHEEL, STRAP, SIGNAL, ROUTE_MAP, BOAT,
-    NEED_WANT, REAL_DISCOUNT, COIN_BALANCE, FINANCIAL_TRAP, EXTRA_PURCHASE }
+    NEED_WANT, REAL_DISCOUNT, COIN_BALANCE, FINANCIAL_TRAP, EXTRA_PURCHASE,
+    TRIP_PACKING, SHOPPING_COMPARISON, RECORD_JOURNAL, RECORD_LENSES, RECORD_LIGHTS,
+    OBSERVATORY_OPENING, PLATE_HAND, PLATE_SOLUTION, LIGHT_INSCRIPTION,
+    SERVICE_EMBLEM, SIGNAL_POST, CHAPTER_FINALE, RING_TOSS }
 data class DeedGamePresentation(val title: String, val maximumReward: Long, val canPlay: Boolean,
     val storyAction: Boolean = false, val sceneRes: Int? = null, val instructions: String? = null,
     val activityArtworkRes: Int? = null)
@@ -73,6 +78,7 @@ internal class DeedGameViewModel @Inject constructor(
     private var pending: PendingAction? = null
     private var rejectedAction: EngineCommand? = null
     private val comparisonEvidence = linkedMapOf<String, PriceQuizEvidence>()
+    private val chapterPracticeEvidence = linkedMapOf<String, ChapterPracticeEvidence>()
     private val comparisonWrites = Mutex()
     private var comparisonWriter: Job? = null
     private var comparisonSaveFailed = false
@@ -86,7 +92,10 @@ internal class DeedGameViewModel @Inject constructor(
 
     fun load(id: String, storyChoiceId: String? = null, reload: Boolean = false) {
         if (!reload && occurrenceId == id && choiceId == storyChoiceId && observer?.isActive == true) return
-        if (occurrenceId != id || choiceId != storyChoiceId) comparisonEvidence.clear()
+        if (occurrenceId != id || choiceId != storyChoiceId) {
+            comparisonEvidence.clear()
+            chapterPracticeEvidence.clear()
+        }
         occurrenceId = id
         choiceId = storyChoiceId
         observer?.cancel()
@@ -126,6 +135,20 @@ internal class DeedGameViewModel @Inject constructor(
     fun finishChapterGame(score: DeedGameScore) {
         if (mutableState.value.presentation?.canPlay != true || score.kind !in chapterGameKinds || repairUnconfirmed()) return
         finish(score)
+    }
+
+    fun finishTripPacking(state: TripPacking) {
+        if (mutableState.value.presentation?.canPlay != true || mutableState.value.type != DeedGameType.TRIP_PACKING) return
+        val score = DeedGameScore.fromTripPacking(state) ?: return
+        val evidence = ChapterPracticeEvidence.packing(state)
+        chapterPracticeEvidence[evidence.key] = evidence
+        finishChapterGame(score)
+    }
+
+    fun recordShoppingProgress(progress: ShoppingProgress) {
+        if (mutableState.value.type != DeedGameType.SHOPPING_COMPARISON || progress.state.answers.isEmpty()) return
+        ChapterPracticeEvidence.shopping(progress).forEach { chapterPracticeEvidence[it.key] = it }
+        if (!busy) persistComparisonAnswers()
     }
 
     /** The child board owns only the collision. This host owns the durable payment intent. */
@@ -314,7 +337,7 @@ internal class DeedGameViewModel @Inject constructor(
     }
 
     private fun persistComparisonAnswers() {
-        if (comparisonWriter?.isActive == true || comparisonEvidence.isEmpty()) return
+        if (comparisonWriter?.isActive == true || (comparisonEvidence.isEmpty() && chapterPracticeEvidence.isEmpty())) return
         comparisonWriter = viewModelScope.launch {
             try {
                 flushComparisonAnswers()
@@ -332,11 +355,15 @@ internal class DeedGameViewModel @Inject constructor(
         val id = occurrenceId ?: return@withLock
         while (true) {
             val batches = comparisonEvidence.values.toList()
-            if (batches.isEmpty()) return@withLock
+            val practiceBatches = chapterPracticeEvidence.values.toList()
+            if (batches.isEmpty() && practiceBatches.isEmpty()) return@withLock
             val game = checkNotNull(session.read())
             val occurrence = checkNotNull(game.engine?.events?.find { it.id == id }) { "This comparison belongs to an unavailable deed" }
-            check(gameKind(occurrence) == DeedGameKind.COMPARISON)
-            val eventIds = batches.flatMap { PriceQuizEvidenceMapper.eventIds(it, id) }.toSet()
+            val kind = gameKind(occurrence)
+            check(batches.isEmpty() || kind == DeedGameKind.COMPARISON)
+            check(practiceBatches.all { it.kind == kind })
+            val eventIds = batches.flatMap { PriceQuizEvidenceMapper.eventIds(it, id) }.toSet() +
+                practiceBatches.map { it.eventId(id) }
             val recorded = checkNotNull(session.recordedFacts(eventIds)) { "History is not available" }
             val existing = recorded.facts.associateBy { it.eventId }
             val version = session.contentFingerprint
@@ -344,19 +371,22 @@ internal class DeedGameViewModel @Inject constructor(
                 PriceQuizEvidenceMapper.facts(evidence, id, recorded.runId,
                     Math.addExact(recorded.sequence, 1), game.engine?.day,
                     game.financial.currentPeriod?.id, version, session.catalog.rules.id)
-            }
+            } + practiceBatches.map { it.fact(id, recorded.runId, Math.addExact(recorded.sequence, 1),
+                game.engine?.day, game.financial.currentPeriod?.id, version, session.catalog.rules.id) }
             for (fact in candidates) existing[fact.eventId]?.let { stored ->
                 check(stored.episodeId == fact.episodeId && stored.detail == fact.detail) { "Conflicting comparison answer" }
             }
             val missing = candidates.filter { it.eventId !in existing }
             if (missing.isEmpty()) {
                 // The indexed read may have suspended while another answer arrived.
-                if (batches == comparisonEvidence.values.toList()) return@withLock
+                if (batches == comparisonEvidence.values.toList() &&
+                    practiceBatches == chapterPracticeEvidence.values.toList()) return@withLock
                 continue
             }
             if (!session.recordFacts(missing)) {
                 // Demo answers intentionally produce no evidence, so a read-back retry cannot complete.
                 batches.forEach { if (comparisonEvidence[it.seriesId] == it) comparisonEvidence.remove(it.seriesId) }
+                practiceBatches.forEach { if (chapterPracticeEvidence[it.key] == it) chapterPracticeEvidence.remove(it.key) }
                 return@withLock
             }
             // An answer may have arrived during the write; loop before allowing completion or exit.
@@ -482,7 +512,7 @@ internal class DeedGameViewModel @Inject constructor(
                 presentation = mutableState.value.presentation?.copy(canPlay = false),
                 reward = DeedRewardUiState(reward.earned, reward.itemTitle,
                     if (rewardDeposited > 0 || session.demoModeEnabled) 0 else reward.transferMaximum(game, session.catalog),
-                    game.economy.plan.reserve, game.economy.savingsBalance, reward.sceneRes,
+                    game.economy.plan.reserve, game.economy.savingsBalance, reward.sceneRes, reward.itemPrice,
                     editing = rewardEditing, input = rewardInput, deposited = rewardDeposited),
             )
             return
@@ -543,6 +573,19 @@ internal class DeedGameViewModel @Inject constructor(
                 DeedGameKind.COIN_BALANCE -> DeedGameType.COIN_BALANCE
                 DeedGameKind.FINANCIAL_TRAP -> DeedGameType.FINANCIAL_TRAP
                 DeedGameKind.EXTRA_PURCHASE -> DeedGameType.EXTRA_PURCHASE
+                DeedGameKind.TRIP_PACKING -> DeedGameType.TRIP_PACKING
+                DeedGameKind.SHOPPING_COMPARISON -> DeedGameType.SHOPPING_COMPARISON
+                DeedGameKind.RECORD_JOURNAL -> DeedGameType.RECORD_JOURNAL
+                DeedGameKind.RECORD_LENSES -> DeedGameType.RECORD_LENSES
+                DeedGameKind.RECORD_LIGHTS -> DeedGameType.RECORD_LIGHTS
+                DeedGameKind.OBSERVATORY_OPENING -> DeedGameType.OBSERVATORY_OPENING
+                DeedGameKind.PLATE_HAND -> DeedGameType.PLATE_HAND
+                DeedGameKind.PLATE_SOLUTION -> DeedGameType.PLATE_SOLUTION
+                DeedGameKind.LIGHT_INSCRIPTION -> DeedGameType.LIGHT_INSCRIPTION
+                DeedGameKind.SERVICE_EMBLEM -> DeedGameType.SERVICE_EMBLEM
+                DeedGameKind.SIGNAL_POST -> DeedGameType.SIGNAL_POST
+                DeedGameKind.CHAPTER_FINALE -> DeedGameType.CHAPTER_FINALE
+                DeedGameKind.RING_TOSS -> DeedGameType.RING_TOSS
             },
             presentation = DeedGamePresentation(renderPetText(session.catalog.displayTitle(event), game.pet.name), reward, pending == null && message == null && !repairWriting,
                 storyAction = storyGame,
@@ -569,7 +612,12 @@ internal class DeedGameViewModel @Inject constructor(
         val financialGameKinds = setOf(DeedGameKind.NEED_WANT, DeedGameKind.REAL_DISCOUNT,
             DeedGameKind.COIN_BALANCE, DeedGameKind.FINANCIAL_TRAP, DeedGameKind.EXTRA_PURCHASE)
         val chapterGameKinds = setOf(DeedGameKind.TELESCOPE, DeedGameKind.MARK, DeedGameKind.WHEEL,
-            DeedGameKind.STRAP, DeedGameKind.SIGNAL, DeedGameKind.ROUTE_MAP, DeedGameKind.BOAT)
+            DeedGameKind.STRAP, DeedGameKind.SIGNAL, DeedGameKind.ROUTE_MAP, DeedGameKind.BOAT,
+            DeedGameKind.TRIP_PACKING, DeedGameKind.SHOPPING_COMPARISON, DeedGameKind.RECORD_JOURNAL,
+            DeedGameKind.RECORD_LENSES, DeedGameKind.RECORD_LIGHTS,
+            DeedGameKind.OBSERVATORY_OPENING, DeedGameKind.PLATE_HAND, DeedGameKind.PLATE_SOLUTION,
+            DeedGameKind.LIGHT_INSCRIPTION, DeedGameKind.SERVICE_EMBLEM, DeedGameKind.SIGNAL_POST,
+            DeedGameKind.CHAPTER_FINALE, DeedGameKind.RING_TOSS)
         const val REPAIR_KEY = "boat_payment_key"
         const val REPAIR_REQUEST = "boat_payment_request"
         const val REPAIR_CONFIRMED = "boat_payment_confirmed"

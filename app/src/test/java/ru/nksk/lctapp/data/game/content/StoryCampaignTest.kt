@@ -47,7 +47,7 @@ class StoryCampaignTest {
     @Test fun genericLoreSkipsAreRetiredWithoutRemovingHistoricalDefinitionsOrRealBranches() {
         val catalog = bundledGameCatalog()
         val genericSkips = sourceLoreCards.filter { it.optional && it.id != "G5.02" }
-            .flatMap { listOf(storyEventId(it.id), currentStoryEventId(catalog, it.id)) }
+            .flatMap { storyVersions(catalog, it.id) }
             .map { "$it:skip" }.toSet()
         val retired = catalog.policies.values.flatMap { it.disabledChoiceIds }.toSet()
         assertEquals(genericSkips, retired)
@@ -228,7 +228,7 @@ class StoryCampaignTest {
         // verifies the core-only path without executing a retired generic skip.
         val catalog = bundledGameCatalog().let { original ->
             val optionalIds = sourceLoreCards.filter { it.optional }
-                .flatMap { listOf(storyEventId(it.id), currentStoryEventId(original, it.id)) }.toSet()
+                .flatMap { storyVersions(original, it.id) }.toSet()
             if (offerOptionalScenes) original else original.copy(policies = original.policies.mapValues { (id, policy) ->
                 if (id in optionalIds) policy.copy(condition = StoryCondition.Not(StoryCondition.Always)) else policy
             })
@@ -375,6 +375,11 @@ class StoryCampaignTest {
     }
 
     private companion object {
+        fun storyVersions(catalog: GameCatalog, sourceId: String): List<String> =
+            catalog.content.events.map { it.id }.filter {
+                it.startsWith("campaign-choice-v") && it.substringAfter(':') == sourceId
+            }
+
         fun currentStoryEventId(catalog: GameCatalog, sourceId: String): String {
             val originalId = storyEventId(sourceId)
             val originalChoices = catalog.content.choices.filter { it.eventId == originalId }.map { it.id }.toSet()
@@ -390,7 +395,12 @@ class StoryCampaignTest {
             DeedGameKind.NEED_WANT, DeedGameKind.REAL_DISCOUNT, DeedGameKind.COIN_BALANCE,
             DeedGameKind.FINANCIAL_TRAP, DeedGameKind.EXTRA_PURCHASE -> completedFinancialGameScore(kind)
             DeedGameKind.TELESCOPE, DeedGameKind.MARK, DeedGameKind.WHEEL, DeedGameKind.STRAP,
-            DeedGameKind.SIGNAL, DeedGameKind.ROUTE_MAP, DeedGameKind.BOAT -> completedChapterGameScore(kind)
+            DeedGameKind.SIGNAL, DeedGameKind.ROUTE_MAP, DeedGameKind.BOAT,
+            DeedGameKind.TRIP_PACKING, DeedGameKind.SHOPPING_COMPARISON, DeedGameKind.RECORD_JOURNAL,
+            DeedGameKind.RECORD_LENSES, DeedGameKind.RECORD_LIGHTS,
+            DeedGameKind.OBSERVATORY_OPENING, DeedGameKind.PLATE_HAND, DeedGameKind.PLATE_SOLUTION,
+            DeedGameKind.LIGHT_INSCRIPTION, DeedGameKind.SERVICE_EMBLEM, DeedGameKind.SIGNAL_POST,
+            DeedGameKind.CHAPTER_FINALE, DeedGameKind.RING_TOSS -> completedChapterGameScore(kind)
             DeedGameKind.PRECISION -> DeedGameScore.fromPrecision(TargetStopState(10, round = 5, hits = 5, lastHit = true))
             DeedGameKind.COMPARISON -> DeedGameScore.fromComparison(PriceQuizState.create().copy(current = 5, correctAnswers = 5))
             DeedGameKind.MEMORY -> DeedGameScore.fromMemory(MemoryState((0 until MemoryState.PAIRS).flatMap { listOf(it, it) })

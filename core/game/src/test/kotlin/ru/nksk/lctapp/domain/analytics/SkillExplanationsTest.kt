@@ -33,7 +33,7 @@ class SkillExplanationsTest {
         assertEquals(explanation, explain(observations.reversed()))
         assertEquals(listOf("a", "z"), explanation.evidence.map { it.episodeId })
         assertEquals(listOf("z1", "z2"), explanation.evidence.last().sourceEventIds)
-        assertEquals("В одних заданиях сравнивал суммы верно, в других ошибался.", explanation.summary)
+        assertEquals("Не всегда сравнивает суммы верно: есть и правильные ответы, и ошибки.", explanation.summary)
     }
 
     @Test fun laterCorrectAnswerDoesNotHideDifficultyOnTheFirstAttempt() {
@@ -49,7 +49,7 @@ class SkillExplanationsTest {
         val profile = SkillEvaluator().project("run", listOf(first, repeated, second))
             .single { it.skill == SkillId.COMPARE_AMOUNTS }
         val explanation = SkillExplanations.explain(profile)
-        assertEquals("При сравнении сумм были ошибки.", explanation.summary)
+        assertEquals("Ошибался при сравнении сумм.", explanation.summary)
         assertTrue(explanation.evidence.isEmpty())
         assertEquals(setOf(first.eventId, repeated.eventId, second.eventId), profile.observations.single().sourceEventIds.toSet())
     }
@@ -60,9 +60,9 @@ class SkillExplanationsTest {
             fact("saving", 2, FactDetail.SavingCycleClosed("goal", historyComplete = true))
                 .copy(actor = AnalyticsActor.SYSTEM),
         ))
-        assertEquals("Пока не видно повторяющихся накоплений на цель.", explanation.summary)
+        assertEquals("Пока мало примеров, чтобы судить о регулярном накоплении.", explanation.summary)
         assertTrue(explanation.evidence.single().text.contains("после одного поступления"))
-        assertTrue(explanation.evidence.single().text.contains("повторения после нового поступления пока не видно"))
+        assertTrue(explanation.evidence.single().text.contains("Пока рано говорить, что это стало привычкой"))
         assertFalse(explanation.evidence.single().text.contains("не умеет"))
     }
 
@@ -74,7 +74,7 @@ class SkillExplanationsTest {
             fact("saving", 4, FactDetail.SavingCycleClosed("goal", historyComplete = true))
                 .copy(actor = AnalyticsActor.SYSTEM),
         ))
-        assertEquals("Сохранял деньги на цель после разных поступлений.", explanation.summary)
+        assertEquals("Откладывал из разных поступлений и сохранял эти деньги для цели.", explanation.summary)
         assertTrue(explanation.evidence.isEmpty())
         assertFalse(explanation.summary.any(Char::isDigit))
         assertFalse(explanation.summary.contains("самостоятель"))
@@ -100,7 +100,7 @@ class SkillExplanationsTest {
             fact("earning", 2, FactDetail.EarningCompleted("offer", 2, 7, true))
                 .copy(actor = AnalyticsActor.SYSTEM),
         ))
-        assertEquals("Выполнил выбранное дело в срок, а после награды снова распорядился деньгами.",
+        assertEquals("Выполнил дело в срок и решил, как использовать заработанные деньги.",
             explanation.summary)
         assertTrue(explanation.evidence.isEmpty())
         assertFalse(explanation.summary.any(Char::isDigit))
@@ -112,9 +112,9 @@ class SkillExplanationsTest {
         val ineligible = observation("ineligible", reason = ObservationReason.CORRECT_COMPARISON)
             .copy(eligibility = ObservationEligibility.UNDETERMINED)
         val explanation = explain(listOf(pending, ineligible))
-        assertEquals("Пока мало данных о том, как ребёнок сравнивает суммы.", explanation.summary)
+        assertEquals("Пока мало ответов, чтобы понять, как ребёнок сравнивает суммы.", explanation.summary)
         assertTrue(explanation.evidence.any { it.text == "Серия вопросов ещё не завершена." })
-        assertTrue(explanation.evidence.any { it.text == "По этой ситуации пока нельзя сказать, как ребёнок сделал выбор." })
+        assertTrue(explanation.evidence.any { it.text == "Об этом выборе пока слишком мало известно, чтобы делать вывод." })
         assertFalse(explanation.evidence.any { it.text.contains("верно сравнил") })
     }
 
@@ -124,8 +124,8 @@ class SkillExplanationsTest {
             reason = ObservationReason.INCORRECT_COMPARISON, sourceEventIds = listOf("other-source"))
         val explanation = explain(listOf(positive, conflicting))
         assertEquals(1, explanation.evidence.size)
-        assertEquals("Пока мало данных о том, как ребёнок сравнивает суммы.", explanation.summary)
-        assertTrue(explanation.evidence.single().text.contains("не получается надёжно разобрать"))
+        assertEquals("Пока мало ответов, чтобы понять, как ребёнок сравнивает суммы.", explanation.summary)
+        assertTrue(explanation.evidence.single().text.contains("пока нельзя сделать вывод"))
         assertEquals(setOf("same-source", "other-source"), explanation.evidence.single().sourceEventIds.toSet())
     }
 
@@ -137,7 +137,7 @@ class SkillExplanationsTest {
             source.copy(sourceEventIds = emptyList()),
         ))
         assertTrue(explanation.evidence.isEmpty())
-        assertEquals("Пока мало данных о том, как ребёнок сравнивает суммы.", explanation.summary)
+        assertEquals("Пока мало ответов, чтобы понять, как ребёнок сравнивает суммы.", explanation.summary)
     }
 
     @Test fun revealedAnswerAndReportedAdultHelpRemainVisibleWithoutAssumingIndependence() {
@@ -158,7 +158,7 @@ class SkillExplanationsTest {
             comparisonFamily = "expense-family",
         )).copy(learningContext = LearningContext.COUNTERFACTUAL)
         val explanation = evaluated(SkillId.RECONSIDER_DECISION, listOf(answer))
-        assertEquals("При разборе другого хода событий причину результата объяснил верно, но применение в следующем похожем выборе пока не видно.",
+        assertEquals("При разборе другого выбора верно объяснил, почему так получилось. Пока неизвестно, учтёт ли это в следующем похожем выборе.",
             explanation.summary)
         assertTrue(explanation.evidence.isEmpty())
     }
@@ -169,12 +169,12 @@ class SkillExplanationsTest {
                 reason = ObservationReason.ORIGINAL_SHORTFALL).copy(measures = mapOf("baselineShortfall" to 21)),
         )))
         assertEquals("Денег на необходимое не хватало ещё до распределения.", explanation.evidence.single().text)
-        assertEquals("Пока мало данных о том, как ребёнок распределяет деньги.", explanation.summary)
+        assertEquals("Пока мало решений, чтобы понять, как ребёнок распределяет деньги.", explanation.summary)
     }
 
     @Test fun unknownRuleVersionAndInvalidMeasurementsNeverInventAmounts() {
         val future = observation("future", reason = ObservationReason.CORRECT_COMPARISON).copy(ruleVersion = 99)
-        assertEquals("Пока мало данных о том, как ребёнок сравнивает суммы.", explain(listOf(future)).summary)
+        assertEquals("Пока мало ответов, чтобы понять, как ребёнок сравнивает суммы.", explain(listOf(future)).summary)
         val badMeasures = observation("bad-measure", reason = ObservationReason.CORRECT_COMPARISON)
             .copy(measures = mapOf("correctFirstAnswers" to -9, "questions" to 2))
         val text = explain(listOf(badMeasures)).summary
@@ -270,7 +270,7 @@ class SkillExplanationsTest {
         ))
         assertTrue(explanation.evidence.single().text.contains("нельзя уверенно сказать"))
         assertFalse(explanation.evidence.single().text.contains("не хватало"))
-        assertEquals("Пока не видно повторяющихся накоплений на цель.", explanation.summary)
+        assertEquals("Пока мало примеров, чтобы судить о регулярном накоплении.", explanation.summary)
     }
 
     @Test fun partialPlannedDepositsAreNotRewordedAsNoDeposits() {
@@ -289,7 +289,7 @@ class SkillExplanationsTest {
         )))
         assertTrue(explanation.evidence.single().text.contains("не видно оплаты"))
         assertFalse(explanation.evidence.single().text.contains("не хватало"))
-        assertEquals("Пока не видно, хватает ли денег на необходимое до следующего дохода.", explanation.summary)
+        assertEquals("Пока неизвестно, хватает ли денег на необходимое до следующего дохода.", explanation.summary)
     }
 
     @Test fun missedDeadlineDoesNotInventAnEnergyShortage() {
@@ -414,7 +414,7 @@ class SkillExplanationsTest {
         }
         val evidence = explanation.evidence.single().text
         assertTrue(evidence.startsWith("День 4, «Лавка у причала»: в тренировке:"))
-        assertTrue(evidence.endsWith("Отмечена помощь взрослого."))
+        assertTrue(evidence.endsWith("Указана помощь взрослого."))
         assertEquals("На тренировке верно сравнил суммы.", explanation.summary)
     }
 
@@ -428,7 +428,7 @@ class SkillExplanationsTest {
             SkillEventContext(1, " "), SkillEventContext(1, "Название\u0000")).forEach { context ->
             assertEquals(ordinary, SkillExplanations.explain(profile) { context })
         }
-        assertEquals("Правильный ответ был показан, отмечена помощь взрослого.", ordinary.evidence.single().text)
+        assertEquals("Правильный ответ был показан, указана помощь взрослого.", ordinary.evidence.single().text)
     }
 
     @Test fun contextlessResultDoesNotReferToAnUnseenSituation() {

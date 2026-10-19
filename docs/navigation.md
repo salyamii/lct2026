@@ -35,8 +35,20 @@ Live budget redirects keep `NavDisplay` and its entry decorators mounted. The
 outgoing screen is temporarily noninteractive until the persisted planning route
 replaces it; only initial gate loading uses the full loading screen. Successful
 Day actions that require this redirect freeze their outgoing presentation too.
-Short Day writes block duplicate input immediately, but show their saving
+Short Day and Tasks writes block duplicate input immediately, but show their saving
 indicator only after 300 ms, avoiding a spinner flash for fast local commits.
+
+By CAMPAIGN-D-005, the same app-level observer also projects a missing current
+chapter goal. After a finale, chapters 2–5 require an explicit savings target in
+the existing `Goal` entry. Pending budget planning has priority; an older saved
+finale's `RESULT` is acknowledged first. The redirect keeps `NavDisplay` mounted
+and replaces the stack with MainMenu/Goal. Toolbar, system and predictive Back
+cannot bypass the required choice; other-goal browsing is hidden on this step.
+The existing `SelectSavingGoal` commits the choice and opens its period plan.
+Buying a part later does not repeat the gate, and a completed campaign is exempt.
+Settings remains accessible when restoring its route. No new route or persisted
+flag is introduced. This is the required-choice exception to ordinary Goal Back
+behavior below.
 
 | Menu action | Destination |
 | --- | --- |
@@ -64,7 +76,7 @@ use entry-scoped temporary state and do not write to the game repository.
 Back returns to the gallery and then Tasks. This supersedes the visible gallery
 entry retained by CHAPTER-GAMES-D-005; real games still open from their events.
 
-By CHAPTER-GAMES-D-004, real chapter games use the existing `DeedGame` entry
+By CHAPTER-GAMES-D-004/007, real chapter games use the existing `DeedGame` entry
 with an occurrence ID and, for a story branch, its choice ID. Tasks supplies
 a `chapterContent` composable slot; app-owned `ChapterStoryGameContent` chooses
 the scene from `feature/storygames`. Features do not import each other.
@@ -73,6 +85,13 @@ validates through `DeedGameScore.from…` before Tasks saves `CompleteDeed` or
 `CompleteStoryGame`. Back pauses the real event, and saving or an inactive
 lifecycle blocks input. Failed completion remains available for an explicit
 retry through the existing Tasks session state.
+
+N1.SHOP, N1.PACK, the three revised record scenes and the six discovery scenes
+(including the chapter finale) use this same entry;
+there are no additional dialogs, navigation routes or test-gallery buttons.
+The shopping board also opens from the revised short Keeper job. New boat
+offers require packing; old offered/active boat occurrences keep their original
+identity and guard. The local supply exercise never purchases personal items.
 
 The same app slot connects boat repair to Tasks' durable `PayBoatRepair`
 request. Only confirmed payment resumes the boat; the real money journal is

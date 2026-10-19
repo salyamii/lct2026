@@ -18,7 +18,9 @@ internal fun SpendingQuote.playerDescription(kind: SpendingKind, reserveBefore: 
     if (kind == SpendingKind.EARNING) return null
     val amount = parts.sumOf { it.amount }
     return if (kind == SpendingKind.GOAL) "Возьмём из копилки $amount ${paymentCoins(amount)}."
-    else availableSourcesDescription(prefix = "Возьмём для оплаты", reserveBefore = reserveBefore)
+    else availableSourcesDescription(prefix = "Возьмём для оплаты", reserveBefore = reserveBefore)?.let { sources ->
+        if (parts.count { it.amount > 0 } > 1) "Всего: ${coinAmount(amount)}.\n$sources" else sources
+    }
 }
 
 internal fun SpendingQuote.availableSourcesDescription(prefix: String = "Возьмём", reserveBefore: Long? = null): String? {

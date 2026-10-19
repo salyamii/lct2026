@@ -37,6 +37,7 @@ internal fun AdaptiveActionPanel(
     actionsAtTop: Boolean = false,
     contentScrollState: ScrollState? = null,
     minimumBodyHeight: Dp = 64.dp,
+    contentArrangement: Arrangement.Vertical? = null,
     actions: @Composable ColumnScope.() -> Unit,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -47,7 +48,7 @@ internal fun AdaptiveActionPanel(
         if (!constraints.hasBoundedHeight) {
             Column(Modifier.fillMaxWidth().padding(contentPadding), verticalArrangement = Arrangement.spacedBy(sectionSpacing)) {
                 if (actionsAtTop) Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(actionSpacing), content = actions)
-                Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(contentSpacing), content = content)
+                Column(Modifier.fillMaxWidth(), verticalArrangement = contentArrangement ?: Arrangement.spacedBy(contentSpacing), content = content)
                 if (!actionsAtTop) Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(actionSpacing), content = actions)
             }
         } else {
@@ -68,7 +69,7 @@ internal fun AdaptiveActionPanel(
                 val bodyPlaceable = subcompose("body") {
                     Column(Modifier.fillMaxWidth().then(
                         if (keepActionsOutsideScroll) Modifier.verticalScroll(bodyScroll) else Modifier
-                    ), verticalArrangement = Arrangement.spacedBy(contentSpacing), content = content)
+                    ), verticalArrangement = contentArrangement ?: Arrangement.spacedBy(contentSpacing), content = content)
                 }.single().measure(unbounded.copy(
                     minHeight = if (keepActionsOutsideScroll && fillBody) bodyHeight else 0,
                     maxHeight = if (keepActionsOutsideScroll) bodyHeight else Constraints.Infinity,

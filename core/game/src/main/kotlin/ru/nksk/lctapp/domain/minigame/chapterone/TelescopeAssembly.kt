@@ -1,29 +1,31 @@
 package ru.nksk.lctapp.domain.minigame.chapterone
 
 import kotlin.math.abs
+import kotlin.random.Random
 
 enum class TelescopePart { TRIPOD, TUBE, LENS }
-enum class TelescopeStage { TRIPOD, TUBE, MOUNT, EYEPIECE, THREAD, FOCUS, COMPLETE }
+enum class TelescopeStage { TRIPOD, TUBE, EYEPIECE, FOCUS, COMPLETE }
 
-/** Temporary practice state. It never represents a purchase or a campaign reward. */
+/** Local assembly progress. Completing it does not itself grant a campaign reward. */
 data class TelescopeAssembly(
     val installedCount: Int = 0,
     val selectedPart: TelescopePart? = null,
     val focus: Float = .18f,
     val completed: Boolean = false,
+    // Kept for existing completion validation; seating a part now secures it immediately.
     val firstFastener: Float = 0f,
     val secondFastener: Float = 0f,
     val selectedFastener: Int = 0,
     val mountSecured: Boolean = false,
     val eyepieceTurn: Float = 0f,
     val eyepieceSecured: Boolean = false,
+    val skyVariant: Int = 0,
+    val focusTarget: Float = FOCUS_TARGET,
 ) {
     val stage: TelescopeStage get() = when {
         installedCount == 0 -> TelescopeStage.TRIPOD
         installedCount == 1 -> TelescopeStage.TUBE
-        !mountSecured -> TelescopeStage.MOUNT
         installedCount == 2 -> TelescopeStage.EYEPIECE
-        !eyepieceSecured -> TelescopeStage.THREAD
         completed -> TelescopeStage.COMPLETE
         else -> TelescopeStage.FOCUS
     }
@@ -34,43 +36,24 @@ data class TelescopeAssembly(
         else -> null
     }
     val assembled: Boolean get() = installedCount == 3 && mountSecured && eyepieceSecured
-    val mountReady: Boolean get() = firstFastener >= MOUNT_TURN - TURN_TOLERANCE && secondFastener >= MOUNT_TURN - TURN_TOLERANCE
-    val eyepieceReady: Boolean get() = eyepieceTurn >= EYEPIECE_TURN - TURN_TOLERANCE
-    val sharpness: Float get() = (1f - abs(focus - FOCUS_TARGET) / .32f).coerceIn(0f, 1f)
-    val inFocus: Boolean get() = assembled && abs(focus - FOCUS_TARGET) <= FOCUS_TOLERANCE
+    val sharpness: Float get() = (1f - abs(focus - focusTarget) / .32f).coerceIn(0f, 1f)
+    val inFocus: Boolean get() = assembled && abs(focus - focusTarget) <= FOCUS_TOLERANCE
 
     fun select(part: TelescopePart): TelescopeAssembly =
         if (nextPart == null || part.ordinal < installedCount) this else copy(selectedPart = part)
 
-    fun install(part: TelescopePart): TelescopeAssembly =
-        if (!completed && part == nextPart) copy(installedCount = installedCount + 1, selectedPart = null)
-        else this
-
-    fun selectFastener(index: Int): TelescopeAssembly =
-        if (stage == TelescopeStage.MOUNT && index in 0..1) copy(selectedFastener = index) else this
-
-    fun turnFastener(index: Int, degrees: Float): TelescopeAssembly {
-        if (stage != TelescopeStage.MOUNT || index !in 0..1 || !degrees.isFinite()) return this
-        return if (index == 0) copy(firstFastener = (firstFastener + degrees).coerceIn(0f, MOUNT_TURN), selectedFastener = index)
-        else copy(secondFastener = (secondFastener + degrees).coerceIn(0f, MOUNT_TURN), selectedFastener = index)
-    }
-
-    fun secureMount(): TelescopeAssembly =
-        if (stage == TelescopeStage.MOUNT && mountReady) copy(mountSecured = true,
-            firstFastener = MOUNT_TURN, secondFastener = MOUNT_TURN) else this
-
-    fun turnEyepiece(degrees: Float): TelescopeAssembly =
-        if (stage != TelescopeStage.THREAD || !degrees.isFinite()) this
-        else copy(eyepieceTurn = (eyepieceTurn + degrees).coerceIn(0f, EYEPIECE_TURN))
-
-    fun secureEyepiece(): TelescopeAssembly =
-        if (stage == TelescopeStage.THREAD && eyepieceReady) copy(eyepieceSecured = true, eyepieceTurn = EYEPIECE_TURN) else this
-
-    /** Release, rather than an intermediate pointer frame, advances a finished connection. */
-    fun finishTurning(): TelescopeAssembly = when (stage) {
-        TelescopeStage.MOUNT -> secureMount()
-        TelescopeStage.THREAD -> secureEyepiece()
-        else -> this
+    fun install(part: TelescopePart): TelescopeAssembly {
+        if (completed || part != nextPart) return this
+        val count = installedCount + 1
+        return copy(
+            installedCount = count,
+            selectedPart = null,
+            firstFastener = if (count >= 2) MOUNT_TURN else 0f,
+            secondFastener = if (count >= 2) MOUNT_TURN else 0f,
+            mountSecured = count >= 2,
+            eyepieceTurn = if (count == 3) EYEPIECE_TURN else 0f,
+            eyepieceSecured = count == 3,
+        )
     }
 
     fun adjustFocus(value: Float): TelescopeAssembly =
@@ -83,30 +66,50 @@ data class TelescopeAssembly(
         const val FOCUS_TOLERANCE = .085f
         const val MOUNT_TURN = 180f
         const val EYEPIECE_TURN = 270f
-        const val TURN_TOLERANCE = 8f
-        const val SAVE_VERSION = 2
+        const val SKY_VARIANT_COUNT = 5
+        const val SAVE_VERSION = 4
+        private val FOCUS_TARGETS = listOf(.24f, .39f, .54f, .69f, .84f)
+
+        fun create(random: Random = Random.Default, previous: TelescopeAssembly? = null): TelescopeAssembly {
+            val skies = (0 until SKY_VARIANT_COUNT).filter { it != previous?.skyVariant }
+            val targets = FOCUS_TARGETS.filter {
+                previous == null || !previous.focusTarget.isFinite() ||
+                    abs(it - previous.focusTarget) > FOCUS_TOLERANCE * 2
+            }
+            return TelescopeAssembly(
+                focus = .02f,
+                skyVariant = skies.random(random),
+                focusTarget = targets.random(random),
+            )
+        }
 
         fun restore(
             installed: Int, selected: Int?, focus: Float, completed: Boolean,
-            firstFastener: Float = 0f, secondFastener: Float = 0f, selectedFastener: Int = 0,
-            mountSecured: Boolean = false, eyepieceTurn: Float = 0f, eyepieceSecured: Boolean = false,
             version: Int = SAVE_VERSION,
+            skyVariant: Int = 0,
+            focusTarget: Float = FOCUS_TARGET,
         ): TelescopeAssembly {
-            if (version != SAVE_VERSION) return TelescopeAssembly()
+            if (version !in 1..SAVE_VERSION) return TelescopeAssembly()
             val count = installed.coerceIn(0, TelescopePart.entries.size)
+            val validFocus = focus.isFinite() && focus in 0f..1f
             val safeFocus = if (focus.isFinite()) focus.coerceIn(0f, 1f) else .18f
-            fun safeTurn(value: Float, limit: Float) = if (value.isFinite()) value.coerceIn(0f, limit) else 0f
-            val first = if (count >= 2) safeTurn(firstFastener, MOUNT_TURN) else 0f
-            val second = if (count >= 2) safeTurn(secondFastener, MOUNT_TURN) else 0f
-            val securedMount = mountSecured && first == MOUNT_TURN && second == MOUNT_TURN
-            val safeCount = if (count == 3 && !securedMount) 2 else count
-            val thread = if (safeCount == 3) safeTurn(eyepieceTurn, EYEPIECE_TURN) else 0f
-            val state = TelescopeAssembly(safeCount, TelescopePart.entries.getOrNull(selected ?: -1)
-                ?.takeIf { it.ordinal >= safeCount }, safeFocus,
-                firstFastener = first, secondFastener = second,
-                selectedFastener = selectedFastener.coerceIn(0, 1), mountSecured = securedMount,
-                eyepieceTurn = thread, eyepieceSecured = eyepieceSecured && thread == EYEPIECE_TURN && safeCount == 3)
-            return state.copy(completed = completed && state.inFocus)
+            val validSky = skyVariant in 0 until SKY_VARIANT_COUNT
+            val validTarget = focusTarget.isFinite() && focusTarget in 0f..1f
+            val legacy = version < 4
+            // Older saves may be midway through a removed tightening step. Keep all
+            // installed parts and continue at the next placement or focus adjustment.
+            val state = TelescopeAssembly(count, TelescopePart.entries.getOrNull(selected ?: -1)
+                ?.takeIf { it.ordinal >= count }, safeFocus,
+                firstFastener = if (count >= 2) MOUNT_TURN else 0f,
+                secondFastener = if (count >= 2) MOUNT_TURN else 0f,
+                mountSecured = count >= 2,
+                eyepieceTurn = if (count == 3) EYEPIECE_TURN else 0f,
+                eyepieceSecured = count == 3,
+                skyVariant = if (legacy || !validSky) 0 else skyVariant,
+                focusTarget = if (legacy || !validTarget) FOCUS_TARGET else focusTarget,
+            )
+            return state.copy(completed = completed && validFocus &&
+                (legacy || (validSky && validTarget)) && state.inFocus)
         }
     }
 }

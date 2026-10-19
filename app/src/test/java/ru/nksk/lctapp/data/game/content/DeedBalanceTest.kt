@@ -40,7 +40,7 @@ class DeedBalanceTest {
     @Test fun practicalStoryActionsRequireAPlayedBoardWhileDialogueAndTravelKeepTheirChoices() {
         val catalog = bundledGameCatalog()
         val mapped = catalog.policies.values.flatMap { it.choiceGameKinds.keys }.toSet()
-        assertEquals(13, mapped.count { it.startsWith("campaign-choice-v1:") })
+        assertEquals(15, mapped.count { it.startsWith("campaign-choice-v1:") })
         assertEquals(17, mapped.count { it.startsWith("figma-") }) // Includes both historical and current repair boards.
         assertTrue("${storyEventId("N1.WHEEL")}:continue" in mapped)
         assertTrue("${storyEventId("G5.08")}:continue" in mapped)

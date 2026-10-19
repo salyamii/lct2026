@@ -95,7 +95,19 @@ class EventFactory(
                         (current.family ?: currentId) == (policy.scheduling.family ?: id)
                 })
             } == true)
-            require(!policy.finishesStoryAct || campaign?.acts?.any { it.finaleId == id } == true)
+            require(!policy.finishesStoryAct || campaign?.acts?.any { act ->
+                if (act.id != policy.storyActId) false
+                else if (act.finaleId == id) true
+                else {
+                    val current = policies.getValue(act.finaleId).scheduling
+                    // An already offered finale keeps its immutable rules after an update.
+                    // Its outcome must still complete the same current chapter.
+                    id in current.previousEventIds &&
+                        (current.family ?: act.finaleId) == (policy.scheduling.family ?: id) &&
+                        eventChoices.isNotEmpty() && campaign.completionAliases[act.finaleId].orEmpty()
+                            .containsAll(eventChoices.map { it.id })
+                }
+            } == true)
             require(policy.choiceEnergyCosts.keys.all { choice -> eventChoices.any { it.id == choice } }) {
                 "Energy override must belong to this event: $id"
             }
