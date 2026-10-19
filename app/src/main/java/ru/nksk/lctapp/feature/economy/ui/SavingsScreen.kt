@@ -38,7 +38,8 @@ import ru.nksk.lctapp.domain.economy.EconomyOperations
 /** One destination: choose a direction, preview, confirm and see the receipt in place. */
 @Composable
 internal fun SavingsScreen(state: EconomyUiState, onAction: (EconomyAction) -> Unit,
-    onBack: () -> Unit, onOpenGoal: () -> Unit, onOpenBudget: () -> Unit) {
+    onBack: () -> Unit, onOpenGoal: () -> Unit, onOpenBudget: () -> Unit,
+    onHome: () -> Unit = onBack, homeEnabled: Boolean = !state.saving) {
     val economy = state.economy
     val withdrawing = state.savingsStep == SavingsStep.WITHDRAW
     val amount = state.transferInput.toLongOrNull()
@@ -54,6 +55,7 @@ internal fun SavingsScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
     }
     AdventureScreen(
         title = "Наша копилка", onBack = onBack,
+        onHome = onHome, homeEnabled = homeEnabled,
         available = economy?.availableBalance, savings = economy?.savingsBalance,
         characterRes = pet?.artworkRes, characterMotionIntensity = pet?.motionIntensity ?: 1f,
         characterDescription = pet?.name,

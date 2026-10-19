@@ -48,6 +48,8 @@ fun TripPackingGameEntry(
     onExit: () -> Unit,
     onCompleted: (TripPacking) -> Unit,
     interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     val model = hiltViewModel<TripPackingGameViewModel>()
     val game by model.uiState.collectAsStateWithLifecycle()
@@ -55,7 +57,8 @@ fun TripPackingGameEntry(
     val onAction: (TripPackingAction) -> Unit = remember(model) { { if (!blocked) model.onAction(it) } }
     val exit = { if (!blocked) onExit() }
     BackHandler(onBack = exit)
-    TripPackingGameScreen(game, onAction, exit, onCompleted, interactionBlocked)
+    TripPackingGameScreen(game, onAction, exit, onCompleted, interactionBlocked,
+        onHome = { if (homeEnabled) onHome() }, homeEnabled = homeEnabled)
 }
 
 @Composable
@@ -65,11 +68,15 @@ fun TripPackingGameScreen(
     onExit: () -> Unit,
     onCompleted: (TripPacking) -> Unit,
     interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     ChapterGameScaffold(
         title = "Сборы в дорогу",
         instruction = "Возьми карту и фонарь. Оставь 3 монеты про запас.",
         onExit = onExit,
+        onHome = onHome,
+        homeEnabled = homeEnabled,
         footer = {
             GameActionButton(if (game.completed) "Продолжить" else "Собрать рюкзак", {
                 if (!interactionBlocked && game.ready) {

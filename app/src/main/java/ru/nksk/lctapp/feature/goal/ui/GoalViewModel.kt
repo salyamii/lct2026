@@ -50,6 +50,10 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
 
     init { load() }
 
+    /** An unsubmitted quote may close; a submitted purchase or continuation must keep its retry. */
+    fun canReturnHome(): Boolean = !busy && !mutableState.value.busy && pendingContinuation == null &&
+        !(purchaseSubmitted && pending != null)
+
     fun setActive(active: Boolean) {
         if (screenActive == active) return
         screenActive = active

@@ -15,6 +15,8 @@ data class ChapterDeedContent(
     val onExit: () -> Unit,
     val onShoppingProgress: (ShoppingProgress) -> Unit = {},
     val onPackingCompleted: (TripPacking) -> Unit = {},
+    val onHome: () -> Unit = onExit,
+    val homeEnabled: Boolean = !interactionBlocked,
 )
 
 enum class ChapterRepairPayment { PAID, NOT_ENOUGH_COINS, FAILED }

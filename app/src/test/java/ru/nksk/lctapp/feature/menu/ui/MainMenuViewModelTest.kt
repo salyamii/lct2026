@@ -26,6 +26,7 @@ import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.content.*
 import ru.nksk.lctapp.domain.finance.FinancialPeriod
 import ru.nksk.lctapp.domain.finance.FinancialProgress
+import ru.nksk.lctapp.domain.story.StoryDecision
 import ru.nksk.lctapp.data.game.content.bundledGameCatalog
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -273,6 +274,51 @@ class MainMenuViewModelTest {
         override suspend fun read() = content
         override suspend fun install(content: StoryContent) { this.content = content }
     }, catalog, initial)
+
+    @Test fun continueAfterHomeReopensMissingChapterGoalWithoutFinishingTheDay() = runTest(dispatcher) {
+        val catalog = bundledGameCatalog()
+        val firstAct = checkNotNull(catalog.storyCampaign).acts.first()
+        val initial = createInitialGameState().let { game -> game.copy(
+            selectedGoalId = null, selectedSavingItemId = null,
+            economy = EconomyState(BudgetPlan(35, 0, 0, 0)),
+            financial = FinancialProgress(),
+            story = game.story.copy(decisions = listOf(StoryDecision("finale",
+                catalog.content.choices.first { it.eventId == firstAct.finaleId }.id))),
+            engine = EngineState(catalog.rules.id, 1, 3, DayPhase.READY_TO_END, 5, 2, true,
+                null, 100, emptyList(), emptyList()),
+        ) }
+        val repository = MenuRepository(initial)
+        val model = model(session(repository, initial, catalog))
+        var openedGoal = 0
+        var openedDay = 0
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.openGoal.collect { openedGoal++ } }
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.openDay.collect { openedDay++ } }
+        advanceUntilIdle()
+        val before = repository.read()
+        val writes = repository.requests.size
+        assertEquals("Выбрать цель", (model.uiState.value as MainMenuLoadState.Ready).menu.continueLabel)
+
+        model.continueDay()
+        advanceUntilIdle()
+
+        assertEquals(1, openedGoal)
+        assertEquals(0, openedDay)
+        assertEquals(before, repository.read())
+        assertEquals(writes, repository.requests.size)
+
+        repository.update { game -> game.copy(economy = game.economy.copy(planning =
+            BudgetPlanning("next-budget", BudgetPlanningReason.WEEKLY, BudgetPlanningStage.ALLOCATION, 35))) }
+        var openedBudget = 0
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { model.openBudget.collect { openedBudget++ } }
+        advanceUntilIdle()
+        val withBudget = repository.read()
+        model.continueDay()
+        advanceUntilIdle()
+        assertEquals(1, openedBudget)
+        assertEquals(1, openedGoal)
+        assertEquals(withBudget, repository.read())
+        assertEquals(writes, repository.requests.size)
+    }
 
     @Test fun unallocatedMoneyWithoutAnOpenPlanRoutesToBudgetWithoutAdvancingTheWorld() = runTest(dispatcher) {
         val initial = createInitialGameState().copy(economy = EconomyState(BudgetPlan(35, 0, 0, 0), unallocated = 1))

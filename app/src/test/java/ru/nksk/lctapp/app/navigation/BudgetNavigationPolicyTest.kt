@@ -47,4 +47,12 @@ class BudgetNavigationPolicyTest {
         assertFalse(shouldPresentBudget(pending, Day, pending.id, pending.id))
         assertTrue(shouldPresentBudget(pending.copy(id = "next-budget"), Day, pending.id, pending.id))
     }
+
+    @Test fun homeFromUnfinishedAllocationKeepsTheMenuButCannotBypassPlanningOnContinue() {
+        val pending = initial.copy(stage = BudgetPlanningStage.ALLOCATION)
+        assertFalse(shouldPresentBudget(pending, MainMenu, pending.id))
+        assertTrue(shouldPresentBudget(pending, Day, pending.id))
+        assertTrue(shouldPresentBudget(pending, Tasks, pending.id))
+        assertTrue(shouldPresentBudget(pending.copy(id = "new-period"), MainMenu, pending.id))
+    }
 }

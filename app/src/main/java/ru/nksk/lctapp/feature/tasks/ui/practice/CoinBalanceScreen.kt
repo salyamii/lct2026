@@ -41,6 +41,7 @@ fun CoinBalanceScreen(
     onAction: (CoinBalanceAction) -> Unit,
     onBack: () -> Unit,
     deed: DeedGamePresentation? = null,
+    onHome: () -> Unit = onBack,
 ) {
     val feedback = remember { BringIntoViewRequester() }
     LaunchedEffect(state.current, state.verdict) {
@@ -49,7 +50,7 @@ fun CoinBalanceScreen(
     PracticeScaffold(stringResource(R.string.practice_balance_title), R.drawable.location_city,
         R.drawable.npc_caretaker_explaining, stringResource(state.round.scenario.promptRes, state.round.income),
         state.current, state.rounds.size, state.correctAnswers, state.finished,
-        { onAction(CoinBalanceAction.Restart) }, onBack, deed, DeedRewardPreview.fromCoinBalance(state)) {
+        { onAction(CoinBalanceAction.Restart) }, onBack, deed, DeedRewardPreview.fromCoinBalance(state), onHome = onHome) {
         PracticeBoard {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 PracticeText(stringResource(R.string.practice_received), bold = true)

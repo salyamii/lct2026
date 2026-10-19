@@ -40,7 +40,10 @@ fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> 
         }
         BackHandler(enabled = resumed) { model.leave() }
         val leave = { if (resumed) model.leave() }
+        val home = { if (resumed) model.leaveToHome() }
+        val boardPresentation = state.presentation?.copy(canReturnHome = resumed && state.canReturnHome)
         DeedGameHost(state, model::retry, leave, onSkipGame = { if (resumed) model.skipGame() },
+            onHome = home,
             onOpenSavings = { if (resumed) model.openRewardTransfer() },
             onSavingsInput = { if (resumed) model.changeRewardTransferInput(it) },
             onConfirmSavings = { if (resumed) model.confirmRewardTransfer() },
@@ -51,7 +54,7 @@ fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> 
                     val board by game.uiState.collectAsStateWithLifecycle()
                     LaunchedEffect(board.game) { model.finishMemory(board.game) }
                     MemoryGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
-                        leave, state.presentation)
+                        leave, boardPresentation, onHome = home)
                 }
                 DeedGameType.COMPARISON -> {
                     val game = hiltViewModel<PriceQuizViewModel>()
@@ -67,21 +70,21 @@ fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> 
                             model.recordComparisonAnswers(game.comparisonEvidence())
                         }
                     },
-                        leave, state.presentation)
+                        leave, boardPresentation, onHome = home)
                 }
                 DeedGameType.PRECISION -> {
                     val game = hiltViewModel<TargetStopViewModel>()
                     val board by game.uiState.collectAsStateWithLifecycle()
                     LaunchedEffect(board.game) { model.finishPrecision(board.game) }
                     TargetStopScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
-                        leave, state.presentation)
+                        leave, boardPresentation, onHome = home)
                 }
                 DeedGameType.LIGHTS -> {
                     val game = hiltViewModel<LightsGameViewModel>()
                     val board by game.uiState.collectAsStateWithLifecycle()
                     LaunchedEffect(board.game) { model.finishLights(board.game) }
                     LightsGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
-                        leave, state.presentation)
+                        leave, boardPresentation, onHome = home)
                 }
                 DeedGameType.SEQUENCE -> {
                     val game = hiltViewModel<SequenceGameViewModel>()
@@ -92,21 +95,21 @@ fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> 
                             game.onAction(it)
                         }
                     },
-                        leave, state.presentation)
+                        leave, boardPresentation, onHome = home)
                 }
                 DeedGameType.PIPES -> {
                     val game = hiltViewModel<PipesGameViewModel>()
                     val board by game.uiState.collectAsStateWithLifecycle()
                     LaunchedEffect(board.game) { model.finishPipes(board.game) }
                     PipesGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
-                        leave, state.presentation)
+                        leave, boardPresentation, onHome = home)
                 }
                 DeedGameType.DIFFERENCES -> {
                     val game = hiltViewModel<DifferencesGameViewModel>()
                     val board by game.uiState.collectAsStateWithLifecycle()
                     LaunchedEffect(board.game) { model.finishDifferences(board.game) }
                     DifferencesGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
-                        leave, state.presentation)
+                        leave, boardPresentation, onHome = home)
                 }
                 DeedGameType.STACKING -> {
                     val game = hiltViewModel<StackingGameViewModel>()
@@ -114,7 +117,7 @@ fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> 
                     val position = game.position.collectAsStateWithLifecycle()
                     LaunchedEffect(board.game) { model.finishStacking(board.game) }
                     StackingGameScreen(board, { if (resumed && state.presentation?.canPlay == true) game.onAction(it) },
-                        leave, state.presentation, position = { position.value })
+                        leave, boardPresentation, onHome = home, position = { position.value })
                 }
                 DeedGameType.TELESCOPE, DeedGameType.MARK, DeedGameType.WHEEL,
                 DeedGameType.STRAP, DeedGameType.SIGNAL, DeedGameType.ROUTE_MAP, DeedGameType.BOAT,
@@ -126,10 +129,12 @@ fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> 
                     chapterContent(ChapterDeedContent(
                         kind = DeedGameKind.valueOf(checkNotNull(state.type).name),
                         interactionBlocked = !resumed || state.busy || state.presentation?.canPlay != true,
+                        homeEnabled = resumed && state.canReturnHome,
                         repairCoins = state.repairCoins,
                         onCompleted = { if (resumed) model.finishChapterGame(it) },
                         onPayRepair = { id, rock -> model.payBoatRepair(id, rock) },
                         onExit = leave,
+                        onHome = home,
                         onShoppingProgress = model::recordShoppingProgress,
                         onPackingCompleted = { if (resumed) model.finishTripPacking(it) },
                     ))
@@ -138,8 +143,8 @@ fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> 
                 DeedGameType.FINANCIAL_TRAP, DeedGameType.EXTRA_PURCHASE -> FinancialDeedContent(
                     occurrenceId = source.occurrenceId,
                     kind = DeedGameKind.valueOf(checkNotNull(state.type).name),
-                    deed = checkNotNull(state.presentation), resumed = resumed,
-                    onCompleted = model::finishFinancialGame, onBack = leave,
+                    deed = checkNotNull(boardPresentation), resumed = resumed,
+                    onCompleted = model::finishFinancialGame, onBack = leave, onHome = home,
                 )
                 null -> Unit
             }

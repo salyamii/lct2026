@@ -46,7 +46,7 @@ data object ChapterPractice : NavKey
 data class OtherPaths(val day: Int) : NavKey { init { require(day > 0) } }
 
 fun EntryProviderScope<NavKey>.learningEntry(onBack: (NavKey) -> Unit, onOpenBudget: (NavKey) -> Unit = {},
-    onContinueStory: (NavKey) -> Unit = onBack, onArchives: (NavKey) -> Unit = {}) {
+    onContinueStory: (NavKey) -> Unit = onBack, onArchives: (NavKey) -> Unit = {}, onHome: (NavKey) -> Unit = onBack) {
     entry<Learning> { source ->
         val model = hiltViewModel<LearningHistoryViewModel>()
         val state by model.uiState.collectAsStateWithLifecycle()
@@ -58,20 +58,21 @@ fun EntryProviderScope<NavKey>.learningEntry(onBack: (NavKey) -> Unit, onOpenBud
             }
         }
         HistoryScreen(state, onRetry = dropUnlessResumed { model.retry() },
-            onBack = dropUnlessResumed { onBack(source) }, onArchives = dropUnlessResumed { onArchives(source) })
+            onBack = dropUnlessResumed { onBack(source) }, onArchives = dropUnlessResumed { onArchives(source) },
+            onHome = dropUnlessResumed { onHome(source) })
     }
     entry<SkillTraining> { source ->
-        TrainingEntryContent(source, false, onBack, onOpenBudget, onContinueStory)
+        TrainingEntryContent(source, false, onBack, onOpenBudget, onContinueStory, onHome)
     }
     entry<ChapterPractice> { source ->
-        TrainingEntryContent(source, true, onBack, onOpenBudget, onContinueStory)
+        TrainingEntryContent(source, true, onBack, onOpenBudget, onContinueStory, onHome)
     }
-    entry<OtherPaths> { source -> ReflectionEntryContent(source, onBack) }
+    entry<OtherPaths> { source -> ReflectionEntryContent(source, onBack, onHome) }
 }
 
 @Composable
 private fun TrainingEntryContent(source: NavKey, chapterPractice: Boolean, onBack: (NavKey) -> Unit,
-    onOpenBudget: (NavKey) -> Unit, onContinueStory: (NavKey) -> Unit) {
+    onOpenBudget: (NavKey) -> Unit, onContinueStory: (NavKey) -> Unit, onHome: (NavKey) -> Unit) {
     val model = hiltViewModel<TrainingViewModel>()
     val state by model.uiState.collectAsStateWithLifecycle()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -96,11 +97,14 @@ private fun TrainingEntryContent(source: NavKey, chapterPractice: Boolean, onBac
         if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) model.onAction(it)
     }, onBack = dropUnlessResumed { onBack(source) },
         onOpenBudget = dropUnlessResumed { onOpenBudget(source) },
-        onContinueStory = dropUnlessResumed { model.continueStory() })
+        onContinueStory = dropUnlessResumed { model.continueStory() },
+        onHome = dropUnlessResumed {
+            if (model.canReturnHome()) onHome(source)
+        }, homeEnabled = model.canReturnHome())
 }
 
 @Composable
-private fun ReflectionEntryContent(source: OtherPaths, onBack: (NavKey) -> Unit) {
+private fun ReflectionEntryContent(source: OtherPaths, onBack: (NavKey) -> Unit, onHome: (NavKey) -> Unit) {
     val model = hiltViewModel<ReflectionViewModel>()
     val state by model.uiState.collectAsStateWithLifecycle()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -122,5 +126,7 @@ private fun ReflectionEntryContent(source: OtherPaths, onBack: (NavKey) -> Unit)
     BackHandler { back() }
     ReflectionScreen(state, onAction = {
         if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) model.onAction(it)
-    }, onBack = dropUnlessResumed { onBack(source) })
+    }, onBack = dropUnlessResumed { onBack(source) },
+        onHome = dropUnlessResumed { if (model.canReturnHome()) onHome(source) },
+        homeEnabled = model.canReturnHome())
 }

@@ -58,6 +58,8 @@ fun DeedsScreen(onTraining: () -> Unit, onExit: () -> Unit,
     state: DeedsUiState = DeedsUiState(), onStart: (String) -> Unit = {}, onRetry: () -> Unit = {},
     onFeed: (String) -> Unit = {}, onCurrentEvent: () -> Unit = {},
     onDismissMessage: () -> Unit = {},
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !state.busy,
 ) {
     BackHandler(enabled = state.busy) {}
     Box(Modifier.fillMaxSize()) {
@@ -65,6 +67,8 @@ fun DeedsScreen(onTraining: () -> Unit, onExit: () -> Unit,
             state = state.copy(busy = false),
             onTraining = { if (!state.busy) onTraining() },
             onExit = { if (!state.busy) onExit() },
+            onHome = { if (!state.busy) onHome() },
+            homeEnabled = homeEnabled,
             onStart = { if (!state.busy) onStart(it) },
             onRetry = { if (!state.busy) onRetry() },
             onCurrentEvent = { if (!state.busy) onCurrentEvent() },
@@ -104,7 +108,7 @@ fun DeedsScreen(onTraining: () -> Unit, onExit: () -> Unit,
 @Composable
 private fun DeedsContent(onTraining: () -> Unit, onExit: () -> Unit,
     state: DeedsUiState, onStart: (String) -> Unit, onRetry: () -> Unit,
-    onCurrentEvent: () -> Unit,
+    onCurrentEvent: () -> Unit, onHome: () -> Unit, homeEnabled: Boolean,
 ) {
     val listState = rememberLazyListState()
     var lastFirstOfferId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -126,7 +130,8 @@ private fun DeedsContent(onTraining: () -> Unit, onExit: () -> Unit,
         Box {
             DeedBackdrop(R.drawable.location_observatory,
                 modifier = Modifier.fillMaxWidth().height(230.dp))
-            DeedHeader(stringResource(R.string.navigation_back), onBack = onExit)
+            DeedHeader(stringResource(R.string.navigation_back), onBack = onExit,
+                onHome = onHome, homeEnabled = homeEnabled)
         }
         DeedSheet(modifier = Modifier.weight(1f)) {
             LazyColumn(

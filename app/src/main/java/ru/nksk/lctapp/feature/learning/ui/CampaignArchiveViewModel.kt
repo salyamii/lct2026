@@ -38,6 +38,8 @@ internal class CampaignArchiveViewModel @Inject constructor(private val session:
 
     init { reload() }
 
+    fun canReturnHome(): Boolean = !state.value.busy && pendingRestart == null
+
     fun retry() {
         if (pendingRestart != null) restart() else reload()
     }

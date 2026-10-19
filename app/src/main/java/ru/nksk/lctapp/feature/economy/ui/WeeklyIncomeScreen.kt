@@ -18,8 +18,7 @@ import ru.nksk.lctapp.core.ui.components.GameInk
 import ru.nksk.lctapp.core.ui.components.GamePaper
 import ru.nksk.lctapp.core.ui.components.GameArtwork
 import ru.nksk.lctapp.core.ui.components.AdaptiveActionPanel
-import ru.nksk.lctapp.core.ui.components.GameBackButton
-import ru.nksk.lctapp.core.ui.components.GameSceneTitle
+import ru.nksk.lctapp.core.ui.components.GameNavigationHeader
 import ru.nksk.lctapp.core.ui.components.GameActionButton
 import ru.nksk.lctapp.core.ui.components.GameActionStyle
 import ru.nksk.lctapp.core.ui.components.FinancialAdviceText
@@ -60,18 +59,20 @@ internal fun WeeklyIncomeScreen(
     onOpenReserveTransfer: () -> Unit = {},
     onReserveInputChange: (String) -> Unit = {},
     onCancelReserveTransfer: () -> Unit = {},
+    onHome: () -> Unit = onBack,
+    homeEnabled: Boolean = !state.busy,
 ) {
     BoxWithConstraints(Modifier.fillMaxSize().background(GameInk).imePadding()) {
         val landscape = maxWidth >= 600.dp && maxWidth > maxHeight
         if (landscape) {
             Row(Modifier.fillMaxSize()) {
-                IncomeHero(state, onBack, Modifier.weight(1f).fillMaxHeight())
+                IncomeHero(state, onBack, onHome, homeEnabled, Modifier.weight(1f).fillMaxHeight())
                 IncomeInvitation(state, onPlan, onDepositReserve, onAdviceShown, onOpenReserveTransfer,
                     onReserveInputChange, onCancelReserveTransfer, Modifier.weight(1f).fillMaxHeight())
             }
         } else {
             Column(Modifier.fillMaxSize()) {
-                IncomeHero(state, onBack, Modifier.fillMaxWidth().weight(0.46f))
+                IncomeHero(state, onBack, onHome, homeEnabled, Modifier.fillMaxWidth().weight(0.46f))
                 IncomeInvitation(state, onPlan, onDepositReserve, onAdviceShown, onOpenReserveTransfer,
                     onReserveInputChange, onCancelReserveTransfer, Modifier.fillMaxWidth().weight(0.54f))
             }
@@ -80,17 +81,15 @@ internal fun WeeklyIncomeScreen(
 }
 
 @Composable
-private fun IncomeHero(state: WeeklyIncomeUiState, onBack: () -> Unit, modifier: Modifier) {
+private fun IncomeHero(state: WeeklyIncomeUiState, onBack: () -> Unit, onHome: () -> Unit,
+    homeEnabled: Boolean, modifier: Modifier) {
     Box(modifier) {
         GameArtwork(R.drawable.event_weekly_income_background, null, Modifier.matchParentSize(),
             contentScale = ContentScale.Crop, alignment = Alignment.BottomCenter)
         Column(Modifier.fillMaxSize()
             .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))) {
-            Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                GameBackButton(onClick = onBack, enabled = !state.busy, contentDescription = "В главное меню")
-                GameSceneTitle(state.header, Modifier.weight(1f, fill = false))
-            }
+            GameNavigationHeader(state.header, onBack, onHome,
+                Modifier.fillMaxWidth().padding(12.dp), backEnabled = !state.busy, homeEnabled = homeEnabled)
         }
     }
 }

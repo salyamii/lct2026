@@ -44,15 +44,17 @@ import ru.nksk.lctapp.domain.timemachine.TimeMachineStatus
 private val PathRule = Color(0xFFE5DCC6)
 
 @Composable
-internal fun ReflectionScreen(state: ReflectionUiState, onAction: (ReflectionAction) -> Unit, onBack: () -> Unit) {
-    if (state.chronoscopeStep != null) ChronoscopeScreen(state, onAction, onBack)
-    else LearningPage("А что, если…", onBack) {
+internal fun ReflectionScreen(state: ReflectionUiState, onAction: (ReflectionAction) -> Unit, onBack: () -> Unit,
+    onHome: () -> Unit = onBack, homeEnabled: Boolean = !state.busy) {
+    if (state.chronoscopeStep != null) ChronoscopeScreen(state, onAction, onBack, onHome, homeEnabled)
+    else LearningPage("А что, если…", onBack, onHome = onHome, homeEnabled = homeEnabled) {
         learningStatus(state.loading, state.busy, state.error, onRetry = { onAction(ReflectionAction.Retry) })
     }
 }
 
 @Composable
-internal fun ChronoscopeScreen(state: ReflectionUiState, onAction: (ReflectionAction) -> Unit, onExit: () -> Unit) {
+internal fun ChronoscopeScreen(state: ReflectionUiState, onAction: (ReflectionAction) -> Unit, onExit: () -> Unit,
+    onHome: () -> Unit = onExit, homeEnabled: Boolean = !state.busy) {
     val step = state.chronoscopeStep ?: return
     val memory = state.memory
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -101,6 +103,8 @@ internal fun ChronoscopeScreen(state: ReflectionUiState, onAction: (ReflectionAc
         else -> null
     }
     AdventureScreen(
+        onHome = onHome,
+        homeEnabled = homeEnabled,
         title = if (state.demoExample && step != ChronoscopeStep.PRESENT) "Демо-пример" else title,
         onBack = {
             if (step in setOf(ChronoscopeStep.INTRO, ChronoscopeStep.MOMENTS, ChronoscopeStep.PRESENT)) onExit()

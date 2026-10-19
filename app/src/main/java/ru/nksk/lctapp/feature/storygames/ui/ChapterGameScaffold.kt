@@ -23,9 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.components.GameArtwork
-import ru.nksk.lctapp.core.ui.components.GameBackButton
+import ru.nksk.lctapp.core.ui.components.GameNavigationHeader
 import ru.nksk.lctapp.core.ui.components.GamePlaque
-import ru.nksk.lctapp.core.ui.components.GameSceneTitle
 import ru.nksk.lctapp.core.ui.theme.Nunito
 
 /** One bounded play area: games share the app's artwork, controls and safe insets. */
@@ -35,6 +34,8 @@ internal fun ChapterGameScaffold(
     instruction: String,
     onExit: () -> Unit,
     modifier: Modifier = Modifier,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = true,
     footer: @Composable () -> Unit = {},
     content: @Composable BoxScope.() -> Unit,
 ) {
@@ -45,12 +46,8 @@ internal fun ChapterGameScaffold(
             Color(0x990F1830), Color(0xCC101729), Color(0xEE101729)))))
         Column(Modifier.fillMaxSize().safeDrawingPadding().padding(horizontal = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(Modifier.fillMaxWidth().padding(top = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                GameBackButton(onExit)
-                GameSceneTitle(title, Modifier.weight(1f))
-            }
+            GameNavigationHeader(title, onExit, onHome,
+                Modifier.fillMaxWidth().padding(top = 4.dp), homeEnabled = homeEnabled)
             if (instruction.isNotBlank()) GamePlaque(
                 Modifier.fillMaxWidth(), light = true, fixedEdges = true,
             ) {

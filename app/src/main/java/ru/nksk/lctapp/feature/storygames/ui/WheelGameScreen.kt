@@ -70,6 +70,8 @@ fun WheelGameEntry(
     onExit: () -> Unit,
     onCompleted: ((WheelRepair) -> Unit)? = null,
     interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     val viewModel = hiltViewModel<WheelGameViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -77,6 +79,8 @@ fun WheelGameEntry(
     WheelGameScreen(state,
         onAction = { if (!interactionBlocked) viewModel.onAction(it) },
         onExit = { if (!interactionBlocked) onExit() },
+        onHome = { if (homeEnabled) onHome() },
+        homeEnabled = homeEnabled,
         onCompleted = onCompleted?.let { complete -> { game -> if (!interactionBlocked) complete(game) } },
         interactionBlocked = interactionBlocked)
 }
@@ -88,6 +92,8 @@ fun WheelGameScreen(
     onExit: () -> Unit,
     onCompleted: ((WheelRepair) -> Unit)? = null,
     interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     val game = uiState.game
     ChapterGameScaffold(
@@ -95,6 +101,8 @@ fun WheelGameScreen(
         instruction = if (game.completed) "Колесо снова в деле!"
             else "Поверни часть колеса, чтобы края совпали. Затем закрепи её.",
         onExit = onExit,
+        onHome = onHome,
+        homeEnabled = homeEnabled,
         footer = {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 if (game.completed) {

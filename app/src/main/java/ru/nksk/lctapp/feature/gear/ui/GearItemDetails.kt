@@ -61,6 +61,8 @@ import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.components.GameArtwork
 import ru.nksk.lctapp.core.ui.components.GameActionButton
 import ru.nksk.lctapp.core.ui.components.GameActionStyle
+import ru.nksk.lctapp.core.ui.components.GameBackButton
+import ru.nksk.lctapp.core.ui.components.GameHomeButton
 import ru.nksk.lctapp.core.ui.theme.AdventureLime
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
@@ -76,6 +78,8 @@ internal fun GearItemDetails(
     onEquip: (String) -> Unit,
     busy: Boolean,
     actionMessage: Int? = null,
+    onHome: () -> Unit = onClose,
+    homeEnabled: Boolean = !busy,
 ) {
     val pages = item.pages.ifEmpty {
         listOf(GearContentPage("overview", item.name, item.artworkRes, item.description))
@@ -91,6 +95,11 @@ internal fun GearItemDetails(
             Modifier.safeDrawingPadding().widthIn(max = 840.dp).fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                GameBackButton(onClose, enabled = !busy)
+                GameHomeButton(onHome, enabled = homeEnabled)
+            }
             Row(
                 Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -102,10 +111,6 @@ internal fun GearItemDetails(
                     color = GearColors.Ink, fontFamily = Rubik,
                     fontWeight = FontWeight.Bold, fontSize = 23.sp,
                 )
-                TextButton(onClick = onClose, modifier = Modifier.heightIn(min = 48.dp)) {
-                    Text("Закрыть", color = GearColors.Ink, fontFamily = Nunito,
-                        fontWeight = FontWeight.Bold)
-                }
             }
             actionMessage?.let { message ->
                 Text(

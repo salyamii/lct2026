@@ -252,6 +252,18 @@ See [event authoring](design/event-authoring.md) and the
 
 ## Shared presentation
 
+By HOME-NAV-D-001, `GameHomeButton` reuses the shared parchment plaque with a
+small vector house and a Russian label. Screen and entry callbacks keep Home
+separate from Back; app navigation owns returning to the existing menu. Mandatory
+budget/goal work can be left through Home but is checked before Continue can
+dispatch gameplay. Mini-games keep their existing pause/write ownership.
+`GameNavigationHeader` moves a nonempty title below the controls on narrow
+screens or with enlarged text, keeping the Home touch target and title legible.
+The map uses its own compact overlay header by MAP-D-010: balanced side controls
+keep the two-line title centered, and the artwork retains the whole screen area.
+Only controls receive safe drawing insets; information opens above its bottom-right
+button. Image and landmark coordinates still use the same proportional canvas.
+
 `GameActionButton` owns primary, secondary and quiet interaction states, visible
 disabled treatment, loading footprint, multiline text and minimum touch height.
 Feature wrappers may select approved typography/shape; they do not reimplement

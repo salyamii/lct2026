@@ -74,6 +74,8 @@ fun StrapGameEntry(
     onExit: () -> Unit,
     onCompleted: ((StrapRepair) -> Unit)? = null,
     interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     val model = hiltViewModel<StrapGameViewModel>()
     val state by model.uiState.collectAsStateWithLifecycle()
@@ -83,7 +85,8 @@ fun StrapGameEntry(
     }
     val exit = { if (!blocked) onExit() }
     BackHandler(onBack = exit)
-    StrapGameScreen(state, onAction, exit, onCompleted, interactionBlocked)
+    StrapGameScreen(state, onAction, exit, onCompleted, interactionBlocked,
+        onHome = { if (homeEnabled) onHome() }, homeEnabled = homeEnabled)
 }
 
 @Composable
@@ -93,6 +96,8 @@ fun StrapGameScreen(
     onExit: () -> Unit,
     onCompleted: ((StrapRepair) -> Unit)? = null,
     interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     val game = state.game
     ChapterGameScaffold(
@@ -104,6 +109,8 @@ fun StrapGameScreen(
             StrapPhase.DONE -> "Лямка снова крепкая, новый рюкзак покупать не пришлось."
         },
         onExit = onExit,
+        onHome = onHome,
+        homeEnabled = homeEnabled,
         footer = {
             when (game.phase) {
                 StrapPhase.ALIGN -> GameActionButton("Совместить края", { onAction(StrapGameAction.Align) })

@@ -59,6 +59,7 @@ internal class MainMenuViewModel @Inject constructor(
         val demoMode: Boolean,
         val menu: MainMenuUiState,
         val continuation: ContinueDayPlan,
+        val needsChapterGoal: Boolean,
         val meals: List<MealChoiceUiState>? = null,
     )
     private var presentation: Presentation? = null
@@ -71,6 +72,8 @@ internal class MainMenuViewModel @Inject constructor(
     val openDay = dayNavigation.receiveAsFlow()
     private val budgetNavigation = Channel<Unit>(Channel.BUFFERED)
     val openBudget = budgetNavigation.receiveAsFlow()
+    private val goalNavigation = Channel<Unit>(Channel.BUFFERED)
+    val openGoal = goalNavigation.receiveAsFlow()
     private val trainingNavigation = Channel<Unit>(Channel.BUFFERED)
     val openTraining = trainingNavigation.receiveAsFlow()
 
@@ -116,7 +119,9 @@ internal class MainMenuViewModel @Inject constructor(
             ?: run { render(); return }
         when (val plan = current.continuation) {
             ContinueDayPlan.NeedsBudget -> viewModelScope.launch { budgetNavigation.send(Unit) }
-            is ContinueDayPlan.Day -> act(game, plan.command, open = true)
+            is ContinueDayPlan.Day -> if (current.needsChapterGoal) {
+                viewModelScope.launch { goalNavigation.send(Unit) }
+            } else act(game, plan.command, open = true)
         }
     }
 
@@ -316,6 +321,11 @@ internal class MainMenuViewModel @Inject constructor(
     private fun buildPresentation(game: GameState, demoMode: Boolean): Presentation {
         val continuation = session.continueDayPlan(game, demoMode)
         val command = (continuation as? ContinueDayPlan.Day)?.command
+        val currentEvent = game.engine?.currentEvent
+        val unfinishedFinaleResult = currentEvent?.status == EventStatus.RESULT &&
+            session.catalog.policies[currentEvent.eventId]?.finishesStoryAct == true
+        val storyProgress = session.catalog.storyProgress(game)
+        val needsChapterGoal = !unfinishedFinaleResult && storyProgress.unselectedChapterGoal != null
         val menu = game.toMainMenuUiState(session.catalog, demoMode)
         return Presentation(game, demoMode, menu.copy(
             availableDeedsCount = session.engine.availableDeeds(game).count { offer ->
@@ -326,13 +336,14 @@ internal class MainMenuViewModel @Inject constructor(
                 else it.quote.playerDescription(it.kind)
             },
             mealPrice = session.catalog.mealPolicy.effectivePrice(session.catalog.mealPolicy.basicMeal.id, demoMode),
-            continueLabel = if (game.engine?.phase == DayPhase.FINISHED) menu.continueLabel else when (command) {
+            continueLabel = if (needsChapterGoal && continuation != ContinueDayPlan.NeedsBudget) "Выбрать цель"
+            else if (game.engine?.phase == DayPhase.FINISHED) menu.continueLabel else when (command) {
                 EngineCommand.FinishDay -> "Закончить день"
-                EngineCommand.OpenNextEvent -> if (session.catalog.storyProgress(game).goalReadyForStory)
+                EngineCommand.OpenNextEvent -> if (storyProgress.goalReadyForStory)
                     "Выполнить цель" else "Продолжить день"
                 else -> menu.continueLabel
             },
-        ), continuation)
+        ), continuation, needsChapterGoal)
     }
 
     private fun publish(current: Presentation, ready: Boolean) {

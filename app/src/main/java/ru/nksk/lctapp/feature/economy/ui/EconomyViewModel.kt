@@ -169,6 +169,10 @@ internal class EconomyViewModel @Inject constructor(private val session: GameSes
         }
     }
 
+    /** Read errors and rejected previews can close; queued or uncertain writes must stay here. */
+    fun canReturnHome(): Boolean = !state.value.saving && queued == 0 && failed == null &&
+        state.value.budgetConfirmation == null
+
     private fun observe() {
         if (!screenActive || observation?.isActive == true) return
         observation = viewModelScope.launch {

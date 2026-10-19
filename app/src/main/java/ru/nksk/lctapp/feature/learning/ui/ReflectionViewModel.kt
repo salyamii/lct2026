@@ -68,6 +68,9 @@ internal class ReflectionViewModel @Inject constructor(private val session: Game
     private data class QuizSubmission(val quizId: String, val optionId: String, val id: String,
         val questionPresented: Boolean, val usedHint: Boolean)
     private var pendingQuizSubmission: QuizSubmission? = null
+
+    // Optional telemetry retries do not prevent leaving; an unresolved answer does.
+    fun canReturnHome(): Boolean = !state.value.busy && pendingQuizSubmission == null
     private val presentedChronoscopeQuestions = mutableSetOf<String>()
     private var shownAdviceId: String? = null
     private sealed interface ChronoscopeRecord {

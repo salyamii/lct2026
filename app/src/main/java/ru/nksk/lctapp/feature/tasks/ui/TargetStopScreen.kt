@@ -54,6 +54,7 @@ fun TargetStopScreen(
     onAction: (TargetStopAction) -> Unit,
     onBack: () -> Unit,
     deed: DeedGamePresentation? = null,
+    onHome: () -> Unit = onBack,
 ) {
     val state = uiState.game
     val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
@@ -89,7 +90,7 @@ fun TargetStopScreen(
                 modifier = Modifier.fillMaxWidth().height(sceneHeight), blurred = deed?.storyAction != true)
                 if (sceneHeight >= 150.dp) deed?.activityArtworkRes?.let { art -> GameArtwork(art, null,
                     Modifier.align(Alignment.BottomEnd).size(92.dp)) }
-                DeedHeader(deed?.title ?: stringResource(R.string.deeds_target_title), onBack = onBack)
+                DeedHeader(deed?.title ?: stringResource(R.string.deeds_target_title), onBack = onBack, onHome = onHome, homeEnabled = deed?.canReturnHome != false)
             }
             DeedGameSheet(deed, DeedRewardPreview.fromPrecision(state), modifier = Modifier.weight(1f)) {
                 Text(

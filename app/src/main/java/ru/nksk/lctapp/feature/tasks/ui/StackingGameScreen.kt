@@ -45,6 +45,7 @@ fun StackingGameScreen(
     onAction: (StackingGameAction) -> Unit,
     onBack: () -> Unit,
     deed: DeedGamePresentation? = null,
+    onHome: () -> Unit = onBack,
     position: () -> Float,
 ) {
     val state = uiState.game
@@ -56,7 +57,7 @@ fun StackingGameScreen(
                 modifier = Modifier.fillMaxWidth().height(150.dp), blurred = deed?.storyAction != true)
             deed?.activityArtworkRes?.let { art -> GameArtwork(art, null,
                 Modifier.align(Alignment.BottomEnd).size(92.dp).padding(4.dp)) }
-            DeedHeader(deed?.title ?: "Ящики на причале", onBack = onBack)
+            DeedHeader(deed?.title ?: "Ящики на причале", onBack = onBack, onHome = onHome, homeEnabled = deed?.canReturnHome != false)
         }
         DeedGameSheet(deed, DeedRewardPreview.fromStacking(state), modifier = Modifier.weight(1f)) {
             Text(

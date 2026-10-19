@@ -23,12 +23,13 @@ fun ExtraPurchaseScreen(
     onAction: (PracticeChoiceAction) -> Unit,
     onBack: () -> Unit,
     deed: DeedGamePresentation? = null,
+    onHome: () -> Unit = onBack,
 ) {
     val question = state.question
     PracticeScaffold(stringResource(R.string.practice_extra_title), R.drawable.location_workshop_day,
         R.drawable.npc_tiko_workbench, stringResource(R.string.practice_extra_prompt),
         state.current, state.questions.size, state.correctAnswers, state.finished,
-        { onAction(PracticeChoiceAction.Restart) }, onBack, deed, DeedRewardPreview.fromPractice(state)) {
+        { onAction(PracticeChoiceAction.Restart) }, onBack, deed, DeedRewardPreview.fromPractice(state), onHome = onHome) {
         PracticeBoard(background = R.drawable.prop_practice_workbench) {
             Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
                 .background(DeedColors.CreamCard).padding(10.dp),

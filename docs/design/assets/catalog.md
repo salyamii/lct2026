@@ -77,6 +77,14 @@ compact Back buttons (52 dp). Labels remain native and can increase the
 height; nine-slice rendering keeps the corners proportional. Onboarding
 receives these controls from app composition.
 
+The Home control reuses the same frame and a native «Домой» label, with a
+52 dp minimum touch height. Its small house outline is locally authored;
+there is no additional bitmap or Figma export.
+
+| Resource | Dimensions | Source and conversion |
+| --- | --- | --- |
+| `game_home` | 24 × 24 | [SVG](game_home.svg), [Android vector](../../../app/src/main/res/drawable/game_home.xml). Identical path, rounded 1.8-unit stroke; authored 2026-10-19. Displayed at 22 dp, tinted with the existing game ink color. |
+
 ## Observatory menu artwork - 2026-10-17
 
 Built-in imagegen illustrations requested for the main screen. Originals,

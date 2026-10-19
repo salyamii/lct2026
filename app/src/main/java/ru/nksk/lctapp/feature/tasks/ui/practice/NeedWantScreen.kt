@@ -19,12 +19,13 @@ fun NeedWantScreen(
     onAction: (PracticeChoiceAction) -> Unit,
     onBack: () -> Unit,
     deed: DeedGamePresentation? = null,
+    onHome: () -> Unit = onBack,
 ) {
     val question = state.question
     PracticeScaffold(stringResource(R.string.practice_needs_title), R.drawable.location_city,
         R.drawable.npc_luna_explaining, stringResource(question.situation.promptRes),
         state.current, state.questions.size, state.correctAnswers, state.finished,
-        { onAction(PracticeChoiceAction.Restart) }, onBack, deed, DeedRewardPreview.fromPractice(state)) {
+        { onAction(PracticeChoiceAction.Restart) }, onBack, deed, DeedRewardPreview.fromPractice(state), onHome = onHome) {
         PracticeBoard {
             GameArtwork(question.item.artwork, null, Modifier.size(148.dp))
             PracticeText(stringResource(question.item.titleRes), bold = true)

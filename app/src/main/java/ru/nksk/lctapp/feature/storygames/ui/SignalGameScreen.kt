@@ -80,6 +80,8 @@ fun SignalGameEntry(
     onExit: () -> Unit,
     onCompleted: ((SignalState) -> Unit)? = null,
     interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     val viewModel = hiltViewModel<SignalViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -87,6 +89,8 @@ fun SignalGameEntry(
     SignalGameScreen(state,
         onAction = { if (!interactionBlocked) viewModel.onAction(it) },
         onExit = { if (!interactionBlocked) onExit() },
+        onHome = { if (homeEnabled) onHome() },
+        homeEnabled = homeEnabled,
         onCompleted = onCompleted?.let { complete -> {
             if (!interactionBlocked && viewModel.uiState.value.game.complete) complete(viewModel.uiState.value.game)
         } }, interactionBlocked = interactionBlocked)
@@ -99,6 +103,8 @@ fun SignalGameScreen(
     onExit: () -> Unit,
     onCompleted: (() -> Unit)? = null,
     interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     val game = state.game
     ChapterGameScaffold(
@@ -109,6 +115,8 @@ fun SignalGameScreen(
             else -> "Набери три огня по записи и отправь сигнал башне."
         },
         onExit = onExit,
+        onHome = onHome,
+        homeEnabled = homeEnabled,
         footer = {
             if (game.complete && onCompleted != null) {
                 GameActionButton("Продолжить", onCompleted, interactionBlocked = interactionBlocked)

@@ -566,6 +566,97 @@ class DeedGameViewModelTest {
         assertEquals(0, f.repo.committed.count { it.command is EngineCommand.DepositSavings })
     }
 
+    @Test fun homeLeavesRewardEditorWithoutTransferringWhileBackOnlyClosesTheEditor() = runTest(dispatcher) {
+        val f = fixture(withSavingsGoal = true)
+        runCurrent()
+        f.model.finishComparison(completedQuiz())
+        runCurrent()
+        val earned = f.repo.read()
+        assertTrue(f.model.uiState.value.canReturnHome)
+        val exits = mutableListOf<String?>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { f.model.exit.collect { exits += it } }
+
+        f.model.openRewardTransfer()
+        f.model.changeRewardTransferInput("2")
+        f.model.leave()
+        runCurrent()
+        assertFalse(f.model.uiState.value.reward!!.editing)
+        assertTrue(exits.isEmpty())
+
+        f.model.openRewardTransfer()
+        f.model.changeRewardTransferInput("2")
+        f.model.leaveToHome()
+        f.model.leaveToHome()
+        runCurrent()
+        assertEquals(listOf<String?>(null), exits)
+        assertFalse(f.model.uiState.value.canReturnHome)
+        assertEquals(earned, f.repo.read())
+        assertEquals(0, f.repo.attempted.count { it.command is EngineCommand.DepositSavings })
+    }
+
+    @Test fun homeKeepsAnUncertainCompletionAvailableForRetry() = runTest(dispatcher) {
+        val f = fixture(withSavingsGoal = true)
+        runCurrent()
+        val exits = mutableListOf<String?>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { f.model.exit.collect { exits += it } }
+        f.repo.failure = IOException("Completion unavailable")
+        f.model.finishComparison(completedQuiz())
+        runCurrent()
+        val original = f.repo.attempted.last()
+        f.model.leaveToHome()
+        runCurrent()
+        assertTrue(exits.isEmpty())
+        assertTrue(f.model.uiState.value.canRetry)
+        assertFalse(f.model.uiState.value.canReturnHome)
+        assertTrue(f.repo.committed.isEmpty())
+
+        f.repo.failure = null
+        f.model.retry()
+        runCurrent()
+        assertEquals(original, f.repo.committed.single())
+        assertTrue(f.model.uiState.value.canReturnHome)
+        f.model.leaveToHome()
+        runCurrent()
+        assertEquals(listOf<String?>(null), exits)
+    }
+
+    @Test fun homeWaitsForTransferWriteAndItsUncertainReplyBeforeLeaving() = runTest(dispatcher) {
+        val f = fixture(withSavingsGoal = true)
+        runCurrent()
+        f.model.finishComparison(completedQuiz())
+        runCurrent()
+        f.model.openRewardTransfer()
+        f.model.changeRewardTransferInput("2")
+        val releaseWrite = CompletableDeferred<Unit>()
+        f.repo.afterWrite = { releaseWrite.await(); throw IOException("Transfer reply lost") }
+        val exits = mutableListOf<String?>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { f.model.exit.collect { exits += it } }
+
+        f.model.confirmRewardTransfer()
+        runCurrent()
+        assertTrue(f.model.uiState.value.busy)
+        assertFalse(f.model.uiState.value.canReturnHome)
+        f.model.leaveToHome()
+        runCurrent()
+        assertTrue(exits.isEmpty())
+        releaseWrite.complete(Unit)
+        runCurrent()
+        assertTrue(f.model.uiState.value.canRetry)
+        assertFalse(f.model.uiState.value.canReturnHome)
+        f.model.leaveToHome()
+        runCurrent()
+        assertTrue(exits.isEmpty())
+
+        f.repo.afterWrite = {}
+        f.model.retry()
+        runCurrent()
+        assertTrue(f.model.uiState.value.canReturnHome)
+        f.model.leaveToHome()
+        runCurrent()
+        assertEquals(listOf<String?>(null), exits)
+        assertEquals(1, f.repo.committed.count { it.command is EngineCommand.DepositSavings })
+    }
+
     @Test fun earnedRewardDoesNotIncludeLaterIncomeAfterLostCompletionReply() = runTest(dispatcher) {
         val f = fixture(withSavingsGoal = true)
         runCurrent()

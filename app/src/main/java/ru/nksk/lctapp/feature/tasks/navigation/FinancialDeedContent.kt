@@ -17,6 +17,7 @@ internal fun FinancialDeedContent(
     resumed: Boolean,
     onCompleted: (DeedGameScore) -> Unit,
     onBack: () -> Unit,
+    onHome: () -> Unit,
 ) {
     val model = hiltViewModel<FinancialGameViewModel>()
     val board by model.uiState.collectAsStateWithLifecycle()
@@ -29,11 +30,11 @@ internal fun FinancialDeedContent(
     val choiceAction: (PracticeChoiceAction) -> Unit = { if (canPlay) model.onChoice(it) }
     val presentation = deed.copy(canPlay = canPlay)
     when (current) {
-        is FinancialBoard.Needs -> NeedWantScreen(current.game, choiceAction, onBack, presentation)
-        is FinancialBoard.Discounts -> RealDiscountScreen(current.game, choiceAction, onBack, presentation)
-        is FinancialBoard.Traps -> FinancialTrapScreen(current.game, choiceAction, onBack, presentation)
-        is FinancialBoard.Extra -> ExtraPurchaseScreen(current.game, choiceAction, onBack, presentation)
+        is FinancialBoard.Needs -> NeedWantScreen(current.game, choiceAction, onBack, presentation, onHome)
+        is FinancialBoard.Discounts -> RealDiscountScreen(current.game, choiceAction, onBack, presentation, onHome)
+        is FinancialBoard.Traps -> FinancialTrapScreen(current.game, choiceAction, onBack, presentation, onHome)
+        is FinancialBoard.Extra -> ExtraPurchaseScreen(current.game, choiceAction, onBack, presentation, onHome)
         is FinancialBoard.Balance -> CoinBalanceScreen(current.game,
-            { if (canPlay) model.onBalance(it) }, onBack, presentation)
+            { if (canPlay) model.onBalance(it) }, onBack, presentation, onHome)
     }
 }

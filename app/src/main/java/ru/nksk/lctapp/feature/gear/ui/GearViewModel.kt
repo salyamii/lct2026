@@ -33,6 +33,8 @@ internal class GearViewModel @Inject constructor(
 
     init { retry() }
 
+    fun canReturnHome(): Boolean = !changing
+
     fun retry() {
         if (observation?.isActive == true) return
         observation = viewModelScope.launch {

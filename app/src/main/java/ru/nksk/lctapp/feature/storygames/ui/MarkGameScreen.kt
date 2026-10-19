@@ -82,6 +82,8 @@ fun MarkGameEntry(
     onExit: () -> Unit,
     onCompleted: ((MarkState) -> Unit)? = null,
     interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     val viewModel = hiltViewModel<MarkViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -89,6 +91,8 @@ fun MarkGameEntry(
     MarkGameScreen(state,
         onAction = { if (!interactionBlocked) viewModel.onAction(it) },
         onExit = { if (!interactionBlocked) onExit() },
+        onHome = { if (homeEnabled) onHome() },
+        homeEnabled = homeEnabled,
         onCompleted = onCompleted?.let { complete -> {
             if (!interactionBlocked && viewModel.uiState.value.game.complete) complete(viewModel.uiState.value.game)
         } }, interactionBlocked = interactionBlocked)
@@ -101,6 +105,8 @@ fun MarkGameScreen(
     onExit: () -> Unit,
     onCompleted: (() -> Unit)? = null,
     interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     val game = state.game
     val instruction = when {
@@ -109,6 +115,7 @@ fun MarkGameScreen(
         else -> "Сотри пыль пальцем, чтобы рассмотреть знак на ящике."
     }
     ChapterGameScaffold("Знак на причале", instruction, onExit,
+        onHome = onHome, homeEnabled = homeEnabled,
         footer = {
             if (game.complete && onCompleted != null) {
                 GameActionButton("Продолжить", onCompleted, interactionBlocked = interactionBlocked)

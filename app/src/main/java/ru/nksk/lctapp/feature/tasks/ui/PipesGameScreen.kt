@@ -147,6 +147,7 @@ fun PipesGameScreen(
     onAction: (PipesGameAction) -> Unit,
     onBack: () -> Unit,
     deed: DeedGamePresentation? = null,
+    onHome: () -> Unit = onBack,
 ) {
     val state = uiState.game
     val activeColor = state.activeColor
@@ -159,7 +160,7 @@ fun PipesGameScreen(
                 modifier = Modifier.fillMaxWidth().height(150.dp), blurred = deed?.storyAction != true)
             deed?.activityArtworkRes?.let { art -> GameArtwork(art, null,
                 Modifier.align(Alignment.BottomEnd).size(92.dp).padding(4.dp)) }
-            DeedHeader(deed?.title ?: "Свяжи концы", onBack = onBack)
+            DeedHeader(deed?.title ?: "Свяжи концы", onBack = onBack, onHome = onHome, homeEnabled = deed?.canReturnHome != false)
         }
         DeedGameSheet(deed, DeedRewardPreview.fromPipes(state), modifier = Modifier.weight(1f)) {
             Text(

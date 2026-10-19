@@ -40,11 +40,13 @@ internal enum class ChapterTestGame(val id: String, val title: String, @Drawable
 }
 
 @Composable
-internal fun ChapterGamesScreen(onOpen: (String) -> Unit, onExit: () -> Unit) {
+internal fun ChapterGamesScreen(onOpen: (String) -> Unit, onExit: () -> Unit,
+    onHome: () -> Unit = onExit) {
     ChapterGameScaffold(
         title = "Тестовые игры",
         instruction = "Глава 1. Башня отвечает",
         onExit = onExit,
+        onHome = onHome,
         footer = {
             Text("Можно пробовать снова. Монеты и сюжет сохранятся.",
                 Modifier.fillMaxWidth().padding(horizontal = 8.dp),
