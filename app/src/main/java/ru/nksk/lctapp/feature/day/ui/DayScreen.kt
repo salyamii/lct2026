@@ -74,7 +74,7 @@ private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
         PurchaseCard(state, onAction, onBack)
     } else AdventureScreen(
         title = "", onBack = onBack, backgroundRes = state.eventBackgroundRes,
-        blurBackground = state.focusesItem,
+        blurBackground = state.focusesItem || state.shortDeed,
         artworkSceneKey = state.audioOccurrenceId ?: state.title,
         indicators = { state.indicators?.let { PetIndicators(it) } },
         sceneAspectRatio = 1.12f, pinFooter = false,
@@ -100,7 +100,7 @@ private fun PurchaseCard(state: DayUiState, onAction: (DayAction) -> Unit, onBac
     AdventureScreen(
         title = "", onBack = onBack,
         backgroundRes = state.eventBackgroundRes,
-        blurBackground = state.focusesItem,
+        blurBackground = state.focusesItem || state.shortDeed,
         artworkSceneKey = state.audioOccurrenceId ?: state.title,
         indicators = { state.indicators?.let { PetIndicators(it) } },
         sceneAspectRatio = 1.12f, pinFooter = false,

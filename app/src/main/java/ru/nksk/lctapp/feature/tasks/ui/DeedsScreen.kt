@@ -39,7 +39,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -125,12 +124,8 @@ private fun DeedsContent(onTraining: () -> Unit, onExit: () -> Unit,
             .background(DeedColors.Scene),
     ) {
         Box {
-            GameArtwork(
-                R.drawable.location_observatory,
-                contentDescription = null,
-                modifier = Modifier.fillMaxWidth().height(230.dp),
-                contentScale = ContentScale.Crop,
-            )
+            DeedBackdrop(R.drawable.location_observatory,
+                modifier = Modifier.fillMaxWidth().height(230.dp))
             DeedHeader(stringResource(R.string.navigation_back), onBack = onExit)
         }
         DeedSheet(modifier = Modifier.weight(1f)) {

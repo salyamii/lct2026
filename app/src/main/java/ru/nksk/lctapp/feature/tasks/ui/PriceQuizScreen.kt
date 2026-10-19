@@ -25,7 +25,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
@@ -74,11 +73,8 @@ fun PriceQuizScreen(
             .background(DeedColors.Scene),
     ) {
         Box {
-            GameArtwork(deed?.sceneRes ?: R.drawable.location_workshop,
-                contentDescription = null,
-                modifier = Modifier.fillMaxWidth().height(150.dp),
-                contentScale = ContentScale.Crop,
-            )
+            DeedBackdrop(deed?.sceneRes ?: R.drawable.location_workshop,
+                modifier = Modifier.fillMaxWidth().height(150.dp), blurred = deed?.storyAction != true)
             deed?.activityArtworkRes?.let { art -> GameArtwork(art, null,
                 Modifier.align(Alignment.BottomEnd).size(92.dp)) }
             DeedHeader(deed?.title ?: stringResource(R.string.deeds_price_title), onBack = onBack)

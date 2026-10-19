@@ -1,6 +1,7 @@
 package ru.nksk.lctapp.feature.tasks.ui
 
 import ru.nksk.lctapp.core.ui.components.GameArtwork
+import ru.nksk.lctapp.core.ui.components.GameBackdrop
 import ru.nksk.lctapp.core.ui.components.GameActionButton
 import ru.nksk.lctapp.core.ui.components.GameActionButtonDefaults
 import ru.nksk.lctapp.core.ui.components.GameActionStyle
@@ -35,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -45,6 +45,12 @@ import androidx.compose.ui.window.Dialog
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.Nunito
 import ru.nksk.lctapp.core.ui.theme.Rubik
+
+/** Decorative scenery only; activity artwork and controls remain sharp. */
+@Composable
+internal fun DeedBackdrop(@DrawableRes resource: Int, modifier: Modifier = Modifier, blurred: Boolean = true) {
+    GameBackdrop(resource, blurred, modifier)
+}
 
 /** Native Back control and an optional scene title in the shared game frames. */
 @Composable
@@ -174,11 +180,9 @@ fun DeedCard(
             .clickable(onClick = onOpen),
     ) {
         Box(modifier = Modifier.fillMaxWidth().height(140.dp)) {
-            scene?.let { GameArtwork(
+            scene?.let { DeedBackdrop(
                 it,
-                contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
             ) }
             Box(
                 modifier = Modifier
