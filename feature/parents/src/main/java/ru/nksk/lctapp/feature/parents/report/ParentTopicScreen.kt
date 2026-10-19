@@ -24,6 +24,7 @@ import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
@@ -149,22 +150,26 @@ private fun SkillEvidence(skill: ParentSkill) {
         if (counts.observedEpisodes == 0) {
             Text(stringResource(R.string.parents_report_no_evidence_body), style = MaterialTheme.typography.bodyMedium)
         } else {
-            EvidenceRow(stringResource(R.string.parents_report_supported), counts.supportedEpisodes)
-            EvidenceRow(stringResource(R.string.parents_report_difficulties), counts.difficultyEpisodes)
-            EvidenceRow(stringResource(R.string.parents_report_neutral), counts.neutralEpisodes)
-            EvidenceRow(stringResource(R.string.parents_report_incomplete), counts.incompleteEpisodes)
-            if (counts.pendingEpisodes > 0) EvidenceRow(stringResource(R.string.parents_report_pending), counts.pendingEpisodes)
-            EvidenceRow(stringResource(R.string.parents_report_no_hints), counts.supportedWithoutGameHints)
-            EvidenceRow(stringResource(R.string.parents_report_assisted), counts.assistedEpisodes)
+            // Row gaps stay tighter than the title gap above them.
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                EvidenceRow(stringResource(R.string.parents_report_supported), counts.supportedEpisodes)
+                EvidenceRow(stringResource(R.string.parents_report_difficulties), counts.difficultyEpisodes)
+                EvidenceRow(stringResource(R.string.parents_report_neutral), counts.neutralEpisodes)
+                EvidenceRow(stringResource(R.string.parents_report_incomplete), counts.incompleteEpisodes)
+                if (counts.pendingEpisodes > 0) EvidenceRow(stringResource(R.string.parents_report_pending), counts.pendingEpisodes)
+                EvidenceRow(stringResource(R.string.parents_report_no_hints), counts.supportedWithoutGameHints)
+                EvidenceRow(stringResource(R.string.parents_report_assisted), counts.assistedEpisodes)
+            }
         }
     }
 }
 
 @Composable
 private fun EvidenceRow(label: String, count: Int) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically) {
         Text(label, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-        Text(count.toString(), style = MaterialTheme.typography.titleMedium)
+        Text(count.toString(), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.End)
     }
 }
 
