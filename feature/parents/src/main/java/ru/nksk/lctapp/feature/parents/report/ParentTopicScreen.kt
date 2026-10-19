@@ -24,6 +24,7 @@ import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
@@ -61,9 +62,6 @@ fun ParentTopicScreen(
                         item {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Text(skill.title, style = MaterialTheme.typography.headlineSmall)
-                                explanation?.let {
-                                    Text(it.description, style = MaterialTheme.typography.bodyLarge)
-                                }
                                 ParentSkillAssessmentLabel(skill.assessment)
                             }
                         }
@@ -74,6 +72,12 @@ fun ParentTopicScreen(
                                 onRefresh = onRefresh,
                             )
                         }
+                        val material = skill.material
+                        val description = explanation?.description ?: material?.learningGoal
+                        if (!description.isNullOrBlank()) {
+                            item { ParentMaterialCard(stringResource(R.string.parents_report_meaning), description) }
+                        }
+                        item { SkillEvidence(skill) }
                         item {
                             ParentMaterialCard(
                                 stringResource(
@@ -82,12 +86,15 @@ fun ParentTopicScreen(
                                     } else R.string.parents_report_explanation_server,
                                 ),
                                 explanation?.let {
-                                    (listOf(it.summary) + it.evidence.take(2)).joinToString("\n\n")
+                                    it.paragraphs().joinToString("\n\n")
                                 } ?: stringResource(R.string.parents_report_explanation_missing),
                             )
                         }
-                        item { SkillEvidence(skill) }
-                        val material = skill.material
+                        item {
+                            ParentMaterialCard(stringResource(R.string.parents_report_assessment_reason),
+                                skill.assessment?.assessmentReason
+                                    ?: stringResource(R.string.parents_report_reason_missing))
+                        }
                         if (state.report.materialsRefreshing) {
                             item { Text(stringResource(R.string.parents_materials_loading), style = MaterialTheme.typography.bodySmall) }
                         }
@@ -99,7 +106,6 @@ fun ParentTopicScreen(
                             }), style = MaterialTheme.typography.bodySmall) }
                         }
                         if (material != null) {
-                            item { ParentMaterialCard(stringResource(R.string.parents_materials_goal), material.learningGoal) }
                             item { ParentMaterialCard(stringResource(R.string.parents_materials_story), material.story) }
                             item { ParentMaterialCard(stringResource(R.string.parents_materials_own_story), material.replaceWithParentStory) }
                             item { ParentMaterialCard(stringResource(R.string.parents_report_questions_title),
@@ -128,35 +134,42 @@ fun ParentTopicScreen(
 
 @Composable
 private fun SkillEvidence(skill: ParentSkill) {
+    val counts = skill.displayObservationCounts
+    val serverCounts = skill.assessment?.observationCounts != null
     Column(
-        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
-            .padding(20.dp),
+        modifier = Modifier.fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp)).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(stringResource(R.string.parents_report_evidence_title), style = MaterialTheme.typography.titleMedium)
-        if (skill.observedEpisodes == 0) {
-            Text(
-                stringResource(R.string.parents_report_no_evidence_body),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+        Text(stringResource(if (serverCounts) R.string.parents_report_evidence_title
+            else R.string.parents_report_evidence_local_title), style = MaterialTheme.typography.titleMedium)
+        if (!serverCounts && skill.assessment != null) {
+            Text(stringResource(R.string.parents_report_evidence_local_note),
+                style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        if (counts.observedEpisodes == 0) {
+            Text(stringResource(R.string.parents_report_no_evidence_body), style = MaterialTheme.typography.bodyMedium)
         } else {
-            EvidenceRow(stringResource(R.string.parents_report_supported), skill.supportedEpisodes)
-            EvidenceRow(stringResource(R.string.parents_report_difficulties), skill.difficultyEpisodes)
-            EvidenceRow(stringResource(R.string.parents_report_neutral), skill.neutralEpisodes)
-            EvidenceRow(stringResource(R.string.parents_report_incomplete), skill.incompleteEpisodes)
-            if (skill.pendingEpisodes > 0) EvidenceRow(stringResource(R.string.parents_report_pending), skill.pendingEpisodes)
-            EvidenceRow(stringResource(R.string.parents_report_no_hints), skill.supportedWithoutGameHints)
-            EvidenceRow(stringResource(R.string.parents_report_assisted), skill.assistedEpisodes)
+            // Row gaps stay tighter than the title gap above them.
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                EvidenceRow(stringResource(R.string.parents_report_supported), counts.supportedEpisodes)
+                EvidenceRow(stringResource(R.string.parents_report_difficulties), counts.difficultyEpisodes)
+                EvidenceRow(stringResource(R.string.parents_report_neutral), counts.neutralEpisodes)
+                EvidenceRow(stringResource(R.string.parents_report_incomplete), counts.incompleteEpisodes)
+                if (counts.pendingEpisodes > 0) EvidenceRow(stringResource(R.string.parents_report_pending), counts.pendingEpisodes)
+                EvidenceRow(stringResource(R.string.parents_report_no_hints), counts.supportedWithoutGameHints)
+                EvidenceRow(stringResource(R.string.parents_report_assisted), counts.assistedEpisodes)
+            }
         }
     }
 }
 
 @Composable
 private fun EvidenceRow(label: String, count: Int) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-        Text(count.toString(), style = MaterialTheme.typography.titleMedium)
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically) {
+        Text(label, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+        Text(count.toString(), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.End)
     }
 }
 

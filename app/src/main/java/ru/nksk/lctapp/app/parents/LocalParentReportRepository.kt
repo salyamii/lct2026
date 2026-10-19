@@ -42,6 +42,7 @@ import ru.nksk.lctapp.feature.parents.report.ParentAssessmentSync
 import ru.nksk.lctapp.feature.parents.report.ParentSkillAssessment
 import ru.nksk.lctapp.feature.parents.report.ParentSkillExplanation
 import ru.nksk.lctapp.feature.parents.report.ParentSkillStatus
+import ru.nksk.lctapp.feature.parents.report.ParentObservationCounts
 import ru.nksk.lctapp.feature.parents.report.ParentSyncPhase
 
 /** App composition bridges the existing local aggregate to the isolated parent feature. */
@@ -110,6 +111,14 @@ internal fun withServerAssessments(
                     },
                     policyVersion = assessment.policyVersion,
                     explanation = assessment.explanation?.toParentExplanation(),
+                    assessmentReason = assessment.assessmentReason,
+                    observationCounts = assessment.observationCounts?.let { counts ->
+                        ParentObservationCounts(
+                            counts.observedEpisodes, counts.completedEpisodes, counts.supportedEpisodes,
+                            counts.difficultyEpisodes, counts.neutralEpisodes, counts.pendingEpisodes,
+                            counts.incompleteEpisodes, counts.supportedWithoutGameHints, counts.assistedEpisodes,
+                        )
+                    },
                 )
             })
         },
@@ -145,6 +154,7 @@ internal fun localParentReport(game: GameState?, history: List<AuditEntry>, cont
                 id = id.id,
                 title = id.parentTitle(),
                 observedEpisodes = profile.observations.size,
+                completedEpisodes = profile.completedEpisodes,
                 supportedEpisodes = profile.supportedEpisodes,
                 difficultyEpisodes = profile.difficultyEpisodes,
                 neutralEpisodes = profile.neutralEpisodes,

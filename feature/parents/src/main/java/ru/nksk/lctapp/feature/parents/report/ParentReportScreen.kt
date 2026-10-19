@@ -196,9 +196,9 @@ private fun SkillCard(skill: ParentSkill, onOpen: () -> Unit) {
                 Text(skill.title, style = MaterialTheme.typography.titleMedium)
                 Text(
                     stringResource(
-                        if (skill.observedEpisodes == 0) R.string.parents_report_no_observations
+                        if (skill.displayObservationCounts.observedEpisodes == 0) R.string.parents_report_no_observations
                         else R.string.parents_report_observations,
-                        skill.observedEpisodes,
+                        skill.displayObservationCounts.observedEpisodes,
                     ),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

@@ -34,10 +34,32 @@ import ru.nksk.lctapp.domain.backend.SkillAssessmentDto
 import ru.nksk.lctapp.domain.backend.SkillAssessmentsResponse
 import ru.nksk.lctapp.domain.backend.SkillStatus
 import ru.nksk.lctapp.domain.backend.SkillSyncPhase
+import ru.nksk.lctapp.domain.backend.SkillObservationCounts
 import ru.nksk.lctapp.feature.parents.report.ParentSkillStatus
 import ru.nksk.lctapp.feature.parents.report.ParentSyncPhase
 
 class LocalParentReportRepositoryTest {
+    @Test fun serverObservationCountsAreMappedAlongsideTheServerStatus() {
+        val game = createInitialGameState()
+        val history = listOf(AuditEntry("start", 1, "current", AuditType.INITIALIZED, after = game))
+        val local = checkNotNull(localParentReport(game, history, StoryContent()))
+        val generation = localGameGeneration("current", null)
+        val response = assessments("current", 1).let { result -> result.copy(skills = result.skills.map {
+            it.copy(observationCounts = SkillObservationCounts(6, 6, 5, 1, 0, 0, 0, 5, 1))
+        }) }
+        val report = withServerAssessments(local, "current", 1, generation,
+            CloudSyncState(skills = response, skillsGeneration = generation))
+        val skill = report.skills.first()
+
+        assertEquals(ParentSkillStatus.MASTERED, skill.assessment?.status)
+        assertEquals(6, skill.assessment?.observationCounts?.observedEpisodes)
+        assertEquals(5, skill.assessment?.observationCounts?.supportedEpisodes)
+        assertEquals(1, skill.assessment?.observationCounts?.difficultyEpisodes)
+        assertEquals(5, skill.assessment?.observationCounts?.supportedWithoutGameHints)
+        assertEquals(1, skill.assessment?.observationCounts?.assistedEpisodes)
+        assertEquals(0, skill.observedEpisodes)
+    }
+
     @Test fun reportUsesCurrentLocalNameAndBothRealMoneyAccountsWithoutWriting() = runTest {
         val original = createInitialGameState()
         val game = original.copy(
@@ -87,9 +109,11 @@ class LocalParentReportRepositoryTest {
         assertEquals(1, needs.supportedEpisodes)
         assertEquals(0, needs.difficultyEpisodes)
         assertEquals(
-            listOf("После решения о покупке денег на необходимое осталось достаточно."),
-            needs.localExplanation?.evidence,
+            "При выборе покупки оставил достаточно денег на необходимое.",
+            needs.localExplanation?.summary,
         )
+        // The sole episode adds no detail beyond the summary; do not repeat it.
+        assertEquals(emptyList<String>(), needs.localExplanation?.evidence)
         assertEquals(0, report.skills.single { it.id == "FIN-01" }.observedEpisodes)
     }
 
@@ -176,6 +200,7 @@ class LocalParentReportRepositoryTest {
         val explanation = checkNotNull(skill.assessment?.explanation)
 
         assertTrue(report.assessmentSync.isStale)
+        assertEquals("Два успеха", skill.assessment?.assessmentReason)
         assertEquals(shared.description, explanation.description)
         assertEquals(shared.summary, explanation.summary)
         assertEquals(shared.evidence.map { it.text }, explanation.evidence)
@@ -288,7 +313,7 @@ class LocalParentReportRepositoryTest {
     }
 
     private fun assessments(runId: String, sequence: Long, explanation: SkillExplanation? = null) = SkillAssessmentsResponse(
-        runId, sequence, SkillId.entries.map { SkillAssessmentDto(it, SkillStatus.MASTERED, "server-policy-v1", explanation) },
+        runId, sequence, SkillId.entries.map { SkillAssessmentDto(it, SkillStatus.MASTERED, "server-policy-v1", explanation, assessmentReason = "Два успеха") },
     )
 
     private fun serverExplanation() = SkillExplanation(
