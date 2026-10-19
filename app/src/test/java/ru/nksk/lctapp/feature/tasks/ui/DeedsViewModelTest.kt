@@ -42,6 +42,31 @@ class DeedsViewModelTest {
     @Before fun setup() { Dispatchers.setMain(dispatcher) }
     @After fun cleanup() { store.clear(); Dispatchers.resetMain() }
 
+    @Test fun aNewlyDeferredOfferAppearsFirstWithoutRecreatingOrRefreshingTasks() = runTest(dispatcher) {
+        val (repository, model, session) = fixture()
+        runCurrent()
+        val first = repository.read().engine!!.deeds.single()
+        model.onScreenHidden()
+        assertTrue(session.dispatch(EngineRequest("show-next-offer", repository.read().engine!!.revision,
+            EngineCommand.OpenNextEvent)) is EngineResult.Applied)
+        val offered = repository.read()
+        val latest = offered.engine!!.deeds.last()
+        assertTrue(session.dispatch(EngineRequest("defer-next-offer", offered.engine!!.revision,
+            EngineCommand.DismissDeedProposal(offered.engine!!.currentEvent!!.id))) is EngineResult.Applied)
+        runCurrent()
+        model.onScreenResumed()
+
+        val saved = repository.read()
+        assertEquals(listOf(latest.id, first.id), model.uiState.value.offers.map { it.id })
+        assertEquals(listOf(first, latest), saved.engine!!.deeds)
+        assertNull(saved.engine!!.currentEvent)
+        assertFalse(model.uiState.value.hasCurrentEvent)
+        assertFalse(model.uiState.value.busy)
+        assertEquals(offered.engine!!.steps, saved.engine!!.steps)
+        assertEquals(offered.engine!!.energy, saved.engine!!.energy)
+        assertEquals(offered.economy, saved.economy)
+    }
+
     @Test fun startingKeepsTheListUntilNavigationAndReturningRefreshesWithoutExtendingTheOffer() = runTest(dispatcher) {
         val (repository, model, session) = fixture()
         runCurrent()

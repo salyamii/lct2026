@@ -7,6 +7,9 @@ enum class DeedGameKind {
     MEMORY, COMPARISON, PRECISION, LIGHTS, SEQUENCE, PIPES, DIFFERENCES, STACKING,
     TELESCOPE, MARK, WHEEL, STRAP, SIGNAL, ROUTE_MAP, BOAT,
     NEED_WANT, REAL_DISCOUNT, COIN_BALANCE, FINANCIAL_TRAP, EXTRA_PURCHASE,
+    TRIP_PACKING, SHOPPING_COMPARISON, RECORD_JOURNAL, RECORD_LENSES, RECORD_LIGHTS,
+    OBSERVATORY_OPENING, PLATE_HAND, PLATE_SOLUTION, LIGHT_INSCRIPTION,
+    SERVICE_EMBLEM, SIGNAL_POST, CHAPTER_FINALE, RING_TOSS,
 }
 
 /** A completed round set; incomplete boards cannot be submitted for payment. */
@@ -21,6 +24,7 @@ class DeedGameScore private constructor(
         require(when (kind) {
             DeedGameKind.MEMORY -> correct == MemoryState.PAIRS && attempts >= MemoryState.PAIRS
             DeedGameKind.COMPARISON -> attempts == PriceQuizState.QUESTION_COUNT
+            DeedGameKind.SHOPPING_COMPARISON -> attempts == ShoppingComparison.rounds.size
             DeedGameKind.PRECISION -> attempts == TargetStopState.ROUNDS
             DeedGameKind.LIGHTS -> attempts == 1 && correct == 1
             DeedGameKind.SEQUENCE -> SequenceState.isSupportedRoundLimit(attempts)
@@ -32,14 +36,36 @@ class DeedGameScore private constructor(
             DeedGameKind.COIN_BALANCE -> attempts == CoinBalanceState.create().rounds.size
             DeedGameKind.FINANCIAL_TRAP -> attempts == PracticeGames.traps().questions.size
             DeedGameKind.EXTRA_PURCHASE -> attempts == PracticeGames.extraPurchases().questions.size
+            DeedGameKind.RING_TOSS -> attempts == RingToss.THROW_COUNT
             DeedGameKind.TELESCOPE, DeedGameKind.MARK, DeedGameKind.WHEEL,
-            DeedGameKind.STRAP, DeedGameKind.SIGNAL, DeedGameKind.ROUTE_MAP, DeedGameKind.BOAT -> correct == 1 && attempts == 1
+            DeedGameKind.STRAP, DeedGameKind.SIGNAL, DeedGameKind.ROUTE_MAP, DeedGameKind.BOAT,
+            DeedGameKind.TRIP_PACKING, DeedGameKind.RECORD_JOURNAL, DeedGameKind.RECORD_LENSES,
+            DeedGameKind.RECORD_LIGHTS, DeedGameKind.OBSERVATORY_OPENING, DeedGameKind.PLATE_HAND,
+            DeedGameKind.PLATE_SOLUTION, DeedGameKind.LIGHT_INSCRIPTION, DeedGameKind.SERVICE_EMBLEM,
+            DeedGameKind.SIGNAL_POST, DeedGameKind.CHAPTER_FINALE -> correct == 1 && attempts == 1
         }) { "Invalid completed mini-game result" }
     }
     /** Completed paid work earns at least one coin; a zero authored reward stays zero. */
     fun reward(maximum: Long): Long = deedReward(maximum, correct, attempts)
 
     companion object {
+        fun fromRingToss(state: RingToss): DeedGameScore? =
+            if (state.complete) DeedGameScore(DeedGameKind.RING_TOSS, state.hits, RingToss.THROW_COUNT) else null
+
+        fun fromDiscovery(state: ChapterDiscovery): DeedGameScore? {
+            if (!state.complete) return null
+            val kind = when (state.scene) {
+                DiscoveryScene.OBSERVATORY -> DeedGameKind.OBSERVATORY_OPENING
+                DiscoveryScene.PLATE_HAND -> DeedGameKind.PLATE_HAND
+                DiscoveryScene.PLATE_SOLUTION -> DeedGameKind.PLATE_SOLUTION
+                DiscoveryScene.INSCRIPTION -> DeedGameKind.LIGHT_INSCRIPTION
+                DiscoveryScene.EMBLEM -> DeedGameKind.SERVICE_EMBLEM
+                DiscoveryScene.SIGNAL_POST -> DeedGameKind.SIGNAL_POST
+                DiscoveryScene.FINALE -> DeedGameKind.CHAPTER_FINALE
+            }
+            return DeedGameScore(kind, 1, 1)
+        }
+
         /** Only a complete authored set can settle its paid deed; shuffled order is supported. */
         fun fromNeedWant(state: PracticeChoiceState<NeedWantQuestion>): DeedGameScore? =
             fromPractice(DeedGameKind.NEED_WANT, state, PracticeGames.matchesNeeds(state.questions))
@@ -62,6 +88,23 @@ class DeedGameScore private constructor(
             if (state.rounds == CoinBalanceState.create().rounds && state.finished && state.started &&
                 state.verdict == null && state.removed.isEmpty() && !state.madeMistake)
                 DeedGameScore(DeedGameKind.COIN_BALANCE, state.correctAnswers, state.rounds.size) else null
+
+        fun fromTripPacking(state: TripPacking): DeedGameScore? =
+            if (state.completed) DeedGameScore(DeedGameKind.TRIP_PACKING, 1, 1) else null
+
+        fun fromShoppingComparison(state: ShoppingComparison): DeedGameScore? =
+            if (state.completed) DeedGameScore(DeedGameKind.SHOPPING_COMPARISON,
+                state.correctAnswers, ShoppingComparison.rounds.size) else null
+
+        fun fromRecordStudy(state: RecordStudy): DeedGameScore? {
+            if (!state.complete || state.selectedLens != null || state.needsCorrection) return null
+            val kind = when (state.kind) {
+                RecordStudyKind.CARGO_JOURNAL -> DeedGameKind.RECORD_JOURNAL
+                RecordStudyKind.THREE_LENSES -> DeedGameKind.RECORD_LENSES
+                RecordStudyKind.LIGHT_ORDER -> DeedGameKind.RECORD_LIGHTS
+            }
+            return DeedGameScore(kind, 1, 1)
+        }
 
         fun fromBoat(state: BoatJourney): DeedGameScore? =
             if (state.phase == BoatPhase.ARRIVED && state.plan != null && state.distance == 1f &&

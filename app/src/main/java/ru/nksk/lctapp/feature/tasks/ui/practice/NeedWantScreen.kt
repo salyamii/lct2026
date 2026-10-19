@@ -28,11 +28,11 @@ fun NeedWantScreen(
         PracticeBoard {
             GameArtwork(question.item.artwork, null, Modifier.size(148.dp))
             PracticeText(stringResource(question.item.titleRes), bold = true)
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                for (choice in 0..1) PracticeOption(
+            PracticeChoices(2) { choice, modifier ->
+                PracticeOption(
                     title = stringResource(if (choice == 0) R.string.practice_road else R.string.practice_joy),
                     subtitle = stringResource(if (choice == 0) R.string.practice_road_hint else R.string.practice_joy_hint),
-                    modifier = Modifier.weight(1f), enabled = deed?.canPlay != false && state.selectedChoice == null,
+                    modifier = modifier, enabled = deed?.canPlay != false && state.selectedChoice == null,
                     picked = state.selectedChoice == choice,
                     correct = state.selectedChoice?.let { choice == question.correctChoice },
                     onClick = { onAction(PracticeChoiceAction.Answer(choice, state.current)) },

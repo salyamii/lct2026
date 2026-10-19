@@ -25,6 +25,8 @@ import ru.nksk.lctapp.domain.engine.*
 import ru.nksk.lctapp.domain.game.GameRepository
 import ru.nksk.lctapp.domain.game.GameState
 import ru.nksk.lctapp.domain.game.OwnedItem
+import ru.nksk.lctapp.domain.finance.FinancialProgress
+import ru.nksk.lctapp.domain.story.StoryDecision
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GoalViewModelTest {
@@ -63,6 +65,44 @@ class GoalViewModelTest {
         assertEquals(listOf(24L, 36L, 90L, 30L), shown.projects.first().requirements.map { it.price })
         assertTrue(shown.projects.first().requirements.none { it.owned })
         assertEquals(before, fixture.state)
+    }
+
+    @Test fun newChapterOverridesRestoredGoalPreviewAndRequiresAnExplicitSavingsTarget() = runTest(dispatcher) {
+        val fixture = Fixture(savings = 15)
+        fixture.start()
+        val acts = checkNotNull(fixture.catalog.storyCampaign).acts
+        val nextGoal = fixture.catalog.goals.single { it.goalId == acts[1].goalId }
+        val finaleChoice = fixture.catalog.content.choices.first { it.eventId == acts.first().finaleId }.id
+        fixture.repository.update { game ->
+            game.copy(selectedGoalId = null, selectedSavingItemId = null, financial = FinancialProgress(),
+                story = game.story.copy(activeEventId = null,
+                    decisions = game.story.decisions + StoryDecision("finale", finaleChoice)),
+                completedGoalProjects = listOf(CompletedGoalProject(fixture.goal.goalId, "finale")),
+                engine = game.engine!!.copy(events = emptyList(), phase = DayPhase.READY_TO_END))
+        }
+        val handle = SavedStateHandle(mapOf("viewed_goal" to fixture.goal.goalId, "show_list" to true, "return_to_list" to true))
+        val model = fixture.model(handle)
+        runCurrent()
+        val before = fixture.state
+        assertTrue(model.uiState.value.chapterSelectionRequired)
+        assertEquals(nextGoal.goalId, model.uiState.value.goalId)
+        assertFalse(model.uiState.value.showList)
+        assertFalse(model.uiState.value.returnToList)
+        model.onAction(GoalAction.ShowList)
+        model.onAction(GoalAction.View(fixture.catalog.goals.last().goalId))
+        assertEquals(nextGoal.goalId, model.uiState.value.goalId)
+        assertEquals(before, fixture.state)
+
+        model.onAction(GoalAction.SelectSavingGoal(nextGoal.goalId, nextGoal.itemIds.first()))
+        runCurrent()
+        assertFalse(model.uiState.value.chapterSelectionRequired)
+        assertEquals(nextGoal.goalId, fixture.state.selectedGoalId)
+        assertEquals(nextGoal.itemIds.first(), fixture.state.selectedSavingItemId)
+        assertEquals(before.economy.availableBalance, fixture.state.economy.availableBalance)
+        assertEquals(before.economy.savingsBalance, fixture.state.economy.savingsBalance)
+        assertEquals(before.story.decisions, fixture.state.story.decisions)
+        assertEquals(before.engine!!.steps, fixture.state.engine!!.steps)
+        assertNotNull(fixture.state.economy.planning)
     }
 
     @Test fun viewingFutureChapterAndReturningNeverChangesSavedGoalOrMoney() = runTest(dispatcher) {

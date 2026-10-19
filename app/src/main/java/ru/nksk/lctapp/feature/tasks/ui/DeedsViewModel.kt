@@ -147,7 +147,9 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
             loading = false, busy = busy, message = message, petName = saved.pet.name,
             indicators = petIndicators(saved, catalog, shownDemoMode),
             hasCurrentEvent = saved.engine?.currentEvent != null,
-            offers = session.engine.availableDeeds(saved).map { offer ->
+            // A just-deferred offer should be visible at the start of Tasks, not below older work.
+            // Reverse only the presentation; persisted offer order and deadlines stay intact.
+            offers = session.engine.availableDeeds(saved).asReversed().map { offer ->
                 val event = catalog.content.events.single { it.id == offer.eventId }
                 val card = catalog.cards.getValue(event.id)
                 val reward = catalog.content.choices.single { it.eventId == event.id }.moneyDelta

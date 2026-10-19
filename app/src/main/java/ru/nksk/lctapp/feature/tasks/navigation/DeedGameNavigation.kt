@@ -117,7 +117,12 @@ fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> 
                         leave, state.presentation, position = { position.value })
                 }
                 DeedGameType.TELESCOPE, DeedGameType.MARK, DeedGameType.WHEEL,
-                DeedGameType.STRAP, DeedGameType.SIGNAL, DeedGameType.ROUTE_MAP, DeedGameType.BOAT -> {
+                DeedGameType.STRAP, DeedGameType.SIGNAL, DeedGameType.ROUTE_MAP, DeedGameType.BOAT,
+                DeedGameType.TRIP_PACKING, DeedGameType.SHOPPING_COMPARISON, DeedGameType.RECORD_JOURNAL,
+                DeedGameType.RECORD_LENSES, DeedGameType.RECORD_LIGHTS,
+                DeedGameType.OBSERVATORY_OPENING, DeedGameType.PLATE_HAND, DeedGameType.PLATE_SOLUTION,
+                DeedGameType.LIGHT_INSCRIPTION, DeedGameType.SERVICE_EMBLEM, DeedGameType.SIGNAL_POST,
+                DeedGameType.CHAPTER_FINALE, DeedGameType.RING_TOSS -> {
                     chapterContent(ChapterDeedContent(
                         kind = DeedGameKind.valueOf(checkNotNull(state.type).name),
                         interactionBlocked = !resumed || state.busy || state.presentation?.canPlay != true,
@@ -125,6 +130,8 @@ fun EntryProviderScope<NavKey>.deedGameEntry(onFinished: (DeedGame, String?) -> 
                         onCompleted = { if (resumed) model.finishChapterGame(it) },
                         onPayRepair = { id, rock -> model.payBoatRepair(id, rock) },
                         onExit = leave,
+                        onShoppingProgress = model::recordShoppingProgress,
+                        onPackingCompleted = { if (resumed) model.finishTripPacking(it) },
                     ))
                 }
                 DeedGameType.NEED_WANT, DeedGameType.REAL_DISCOUNT, DeedGameType.COIN_BALANCE,

@@ -42,10 +42,11 @@ class AppDiagnostics @Inject constructor(@ApplicationContext context: Context) {
         installed = true
     }
 
-    /** Callers supply fixed labels/enums, never names, identifiers, routes or snapshot bodies. */
+    /** Callers supply fixed labels/enums or code frames, never names, content IDs, routes or snapshots. */
     @Synchronized
     fun updateContext(key: String, value: String) {
-        val safeValue = value.take(120).replace('\n', ' ').replace('\r', ' ')
+        // Keep the end of a source frame (file and line), needed to retrace release builds.
+        val safeValue = value.take(400).replace('\n', ' ').replace('\r', ' ')
         if (fields[key] == safeValue) return
         if (key !in fields && fields.size >= 16) return
         fields[key.take(40)] = safeValue

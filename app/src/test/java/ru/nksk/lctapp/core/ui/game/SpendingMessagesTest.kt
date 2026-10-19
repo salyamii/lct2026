@@ -45,7 +45,7 @@ class SpendingMessagesTest {
         val economy = EconomyState(BudgetPlan(35, 3, 0, 10), savingsBalance = 50)
         val quote = EconomyOperations.quote(economy, 7, SpendingKind.WANT)
         assertEquals("Из запаса: 4. Останется: 6.", quote.reserveSpendingDescription(economy.plan.reserve))
-        assertEquals("Возьмём для оплаты 3 монеты из денег на желания.\nИз запаса: 4. Останется: 6.",
+        assertEquals("Всего: 7 монет.\nВозьмём для оплаты 3 монеты из денег на желания.\nИз запаса: 4. Останется: 6.",
             quote.playerDescription(SpendingKind.WANT, economy.plan.reserve))
         assertEquals(50L, economy.savingsBalance)
     }

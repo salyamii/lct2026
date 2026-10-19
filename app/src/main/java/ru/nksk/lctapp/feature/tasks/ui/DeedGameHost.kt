@@ -5,15 +5,19 @@ import ru.nksk.lctapp.core.ui.components.GameArtwork
 import ru.nksk.lctapp.core.ui.components.GameActionButton
 import ru.nksk.lctapp.core.ui.components.GameActionStyle
 import ru.nksk.lctapp.core.ui.components.InlineSavingsTransfer
+import ru.nksk.lctapp.core.ui.components.SavingsGauge
 import ru.nksk.lctapp.core.ui.game.coinAmount
 import ru.nksk.lctapp.core.ui.theme.Nunito
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -71,42 +75,71 @@ private fun DeedRewardResult(state: DeedGameUiState, onRetry: () -> Unit, onCont
     onOpenSavings: () -> Unit, onSavingsInput: (String) -> Unit,
     onConfirmSavings: () -> Unit, onCancelSavings: () -> Unit) {
     val reward = checkNotNull(state.reward)
-    BoxWithConstraints(Modifier.fillMaxSize().imePadding()) {
-        val panelHeight = maxHeight * .85f
+    val scroll = rememberScrollState()
+    BoxWithConstraints(Modifier.fillMaxSize()) {
         GameArtwork(reward.sceneRes,
             contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-        DeedSheet(Modifier.align(Alignment.BottomCenter).heightIn(max = panelHeight)
-            .verticalScroll(rememberScrollState())) {
-            Text("Получено ${coinAmount(reward.earned)}", fontFamily = Nunito,
-                fontWeight = FontWeight.ExtraBold, fontSize = 22.sp, color = DeedColors.Text)
-            Spacer(Modifier.height(8.dp))
-            Text("На цель: ${reward.goalTitle}", fontFamily = Nunito, fontSize = 15.sp,
-                color = DeedColors.Text)
-            Spacer(Modifier.height(12.dp))
-            if (reward.deposited > 0) {
-                Text("В копилке +${reward.deposited}", fontFamily = Nunito,
-                    fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, color = DeedColors.Text)
-                Spacer(Modifier.height(12.dp))
+        // The jar belongs to the full screen, not to the form's remaining space.
+        // Its position and size depend only on the viewport before keyboard insets.
+        val jarHeight = (maxHeight * .26f).coerceAtMost(320.dp)
+        val jarWidth = minOf(192.dp, maxWidth * .5f, jarHeight / 1.7f)
+        val panelMaxHeight = ((maxHeight - jarHeight) / 2 - 12.dp).coerceAtLeast(0.dp)
+        Box(Modifier.size(jarWidth, jarHeight).align(Alignment.Center), contentAlignment = Alignment.Center) {
+            SavingsGauge(reward.savingsBalance, reward.goalPrice, Modifier.width(jarWidth),
+                contentDescription = "На цель «${reward.goalTitle}»: накоплено ${reward.savingsBalance} из ${reward.goalPrice} монет")
+        }
+        // Only the form moves above the keyboard and scrolls. Its normal bounds
+        // leave the centred jar visible, without stretching the cream background.
+        Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().imePadding()) {
+            Box(Modifier.fillMaxWidth().heightIn(max = panelMaxHeight)
+                .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+                .background(DeedColors.Cream).verticalScroll(scroll)) {
+                DeedRewardActions(state, onRetry, onContinue, onOpenSavings, onSavingsInput,
+                    onConfirmSavings, onCancelSavings)
             }
-            state.message?.let {
-                Text(it, color = DeedColors.Text, fontFamily = Nunito)
+        }
+    }
+}
+
+@Composable
+private fun DeedRewardActions(state: DeedGameUiState, onRetry: () -> Unit, onContinue: () -> Unit,
+    onOpenSavings: () -> Unit, onSavingsInput: (String) -> Unit,
+    onConfirmSavings: () -> Unit, onCancelSavings: () -> Unit) {
+    val reward = checkNotNull(state.reward)
+    DeedSheet {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text("Получено ${coinAmount(reward.earned)}", Modifier.weight(1f), fontFamily = Nunito,
+                fontWeight = FontWeight.ExtraBold, fontSize = 22.sp, color = DeedColors.Text)
+            Box(Modifier.size(32.dp), contentAlignment = Alignment.Center) {
+                if (state.busy) GameLoadingIndicator(size = 28.dp, delayMillis = 250)
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        Text("На цель: ${reward.goalTitle}", fontFamily = Nunito, fontSize = 15.sp,
+            color = DeedColors.Text)
+        Spacer(Modifier.height(12.dp))
+        if (reward.deposited > 0) {
+            Text("В копилке +${reward.deposited}", fontFamily = Nunito,
+                fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, color = DeedColors.Text)
+            Spacer(Modifier.height(12.dp))
+        }
+        if (state.canRetry) {
+            GameActionButton("Повторить", onRetry, Modifier.fillMaxWidth(), interactionBlocked = state.busy)
+        } else if (reward.editing) {
+            InlineSavingsTransfer(reward.input, reward.maximum, reward.reserveBalance, reward.savingsBalance,
+                enabled = true, onInputChange = onSavingsInput,
+                onConfirm = onConfirmSavings, onCancel = onCancelSavings, interactionBlocked = state.busy)
+        } else {
+            if (reward.maximum > 0 && reward.deposited == 0L) {
+                GameActionButton("Отложить на цель", onOpenSavings, Modifier.fillMaxWidth(), interactionBlocked = state.busy)
                 Spacer(Modifier.height(8.dp))
             }
-            if (state.canRetry) {
-                GameActionButton("Повторить", onRetry, Modifier.fillMaxWidth(), enabled = !state.busy)
-            } else if (reward.editing) {
-                InlineSavingsTransfer(reward.input, reward.maximum, reward.reserveBalance, reward.savingsBalance,
-                    enabled = !state.busy, onInputChange = onSavingsInput,
-                    onConfirm = onConfirmSavings, onCancel = onCancelSavings)
-            } else {
-                if (reward.maximum > 0 && reward.deposited == 0L) {
-                    GameActionButton("Отложить на цель", onOpenSavings, Modifier.fillMaxWidth(), enabled = !state.busy)
-                    Spacer(Modifier.height(8.dp))
-                }
-                GameActionButton("Продолжить", onContinue, Modifier.fillMaxWidth(), enabled = !state.busy,
-                    style = GameActionStyle.SECONDARY)
-            }
-            if (state.busy) GameLoadingIndicator(Modifier.fillMaxWidth(), size = 40.dp)
+            GameActionButton("Продолжить", onContinue, Modifier.fillMaxWidth(), interactionBlocked = state.busy,
+                style = GameActionStyle.SECONDARY)
+        }
+        state.message?.let {
+            Spacer(Modifier.height(8.dp))
+            Text(it, color = DeedColors.Text, fontFamily = Nunito)
         }
     }
 }

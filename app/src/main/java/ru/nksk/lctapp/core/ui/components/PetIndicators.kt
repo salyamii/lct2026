@@ -15,13 +15,13 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -116,7 +116,7 @@ private fun PetIndicatorsHud(
     }
 }
 
-/** One division per unit of the existing daily energy allowance. */
+/** One paw print per unit of the existing daily energy allowance. */
 @Composable
 private fun FramedEnergyGauge(state: PetIndicatorsUiState, modifier: Modifier) {
     val frameHeight = 68.dp * LocalDensity.current.fontScale.coerceAtLeast(1f)
@@ -129,6 +129,12 @@ private fun FramedEnergyGauge(state: PetIndicatorsUiState, modifier: Modifier) {
         animationSpec = tween(250), label = "Framed energy level",
     )
     val low = energy != null && energy <= 1 && !state.demoMode
+    // Simple silhouette stays legible in the narrow rail; no small raster copies are decoded.
+    val paw = remember { energyPawOutline() }
+    val chargedPaw = remember(low) {
+        Brush.verticalGradient(if (low) listOf(Color(0xFFF7D6A0), Color(0xFFD99447), Color(0xFFAA632B))
+            else listOf(Color(0xFFFFF1C1), Color(0xFFF0C064), Color(0xFFC18B3C)), startY = 0f, endY = 100f)
+    }
     Box(modifier.height(frameHeight)) {
         GamePlaque(Modifier.matchParentSize(), artworkRes = R.drawable.menu_energy_frame_v4,
             fixedEdges = true, contentPadding = PaddingValues(0.dp)) {}
@@ -136,26 +142,28 @@ private fun FramedEnergyGauge(state: PetIndicatorsUiState, modifier: Modifier) {
             // Match the nine-slice skin: larger text grows the middle, not the carved ends.
             val referenceHeight = minOf(size.height, 64.dp.toPx())
             val side = minOf(referenceHeight * 3f * .115f, size.width * .22f)
-            val top = size.height * .50f
-            val height = (size.height - referenceHeight * .52f) * (.18f / .48f)
+            val edge = referenceHeight * .26f
+            val middle = size.height - edge * 2f
+            val top = edge + middle * ((.475f - .26f) / .48f)
+            val height = middle * (.225f / .48f)
             val divisions = state.maxEnergy.coerceAtLeast(1)
-            val gap = minOf(3.dp.toPx(), (size.width - side * 2f) / (divisions * 5f))
-            val cellWidth = ((size.width - side * 2f - gap * (divisions - 1)) / divisions).coerceAtLeast(0f)
-            val radius = CornerRadius(minOf(height / 2f, 4.dp.toPx()))
+            val cellWidth = ((size.width - side * 2f) / divisions).coerceAtLeast(0f)
+            val pawSize = minOf(height, cellWidth * .80f)
             for (division in 0 until divisions) {
-                val left = side + division * (cellWidth + gap)
-                val origin = Offset(left, top)
-                val cell = Size(cellWidth, height)
-                drawRoundRect(Color(0xFF503522), origin, cell, radius)
+                val left = side + cellWidth * (division + .5f) - pawSize / 2f
                 val charge = (fraction * divisions - division).coerceIn(0f, 1f)
-                if (charge > 0f) clipRect(left, top, left + cellWidth * charge, top + height) {
-                    drawRoundRect(Brush.verticalGradient(
-                        if (low) listOf(Color(0xFFF4C486), Color(0xFFC87832), Color(0xFF955027))
-                        else listOf(Color(0xFFFFE8A8), Color(0xFFE8B44F), Color(0xFFAF762B)),
-                        startY = top, endY = top + height), origin, cell, radius)
+                translate(left, top + (height - pawSize) / 2f) {
+                    scale(pawSize / 100f, pawSize / 100f, pivot = Offset.Zero) {
+                        translate(top = 3f) { drawPath(paw, Color(0xAA24170F)) }
+                        drawPath(paw, Color(0xFF533A29))
+                        drawPath(paw, Color(0xFF997449), style = Stroke(2.5f))
+                        // Whole prints brighten/fade; no rectangular fill or clipped half-paws.
+                        if (charge > 0f) {
+                            drawPath(paw, chargedPaw, alpha = charge)
+                            drawPath(paw, Color(0xFFFFE6AA), alpha = charge * .85f, style = Stroke(2f))
+                        }
+                    }
                 }
-                drawRoundRect(Color(0xFFB28749).copy(alpha = .55f), origin, cell, radius,
-                    style = Stroke(.6.dp.toPx()))
             }
         }
         Box(Modifier.align(Alignment.TopCenter).fillMaxWidth().padding(top = captionTop)
@@ -165,6 +173,38 @@ private fun FramedEnergyGauge(state: PetIndicatorsUiState, modifier: Modifier) {
                 fontSize = 12.sp, lineHeight = 15.sp, maxLines = 1)
         }
     }
+}
+
+/** Four toes and a soft pad, cached once and scaled uniformly inside each energy slot. */
+private fun energyPawOutline() = Path().apply {
+    moveTo(50f, 45f)
+    cubicTo(38f, 45f, 34f, 57f, 25f, 68f)
+    cubicTo(18f, 77f, 22f, 91f, 32f, 92f)
+    cubicTo(40f, 93f, 44f, 87f, 50f, 87f)
+    cubicTo(56f, 87f, 60f, 93f, 68f, 92f)
+    cubicTo(78f, 91f, 82f, 77f, 75f, 68f)
+    cubicTo(66f, 57f, 62f, 45f, 50f, 45f)
+    close()
+    moveTo(17f, 29f)
+    cubicTo(8f, 30f, 6f, 40f, 11f, 49f)
+    cubicTo(16f, 59f, 26f, 61f, 30f, 55f)
+    cubicTo(35f, 47f, 27f, 29f, 17f, 29f)
+    close()
+    moveTo(35f, 7f)
+    cubicTo(24f, 7f, 23f, 20f, 27f, 31f)
+    cubicTo(31f, 41f, 41f, 43f, 46f, 35f)
+    cubicTo(51f, 26f, 46f, 7f, 35f, 7f)
+    close()
+    moveTo(65f, 7f)
+    cubicTo(54f, 7f, 49f, 26f, 54f, 35f)
+    cubicTo(59f, 43f, 69f, 41f, 73f, 31f)
+    cubicTo(77f, 20f, 76f, 7f, 65f, 7f)
+    close()
+    moveTo(83f, 29f)
+    cubicTo(73f, 29f, 65f, 47f, 70f, 55f)
+    cubicTo(74f, 61f, 84f, 59f, 89f, 49f)
+    cubicTo(94f, 40f, 92f, 30f, 83f, 29f)
+    close()
 }
 
 @Composable

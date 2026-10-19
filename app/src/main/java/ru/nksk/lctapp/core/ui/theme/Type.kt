@@ -21,14 +21,14 @@ private val MenuText = TextStyle(
 )
 
 // Game copy is currently Russian even when the device uses another language.
-// Keep source strings intact; Android chooses hyphenation points during layout.
+// Keep words intact in both descriptions and controls.
 internal val GameTextWrapping = TextStyle(
     localeList = LocaleList("ru"),
-    hyphens = Hyphens.Auto,
+    hyphens = Hyphens.None,
     lineBreak = LineBreak.Paragraph,
 )
 
-// Action labels wrap at word boundaries; paragraph hyphenation belongs to longer game copy.
+// Controls use simple word wrapping; descriptions retain paragraph line balancing.
 internal val GameLabelTextWrapping = GameTextWrapping.copy(
     hyphens = Hyphens.None,
     lineBreak = LineBreak.Simple,

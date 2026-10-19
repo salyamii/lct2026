@@ -298,7 +298,13 @@ class BundledCampaignBalanceTest {
             DeedGameKind.NEED_WANT, DeedGameKind.REAL_DISCOUNT, DeedGameKind.COIN_BALANCE,
             DeedGameKind.FINANCIAL_TRAP, DeedGameKind.EXTRA_PURCHASE -> completedFinancialGameScore(kind, cap)
             DeedGameKind.TELESCOPE, DeedGameKind.MARK, DeedGameKind.WHEEL, DeedGameKind.STRAP,
-            DeedGameKind.SIGNAL, DeedGameKind.ROUTE_MAP, DeedGameKind.BOAT -> completedChapterGameScore(kind)
+            DeedGameKind.SIGNAL, DeedGameKind.ROUTE_MAP, DeedGameKind.BOAT,
+            DeedGameKind.TRIP_PACKING, DeedGameKind.RECORD_JOURNAL,
+            DeedGameKind.RECORD_LENSES, DeedGameKind.RECORD_LIGHTS,
+            DeedGameKind.OBSERVATORY_OPENING, DeedGameKind.PLATE_HAND, DeedGameKind.PLATE_SOLUTION,
+            DeedGameKind.LIGHT_INSCRIPTION, DeedGameKind.SERVICE_EMBLEM, DeedGameKind.SIGNAL_POST,
+            DeedGameKind.CHAPTER_FINALE, DeedGameKind.RING_TOSS -> completedChapterGameScore(kind)
+            DeedGameKind.SHOPPING_COMPARISON -> completedShoppingGameScore(3 * cap / 100)
             // Five-round games cannot represent exactly 50%; round down to 2/5, never up to 3/5.
             DeedGameKind.PRECISION -> DeedGameScore.fromPrecision(TargetStopState(10,
                 round = TargetStopState.ROUNDS, hits = TargetStopState.ROUNDS * cap / 100, lastHit = true))

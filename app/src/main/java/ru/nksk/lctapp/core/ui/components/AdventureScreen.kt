@@ -11,10 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,7 +19,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.SubcomposeLayout
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
@@ -61,6 +57,8 @@ internal fun AdventureScreen(
     scrollWholePage: Boolean = false,
     fitContent: Boolean = false,
     contentScrollState: ScrollState? = null,
+    overflowScrollState: ScrollState? = null,
+    showBack: Boolean = true,
     headerAction: (@Composable () -> Unit)? = null,
     indicators: (@Composable () -> Unit)? = null,
     scene: (@Composable BoxScope.() -> Unit)? = null,
@@ -70,6 +68,7 @@ internal fun AdventureScreen(
     GameArtworkScene(artworkSceneKey, modifier.fillMaxSize().background(GamePaper)) {
     BoxWithConstraints(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding().imePadding()) {
         val pageScroll = contentScrollState ?: rememberScrollState()
+        val overflowScroll = overflowScrollState ?: key(pageScroll) { rememberScrollState() }
         val fixedActionScroll = rememberScrollState()
         val density = LocalDensity.current
         val fontScale = density.fontScale
@@ -81,11 +80,6 @@ internal fun AdventureScreen(
         // header, balances and character instead of reserving a percentage of empty floor.
         val customStageHeight = if (sceneAspectRatio != null) (maxWidth / sceneAspectRatio).coerceIn(180.dp, 440.dp)
             else (maxHeight * sceneFraction.coerceIn(.30f, .70f)).coerceIn(240.dp, 420.dp)
-        var measuredStageHeight by remember { mutableIntStateOf(0) }
-        val compact = maxHeight < 600.dp || largeText || (measuredStageHeight > 0 &&
-            maxHeight - with(density) { measuredStageHeight.toDp() } < 200.dp)
-        val backgroundHeight = if (measuredStageHeight > 0) with(density) { measuredStageHeight.toDp() }
-            else if (scene != null) customStageHeight else 340.dp
         @Composable fun Indicators() {
             indicators?.let { content ->
                 Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 8.dp)) { content() }
@@ -96,7 +90,7 @@ internal fun AdventureScreen(
                 Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    GameBackButton(onBack)
+                    if (showBack) GameBackButton(onBack)
                     if (title.isNotBlank()) GameSceneTitle(title, Modifier.weight(1f, fill = false))
                     else Spacer(Modifier.weight(1f))
                     if (!separateHeaderAction) headerAction?.invoke()
@@ -112,7 +106,7 @@ internal fun AdventureScreen(
             }
         }
         @Composable fun Stage() {
-            Column(Modifier.fillMaxWidth().onSizeChanged { measuredStageHeight = it.height }) {
+            Column(Modifier.fillMaxWidth()) {
                 Indicators()
                 // Indicators get their own space, leaving the character's existing canvas intact.
                 Column(Modifier.fillMaxWidth().then(
@@ -150,7 +144,7 @@ internal fun AdventureScreen(
                 }
             }
         }
-        @Composable fun SceneBackground(backgroundModifier: Modifier = Modifier.fillMaxWidth().height(backgroundHeight + 28.dp)) {
+        @Composable fun SceneBackground(backgroundModifier: Modifier) {
             // Continue the same scene beneath the rounded panel instead of exposing a
             // rectangular dark seam. The layer follows whichever content owns the scroll.
             Box(backgroundModifier) {
@@ -196,11 +190,18 @@ internal fun AdventureScreen(
             // A form keeps one scroll owner through IME and compact-layout changes. Its
             // primary action remains outside the changing preview/receipt content.
             Column(Modifier.fillMaxSize()) {
-                Box(Modifier.weight(1f).fillMaxWidth().background(GamePaper).verticalScroll(pageScroll)) {
-                    SceneBackground()
-                    Column(Modifier.fillMaxWidth()) {
-                        Stage()
+                SubcomposeLayout(Modifier.weight(1f).fillMaxWidth().background(GamePaper).verticalScroll(pageScroll)) { childConstraints ->
+                    val natural = childConstraints.copy(minHeight = 0, maxHeight = Constraints.Infinity)
+                    val stage = subcompose("stage") { Stage() }.single().measure(natural)
+                    val panel = subcompose("panel") {
                         Panel(Modifier, scrollContent = false, includeFooter = !pinFooter)
+                    }.single().measure(natural)
+                    val backdrop = subcompose("backdrop") { SceneBackground(Modifier.fillMaxSize()) }
+                        .single().measure(Constraints.fixed(childConstraints.maxWidth, stage.height + 28.dp.roundToPx()))
+                    layout(childConstraints.maxWidth, (stage.height + panel.height).coerceAtLeast(childConstraints.minHeight)) {
+                        backdrop.placeRelative(0, 0)
+                        stage.placeRelative(0, 0)
+                        panel.placeRelative(0, stage.height)
                     }
                 }
                 if (pinFooter) footer?.let {
@@ -215,12 +216,23 @@ internal fun AdventureScreen(
                 }
             }
         } else {
-            Box(Modifier.fillMaxSize().background(GamePaper)
-                .then(if (compact) Modifier.verticalScroll(pageScroll) else Modifier)) {
-                SceneBackground()
-                Column(if (compact) Modifier.fillMaxWidth() else Modifier.fillMaxSize()) {
-                    Stage()
-                    Panel(if (compact) Modifier else Modifier.weight(1f), scrollContent = !compact)
+            val viewportHeight = constraints.maxHeight
+            // Choose the scroll owner and crop from measured bounds before drawing the first
+            // frame. The outer scroll has no range while the panel owns the scrolling body.
+            SubcomposeLayout(Modifier.fillMaxSize().background(GamePaper).verticalScroll(overflowScroll)) { childConstraints ->
+                val natural = childConstraints.copy(minHeight = 0, maxHeight = Constraints.Infinity)
+                val stage = subcompose("stage") { Stage() }.single().measure(natural)
+                val panelHeight = (viewportHeight - stage.height).coerceAtLeast(0)
+                val compact = viewportHeight < 600.dp.roundToPx() || largeText || panelHeight < 200.dp.roundToPx()
+                val panel = subcompose("panel") {
+                    Panel(Modifier, scrollContent = !compact)
+                }.single().measure(if (compact) natural else Constraints.fixed(childConstraints.maxWidth, panelHeight))
+                val backdrop = subcompose("backdrop") { SceneBackground(Modifier.fillMaxSize()) }
+                    .single().measure(Constraints.fixed(childConstraints.maxWidth, stage.height + 28.dp.roundToPx()))
+                layout(childConstraints.maxWidth, (stage.height + panel.height).coerceAtLeast(viewportHeight)) {
+                    backdrop.placeRelative(0, 0)
+                    stage.placeRelative(0, 0)
+                    panel.placeRelative(0, stage.height)
                 }
             }
         }

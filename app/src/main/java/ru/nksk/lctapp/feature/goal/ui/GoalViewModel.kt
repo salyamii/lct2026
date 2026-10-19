@@ -92,6 +92,8 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
         if (busy || !screenActive) return
         if (action == GoalAction.Retry) { load(); return }
         val game = saved ?: return
+        if (session.catalog.storyProgress(game).unselectedChapterGoal != null &&
+            (action is GoalAction.View || action == GoalAction.ShowList)) return
         when (action) {
             is GoalAction.View -> {
                 if (session.catalog.goals.none { it.goalId == action.goalId }) return
@@ -329,8 +331,9 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
                 })
         }
         val currentGoal = activeGoal ?: story.requiredGoal
-        val goal = catalog.goals.firstOrNull { it.goalId == handle.get<String>("viewed_goal") } ?: currentGoal
-        val showList = handle.get<Boolean>("show_list") ?: false
+        val chapterChoice = story.unselectedChapterGoal
+        val goal = chapterChoice ?: catalog.goals.firstOrNull { it.goalId == handle.get<String>("viewed_goal") } ?: currentGoal
+        val showList = chapterChoice == null && handle.get<Boolean>("show_list") == true
         val common = GoalUiState(loading = false, busy = busy, petName = game.pet.name,
             demoMode = session.demoModeEnabled,
             character = adventurePetArtwork(game.pet),
@@ -340,11 +343,12 @@ internal class GoalViewModel @Inject constructor(private val session: GameSessio
             transfersEnabled = game.economy.planning == null && game.economy.unallocated == 0L,
             projects = projects, showList = showList || goal == null,
             currentGoalId = currentGoal?.goalId,
-            returnToList = !showList && goal != null && handle.get<Boolean>("return_to_list") == true,
+            returnToList = chapterChoice == null && !showList && goal != null && handle.get<Boolean>("return_to_list") == true,
             completedProjectCount = catalog.goals.count { story.goalCompleted(it) },
             campaignComplete = story.campaignComplete,
+            chapterSelectionRequired = chapterChoice != null,
             message = message, confirmation = confirmation, celebration = celebration,
-            purchaseResult = handle.get<String>("purchase_result_item")?.let { id ->
+            purchaseResult = handle.get<String>("purchase_result_item")?.takeIf { chapterChoice == null }?.let { id ->
                 catalog.content.items.firstOrNull { it.id == id && game.ownedItems.any { owned -> owned.itemId == id } }
                     ?.let { item -> GoalPurchaseResult(item.id, renderPetText(item.name, game.pet.name).asGameUiText(),
                         handle.get<Long>("purchase_result_price") ?: checkNotNull(item.priceCoins)) }

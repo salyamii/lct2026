@@ -3,6 +3,8 @@ package ru.nksk.lctapp.app.navigation
 import androidx.compose.runtime.Composable
 import ru.nksk.lctapp.domain.minigame.DeedGameKind
 import ru.nksk.lctapp.domain.minigame.DeedGameScore
+import ru.nksk.lctapp.domain.minigame.chapterone.RecordStudyKind
+import ru.nksk.lctapp.domain.minigame.chapterone.DiscoveryScene
 import ru.nksk.lctapp.feature.storygames.ui.*
 import ru.nksk.lctapp.feature.tasks.navigation.ChapterDeedContent
 import ru.nksk.lctapp.feature.tasks.navigation.ChapterRepairPayment
@@ -11,6 +13,36 @@ import ru.nksk.lctapp.feature.tasks.navigation.ChapterRepairPayment
 @Composable
 internal fun ChapterStoryGameContent(host: ChapterDeedContent) {
     when (host.kind) {
+        DeedGameKind.RING_TOSS -> RingTossGameEntry(host.onExit,
+            onCompleted = { DeedGameScore.fromRingToss(it)?.let(host.onCompleted) },
+            interactionBlocked = host.interactionBlocked)
+        DeedGameKind.OBSERVATORY_OPENING, DeedGameKind.PLATE_HAND, DeedGameKind.PLATE_SOLUTION,
+        DeedGameKind.LIGHT_INSCRIPTION, DeedGameKind.SERVICE_EMBLEM, DeedGameKind.SIGNAL_POST,
+        DeedGameKind.CHAPTER_FINALE -> DiscoveryGameEntry(when (host.kind) {
+            DeedGameKind.OBSERVATORY_OPENING -> DiscoveryScene.OBSERVATORY
+            DeedGameKind.PLATE_HAND -> DiscoveryScene.PLATE_HAND
+            DeedGameKind.PLATE_SOLUTION -> DiscoveryScene.PLATE_SOLUTION
+            DeedGameKind.LIGHT_INSCRIPTION -> DiscoveryScene.INSCRIPTION
+            DeedGameKind.SERVICE_EMBLEM -> DiscoveryScene.EMBLEM
+            DeedGameKind.SIGNAL_POST -> DiscoveryScene.SIGNAL_POST
+            else -> DiscoveryScene.FINALE
+        }, host.onExit,
+            onCompleted = { DeedGameScore.fromDiscovery(it)?.let(host.onCompleted) },
+            interactionBlocked = host.interactionBlocked)
+        DeedGameKind.TRIP_PACKING -> TripPackingGameEntry(host.onExit,
+            onCompleted = host.onPackingCompleted,
+            interactionBlocked = host.interactionBlocked)
+        DeedGameKind.SHOPPING_COMPARISON -> ShoppingComparisonGameEntry(host.onExit,
+            onCompleted = { DeedGameScore.fromShoppingComparison(it)?.let(host.onCompleted) },
+            onProgress = host.onShoppingProgress, interactionBlocked = host.interactionBlocked)
+        DeedGameKind.RECORD_JOURNAL, DeedGameKind.RECORD_LENSES, DeedGameKind.RECORD_LIGHTS ->
+            RecordGameEntry(when (host.kind) {
+                DeedGameKind.RECORD_JOURNAL -> RecordStudyKind.CARGO_JOURNAL
+                DeedGameKind.RECORD_LENSES -> RecordStudyKind.THREE_LENSES
+                else -> RecordStudyKind.LIGHT_ORDER
+            }, host.onExit,
+                onCompleted = { DeedGameScore.fromRecordStudy(it)?.let(host.onCompleted) },
+                interactionBlocked = host.interactionBlocked)
         DeedGameKind.TELESCOPE -> TelescopeGameEntry(host.onExit,
             onCompleted = { DeedGameScore.fromTelescope(it)?.let(host.onCompleted) },
             interactionBlocked = host.interactionBlocked)

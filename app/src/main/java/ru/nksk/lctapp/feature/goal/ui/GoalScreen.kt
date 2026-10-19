@@ -65,6 +65,7 @@ internal fun GoalScreen(
     val result = state.purchaseResult
     val ready = state.parts.isNotEmpty() && state.parts.all { it.owned }
     val detailsScroll = rememberScrollState()
+    val detailsOverflowScroll = rememberScrollState()
     // Keep the catalogue's scroll outside its conditional composition so previews
     // and Activity recreation return to the same card and offset.
     val projectsScroll = rememberLazyListState()
@@ -77,16 +78,19 @@ internal fun GoalScreen(
             if (selectionKey.first == previousSelection.first && target != null && state.selected && !state.showList) {
                 withFrameNanos { }
                 selectedGoalAnchor.bringIntoView()
-            } else detailsScroll.scrollTo(0)
+            } else {
+                detailsScroll.scrollTo(0)
+                detailsOverflowScroll.scrollTo(0)
+            }
         }
         previousSelection = selectionKey
     }
     val back = {
-        if (!state.busy) {
+        if (!state.busy && !state.chapterSelectionRequired) {
             state.backAction?.let(onAction) ?: onBack()
         }
     }
-    BackHandler(enabled = state.busy || state.backAction != null) { back() }
+    BackHandler(enabled = state.busy || state.chapterSelectionRequired || state.backAction != null) { back() }
 
     if (state.showList && !state.loading && !state.failed && result == null) {
         GoalProjectList(state, projectsScroll, back) { onAction(GoalAction.View(it)) }
@@ -102,8 +106,10 @@ internal fun GoalScreen(
         contentSpacing = 8.dp,
         pinFooter = false,
         contentScrollState = detailsScroll,
+        overflowScrollState = detailsOverflowScroll,
+        showBack = !state.chapterSelectionRequired,
         headerAction = {
-            if (!state.loading && !state.failed && result == null) {
+            if (!state.loading && !state.failed && result == null && !state.chapterSelectionRequired) {
                 GameForwardAction("Другие цели", { onAction(GoalAction.ShowList) },
                     Modifier.widthIn(max = 210.dp), enabled = !state.busy)
             }
@@ -124,7 +130,7 @@ internal fun GoalScreen(
                     onAction(GoalAction.ContinueStory)
                 }, enabled = !state.busy)
                 state.selected && target != null -> Unit
-                state.selected -> GoalSavingsLink(state.balance, onOpenSavings, !state.busy)
+                state.selected && !state.chapterSelectionRequired -> GoalSavingsLink(state.balance, onOpenSavings, !state.busy)
             }
         },
     ) {
@@ -143,6 +149,7 @@ internal fun GoalScreen(
             else -> {
                 AdventureHeading(state.title)
                 AdventureBody(goalPreviewText(state.goalId, state.description))
+                if (state.chapterSelectionRequired && !ready) AdventureBody("Выбери, на что будем копить сначала.")
                 when {
                     state.completedProject -> GoalStatus("Цель выполнена")
                     ready -> GoalStatus("Снаряжение собрано. Пора выполнить цель!")

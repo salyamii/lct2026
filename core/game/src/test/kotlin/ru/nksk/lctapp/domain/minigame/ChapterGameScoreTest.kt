@@ -9,8 +9,7 @@ import ru.nksk.lctapp.domain.minigame.chapterone.*
 
 class ChapterGameScoreTest {
     private fun telescope() = TelescopeAssembly().install(TelescopePart.TRIPOD).install(TelescopePart.TUBE)
-        .turnFastener(0, 180f).turnFastener(1, 180f).secureMount()
-        .install(TelescopePart.LENS).turnEyepiece(270f).secureEyepiece()
+        .install(TelescopePart.LENS)
         .adjustFocus(TelescopeAssembly.FOCUS_TARGET).observe()
 
     private fun mark(): MarkState = MarkGame.strokes.flatten().fold(

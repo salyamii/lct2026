@@ -11,7 +11,7 @@ import ru.nksk.lctapp.domain.story.StoryDecision
 class BundledActivityGamesTest {
     private val catalog = bundledGameCatalog()
     private val deedBoards = linkedMapOf(
-        "2163-2" to DeedGameKind.COMPARISON, "2163-43" to DeedGameKind.TELESCOPE,
+        "2163-2" to DeedGameKind.SHOPPING_COMPARISON, "2163-43" to DeedGameKind.TELESCOPE,
         "2238-120" to DeedGameKind.PRECISION, "2270-2" to DeedGameKind.STACKING,
         "2270-54" to DeedGameKind.PIPES, "2270-106" to DeedGameKind.DIFFERENCES,
         "2270-158" to DeedGameKind.PRECISION, "2270-210" to DeedGameKind.MEMORY,
@@ -19,8 +19,9 @@ class BundledActivityGamesTest {
         "2289-110" to DeedGameKind.DIFFERENCES, "2289-164" to DeedGameKind.MEMORY,
         "2289-218" to DeedGameKind.PRECISION,
     )
-    private val changedDeeds = setOf("2163-43", "2238-120", "2270-54", "2270-106", "2289-2", "2289-110", "2289-164", "2289-218")
+    private val changedDeeds = setOf("2163-2", "2163-43", "2238-120", "2270-54", "2270-106", "2289-2", "2289-110", "2289-164", "2289-218")
     private val storyBoards = mapOf("G1.02" to DeedGameKind.MARK, "G1.06" to DeedGameKind.ROUTE_MAP,
+        "G1.04" to DeedGameKind.RECORD_JOURNAL, "G1.08" to DeedGameKind.RECORD_LENSES, "G1.10" to DeedGameKind.RECORD_LIGHTS,
         "G1.11" to DeedGameKind.SIGNAL, "N1.WHEEL" to DeedGameKind.WHEEL, "G2.03" to DeedGameKind.PIPES, "G3.06" to DeedGameKind.DIFFERENCES,
         "G3.09" to DeedGameKind.STACKING, "G3.11" to DeedGameKind.SEQUENCE, "G5.08" to DeedGameKind.LIGHTS)
     private val revisions = changedDeeds.associate { "figma-$it-v1:balance-v2" to "figma-$it-v1:balance-v2:game-v3" } +
@@ -48,7 +49,8 @@ class BundledActivityGamesTest {
         assertTrue(catalog.dailyEventPool.containsAll(listOf("figma-2326-112-v3", "figma-2326-352-v3")))
         val current = catalog.deedPool + catalog.dailyEventPool + storyIds
         val kinds = current.flatMap { id -> catalog.policies.getValue(id).let { listOfNotNull(it.deedGameKind) + it.choiceGameKinds.values } }.toSet()
-        assertEquals(DeedGameKind.entries.toSet(), kinds)
+        // The old price quiz remains readable only for previously offered boards.
+        assertEquals(DeedGameKind.entries.toSet() - DeedGameKind.COMPARISON, kinds)
         assertTrue(catalog.policies.getValue(LORE_PLATE_CLEANING).choiceGameKinds.isEmpty())
         assertFalse(catalog.policies.getValue("campaign-choice-v2:G2.03").choiceGameKinds.containsKey("campaign-choice-v2:G2.03:detour"))
         // Retained historical story versions are valid even though only the new IDs are in current acts.

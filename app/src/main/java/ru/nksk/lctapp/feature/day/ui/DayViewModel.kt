@@ -32,6 +32,7 @@ import ru.nksk.lctapp.core.ui.game.playerMessage
 import ru.nksk.lctapp.core.ui.game.eventCompletionMessage
 import ru.nksk.lctapp.core.ui.game.restingPetArtwork
 import ru.nksk.lctapp.core.ui.game.asGameActionLabel
+import ru.nksk.lctapp.core.ui.game.asPurchaseActionLabel
 import ru.nksk.lctapp.core.ui.game.asGameUiText
 import ru.nksk.lctapp.core.ui.game.asPetEffortText
 import ru.nksk.lctapp.core.ui.game.deedDeadline
@@ -644,6 +645,8 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
             options = (if (restFromCard) emptyList() else choices).map { DayOption(it.id, if (isDeed(saved)) {
                 if (goalSelected) "Заработать на цель" else "Выполнить дело"
             } else if (it.moneyDelta < 0 && choiceDeltas.getValue(it.id) == 0L) "Получить бесплатно"
+                else if (purchaseCard && choiceDeltas.getValue(it.id) < 0)
+                    renderPetText(catalog.displayAction(it).asPurchaseActionLabel(-choiceDeltas.getValue(it.id)), saved.pet.name)
                 else renderPetText(catalog.displayAction(it).withoutEffortSuffix().asGameActionLabel(), saved.pet.name),
                 blocked[it.id] == BlockReason.MustEat, blocked[it.id] == null || blocked[it.id] == BlockReason.MustEat,
                 if (it.moneyDelta < 0 && choiceDeltas.getValue(it.id) == 0L) "Бесплатно · режим бога"

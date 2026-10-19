@@ -14,11 +14,10 @@ internal fun EventMedia.sceneArtwork(description: String): EventSceneArtwork? =
 internal fun eventMediaArtwork(key: String?): Int? = when (key) {
     "npc.butcher.orders" -> R.drawable.npc_butcher_orders
     "purchase.bakery_bun" -> R.drawable.prop_bakery_bun
-    "purchase.explorer_hat" -> R.drawable.prop_fair_explorer_hat
+    "purchase.explorer_hat", "accessory.explorer_hat" -> cosmeticArtwork("HAT")
     "purchase.ring_toss" -> R.drawable.prop_fair_ring_toss
     "purchase.compass_keychain" -> R.drawable.prop_fair_compass_keychain
     "purchase.toy_boat" -> R.drawable.prop_fair_toy_boat
-    "accessory.explorer_hat" -> R.drawable.gear_explorer_hat
     "accessory.pilot_goggles" -> R.drawable.gear_pilot_goggles
     "accessory.route_patch" -> R.drawable.gear_route_patch
     "accessory.binoculars" -> R.drawable.gear_binoculars

@@ -87,11 +87,15 @@ private fun GameDirectionButton(
 }
 
 @Composable
-internal fun GameSceneTitle(title: String, modifier: Modifier = Modifier) {
+internal fun GameSceneTitle(
+    title: String,
+    modifier: Modifier = Modifier,
+    textAlign: TextAlign = TextAlign.Unspecified,
+) {
     GamePlaque(modifier.heightIn(min = 52.dp), artworkRes = R.drawable.menu_name_plaque_v3,
         fixedEdges = true,
         contentPadding = PaddingValues(start = 32.dp, end = 20.dp, top = 18.dp, bottom = 18.dp)) {
         Text(title, color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold,
-            fontSize = 16.sp, lineHeight = 22.sp)
+            fontSize = 16.sp, lineHeight = 22.sp, textAlign = textAlign)
     }
 }

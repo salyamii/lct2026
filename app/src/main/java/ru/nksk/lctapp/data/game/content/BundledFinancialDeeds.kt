@@ -26,7 +26,9 @@ internal fun GameCatalog.withFinancialDeeds(): GameCatalog {
             "Тико готовит вещи для разных дел: починить верстак, сходить в обсерваторию и на рыбалку. Найди в каждом наборе лишний предмет.",
             "Помогли Тико убрать лишние покупки из списков", "4013-749", "workshop", "tiko"),
     )
-    return withEventSpecs(specs).copy(deedPool = deedPool + specs.map { it.definition.id })
+    // Keep retired definitions for saved offers and history, but never schedule them again.
+    val offered = specs.filterNot { it.policy.deedGameKind == DeedGameKind.COIN_BALANCE }
+    return withEventSpecs(specs).copy(deedPool = deedPool + offered.map { it.definition.id })
 }
 
 private fun financialDeed(key: String, kind: DeedGameKind, title: String, body: String,
