@@ -3,6 +3,7 @@ package ru.nksk.lctapp.feature.gear.ui
 import ru.nksk.lctapp.core.ui.components.GameLoadingIndicator
 import ru.nksk.lctapp.core.ui.components.GameArtwork
 import ru.nksk.lctapp.core.ui.components.GameBackButton
+import ru.nksk.lctapp.core.ui.components.GameHomeButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,10 +50,15 @@ import ru.nksk.lctapp.core.ui.theme.Rubik
 @Composable
 internal fun GearScreen(state: GearLoadState, onBack: () -> Unit, onRetry: () -> Unit,
     onEquip: (String) -> Unit = {}, onOpenItem: (String) -> Unit = {},
-    gridState: LazyGridState = rememberLazyGridState()) {
+    gridState: LazyGridState = rememberLazyGridState(), onHome: () -> Unit = onBack,
+    homeEnabled: Boolean = (state as? GearLoadState.Ready)?.busy != true) {
     Box(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding()) {
         Column(Modifier.align(Alignment.TopCenter).widthIn(max = 840.dp).fillMaxSize()) {
-            GameBackButton(onClick = onBack, modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp))
+            Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                GameBackButton(onClick = onBack)
+                GameHomeButton(onHome, enabled = homeEnabled)
+            }
             Row(
                 Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, bottom = 22.dp),
                 verticalAlignment = Alignment.CenterVertically,

@@ -3,6 +3,7 @@ package ru.nksk.lctapp.feature.tasks.ui
 import ru.nksk.lctapp.core.ui.components.GameLoadingIndicator
 import ru.nksk.lctapp.core.ui.components.GameActionButton
 import ru.nksk.lctapp.core.ui.components.GameActionStyle
+import ru.nksk.lctapp.core.ui.components.GameHomeButton
 import ru.nksk.lctapp.core.ui.components.InlineSavingsTransfer
 import ru.nksk.lctapp.core.ui.components.SavingsGauge
 import ru.nksk.lctapp.core.ui.game.coinAmount
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 internal fun DeedGameHost(state: DeedGameUiState, onRetry: () -> Unit, onBack: () -> Unit,
+    onHome: () -> Unit = onBack,
     onSkipGame: () -> Unit = {},
     onOpenSavings: () -> Unit = {},
     onSavingsInput: (String) -> Unit = {},
@@ -30,15 +32,19 @@ internal fun DeedGameHost(state: DeedGameUiState, onRetry: () -> Unit, onBack: (
     onCancelSavings: () -> Unit = {},
     content: @Composable () -> Unit) {
     if (state.reward != null) {
-        DeedRewardResult(state, onRetry, onBack, onOpenSavings, onSavingsInput, onConfirmSavings, onCancelSavings)
+        DeedRewardResult(state, onRetry, onBack, onHome, onOpenSavings, onSavingsInput, onConfirmSavings, onCancelSavings)
     } else if (state.presentation == null) {
         Surface(Modifier.fillMaxSize()) {
-            Column(Modifier.safeDrawingPadding().padding(24.dp), verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally) {
-                if (state.loading) GameLoadingIndicator()
-                state.message?.let { Text(it) }
-                if (state.canRetry) Button(onRetry, enabled = !state.busy) { Text("Повторить") }
-                TextButton(onBack) { Text("В главное меню") }
+            Box(Modifier.fillMaxSize()) {
+                Column(Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally) {
+                    if (state.loading) GameLoadingIndicator()
+                    state.message?.let { Text(it) }
+                    if (state.canRetry) Button(onRetry, enabled = !state.busy) { Text("Повторить") }
+                }
+                GameHomeButton(onHome, Modifier.align(Alignment.TopEnd).safeDrawingPadding().padding(16.dp),
+                    enabled = state.canReturnHome)
             }
         }
     } else {
@@ -69,13 +75,15 @@ internal fun DeedGameHost(state: DeedGameUiState, onRetry: () -> Unit, onBack: (
 
 /** Completion replaces the board inside its existing route; it is never a second dialog. */
 @Composable
-private fun DeedRewardResult(state: DeedGameUiState, onRetry: () -> Unit, onContinue: () -> Unit,
+private fun DeedRewardResult(state: DeedGameUiState, onRetry: () -> Unit, onContinue: () -> Unit, onHome: () -> Unit,
     onOpenSavings: () -> Unit, onSavingsInput: (String) -> Unit,
     onConfirmSavings: () -> Unit, onCancelSavings: () -> Unit) {
     val reward = checkNotNull(state.reward)
     val scroll = rememberScrollState()
     BoxWithConstraints(Modifier.fillMaxSize()) {
         DeedBackdrop(reward.sceneRes, modifier = Modifier.fillMaxSize())
+        GameHomeButton(onHome, Modifier.align(Alignment.TopEnd).safeDrawingPadding().padding(16.dp),
+            enabled = state.canReturnHome)
         // The jar belongs to the full screen, not to the form's remaining space.
         // Its position and size depend only on the viewport before keyboard insets.
         val jarHeight = (maxHeight * .26f).coerceAtMost(320.dp)

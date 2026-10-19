@@ -67,6 +67,8 @@ internal fun RingTossGameEntry(
     onExit: () -> Unit,
     onCompleted: (RingToss) -> Unit,
     interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     val model = hiltViewModel<RingTossGameViewModel>()
     val game by model.uiState.collectAsStateWithLifecycle()
@@ -74,7 +76,8 @@ internal fun RingTossGameEntry(
     val onAction: (RingTossAction) -> Unit = remember(model) { { if (!blocked) model.onAction(it) } }
     val exit = { if (!blocked) onExit() }
     BackHandler(onBack = exit)
-    RingTossGameScreen(game, onAction, exit, onCompleted, interactionBlocked)
+    RingTossGameScreen(game, onAction, exit, onCompleted, interactionBlocked,
+        onHome = { if (homeEnabled) onHome() }, homeEnabled = homeEnabled)
 }
 
 @Composable
@@ -84,6 +87,8 @@ internal fun RingTossGameScreen(
     onExit: () -> Unit,
     onCompleted: (RingToss) -> Unit,
     interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     var settledCount by remember { mutableIntStateOf(game.throws.size) }
     val flight = remember { Animatable(1f) }
@@ -101,6 +106,8 @@ internal fun RingTossGameScreen(
         instruction = if (game.complete && !inFlight) "Все кольца брошены. Попаданий: ${game.hits} из ${RingToss.THROW_COUNT}."
             else "Потяни кольцо вниз и отпусти.",
         onExit = onExit,
+        onHome = onHome,
+        homeEnabled = homeEnabled,
         footer = {
             if (game.complete && !inFlight) {
                 GameActionButton("Продолжить", { if (!interactionBlocked) onCompleted(game) },

@@ -5,8 +5,7 @@ import ru.nksk.lctapp.core.ui.components.GameBackdrop
 import ru.nksk.lctapp.core.ui.components.GameActionButton
 import ru.nksk.lctapp.core.ui.components.GameActionButtonDefaults
 import ru.nksk.lctapp.core.ui.components.GameActionStyle
-import ru.nksk.lctapp.core.ui.components.GameBackButton
-import ru.nksk.lctapp.core.ui.components.GameSceneTitle
+import ru.nksk.lctapp.core.ui.components.GameNavigationHeader
 import ru.nksk.lctapp.core.ui.components.PetChoiceEffects
 import ru.nksk.lctapp.core.ui.components.PetIndicatorEffectUiState
 import androidx.annotation.DrawableRes
@@ -58,23 +57,22 @@ fun DeedHeader(
     title: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    onHome: () -> Unit = onBack,
+    homeEnabled: Boolean = true,
     trailing: @Composable () -> Unit = {},
 ) {
     val backDescription = stringResource(R.string.navigation_back)
-    Row(
+    GameNavigationHeader(
+        title = title.takeUnless { it == backDescription }.orEmpty(),
+        onBack = onBack,
+        onHome = onHome,
+        homeEnabled = homeEnabled,
+        trailing = trailing,
         modifier = modifier
             .fillMaxWidth()
             .statusBarsPadding()
             .padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        GameBackButton(onBack, contentDescription = backDescription)
-        if (title.isNotBlank() && title != backDescription) {
-            GameSceneTitle(title, Modifier.weight(1f, fill = false))
-        } else Spacer(Modifier.weight(1f))
-        trailing()
-    }
+    )
 }
 
 /** Янтарный или лаймовый чип события. */

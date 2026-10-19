@@ -61,6 +61,8 @@ internal class TrainingViewModel @Inject constructor(private val session: GameSe
     private var presentedQuestion: String? = null
     private var pendingPracticeRequest: EngineRequest? = null
     private var pendingContinuation: GameActionAttempt? = null
+
+    fun canReturnHome(): Boolean = !state.value.busy && pendingPracticeRequest == null && pendingContinuation == null
     private val continuationNavigation = Channel<TrainingContinuationDestination>(Channel.BUFFERED)
     val openContinuation = continuationNavigation.receiveAsFlow()
     private var refreshRequired = false

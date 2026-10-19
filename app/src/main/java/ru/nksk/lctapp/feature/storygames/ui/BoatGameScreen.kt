@@ -85,6 +85,8 @@ fun BoatGameEntry(
     onArrived: ((BoatJourney) -> Unit)? = null,
     startPrepared: Boolean = false,
     interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     val model = hiltViewModel<BoatGameViewModel>()
     val state by model.uiState.collectAsStateWithLifecycle()
@@ -133,7 +135,8 @@ fun BoatGameEntry(
     BoatGameScreen(state, model.motion, onAction, exit,
         onArrived = onArrived?.let { completed -> { if (!blocked) completed(model.motion.value) } },
         repairCoins = if (externalPayment) repairCoins else state.reserve,
-        externalPayment = externalPayment, interactionBlocked = interactionBlocked)
+        externalPayment = externalPayment, interactionBlocked = interactionBlocked,
+        onHome = { if (homeEnabled) onHome() }, homeEnabled = homeEnabled)
 }
 
 @Composable
@@ -146,6 +149,8 @@ private fun BoatGameScreen(
     repairCoins: Int?,
     externalPayment: Boolean,
     interactionBlocked: Boolean,
+    onHome: () -> Unit,
+    homeEnabled: Boolean,
 ) {
     val instruction = when (state.phase) {
         BoatPhase.PREPARATION -> "Билет и обед уже в плане. Реши, что сделать с двумя оставшимися монетами."
@@ -163,6 +168,8 @@ private fun BoatGameScreen(
         title = "Поездка к звёздам",
         instruction = instruction,
         onExit = onExit,
+        onHome = onHome,
+        homeEnabled = homeEnabled,
         footer = {
             when (state.phase) {
                 BoatPhase.PREPARATION -> GameActionButton("Отправиться", { onAction(BoatGameAction.Launch) },

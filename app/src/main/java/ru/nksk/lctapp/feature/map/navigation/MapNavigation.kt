@@ -18,7 +18,8 @@ import ru.nksk.lctapp.feature.map.ui.*
 @SerialName("village") // Preserve saved navigation stacks from the placeholder route.
 data object GameMap : NavKey
 
-fun EntryProviderScope<NavKey>.mapEntry(onBack: (GameMap) -> Unit, onSelected: (GameMap) -> Unit) {
+fun EntryProviderScope<NavKey>.mapEntry(onBack: (GameMap) -> Unit, onSelected: (GameMap) -> Unit,
+    onHome: (GameMap) -> Unit = onBack) {
     entry<GameMap> { source ->
         val viewModel = hiltViewModel<MapViewModel>()
         val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -32,6 +33,7 @@ fun EntryProviderScope<NavKey>.mapEntry(onBack: (GameMap) -> Unit, onSelected: (
         val back = dropUnlessResumed { if (!state.saving) onBack(source) }
         MapContent(state,
             onSelect = { if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) viewModel.select(it) },
-            onBack = back, onRetry = viewModel::reload, onDismissError = viewModel::dismissError)
+            onBack = back, onRetry = viewModel::reload, onDismissError = viewModel::dismissError,
+            onHome = dropUnlessResumed { if (!viewModel.uiState.value.saving) onHome(source) })
     }
 }

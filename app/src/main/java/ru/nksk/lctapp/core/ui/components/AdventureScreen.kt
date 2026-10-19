@@ -59,6 +59,8 @@ internal fun AdventureScreen(
     contentScrollState: ScrollState? = null,
     overflowScrollState: ScrollState? = null,
     showBack: Boolean = true,
+    onHome: (() -> Unit)? = null,
+    homeEnabled: Boolean = true,
     headerAction: (@Composable () -> Unit)? = null,
     indicators: (@Composable () -> Unit)? = null,
     scene: (@Composable BoxScope.() -> Unit)? = null,
@@ -73,8 +75,8 @@ internal fun AdventureScreen(
         val density = LocalDensity.current
         val fontScale = density.fontScale
         val largeText = fontScale >= 1.4f
-        val separateHeaderAction = title.isNotBlank() && headerAction != null &&
-            (maxWidth < 400.dp || fontScale >= 1.3f)
+        val separateHeaderAction = headerAction != null && (onHome != null ||
+            (title.isNotBlank() && (maxWidth < 400.dp || fontScale >= 1.3f)))
         val fitSceneToCard = fitContent && scene != null && !pinFooter && !scrollWholePage
         // Illustrated custom scenes retain their own framing. Adviser scenes wrap the
         // header, balances and character instead of reserving a percentage of empty floor.
@@ -87,14 +89,10 @@ internal fun AdventureScreen(
         }
         @Composable fun Header() {
             Column(Modifier.fillMaxWidth()) {
-                Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    if (showBack) GameBackButton(onBack)
-                    if (title.isNotBlank()) GameSceneTitle(title, Modifier.weight(1f, fill = false))
-                    else Spacer(Modifier.weight(1f))
-                    if (!separateHeaderAction) headerAction?.invoke()
-                }
+                GameNavigationHeader(title, onBack, onHome,
+                    Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                    showBack = showBack, homeEnabled = homeEnabled,
+                    trailing = if (!separateHeaderAction) headerAction else null)
                 if (separateHeaderAction) {
                     Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 8.dp),
                         contentAlignment = Alignment.CenterEnd) { headerAction?.invoke() }

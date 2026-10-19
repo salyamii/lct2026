@@ -68,6 +68,8 @@ fun TelescopeGameEntry(
     onExit: () -> Unit,
     onCompleted: ((TelescopeAssembly) -> Unit)? = null,
     interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     val viewModel = hiltViewModel<TelescopeGameViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -75,6 +77,8 @@ fun TelescopeGameEntry(
     TelescopeGameScreen(state,
         onAction = { if (!interactionBlocked) viewModel.onAction(it) },
         onExit = { if (!interactionBlocked) onExit() },
+        onHome = { if (homeEnabled) onHome() },
+        homeEnabled = homeEnabled,
         onCompleted = onCompleted?.let { complete -> { game -> if (!interactionBlocked) complete(game) } },
         interactionBlocked = interactionBlocked)
 }
@@ -86,6 +90,8 @@ fun TelescopeGameScreen(
     onExit: () -> Unit,
     onCompleted: ((TelescopeAssembly) -> Unit)? = null,
     interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     val game = uiState.game
     ChapterGameScaffold(
@@ -96,6 +102,8 @@ fun TelescopeGameScreen(
             else -> game.nextPart!!.assemblyInstruction()
         },
         onExit = onExit,
+        onHome = onHome,
+        homeEnabled = homeEnabled,
         footer = {
             if (game.completed) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {

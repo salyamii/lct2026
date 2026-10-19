@@ -49,7 +49,8 @@ import kotlin.math.sin
 
 @Composable
 internal fun DiscoveryGameEntry(scene: DiscoveryScene, onExit: () -> Unit,
-    onCompleted: (ChapterDiscovery) -> Unit, interactionBlocked: Boolean = false) {
+    onCompleted: (ChapterDiscovery) -> Unit, interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit, homeEnabled: Boolean = !interactionBlocked) {
     val model = hiltViewModel<DiscoveryGameViewModel>(key = "discovery:${scene.name}")
     val game by model.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(model, scene) { model.prepare(scene) }
@@ -59,12 +60,13 @@ internal fun DiscoveryGameEntry(scene: DiscoveryScene, onExit: () -> Unit,
         { if (!interactionBlocked) onExit() }, {
             val current = model.uiState.value
             if (!interactionBlocked && current.scene == scene && current.complete) onCompleted(current)
-        }, interactionBlocked)
+        }, interactionBlocked, onHome = { if (homeEnabled) onHome() }, homeEnabled = homeEnabled)
 }
 
 @Composable
 internal fun DiscoveryGameScreen(game: ChapterDiscovery, onAction: (DiscoveryAction) -> Unit,
-    onExit: () -> Unit, onCompleted: () -> Unit, interactionBlocked: Boolean = false) {
+    onExit: () -> Unit, onCompleted: () -> Unit, interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit, homeEnabled: Boolean = !interactionBlocked) {
     val title = when (game.scene) {
         DiscoveryScene.OBSERVATORY -> "Обсерватория"
         DiscoveryScene.PLATE_HAND, DiscoveryScene.PLATE_SOLUTION -> "Знакомый знак"
@@ -73,7 +75,8 @@ internal fun DiscoveryGameScreen(game: ChapterDiscovery, onAction: (DiscoveryAct
         DiscoveryScene.SIGNAL_POST -> "Каменный пост"
         DiscoveryScene.FINALE -> "Ночь наблюдений"
     }
-    ChapterGameScaffold(title, discoveryInstruction(game), onExit, footer = {
+    ChapterGameScaffold(title, discoveryInstruction(game), onExit, onHome = onHome,
+        homeEnabled = homeEnabled, footer = {
         if (game.complete) GameActionButton("Продолжить", onCompleted, interactionBlocked = interactionBlocked)
         else if (game.scene == DiscoveryScene.SIGNAL_POST) GameActionButton("Запомнить отражение",
             { onAction(DiscoveryAction.CaptureReflection) }, enabled = game.reflectionReady,

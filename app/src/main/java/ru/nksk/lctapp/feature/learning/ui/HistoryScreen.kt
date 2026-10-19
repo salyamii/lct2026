@@ -14,8 +14,9 @@ import ru.nksk.lctapp.core.ui.game.asGameUiText
 
 @Composable
 internal fun HistoryScreen(state: HistoryUiState, onRetry: () -> Unit, onBack: () -> Unit,
-    title: String = "История приключения", onArchives: (() -> Unit)? = null) {
-    LearningPage(title, onBack) {
+    title: String = "История приключения", onArchives: (() -> Unit)? = null,
+    onHome: () -> Unit = onBack, homeEnabled: Boolean = true) {
+    LearningPage(title, onBack, onHome = onHome, homeEnabled = homeEnabled) {
         learningStatus(state.loading, false, state.error, onRetry = onRetry)
         onArchives?.let { open -> item { PracticeButton("Прошлые приключения", true, primary = false, onClick = open) } }
         if (!state.loading && state.hasPlans) item {

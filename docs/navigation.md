@@ -44,11 +44,38 @@ the existing `Goal` entry. Pending budget planning has priority; an older saved
 finale's `RESULT` is acknowledged first. The redirect keeps `NavDisplay` mounted
 and replaces the stack with MainMenu/Goal. Toolbar, system and predictive Back
 cannot bypass the required choice; other-goal browsing is hidden on this step.
+By HOME-NAV-D-001, an explicit Home action may return to MainMenu. A saveable
+navigation marker exempts only that menu visit for the same required goal.
+Continue checks the current prerequisite before dispatching a day command and
+opens Goal again; a pending budget still has priority.
 The existing `SelectSavingGoal` commits the choice and opens its period plan.
 Buying a part later does not repeat the gate, and a completed campaign is exempt.
 Settings remains accessible when restoring its route. No new route or persisted
 flag is introduced. This is the required-choice exception to ordinary Goal Back
 behavior below.
+
+## Home control — 2026-10-19
+
+By HOME-NAV-D-001, feature entries pass explicit Home callbacks separately from
+Back. The shared parchment control is placed on the right of navigation rows;
+AdventureScreen moves any secondary header action below that row. On Goal,
+Other goals belongs to the bottom-right of the illustration above the lower panel;
+Back and Home remain at the top. On the map, MAP-D-010 keeps a compact centered
+two-line title and Back/Home over the full-screen artwork. The information button
+is at the bottom-right; on narrow screens Home uses its icon with an accessible
+name. The app host
+validates the source and returns to the existing MainMenu root, with no duplicate
+route or game command. Pending budget drafts and chapter choices remain required
+before gameplay. Only the explicit Home visit suppresses the chapter-goal
+redirect to that same menu; another chapter or gameplay destination is not exempt.
+
+Real mini-games reuse their existing guarded pause/exit flow. Reward Home exits
+the whole screen even with an amount editor open, without transferring money.
+Earned rewards remain committed. A story Home callback does not acknowledge a
+result or choose Later. Saving and pending financial confirmations retain their
+existing guards. The control is absent before the world exists, on MainMenu,
+and in small dialogs; the separate protected parent Activity retains its own
+exit. No snapshot fields or route serializers are added.
 
 | Menu action | Destination |
 | --- | --- |
@@ -284,6 +311,11 @@ with feeding. Feeding never automatically executes the original action.
 
 The `goal` key is unchanged. Its entry obtains GoalViewModel and collects state
 with lifecycle awareness. Selecting a goal and buying parts stay on that screen;
+while the initial state is unresolved, a neutral surface retains Back/Home and
+shows a loading indicator only after 300 ms. It does not compose a chapter preview
+or its lower panel until the real goal/catalogue arrives, avoiding a flash of the
+first chapter when entering a later one. Read errors use the same neutral surface
+with Retry. No extra navigation entry or game read is added.
 Back returns to the existing menu without executing a new event. The next explicit
 Continue dispatches the next allowed event through GameSession. Purchase feedback
 is transient local presentation state, never a saved route or domain event.

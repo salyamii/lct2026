@@ -89,6 +89,8 @@ fun StarChartGameEntry(
     onCompleted: ((StarChartState) -> Unit)? = null,
     routeMap: Boolean = false,
     interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     val viewModel = hiltViewModel<StarChartViewModel>(key = if (routeMap) "route_map" else "star_chart")
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -96,6 +98,8 @@ fun StarChartGameEntry(
     StarChartGameScreen(state,
         onAction = { if (!interactionBlocked) viewModel.onAction(it) },
         onExit = { if (!interactionBlocked) onExit() },
+        onHome = { if (homeEnabled) onHome() },
+        homeEnabled = homeEnabled,
         onCompleted = onCompleted?.let { complete -> {
             if (!interactionBlocked && viewModel.uiState.value.game.complete) complete(viewModel.uiState.value.game)
         } }, routeMap = routeMap, interactionBlocked = interactionBlocked)
@@ -109,6 +113,8 @@ fun StarChartGameScreen(
     onCompleted: (() -> Unit)? = null,
     routeMap: Boolean = false,
     interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     val game = state.game
     val points = if (routeMap) RouteMapGame.points else StarChartGame.stars
@@ -120,6 +126,8 @@ fun StarChartGameScreen(
         } else if (game.complete) "Карта готова. Теперь созвездие легче найти в небе."
         else "Соедини звёзды, как на образце: веди пальцем или касайся по очереди.",
         onExit = onExit,
+        onHome = onHome,
+        homeEnabled = homeEnabled,
         footer = {
             if (game.complete && onCompleted != null) {
                 GameActionButton("Продолжить", onCompleted, interactionBlocked = interactionBlocked)

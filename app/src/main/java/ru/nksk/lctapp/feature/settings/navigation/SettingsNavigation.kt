@@ -38,7 +38,8 @@ data object Settings : NavKey
 
 @Suppress("DEPRECATION")
 fun EntryProviderScope<NavKey>.settingsEntry(onBack: (Settings) -> Unit, debugButton: (@Composable () -> Unit)? = null,
-    onRepeatTutorial: ((Settings) -> Unit)? = null, survey: (@Composable () -> Unit)? = null) {
+    onRepeatTutorial: ((Settings) -> Unit)? = null, survey: (@Composable () -> Unit)? = null,
+    onHome: (Settings) -> Unit = onBack) {
     entry<Settings> { source ->
         val model = hiltViewModel<SettingsViewModel>()
         val state by model.uiState.collectAsStateWithLifecycle()
@@ -57,6 +58,7 @@ fun EntryProviderScope<NavKey>.settingsEntry(onBack: (Settings) -> Unit, debugBu
         SettingsScreen(state,
             onAction = { if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) model.onAction(it) },
             onBack = dropUnlessResumed { onBack(source) },
+            onHome = dropUnlessResumed { onHome(source) },
             onCopyProfile = { id -> if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) clipboard.setText(AnnotatedString(id)) },
             debugButton = debugButton,
             survey = survey,

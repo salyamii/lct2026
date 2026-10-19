@@ -33,7 +33,8 @@ import ru.nksk.lctapp.domain.finance.FinancialQuestionKind
 
 @Composable
 internal fun TrainingScreen(state: TrainingUiState, onAction: (TrainingAction) -> Unit, onBack: () -> Unit,
-    onOpenBudget: () -> Unit = {}, onContinueStory: () -> Unit = onBack) {
+    onOpenBudget: () -> Unit = {}, onContinueStory: () -> Unit = onBack, onHome: () -> Unit = onBack,
+    homeEnabled: Boolean = !state.busy) {
     val question = state.question.takeIf { state.practiceOpen }
     val closeQuestion = {
         if (!state.busy) {
@@ -43,9 +44,10 @@ internal fun TrainingScreen(state: TrainingUiState, onAction: (TrainingAction) -
     }
     BackHandler(enabled = question != null) { closeQuestion() }
     if (question != null) {
-        PracticeQuestionScreen(state, question, onAction, closeQuestion, onOpenBudget, onContinueStory)
+        PracticeQuestionScreen(state, question, onAction, closeQuestion, onOpenBudget, onContinueStory, onHome, homeEnabled)
     } else if (state.chapterPractice) {
-        LearningPage("Перед продолжением истории", onBack) {
+        LearningPage("Перед продолжением истории", onBack, onHome = onHome,
+            homeEnabled = homeEnabled) {
             learningStatus(state.loading, state.busy, state.error, state.practiceRetryRequired, showSaving = false) {
                 onAction(TrainingAction.Retry)
             }
@@ -55,7 +57,8 @@ internal fun TrainingScreen(state: TrainingUiState, onAction: (TrainingAction) -
             }
             if (!state.loading && state.hasGame && state.demoMode) item { SkipChapterPracticeButton(state, onAction) }
         }
-    } else LearningPage("Тренировка навыков", onBack) {
+    } else LearningPage("Тренировка навыков", onBack, onHome = onHome,
+        homeEnabled = homeEnabled) {
         learningStatus(state.loading, state.busy, state.error, state.practiceRetryRequired) { onAction(TrainingAction.Retry) }
         if (!state.loading && state.hasGame) {
             item {
@@ -109,7 +112,7 @@ private fun TrainingTopic(kind: FinancialQuestionKind, resumeAt: Int?, enabled: 
 @Composable
 private fun PracticeQuestionScreen(state: TrainingUiState, question: FinancialQuestion,
     onAction: (TrainingAction) -> Unit, onBack: () -> Unit, onOpenBudget: () -> Unit,
-    onContinueStory: () -> Unit) {
+    onContinueStory: () -> Unit, onHome: () -> Unit, homeEnabled: Boolean) {
     var retrying by rememberSaveable(question.id, question.attempts) { mutableStateOf(false) }
     val series = question.series
     val advancing = !state.chapterPractice && question.correct && series != null
@@ -140,7 +143,8 @@ private fun PracticeQuestionScreen(state: TrainingUiState, question: FinancialQu
     LaunchedEffect(automaticAdvance) { automaticAdvance?.let(onAction) }
     // Only a new question gets a fresh scroll position; saving an answer keeps the same page footprint.
     val questionScroll = key(question.id) { rememberLazyListState() }
-    LearningPage(question.kind.trainingTitle(), onBack, backEnabled = !state.busy, listState = questionScroll) {
+    LearningPage(question.kind.trainingTitle(), onBack, backEnabled = !state.busy, listState = questionScroll,
+        onHome = onHome, homeEnabled = homeEnabled) {
         learningStatus(state.loading, state.busy, state.error, state.practiceRetryRequired, showSaving = false) { onAction(TrainingAction.Retry) }
         if (state.needsBudgetPlanning) item { BudgetReminder(true, !state.busy && !state.practiceRetryRequired, onOpenBudget) }
         if (state.chapterPractice && state.demoMode) item { SkipChapterPracticeButton(state, onAction) }

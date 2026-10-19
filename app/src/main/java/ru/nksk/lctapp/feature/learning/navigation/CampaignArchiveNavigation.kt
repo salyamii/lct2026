@@ -16,13 +16,16 @@ import ru.nksk.lctapp.feature.learning.ui.CampaignArchiveViewModel
 @SerialName("campaign_archive")
 data object CampaignArchive : NavKey
 
-fun EntryProviderScope<NavKey>.campaignArchiveEntry(onBack: (NavKey) -> Unit, onRestarted: (NavKey) -> Unit) {
+fun EntryProviderScope<NavKey>.campaignArchiveEntry(onBack: (NavKey) -> Unit, onRestarted: (NavKey) -> Unit,
+    onHome: (NavKey) -> Unit = onBack) {
     entry<CampaignArchive> { source ->
         val model = hiltViewModel<CampaignArchiveViewModel>()
         val state by model.uiState.collectAsStateWithLifecycle()
         LaunchedEffect(state.restarted) { if (state.restarted) onRestarted(source) }
         CampaignArchiveScreen(state, onRestart = dropUnlessResumed { model.restart() },
             onArchive = model::openArchive, onCloseArchive = model::closeArchive,
-            onRetry = model::retry, onBack = dropUnlessResumed { onBack(source) })
+            onRetry = model::retry, onBack = dropUnlessResumed { onBack(source) },
+            onHome = dropUnlessResumed { if (model.canReturnHome()) onHome(source) },
+            homeEnabled = model.canReturnHome())
     }
 }

@@ -160,6 +160,10 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
 
     init { load() }
 
+    /** Keep an uncertain command available for its existing retry, including campaign restart. */
+    fun canReturnHome(): Boolean = !busy && !mutableState.value.busy &&
+        pendingAction == null && pendingRestart == null
+
     fun setActive(active: Boolean) {
         if (screenActive == active) return
         screenActive = active

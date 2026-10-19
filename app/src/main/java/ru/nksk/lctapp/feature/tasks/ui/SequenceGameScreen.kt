@@ -59,6 +59,7 @@ fun SequenceGameScreen(
     onAction: (SequenceGameAction) -> Unit,
     onBack: () -> Unit,
     deed: DeedGamePresentation? = null,
+    onHome: () -> Unit = onBack,
 ) {
     val state = uiState.game
     BoxWithConstraints(Modifier.fillMaxSize().background(DeedColors.Scene)) {
@@ -75,7 +76,7 @@ fun SequenceGameScreen(
                     modifier = Modifier.fillMaxWidth().height(150.dp), blurred = deed?.storyAction != true)
                 deed?.activityArtworkRes?.let { art -> GameArtwork(art, null,
                     Modifier.align(Alignment.BottomEnd).size(92.dp).padding(4.dp)) }
-                DeedHeader(deed?.title ?: "Сигналы башни", onBack = onBack)
+                DeedHeader(deed?.title ?: "Сигналы башни", onBack = onBack, onHome = onHome, homeEnabled = deed?.canReturnHome != false)
             }
             DeedGameSheet(deed, DeedRewardPreview.fromSequence(state), modifier = Modifier.weight(1f)) {
                 Text(

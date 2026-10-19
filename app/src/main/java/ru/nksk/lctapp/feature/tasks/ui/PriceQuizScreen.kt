@@ -56,6 +56,7 @@ fun PriceQuizScreen(
     onAction: (PriceQuizAction) -> Unit,
     onBack: () -> Unit,
     deed: DeedGamePresentation? = null,
+    onHome: () -> Unit = onBack,
 ) {
     val state = uiState.game
     val displayedIndex = minOf(state.current, state.questions.lastIndex)
@@ -77,7 +78,7 @@ fun PriceQuizScreen(
                 modifier = Modifier.fillMaxWidth().height(150.dp), blurred = deed?.storyAction != true)
             deed?.activityArtworkRes?.let { art -> GameArtwork(art, null,
                 Modifier.align(Alignment.BottomEnd).size(92.dp)) }
-            DeedHeader(deed?.title ?: stringResource(R.string.deeds_price_title), onBack = onBack)
+            DeedHeader(deed?.title ?: stringResource(R.string.deeds_price_title), onBack = onBack, onHome = onHome, homeEnabled = deed?.canReturnHome != false)
         }
         DeedGameSheet(deed, DeedRewardPreview.fromComparison(state), modifier = Modifier.weight(1f)) {
             Text(

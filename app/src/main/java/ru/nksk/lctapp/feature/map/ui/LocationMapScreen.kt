@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.key
@@ -25,7 +26,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,13 +45,16 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.*
 import ru.nksk.lctapp.core.ui.components.GameBackButton
-import ru.nksk.lctapp.core.ui.components.GameSceneTitle
+import ru.nksk.lctapp.core.ui.components.GameHomeButton
+import ru.nksk.lctapp.core.ui.components.GamePlaque
+import ru.nksk.lctapp.core.ui.components.GameInk
 
 /** Presentation only: coordinates and artwork do not define unlock or travel rules. */
 @Immutable
@@ -65,20 +73,15 @@ fun LocationMapScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     interactionEnabled: Boolean = true,
+    onHome: () -> Unit = onBack,
 ) {
     Box(modifier.fillMaxSize().background(AdventureNight), contentAlignment = Alignment.TopCenter) {
-        BoxWithConstraints(Modifier.widthIn(max = 600.dp).fillMaxSize().safeDrawingPadding()) {
-            val separateHeader = maxWidth < 360.dp || LocalDensity.current.fontScale >= 1.3f
-            Column(Modifier.fillMaxSize()) {
-                if (separateHeader) MapHeader(onBack, interactionEnabled, Modifier.fillMaxWidth())
-                MapViewport(locations, currentLocationId, onLocationClick, onBack,
-                    Modifier.weight(1f).fillMaxWidth(), interactionEnabled, overlayHeader = !separateHeader)
-            }
-        }
+        MapViewport(locations, currentLocationId, onLocationClick, onBack,
+            Modifier.fillMaxSize(), interactionEnabled, onHome)
     }
 }
 
-/** Header space is measured separately; image and landmark coordinates share the remaining canvas. */
+/** Artwork and landmark targets share one full-screen canvas; controls float above it. */
 @Composable
 private fun MapViewport(
     locations: List<MapLocationUi>,
@@ -87,7 +90,7 @@ private fun MapViewport(
     onBack: () -> Unit,
     modifier: Modifier,
     interactionEnabled: Boolean,
-    overlayHeader: Boolean,
+    onHome: () -> Unit,
 ) {
     BoxWithConstraints(modifier) {
         val size = mapCanvasSize(maxWidth.value, maxHeight.value, LocalDensity.current.fontScale)
@@ -128,18 +131,17 @@ private fun MapViewport(
                 }
             }
         }
-        if (canScrollDown) MapScrollHint(up = false,
-            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp))
-        if (overlayHeader) {
-            // Overlay the actual image bounds, including letterboxing on tall/wide windows.
-            val headerTop = if (size.scrollable) 0.dp else ((maxHeight - canvasHeight) / 2).coerceAtLeast(0.dp)
-            Column(Modifier.align(Alignment.TopCenter).offset(y = headerTop).width(canvasWidth)) {
-                MapHeader(onBack, interactionEnabled)
-                if (canScrollUp) MapScrollHint(up = true,
-                    modifier = Modifier.align(Alignment.End).padding(horizontal = 16.dp, vertical = 8.dp))
+        MapHeader(onBack, onHome, interactionEnabled,
+            Modifier.align(Alignment.TopCenter).fillMaxWidth().safeDrawingPadding())
+        Box(Modifier.align(Alignment.BottomEnd).safeDrawingPadding().padding(12.dp)) {
+            MapInformationButton()
+        }
+        if (canScrollUp || canScrollDown) {
+            Column(Modifier.align(Alignment.BottomStart).safeDrawingPadding().padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                if (canScrollUp) MapScrollHint(up = true)
+                if (canScrollDown) MapScrollHint(up = false)
             }
-        } else if (canScrollUp) {
-            MapScrollHint(up = true, modifier = Modifier.align(Alignment.TopEnd).padding(16.dp))
         }
     }
 }
@@ -160,15 +162,29 @@ private fun MapScrollHint(up: Boolean, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun MapHeader(onBack: () -> Unit, interactionEnabled: Boolean, modifier: Modifier = Modifier) {
-    Row(
-        modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        GameBackButton(onBack, enabled = interactionEnabled)
-        GameSceneTitle("Карта\nприключений", Modifier.weight(1f), textAlign = TextAlign.Center)
-        MapInformationButton()
+private fun MapHeader(onBack: () -> Unit, onHome: () -> Unit, interactionEnabled: Boolean,
+    modifier: Modifier = Modifier) {
+    BoxWithConstraints(modifier.padding(horizontal = 6.dp, vertical = 4.dp)) {
+        val showHomeLabel = maxWidth >= 460.dp && LocalDensity.current.fontScale < 1.3f
+        val sideWidth = if (showHomeLabel) 116.dp else 48.dp
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+            Box(Modifier.width(sideWidth), contentAlignment = Alignment.CenterStart) {
+                GameBackButton(onBack, Modifier.size(48.dp), enabled = interactionEnabled)
+            }
+            GamePlaque(Modifier.weight(1f).heightIn(min = 64.dp),
+                artworkRes = R.drawable.menu_name_plaque_v3, fixedEdges = true,
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp)) {
+                Text("Карта\nприключений", color = GameInk, fontFamily = Nunito,
+                    fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, lineHeight = 19.sp,
+                    textAlign = TextAlign.Center)
+            }
+            Box(Modifier.width(sideWidth), contentAlignment = Alignment.CenterEnd) {
+                GameHomeButton(onHome,
+                    modifier = if (showHomeLabel) Modifier else Modifier.size(48.dp),
+                    enabled = interactionEnabled, showLabel = showHomeLabel)
+            }
+        }
     }
 }
 
@@ -184,38 +200,40 @@ private fun LocationMapPreview() {
 @Composable
 private fun MapInformationButton() {
     var expanded by rememberSaveable { mutableStateOf(false) }
-    val popupOffset = with(LocalDensity.current) { 60.dp.roundToPx() }
+    val popupGap = with(LocalDensity.current) { 8.dp.roundToPx() }
+    val popupPosition = remember(popupGap) {
+        object : PopupPositionProvider {
+            override fun calculatePosition(anchorBounds: IntRect, windowSize: IntSize,
+                layoutDirection: LayoutDirection, popupContentSize: IntSize): IntOffset {
+                val x = (anchorBounds.right - popupContentSize.width)
+                    .coerceIn(0, (windowSize.width - popupContentSize.width).coerceAtLeast(0))
+                val y = (anchorBounds.top - popupContentSize.height - popupGap).coerceAtLeast(0)
+                return IntOffset(x, y)
+            }
+        }
+    }
     Box {
-        Box(
-            Modifier.size(52.dp).clip(CircleShape)
-                .background(AdventurePanel)
-                .border(1.dp, AdventureLavender.copy(alpha = .6f), CircleShape)
-                .clickable(role = Role.Button, onClickLabel = "Показать подсказку") { expanded = !expanded }
-                .semantics { contentDescription = "Информация о карте" },
-            contentAlignment = Alignment.Center,
-        ) {
-            Text("i", color = AdventureLavender, fontFamily = Rubik, fontSize = 27.sp,
-                modifier = Modifier.clearAndSetSemantics {})
+        GamePlaque(Modifier.size(52.dp), light = true, fixedEdges = true,
+            contentPadding = PaddingValues(0.dp)) {
+            IconButton(onClick = { expanded = !expanded }, modifier = Modifier.fillMaxSize()
+                .semantics { contentDescription = "Информация о карте" }) {
+                Text("i", color = GameInk, fontFamily = Rubik, fontSize = 26.sp,
+                    modifier = Modifier.clearAndSetSemantics {})
+            }
         }
         if (expanded) {
             Popup(
-                alignment = Alignment.TopEnd,
-                offset = IntOffset(0, popupOffset),
+                popupPositionProvider = popupPosition,
                 onDismissRequest = { expanded = false },
                 properties = PopupProperties(focusable = true),
             ) {
-                Text(
-                    "Выбери место на карте, куда отправимся",
-                    modifier = Modifier.widthIn(max = 260.dp)
-                        .shadow(8.dp, RoundedCornerShape(16.dp))
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(AdventurePanel)
-                        .border(1.dp, AdventureLavender.copy(alpha = .4f), RoundedCornerShape(16.dp))
-                        .semantics { paneTitle = "Информация о карте" }
-                        .padding(16.dp),
-                    color = AdventureLabel, fontFamily = Nunito,
-                    fontSize = 14.sp, lineHeight = 20.sp,
-                )
+                GamePlaque(Modifier.widthIn(max = 260.dp).semantics { paneTitle = "Информация о карте" },
+                    light = true, fixedEdges = true,
+                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp)) {
+                    Text("Выбери место на карте, куда отправимся", color = GameInk,
+                        fontFamily = Nunito, fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp, lineHeight = 20.sp)
+                }
             }
         }
     }

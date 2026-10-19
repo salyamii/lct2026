@@ -21,7 +21,8 @@ import ru.nksk.lctapp.feature.goal.ui.GoalContinuationDestination
 data object Goal : NavKey
 
 fun EntryProviderScope<NavKey>.goalEntry(onBack: (Goal) -> Unit, onOpenSavings: (Goal) -> Unit,
-    onContinueDay: (Goal) -> Unit, onBudget: (Goal) -> Unit, onTraining: (Goal) -> Unit) {
+    onContinueDay: (Goal) -> Unit, onBudget: (Goal) -> Unit, onTraining: (Goal) -> Unit,
+    onHome: (Goal) -> Unit = onBack) {
     entry<Goal> { source ->
         val model = hiltViewModel<GoalViewModel>()
         val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -46,6 +47,8 @@ fun EntryProviderScope<NavKey>.goalEntry(onBack: (Goal) -> Unit, onOpenSavings: 
                 if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) model.onAction(action)
             },
             onBack = dropUnlessResumed { onBack(source) },
+            onHome = dropUnlessResumed { if (model.canReturnHome()) onHome(source) },
+            homeEnabled = model.canReturnHome(),
             onOpenSavings = dropUnlessResumed { onOpenSavings(source) },
         )
     }

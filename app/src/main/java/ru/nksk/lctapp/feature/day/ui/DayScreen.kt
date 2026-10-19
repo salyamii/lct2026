@@ -15,7 +15,8 @@ import ru.nksk.lctapp.core.ui.components.*
 
 @Composable
 internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit,
-    onLoadingContinue: () -> Unit = onBack, summaryExtra: (@Composable () -> Unit)? = null) {
+    onLoadingContinue: () -> Unit = onBack, summaryExtra: (@Composable () -> Unit)? = null,
+    onHome: () -> Unit = onBack, homeEnabled: Boolean = !state.busy && !state.retryRequired) {
     // Saving overlays the existing card. It must not insert a row, shift the scroll
     // position or recolour every choice immediately before the route disappears.
     BackHandler(enabled = state.busy) {}
@@ -23,6 +24,7 @@ internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
         DayContent(state.copy(busy = false),
             onAction = { if (!state.busy) onAction(it) },
             onBack = { if (!state.busy) onBack() },
+            onHome = { if (homeEnabled) onHome() }, homeEnabled = homeEnabled,
             onLoadingContinue = { if (!state.busy) onLoadingContinue() }, summaryExtra = summaryExtra)
         if (state.busy) Box(Modifier.fillMaxSize().pointerInput(Unit) {
             awaitPointerEventScope {
@@ -44,10 +46,12 @@ internal fun DayScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
 
 @Composable
 private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit,
-    onLoadingContinue: () -> Unit, summaryExtra: (@Composable () -> Unit)?) {
+    onLoadingContinue: () -> Unit, summaryExtra: (@Composable () -> Unit)?, onHome: () -> Unit,
+    homeEnabled: Boolean) {
     if (state.loading) {
         Box(Modifier.fillMaxSize()) {
             GameLoadingScreen()
+            GameHomeButton(onHome, Modifier.align(Alignment.TopEnd).safeDrawingPadding().padding(16.dp), enabled = homeEnabled)
             // Keep the shared coin centered while the existing exit remains reachable.
             Box(Modifier.align(Alignment.BottomCenter).safeDrawingPadding().padding(24.dp)) {
                 AdventurePrimaryButton("Вперёд", onLoadingContinue)
@@ -62,18 +66,20 @@ private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
                 Text("Не удалось загрузить игру. Сохранение не изменено.")
                 GameActionButton("Повторить", { onAction(DayAction.Retry) })
                 TextButton(onBack) { Text("Назад") }
+                GameHomeButton(onHome, enabled = homeEnabled)
             }
         }
         return
     }
     if (state.summary != null) {
-        DaySummaryScreen(state, onAction, onBack, summaryExtra)
+        DaySummaryScreen(state, onAction, onBack, summaryExtra, onHome, homeEnabled)
     } else if (state.layout == EventLayout.INTRODUCTION) {
-        StoryIntroduction(state, onAction, onBack)
+        StoryIntroduction(state, onAction, onBack, onHome, homeEnabled)
     } else if (state.layout == EventLayout.PURCHASE) {
-        PurchaseCard(state, onAction, onBack)
+        PurchaseCard(state, onAction, onBack, onHome, homeEnabled)
     } else AdventureScreen(
         title = "", onBack = onBack, backgroundRes = state.eventBackgroundRes,
+        onHome = onHome, homeEnabled = homeEnabled,
         blurBackground = state.focusesItem || state.shortDeed,
         artworkSceneKey = state.audioOccurrenceId ?: state.title,
         indicators = { state.indicators?.let { PetIndicators(it) } },
@@ -96,9 +102,11 @@ private fun DayContent(state: DayUiState, onAction: (DayAction) -> Unit, onBack:
 }
 
 @Composable
-private fun PurchaseCard(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit) {
+private fun PurchaseCard(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit,
+    onHome: () -> Unit, homeEnabled: Boolean) {
     AdventureScreen(
         title = "", onBack = onBack,
+        onHome = onHome, homeEnabled = homeEnabled,
         backgroundRes = state.eventBackgroundRes,
         blurBackground = state.focusesItem || state.shortDeed,
         artworkSceneKey = state.audioOccurrenceId ?: state.title,
@@ -129,9 +137,11 @@ private fun PurchaseCard(state: DayUiState, onAction: (DayAction) -> Unit, onBac
 }
 
 @Composable
-private fun StoryIntroduction(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit) {
+private fun StoryIntroduction(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit,
+    onHome: () -> Unit, homeEnabled: Boolean) {
     AdventureScreen(
         title = "", onBack = onBack,
+        onHome = onHome, homeEnabled = homeEnabled,
         backgroundRes = state.eventBackgroundRes,
         artworkSceneKey = state.audioOccurrenceId ?: state.title,
         indicators = { state.indicators?.let { PetIndicators(it) } },

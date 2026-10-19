@@ -67,6 +67,7 @@ internal fun PracticeScaffold(
     onBack: () -> Unit,
     deed: DeedGamePresentation? = null,
     reward: DeedRewardPreview,
+    onHome: () -> Unit = onBack,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(Modifier.fillMaxSize().background(DeedColors.Scene)) {
@@ -74,7 +75,7 @@ internal fun PracticeScaffold(
             DeedBackdrop(scene, Modifier.fillMaxWidth().height(116.dp), blurred = deed?.storyAction == false)
             Box(Modifier.fillMaxWidth().height(116.dp).background(
                 Brush.verticalGradient(listOf(Color(0x99171440), Color.Transparent))))
-            DeedHeader(title, onBack)
+            DeedHeader(title, onBack, onHome = onHome, homeEnabled = deed?.canReturnHome != false)
         }
         DeedSheet(Modifier.weight(1f)) {
             if (deed != null && !deed.storyAction && deed.maximumReward > 0) {

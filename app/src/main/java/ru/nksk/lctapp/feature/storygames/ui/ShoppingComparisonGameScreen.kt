@@ -51,6 +51,8 @@ fun ShoppingComparisonGameEntry(
     onCompleted: (ShoppingComparison) -> Unit,
     interactionBlocked: Boolean = false,
     onProgress: (ShoppingProgress) -> Unit = {},
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     val model = hiltViewModel<ShoppingComparisonGameViewModel>()
     val game by model.uiState.collectAsStateWithLifecycle()
@@ -74,7 +76,8 @@ fun ShoppingComparisonGameEntry(
     }
     val exit = { if (!blocked) onExit() }
     BackHandler(onBack = exit)
-    ShoppingComparisonGameScreen(game, onAction, exit, onCompleted, interactionBlocked)
+    ShoppingComparisonGameScreen(game, onAction, exit, onCompleted, interactionBlocked,
+        onHome = { if (homeEnabled) onHome() }, homeEnabled = homeEnabled)
 }
 
 @Composable
@@ -84,12 +87,16 @@ fun ShoppingComparisonGameScreen(
     onExit: () -> Unit,
     onCompleted: (ShoppingComparison) -> Unit,
     interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     val round = game.currentRound
     ChapterGameScaffold(
         title = "Покупки для Смотрителя",
         instruction = "Смотритель дал монеты на покупки. Сравни цены в двух лавках.",
         onExit = onExit,
+        onHome = onHome,
+        homeEnabled = homeEnabled,
         footer = {
             GameActionButton(if (game.completed) "Продолжить" else "Следующая покупка", {
                 if (!interactionBlocked) {

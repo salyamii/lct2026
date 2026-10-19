@@ -33,6 +33,8 @@ internal fun GameCardLayout(
     onBack: () -> Unit,
     sceneDim: Float = 0f,
     characterDescription: String? = null,
+    onHome: (() -> Unit)? = null,
+    homeEnabled: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     BoxWithConstraints(Modifier.fillMaxSize().background(AdventureNight)) {
@@ -45,11 +47,9 @@ internal fun GameCardLayout(
                     GameArtwork(it, characterDescription, Modifier.fillMaxHeight(0.78f).fillMaxWidth(0.7f)
                         .align(Alignment.BottomCenter).padding(bottom = 12.dp), contentScale = ContentScale.Fit)
                 }
-                Row(Modifier.statusBarsPadding().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    GameBackButton(onClick = onBack)
-                    Spacer(Modifier.width(8.dp))
-                    GameSceneTitle(category, Modifier.weight(1f, fill = false))
-                }
+                GameNavigationHeader(category, onBack, onHome,
+                    Modifier.fillMaxWidth().statusBarsPadding().padding(16.dp),
+                    homeEnabled = homeEnabled)
             }
         }
         @Composable fun Panel(modifier: Modifier) {

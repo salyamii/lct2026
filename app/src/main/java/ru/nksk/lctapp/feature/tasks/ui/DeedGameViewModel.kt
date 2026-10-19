@@ -40,7 +40,7 @@ enum class DeedGameType { MEMORY, COMPARISON, PRECISION, LIGHTS, SEQUENCE, PIPES
     SERVICE_EMBLEM, SIGNAL_POST, CHAPTER_FINALE, RING_TOSS }
 data class DeedGamePresentation(val title: String, val maximumReward: Long, val canPlay: Boolean,
     val storyAction: Boolean = false, val sceneRes: Int? = null, val instructions: String? = null,
-    val activityArtworkRes: Int? = null)
+    val activityArtworkRes: Int? = null, val canReturnHome: Boolean = true)
 internal data class DeedGameUiState(
     val loading: Boolean = true,
     val type: DeedGameType? = null,
@@ -54,6 +54,7 @@ internal data class DeedGameUiState(
     val demoMode: Boolean = false,
     val reward: DeedRewardUiState? = null,
     val repairCoins: Int = 0,
+    val canReturnHome: Boolean = false,
 )
 
 /** Connects an actual offered deed to a transient board and one atomic engine outcome. */
@@ -109,7 +110,8 @@ internal class DeedGameViewModel @Inject constructor(
                 session.observe().collect { latest = checkNotNull(it); render() }
             } catch (cancelled: CancellationException) { throw cancelled
             } catch (_: Exception) {
-                mutableState.value = DeedGameUiState(loading = false, message = "Не удалось загрузить дело. Попробуй ещё раз.", canRetry = true)
+                mutableState.value = DeedGameUiState(loading = false, message = "Не удалось загрузить дело. Попробуй ещё раз.",
+                    canRetry = true, canReturnHome = canReturnHome())
             }
         }
     }
@@ -216,11 +218,22 @@ internal class DeedGameViewModel @Inject constructor(
         execute(EngineCommand.SkipMiniGame(id, choiceId))
     }
 
-    fun leave() {
+    fun leave() = leave(dismissRewardEditor = false)
+
+    /** Home closes the result directly; only an explicit confirmation transfers coins. */
+    fun leaveToHome() {
+        if (!canReturnHome()) return
+        leave(dismissRewardEditor = true)
+    }
+
+    private fun canReturnHome() = !busy && !repairWriting && !repairUnconfirmed() &&
+        pending == null && !rewardReceiptNeeded
+
+    private fun leave(dismissRewardEditor: Boolean) {
         if (busy || repairWriting || repairUnconfirmed()) return
         if (rewardOutcome != null) {
             if (pending != null || rewardReceiptNeeded) return
-            if (rewardEditing) { cancelRewardTransfer(); return }
+            if (rewardEditing && !dismissRewardEditor) { cancelRewardTransfer(); return }
             savedState[REWARD_DISMISSED] = true
             exit()
             return
@@ -409,7 +422,7 @@ internal class DeedGameViewModel @Inject constructor(
         busy = true
         message = null
         mutableState.value = mutableState.value.copy(busy = true, message = null,
-            canSkipGame = false,
+            canSkipGame = false, canReturnHome = false,
             presentation = mutableState.value.presentation?.copy(canPlay = false))
         viewModelScope.launch {
             var leaving = false
@@ -497,7 +510,7 @@ internal class DeedGameViewModel @Inject constructor(
     private fun exit() {
         busy = true
         mutableState.value = mutableState.value.copy(busy = true,
-            canSkipGame = false,
+            canSkipGame = false, canReturnHome = false,
             presentation = mutableState.value.presentation?.copy(canPlay = false))
         exits.trySend(null)
     }
@@ -508,6 +521,7 @@ internal class DeedGameViewModel @Inject constructor(
             val game = latest ?: return
             mutableState.value = mutableState.value.copy(
                 loading = false, busy = false, message = message,
+                canReturnHome = canReturnHome(),
                 canRetry = pending != null || rewardReceiptNeeded, canSkipGame = false,
                 presentation = mutableState.value.presentation?.copy(canPlay = false),
                 reward = DeedRewardUiState(reward.earned, reward.itemTitle,
@@ -519,13 +533,13 @@ internal class DeedGameViewModel @Inject constructor(
         }
         if (rewardReceiptNeeded) {
             mutableState.value = mutableState.value.copy(loading = false, busy = false, message = message,
-                canRetry = true, canSkipGame = false,
+                canRetry = true, canSkipGame = false, canReturnHome = false,
                 presentation = mutableState.value.presentation?.copy(canPlay = false))
             return
         }
         if (pending != null) {
             mutableState.value = mutableState.value.copy(loading = false, busy = false, message = message, canRetry = true,
-                canSkipGame = false,
+                canSkipGame = false, canReturnHome = false,
                 presentation = mutableState.value.presentation?.copy(canPlay = false))
             return
         }
@@ -542,7 +556,8 @@ internal class DeedGameViewModel @Inject constructor(
         }
         val kind = occurrence?.let(::gameKind)
         if (occurrence?.status != EventStatus.ACTIVE || kind == null) {
-            mutableState.value = DeedGameUiState(loading = false, message = "Это дело больше недоступно.")
+            mutableState.value = DeedGameUiState(loading = false, message = "Это дело больше недоступно.",
+                canReturnHome = canReturnHome())
             return
         }
         val event = session.catalog.content.events.single { it.id == occurrence.eventId }
@@ -552,6 +567,7 @@ internal class DeedGameViewModel @Inject constructor(
         val theme = card?.presentation?.media?.let { storyGameTheme(it, kind) }
         mutableState.value = DeedGameUiState(
             loading = false,
+            canReturnHome = canReturnHome(),
             type = when (kind) {
                 DeedGameKind.MEMORY -> DeedGameType.MEMORY
                 DeedGameKind.COMPARISON -> DeedGameType.COMPARISON

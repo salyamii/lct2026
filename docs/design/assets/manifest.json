@@ -110,6 +110,20 @@
   "scope": "Five character/equipment packs (252 layers including 12 sleeping foxes), all 14 locations, additional NPC/event art, and existing menu/font assets, onboarding artwork and the debug settings vector. Design mockup screens and hidden RAW work areas are excluded. Includes five generated chapter preview illustrations for the goal screen.",
   "assets": [
     {
+      "resource": "game_home",
+      "category": "Game navigation",
+      "path": "app/src/main/res/drawable/game_home.xml",
+      "format": "vector_xml",
+      "width": 24,
+      "height": 24,
+      "bytes": 483,
+      "sha256": "bc4fb6a5a2d3142b0ddce34308386b75e493e3e7449aec144b9b86620a93f65b",
+      "source_method": "locally_authored_svg",
+      "source_path": "docs/design/assets/game_home.svg",
+      "source_sha256": "c4b5dc0fdb231a67c5fa60222d1ce51e4ab809fef82c6276563d618f76c2554f",
+      "source_notes": "Locally authored house outline for the Home button, 2026-10-19; no Figma source. SVG path and rounded 1.8-unit stroke copied unchanged into a 24x24 Android vector. Runtime icon uses GameInk inside the existing menu_action_plaque_v2 frame."
+    },
+    {
       "resource": "menu_coin",
       "category": "Existing menu",
       "path": "app/src/main/res/drawable-nodpi/menu_coin.webp",

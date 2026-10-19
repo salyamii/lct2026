@@ -60,6 +60,11 @@ fun EntryProviderScope<NavKey>.mainMenuEntry(
                 viewModel.openBudget.collect { onAction(source, MainMenuAction.Coins) }
             }
         }
+        LaunchedEffect(viewModel, lifecycle, "goal") {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.openGoal.collect { onAction(source, MainMenuAction.Goal) }
+            }
+        }
         val ready = (state as? MainMenuLoadState.Ready)?.menu
         decorate(ready != null && ready.dayStatus == null,
             ready != null && !ready.busy && !ready.showMeals && ready.nameEditor == null) {

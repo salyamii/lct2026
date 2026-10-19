@@ -63,6 +63,14 @@ class ChapterGoalNavigationPolicyTest {
         assertFalse(shouldPresentChapterGoal(null, null, Day))
     }
 
+    @Test fun explicitHomeAllowsOnlyTheMenuAndOnlyForTheSameMissingGoal() {
+        val goalId = checkNotNull(acts[1].goalId)
+        assertFalse(shouldPresentChapterGoal(goalId, null, MainMenu, homeGoalId = goalId))
+        assertTrue(shouldPresentChapterGoal(goalId, null, Day, homeGoalId = goalId))
+        assertTrue(shouldPresentChapterGoal(goalId, null, Tasks, homeGoalId = goalId))
+        assertTrue(shouldPresentChapterGoal(acts[2].goalId, null, MainMenu, homeGoalId = goalId))
+    }
+
     private fun afterFinales(count: Int) = createInitialGameState().let { initial ->
         initial.copy(selectedGoalId = null, selectedSavingItemId = null, story = initial.story.copy(
             decisions = acts.take(count).mapIndexed { index, act ->

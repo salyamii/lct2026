@@ -42,6 +42,7 @@ fun EntryProviderScope<NavKey>.tasksEntry(
     onBack: (NavKey) -> Unit,
     onEvent: (Tasks) -> Unit,
     onGame: (Tasks, String) -> Unit,
+    onHome: (NavKey) -> Unit = onBack,
 ) {
     entry<Tasks> { source ->
         val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -66,22 +67,27 @@ fun EntryProviderScope<NavKey>.tasksEntry(
             onCurrentEvent = dropUnlessResumed { onEvent(source) },
             onTraining = dropUnlessResumed { onTraining(source) },
             onExit = dropUnlessResumed { onBack(source) },
+            onHome = dropUnlessResumed { if (viewModel.canReturnHome()) onHome(source) },
+            homeEnabled = viewModel.canReturnHome(),
         )
     }
     // Kept only for back stacks saved before demo entry points were removed from Tasks.
     entry<StarPlates> { source ->
         val viewModel = hiltViewModel<MemoryGameViewModel>()
         val state by viewModel.uiState.collectAsStateWithLifecycle()
-        MemoryGameScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) })
+        MemoryGameScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) },
+            onHome = dropUnlessResumed { onHome(source) })
     }
     entry<PriceCheck> { source ->
         val viewModel = hiltViewModel<PriceQuizViewModel>()
         val state by viewModel.uiState.collectAsStateWithLifecycle()
-        PriceQuizScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) })
+        PriceQuizScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) },
+            onHome = dropUnlessResumed { onHome(source) })
     }
     entry<Telescope> { source ->
         val viewModel = hiltViewModel<TargetStopViewModel>()
         val state by viewModel.uiState.collectAsStateWithLifecycle()
-        TargetStopScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) })
+        TargetStopScreen(state, viewModel::onAction, dropUnlessResumed { onBack(source) },
+            onHome = dropUnlessResumed { onHome(source) })
     }
 }

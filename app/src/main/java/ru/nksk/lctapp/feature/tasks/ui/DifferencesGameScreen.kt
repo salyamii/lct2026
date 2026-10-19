@@ -50,6 +50,7 @@ fun DifferencesGameScreen(
     onAction: (DifferencesGameAction) -> Unit,
     onBack: () -> Unit,
     deed: DeedGamePresentation? = null,
+    onHome: () -> Unit = onBack,
 ) {
     val state = uiState.game
     Column(
@@ -60,7 +61,7 @@ fun DifferencesGameScreen(
                 modifier = Modifier.fillMaxWidth().height(150.dp), blurred = deed?.storyAction != true)
             deed?.activityArtworkRes?.let { art -> GameArtwork(art, null,
                 Modifier.align(Alignment.BottomEnd).size(92.dp).padding(4.dp)) }
-            DeedHeader(deed?.title ?: "Сверка находок", onBack = onBack)
+            DeedHeader(deed?.title ?: "Сверка находок", onBack = onBack, onHome = onHome, homeEnabled = deed?.canReturnHome != false)
         }
         DeedGameSheet(deed, DeedRewardPreview.fromDifferences(state), modifier = Modifier.weight(1f)) {
             Text(

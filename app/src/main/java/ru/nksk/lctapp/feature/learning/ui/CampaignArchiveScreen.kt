@@ -14,15 +14,17 @@ import ru.nksk.lctapp.core.ui.components.MovingPetArtwork
 
 @Composable
 internal fun CampaignArchiveScreen(state: CampaignArchiveUiState, onRestart: () -> Unit,
-    onArchive: (String) -> Unit, onCloseArchive: () -> Unit, onRetry: () -> Unit, onBack: () -> Unit) {
+    onArchive: (String) -> Unit, onCloseArchive: () -> Unit, onRetry: () -> Unit, onBack: () -> Unit,
+    onHome: () -> Unit = onBack, homeEnabled: Boolean = !state.busy) {
     BackHandler(state.busy) {}
     val detail = state.detail
     if (detail != null) {
         BackHandler { onCloseArchive() }
-        HistoryScreen(detail, onRetry = onRetry, onBack = onCloseArchive, title = "Прошлое приключение")
+        HistoryScreen(detail, onRetry = onRetry, onBack = onCloseArchive, title = "Прошлое приключение",
+            onHome = onHome, homeEnabled = homeEnabled)
         return
     }
-    LearningPage("Хроноскоп", onBack, backEnabled = !state.busy) {
+    LearningPage("Хроноскоп", onBack, backEnabled = !state.busy, onHome = onHome, homeEnabled = homeEnabled) {
         learningStatus(state.loading, false, state.error, onRetry = onRetry)
         if (!state.loading && state.canRestart) item {
             LearningCard("Другие пути ещё ждут") {

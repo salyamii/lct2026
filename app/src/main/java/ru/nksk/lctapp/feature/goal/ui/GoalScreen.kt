@@ -60,6 +60,8 @@ internal fun GoalScreen(
     onBack: () -> Unit,
     onAction: (GoalAction) -> Unit,
     onOpenSavings: () -> Unit = {},
+    onHome: () -> Unit = onBack,
+    homeEnabled: Boolean = !state.busy,
 ) {
     val target = state.parts.firstOrNull { it.savingTarget && !it.owned }
     val result = state.purchaseResult
@@ -92,8 +94,16 @@ internal fun GoalScreen(
     }
     BackHandler(enabled = state.busy || state.chapterSelectionRequired || state.backAction != null) { back() }
 
-    if (state.showList && !state.loading && !state.failed && result == null) {
-        GoalProjectList(state, projectsScroll, back) { onAction(GoalAction.View(it)) }
+    // An unresolved goal must not briefly show the first chapter's fallback illustration.
+    if (state.loading || state.failed) {
+        GoalPendingContent(state.loading, back, onHome, homeEnabled,
+            showBack = !state.chapterSelectionRequired,
+            onRetry = { onAction(GoalAction.Retry) })
+        return
+    }
+
+    if (state.showList && result == null) {
+        GoalProjectList(state, projectsScroll, back, onHome, homeEnabled) { onAction(GoalAction.View(it)) }
         return
     }
 
@@ -108,17 +118,17 @@ internal fun GoalScreen(
         contentScrollState = detailsScroll,
         overflowScrollState = detailsOverflowScroll,
         showBack = !state.chapterSelectionRequired,
-        headerAction = {
-            if (!state.loading && !state.failed && result == null && !state.chapterSelectionRequired) {
+        onHome = onHome,
+        homeEnabled = homeEnabled,
+        scene = {
+            if (result == null && !state.chapterSelectionRequired) {
                 GameForwardAction("Другие цели", { onAction(GoalAction.ShowList) },
-                    Modifier.widthIn(max = 210.dp), enabled = !state.busy)
+                    Modifier.align(Alignment.BottomEnd).padding(horizontal = 16.dp).padding(bottom = 12.dp)
+                        .widthIn(max = 210.dp), enabled = !state.busy)
             }
         },
-        scene = {},
         footer = {
             when {
-                state.loading -> Unit
-                state.failed -> AdventurePrimaryButton("Повторить", { onAction(GoalAction.Retry) })
                 result != null -> AdventurePrimaryButton(if (ready) "Выполнить цель" else "К целям", {
                     onAction(if (ready) GoalAction.ContinueStory else GoalAction.DismissPurchaseResult)
                 }, enabled = !state.busy)
@@ -135,11 +145,6 @@ internal fun GoalScreen(
         },
     ) {
         when {
-            state.loading -> GameLoadingIndicator(Modifier.align(Alignment.CenterHorizontally))
-            state.failed -> {
-                AdventureHeading("Не удалось открыть цели")
-                AdventureBody("Попробуй загрузить их ещё раз.")
-            }
             result != null -> {
                 GoalItemIllustration(result.itemId, Modifier.size(88.dp).align(Alignment.CenterHorizontally))
                 AdventureHeading("${result.itemTitle} теперь у нас!")
@@ -176,6 +181,30 @@ internal fun GoalScreen(
         state.celebration?.let { AdventureBody(it) }
     }
     state.confirmation?.let { GoalPurchaseDialog(it, state.busy, state.message, onAction) }
+}
+
+@Composable
+private fun GoalPendingContent(loading: Boolean, onBack: () -> Unit, onHome: () -> Unit,
+    homeEnabled: Boolean, showBack: Boolean, onRetry: () -> Unit) {
+    Box(Modifier.fillMaxSize().background(AdventureNight)) {
+        Column(Modifier.fillMaxSize().safeDrawingPadding()) {
+            GameNavigationHeader("", onBack, onHome,
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                homeEnabled = homeEnabled, showBack = showBack)
+            if (!loading) Box(Modifier.weight(1f).fillMaxWidth().padding(16.dp),
+                contentAlignment = Alignment.Center) {
+                Surface(Modifier.widthIn(max = 440.dp).verticalScroll(rememberScrollState()),
+                    color = GamePaper, shape = RoundedCornerShape(28.dp)) {
+                    Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        AdventureHeading("Не удалось открыть цели")
+                        AdventureBody("Попробуй загрузить их ещё раз.")
+                        AdventurePrimaryButton("Повторить", onRetry)
+                    }
+                }
+            }
+        }
+        if (loading) GameLoadingIndicator(Modifier.align(Alignment.Center), delayMillis = 300)
+    }
 }
 
 @Composable
@@ -384,13 +413,12 @@ private fun GoalProjectCard(project: GoalProjectUiState, enabled: Boolean, onCli
 }
 
 @Composable
-private fun GoalProjectList(state: GoalUiState, scrollState: LazyListState, onBack: () -> Unit, onView: (String) -> Unit) {
+private fun GoalProjectList(state: GoalUiState, scrollState: LazyListState, onBack: () -> Unit,
+    onHome: () -> Unit, homeEnabled: Boolean, onView: (String) -> Unit) {
     Column(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding()) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            GameBackButton(onBack)
-            GameSceneTitle(if (state.campaignComplete) "Наши приключения" else "Большие цели", Modifier.weight(1f))
-        }
+        GameNavigationHeader(if (state.campaignComplete) "Наши приключения" else "Большие цели",
+            onBack, onHome, Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            homeEnabled = homeEnabled)
         LazyColumn(Modifier.weight(1f).fillMaxWidth().clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
             .background(GamePaper).testTag("goal_project_list"), state = scrollState,
             contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {

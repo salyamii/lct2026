@@ -21,6 +21,7 @@ fun FinancialTrapScreen(
     onAction: (PracticeChoiceAction) -> Unit,
     onBack: () -> Unit,
     deed: DeedGamePresentation? = null,
+    onHome: () -> Unit = onBack,
 ) {
     val question = state.question
     val scenario = question.scenario
@@ -31,7 +32,7 @@ fun FinancialTrapScreen(
             TrapScenario.URGENT_TICKET -> R.string.practice_urgent_prompt
             TrapScenario.DELIVERY_FEE -> R.string.practice_delivery_prompt
         }), state.current, state.questions.size, state.correctAnswers, state.finished,
-        { onAction(PracticeChoiceAction.Restart) }, onBack, deed, DeedRewardPreview.fromPractice(state)) {
+        { onAction(PracticeChoiceAction.Restart) }, onBack, deed, DeedRewardPreview.fromPractice(state), onHome = onHome) {
         PracticeBoard(background = R.drawable.location_pier) {
             GameArtwork(R.drawable.gear_stargazing_trip, null, Modifier.size(72.dp))
             PracticeChoices(question.options.size) { index, modifier ->

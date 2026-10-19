@@ -105,6 +105,7 @@ fun LctNavHost(
     val gateModel: EconomyGateViewModel = hiltViewModel()
     val gate by gateModel.uiState.collectAsStateWithLifecycle()
     var presentedPlanningId by rememberSaveable { mutableStateOf<String?>(null) }
+    var homeGoalId by rememberSaveable { mutableStateOf<String?>(null) }
     // A confirmed write can reach its callback before the gate's Room observation catches up.
     var confirmedPlanningId by remember { mutableStateOf<String?>(null) }
     val destination = backStack.lastOrNull()
@@ -125,10 +126,10 @@ fun LctNavHost(
         }
     }
     val redirectingToBudget = shouldPresentBudget(pending, destination, presentedPlanningId, confirmedPlanningId)
-    val redirectingToGoal = shouldPresentChapterGoal(gate.requiredGoalId, pending, destination)
+    val redirectingToGoal = shouldPresentChapterGoal(gate.requiredGoalId, pending, destination, homeGoalId)
     val redirecting = redirectingToBudget || redirectingToGoal
-    LaunchedEffect(gate.requiredGoalId, pending, destination) {
-        if (shouldPresentChapterGoal(gate.requiredGoalId, pending, destination)) {
+    LaunchedEffect(gate.requiredGoalId, pending, destination, homeGoalId) {
+        if (shouldPresentChapterGoal(gate.requiredGoalId, pending, destination, homeGoalId)) {
             backStack.clear()
             backStack.add(MainMenu)
             backStack.add(Goal)
@@ -160,6 +161,16 @@ fun LctNavHost(
         if (backStack.lastOrNull() == source && backStack.size > 1) {
             navigator.returnToRoot(source)
             completion = message?.let(::CompletionNotice)
+        }
+    }
+    val home: (NavKey) -> Unit = { source ->
+        // Check before touching gate state: an outgoing screen must not dismiss a new gate.
+        if (backStack.lastOrNull() == source && backStack.size > 1) {
+            val currentGate = gateModel.uiState.value
+            currentGate.planning?.let { presentedPlanningId = it.id }
+            homeGoalId = currentGate.requiredGoalId
+            completion = null
+            navigator.returnToRoot(source)
         }
     }
     LaunchedEffect(completion, destination) {
@@ -227,7 +238,7 @@ fun LctNavHost(
                         },
                     )
                 }
-                settingsEntry(onBack = navigator::goBack, debugButton = debugSettingsButton,
+                settingsEntry(onBack = navigator::goBack, onHome = home, debugButton = debugSettingsButton,
                     survey = { SurveySettingsEntry(surveyModel) },
                     onRepeatTutorial = { source ->
                         if (backStack.lastOrNull() == source) {
@@ -235,23 +246,25 @@ fun LctNavHost(
                             navigator.returnToRoot(source)
                         }
                     })
-                gearEntry(onBack = navigator::goBack)
+                gearEntry(onBack = navigator::goBack, onHome = home)
                 tasksEntry(
                     onEvent = { source -> navigator.navigate(source, Day) },
                     onGame = { source, id -> navigator.navigate(source, DeedGame(id)) },
                     onTraining = { source -> navigator.navigate(source, SkillTraining) },
                     onBack = navigator::goBack,
+                    onHome = home,
                 )
                 storyGamesEntry(
                     onOpen = { source, id -> navigator.navigate(source, ChapterTestGameSession(id)) },
                     onBack = navigator::goBack,
+                    onHome = home,
                 )
-                goalEntry(onBack = navigator::goBack,
+                goalEntry(onBack = navigator::goBack, onHome = home,
                     onOpenSavings = { source -> navigator.navigateToExisting(source, Savings) },
                     onContinueDay = { source -> navigator.replace(source, Day) },
                     onBudget = { source -> navigator.navigateToExisting(source, Economy) },
                     onTraining = { source -> navigator.navigateToExisting(source, ChapterPractice) })
-                economyEntry(onBack = { source -> navigator.finishBudget(source, ChapterPractice) },
+                economyEntry(onBack = { source -> navigator.finishBudget(source, ChapterPractice) }, onHome = home,
                     onConfirmed = { source, planningId ->
                         if (backStack.lastOrNull() == source) {
                             confirmedPlanningId = planningId.takeIf { it == gateModel.uiState.value.planning?.id }
@@ -259,24 +272,24 @@ fun LctNavHost(
                         }
                     },
                     onOpenSavings = { source -> navigator.navigateToExisting(source, Savings) })
-                savingsEntry(onBack = navigator::goBack,
+                savingsEntry(onBack = navigator::goBack, onHome = home,
                     onOpenGoal = { source -> navigator.navigateToExisting(source, Goal) },
                     onOpenBudget = { source -> navigator.navigateToExisting(source, Economy) })
-                learningEntry(onBack = navigator::goBack,
+                learningEntry(onBack = navigator::goBack, onHome = home,
                     onOpenBudget = { source ->
                         if (source == ChapterPractice) navigator.moveToTop(source, Economy)
                         else navigator.navigateToExisting(source, Economy)
                     },
                     onContinueStory = { source -> navigator.returnToOrReplace(source, Day) },
                     onArchives = { source -> navigator.navigate(source, CampaignArchive) })
-                campaignArchiveEntry(onBack = navigator::goBack, onRestarted = { source ->
+                campaignArchiveEntry(onBack = navigator::goBack, onHome = home, onRestarted = { source ->
                     if (backStack.lastOrNull() == source) {
                         navigator.returnToRoot(source)
                         onNewCampaignSetup()
                     }
                 })
-                mapEntry(onBack = navigator::goBack, onSelected = navigator::returnToRoot)
-                dayEntry(onBack = navigator::goBack, onFinished = finish,
+                mapEntry(onBack = navigator::goBack, onHome = home, onSelected = navigator::returnToRoot)
+                dayEntry(onBack = navigator::goBack, onHome = home, onFinished = finish,
                     summaryExtra = { SurveyInvitationEntry(surveyModel) },
                     onRestarted = { source ->
                         if (backStack.lastOrNull() == source) {

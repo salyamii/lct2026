@@ -60,6 +60,8 @@ fun RecordGameEntry(
     onExit: () -> Unit,
     onCompleted: ((RecordStudy) -> Unit)? = null,
     interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     val viewModel = hiltViewModel<RecordGameViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -69,6 +71,8 @@ fun RecordGameEntry(
         state = state,
         onAction = { if (!interactionBlocked) viewModel.onAction(it) },
         onExit = { if (!interactionBlocked) onExit() },
+        onHome = { if (homeEnabled) onHome() },
+        homeEnabled = homeEnabled,
         onCompleted = onCompleted?.let { complete -> {
             val game = viewModel.uiState.value.game
             if (!interactionBlocked && game.kind == kind && game.complete) complete(game)
@@ -84,6 +88,8 @@ fun RecordGameScreen(
     onExit: () -> Unit,
     onCompleted: (() -> Unit)? = null,
     interactionBlocked: Boolean = false,
+    onHome: () -> Unit = onExit,
+    homeEnabled: Boolean = !interactionBlocked,
 ) {
     val game = state.game
     val title = when (game.kind) {
@@ -109,7 +115,8 @@ fun RecordGameScreen(
             else -> "Перенеси три цвета из журнала в свою запись."
         }
     }
-    ChapterGameScaffold(title, instruction, onExit, footer = {
+    ChapterGameScaffold(title, instruction, onExit, onHome = onHome,
+        homeEnabled = homeEnabled, footer = {
         if (game.complete) GameActionButton(
             "Продолжить", onCompleted ?: onExit, interactionBlocked = interactionBlocked,
         )

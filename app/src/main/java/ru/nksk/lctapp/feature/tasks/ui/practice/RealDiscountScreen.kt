@@ -34,12 +34,13 @@ fun RealDiscountScreen(
     onAction: (PracticeChoiceAction) -> Unit,
     onBack: () -> Unit,
     deed: DeedGamePresentation? = null,
+    onHome: () -> Unit = onBack,
 ) {
     val question = state.question
     PracticeScaffold(stringResource(R.string.practice_discount_title), R.drawable.location_city,
         R.drawable.npc_butcher_pointing, stringResource(R.string.practice_discount_prompt),
         state.current, state.questions.size, state.correctAnswers, state.finished,
-        { onAction(PracticeChoiceAction.Restart) }, onBack, deed, DeedRewardPreview.fromPractice(state)) {
+        { onAction(PracticeChoiceAction.Restart) }, onBack, deed, DeedRewardPreview.fromPractice(state), onHome = onHome) {
         PracticeBoard {
             PracticeChoices(2) { index, modifier ->
                 if (index == 0) {

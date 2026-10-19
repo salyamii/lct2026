@@ -25,7 +25,7 @@ import ru.nksk.lctapp.feature.gear.ui.GearItemDetails
 @SerialName("gear")
 data object Gear : NavKey
 
-fun EntryProviderScope<NavKey>.gearEntry(onBack: (Gear) -> Unit) {
+fun EntryProviderScope<NavKey>.gearEntry(onBack: (Gear) -> Unit, onHome: (Gear) -> Unit = onBack) {
     entry<Gear> { source ->
         val model = hiltViewModel<GearViewModel>()
         val state by model.uiState.collectAsStateWithLifecycle()
@@ -34,6 +34,7 @@ fun EntryProviderScope<NavKey>.gearEntry(onBack: (Gear) -> Unit) {
         var selectedOccurrenceId by rememberSaveable { mutableStateOf<String?>(null) }
         var selectedPageId by rememberSaveable { mutableStateOf<String?>(null) }
         val ready = state as? GearLoadState.Ready
+        val home = dropUnlessResumed { if (model.canReturnHome()) onHome(source) }
         val selectedItem = ready?.inventory?.ownedOccurrence(selectedOccurrenceId)
         val closeDetails: () -> Unit = { selectedOccurrenceId = null; selectedPageId = null }
         LaunchedEffect(ready?.inventory, selectedOccurrenceId) {
@@ -50,12 +51,15 @@ fun EntryProviderScope<NavKey>.gearEntry(onBack: (Gear) -> Unit) {
                 onClose = dropUnlessResumed { closeDetails() },
                 onEquip = { if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) model.equip(it) },
                 busy = ready?.busy == true,
-                actionMessage = ready?.actionMessage)
+                actionMessage = ready?.actionMessage,
+                onHome = home, homeEnabled = model.canReturnHome())
         } else {
             GearScreen(
                 state = state,
                 onRetry = model::retry,
                 onBack = dropUnlessResumed { onBack(source) },
+                onHome = home,
+                homeEnabled = model.canReturnHome(),
                 onEquip = { if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) model.equip(it) },
                 onOpenItem = { id ->
                     if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) &&

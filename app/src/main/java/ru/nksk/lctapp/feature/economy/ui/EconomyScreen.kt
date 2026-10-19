@@ -2,6 +2,7 @@ package ru.nksk.lctapp.feature.economy.ui
 
 import ru.nksk.lctapp.core.ui.components.GameLoadingScreen
 import ru.nksk.lctapp.core.ui.components.GameActionButton
+import ru.nksk.lctapp.core.ui.components.GameHomeButton
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,12 +21,14 @@ import ru.nksk.lctapp.domain.economy.BudgetPlanningStage
 
 @Composable
 internal fun EconomyScreen(state: EconomyUiState, onAction: (EconomyAction) -> Unit, onBack: () -> Unit,
-    onOpenSavings: () -> Unit = {}) {
+    onOpenSavings: () -> Unit = {}, onHome: () -> Unit = onBack,
+    homeEnabled: Boolean = !state.saving && state.budgetConfirmation == null) {
     val economy = state.economy
     if (economy == null && state.loading) {
         // An unfinished budget can be the first destination after the startup gate.
         Box(Modifier.fillMaxSize()) {
             GameLoadingScreen()
+            GameHomeButton(onHome, Modifier.align(Alignment.TopEnd).safeDrawingPadding().padding(16.dp), enabled = homeEnabled)
             TextButton(onClick = onBack,
                 modifier = Modifier.align(Alignment.BottomCenter).safeDrawingPadding().padding(24.dp)) {
                 Text("В меню")
@@ -36,7 +39,7 @@ internal fun EconomyScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
             Column(Modifier.safeDrawingPadding().padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                 GameActionButton("Повторить загрузку", { onAction(EconomyAction.Retry) })
-                TextButton(onClick = onBack) { Text("В меню") }
+                GameHomeButton(onHome, enabled = homeEnabled)
             }
         }
     } else {
@@ -59,6 +62,7 @@ internal fun EconomyScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
                     title = if (planning.reason == BudgetPlanningReason.INITIAL) "Монеты для приключения" else "Монеты на неделю"),
                 onPlan = { if (!receiptBusy) onAction(EconomyAction.StartAllocation) },
                 onBack = { if (!receiptBusy) onBack() },
+                onHome = onHome, homeEnabled = homeEnabled,
                 onDepositReserve = { if (!receiptBusy) onAction(EconomyAction.DepositWeeklyReserve) },
                 onOpenReserveTransfer = { if (!receiptBusy) onAction(EconomyAction.OpenWeeklyReserveTransfer) },
                 onReserveInputChange = { onAction(EconomyAction.UpdateWeeklyReserveInput(it)) },
@@ -69,6 +73,7 @@ internal fun EconomyScreen(state: EconomyUiState, onAction: (EconomyAction) -> U
                 interactionsBlocked = state.budgetConfirmation != null,
                 onAmountChange = { article, amount -> onAction(EconomyAction.SetAmount(article, amount)) },
                 onConfirm = { onAction(EconomyAction.Confirm) }, onBack = onBack,
+                onHome = onHome, homeEnabled = homeEnabled,
                 onAdjust = { article, increase -> onAction(EconomyAction.Adjust(article, increase)) },
                 onOpenSavings = onOpenSavings,
                 pet = display.pet,

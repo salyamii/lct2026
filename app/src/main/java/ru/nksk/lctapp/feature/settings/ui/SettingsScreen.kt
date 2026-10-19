@@ -46,13 +46,10 @@ internal fun SettingsScreen(state: SettingsUiState, onAction: (SettingsAction) -
     onDownloadDiagnostics: () -> Unit = {}, pickingDiagnostics: Boolean = false,
     onRepeatTutorial: (() -> Unit)? = null,
     debugInfo: (@Composable () -> Unit)? = null,
-    survey: (@Composable () -> Unit)? = null) {
+    survey: (@Composable () -> Unit)? = null, onHome: () -> Unit = onBack) {
     Column(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding().background(GamePaper)) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            GameBackButton(onBack)
-            AdventureHeading("Настройки")
-        }
+        GameNavigationHeader("Настройки", onBack, onHome,
+            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp))
         Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)) {
             survey?.invoke()

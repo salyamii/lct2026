@@ -60,6 +60,8 @@ internal fun BudgetPlanScreen(state: BudgetUiState, onAmountChange: (BudgetArtic
     interactionsBlocked: Boolean = false,
     onAdviceShown: (String) -> Unit = {},
     onArticleFocused: (BudgetArticle) -> Unit = {},
+    onHome: () -> Unit = onBack,
+    homeEnabled: Boolean = !state.busy && !interactionsBlocked,
 ) {
     var editing by rememberSaveable { mutableStateOf<String?>(null) }
     var balancesVisible by remember(state.availableBalance, state.savingsBalance) { mutableStateOf(false) }
@@ -93,11 +95,9 @@ internal fun BudgetPlanScreen(state: BudgetUiState, onAmountChange: (BudgetArtic
                 BudgetPlanFooter(state, interactionsBlocked, onConfirm, contextId) { transferVisible = it }
             },
         ) {
-            Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                GameBackButton(onClick = onBack, enabled = !interactionsBlocked)
-                GameSceneTitle(state.title, Modifier.weight(1f))
-            }
+            GameNavigationHeader(state.title, onBack, onHome,
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                backEnabled = !interactionsBlocked, homeEnabled = homeEnabled)
             Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally) {
                 key(state.availableBalance, state.savingsBalance) {

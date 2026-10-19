@@ -53,13 +53,15 @@ private val DiarySecondary = Color(0xFF685A48)
 /** Keep the approved night scene and bed above the day's real, ordered journal entries. */
 @Composable
 internal fun DaySummaryScreen(state: DayUiState, onAction: (DayAction) -> Unit, onBack: () -> Unit,
-    extra: (@Composable () -> Unit)? = null) {
+    extra: (@Composable () -> Unit)? = null, onHome: () -> Unit = onBack,
+    homeEnabled: Boolean = !state.busy && !state.retryRequired) {
     val summary = state.summary ?: return
     GameCardLayout(
         category = "Итоги дня",
         scene = R.drawable.location_bedroom_night,
         character = state.restingPetRes,
         onBack = onBack,
+        onHome = onHome, homeEnabled = homeEnabled,
         characterDescription = "${state.petName} спит",
     ) {
         GameTitle("День ${summary.day} завершён")

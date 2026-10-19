@@ -54,6 +54,9 @@ internal class DeedsViewModel @Inject constructor(private val session: GameSessi
 
     init { retry() }
 
+    /** Keep the original idempotent request available after an uncertain save. */
+    fun canReturnHome(): Boolean = !busy && !navigating && pendingRequest == null
+
     fun retry() {
         if (loading?.isActive == true) return
         loading = viewModelScope.launch {

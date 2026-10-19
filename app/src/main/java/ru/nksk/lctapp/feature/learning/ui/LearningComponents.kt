@@ -21,6 +21,8 @@ import ru.nksk.lctapp.core.ui.components.AdventureBody
 import ru.nksk.lctapp.core.ui.components.AdventureHeading
 import ru.nksk.lctapp.core.ui.components.GameInk
 import ru.nksk.lctapp.core.ui.components.GamePaper
+import ru.nksk.lctapp.core.ui.components.GameBackButton
+import ru.nksk.lctapp.core.ui.components.GameHomeButton
 import ru.nksk.lctapp.core.ui.game.asGameUiText
 import ru.nksk.lctapp.core.ui.theme.AdventureNight
 
@@ -29,18 +31,21 @@ internal val PracticeDisabled = Color(0xFFEAE6F0)
 
 @Composable
 internal fun LearningPage(title: String, onBack: () -> Unit, backEnabled: Boolean = true,
-    listState: LazyListState = rememberLazyListState(), content: LazyListScope.() -> Unit) {
+    listState: LazyListState = rememberLazyListState(), onHome: () -> Unit = onBack,
+    homeEnabled: Boolean = backEnabled, content: LazyListScope.() -> Unit) {
     Box(Modifier.fillMaxSize().background(AdventureNight).safeDrawingPadding().background(GamePaper),
         contentAlignment = Alignment.TopCenter) {
-        LazyColumn(Modifier.widthIn(max = 680.dp).fillMaxSize(), state = listState, contentPadding = PaddingValues(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            item {
-                TextButton(onClick = onBack, enabled = backEnabled,
-                    colors = ButtonDefaults.textButtonColors(contentColor = GameInk, disabledContentColor = GameInk),
-                    contentPadding = PaddingValues(horizontal = 0.dp, vertical = 12.dp)) { Text("Назад") }
-                AdventureHeading(title)
+        Column(Modifier.widthIn(max = 680.dp).fillMaxSize()) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                GameBackButton(onBack, enabled = backEnabled)
+                GameHomeButton(onHome, enabled = homeEnabled)
             }
-            content()
+            LazyColumn(Modifier.fillMaxWidth().weight(1f), state = listState, contentPadding = PaddingValues(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                item { AdventureHeading(title) }
+                content()
+            }
         }
     }
 }

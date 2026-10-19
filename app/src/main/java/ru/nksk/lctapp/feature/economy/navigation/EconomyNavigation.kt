@@ -39,7 +39,7 @@ data object Economy : NavKey
 data object Savings : NavKey
 
 fun EntryProviderScope<NavKey>.economyEntry(onBack: (Economy) -> Unit, onConfirmed: (Economy, String?) -> Unit,
-    onOpenSavings: (Economy) -> Unit = {}) {
+    onOpenSavings: (Economy) -> Unit = {}, onHome: (Economy) -> Unit = onBack) {
     entry<Economy> { source ->
         val model = hiltViewModel<EconomyViewModel>()
         val state by model.uiState.collectAsStateWithLifecycle()
@@ -90,12 +90,17 @@ fun EntryProviderScope<NavKey>.economyEntry(onBack: (Economy) -> Unit, onConfirm
         EconomyScreen(state, onAction = {
             if (it is EconomyAction.ContextPresented || lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) model.onAction(it)
         }, onBack = dropUnlessResumed { back() },
+            onHome = dropUnlessResumed {
+                if (model.canReturnHome()) onHome(source)
+            },
+            homeEnabled = model.canReturnHome(),
             onOpenSavings = dropUnlessResumed { onOpenSavings(source) })
     }
 }
 
 fun EntryProviderScope<NavKey>.savingsEntry(onBack: (Savings) -> Unit,
-    onOpenGoal: (Savings) -> Unit, onOpenBudget: (Savings) -> Unit) {
+    onOpenGoal: (Savings) -> Unit, onOpenBudget: (Savings) -> Unit,
+    onHome: (Savings) -> Unit = onBack) {
     entry<Savings> { source ->
         val model = hiltViewModel<EconomyViewModel>()
         val state by model.uiState.collectAsStateWithLifecycle()
@@ -116,6 +121,10 @@ fun EntryProviderScope<NavKey>.savingsEntry(onBack: (Savings) -> Unit,
         SavingsScreen(state, onAction = { action ->
             if (action is EconomyAction.TransferContextPresented || lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) model.onAction(action)
         }, onBack = dropUnlessResumed { back() },
+            onHome = dropUnlessResumed {
+                if (model.canReturnHome()) onHome(source)
+            },
+            homeEnabled = model.canReturnHome(),
             onOpenGoal = dropUnlessResumed {
                 if (!state.saving) { model.onAction(EconomyAction.OpenSavingsHub); onOpenGoal(source) }
             },

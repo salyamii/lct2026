@@ -15,7 +15,7 @@ internal fun ChapterStoryGameContent(host: ChapterDeedContent) {
     when (host.kind) {
         DeedGameKind.RING_TOSS -> RingTossGameEntry(host.onExit,
             onCompleted = { DeedGameScore.fromRingToss(it)?.let(host.onCompleted) },
-            interactionBlocked = host.interactionBlocked)
+            interactionBlocked = host.interactionBlocked, onHome = host.onHome, homeEnabled = host.homeEnabled)
         DeedGameKind.OBSERVATORY_OPENING, DeedGameKind.PLATE_HAND, DeedGameKind.PLATE_SOLUTION,
         DeedGameKind.LIGHT_INSCRIPTION, DeedGameKind.SERVICE_EMBLEM, DeedGameKind.SIGNAL_POST,
         DeedGameKind.CHAPTER_FINALE -> DiscoveryGameEntry(when (host.kind) {
@@ -28,13 +28,13 @@ internal fun ChapterStoryGameContent(host: ChapterDeedContent) {
             else -> DiscoveryScene.FINALE
         }, host.onExit,
             onCompleted = { DeedGameScore.fromDiscovery(it)?.let(host.onCompleted) },
-            interactionBlocked = host.interactionBlocked)
+            interactionBlocked = host.interactionBlocked, onHome = host.onHome, homeEnabled = host.homeEnabled)
         DeedGameKind.TRIP_PACKING -> TripPackingGameEntry(host.onExit,
             onCompleted = host.onPackingCompleted,
-            interactionBlocked = host.interactionBlocked)
+            interactionBlocked = host.interactionBlocked, onHome = host.onHome, homeEnabled = host.homeEnabled)
         DeedGameKind.SHOPPING_COMPARISON -> ShoppingComparisonGameEntry(host.onExit,
             onCompleted = { DeedGameScore.fromShoppingComparison(it)?.let(host.onCompleted) },
-            onProgress = host.onShoppingProgress, interactionBlocked = host.interactionBlocked)
+            onProgress = host.onShoppingProgress, interactionBlocked = host.interactionBlocked, onHome = host.onHome, homeEnabled = host.homeEnabled)
         DeedGameKind.RECORD_JOURNAL, DeedGameKind.RECORD_LENSES, DeedGameKind.RECORD_LIGHTS ->
             RecordGameEntry(when (host.kind) {
                 DeedGameKind.RECORD_JOURNAL -> RecordStudyKind.CARGO_JOURNAL
@@ -42,25 +42,25 @@ internal fun ChapterStoryGameContent(host: ChapterDeedContent) {
                 else -> RecordStudyKind.LIGHT_ORDER
             }, host.onExit,
                 onCompleted = { DeedGameScore.fromRecordStudy(it)?.let(host.onCompleted) },
-                interactionBlocked = host.interactionBlocked)
+                interactionBlocked = host.interactionBlocked, onHome = host.onHome, homeEnabled = host.homeEnabled)
         DeedGameKind.TELESCOPE -> TelescopeGameEntry(host.onExit,
             onCompleted = { DeedGameScore.fromTelescope(it)?.let(host.onCompleted) },
-            interactionBlocked = host.interactionBlocked)
+            interactionBlocked = host.interactionBlocked, onHome = host.onHome, homeEnabled = host.homeEnabled)
         DeedGameKind.WHEEL -> WheelGameEntry(host.onExit,
             onCompleted = { DeedGameScore.fromWheel(it)?.let(host.onCompleted) },
-            interactionBlocked = host.interactionBlocked)
+            interactionBlocked = host.interactionBlocked, onHome = host.onHome, homeEnabled = host.homeEnabled)
         DeedGameKind.STRAP -> StrapGameEntry(host.onExit,
             onCompleted = { DeedGameScore.fromStrap(it)?.let(host.onCompleted) },
-            interactionBlocked = host.interactionBlocked)
+            interactionBlocked = host.interactionBlocked, onHome = host.onHome, homeEnabled = host.homeEnabled)
         DeedGameKind.MARK -> MarkGameEntry(host.onExit,
             onCompleted = { DeedGameScore.fromMark(it)?.let(host.onCompleted) },
-            interactionBlocked = host.interactionBlocked)
+            interactionBlocked = host.interactionBlocked, onHome = host.onHome, homeEnabled = host.homeEnabled)
         DeedGameKind.SIGNAL -> SignalGameEntry(host.onExit,
             onCompleted = { DeedGameScore.fromSignal(it)?.let(host.onCompleted) },
-            interactionBlocked = host.interactionBlocked)
+            interactionBlocked = host.interactionBlocked, onHome = host.onHome, homeEnabled = host.homeEnabled)
         DeedGameKind.ROUTE_MAP -> StarChartGameEntry(host.onExit,
             onCompleted = { DeedGameScore.fromRouteMap(it)?.let(host.onCompleted) },
-            routeMap = true, interactionBlocked = host.interactionBlocked)
+            routeMap = true, interactionBlocked = host.interactionBlocked, onHome = host.onHome, homeEnabled = host.homeEnabled)
         DeedGameKind.BOAT -> BoatGameEntry(host.onExit, repairCoins = host.repairCoins,
             onPaidRepair = { request ->
                 when (host.onPayRepair(request.requestId, request.rockIndex)) {
@@ -70,7 +70,7 @@ internal fun ChapterStoryGameContent(host: ChapterDeedContent) {
                 }
             },
             onArrived = { DeedGameScore.fromBoat(it)?.let(host.onCompleted) },
-            startPrepared = true, interactionBlocked = host.interactionBlocked)
+            startPrepared = true, interactionBlocked = host.interactionBlocked, onHome = host.onHome, homeEnabled = host.homeEnabled)
         else -> error("Not a chapter game: ${host.kind}")
     }
 }

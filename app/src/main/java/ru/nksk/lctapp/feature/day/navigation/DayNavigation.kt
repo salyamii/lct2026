@@ -26,7 +26,8 @@ fun EntryProviderScope<NavKey>.dayEntry(onBack: (Day) -> Unit, onFinished: (Day,
     onGame: (Day, String) -> Unit, onLearning: (Day) -> Unit = {},
     onStoryGame: (Day, String, String) -> Unit = { _, _, _ -> },
     onReflection: (Day, Int) -> Unit = { _, _ -> }, isCurrentEntry: (Day) -> Boolean = { true },
-    onRestarted: (Day) -> Unit = {}, summaryExtra: (@Composable () -> Unit)? = null) {
+    onRestarted: (Day) -> Unit = {}, summaryExtra: (@Composable () -> Unit)? = null,
+    onHome: (Day) -> Unit = onBack) {
     entry<Day> { source ->
         val viewModel = hiltViewModel<DayViewModel>()
         val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -68,6 +69,8 @@ fun EntryProviderScope<NavKey>.dayEntry(onBack: (Day) -> Unit, onFinished: (Day,
             state = state,
             onAction = { if (it is DayAction.FinancialContextPresented || lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) viewModel.onAction(it) },
             onBack = dropUnlessResumed { onBack(source) },
+            onHome = dropUnlessResumed { if (viewModel.canReturnHome()) onHome(source) },
+            homeEnabled = viewModel.canReturnHome(),
             // Starting the day was already committed. Continue to the existing menu without another command.
             onLoadingContinue = dropUnlessResumed { onFinished(source, null) },
             summaryExtra = summaryExtra,
