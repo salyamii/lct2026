@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -57,11 +56,8 @@ fun DifferencesGameScreen(
         modifier = Modifier.fillMaxSize().background(DeedColors.Scene),
     ) {
         Box {
-            GameArtwork(deed?.sceneRes ?: R.drawable.location_observatory,
-                contentDescription = null,
-                modifier = Modifier.fillMaxWidth().height(150.dp),
-                contentScale = ContentScale.Crop,
-            )
+            DeedBackdrop(deed?.sceneRes ?: R.drawable.location_observatory,
+                modifier = Modifier.fillMaxWidth().height(150.dp), blurred = deed?.storyAction != true)
             deed?.activityArtworkRes?.let { art -> GameArtwork(art, null,
                 Modifier.align(Alignment.BottomEnd).size(92.dp).padding(4.dp)) }
             DeedHeader(deed?.title ?: "Сверка находок", onBack = onBack)

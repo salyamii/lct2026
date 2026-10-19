@@ -19,7 +19,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import ru.nksk.lctapp.app.createInitialGameState
+import ru.nksk.lctapp.data.game.content.bundledGameCatalog
 import ru.nksk.lctapp.data.game.local.GameDatabase
+import ru.nksk.lctapp.domain.pet.PetCosmetics
 import ru.nksk.lctapp.domain.content.*
 import ru.nksk.lctapp.domain.economy.*
 import ru.nksk.lctapp.domain.game.OwnedItem
@@ -146,6 +148,46 @@ class GamePersistenceTest {
         assertEquals("earning", state.story.activeEventId)
         assertEquals(4, state.story.nextScriptPosition)
         assertEquals("day", games.update { it.copy(story = it.story.copy(nextScriptPosition = null)) }.story.currentDayId)
+    }
+
+    @Test fun capDescriptionsUpdateStoredRowsWithoutChangingOwnedItemsOrHistory() = runBlocking {
+        val capIds = PetCosmetics.parentRewards.flatMap { it.itemIds }.toSet()
+        val caps = bundledGameCatalog().content.items.filter { it.id in capIds }
+        val legacyDescriptions = listOf(
+            "Награда за квест с родителем. Можно надеть в снаряжении.",
+            "Подарок от родителя. Можно надеть в разделе «Снаряжение».",
+        )
+        val ordinary = ItemDefinition("ordinary", "Другая вещь", legacyDescriptions.last())
+        content.install(StoryContent(items = caps.mapIndexed { index, item ->
+            item.copy(description = legacyDescriptions[index % legacyDescriptions.size])
+        } + ordinary))
+        games.initializeIfAbsent(createInitialGameState().copy(ownedItems = listOf(
+            OwnedItem("cap-first", caps.first().id), OwnedItem("other", ordinary.id),
+            OwnedItem("cap-second", caps.first().id),
+        )))
+        val beforeGame = games.read()
+        val beforeHistory = games.readHistory()
+        val expectedRows = db.storyContentDao().readItem().map {
+            if (it.id in capIds) it.copy(description = "Кепка") else it
+        }
+        repeat(2) { content.install(StoryContent(items = caps)) }
+        assertEquals(expectedRows, db.storyContentDao().readItem())
+        assertEquals(beforeGame, games.read())
+        assertEquals(beforeHistory, games.readHistory())
+        assertEquals(caps.toSet(), content.read().items.filter { it.id in capIds }.toSet())
+    }
+
+    @Test fun failedCatalogInstallRollsBackCapDescriptionUpgrade() = runBlocking {
+        val cap = bundledGameCatalog().content.items.first {
+            it.id in PetCosmetics.parentRewards.first().itemIds
+        }
+        val previous = cap.copy(description = "Подарок от родителя. Можно надеть в разделе «Снаряжение».")
+        content.install(StoryContent(items = listOf(previous)))
+        val before = db.storyContentDao().readItem()
+        expectFailure { content.install(StoryContent(
+            items = listOf(cap), chapters = listOf(ChapterDefinition("bad-upgrade", "Bad", "absent-goal")),
+        )) }
+        assertEquals(before, db.storyContentDao().readItem())
     }
 
     @Test fun identicalContentCanBeInstalledAgainButChangedChoiceCannotRewriteHistory() = runBlocking {

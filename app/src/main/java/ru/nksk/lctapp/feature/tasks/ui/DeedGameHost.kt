@@ -1,7 +1,6 @@
 package ru.nksk.lctapp.feature.tasks.ui
 
 import ru.nksk.lctapp.core.ui.components.GameLoadingIndicator
-import ru.nksk.lctapp.core.ui.components.GameArtwork
 import ru.nksk.lctapp.core.ui.components.GameActionButton
 import ru.nksk.lctapp.core.ui.components.GameActionStyle
 import ru.nksk.lctapp.core.ui.components.InlineSavingsTransfer
@@ -18,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -77,8 +75,7 @@ private fun DeedRewardResult(state: DeedGameUiState, onRetry: () -> Unit, onCont
     val reward = checkNotNull(state.reward)
     val scroll = rememberScrollState()
     BoxWithConstraints(Modifier.fillMaxSize()) {
-        GameArtwork(reward.sceneRes,
-            contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+        DeedBackdrop(reward.sceneRes, modifier = Modifier.fillMaxSize())
         // The jar belongs to the full screen, not to the form's remaining space.
         // Its position and size depend only on the viewport before keyboard insets.
         val jarHeight = (maxHeight * .26f).coerceAtMost(320.dp)

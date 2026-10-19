@@ -47,6 +47,7 @@ import ru.nksk.lctapp.feature.tasks.ui.DeedButton
 import ru.nksk.lctapp.feature.tasks.ui.DeedButtonSoft
 import ru.nksk.lctapp.feature.tasks.ui.DeedColors
 import ru.nksk.lctapp.feature.tasks.ui.DeedHeader
+import ru.nksk.lctapp.feature.tasks.ui.DeedBackdrop
 import ru.nksk.lctapp.feature.tasks.ui.DeedSheet
 
 internal val PracticeInk = GameInk
@@ -70,7 +71,7 @@ internal fun PracticeScaffold(
 ) {
     Column(Modifier.fillMaxSize().background(DeedColors.Scene)) {
         Box {
-            GameArtwork(scene, null, Modifier.fillMaxWidth().height(116.dp), contentScale = ContentScale.Crop)
+            DeedBackdrop(scene, Modifier.fillMaxWidth().height(116.dp), blurred = deed?.storyAction == false)
             Box(Modifier.fillMaxWidth().height(116.dp).background(
                 Brush.verticalGradient(listOf(Color(0x99171440), Color.Transparent))))
             DeedHeader(title, onBack)

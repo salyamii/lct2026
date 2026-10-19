@@ -45,11 +45,8 @@ fun LightsGameScreen(
         modifier = Modifier.fillMaxSize().background(DeedColors.Scene),
     ) {
         Box {
-            GameArtwork(deed?.sceneRes ?: R.drawable.location_observatory,
-                contentDescription = null,
-                modifier = Modifier.fillMaxWidth().height(150.dp),
-                contentScale = ContentScale.Crop,
-            )
+            DeedBackdrop(deed?.sceneRes ?: R.drawable.location_observatory,
+                modifier = Modifier.fillMaxWidth().height(150.dp), blurred = deed?.storyAction != true)
             deed?.activityArtworkRes?.let { art -> GameArtwork(art, null,
                 Modifier.align(Alignment.BottomEnd).size(92.dp).padding(4.dp)) }
             DeedHeader(deed?.title ?: "Фонари обсерватории", onBack = onBack)

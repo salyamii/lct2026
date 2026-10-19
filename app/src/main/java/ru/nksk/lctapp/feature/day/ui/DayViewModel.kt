@@ -87,6 +87,7 @@ internal data class DayUiState(
     val eventArtwork: EventSceneArtwork? = null,
     val eventBackgroundRes: Int = R.drawable.menu_village,
     val deedDeadline: String? = null,
+    val shortDeed: Boolean = false,
     val audioOccurrenceId: String? = null,
     val eventMedia: EventMedia = EventMedia(),
 ) {
@@ -619,6 +620,7 @@ internal class DayViewModel @Inject constructor(private val session: GameSession
             locationTitle = renderPetText(presentation.locationTitle ?: card?.category.orEmpty(), saved.pet.name),
             purchaseArtworkRes = purchaseArtworkRes,
             deedDeadline = offeredDeed?.let { deedDeadline(checkNotNull(day).day, it.expiresDay) },
+            shortDeed = isDeed(saved),
             pet = PetEventCondition.forPresentation(saved, session.catalog.policies).toAdventurePetPresentation(),
             eventArtwork = presentation.media.sceneArtwork(event?.let(catalog::displayTitle).orEmpty())
                 ?: eventSceneArtwork(event?.id, variant?.character ?: card?.character),

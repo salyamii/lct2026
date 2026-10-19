@@ -33,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -86,11 +85,8 @@ fun TargetStopScreen(
         val sceneHeight = if (maxHeight < 480.dp) 72.dp else 150.dp
         Column(Modifier.fillMaxSize()) {
             Box {
-                GameArtwork(deed?.sceneRes ?: R.drawable.location_observatory,
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxWidth().height(sceneHeight),
-                    contentScale = ContentScale.Crop,
-                )
+                DeedBackdrop(deed?.sceneRes ?: R.drawable.location_observatory,
+                modifier = Modifier.fillMaxWidth().height(sceneHeight), blurred = deed?.storyAction != true)
                 if (sceneHeight >= 150.dp) deed?.activityArtworkRes?.let { art -> GameArtwork(art, null,
                     Modifier.align(Alignment.BottomEnd).size(92.dp)) }
                 DeedHeader(deed?.title ?: stringResource(R.string.deeds_target_title), onBack = onBack)
