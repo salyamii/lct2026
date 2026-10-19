@@ -37,6 +37,21 @@ data class ParentSkillAssessment(
     val status: ParentSkillStatus,
     val policyVersion: String,
     val explanation: ParentSkillExplanation? = null,
+    val assessmentReason: String? = null,
+    val observationCounts: ParentObservationCounts? = null,
+)
+
+@Immutable
+data class ParentObservationCounts(
+    val observedEpisodes: Int,
+    val completedEpisodes: Int,
+    val supportedEpisodes: Int,
+    val difficultyEpisodes: Int,
+    val neutralEpisodes: Int,
+    val pendingEpisodes: Int,
+    val incompleteEpisodes: Int,
+    val supportedWithoutGameHints: Int,
+    val assistedEpisodes: Int,
 )
 
 @Immutable
@@ -69,7 +84,15 @@ data class ParentSkill(
     val material: ParentTopicMaterial? = null,
     /** Current local observations, kept separate from the server assessment's history boundary. */
     val localExplanation: ParentSkillExplanation? = null,
+    val completedEpisodes: Int = 0,
 )
+
+/** Prefer the server's counts so the numbers explain the displayed server status. */
+internal val ParentSkill.displayObservationCounts: ParentObservationCounts
+    get() = assessment?.observationCounts ?: ParentObservationCounts(
+        observedEpisodes, completedEpisodes, supportedEpisodes, difficultyEpisodes,
+        neutralEpisodes, pendingEpisodes, incompleteEpisodes, supportedWithoutGameHints, assistedEpisodes,
+    )
 
 @Immutable
 sealed interface ParentReportUiState {
@@ -88,3 +111,8 @@ data class ParentTopicMaterial(
     val researchBasis: String,
     val researchSources: List<String>,
 )
+
+/** Deduplicate exact wording only; retain separate recorded events. */
+internal fun ParentSkillExplanation.paragraphs(): List<String> =
+    (listOf(summary) + evidence).map(String::trim).filter(String::isNotBlank)
+        .distinctBy { it.replace(Regex("\\s+"), " ") }.take(3)

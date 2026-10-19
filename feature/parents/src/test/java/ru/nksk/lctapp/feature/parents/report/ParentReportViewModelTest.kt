@@ -24,6 +24,13 @@ class ParentReportViewModelTest {
     @Before fun setUp() = Dispatchers.setMain(dispatcher)
     @After fun tearDown() = Dispatchers.resetMain()
 
+    @Test fun explanationDropsLiteralRepetitionAndKeepsDifferentEvents() {
+        val explanation = ParentSkillExplanation("Описание", "Получилось сравнить.", listOf(
+            "Получилось  сравнить.", "День 2: выбрал больше", "День 3: выбрал больше"))
+        assertEquals(listOf("Получилось сравнить.", "День 2: выбрал больше", "День 3: выбрал больше"),
+            explanation.paragraphs())
+    }
+
     @Test fun reportObservationsOnlyRunWhileAnUnlockedScreenCollects() = runTest(dispatcher) {
         var activeObservers = 0
         val repository = object : ParentReportRepository {

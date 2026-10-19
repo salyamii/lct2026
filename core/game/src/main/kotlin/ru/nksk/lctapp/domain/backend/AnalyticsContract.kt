@@ -97,6 +97,11 @@ data class SkillAssessmentDto(
     @Serializable(with = OptionalSkillExplanationSerializer::class)
     @EncodeDefault(EncodeDefault.Mode.NEVER)
     val explanation: SkillExplanation? = null,
+    @Serializable(with = OptionalAssessmentReasonSerializer::class)
+    val assessmentReason: String? = null,
+    @Serializable(with = OptionalObservationCountsSerializer::class)
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
+    val observationCounts: SkillObservationCounts? = null,
 ) {
     init { require(policyVersion.isNotBlank()) }
 }

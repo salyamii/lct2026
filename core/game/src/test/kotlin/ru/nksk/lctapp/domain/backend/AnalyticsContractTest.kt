@@ -10,6 +10,43 @@ import ru.nksk.lctapp.domain.analytics.*
 class AnalyticsContractTest {
     private val json = Json { encodeDefaults = true; classDiscriminator = "_type" }
 
+    @Test fun serverObservationCountsSurviveTransportInsteadOfBeingDiscarded() {
+        val compatibleJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+        val counts = """{"observedEpisodes":6,"completedEpisodes":6,"supportedEpisodes":5,"difficultyEpisodes":1,"neutralEpisodes":0,"pendingEpisodes":0,"incompleteEpisodes":0,"supportedWithoutGameHints":5,"assistedEpisodes":0}"""
+        val decoded = compatibleJson.decodeFromString<SkillAssessmentDto>(
+            """{"skillId":"FIN-01","status":"MASTERED","policyVersion":"v1","observationCounts":$counts}""")
+        val encoded = compatibleJson.encodeToString(decoded)
+        assertTrue("The server's observation counters must reach both parent clients", encoded.contains("\"observationCounts\":"))
+        assertTrue(encoded.contains("\"supportedEpisodes\":5"))
+        assertTrue(encoded.contains("\"difficultyEpisodes\":1"))
+    }
+
+    @Test fun invalidOrMissingOptionalCountsDoNotHideAValidStatus() {
+        val compatibleJson = Json { ignoreUnknownKeys = true }
+        val valid = """{"observedEpisodes":6,"completedEpisodes":6,"supportedEpisodes":5,"difficultyEpisodes":1,"neutralEpisodes":0,"pendingEpisodes":0,"incompleteEpisodes":0,"supportedWithoutGameHints":5,"assistedEpisodes":1}"""
+        for (counts in listOf("null", "[]", "42", "{}", "{\"observedEpisodes\":-1}",
+            valid.replace("\"supportedEpisodes\":5", "\"supportedEpisodes\":\"5\""),
+            valid.replace("\"supportedEpisodes\":5", "\"supportedEpisodes\":-1"))) {
+            val decoded = compatibleJson.decodeFromString<SkillAssessmentDto>(
+                """{"skillId":"FIN-01","status":"MASTERED","policyVersion":"v1","observationCounts":$counts}""")
+            assertEquals(SkillStatus.MASTERED, decoded.status)
+            assertNull(decoded.observationCounts)
+        }
+        val legacy = compatibleJson.decodeFromString<SkillAssessmentDto>(
+            """{"skillId":"FIN-01","status":"MASTERED","policyVersion":"v1"}""")
+        assertNull(legacy.observationCounts)
+    }
+
+    @Test fun reasonIsOptionalAndMalformedTextDoesNotHideAssessment() {
+        fun decode(value: String) = json.decodeFromString<SkillAssessmentDto>(
+            """{"skillId":"FIN-01","status":"MASTERED","policyVersion":"v1","assessmentReason":$value}""")
+        assertEquals("Два успеха", decode("\"Два успеха\"").assessmentReason)
+        listOf("null", "[]", "42", "{}", "\" \"", "\"" + "x".repeat(601) + "\"").forEach {
+            assertEquals(SkillStatus.MASTERED, decode(it).status)
+            assertNull(decode(it).assessmentReason)
+        }
+    }
+
     @Test fun statusesMatchBackendExactlyWithoutReusingEpisodeOutcomes() {
         assertEquals(listOf("MASTERED", "PRACTICING", "NO_DATA", "HAS_PROBLEM"), SkillStatus.entries.map { it.name })
         SkillStatus.entries.forEach { status ->

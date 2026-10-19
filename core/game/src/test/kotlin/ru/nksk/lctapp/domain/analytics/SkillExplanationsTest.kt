@@ -60,7 +60,7 @@ class SkillExplanationsTest {
             fact("saving", 2, FactDetail.SavingCycleClosed("goal", historyComplete = true))
                 .copy(actor = AnalyticsActor.SYSTEM),
         ))
-        assertEquals("Пока мало примеров, чтобы судить о регулярном накоплении.", explanation.summary)
+        assertEquals("Пока мало пополнений копилки, чтобы судить о накоплении.", explanation.summary)
         assertTrue(explanation.evidence.single().text.contains("после одного поступления"))
         assertTrue(explanation.evidence.single().text.contains("Пока рано говорить, что это стало привычкой"))
         assertFalse(explanation.evidence.single().text.contains("не умеет"))
@@ -169,7 +169,7 @@ class SkillExplanationsTest {
                 reason = ObservationReason.ORIGINAL_SHORTFALL).copy(measures = mapOf("baselineShortfall" to 21)),
         )))
         assertEquals("Денег на необходимое не хватало ещё до распределения.", explanation.evidence.single().text)
-        assertEquals("Пока мало решений, чтобы понять, как ребёнок распределяет деньги.", explanation.summary)
+        assertEquals("Пока мало решений о деньгах, чтобы увидеть, как ребёнок их распределяет.", explanation.summary)
     }
 
     @Test fun unknownRuleVersionAndInvalidMeasurementsNeverInventAmounts() {
@@ -270,7 +270,7 @@ class SkillExplanationsTest {
         ))
         assertTrue(explanation.evidence.single().text.contains("нельзя уверенно сказать"))
         assertFalse(explanation.evidence.single().text.contains("не хватало"))
-        assertEquals("Пока мало примеров, чтобы судить о регулярном накоплении.", explanation.summary)
+        assertEquals("Пока мало пополнений копилки, чтобы судить о накоплении.", explanation.summary)
     }
 
     @Test fun partialPlannedDepositsAreNotRewordedAsNoDeposits() {
@@ -428,7 +428,7 @@ class SkillExplanationsTest {
             SkillEventContext(1, " "), SkillEventContext(1, "Название\u0000")).forEach { context ->
             assertEquals(ordinary, SkillExplanations.explain(profile) { context })
         }
-        assertEquals("Правильный ответ был показан, указана помощь взрослого.", ordinary.evidence.single().text)
+        assertEquals("Правильный ответ был показан; указана помощь взрослого.", ordinary.evidence.single().text)
     }
 
     @Test fun contextlessResultDoesNotReferToAnUnseenSituation() {

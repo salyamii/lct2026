@@ -133,16 +133,16 @@ object SkillExplanations {
         }
         return when (skill) {
             SkillId.COMPARE_AMOUNTS -> "Пока мало ответов, чтобы понять, как ребёнок сравнивает суммы."
-            SkillId.PLAN_BUDGET -> "Пока мало решений, чтобы понять, как ребёнок распределяет деньги."
-            SkillId.PRIORITIZE_NEEDS -> "Пока мало примеров выбора между желанной покупкой и необходимым."
+            SkillId.PLAN_BUDGET -> "Пока мало решений о деньгах, чтобы увидеть, как ребёнок их распределяет."
+            SkillId.PRIORITIZE_NEEDS -> "Пока мало покупок, где видно, оставляет ли ребёнок деньги на необходимое."
             SkillId.MAKE_MONEY_LAST -> "Пока неизвестно, хватает ли денег на необходимое до следующего дохода."
-            SkillId.SAVE_FOR_GOAL -> "Пока мало примеров, чтобы судить о регулярном накоплении."
-            SkillId.DELAY_PURCHASE -> "Пока мало примеров, чтобы понять, готов ли ребёнок подождать с покупкой ради цели."
-            SkillId.BUILD_EMERGENCY_FUND -> "Пока мало примеров того, как ребёнок оставляет и использует запас."
+            SkillId.SAVE_FOR_GOAL -> "Пока мало пополнений копилки, чтобы судить о накоплении."
+            SkillId.DELAY_PURCHASE -> "Пока не было выбора «подождать ради цели или купить сейчас» — судить рано."
+            SkillId.BUILD_EMERGENCY_FUND -> "Пока мало случаев с запасом — не видно, оставляет ли его ребёнок и как тратит."
             SkillId.ADAPT_AFTER_EXPENSE -> "Пока мало решений после неожиданных расходов."
-            SkillId.COMPARE_COSTS -> "Пока мало примеров, чтобы понять, учитывает ли ребёнок деньги, силы и время при выборе."
+            SkillId.COMPARE_COSTS -> "Пока мало выборов, где видно, взвешивает ли ребёнок цену вместе со силами и временем."
             SkillId.PLAN_EXTRA_INCOME -> "Пока неизвестно, удалось ли выполнить выбранное дело и распорядиться заработком."
-            SkillId.RECONSIDER_DECISION -> "Пока мало примеров того, как ребёнок учитывает прошлый опыт в новом выборе."
+            SkillId.RECONSIDER_DECISION -> "Пока мало похожих выборов подряд, чтобы увидеть, использует ли ребёнок прошлый опыт."
             SkillId.UNDERSTAND_INCOME_AND_EXPENSES -> "Пока мало ответов о доходах, расходах и переводах в копилку."
         }
     }
@@ -303,12 +303,13 @@ object SkillExplanations {
             if (Assistance.ADULT_REPORTED in observation.assistance) add("указана помощь взрослого")
         }
         // No hints recorded does not establish absence of adult help or an independent decision.
-        return if (help.isEmpty()) "" else "${help.joinToString(", ").replaceFirstChar { it.uppercase() }}."
+        // One sentence: evidence text is limited to two dots in total.
+        return if (help.isEmpty()) "" else "${help.joinToString("; ").replaceFirstChar { it.uppercase() }}."
     }
 
     private fun reasonText(observation: SkillObservation): String = with(observation) {
         when (reason) {
-            ObservationReason.CONTEXT_MISSING -> "Для вывода не хватает сведений об условиях выбора."
+            ObservationReason.CONTEXT_MISSING -> "Мало видно, как именно шёл этот выбор, поэтому вывода пока нет."
             ObservationReason.PRESENTATION_MISSING ->
                 "Неизвестно, видел ли ребёнок нужную информацию перед выбором."
             ObservationReason.INVALID_CONTEXT ->
