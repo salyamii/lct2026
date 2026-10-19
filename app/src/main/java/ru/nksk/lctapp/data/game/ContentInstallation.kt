@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.data.game
 
+import ru.nksk.lctapp.data.game.content.PARENT_CAP_DESCRIPTION
 import ru.nksk.lctapp.domain.content.EventType
 import ru.nksk.lctapp.domain.content.ItemOperation
 import ru.nksk.lctapp.domain.content.StoryContent
@@ -22,12 +23,16 @@ internal fun StoryContent.withCurrentTypography(): StoryContent = copy(
 
 private fun String.currentTypography(): String = replace('\u2014', '-')
 
-/** Compare the pre-main cap wording without rewriting saved definitions or relaxing other fields. */
+/** Only the two released cap descriptions may upgrade; every other field remains immutable. */
 private fun StoryContent.withLegacyParentCapDescriptions(): StoryContent {
     val capIds = PetCosmetics.parentRewards.flatMap { it.itemIds }.toSet()
+    val legacyDescriptions = setOf(
+        "Награда за квест с родителем. Можно надеть в снаряжении.",
+        "Подарок от родителя. Можно надеть в разделе «Снаряжение».",
+    )
     return copy(items = items.map { item ->
-        if (item.id in capIds && item.description == "Награда за квест с родителем. Можно надеть в снаряжении.")
-            item.copy(description = "Подарок от родителя. Можно надеть в разделе «Снаряжение».")
+        if (item.id in capIds && item.description in legacyDescriptions)
+            item.copy(description = PARENT_CAP_DESCRIPTION)
         else item
     })
 }

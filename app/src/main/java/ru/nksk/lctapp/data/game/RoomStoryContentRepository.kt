@@ -3,11 +3,13 @@ package ru.nksk.lctapp.data.game
 import androidx.room3.withReadTransaction
 import androidx.room3.withWriteTransaction
 import javax.inject.Inject
+import ru.nksk.lctapp.data.game.content.PARENT_CAP_DESCRIPTION
 import ru.nksk.lctapp.data.game.local.GameDatabase
 import ru.nksk.lctapp.data.game.local.toDomain
 import ru.nksk.lctapp.data.game.local.toEntity
 import ru.nksk.lctapp.domain.content.StoryContent
 import ru.nksk.lctapp.domain.content.StoryContentRepository
+import ru.nksk.lctapp.domain.pet.PetCosmetics
 
 internal class RoomStoryContentRepository @Inject constructor(private val database: GameDatabase) : StoryContentRepository {
     private val dao = database.storyContentDao()
@@ -30,6 +32,15 @@ internal class RoomStoryContentRepository @Inject constructor(private val databa
             dao.insertGoalRequiredItem(added.requiredItems.map { it.toEntity() })
             dao.insertEventItemEffect(added.eventItemEffects.map { it.toEntity() })
             dao.insertChoiceItemEffect(added.choiceItemEffects.map { it.toEntity() })
+            // The comparison above admits only released cap copy, never arbitrary definition edits.
+            val capIds = PetCosmetics.parentRewards.flatMap { it.itemIds }.toSet()
+            val existingItems = existing.items.associateBy { it.id }
+            content.items.filter { it.id in capIds && it.description == PARENT_CAP_DESCRIPTION }.forEach { item ->
+                val previous = existingItems[item.id]
+                if (previous != null && previous.description != item.description) {
+                    check(dao.updateItemDescription(item.id, previous.description, item.description) == 1)
+                }
+            }
         }
     }
 

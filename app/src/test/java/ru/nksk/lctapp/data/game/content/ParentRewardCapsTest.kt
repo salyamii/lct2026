@@ -22,6 +22,7 @@ class ParentRewardCapsTest {
         for (cosmetic in PetCosmetics.parentRewards) {
             val item = added.items.single { it.id == cosmetic.itemIds.single() }
             assertEquals(cosmetic.title, item.name)
+            assertEquals("Кепка", item.description)
             assertEquals(ItemCategory.ACCESSORY, item.category)
             assertNull(item.priceCoins)
             assertFalse(content.requiredItems.any { it.itemId == item.id })
@@ -30,7 +31,7 @@ class ParentRewardCapsTest {
         }
     }
 
-    @Test fun previousQuestBuildCapDefinitionsRemainCompatibleWithoutRewritingStoredItems() {
+    @Test fun previousQuestBuildCapDefinitionsRemainCompatibleWithCurrentDescriptions() {
         val current = bundledGameCatalog().content
         val ids = PetCosmetics.parentRewards.flatMap { it.itemIds }.toSet()
         val oldDescription = "Награда за квест с родителем. Можно надеть в снаряжении."
@@ -40,6 +41,10 @@ class ParentRewardCapsTest {
         })
         assertEquals(ru.nksk.lctapp.domain.content.StoryContent(), current.newDefinitionsComparedTo(saved))
         assertTrue(saved.items.filter { it.id in ids }.all { it.description == oldDescription })
+        val previousMain = saved.copy(items = saved.items.map {
+            if (it.id in ids) it.copy(description = "Подарок от родителя. Можно надеть в разделе «Снаряжение».") else it
+        })
+        assertEquals(ru.nksk.lctapp.domain.content.StoryContent(), current.newDefinitionsComparedTo(previousMain))
         val cap = saved.items.first { it.id in ids }
         for (invalid in listOf(cap.copy(priceCoins = 1), cap.copy(category = ItemCategory.STORY),
             cap.copy(description = "Другая награда"), cap.copy(name = "Другой предмет"))) {

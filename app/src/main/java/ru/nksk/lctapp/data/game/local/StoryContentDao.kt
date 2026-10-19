@@ -19,6 +19,9 @@ internal interface StoryContentDao {
     @Insert
     suspend fun insertItem(rows: List<ItemEntity>)
 
+    @Query("UPDATE ITEM SET description = :description WHERE id = :id AND description = :previousDescription")
+    suspend fun updateItemDescription(id: String, previousDescription: String, description: String): Int
+
     @Query("SELECT * FROM CHAPTER ORDER BY id")
     suspend fun readChapter(): List<ChapterEntity>
 
