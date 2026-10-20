@@ -1,6 +1,6 @@
 package ru.nksk.lctapp.feature.onboarding.ui
 
-import androidx.compose.foundation.Image
+import ru.nksk.lctapp.core.ui.components.BundledArtwork
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -18,7 +18,6 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
@@ -44,7 +43,7 @@ fun OnboardingScreen(
     loadingIndicator: @Composable (Modifier) -> Unit = { Text("Загрузка…", it) },
 ) {
     BoxWithConstraints(modifier.fillMaxSize().background(Night)) {
-        Image(painterResource(artwork.background), null, Modifier.fillMaxSize().blur(1.7.dp),
+        BundledArtwork(artwork.background, null, Modifier.fillMaxSize().blur(1.7.dp),
             contentScale = ContentScale.Crop)
         val actions: (OnboardingAction) -> Unit = { if (!saving) onAction(it) }
         if (maxWidth >= 700.dp && maxWidth > maxHeight) {

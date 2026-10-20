@@ -39,6 +39,7 @@ internal fun GameBackdrop(@DrawableRes resource: Int, blurred: Boolean, modifier
             .allowHardware(false)
             .transformations(SoftBackdropTransformation)
             .transformationDispatcher(Dispatchers.Default)
+            .crossfade(180)
             .build()
     }
     key(request) {

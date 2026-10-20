@@ -1,6 +1,6 @@
 package ru.nksk.lctapp.feature.onboarding.ui
 
-import androidx.compose.foundation.Image
+import ru.nksk.lctapp.core.ui.components.BundledArtwork
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -35,7 +35,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
@@ -101,7 +100,7 @@ fun CustomizationScreen(
             val scope = rememberCoroutineScope()
             Column(Modifier.fillMaxSize().verticalScroll(scroll)) {
                 Box(Modifier.fillMaxWidth()) {
-                    Image(painterResource(artwork.background), null,
+                    BundledArtwork(artwork.background, null,
                         Modifier.matchParentSize().testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
                     Column {
                         CustomizationHeader(onBack, artwork, saving)
@@ -125,7 +124,7 @@ fun CustomizationScreen(
         } else if (maxWidth >= 720.dp) {
             Row(Modifier.fillMaxSize()) {
                 BoxWithConstraints(Modifier.weight(1f).fillMaxHeight()) {
-                    Image(painterResource(artwork.background), null,
+                    BundledArtwork(artwork.background, null,
                         Modifier.matchParentSize().testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
                     CharacterStage(state, artwork,
                         Modifier.size(minOf(maxWidth * .95f, maxHeight * .75f, 520.dp))
@@ -148,7 +147,7 @@ fun CustomizationScreen(
             val stageHeight = if (keyboardHeight > 0.dp) 0.dp else (maxHeight * .30f).coerceIn(100.dp, 300.dp)
             Column(Modifier.fillMaxSize()) {
                 Box(Modifier.fillMaxWidth()) {
-                    Image(painterResource(artwork.background), null,
+                    BundledArtwork(artwork.background, null,
                         Modifier.matchParentSize().testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
                     Column {
                         CustomizationHeader(onBack, artwork, saving)
@@ -343,7 +342,7 @@ private fun CharacterStage(
 ) {
     BoxWithConstraints(modifier) {
         val canvasSize = minOf(maxWidth, maxHeight + 20.dp, maxCanvas)
-        Image(painterResource(artwork.image(state.fur)), "Образ спутника: ${state.fur.label}",
+        BundledArtwork(artwork.image(state.fur), "Образ спутника: ${state.fur.label}",
             Modifier.requiredSize(canvasSize).align(Alignment.Center).offset(y = (-14).dp), contentScale = ContentScale.Fit)
         Text("${state.name.ifBlank { "Твой спутник" }}, ${state.temperament.label.lowercase()}",
             modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 16.dp, vertical = 10.dp)

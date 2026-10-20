@@ -1,6 +1,6 @@
 package ru.nksk.lctapp.feature.onboarding.ui
 
-import androidx.compose.foundation.Image
+import ru.nksk.lctapp.core.ui.components.BundledArtwork
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -44,11 +44,11 @@ fun AdventureIntroductionScreen(
             if (needsOnboardingScroll(maxHeight)) {
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                     Box(Modifier.fillMaxWidth()) {
-                        Image(painterResource(artwork.background), null, Modifier.matchParentSize()
+                        BundledArtwork(artwork.background, null, Modifier.matchParentSize()
                             .testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
                         Column {
                             CustomizationHeader(onBack, artwork, saving = saving, title = "Всё готово!", backDescription = "Назад к аксессуарам")
-                            Image(painterResource(portrait), "Твой спутник готов к приключениям",
+                            BundledArtwork(portrait, "Твой спутник готов к приключениям",
                                 Modifier.fillMaxWidth().height(140.dp), contentScale = ContentScale.Fit)
                         }
                     }
@@ -59,8 +59,8 @@ fun AdventureIntroductionScreen(
             } else if (maxWidth >= 720.dp) {
                 Row(Modifier.fillMaxSize()) {
                     BoxWithConstraints(Modifier.weight(1f).fillMaxHeight()) {
-                        Image(painterResource(artwork.background), null, Modifier.matchParentSize().testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
-                        Image(painterResource(portrait), "Твой спутник готов к приключениям",
+                        BundledArtwork(artwork.background, null, Modifier.matchParentSize().testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
+                        BundledArtwork(portrait, "Твой спутник готов к приключениям",
                             Modifier.size(minOf(maxWidth * .95f, maxHeight * .75f, 520.dp)).align(Alignment.Center))
                         CustomizationHeader(onBack, artwork, saving = saving, title = "Всё готово!", backDescription = "Назад к аксессуарам")
                     }
@@ -71,11 +71,11 @@ fun AdventureIntroductionScreen(
                 val stageHeight = (maxHeight * .27f).coerceIn(110.dp, 280.dp)
                 Column(Modifier.fillMaxSize()) {
                     Box(Modifier.fillMaxWidth()) {
-                        Image(painterResource(artwork.background), null, Modifier.matchParentSize().testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
+                        BundledArtwork(artwork.background, null, Modifier.matchParentSize().testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
                         Column {
                             CustomizationHeader(onBack, artwork, saving = saving, title = "Всё готово!", backDescription = "Назад к аксессуарам")
                             Box(Modifier.fillMaxWidth().height(stageHeight), contentAlignment = Alignment.Center) {
-                                Image(painterResource(portrait), "Твой спутник готов к приключениям",
+                                BundledArtwork(portrait, "Твой спутник готов к приключениям",
                                     Modifier.size(stageHeight + 20.dp).offset(y = (-8).dp))
                             }
                             Box(Modifier.fillMaxWidth().height(24.dp).background(IntroCream,

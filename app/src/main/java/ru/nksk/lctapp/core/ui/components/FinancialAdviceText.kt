@@ -30,7 +30,7 @@ internal fun FinancialAdviceText(text: String, modifier: Modifier = Modifier, co
             onShown()
         }
     }
-    Text(text, modifier.onGloballyPositioned { coordinates ->
+    Text(text, modifier.animateGameContentSize().onGloballyPositioned { coordinates ->
         val bounds = coordinates.boundsInWindow()
         visible = bounds.width > 0 && bounds.height > 0 &&
             bounds.width >= coordinates.size.width - 1 && bounds.height >= coordinates.size.height - 1

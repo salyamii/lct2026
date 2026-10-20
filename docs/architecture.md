@@ -8,7 +8,7 @@ historical decisions and migrations live in the design documents.
 
 | Module / package | Responsibility |
 | --- | --- |
-| `:core:ui` | Shared domain-independent Compose item carousel used by onboarding and parents |
+| `:core:ui` | Shared domain-independent Compose artwork loading, content-size animation and item carousel |
 | `:core:game` | Pure Kotlin domain: game aggregate, commands, rules, content, history, financial projections, snapshot/backend contracts |
 | `:app` / `app` | Android composition, Hilt graph, startup and cross-feature navigation |
 | `:app` / `feature/<name>` | Feature UI, immutable screen state, ViewModels, actions and navigation entries |
@@ -178,11 +178,13 @@ callbacks through `PlaybackLifecycleEffect`. This must not wait for a Compose
 SideEffect: a background window can stop scheduling frames before recomposition.
 Foreground return resumes the retained playback position and keeps sound preferences.
 
-Illustrated adventure screens and the menu use `GameArtworkScene` to reveal their
-initial foreground image group together after asynchronous decode. Backgrounds,
+Illustrated adventure screens and the menu use `GameArtworkScene` to fade in their
+initial foreground image group together after asynchronous decode (ARTWORK-PERF-D-001). Backgrounds,
 text and controls remain mounted and visible while images load; decoding never
 replaces the entire screen with a loading page. Errors release the barrier;
-later pose or clothing updates do not hide a scene already on screen. Scene identity
+later pose or clothing updates do not hide a scene already on screen. Mounted artwork
+that has already appeared stays visible across cards when its resource is unchanged;
+the pet retains its last ready frame while a new pose decodes. Scene identity
 is an event/location key, never the changing world revision or animation phase.
 Background blur uses a bounded cached software transform; a failed transform
 falls back once to the same location without blur. It never changes the location.
@@ -275,9 +277,11 @@ allocating a scrolling body. When both cannot fit, the panel scrolls as one colu
 Onboarding uses the same principle: a scrollable card must not receive only the
 leftover height via weight. Safe system/keyboard insets apply to controls; compact
 windows and large text retain accessible actions through scrolling (ARCH-D-008).
-By FINANCE-UI-D-028, the budget screen sets a body-height threshold large enough
-for an allocation card at the current font scale. The adviser and footer measure
-at natural height, with whole-panel scrolling when required. The food reminder
+By FINANCE-UI-D-028 and LAYOUT-MOTION-D-001, the budget screen sets a body-height
+threshold large enough for an allocation card at the current font scale. The adviser
+follows the allocation grid in the scrolling body, so advice cannot occupy the cards'
+viewport. Only confirmation stays fixed while it fits; the whole panel scrolls on
+short screens. Advice and action sections change size smoothly. The food reminder
 is separate and disappears once the draft covers the known requirement. Its
 actual exposure can carry across draft edits only for the same planning ID,
 requirement and real balances; a hidden reminder never invents learning evidence.
@@ -381,6 +385,23 @@ Frame artwork uses a smaller decode budget matched to its corner scale: 192 x 64
 for fixed corners, and 240 x 80 dp scaled with the system font for menu frames.
 Native frame labels, Back/actions, name and energy controls do not wait for the
 foreground scene's artwork barrier. The barrier still groups character/object art.
+Button/HUD plaque requests explicitly opt out of that barrier, so unfinished decoration cannot
+delay a ready character. The shared `:core:ui` `BundledArtwork` uses the same singleton
+Coil loader for onboarding and the app wrapper; runtime raster images never use
+`painterResource` in those screens. Small vectors and previews retain synchronous
+resource painters. Image requests keep the previous painter during replacement;
+initial scene artwork fades in over 220 ms, and independent cold images over 180 ms.
+Explicitly sized painters keep their decode budget when the layout shrinks. Growth
+upgrades that budget only after bounds have settled for 220 ms, keeping the ready
+painter until completion. Painter identity follows the resource, not each animation
+frame's pixel size. A new card does not repeat the same character's initial fade.
+Memory cards retain explicitly sized front and back painters from initial layout,
+before any tap, and crossfade between them without starting another image request.
+Natural-height advice, adventure content and adaptive action panels use the shared
+220 ms content-size animation (LAYOUT-MOTION-D-001). Budget reminders and transfer
+previews animate their own space instead of nesting another panel-size animation.
+Scrolling remains immediate;
+the animation does not introduce gameplay waits or alter exposure requirements.
 The changing live-pet reaction uses a tracked composition local, invalidating its
 readers rather than the entire navigation tree. Onboarding control renderers keep
 a remembered provider identity. These reduce redundant presentation work; device

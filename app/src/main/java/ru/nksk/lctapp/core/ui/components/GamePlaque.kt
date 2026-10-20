@@ -1,6 +1,8 @@
 package ru.nksk.lctapp.core.ui.components
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -11,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.platform.LocalDensity
@@ -35,10 +38,12 @@ internal fun GamePlaque(
     val textScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
     val decodeSize = if (fixedEdges) DpSize(192.dp, 64.dp)
         else DpSize(240.dp * textScale, 80.dp * textScale)
-    val painter = rememberGameArtworkLoad(resource, decodeSize).painter
+    val painter = rememberGameArtworkLoad(resource, decodeSize, participateInScene = false).painter
+    val opacity = animateFloatAsState(if (painter != null) 1f else 0f,
+        tween(180), label = "plaque-artwork-reveal")
     // Native labels and controls must not wait for unrelated scene artwork to finish loading.
     Box(modifier, contentAlignment = Alignment.Center) {
-        Canvas(Modifier.matchParentSize()) {
+        Canvas(Modifier.matchParentSize().graphicsLayer { alpha = opacity.value }) {
             if (painter != null && size.width > 0 && size.height > 0) {
                 val ratio = painter.intrinsicSize.let { if (it.height > 0) it.width / it.height else 3f }
                 if (fixedEdges) {

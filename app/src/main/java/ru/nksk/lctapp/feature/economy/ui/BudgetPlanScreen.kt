@@ -4,6 +4,12 @@ import ru.nksk.lctapp.core.ui.game.coinAmount
 import ru.nksk.lctapp.core.ui.game.paymentCoinAmount
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -70,6 +76,8 @@ internal fun BudgetPlanScreen(state: BudgetUiState, onAmountChange: (BudgetArtic
         mutableStateOf(false)
     }
     var transferVisible by remember(contextId) { mutableStateOf(false) }
+    var retainedFoodReminder by remember(state.planningId) { mutableStateOf(state.foodReminderText.orEmpty()) }
+    SideEffect { state.foodReminderText?.let { retainedFoodReminder = it } }
     val savingsAction = onOpenSavings ?: onDeposit ?: onWithdraw
     val character = pet?.toLiveAdventurePetPresentation()
     val characterArt = character?.artworkRes
@@ -89,9 +97,9 @@ internal fun BudgetPlanScreen(state: BudgetUiState, onAmountChange: (BudgetArtic
             actionSpacing = 0.dp,
             sectionSpacing = 0.dp,
             fillBody = true,
+            animateContentChanges = false,
             minimumBodyHeight = 176.dp * LocalDensity.current.fontScale.coerceAtLeast(1f),
             actions = {
-                BudgetAdviser(state, characterArt, character?.name, character?.motionIntensity ?: 1f, onAdviceShown)
                 BudgetPlanFooter(state, interactionsBlocked, onConfirm, contextId) { transferVisible = it }
             },
         ) {
@@ -112,7 +120,12 @@ internal fun BudgetPlanScreen(state: BudgetUiState, onAmountChange: (BudgetArtic
                         })
                 }
             }
-            state.foodReminderText?.let { reminder ->
+            // The reminder keeps its own animated space; the allocation grid is never resized
+            // or drawn under the adviser when the reminder appears or disappears.
+            AnimatedVisibility(state.foodReminderText != null,
+                enter = fadeIn(tween(180)) + expandVertically(tween(220)),
+                exit = fadeOut(tween(140)) + shrinkVertically(tween(220))) {
+                val reminder = state.foodReminderText ?: retainedFoodReminder
                 key(state.planningId, reminder) {
                     Box(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 6.dp),
                         contentAlignment = Alignment.Center) {
@@ -154,6 +167,9 @@ internal fun BudgetPlanScreen(state: BudgetUiState, onAmountChange: (BudgetArtic
                     }
                 }
             }
+            // Advice belongs to the scrolling content, after the complete allocation cards.
+            // Only confirmation stays fixed while the available height permits it.
+            BudgetAdviser(state, characterArt, character?.name, character?.motionIntensity ?: 1f, onAdviceShown)
         }
     }
     editing?.let { name ->
@@ -198,6 +214,12 @@ private fun BudgetAdviser(state: BudgetUiState, @DrawableRes characterArt: Int?,
 @Composable
 private fun BudgetPlanFooter(state: BudgetUiState, interactionsBlocked: Boolean, onConfirm: () -> Unit,
     contextId: String?, onTransferVisibility: (Boolean) -> Unit) {
+    val transferCopy = if (state.savingsTransfer > 0) {
+        "В копилку перейдёт ${paymentCoinAmount(state.savingsTransfer)}" to
+            "После подтверждения: доступно ${state.availableAfterConfirmation}, в копилке ${state.savingsAfterConfirmation}."
+    } else null
+    var retainedTransferCopy by remember(contextId) { mutableStateOf(transferCopy) }
+    SideEffect { if (transferCopy != null) retainedTransferCopy = transferCopy }
     Surface(Modifier.fillMaxWidth().testTag("budget.plan.footer"), color = GamePaper,
         shape = RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp)) {
         Box(contentAlignment = Alignment.Center) {
@@ -210,16 +232,21 @@ private fun BudgetPlanFooter(state: BudgetUiState, interactionsBlocked: Boolean,
                     else -> "Распределено: ${coinAmount(state.total)}"
                 }, color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.ExtraBold)
                 BudgetAllocationSummary(state)
-                if (state.savingsTransfer > 0) key(contextId, state.savingsTransfer) {
-                    Column(Modifier.fillMaxWidth().onGloballyPositioned { coordinates ->
-                        val visible = coordinates.boundsInWindow()
-                        onTransferVisibility(visible.width >= coordinates.size.width - 1 &&
-                            visible.height >= coordinates.size.height - 1 && visible.width > 0 && visible.height > 0)
-                    }, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text("В копилку перейдёт ${paymentCoinAmount(state.savingsTransfer)}",
-                            color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                        Text("После подтверждения: доступно ${state.availableAfterConfirmation}, в копилке ${state.savingsAfterConfirmation}.",
-                            color = PlanMuted, fontFamily = Nunito, fontSize = 12.sp, lineHeight = 17.sp)
+                AnimatedVisibility(state.savingsTransfer > 0,
+                    enter = fadeIn(tween(180)) + expandVertically(tween(220)),
+                    exit = fadeOut(tween(140)) + shrinkVertically(tween(220))) {
+                    val copy = transferCopy ?: retainedTransferCopy
+                    if (copy != null) key(contextId, copy) {
+                        Column(Modifier.fillMaxWidth().onGloballyPositioned { coordinates ->
+                            val visible = coordinates.boundsInWindow()
+                            onTransferVisibility(state.savingsTransfer > 0 && visible.width >= coordinates.size.width - 1 &&
+                                visible.height >= coordinates.size.height - 1 && visible.width > 0 && visible.height > 0)
+                        }, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(copy.first,
+                                color = GameInk, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            Text(copy.second,
+                                color = PlanMuted, fontFamily = Nunito, fontSize = 12.sp, lineHeight = 17.sp)
+                        }
                     }
                 }
                 GameActionButton(if (state.isEditing) "Подтвердить бюджет" else "Готово", onConfirm,

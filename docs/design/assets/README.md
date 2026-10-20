@@ -142,6 +142,10 @@ On game screens, load bundled raster artwork through `core/ui/components/GameArt
 It uses the shared Coil loader to decode off the UI thread at the measured display
 size and reuse a bounded memory cache. Keep explicit bounds and the intended
 `ContentScale`; the resource's complete canvas and transparency are preserved.
+The app wrapper delegates to `:core:ui`'s `BundledArtwork`, also used directly by
+onboarding. Decoration frames opt out of the initial scene barrier, and scenes
+fade in their foreground group after decode. Memory-card fronts and backs retain
+their measured painters before interaction instead of loading on a tap.
 The menu shares one explicitly sized painter between the backdrop and frosted
 panel. Preview rendering and small vector icons still use `painterResource`.
 Do not use synchronous raster decoding inside composition on these screens.

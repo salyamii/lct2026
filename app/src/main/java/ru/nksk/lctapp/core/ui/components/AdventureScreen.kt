@@ -133,10 +133,10 @@ internal fun AdventureScreen(
                         .padding(horizontal = 20.dp, vertical = if (fitSceneToCard) 14.dp else 20.dp).let {
                         if (scrollContent && !pinFooter) it.verticalScroll(pageScroll) else it
                     }, verticalArrangement = Arrangement.spacedBy(if (fitSceneToCard) 8.dp else 12.dp)) {
-                        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(contentSpacing),
+                        Column(Modifier.fillMaxWidth().animateGameContentSize(), verticalArrangement = Arrangement.spacedBy(contentSpacing),
                             content = content)
                         if (includeFooter) footer?.let {
-                            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(GameActionButtonDefaults.Spacing), content = it)
+                            Column(Modifier.fillMaxWidth().animateGameContentSize(), verticalArrangement = Arrangement.spacedBy(GameActionButtonDefaults.Spacing), content = it)
                         }
                     }
                 }
@@ -266,7 +266,7 @@ private fun AdventureAdviser(
 /** A shared adviser bubble: its right-hand tail points into the character's canvas. */
 @Composable
 internal fun AdventureSpeechBubble(text: String, modifier: Modifier = Modifier, pointToCharacter: Boolean = true) {
-    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier.animateGameContentSize(), verticalAlignment = Alignment.CenterVertically) {
         Surface(Modifier.weight(1f), color = GamePaper, shape = RoundedCornerShape(20.dp)) {
             Text(text, Modifier.padding(12.dp), color = GameInk,
                 fontFamily = Nunito, fontSize = 14.sp, lineHeight = 19.sp)

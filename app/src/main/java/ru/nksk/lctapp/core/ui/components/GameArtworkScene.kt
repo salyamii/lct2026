@@ -1,5 +1,7 @@
 package ru.nksk.lctapp.core.ui.components
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
@@ -8,6 +10,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -15,7 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -56,11 +59,23 @@ internal fun GameArtworkScene(
 
 /** Apply to foreground artwork only, never the screen's surface, background or actions. */
 @Composable
-internal fun gameArtworkVisibility(): Modifier {
+internal fun gameArtworkVisibility(retainKey: Any? = null): Modifier {
     val scene = LocalGameArtworkScene.current ?: return Modifier
-    return Modifier.drawWithContent { if (scene.revealed) drawContent() }
-        .then(if (scene.revealed) Modifier else Modifier.clearAndSetSemantics {})
+    // A mounted renderer can keep its ready image across cards. New artwork still waits
+    // for its initial group; changing only the scene must not blink the same character.
+    val retained = if (retainKey != null) remember(retainKey) { mutableStateOf(false) } else null
+    val visible = scene.revealed || retained?.value == true
+    SideEffect { if (scene.revealed) retained?.value = true }
+    return key(retained ?: scene) {
+        val opacity = animateFloatAsState(if (visible) 1f else 0f,
+            tween(220), label = "scene-artwork-reveal")
+        Modifier.graphicsLayer { alpha = opacity.value }
+            .then(if (visible) Modifier else Modifier.clearAndSetSemantics {})
+    }
 }
+
+@Composable
+internal fun hasGameArtworkScene(): Boolean = LocalGameArtworkScene.current != null
 
 /** Resource changes or extra images after the first reveal must not blank the existing scene. */
 private class ArtworkSceneLoad {
@@ -79,7 +94,8 @@ private class ArtworkSceneLoad {
 
 /** A terminal decode error releases the barrier too; a broken local asset cannot freeze a screen. */
 @Composable
-internal fun ReportGameArtworkLoad(requestKey: Any, settled: Boolean) {
+internal fun ReportGameArtworkLoad(requestKey: Any, settled: Boolean, participateInScene: Boolean = true) {
+    if (!participateInScene) return
     val scene = LocalGameArtworkScene.current ?: return
     val token = remember(scene, requestKey) { Any() }
     DisposableEffect(scene, token) {

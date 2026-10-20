@@ -38,18 +38,21 @@ internal fun AdaptiveActionPanel(
     contentScrollState: ScrollState? = null,
     minimumBodyHeight: Dp = 64.dp,
     contentArrangement: Arrangement.Vertical? = null,
+    animateContentChanges: Boolean = true,
     actions: @Composable ColumnScope.() -> Unit,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val bodyScroll = contentScrollState ?: rememberScrollState()
     val overflowScroll = key(bodyScroll) { rememberScrollState() }
     val density = LocalDensity.current
+    // Screens with their own per-section visibility animations avoid nesting size animations.
+    val contentAnimation = if (animateContentChanges) Modifier.animateGameContentSize() else Modifier
     BoxWithConstraints(modifier.fillMaxWidth()) {
         if (!constraints.hasBoundedHeight) {
             Column(Modifier.fillMaxWidth().padding(contentPadding), verticalArrangement = Arrangement.spacedBy(sectionSpacing)) {
-                if (actionsAtTop) Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(actionSpacing), content = actions)
-                Column(Modifier.fillMaxWidth(), verticalArrangement = contentArrangement ?: Arrangement.spacedBy(contentSpacing), content = content)
-                if (!actionsAtTop) Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(actionSpacing), content = actions)
+                if (actionsAtTop) Column(Modifier.fillMaxWidth().then(contentAnimation), verticalArrangement = Arrangement.spacedBy(actionSpacing), content = actions)
+                Column(Modifier.fillMaxWidth().then(contentAnimation), verticalArrangement = contentArrangement ?: Arrangement.spacedBy(contentSpacing), content = content)
+                if (!actionsAtTop) Column(Modifier.fillMaxWidth().then(contentAnimation), verticalArrangement = Arrangement.spacedBy(actionSpacing), content = actions)
             }
         } else {
             val viewportHeight = constraints.maxHeight
@@ -60,7 +63,7 @@ internal fun AdaptiveActionPanel(
             SubcomposeLayout(Modifier.fillMaxWidth().verticalScroll(overflowScroll).padding(contentPadding)) { childConstraints ->
                 val unbounded = childConstraints.copy(minHeight = 0, maxHeight = Constraints.Infinity)
                 val actionPlaceable = subcompose("actions") {
-                    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(actionSpacing), content = actions)
+                    Column(Modifier.fillMaxWidth().then(contentAnimation), verticalArrangement = Arrangement.spacedBy(actionSpacing), content = actions)
                 }.single().measure(unbounded)
                 val gap = if (actionPlaceable.height > 0) sectionSpacing.roundToPx() else 0
                 val usableHeight = (viewportHeight - verticalPadding).coerceAtLeast(0)
@@ -69,7 +72,7 @@ internal fun AdaptiveActionPanel(
                 val bodyPlaceable = subcompose("body") {
                     Column(Modifier.fillMaxWidth().then(
                         if (keepActionsOutsideScroll) Modifier.verticalScroll(bodyScroll) else Modifier
-                    ), verticalArrangement = contentArrangement ?: Arrangement.spacedBy(contentSpacing), content = content)
+                    ).then(contentAnimation), verticalArrangement = contentArrangement ?: Arrangement.spacedBy(contentSpacing), content = content)
                 }.single().measure(unbounded.copy(
                     minHeight = if (keepActionsOutsideScroll && fillBody) bodyHeight else 0,
                     maxHeight = if (keepActionsOutsideScroll) bodyHeight else Constraints.Infinity,

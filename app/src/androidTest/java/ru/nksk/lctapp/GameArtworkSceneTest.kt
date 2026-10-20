@@ -40,6 +40,40 @@ import ru.nksk.lctapp.core.ui.theme.LCTAppTheme
 class GameArtworkSceneTest {
     @get:Rule val compose = createComposeRule()
 
+    @Test fun unresolvedDecorationDoesNotDelayForegroundReveal() {
+        compose.setContent {
+            GameArtworkScene("scene", Modifier.size(200.dp).background(Color.Blue).testTag("scene")) {
+                ReportGameArtworkLoad("ready-character", settled = true)
+                ReportGameArtworkLoad("unresolved-frame", settled = false, participateInScene = false)
+                Box(Modifier.size(64.dp).then(gameArtworkVisibility()).background(Color.Red))
+            }
+        }
+        assertCorner(Color.Red)
+    }
+
+    @Test fun initialForegroundFadesInBetweenHiddenAndFullyVisibleFrames() {
+        var settled by mutableStateOf(false)
+        compose.setContent {
+            GameArtworkScene("scene", Modifier.size(200.dp).background(Color.Blue).testTag("scene")) {
+                ReportGameArtworkLoad("character", settled)
+                Box(Modifier.size(64.dp).then(gameArtworkVisibility()).background(Color.Red))
+            }
+        }
+        assertCorner(Color.Blue)
+        compose.mainClock.autoAdvance = false
+        compose.runOnIdle { settled = true }
+        compose.mainClock.advanceTimeByFrame()
+        compose.mainClock.advanceTimeByFrame()
+        compose.mainClock.advanceTimeBy(80)
+        val pixels = compose.onNodeWithTag("scene").captureToImage().toPixelMap()
+        val fading = pixels[pixels.width / 8, pixels.height / 4]
+        assertTrue("Expected a partially revealed foreground, found $fading",
+            fading.red > .02f && fading.red < .98f && fading.blue > .02f && fading.blue < .98f)
+        compose.mainClock.advanceTimeBy(300)
+        assertCorner(Color.Red)
+        compose.mainClock.autoAdvance = true
+    }
+
     @Test fun subcomposedForegroundWaitsForItsGroupWhileBackgroundAndControlsStayUsable() {
         var firstReady by mutableStateOf(false)
         var secondReady by mutableStateOf(false)
@@ -108,6 +142,45 @@ class GameArtworkSceneTest {
         compose.runOnIdle { sceneKey = "second"; settled = false }
         assertCorner(Color.Blue)
         // The contract reports success and terminal error as settled, avoiding a permanent barrier.
+        compose.runOnIdle { settled = true }
+        assertCorner(Color.Red)
+    }
+
+    @Test fun anAlreadyShownCharacterDoesNotHideOrFadeAgainForTheNextCard() {
+        var sceneKey by mutableStateOf("first")
+        var settled by mutableStateOf(true)
+        compose.setContent {
+            GameArtworkScene(sceneKey, Modifier.size(200.dp).background(Color.Blue).testTag("scene")) {
+                ReportGameArtworkLoad("character", settled)
+                Box(Modifier.size(64.dp).then(gameArtworkVisibility(retainKey = "same-character"))
+                    .background(Color.Red))
+            }
+        }
+        assertCorner(Color.Red)
+        compose.mainClock.autoAdvance = false
+        compose.runOnIdle { sceneKey = "next"; settled = false }
+        compose.mainClock.advanceTimeByFrame()
+        assertCorner(Color.Red)
+        compose.runOnIdle { settled = true }
+        compose.mainClock.advanceTimeByFrame()
+        compose.mainClock.advanceTimeBy(80)
+        assertCorner(Color.Red)
+        compose.mainClock.autoAdvance = true
+    }
+
+    @Test fun differentArtworkStillWaitsForTheNewCardsGroup() {
+        var sceneKey by mutableStateOf("first")
+        var artwork by mutableStateOf("first-character")
+        var settled by mutableStateOf(true)
+        compose.setContent {
+            GameArtworkScene(sceneKey, Modifier.size(200.dp).background(Color.Blue).testTag("scene")) {
+                ReportGameArtworkLoad(artwork, settled)
+                Box(Modifier.size(64.dp).then(gameArtworkVisibility(retainKey = artwork)).background(Color.Red))
+            }
+        }
+        assertCorner(Color.Red)
+        compose.runOnIdle { sceneKey = "next"; artwork = "other-character"; settled = false }
+        assertCorner(Color.Blue)
         compose.runOnIdle { settled = true }
         assertCorner(Color.Red)
     }
