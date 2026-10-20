@@ -105,6 +105,7 @@ dependencies {
     ksp(libs.androidx.hilt.compiler)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.coil.compose)
+    implementation(project(":core:ui"))
     implementation(project(":feature:onboarding"))
     implementation(project(":feature:parents"))
     debugImplementation(project(":feature:debug"))

@@ -1,6 +1,5 @@
 package ru.nksk.lctapp.feature.tasks.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -23,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -163,8 +161,8 @@ private fun MovingCrateRow(position: () -> Float, crateCells: Int, cell: Dp, boa
             horizontalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             repeat(crateCells) {
-                Image(
-                    painter = painterResource(R.drawable.deed_game_crate),
+                GameArtwork(
+                    resource = R.drawable.deed_game_crate,
                     contentDescription = null,
                     modifier = Modifier
                         .width(cell)
@@ -196,8 +194,8 @@ private fun CrateRow(leftCells: Int, crateCells: Int, cell: Dp, highlighted: Boo
             horizontalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             repeat(crateCells) {
-                Image(
-                    painter = painterResource(R.drawable.deed_game_crate),
+                GameArtwork(
+                    resource = R.drawable.deed_game_crate,
                     contentDescription = null,
                     modifier = Modifier
                         .width(cell)

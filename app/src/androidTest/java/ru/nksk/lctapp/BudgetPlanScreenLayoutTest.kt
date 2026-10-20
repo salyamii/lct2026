@@ -90,6 +90,37 @@ class BudgetPlanScreenLayoutTest {
         compose.runOnIdle { assertTrue(presented.isEmpty()) }
     }
 
+    @Test fun changingAdviceKeepsAllocationCardsBeforeTheScrollableAdviser() {
+        var shown by mutableStateOf(base)
+        compose.setContent {
+            DeviceConfigurationOverride(DeviceConfigurationOverride.ForcedSize(DpSize(360.dp, 640.dp))) {
+                LCTAppTheme {
+                    BudgetPlanScreen(shown, { _, _ -> }, {}, {},
+                        pet = PetState(selectedLookId = "PLAIN", visualState = PetVisualState.NORMAL))
+                }
+            }
+        }
+        compose.runOnIdle {
+            shown = shown.copy(needs = 35, unallocated = 65,
+                advice = FinancialAdviceUi("expanded", "Подумай о большой цели и оставь запас. ".repeat(6)))
+        }
+        for (article in BudgetArticle.entries) {
+            compose.onNodeWithTag("budget.article.${article.name}").performScrollTo().assertIsDisplayed()
+            val card = compose.onNodeWithTag("budget.article.${article.name}").getUnclippedBoundsInRoot()
+            val visible = compose.onNodeWithTag("budget.article.${article.name}").fetchSemanticsNode().boundsInRoot
+            with(compose.density) {
+                assertTrue("${article.name} is clipped in its viewport", visible.height.toDp() >= card.bottom - card.top - 1.dp)
+            }
+            val adviser = compose.onNodeWithTag("budget.plan.adviser").getUnclippedBoundsInRoot()
+            assertTrue("${article.name} is covered by advice", card.bottom <= adviser.top + 1.dp)
+        }
+        val before = compose.onNodeWithTag("budget.article.RESERVE").getUnclippedBoundsInRoot()
+        compose.onNodeWithTag("budget.plan.adviser").performScrollTo().assertIsDisplayed()
+        val after = compose.onNodeWithTag("budget.article.RESERVE").getUnclippedBoundsInRoot()
+        assertTrue("Advice should scroll with allocation cards", after.top < before.top)
+        compose.onNodeWithTag("budget.plan.confirm").performScrollTo().assertIsDisplayed()
+    }
+
     private val base = BudgetUiState(0, 0, 0, 0, 100, 100,
         knownNeeds = 35, planningId = "plan")
 }

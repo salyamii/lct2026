@@ -1,5 +1,6 @@
 package ru.nksk.lctapp.feature.onboarding.ui
 
+import ru.nksk.lctapp.core.ui.components.BundledArtwork
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -8,7 +9,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -23,12 +23,12 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
@@ -67,12 +67,14 @@ internal fun CharacterScene(
     }
     val action by rememberUpdatedState(onAction)
     val highlight by animateFloatAsState(if (state.foxSelected) 1f else 0f, tween(240), label = "selection")
+    val opacity = animateFloatAsState(if (loaded is ArtworkLoad.Ready) 1f else 0f,
+        tween(220), label = "onboarding-artwork-reveal")
     val gray = remember { ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }) }
     val names = listOf(stringResource(R.string.onboarding_owl), stringResource(R.string.onboarding_fox),
         stringResource(R.string.onboarding_axolotl))
     BoxWithConstraints(modifier.fillMaxWidth().aspectRatio(402f / 456f).clipToBounds()) {
         val scale = maxWidth / 402f
-        Image(painterResource(artwork.groundShadow), null,
+        BundledArtwork(artwork.groundShadow, null,
             Modifier.offset(scale * 12f, scale * 419f).size(scale * 390f, scale * 27f),
             contentScale = ContentScale.FillBounds)
         when (val result = loaded) {
@@ -83,7 +85,7 @@ internal fun CharacterScene(
             is ArtworkLoad.Ready -> {
                 val art = result.art
                 val hitLayers = remember(art) { art.layers.map { it.hit } }
-                Canvas(Modifier.fillMaxSize().pointerInput(art) {
+                Canvas(Modifier.fillMaxSize().graphicsLayer { alpha = opacity.value }.pointerInput(art) {
                     detectTapGestures { position ->
                         hitCharacter(hitLayers, position.x * 402f / size.width,
                             position.y * 456f / size.height)?.let { index ->

@@ -1,6 +1,6 @@
 package ru.nksk.lctapp.feature.onboarding.ui
 
-import androidx.compose.foundation.Image
+import ru.nksk.lctapp.core.ui.components.BundledArtwork
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -97,7 +96,7 @@ fun AdventureGoalSelectionScreen(
                         .padding(10.dp), verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         goal.itemImage?.let { resource ->
-                            Image(painterResource(resource), null,
+                            BundledArtwork(resource, null,
                                 Modifier.size(64.dp), contentScale = ContentScale.Fit)
                         }
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
@@ -133,7 +132,7 @@ fun AdventureStartedScreen(
         largeStage = true, saving = saving,
         stage = {
             BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
-                Image(painterResource(portrait), "Твой спутник готов к приключению",
+                BundledArtwork(portrait, "Твой спутник готов к приключению",
                     Modifier.size(minOf(maxWidth * .82f, maxHeight, 380.dp)), contentScale = ContentScale.Fit)
             }
         }) { scrollAll ->
@@ -167,7 +166,7 @@ internal fun AdventureGoalLayout(
         val wide = maxWidth >= 720.dp && !scrollAll
         val scene: @Composable (Modifier) -> Unit = { modifier ->
             Box(modifier) {
-                Image(painterResource(background), null, Modifier.matchParentSize(), contentScale = ContentScale.Crop)
+                BundledArtwork(background, null, Modifier.matchParentSize(), contentScale = ContentScale.Crop)
                 Column(Modifier.fillMaxSize()) {
                     CustomizationHeader(onBack, artwork, saving = saving, title = title, backDescription = backDescription)
                     Box(Modifier.weight(1f).fillMaxWidth()) { stage() }

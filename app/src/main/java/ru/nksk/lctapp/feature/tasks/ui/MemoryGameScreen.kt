@@ -1,11 +1,17 @@
 package ru.nksk.lctapp.feature.tasks.ui
 
 import ru.nksk.lctapp.core.ui.components.GameArtwork
+import ru.nksk.lctapp.core.ui.components.rememberGameArtworkLoad
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,12 +28,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.sp
 import ru.nksk.lctapp.R
 import ru.nksk.lctapp.core.ui.theme.Rubik
@@ -142,7 +150,7 @@ private fun StarPlateView(
         revealed -> DeedColors.CreamCard
         else -> DeedColors.Board
     }
-    Box(
+    BoxWithConstraints(
         modifier = modifier
             .aspectRatio(0.75f)
             .semantics { contentDescription = description }
@@ -152,17 +160,22 @@ private fun StarPlateView(
             .then(if (enabled && !revealed) Modifier.clickable(onClick = onClick) else Modifier),
         contentAlignment = Alignment.Center,
     ) {
-        if (revealed) {
-            GameArtwork(face,
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize().padding(6.dp),
-            )
-        } else {
-            GameArtwork(R.drawable.deed_star_plate_back,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
-            )
+        // Both painters stay mounted while the card is closed. Opening never starts a new
+        // request, and retaining the painters also protects this board from cache eviction.
+        val front = rememberGameArtworkLoad(face,
+            DpSize((maxWidth - 12.dp).coerceAtLeast(1.dp), (maxHeight - 12.dp).coerceAtLeast(1.dp)),
+            participateInScene = false)
+        val back = rememberGameArtworkLoad(R.drawable.deed_star_plate_back,
+            DpSize(maxWidth, maxHeight), participateInScene = false)
+        val opacity = animateFloatAsState(if (back.painter != null || front.painter != null) 1f else 0f,
+            tween(180), label = "memory-artwork-reveal")
+        Crossfade(targetState = revealed && front.painter != null,
+            modifier = Modifier.fillMaxSize().graphicsLayer { alpha = opacity.value },
+            animationSpec = tween(140), label = "memory-card-face") { showFace ->
+            val painter = if (showFace) front.painter else back.painter
+            if (painter != null) Image(painter, null,
+                modifier = Modifier.fillMaxSize().then(if (showFace) Modifier.padding(6.dp) else Modifier),
+                contentScale = if (showFace) ContentScale.Fit else ContentScale.Crop)
         }
     }
 }

@@ -1,7 +1,7 @@
 package ru.nksk.lctapp.feature.onboarding.ui
 
+import ru.nksk.lctapp.core.ui.components.BundledArtwork
 import androidx.compose.foundation.background
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -46,7 +45,7 @@ fun BudgetIntroductionScreen(
                         backDescription = "Назад к выбору цели")
                     Spacer(Modifier.height(12.dp))
                 }
-                Image(painterResource(artwork.background), null, contentScale = ContentScale.Crop)
+                BundledArtwork(artwork.background, null, contentScale = ContentScale.Crop)
             }) { measurables, constraints ->
                 val header = measurables[0].measure(constraints.copy(minHeight = 0))
                 val background = measurables[1].measure(Constraints.fixed(header.width, header.height + 28.dp.roundToPx()))

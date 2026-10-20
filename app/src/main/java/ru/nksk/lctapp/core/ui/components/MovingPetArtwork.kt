@@ -54,7 +54,8 @@ internal fun MovingPetArtwork(
 
     // A rectangular scene used to center the sprite above a shadow at the bottom.
     // Keep both inside the same square, including on the narrow comparison cards.
-    BoxWithConstraints(modifier.then(gameArtworkVisibility()), contentAlignment = Alignment.BottomCenter) {
+    // The retained frame also covers pose changes while an incoming card is loading.
+    BoxWithConstraints(modifier.then(gameArtworkVisibility(retainKey = Unit)), contentAlignment = Alignment.BottomCenter) {
         val canvasSize = minOf(maxWidth, maxHeight)
         val floor = .935f
         val incomingPet = rememberGameArtworkLoad(artwork, DpSize(canvasSize, canvasSize))

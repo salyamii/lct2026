@@ -3,6 +3,8 @@ package ru.nksk.lctapp.core.ui.components
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -18,31 +20,55 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpSize
-import coil.compose.AsyncImage
+import androidx.compose.ui.unit.IntSize
+import coil.ImageLoader
+import coil.imageLoader
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Scale
+import kotlinx.coroutines.delay
 
 /** A ready painter can enter an animation without another asynchronous load inside its frame. */
 internal data class GameArtworkLoad(val painter: Painter?, val settled: Boolean)
 
 @Composable
-internal fun rememberGameArtworkLoad(@DrawableRes resource: Int, size: DpSize): GameArtworkLoad {
+internal fun rememberGameArtworkLoad(
+    @DrawableRes resource: Int,
+    size: DpSize,
+    participateInScene: Boolean = true,
+    imageLoader: ImageLoader? = null,
+): GameArtworkLoad {
     if (LocalInspectionMode.current) return GameArtworkLoad(painterResource(resource), true)
     val context = LocalContext.current
+    val loader = imageLoader ?: context.imageLoader
     val width = with(LocalDensity.current) { size.width.roundToPx().coerceAtLeast(1) }
     val height = with(LocalDensity.current) { size.height.roundToPx().coerceAtLeast(1) }
-    val request = remember(context, resource, width, height) {
-        ImageRequest.Builder(context).data(resource).size(width, height).scale(Scale.FIT).build()
+    // A panel animation can change the character's bounds every frame. Keep its decode
+    // budget while shrinking; upgrade only after growth settles, preserving the ready frame.
+    var decodeSize by remember(context, resource) { mutableStateOf(IntSize(width, height)) }
+    LaunchedEffect(context, resource, width, height) {
+        if (width > decodeSize.width || height > decodeSize.height) {
+            delay(220)
+            decodeSize = IntSize(maxOf(width, decodeSize.width), maxOf(height, decodeSize.height))
+        }
+    }
+    val request = remember(context, resource, decodeSize) {
+        ImageRequest.Builder(context).data(resource).size(decodeSize.width, decodeSize.height).scale(Scale.FIT).build()
     }
     // Explicit measured bounds avoid waiting for this painter to be drawn before starting decode.
-    // A fresh request must not expose the previous request's Success during its first composition.
-    val painter = key(request) { rememberAsyncImagePainter(request, contentScale = ContentScale.Fit) }
+    // Resource changes need a fresh painter, but resizing the same image must retain it.
+    val painter = key(context, resource, loader) {
+        rememberAsyncImagePainter(request, loader, contentScale = ContentScale.Fit)
+    }
     val loaded = painter.state
-    val settled = loaded is AsyncImagePainter.State.Success || loaded is AsyncImagePainter.State.Error
-    ReportGameArtworkLoad(request, settled)
-    return GameArtworkLoad((loaded as? AsyncImagePainter.State.Success)?.painter, settled)
+    var previous by remember(context, resource, loader) { mutableStateOf<Painter?>(null) }
+    val readyPainter = (loaded as? AsyncImagePainter.State.Success)?.painter
+    SideEffect { if (readyPainter != null) previous = readyPainter }
+    val displayed = readyPainter ?: previous
+    val settled = displayed != null || loaded is AsyncImagePainter.State.Error
+    ReportGameArtworkLoad(request, settled, participateInScene)
+    return GameArtworkLoad(displayed, settled)
 }
 
 /** Local raster art, decoded off the UI thread at its displayed size and cached across screens. */
@@ -61,15 +87,10 @@ internal fun GameArtwork(
             colorFilter = colorFilter)
     } else {
         var settled by remember(resource) { mutableStateOf(false) }
-        // A local replacement keeps its last frame while the next resource is decoded.
-        // The scene's initial barrier is separate and never blanks a revealed scene again.
-        var previous by remember { mutableStateOf<Painter?>(null) }
-        AsyncImage(resource, contentDescription,
-            modifier = modifier.then(if (revealWithScene) gameArtworkVisibility() else Modifier),
-            placeholder = previous, error = previous,
-            onLoading = { settled = false },
-            onSuccess = { previous = it.painter; settled = true },
-            onError = { settled = true },
+        BundledArtwork(resource, contentDescription,
+            modifier = modifier.then(if (revealWithScene) gameArtworkVisibility(retainKey = resource) else Modifier),
+            fadeIn = !revealWithScene || !hasGameArtworkScene(),
+            onLoadSettled = { settled = it },
             alignment = alignment, contentScale = contentScale, colorFilter = colorFilter)
         ReportGameArtworkLoad(resource, settled)
     }
@@ -83,7 +104,8 @@ internal fun rememberScenePainter(@DrawableRes resource: Int, size: DpSize): Pai
     val width = with(LocalDensity.current) { size.width.roundToPx().coerceAtLeast(1) }
     val height = with(LocalDensity.current) { size.height.roundToPx().coerceAtLeast(1) }
     val request = remember(context, resource, width, height) {
-        ImageRequest.Builder(context).data(resource).size(width, height).scale(Scale.FILL).build()
+        ImageRequest.Builder(context).data(resource).size(width, height).scale(Scale.FILL)
+            .crossfade(180).build()
     }
     var settled by remember(request) { mutableStateOf(false) }
     var previous by remember { mutableStateOf<Painter?>(null) }

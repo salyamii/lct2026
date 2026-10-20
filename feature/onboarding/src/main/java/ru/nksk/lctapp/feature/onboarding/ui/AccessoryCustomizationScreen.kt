@@ -1,6 +1,6 @@
 package ru.nksk.lctapp.feature.onboarding.ui
 
-import androidx.compose.foundation.Image
+import ru.nksk.lctapp.core.ui.components.BundledArtwork
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -84,12 +84,12 @@ fun AccessoryCustomizationScreen(
         if (needsOnboardingScroll(maxHeight)) {
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                 Box(Modifier.fillMaxWidth()) {
-                    Image(painterResource(artwork.background), null,
+                    BundledArtwork(artwork.background, null,
                         Modifier.matchParentSize().testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
                     Column {
                         CustomizationHeader(onBack, artwork, saving = saving, title = "Выбор аксессуара",
                             backDescription = "Назад к образу спутника")
-                        Image(painterResource(accessories.portraits.getValue(state.accessory).getValue(state.fur)),
+                        BundledArtwork(accessories.portraits.getValue(state.accessory).getValue(state.fur),
                             "${state.name}: ${state.accessory.label}",
                             Modifier.fillMaxWidth().height(140.dp), contentScale = ContentScale.Fit)
                     }
@@ -104,9 +104,9 @@ fun AccessoryCustomizationScreen(
         } else if (maxWidth >= 720.dp) {
             Row(Modifier.fillMaxSize()) {
                 BoxWithConstraints(Modifier.weight(1f).fillMaxHeight()) {
-                    Image(painterResource(artwork.background), null,
+                    BundledArtwork(artwork.background, null,
                         Modifier.matchParentSize().testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
-                    Image(painterResource(accessories.portraits.getValue(state.accessory).getValue(state.fur)),
+                    BundledArtwork(accessories.portraits.getValue(state.accessory).getValue(state.fur),
                         "${state.name}: ${state.accessory.label}",
                         Modifier.size(minOf(maxWidth * .95f, maxHeight * .75f, 520.dp))
                             .align(Alignment.Center), contentScale = ContentScale.Fit)
@@ -125,13 +125,13 @@ fun AccessoryCustomizationScreen(
             val stageHeight = (maxHeight * .30f).coerceIn(120.dp, 300.dp)
             Column(Modifier.fillMaxSize()) {
                 Box(Modifier.fillMaxWidth()) {
-                    Image(painterResource(artwork.background), null,
+                    BundledArtwork(artwork.background, null,
                         Modifier.matchParentSize().testTag("onboarding_scene_background"), contentScale = ContentScale.Crop)
                     Column {
                         CustomizationHeader(onBack, artwork, saving = saving, title = "Выбор аксессуара",
                             backDescription = "Назад к образу спутника")
                         BoxWithConstraints(Modifier.fillMaxWidth().height(stageHeight)) {
-                            Image(painterResource(accessories.portraits.getValue(state.accessory).getValue(state.fur)),
+                            BundledArtwork(accessories.portraits.getValue(state.accessory).getValue(state.fur),
                                 "${state.name}: ${state.accessory.label}",
                                 Modifier.requiredSize(minOf(maxWidth, stageHeight + 20.dp))
                                     .align(Alignment.Center).offset(y = (-14).dp), contentScale = ContentScale.Fit)
@@ -256,7 +256,7 @@ private fun AccessoryTile(
                     Icon(painterResource(accessories.noneIcon), null,
                         Modifier.size(28.dp), tint = AccessoryMuted)
                 } else {
-                    Image(painterResource(accessories.thumbnails.getValue(item)), null,
+                    BundledArtwork(accessories.thumbnails.getValue(item), null,
                         Modifier.fillMaxSize().alpha(if (item.available) 1f else .45f),
                         colorFilter = if (item.available) null else ColorFilter.colorMatrix(
                             ColorMatrix().apply { setToSaturation(0f) }),
